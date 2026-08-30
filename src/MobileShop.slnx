@@ -1,0 +1,8 @@
+<Solution>
+  <Project Path="MobileShop.Api/MobileShop.Api.csproj" />
+  <Project Path="MobileShop.Dal/MobileShop.Dal.csproj" />
+  <Project Path="MobileShop.Models/MobileShop.Models.csproj" />
+  <Project Path="MobileShop.Services/MobileShop.Services.csproj" />
+  <Project Path="MobileShop.Tests/MobileShop.Tests.csproj" />
+  <Project Path="MobileShop.Web/MobileShop.Web.csproj" />
+</Solution>
