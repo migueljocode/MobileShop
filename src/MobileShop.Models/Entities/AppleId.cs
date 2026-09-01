@@ -14,5 +14,4 @@ public class AppleId : BaseEntity
 
 	[InverseProperty(nameof(Phone.AppleIdNavigation))]
 	public virtual ICollection<Phone> Phones { get; set; } = [];
-	// something
 }
