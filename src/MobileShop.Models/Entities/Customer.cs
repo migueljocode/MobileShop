@@ -3,18 +3,12 @@ namespace MobileShop.Models.Entities;
 [Table("Customers")]
 public class Customer : BaseEntity
 {
-    [Required, StringLength(50)]
-    public string FirstName { get; set; } = string.Empty;
+    public int PersonId { get; set; }
+    public virtual Person PersonNavigation { get; set; } = null!;
 
-    [Required, StringLength(50)]
-    public string LastName { get; set; } = string.Empty;
-
-    [Required, StringLength(10)]
+    [Required(ErrorMessage = "{0} is required.")]
+    [StringLength(10, ErrorMessage = "{0} cannot exceed {1} characters.")]
     public string NationalId { get; set; } = string.Empty;
 
-    [Required, StringLength(20)]
-    public string PhoneNumber { get; set; } = string.Empty;
-
-    [InverseProperty(nameof(Phone.CustomerNavigation))]
-    public virtual ICollection<Phone> PurchasedPhones { get; set; } = [];
+    public virtual ICollection<Transaction> Transactions { get; set; } = [];
 }

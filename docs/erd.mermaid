@@ -1,0 +1,84 @@
+erDiagram
+    PERSON ||--o| SELLER : "may be"
+    PERSON ||--o| CUSTOMER : "may be"
+    PERSON ||--o| USER : "may be"
+    SELLER ||--o{ TRANSACTION : "sells in"
+    CUSTOMER ||--o{ TRANSACTION : "buys in"
+    PRODUCT ||--o{ TRANSACTION : "involved in"
+    PRODUCT ||--o| APPLE_ID : "may have"
+    PRODUCT ||--o| PHONE : "may be"
+    PRODUCT ||--o| SECOND_HAND : "may be"
+    PRODUCT ||--o| GUARANTEE : "may have"
+    PHONE ||--o| IPHONE : "may be"
+
+    PERSON {
+        int Id PK
+        string FirstName
+        string LastName
+        string PhoneNumber
+        string Notes
+    }
+    SELLER {
+        int Id PK
+        int PersonId FK
+        enum EntityType "Real / Legal"
+    }
+    CUSTOMER {
+        int Id PK
+        int PersonId FK
+        string NationalId
+    }
+    USER {
+        int Id PK
+        string Username
+        string PasswordHash
+        int PersonId FK
+    }
+    TRANSACTION {
+        int Id PK
+        DateTime Date
+        int SellerId FK
+        int CustomerId FK
+        int ProductId FK
+        decimal FinishedPrice
+        enum Direction "Buy / Sell"
+    }
+    PRODUCT {
+        int Id PK
+        decimal Price
+        string Manufacturer
+        string Model
+    }
+    APPLE_ID {
+        int Id PK
+        string Email
+        string Password
+        string Notes
+        int ProductId FK
+    }
+    PHONE {
+        int Id PK
+        string IMEI1
+        string IMEI2
+        bool OwnershipTransferred
+        int ProductId FK
+    }
+    SECOND_HAND {
+        int Id PK
+        int TestPeriodDays
+        int UsedDurationDays
+        int ProductId FK
+    }
+    GUARANTEE {
+        int Id PK
+        DateTime StartDate
+        DateTime ExpirationDate
+        string Corporation
+        int ProductId FK
+    }
+    IPHONE {
+        int Id PK
+        int PhoneId FK
+        int BatteryHealth
+        int ChargeCycle
+    }
