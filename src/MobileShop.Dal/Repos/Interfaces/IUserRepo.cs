@@ -12,4 +12,10 @@ public interface IUserRepo : IBaseRepo<User>
     /// <param name="username">The username to look up.</param>
     /// <returns>The matching user, or <see langword="null"/> if none is found.</returns>
     Task<User?> FindByUsernameAsync(string username);
+
+    bool IsPasswordValid(string password);
+    Task<bool> IsPasswordValidAsync(string password);
+
+    bool ChangePassword(string newPassword);
+    Task<bool> ChangePasswordAsync(string newPassword);
 }

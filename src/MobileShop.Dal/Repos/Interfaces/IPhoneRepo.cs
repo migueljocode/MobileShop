@@ -1,7 +1,7 @@
 namespace MobileShop.Dal.Repos.Interfaces;
 
 /// <summary>Repository for <see cref="Phone"/> entities.</summary>
-public interface IPhoneRepo : IBaseRepo<Phone>
+public interface IPhoneRepo : IBaseRepo<Phone>, IForSale<Phone>
 {
     /// <summary>Checks whether a phone with the given <see cref="Phone.IMEI1"/> already exists.</summary>
     /// <param name="imei1">The 15-digit IMEI to check.</param>
