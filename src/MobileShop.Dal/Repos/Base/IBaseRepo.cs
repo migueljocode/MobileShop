@@ -7,7 +7,11 @@ namespace MobileShop.Dal.Repos.Base;
 /// <typeparam name="T">The entity type, which must derive from <see cref="BaseEntity"/>.</typeparam>
 public interface IBaseRepo<T> where T : BaseEntity
 {
-    /// <summary>Finds an entity by its primary key.</summary>
+    /// <summary>
+    /// Finds an entity by its primary key. Always reflects the current query filter state (a
+    /// soft-deleted entity is never returned), even if that entity is already tracked in this
+    /// context - unlike <c>DbSet.Find</c> itself, which would return it anyway.
+    /// </summary>
     /// <param name="id">The entity's Id.</param>
     /// <returns>The entity, or <see langword="null"/> if no match is found.</returns>
     T? Find(int id);

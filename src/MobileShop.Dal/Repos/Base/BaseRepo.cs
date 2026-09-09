@@ -6,8 +6,9 @@ public abstract class BaseRepo<T>(AppDbContext context) : IBaseRepo<T> where T :
     protected AppDbContext Context { get; } = context;
     protected DbSet<T> Table => Context.Set<T>();
 
+    // FirstOrDefault, not Table.Find - see the reasoning on IBaseRepo<T>.Find.
     /// <inheritdoc />
-    public virtual T? Find(int id) => Table.Find(id);
+    public virtual T? Find(int id) => Table.FirstOrDefault(e => e.Id == id);
 
     /// <inheritdoc />
     public virtual IEnumerable<T> GetAll() => Table.ToList();
@@ -38,7 +39,7 @@ public abstract class BaseRepo<T>(AppDbContext context) : IBaseRepo<T> where T :
     public int SaveChanges() => Context.SaveChanges();
 
     /// <inheritdoc />
-    public virtual async Task<T?> FindAsync(int id) => await Table.FindAsync(id);
+    public virtual async Task<T?> FindAsync(int id) => await Table.FirstOrDefaultAsync(e => e.Id == id);
 
     /// <inheritdoc />
     public virtual async Task<IEnumerable<T>> GetAllAsync() => await Table.ToListAsync();
