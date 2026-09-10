@@ -11,12 +11,20 @@ public class CustomerRepo(AppDbContext context) : BaseRepo<Customer>(context), I
                 .FirstOrDefaultAsync(x => x.Id == id);
 
     public IEnumerable<Product>? PurchasedProducts(int customerId)
-    {
-        throw new NotImplementedException();
-    }
+        => Table
+            .Where(c => c.Id == customerId)
+            .SelectMany(c => c.Transactions)
+            .Where(t => t.Direction == TransactionDirection.Sell)
+            .Select(t => t.ProductNavigation)
+            .Distinct()
+            .ToList();
 
-    public Task<IEnumerable<Product>?> PurchasedProductsAsync(int customerId)
-    {
-        throw new NotImplementedException();
-    }
+    public async Task<IEnumerable<Product>?> PurchasedProductsAsync(int customerId)
+        => await Table
+            .Where(c => c.Id == customerId)
+            .SelectMany(c => c.Transactions)
+            .Where(t => t.Direction == TransactionDirection.Sell)
+            .Select(t => t.ProductNavigation)
+            .Distinct()
+            .ToListAsync();
 }

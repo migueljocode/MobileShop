@@ -10,73 +10,90 @@ public class AppleIdRepo(AppDbContext context) : BaseRepo<AppleId>(context), IAp
     public async Task<AppleId?> FindAsync(string email)
         => await Table.FirstOrDefaultAsync(x => x.Email.Equals(email, StringComparison.OrdinalIgnoreCase));
     
-    public Customer? FindUser(int id)
-    {
-        var entity = Table.Include(x => x.ProductNavigation)
-        .ThenInclude(y => y.Transactions)
-        .ThenInclude(z => z.CustomerNavigation)
-        .FirstOrDefault(x => x.Id == id);
-        if (entity is null)
-            return null;
-        return entity
-        .ProductNavigation
-        .Transactions
-        .Select(a => a.CustomerNavigation)
-        .FirstOrDefault();
-    }
 
-    public Task<Customer?> FindUserAsync(int id)
-    {
-        throw new NotImplementedException();
-    }
+    public Guarantee? GetGuarantee(int id)
+        => Table
+            .Include(x => x.ProductNavigation)
+                .ThenInclude(x => x.GuaranteeProfile)
+            .FirstOrDefault(x => x.Id == id)?
+            .ProductNavigation?
+            .GuaranteeProfile;
+    
 
-    public Guarantee? GetGuarantee()
+    public async Task<Guarantee?> GetGuaranteeAsync(int id)
     {
-        throw new NotImplementedException();
-    }
+        var appleId = await Table
+            .Include(x => x.ProductNavigation)
+                .ThenInclude(x => x.GuaranteeProfile)
+            .FirstOrDefaultAsync(x => x.Id == id);
 
-    public Task<Guarantee?> GetGuaranteeAsync()
-    {
-        throw new NotImplementedException();
+        return appleId?
+            .ProductNavigation?
+            .GuaranteeProfile;
     }
 
     public Customer? GetOwner(int id)
-    {
-        throw new NotImplementedException();
+    {        
+        var appleId = 
+        Table.Include(a => a.ProductNavigation)
+                .ThenInclude(p => p.Transactions)
+                    .ThenInclude(t => t.CustomerNavigation)
+                        .ThenInclude(c => c.PersonNavigation)
+            .FirstOrDefault(a => a.Id == id);
+
+        return appleId?
+                .ProductNavigation?
+                .Transactions?
+                .OrderByDescending(x => x.Date)
+                .FirstOrDefault(x => x.Direction == TransactionDirection.Sell)?
+                .CustomerNavigation;
     }
 
-    public Task<Customer?> GetOwnerAsync()
+    public async Task<Customer?> GetOwnerAsync(int id)
     {
-        throw new NotImplementedException();
+        var appleId = await Table
+            .Include(a => a.ProductNavigation)
+                .ThenInclude(p => p.Transactions)
+                    .ThenInclude(t => t.CustomerNavigation)
+            .FirstOrDefaultAsync(a => a.Id == id);
+
+        return appleId?
+            .ProductNavigation?
+            .Transactions?
+            .OrderByDescending(t => t.Date)
+            .FirstOrDefault(t => t.Direction == TransactionDirection.Sell)?
+            .CustomerNavigation;
     }
 
     public bool IsSecondHand(int id)
-    {
-        throw new NotImplementedException();
-    }
+        => Table
+            .Where(x => x.Id == id)
+            .Select(x => x.ProductNavigation.SecondHandProfile)
+            .Any(profile => profile != null);
 
-    public Task<bool> IsSecondHandAsync(int id)
-    {
-        throw new NotImplementedException();
-    }
+    public async Task<bool> IsSecondHandAsync(int id)
+        => await Table
+            .Where(x => x.Id == id)
+            .Select(x => x.ProductNavigation.SecondHandProfile)
+            .AnyAsync(profile => profile != null);
 
     public bool IsSold(int id)
-    {
-        throw new NotImplementedException();
-    }
+        => Table
+            .Where(x => x.Id == id)
+            .SelectMany(x => x.ProductNavigation.Transactions)
+            .Any(t => t.Direction == TransactionDirection.Sell);
 
-    public Task<bool> IsSoldAsync(int id)
-    {
-        throw new NotImplementedException();
-    }
+    public async Task<bool> IsSoldAsync(int id)
+        => await Table
+            .Where(x => x.Id == id)
+            .SelectMany(x => x.ProductNavigation.Transactions)
+            .AnyAsync(t => t.Direction == TransactionDirection.Sell);
 
     public int Quantity()
-    {
-        throw new NotImplementedException();
-    }
+        => Table.Count(a => !a.ProductNavigation.Transactions
+            .Any(t => t.Direction == TransactionDirection.Sell));
 
-    public Task<int> QuantityAsync()
-    {
-        throw new NotImplementedException();
-    }
+    public async Task<int> QuantityAsync()
+        => await Table.CountAsync(a => !a.ProductNavigation.Transactions
+            .Any(t => t.Direction == TransactionDirection.Sell));
 }

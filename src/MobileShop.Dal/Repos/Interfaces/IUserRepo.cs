@@ -13,9 +13,18 @@ public interface IUserRepo : IBaseRepo<User>
     /// <returns>The matching user, or <see langword="null"/> if none is found.</returns>
     Task<User?> FindByUsernameAsync(string username);
 
-    bool IsPasswordValid(string password);
-    Task<bool> IsPasswordValidAsync(string password);
+    /*
+        passwords passed to this methods should be already hashed
+        hash libraries will be included in MobileShop.Services
+        or maybe we will use ASP.NET Core’s built-in PasswordHasher<User> (or BCrypt).
+    */ 
+    bool IsPasswordValid(int userId, string password);
+    bool IsPasswordValid(string username, string password);
+    Task<bool> IsPasswordValidAsync(int userId, string password);
+    Task<bool> IsPasswordValidAsync(string username, string password);
 
-    bool ChangePassword(string newPassword);
-    Task<bool> ChangePasswordAsync(string newPassword);
+    bool ChangePassword(string username, string newPassword);
+    bool ChangePassword(int userId, string newPassword);
+    Task<bool> ChangePasswordAsync(int userId, string newPassword);
+    Task<bool> ChangePasswordAsync(string username, string newPassword);
 }

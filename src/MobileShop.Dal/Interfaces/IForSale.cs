@@ -16,8 +16,8 @@ public interface IForSale<T> where T : BaseEntity // Product should not be imple
     /// see if product have guarantee
     /// </summary>
     /// <returns>The Guarantee object if any and null of none</returns>
-    Guarantee? GetGuarantee();
-    Task<Guarantee?> GetGuaranteeAsync();
+    Guarantee? GetGuarantee(int id);
+    Task<Guarantee?> GetGuaranteeAsync(int id);
 
     /// <summary>
     /// find owner of product if any
@@ -25,7 +25,7 @@ public interface IForSale<T> where T : BaseEntity // Product should not be imple
     /// <param name="id">id of product</param>
     /// <returns>an instance of its owner and if none returns nullF</returns>
     Customer? GetOwner(int id);
-    Task<Customer?> GetOwnerAsync();
+    Task<Customer?> GetOwnerAsync(int id);
 
     bool IsSecondHand(int id);
     Task<bool> IsSecondHandAsync(int id);

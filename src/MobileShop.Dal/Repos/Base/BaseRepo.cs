@@ -11,8 +11,24 @@ public abstract class BaseRepo<T>(AppDbContext context) : IBaseRepo<T> where T :
     public virtual T? Find(int id) => Table.FirstOrDefault(e => e.Id == id);
 
     /// <inheritdoc />
-    public virtual IEnumerable<T> GetAll() => Table.ToList();
+    public virtual T? Find(Expression<Func<T, bool>> predicate)
+        => Table.FirstOrDefault(predicate);
 
+    /// <inheritdoc />
+    public virtual async Task<T?> FindAsync(Expression<Func<T, bool>> predicate)
+        => await Table.FirstOrDefaultAsync(predicate);
+        
+    /// <inheritdoc />
+    public virtual IEnumerable<T> GetAll(Expression<Func<T, bool>>? predicate = null)
+    {
+        IQueryable<T> query = Table;
+
+        if (predicate is not null)
+            query = query.Where(predicate);
+
+        return query.ToList();
+    }
+    
     /// <inheritdoc />
     public virtual int Add(T entity, bool persist = true)
     {
@@ -42,8 +58,15 @@ public abstract class BaseRepo<T>(AppDbContext context) : IBaseRepo<T> where T :
     public virtual async Task<T?> FindAsync(int id) => await Table.FirstOrDefaultAsync(e => e.Id == id);
 
     /// <inheritdoc />
-    public virtual async Task<IEnumerable<T>> GetAllAsync() => await Table.ToListAsync();
+    public virtual async Task<IEnumerable<T>> GetAllAsync(Expression<Func<T, bool>>? predicate = null)
+    {
+        IQueryable<T> query = Table;
 
+        if (predicate is not null)
+            query = query.Where(predicate);
+
+        return await query.ToListAsync();
+    }
     /// <inheritdoc />
     public virtual async Task<int> AddAsync(T entity, bool persist = true)
     {

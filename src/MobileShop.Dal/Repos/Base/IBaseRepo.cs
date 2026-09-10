@@ -16,9 +16,20 @@ public interface IBaseRepo<T> where T : BaseEntity
     /// <returns>The entity, or <see langword="null"/> if no match is found.</returns>
     T? Find(int id);
 
-    /// <summary>Returns every entity of this type (soft-deleted rows are excluded automatically).</summary>
+    /// <summary>
+    /// Finds the first entity that matches the given predicate.
+    /// </summary>
+    /// <param name="predicate">The filter expression.</param>
+    /// <returns>The entity, or <see langword="null"/> if no match is found.</returns>
+    T? Find(Expression<Func<T, bool>> predicate);
+
+    /// <summary>
+    /// Returns every entity of this type (soft-deleted rows are excluded automatically).
+    /// An optional predicate can be supplied to filter the results in the database.
+    /// </summary>
+    /// <param name="predicate">Optional filter expression. When null, all entities are returned.</param>
     /// <returns>All matching entities.</returns>
-    IEnumerable<T> GetAll();
+    IEnumerable<T> GetAll(Expression<Func<T, bool>>? predicate = null);
 
     /// <summary>Marks a new entity for insertion.</summary>
     /// <param name="entity">The entity to add.</param>
@@ -50,9 +61,17 @@ public interface IBaseRepo<T> where T : BaseEntity
     /// <returns>The entity, or <see langword="null"/> if no match is found.</returns>
     Task<T?> FindAsync(int id);
 
+    /// <summary>
+    /// Asynchronous version of <see cref="Find(Expression{Func{T, bool}})"/>.
+    /// </summary>
+    /// <param name="predicate">The filter expression.</param>
+    /// <returns>The entity, or <see langword="null"/> if no match is found.</returns>
+    Task<T?> FindAsync(Expression<Func<T, bool>> predicate);
+
     /// <summary>Asynchronous version of <see cref="GetAll"/>.</summary>
+    /// <param name="predicate">Optional filter expression. When null, all entities are returned.</param>
     /// <returns>All matching entities.</returns>
-    Task<IEnumerable<T>> GetAllAsync();
+    Task<IEnumerable<T>> GetAllAsync(Expression<Func<T, bool>>? predicate = null);
 
     /// <summary>Asynchronous version of <see cref="Add"/>.</summary>
     /// <param name="entity">The entity to add.</param>

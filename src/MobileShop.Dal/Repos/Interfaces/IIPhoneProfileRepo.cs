@@ -5,7 +5,7 @@ namespace MobileShop.Dal.Repos.Interfaces;
 // scope somewhere (e.g. DI registration later), an "IPhoneRepo" here would collide with it.
 // "Profile" matches the existing Phone.IPhoneProfile navigation property name.
 /// <summary>Repository for <see cref="IPhone"/> entities (iPhone-specific details attached to a <see cref="Phone"/>).</summary>
-public interface IIPhoneProfileRepo : IBaseRepo<IPhone>, IForSale<IPhone>
+public interface IIPhoneProfileRepo : IBaseRepo<IPhone>
 {
     
 }

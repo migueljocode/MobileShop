@@ -5,4 +5,6 @@ public interface ISellerRepo : IBaseRepo<Seller>
 {
     IEnumerable<Product>? SoldProducts(int sellerId);
     Task<IEnumerable<Product>?> SoldProductsAsync(int sellerId);
+    IEnumerable<Product>? SoldToShop(int sellerId);
+    Task<IEnumerable<Product>?> SoldToShopAsync(int sellerId);
 }
