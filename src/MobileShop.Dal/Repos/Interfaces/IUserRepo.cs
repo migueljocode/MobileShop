@@ -20,43 +20,6 @@ public interface IUserRepo : IBaseRepo<User>
     /// <returns>The matching user, or <see langword="null"/> if none is found.</returns>
     Task<User?> FindByUsernameAsync(string username);
 
-    [Obsolete("use MobileShop.Services.DataServices.Interfaces.IUserDataService.IsPasswordValid(int userId, string password) instead")]
-    /// <summary>
-    /// Checks <paramref name="password"/> against the stored <see cref="User.PasswordHash"/> using
-    /// direct equality. This only works correctly if whatever computed <see cref="User.PasswordHash"/>
-    /// is deterministic (e.g. a keyed HMAC) - it is NOT compatible with a salted scheme like BCrypt or
-    /// <c>PasswordHasher&lt;User&gt;</c>, since those require the plain password plus the stored hash
-    /// passed to their own <c>Verify</c> method (which extracts the salt itself), not a value compared
-    /// by string equality. If Services adopts one of those, this method's contract needs to change to
-    /// pass the plain password through untouched.
-    /// </summary>
-    /// <param name="userId">The Id of the user to check.</param>
-    /// <param name="password">The value to compare against the stored hash.</param>
-    /// <returns><see langword="true"/> if it matches and the user exists.</returns>
-    bool IsPasswordValid(int userId, string password);
-
-
-    [Obsolete("use MobileShop.Services.DataServices.Interfaces.IUserDataService.IsPasswordValid(string username, string password) instead")]
-    /// <summary>Overload of <see cref="IsPasswordValid(int, string)"/> that looks the user up by username instead of Id.</summary>
-    /// <param name="username">The username of the user to check.</param>
-    /// <param name="password">The value to compare against the stored hash.</param>
-    /// <returns><see langword="true"/> if it matches and the user exists.</returns>
-    bool IsPasswordValid(string username, string password);
-
-    /// <summary>Asynchronous version of <see cref="IsPasswordValid(int, string)"/>.</summary>
-    /// <param name="userId">The Id of the user to check.</param>
-    /// <param name="password">The value to compare against the stored hash.</param>
-    /// <returns><see langword="true"/> if it matches and the user exists.</returns>
-    [Obsolete("use MobileShop.Services.DataServices.Interfaces.IUserDataService.IsPasswordValidAsync(int userId, string password) instead")]
-    Task<bool> IsPasswordValidAsync(int userId, string password);
-
-    [Obsolete("use MobileShop.Services.DataServices.Interfaces.IUserDataService.IsPasswordValidAsync(string username, string password) instead")]
-    /// <summary>Asynchronous version of <see cref="IsPasswordValid(string, string)"/>.</summary>
-    /// <param name="username">The username of the user to check.</param>
-    /// <param name="password">The value to compare against the stored hash.</param>
-    /// <returns><see langword="true"/> if it matches and the user exists.</returns>
-    Task<bool> IsPasswordValidAsync(string username, string password);
-
     /// <summary>Overwrites a user's stored password value directly - no hashing happens here, see the type-level remarks.</summary>
     /// <param name="username">The username of the user whose password is being changed.</param>
     /// <param name="newPassword">The new value to store in <see cref="User.PasswordHash"/>.</param>

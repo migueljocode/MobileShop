@@ -9,12 +9,6 @@ public static class LoggingsConfiguration
     // File: Tab-delimited single-line format optimized for Linux tools (grep, cut, awk)
     private const string FileOutputTemplate = 
         "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz}\t{Level:u3}\t{SourceContext}\t{Message:lj}{NewLine}{Exception}";
-    
-    public static IServiceCollection RegisterLoggingInterfaces(this IServiceCollection services)
-    {
-        services.AddScoped(typeof(IAppLogging<>), typeof(AppLogging<>));
-        return services;
-    }
 
     public static void ConfigureSerilog(this WebApplicationBuilder builder)
     {
@@ -24,11 +18,14 @@ public static class LoggingsConfiguration
         var log = new LoggerConfiguration()
         .MinimumLevel.Debug() // this can be change according to json config later
         .Enrich.FromLogContext()
-        .WriteTo.Console(outputTemplate: ConsoleOutputTemplate, theme: AnsiConsoleTheme.Literate)
+        .WriteTo.Console(
+            outputTemplate: ConsoleOutputTemplate, 
+            theme: AnsiConsoleTheme.Literate)
         .WriteTo.File(
             path: "logs/app-.log", // this can be change according to json config later
             rollingInterval: RollingInterval.Day,
-            outputTemplate: FileOutputTemplate)
-        .CreateLogger();
+            outputTemplate: FileOutputTemplate);
+        
+        builder.Logging.AddSerilog(log.CreateLogger());
     }
 }
