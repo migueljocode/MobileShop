@@ -19,3 +19,4 @@ global using System.ComponentModel.DataAnnotations.Schema;
 
 global using MobileShop.Tests.Dal.BaseClass;
 global using MobileShop.Tests.Dal;
+global using MobileShop.Services.Security;
