@@ -1,6 +1,6 @@
 namespace MobileShop.Dal.Repos.Interfaces;
 
-/// <summary>Repository for <see cref="Phone"/> entities.</summary>
+/// <summary>Repository for <see cref="Phone"/> entities. Also see <see cref="IForSale{T}"/>.</summary>
 public interface IPhoneRepo : IBaseRepo<Phone>, IForSale<Phone>
 {
     /// <summary>Checks whether a phone with the given <see cref="Phone.IMEI1"/> already exists.</summary>

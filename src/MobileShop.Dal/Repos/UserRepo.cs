@@ -3,10 +3,11 @@ namespace MobileShop.Dal.Repos;
 /// <inheritdoc cref="IUserRepo" />
 public class UserRepo(AppDbContext context) : BaseRepo<User>(context), IUserRepo
 {
+    /// <inheritdoc />
     public bool ChangePassword(string username, string newPassword)
     {
-        var user = Find(x => x.Username.Equals(username, StringComparison.OrdinalIgnoreCase));
-        
+        var user = Find(x => x.Username.ToLower() == username.ToLower());
+
         if (user is null)
             return false;
 
@@ -14,10 +15,11 @@ public class UserRepo(AppDbContext context) : BaseRepo<User>(context), IUserRepo
         return Update(user) > 0;
     }
 
+    /// <inheritdoc />
     public bool ChangePassword(int userId, string newPassword)
     {
         var user = Find(userId);
-        
+
         if (user is null)
             return false;
 
@@ -25,10 +27,11 @@ public class UserRepo(AppDbContext context) : BaseRepo<User>(context), IUserRepo
         return Update(user) > 0;
     }
 
+    /// <inheritdoc />
     public async Task<bool> ChangePasswordAsync(int userId, string newPassword)
     {
         var user = await FindAsync(userId);
-        
+
         if (user is null)
             return false;
 
@@ -36,10 +39,11 @@ public class UserRepo(AppDbContext context) : BaseRepo<User>(context), IUserRepo
         return await UpdateAsync(user) > 0;
     }
 
+    /// <inheritdoc />
     public async Task<bool> ChangePasswordAsync(string username, string newPassword)
     {
-        var user = await FindAsync(x => x.Username.Equals(username, StringComparison.OrdinalIgnoreCase));
-        
+        var user = await FindAsync(x => x.Username.ToLower() == username.ToLower());
+
         if (user is null)
             return false;
 
@@ -56,26 +60,31 @@ public class UserRepo(AppDbContext context) : BaseRepo<User>(context), IUserRepo
     public async Task<User?> FindByUsernameAsync(string username)
         => await Table.FirstOrDefaultAsync(u => u.Username == username);
 
-
-    // this methods can be used to validate password based on Password Attribute 
-    // or just use PasswordHasher.VerifyHashedPassword()
+    /// <inheritdoc />
     public bool IsPasswordValid(int userId, string password)
     {
-        throw new NotImplementedException();
+        var user = Find(userId);
+        return user is not null && user.PasswordHash == password;
     }
 
+    /// <inheritdoc />
     public bool IsPasswordValid(string username, string password)
     {
-        throw new NotImplementedException();
+        var user = FindByUsername(username);
+        return user is not null && user.PasswordHash == password;
     }
 
-    public Task<bool> IsPasswordValidAsync(int userId, string password)
+    /// <inheritdoc />
+    public async Task<bool> IsPasswordValidAsync(int userId, string password)
     {
-        throw new NotImplementedException();
+        var user = await FindAsync(userId);
+        return user is not null && user.PasswordHash == password;
     }
 
-    public Task<bool> IsPasswordValidAsync(string username, string password)
+    /// <inheritdoc />
+    public async Task<bool> IsPasswordValidAsync(string username, string password)
     {
-        throw new NotImplementedException();
+        var user = await FindByUsernameAsync(username);
+        return user is not null && user.PasswordHash == password;
     }
 }

@@ -3,7 +3,7 @@ namespace MobileShop.Dal.Repos;
 /// <inheritdoc cref="ISellerRepo" />
 public class SellerRepo(AppDbContext context) : BaseRepo<Seller>(context), ISellerRepo
 {
-    // All products this seller was involved in
+    /// <inheritdoc />
     public IEnumerable<Product>? SoldProducts(int sellerId)
     {
         return Table
@@ -14,6 +14,7 @@ public class SellerRepo(AppDbContext context) : BaseRepo<Seller>(context), ISell
             .ToList();
     }
 
+    /// <inheritdoc />
     public async Task<IEnumerable<Product>?> SoldProductsAsync(int sellerId)
     {
         return await Table
@@ -24,7 +25,7 @@ public class SellerRepo(AppDbContext context) : BaseRepo<Seller>(context), ISell
             .ToListAsync();
     }
 
-    // Only products this seller sold to the shop
+    /// <inheritdoc />
     public IEnumerable<Product>? SoldToShop(int sellerId)
     {
         return Table
@@ -36,6 +37,7 @@ public class SellerRepo(AppDbContext context) : BaseRepo<Seller>(context), ISell
             .ToList();
     }
 
+    /// <inheritdoc />
     public async Task<IEnumerable<Product>?> SoldToShopAsync(int sellerId)
     {
         return await Table

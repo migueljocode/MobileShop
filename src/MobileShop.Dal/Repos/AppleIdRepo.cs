@@ -3,14 +3,15 @@ namespace MobileShop.Dal.Repos;
 /// <inheritdoc cref="IAppleIdRepo" />
 public class AppleIdRepo(AppDbContext context) : BaseRepo<AppleId>(context), IAppleIdRepo
 {
+    /// <inheritdoc />
     public AppleId? Find(string email)
-        => Table.FirstOrDefault(x => x.Email.Equals(email, StringComparison.OrdinalIgnoreCase));
-    
+        => Table.FirstOrDefault(x => x.Email.ToLower() == email.ToLower());
 
+    /// <inheritdoc />
     public async Task<AppleId?> FindAsync(string email)
-        => await Table.FirstOrDefaultAsync(x => x.Email.Equals(email, StringComparison.OrdinalIgnoreCase));
-    
+        => await Table.FirstOrDefaultAsync(x => x.Email.ToLower() == email.ToLower());
 
+    /// <inheritdoc />
     public Guarantee? GetGuarantee(int id)
         => Table
             .Include(x => x.ProductNavigation)
@@ -18,8 +19,8 @@ public class AppleIdRepo(AppDbContext context) : BaseRepo<AppleId>(context), IAp
             .FirstOrDefault(x => x.Id == id)?
             .ProductNavigation?
             .GuaranteeProfile;
-    
 
+    /// <inheritdoc />
     public async Task<Guarantee?> GetGuaranteeAsync(int id)
     {
         var appleId = await Table
@@ -32,9 +33,10 @@ public class AppleIdRepo(AppDbContext context) : BaseRepo<AppleId>(context), IAp
             .GuaranteeProfile;
     }
 
+    /// <inheritdoc />
     public Customer? GetOwner(int id)
-    {        
-        var appleId = 
+    {
+        var appleId =
         Table.Include(a => a.ProductNavigation)
                 .ThenInclude(p => p.Transactions)
                     .ThenInclude(t => t.CustomerNavigation)
@@ -49,6 +51,7 @@ public class AppleIdRepo(AppDbContext context) : BaseRepo<AppleId>(context), IAp
                 .CustomerNavigation;
     }
 
+    /// <inheritdoc />
     public async Task<Customer?> GetOwnerAsync(int id)
     {
         var appleId = await Table
@@ -65,34 +68,40 @@ public class AppleIdRepo(AppDbContext context) : BaseRepo<AppleId>(context), IAp
             .CustomerNavigation;
     }
 
+    /// <inheritdoc />
     public bool IsSecondHand(int id)
         => Table
             .Where(x => x.Id == id)
             .Select(x => x.ProductNavigation.SecondHandProfile)
             .Any(profile => profile != null);
 
+    /// <inheritdoc />
     public async Task<bool> IsSecondHandAsync(int id)
         => await Table
             .Where(x => x.Id == id)
             .Select(x => x.ProductNavigation.SecondHandProfile)
             .AnyAsync(profile => profile != null);
 
+    /// <inheritdoc />
     public bool IsSold(int id)
         => Table
             .Where(x => x.Id == id)
             .SelectMany(x => x.ProductNavigation.Transactions)
             .Any(t => t.Direction == TransactionDirection.Sell);
 
+    /// <inheritdoc />
     public async Task<bool> IsSoldAsync(int id)
         => await Table
             .Where(x => x.Id == id)
             .SelectMany(x => x.ProductNavigation.Transactions)
             .AnyAsync(t => t.Direction == TransactionDirection.Sell);
 
+    /// <inheritdoc />
     public int Quantity()
         => Table.Count(a => !a.ProductNavigation.Transactions
             .Any(t => t.Direction == TransactionDirection.Sell));
 
+    /// <inheritdoc />
     public async Task<int> QuantityAsync()
         => await Table.CountAsync(a => !a.ProductNavigation.Transactions
             .Any(t => t.Direction == TransactionDirection.Sell));
