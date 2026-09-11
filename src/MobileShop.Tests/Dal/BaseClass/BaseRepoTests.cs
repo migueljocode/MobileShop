@@ -201,4 +201,66 @@ public abstract class BaseRepoTests<TEntity, TRepo> : RepoTestBase
 
         Assert.Equal(EntityState.Unchanged, Context.Entry(entity).State);
     }
+
+    [Fact]
+    public void Find_Predicate_ReturnsMatch()
+    {
+        var repo = CreateRepo();
+        var entity = CreateValidEntity();
+        repo.Add(entity);
+
+        var found = repo.Find(e => e.Id == entity.Id);
+
+        Assert.NotNull(found);
+        Assert.Equal(entity.Id, found!.Id);
+    }
+
+    [Fact]
+    public void Find_Predicate_ReturnsNull_WhenNoMatch()
+        => Assert.Null(CreateRepo().Find(e => e.Id == -1));
+
+    [Fact]
+    public async Task FindAsync_Predicate_ReturnsMatch()
+    {
+        var repo = CreateRepo();
+        var entity = CreateValidEntity();
+        await repo.AddAsync(entity);
+
+        var found = await repo.FindAsync(e => e.Id == entity.Id);
+
+        Assert.NotNull(found);
+        Assert.Equal(entity.Id, found!.Id);
+    }
+
+    [Fact]
+    public async Task FindAsync_Predicate_ReturnsNull_WhenNoMatch()
+        => Assert.Null(await CreateRepo().FindAsync(e => e.Id == -1));
+
+    [Fact]
+    public void GetAll_Predicate_FiltersResults()
+    {
+        var repo = CreateRepo();
+        var match = CreateValidEntity();
+        repo.Add(match);
+        repo.Add(CreateValidEntity());
+
+        var results = repo.GetAll(e => e.Id == match.Id).ToList();
+
+        Assert.Single(results);
+        Assert.Equal(match.Id, results[0].Id);
+    }
+
+    [Fact]
+    public async Task GetAllAsync_Predicate_FiltersResults()
+    {
+        var repo = CreateRepo();
+        var match = CreateValidEntity();
+        await repo.AddAsync(match);
+        await repo.AddAsync(CreateValidEntity());
+
+        var results = (await repo.GetAllAsync(e => e.Id == match.Id)).ToList();
+
+        Assert.Single(results);
+        Assert.Equal(match.Id, results[0].Id);
+    }
 }

@@ -7,6 +7,7 @@ global using MobileShop.Models.Entities;
 global using MobileShop.Dal.Repos;
 global using MobileShop.Dal.Repos.Base;
 global using MobileShop.Dal.Repos.Interfaces;
+global using MobileShop.Dal.Interfaces;
 global using MobileShop.Dal.Initialization;
 global using MobileShop.Dal.EfStructures; 
 

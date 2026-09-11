@@ -1,8 +1,10 @@
 namespace MobileShop.Tests.Dal.Repos;
 
-public class PhoneRepoTests : BaseRepoTests<Phone, IPhoneRepo>
+public class PhoneRepoTests : ForSaleRepoTests<Phone, IPhoneRepo>
 {
     protected override IPhoneRepo CreateRepo() => new PhoneRepo(Context);
+
+    protected override int GetProductId(Phone entity) => entity.ProductId;
 
     protected override Phone CreateValidEntity()
     {
