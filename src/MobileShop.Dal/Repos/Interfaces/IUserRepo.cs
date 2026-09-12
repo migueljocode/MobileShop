@@ -2,11 +2,9 @@ namespace MobileShop.Dal.Repos.Interfaces;
 
 /// <summary>
 /// Repository for <see cref="User"/> entities (login accounts).
-/// Passwords are never hashed in this layer - every method here treats <c>password</c>/
-/// <c>newPassword</c> parameters as an already-final value to store or compare directly against
-/// <see cref="User.PasswordHash"/>. Hashing (and re-hashing on login, if a salted scheme like
-/// BCrypt or ASP.NET Core's <c>PasswordHasher&lt;User&gt;</c> is used) belongs in the Services
-/// layer, which is expected to call these methods with the value it wants stored/compared as-is.
+/// Hashing and password verification belong in the Services/security layer.
+/// This repository exposes storage-oriented password update operations that persist the
+/// already-hashed value into <see cref="User.PasswordHash"/>.
 /// </summary>
 public interface IUserRepo : IBaseRepo<User>
 {

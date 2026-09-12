@@ -13,6 +13,7 @@ global using MobileShop.Dal.EfStructures;
 
 global using Microsoft.EntityFrameworkCore;
 global using Microsoft.EntityFrameworkCore.Metadata.Builders;
+global using Microsoft.Extensions.Logging.Abstractions;
 
 global using System.ComponentModel.DataAnnotations;
 global using System.ComponentModel.DataAnnotations.Schema;
@@ -20,3 +21,5 @@ global using System.ComponentModel.DataAnnotations.Schema;
 global using MobileShop.Tests.Dal.BaseClass;
 global using MobileShop.Tests.Dal;
 global using MobileShop.Services.Security;
+global using MobileShop.Services.DataServices.Dal;
+global using MobileShop.Services.DataServices.Interfaces;
