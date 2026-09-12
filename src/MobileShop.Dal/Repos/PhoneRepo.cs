@@ -82,4 +82,17 @@ public class PhoneRepo(AppDbContext context) : BaseRepo<Phone>(context), IPhoneR
     public async Task<int> QuantityAsync()
         => await Table.CountAsync(p => !p.ProductNavigation.Transactions
             .Any(t => t.Direction == TransactionDirection.Sell));
+
+    // Implementation (same pattern as GetGuarantee)
+    public SecondHand? GetSecondHandInfo(int id)
+        => Table
+            .Where(p => p.Id == id)
+            .Select(p => p.ProductNavigation.SecondHandProfile)
+            .FirstOrDefault();
+
+    public async Task<SecondHand?> GetSecondHandInfoAsync(int id)
+        => await Table
+            .Where(p => p.Id == id)
+            .Select(p => p.ProductNavigation.SecondHandProfile)
+            .FirstOrDefaultAsync();
 }

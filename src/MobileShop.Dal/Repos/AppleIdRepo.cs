@@ -105,4 +105,18 @@ public class AppleIdRepo(AppDbContext context) : BaseRepo<AppleId>(context), IAp
     public async Task<int> QuantityAsync()
         => await Table.CountAsync(a => !a.ProductNavigation.Transactions
             .Any(t => t.Direction == TransactionDirection.Sell));
+
+    /// <inheritdoc />
+    public SecondHand? GetSecondHandInfo(int id)
+        => Table
+            .Where(a => a.Id == id)
+            .Select(a => a.ProductNavigation.SecondHandProfile)
+            .FirstOrDefault();
+
+    /// <inheritdoc />
+    public async Task<SecondHand?> GetSecondHandInfoAsync(int id)
+        => await Table
+            .Where(a => a.Id == id)
+            .Select(a => a.ProductNavigation.SecondHandProfile)
+            .FirstOrDefaultAsync();
 }

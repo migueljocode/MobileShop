@@ -12,4 +12,8 @@ public interface IPhoneRepo : IBaseRepo<Phone>, IForSale<Phone>
     /// <param name="imei1">The 15-digit IMEI to check.</param>
     /// <returns><see langword="true"/> if a phone with that IMEI1 is already on record.</returns>
     Task<bool> ImeiExistsAsync(string imei1);
+
+    // Interface
+    SecondHand? GetSecondHandInfo(int id);
+    Task<SecondHand?> GetSecondHandInfoAsync(int id);
 }
