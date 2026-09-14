@@ -16,7 +16,7 @@ public static class LoggingsConfiguration
         var config = builder.Configuration; // maybe used when we created json configuration per project (Web/Api)
         
         var logger = new LoggerConfiguration()
-        .MinimumLevel.Debug() // this can be change according to json config later
+        .MinimumLevel.Information() // this can be change according to json config later
         .Enrich.FromLogContext()
         .WriteTo.Console(
             outputTemplate: ConsoleOutputTemplate, 
