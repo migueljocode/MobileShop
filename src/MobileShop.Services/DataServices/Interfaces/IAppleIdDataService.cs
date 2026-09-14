@@ -2,6 +2,9 @@
 
 public interface IAppleIdDataService : IDataService<AppleId>
 {
+    IReadOnlyList<ProductListItemViewModel> GetInventoryRows();
+    ProductDetailsViewModel? GetDetails(int id);
+
     AppleId? FindByEmail(string email);
     Task<AppleId?> FindByEmailAsync(string email);
 

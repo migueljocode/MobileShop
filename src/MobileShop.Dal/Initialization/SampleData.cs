@@ -52,9 +52,9 @@ internal static class SampleData
 
     internal static List<Phone> Phones { get; } =
     [
-        new() { Id = 1, IMEI1 = "123456789012345", ProductId = 1 },
-        new() { Id = 2, IMEI1 = "234567890123456", IMEI2 = "234567890123457", ProductId = 2 },
-        new() { Id = 3, IMEI1 = "345678901234567", OwnershipTransferred = true, ProductId = 3 }
+        new() { Id = 1, IMEI1 = "123456789012345", Color = "Midnight", ProductId = 1 },
+        new() { Id = 2, IMEI1 = "234567890123456", IMEI2 = "234567890123457", Color = "Black", ProductId = 2 },
+        new() { Id = 3, IMEI1 = "345678901234567", Color = "Green", OwnershipTransferred = true, ProductId = 3 }
     ];
 
     internal static List<SecondHand> SecondHands { get; } =

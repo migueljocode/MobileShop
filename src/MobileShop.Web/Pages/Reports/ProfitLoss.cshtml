@@ -10,5 +10,5 @@
 <p class="lead">Total profit: <strong>@Model.TotalProfit.ToString("N0")</strong></p>
 <table class="table table-striped"><thead><tr><th>Product</th><th>Bought</th><th>Sold</th><th>Profit / loss</th></tr></thead><tbody>
 @foreach (var row in Model.Rows)
-{ <tr><td>@row.Product (#@row.ProductId)</td><td>@row.Bought.ToString("N0")</td><td>@row.Sold.ToString("N0")</td><td>@row.Profit.ToString("N0")</td></tr> }
+{ <tr><td>@row.ProductLabel (#@row.ProductId)</td><td>@row.Bought.ToString("N0")</td><td>@row.Sold.ToString("N0")</td><td>@row.Profit.ToString("N0")</td></tr> }
 </tbody></table>

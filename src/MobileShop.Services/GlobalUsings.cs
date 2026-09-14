@@ -18,3 +18,4 @@ global using MobileShop.Services.DataServices.Dal.Base;
 global using MobileShop.Services.DataServices.Interfaces;
 global using MobileShop.Services.Security;
 global using MobileShop.Models.Enums;
+global using MobileShop.Models.ViewModels.Web;

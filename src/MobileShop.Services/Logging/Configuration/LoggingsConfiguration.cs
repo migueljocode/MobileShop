@@ -13,10 +13,18 @@ public static class LoggingsConfiguration
     public static void ConfigureSerilog(this WebApplicationBuilder builder)
     {
         builder.Logging.ClearProviders();
-        var config = builder.Configuration; // maybe used when we created json configuration per project (Web/Api)
-        
+        var config = builder.Configuration;
+        // Logging:LogLevel:Default controls Serilog's minimum level; Information is the safe fallback.
+        var configuredLevel = config["Logging:LogLevel:Default"];
+        var minimumLevel = Enum.TryParse<Serilog.Events.LogEventLevel>(
+            configuredLevel,
+            ignoreCase: true,
+            out var parsedLevel)
+            ? parsedLevel
+            : Serilog.Events.LogEventLevel.Information;
+
         var logger = new LoggerConfiguration()
-        .MinimumLevel.Debug() // this can be change according to json config later
+        .MinimumLevel.Is(minimumLevel)
         .Enrich.FromLogContext()
         .WriteTo.Console(
             outputTemplate: ConsoleOutputTemplate, 

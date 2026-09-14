@@ -10,6 +10,7 @@ global using MobileShop.Dal.Initialization;
 global using MobileShop.Models.Enums;
 global using MobileShop.Models.Entities;
 global using System.ComponentModel.DataAnnotations;
+global using MobileShop.Models.ViewModels.Web;
 global using MobileShop.Services;
 global using MobileShop.Services.DataServices.Interfaces;
 global using MobileShop.Services.Logging.Configuration;

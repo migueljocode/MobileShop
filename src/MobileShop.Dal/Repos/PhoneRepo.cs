@@ -5,21 +5,31 @@ public class PhoneRepo(AppDbContext context) : BaseRepo<Phone>(context), IPhoneR
 {
     public override Phone? Find(int id)
         => Table.Include(p => p.ProductNavigation)
+                .ThenInclude(p => p.Transactions)
+            .Include(p => p.ProductNavigation)
+                .ThenInclude(p => p.SecondHandProfile)
             .FirstOrDefault(p => p.Id == id);
 
     public override async Task<Phone?> FindAsync(int id)
         => await Table.Include(p => p.ProductNavigation)
+                .ThenInclude(p => p.Transactions)
+            .Include(p => p.ProductNavigation)
+                .ThenInclude(p => p.SecondHandProfile)
             .FirstOrDefaultAsync(p => p.Id == id);
 
     public override IEnumerable<Phone> GetAll(Expression<Func<Phone, bool>>? predicate = null)
     {
-        IQueryable<Phone> query = Table.Include(p => p.ProductNavigation);
+        IQueryable<Phone> query = Table
+            .Include(p => p.ProductNavigation).ThenInclude(p => p.Transactions)
+            .Include(p => p.ProductNavigation).ThenInclude(p => p.SecondHandProfile);
         return (predicate is null ? query : query.Where(predicate)).ToList();
     }
 
     public override async Task<IEnumerable<Phone>> GetAllAsync(Expression<Func<Phone, bool>>? predicate = null)
     {
-        IQueryable<Phone> query = Table.Include(p => p.ProductNavigation);
+        IQueryable<Phone> query = Table
+            .Include(p => p.ProductNavigation).ThenInclude(p => p.Transactions)
+            .Include(p => p.ProductNavigation).ThenInclude(p => p.SecondHandProfile);
         return await (predicate is null ? query : query.Where(predicate)).ToListAsync();
     }
 
@@ -40,6 +50,10 @@ public class PhoneRepo(AppDbContext context) : BaseRepo<Phone>(context), IPhoneR
     /// <inheritdoc />
     public Customer? GetOwner(int id)
         => Table
+            .Include(p => p.ProductNavigation)
+                .ThenInclude(p => p.Transactions)
+                    .ThenInclude(t => t.CustomerNavigation)
+                        .ThenInclude(c => c.PersonNavigation)
             .Where(p => p.Id == id)
             .SelectMany(p => p.ProductNavigation.Transactions)
             .Where(t => t.Direction == TransactionDirection.Sell)
@@ -50,6 +64,10 @@ public class PhoneRepo(AppDbContext context) : BaseRepo<Phone>(context), IPhoneR
     /// <inheritdoc />
     public async Task<Customer?> GetOwnerAsync(int id)
         => await Table
+            .Include(p => p.ProductNavigation)
+                .ThenInclude(p => p.Transactions)
+                    .ThenInclude(t => t.CustomerNavigation)
+                        .ThenInclude(c => c.PersonNavigation)
             .Where(p => p.Id == id)
             .SelectMany(p => p.ProductNavigation.Transactions)
             .Where(t => t.Direction == TransactionDirection.Sell)
