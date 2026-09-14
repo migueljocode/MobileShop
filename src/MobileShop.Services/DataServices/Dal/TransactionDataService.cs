@@ -42,6 +42,81 @@ public class TransactionDataService(
             .Take(count)
             .ToList();
 
+    public IReadOnlyList<TransactionCardViewModel> GetRecentCards(int count = 20)
+        => _transactionRepo.GetAll()
+            .OrderByDescending(t => t.Date)
+            .Take(count)
+            .Select(transaction => new TransactionCardViewModel(
+                transaction.Date,
+                transaction.Direction,
+                transaction.FinishedPrice,
+                ProductLabel(transaction),
+                transaction.Direction == TransactionDirection.Buy
+                    ? $"From: {SellerLabel(transaction)}"
+                    : $"To: {CustomerLabel(transaction)}"))
+            .ToList();
+
+    public IReadOnlyList<TransactionListItemViewModel> GetList(
+        string? direction,
+        int take,
+        bool ascending)
+    {
+        var query = _transactionRepo.GetAll();
+        if (string.Equals(direction, "buy", StringComparison.OrdinalIgnoreCase))
+            query = query.Where(t => t.Direction == TransactionDirection.Buy);
+        else if (string.Equals(direction, "sell", StringComparison.OrdinalIgnoreCase))
+            query = query.Where(t => t.Direction == TransactionDirection.Sell);
+
+        var ordered = ascending
+            ? query.OrderBy(t => t.Date)
+            : query.OrderByDescending(t => t.Date);
+
+        return ordered
+            .Take(Math.Clamp(take, 1, 500))
+            .Select(transaction => new TransactionListItemViewModel(
+                transaction.Date,
+                transaction.Direction,
+                ProductLabel(transaction),
+                transaction.FinishedPrice,
+                SellerLabel(transaction),
+                CustomerLabel(transaction)))
+            .ToList();
+    }
+
+    public IReadOnlyList<ProfitLossRowViewModel> GetProfitLossRows(DateTime? from, DateTime? to)
+    {
+        var transactions = _transactionRepo.GetAll()
+            .Where(t => (!from.HasValue || t.Date.Date >= from.Value.Date) &&
+                        (!to.HasValue || t.Date.Date <= to.Value.Date));
+
+        return transactions
+            .GroupBy(t => t.ProductId)
+            .Select(group =>
+            {
+                var first = group.First();
+                return new ProfitLossRowViewModel(
+                    group.Key,
+                    ProductLabel(first),
+                    group.Where(t => t.Direction == TransactionDirection.Buy).Sum(t => t.FinishedPrice),
+                    group.Where(t => t.Direction == TransactionDirection.Sell).Sum(t => t.FinishedPrice));
+            })
+            .OrderBy(row => row.ProductId)
+            .ToList();
+    }
+
+    public decimal GetProfitLossTotal(DateTime? from, DateTime? to)
+        => GetProfitLossRows(from, to).Sum(row => row.Profit);
+
+    public IReadOnlyList<ProductTransactionViewModel> GetProductTransactions(int productId)
+        => _transactionRepo.GetByProduct(productId)
+            .Select(transaction => new ProductTransactionViewModel(
+                transaction.Date,
+                transaction.Direction,
+                transaction.FinishedPrice,
+                SellerLabel(transaction),
+                CustomerLabel(transaction)))
+            .ToList();
+
     // ── Products bought / sold by the shop ────────────────
 
     public IEnumerable<Product> GetProductsBoughtByShop(
@@ -213,4 +288,23 @@ public class TransactionDataService(
         decimal finishedPrice,
         DateTime? date = null)
         => Task.FromResult(RecordSell(productId, customerId, finishedPrice, date));
+
+    private static string ProductLabel(Transaction transaction)
+        => transaction.ProductNavigation is null
+            ? $"Product #{transaction.ProductId}"
+            : $"{transaction.ProductNavigation.Manufacturer} {transaction.ProductNavigation.Model}";
+
+    private static string SellerLabel(Transaction transaction)
+        => transaction.SellerId == ShopSellerId
+            ? "Shop"
+            : transaction.SellerNavigation?.PersonNavigation is { } person
+                ? $"{person.FirstName} {person.LastName}"
+                : "Seller";
+
+    private static string CustomerLabel(Transaction transaction)
+        => transaction.CustomerId == ShopCustomerId
+            ? "Shop"
+            : transaction.CustomerNavigation?.PersonNavigation is { } person
+                ? $"{person.FirstName} {person.LastName}"
+                : "Customer";
 }

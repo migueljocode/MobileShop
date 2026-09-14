@@ -2,6 +2,9 @@
 
 public interface IPhoneDataService : IDataService<Phone>
 {
+    IReadOnlyList<ProductListItemViewModel> GetInventoryRows();
+    ProductDetailsViewModel? GetDetails(int id);
+
     bool ImeiExists(string imei1);
     Task<bool> ImeiExistsAsync(string imei1);
 

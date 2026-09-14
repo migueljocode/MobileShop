@@ -12,6 +12,9 @@ public class Phone : BaseEntity
     [RegularExpression(@"^[0-9]{15}$", ErrorMessage = "{0} must be exactly 15 digits.")]
     public string? IMEI2 { get; set; }
 
+    [StringLength(50, ErrorMessage = "{0} cannot exceed {1} characters.")]
+    public string? Color { get; set; }
+
     public bool OwnershipTransferred { get; set; }
 
     public int ProductId { get; set; }

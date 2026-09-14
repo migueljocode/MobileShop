@@ -9,6 +9,11 @@ public interface ITransactionDataService : IDataService<Transaction>
 
     IEnumerable<Transaction> GetRecent(int count = 20);
     Task<IEnumerable<Transaction>> GetRecentAsync(int count = 20);
+    IReadOnlyList<TransactionCardViewModel> GetRecentCards(int count = 20);
+    IReadOnlyList<TransactionListItemViewModel> GetList(string? direction, int take, bool ascending);
+    IReadOnlyList<ProfitLossRowViewModel> GetProfitLossRows(DateTime? from, DateTime? to);
+    decimal GetProfitLossTotal(DateTime? from, DateTime? to);
+    IReadOnlyList<ProductTransactionViewModel> GetProductTransactions(int productId);
 
     // TODO: eager-load Product (+ Phone/AppleId profiles) when reports need full details
     IEnumerable<Product> GetProductsBoughtByShop(Expression<Func<Product, bool>>? predicate = null);

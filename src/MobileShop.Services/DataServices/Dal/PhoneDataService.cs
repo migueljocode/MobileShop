@@ -7,6 +7,40 @@ public class PhoneDataService(
 {
     private readonly IPhoneRepo _phoneRepo = phoneRepo;
 
+    public IReadOnlyList<ProductListItemViewModel> GetInventoryRows()
+        => GetAll()
+            .OrderBy(phone => phone.ProductId)
+            .Select(phone => new ProductListItemViewModel(
+                phone.Id,
+                phone.ProductId,
+                "Phone",
+                $"{phone.ProductNavigation.Manufacturer} {phone.ProductNavigation.Model}",
+                $"IMEI: {phone.IMEI1}",
+                phone.Color,
+                phone.ProductNavigation.Transactions.Any(t => t.Direction == TransactionDirection.Sell),
+                phone.ProductNavigation.SecondHandProfile is not null))
+            .ToList();
+
+    public ProductDetailsViewModel? GetDetails(int id)
+    {
+        var phone = Find(id);
+        if (phone is null)
+            return null;
+
+        var owner = GetOwner(id);
+        var guarantee = GetGuarantee(id);
+        return new ProductDetailsViewModel(
+            "Phone",
+            phone.ProductId,
+            phone.ProductNavigation?.Manufacturer ?? "Phone",
+            phone.ProductNavigation?.Model ?? $"Phone #{id}",
+            $"IMEI: {phone.IMEI1}" + (phone.IMEI2 is null ? string.Empty : $" / {phone.IMEI2}"),
+            phone.Color,
+            owner?.PersonNavigation is { } person ? $"{person.FirstName} {person.LastName}" : "Not sold",
+            guarantee is null ? "None" : $"{guarantee.Corporation} until {guarantee.ExpirationDate:d}",
+            GetSecondHandInfo(id) is not null);
+    }
+
     // ── IMEI ──────────────────────────────────────────────
 
     public bool ImeiExists(string imei1)

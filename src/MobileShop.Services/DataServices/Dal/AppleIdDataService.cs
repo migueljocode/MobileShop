@@ -7,6 +7,42 @@ public class AppleIdDataService(
 {
     private readonly IAppleIdRepo _appleIdRepo = appleIdRepo;
 
+    public IReadOnlyList<ProductListItemViewModel> GetInventoryRows()
+        => GetAll()
+            .OrderBy(appleId => appleId.ProductId)
+            .Select(appleId => new ProductListItemViewModel(
+                appleId.Id,
+                appleId.ProductId,
+                "Apple ID",
+                appleId.ProductNavigation is null
+                    ? appleId.Email
+                    : $"{appleId.ProductNavigation.Manufacturer} {appleId.ProductNavigation.Model}",
+                appleId.Email,
+                null,
+                appleId.ProductNavigation?.Transactions.Any(t => t.Direction == TransactionDirection.Sell) ?? false,
+                appleId.ProductNavigation?.SecondHandProfile is not null))
+            .ToList();
+
+    public ProductDetailsViewModel? GetDetails(int id)
+    {
+        var appleId = Find(id);
+        if (appleId is null)
+            return null;
+
+        var owner = GetOwner(id);
+        var guarantee = GetGuarantee(id);
+        return new ProductDetailsViewModel(
+            "Apple ID",
+            appleId.ProductId,
+            appleId.ProductNavigation?.Manufacturer ?? "Apple",
+            appleId.ProductNavigation?.Model ?? appleId.Email,
+            appleId.Email,
+            null,
+            owner?.PersonNavigation is { } person ? $"{person.FirstName} {person.LastName}" : "Not sold",
+            guarantee is null ? "None" : $"{guarantee.Corporation} until {guarantee.ExpirationDate:d}",
+            GetSecondHandInfo(id) is not null);
+    }
+
     // ── Email ─────────────────────────────────────────────
 
     public AppleId? FindByEmail(string email)

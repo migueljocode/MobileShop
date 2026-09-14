@@ -13,7 +13,7 @@
     <div class="col-md-3">
         <div class="card text-bg-success h-100">
             <div class="card-body text-center">
-                <h2 class="card-title">@Model.PhonesInStock</h2>
+                <h2 class="card-title">@Model.Stock.PhonesInStock</h2>
                 <p class="card-text">Phones in stock</p>
             </div>
         </div>
@@ -21,7 +21,7 @@
     <div class="col-md-3">
         <div class="card text-bg-warning h-100">
             <div class="card-body text-center">
-                <h2 class="card-title">@Model.PhonesSecondHand</h2>
+                <h2 class="card-title">@Model.Stock.PhonesSecondHand</h2>
                 <p class="card-text">Second-hand phones</p>
             </div>
         </div>
@@ -29,7 +29,7 @@
     <div class="col-md-3">
         <div class="card text-bg-info h-100">
             <div class="card-body text-center">
-                <h2 class="card-title">@Model.PhonesSecondHandAvailable</h2>
+                <h2 class="card-title">@Model.Stock.PhonesSecondHandAvailable</h2>
                 <p class="card-text">Second-hand available</p>
             </div>
         </div>
@@ -37,7 +37,7 @@
     <div class="col-md-3">
         <div class="card text-bg-primary h-100">
             <div class="card-body text-center">
-                <h2 class="card-title">@Model.AppleIdsInStock</h2>
+                <h2 class="card-title">@Model.Stock.AppleIdsInStock</h2>
                 <p class="card-text">Apple IDs in stock</p>
             </div>
         </div>
@@ -57,13 +57,13 @@ else
             <div class="col-md-6 col-lg-4">
                 <div class="card h-100">
                     <div class="card-body">
-                        <h5 class="card-title">@transaction.Product</h5>
+                        <h5 class="card-title">@transaction.ProductLabel</h5>
                         <p class="card-text mb-1">@transaction.Date.ToString("yyyy-MM-dd HH:mm")</p>
                     <span class="badge @(transaction.Direction == TransactionDirection.Buy ? "text-bg-primary" : "text-bg-dark")">
                         @transaction.Direction
                     </span>
                         <p class="card-text mt-2 mb-0">Finished price: @transaction.FinishedPrice.ToString("N0")</p>
-                        <p class="card-text mb-0">Seller: #@transaction.SellerId · Customer: #@transaction.CustomerId</p>
+                        <p class="card-text mb-0">@transaction.PartyLabel</p>
                     </div>
                 </div>
             </div>
