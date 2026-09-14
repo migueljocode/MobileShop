@@ -15,6 +15,12 @@ public class AppleIdDataService(
     public Task<AppleId?> FindByEmailAsync(string email)
         => _appleIdRepo.FindAsync(email);
 
+    public bool IsSold(int id)
+        => _appleIdRepo.IsSold(id);
+
+    public Task<bool> IsSoldAsync(int id)
+        => _appleIdRepo.IsSoldAsync(id);
+
     // ── Owner (null ⇒ not sold) ───────────────────────────
 
     public Customer? GetOwner(int id)

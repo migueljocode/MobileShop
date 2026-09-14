@@ -1,6 +1,5 @@
 namespace MobileShop.Web.Pages;
 
-[Authorize]
 public class IndexModel(
     IPhoneDataService phoneDataService,
     IAppleIdDataService appleIdDataService,
@@ -38,7 +37,9 @@ public class IndexModel(
                 transaction.Date,
                 transaction.Direction,
                 transaction.FinishedPrice,
-                transaction.ProductId,
+                transaction.ProductNavigation is null
+                    ? $"Product #{transaction.ProductId}"
+                    : $"{transaction.ProductNavigation.Manufacturer} {transaction.ProductNavigation.Model}",
                 transaction.SellerId,
                 transaction.CustomerId))
             .ToList();
@@ -57,7 +58,7 @@ public class IndexModel(
         DateTime Date,
         TransactionDirection Direction,
         decimal FinishedPrice,
-        int ProductId,
+        string Product,
         int SellerId,
         int CustomerId);
 }

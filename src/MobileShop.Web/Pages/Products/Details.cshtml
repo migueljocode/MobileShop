@@ -1,0 +1,25 @@
+@page
+@model MobileShop.Web.Pages.Products.DetailsModel
+@{
+    ViewData["Title"] = "Product details";
+}
+
+@if (Model.Product is not null)
+{
+    <h1>@Model.Product.Manufacturer @Model.Product.Model</h1>
+    <p><strong>Type:</strong> @Model.Product.Type · <strong>Product ID:</strong> @Model.Product.ProductId</p>
+    <dl class="row">
+        <dt class="col-sm-3">Identifier</dt><dd class="col-sm-9">@Model.Product.Identifier</dd>
+        <dt class="col-sm-3">Owner</dt><dd class="col-sm-9">@(Model.Product.Owner is null ? "Not sold" : $"{Model.Product.Owner.FirstName} {Model.Product.Owner.LastName}")</dd>
+        <dt class="col-sm-3">Second-hand</dt><dd class="col-sm-9">@(Model.Product.SecondHand is null ? "No" : "Yes")</dd>
+        <dt class="col-sm-3">Guarantee</dt><dd class="col-sm-9">@(Model.Product.Guarantee is null ? "None" : $"{Model.Product.Guarantee.Corporation} until {Model.Product.Guarantee.ExpirationDate:d}")</dd>
+    </dl>
+    <h2>Transactions</h2>
+    @if (Model.Transactions.Count == 0) { <p class="text-muted">No transactions.</p> }
+    else
+    {
+        <table class="table"><thead><tr><th>Date</th><th>Direction</th><th>Price</th><th>Seller</th><th>Customer</th></tr></thead>
+        <tbody>@foreach (var transaction in Model.Transactions)
+        { <tr><td>@transaction.Date.ToString("yyyy-MM-dd")</td><td>@transaction.Direction</td><td>@transaction.FinishedPrice.ToString("N0")</td><td>#@transaction.SellerId</td><td>#@transaction.CustomerId</td></tr> }</tbody></table>
+    }
+}

@@ -5,6 +5,9 @@ public interface IAppleIdDataService : IDataService<AppleId>
     AppleId? FindByEmail(string email);
     Task<AppleId?> FindByEmailAsync(string email);
 
+    bool IsSold(int id);
+    Task<bool> IsSoldAsync(int id);
+
     // null ⇒ not sold
     // TODO: eager-load PersonNavigation when UI needs full customer details
     Customer? GetOwner(int id);

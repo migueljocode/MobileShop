@@ -3,6 +3,26 @@ namespace MobileShop.Dal.Repos;
 /// <inheritdoc cref="IPhoneRepo" />
 public class PhoneRepo(AppDbContext context) : BaseRepo<Phone>(context), IPhoneRepo
 {
+    public override Phone? Find(int id)
+        => Table.Include(p => p.ProductNavigation)
+            .FirstOrDefault(p => p.Id == id);
+
+    public override async Task<Phone?> FindAsync(int id)
+        => await Table.Include(p => p.ProductNavigation)
+            .FirstOrDefaultAsync(p => p.Id == id);
+
+    public override IEnumerable<Phone> GetAll(Expression<Func<Phone, bool>>? predicate = null)
+    {
+        IQueryable<Phone> query = Table.Include(p => p.ProductNavigation);
+        return (predicate is null ? query : query.Where(predicate)).ToList();
+    }
+
+    public override async Task<IEnumerable<Phone>> GetAllAsync(Expression<Func<Phone, bool>>? predicate = null)
+    {
+        IQueryable<Phone> query = Table.Include(p => p.ProductNavigation);
+        return await (predicate is null ? query : query.Where(predicate)).ToListAsync();
+    }
+
     /// <inheritdoc />
     public Guarantee? GetGuarantee(int id)
         => Table

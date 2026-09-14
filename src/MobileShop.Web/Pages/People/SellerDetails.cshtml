@@ -1,0 +1,11 @@
+@page
+@model MobileShop.Web.Pages.People.SellerDetailsModel
+@{ ViewData["Title"] = "Seller details"; }
+@if (Model.Seller is not null)
+{
+    <h1>@Model.Seller.PersonNavigation.FirstName @Model.Seller.PersonNavigation.LastName</h1>
+    <p>Phone: @Model.Seller.PersonNavigation.PhoneNumber · Type: @Model.Seller.EntityType</p>
+    <h2>Products sold to shop</h2>
+    @if (Model.Products.Count == 0) { <p class="text-muted">No products supplied.</p> }
+    else { <ul>@foreach (var product in Model.Products) { <li>@product.Manufacturer @product.Model (Product #@product.Id)</li> }</ul> }
+}
