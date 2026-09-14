@@ -10,18 +10,28 @@ public class AppleIdDataService(
     public IReadOnlyList<ProductListItemViewModel> GetInventoryRows()
         => GetAll()
             .OrderBy(appleId => appleId.ProductId)
-            .Select(appleId => new ProductListItemViewModel(
-                appleId.Id,
-                appleId.ProductId,
-                "Apple ID",
-                appleId.ProductNavigation is null
-                    ? appleId.Email
-                    : $"{appleId.ProductNavigation.Manufacturer} {appleId.ProductNavigation.Model}",
-                appleId.Email,
-                null,
-                appleId.ProductNavigation?.Transactions.Any(t => t.Direction == TransactionDirection.Sell) ?? false,
-                appleId.ProductNavigation?.SecondHandProfile is not null))
+            .Select(ToInventoryRow)
             .ToList();
+
+    public IReadOnlyList<ProductListItemViewModel> GetSelectableProducts(TransactionDirection direction)
+        => GetAll()
+            .Where(appleId => appleId.ProductNavigation.Transactions.All(transaction => transaction.Direction != direction))
+            .OrderBy(appleId => appleId.ProductId)
+            .Select(ToInventoryRow)
+            .ToList();
+
+    private static ProductListItemViewModel ToInventoryRow(AppleId appleId)
+        => new(
+            appleId.Id,
+            appleId.ProductId,
+            "Apple ID",
+            appleId.ProductNavigation is null
+                ? appleId.Email
+                : $"{appleId.ProductNavigation.Manufacturer} {appleId.ProductNavigation.Model}",
+            appleId.Email,
+            null,
+            appleId.ProductNavigation?.Transactions.Any(t => t.Direction == TransactionDirection.Sell) ?? false,
+            appleId.ProductNavigation?.SecondHandProfile is not null);
 
     public ProductDetailsViewModel? GetDetails(int id)
     {

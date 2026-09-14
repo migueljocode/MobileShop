@@ -10,16 +10,26 @@ public class PhoneDataService(
     public IReadOnlyList<ProductListItemViewModel> GetInventoryRows()
         => GetAll()
             .OrderBy(phone => phone.ProductId)
-            .Select(phone => new ProductListItemViewModel(
-                phone.Id,
-                phone.ProductId,
-                "Phone",
-                $"{phone.ProductNavigation.Manufacturer} {phone.ProductNavigation.Model}",
-                $"IMEI: {phone.IMEI1}",
-                phone.Color,
-                phone.ProductNavigation.Transactions.Any(t => t.Direction == TransactionDirection.Sell),
-                phone.ProductNavigation.SecondHandProfile is not null))
+            .Select(ToInventoryRow)
             .ToList();
+
+    public IReadOnlyList<ProductListItemViewModel> GetSelectableProducts(TransactionDirection direction)
+        => GetAll()
+            .Where(phone => phone.ProductNavigation.Transactions.All(transaction => transaction.Direction != direction))
+            .OrderBy(phone => phone.ProductId)
+            .Select(ToInventoryRow)
+            .ToList();
+
+    private static ProductListItemViewModel ToInventoryRow(Phone phone)
+        => new(
+            phone.Id,
+            phone.ProductId,
+            "Phone",
+            $"{phone.ProductNavigation.Manufacturer} {phone.ProductNavigation.Model}",
+            $"IMEI: {phone.IMEI1}",
+            phone.Color,
+            phone.ProductNavigation.Transactions.Any(t => t.Direction == TransactionDirection.Sell),
+            phone.ProductNavigation.SecondHandProfile is not null);
 
     public ProductDetailsViewModel? GetDetails(int id)
     {

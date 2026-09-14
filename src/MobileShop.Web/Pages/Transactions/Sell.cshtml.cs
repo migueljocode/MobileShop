@@ -1,9 +1,14 @@
 namespace MobileShop.Web.Pages.Transactions;
 
-public class SellModel(ITransactionDataService transactionDataService, ICustomerDataService customerDataService) : PageModel
+public class SellModel(
+    ITransactionDataService transactionDataService,
+    ICustomerDataService customerDataService,
+    IPhoneDataService phoneDataService,
+    IAppleIdDataService appleIdDataService) : PageModel
 {
     [BindProperty] public InputModel Input { get; set; } = new();
     public IReadOnlyList<Customer> Customers { get; private set; } = [];
+    public IReadOnlyList<ProductListItemViewModel> Products { get; private set; } = [];
     public string? Message { get; private set; }
 
     public void OnGet() => LoadCustomers();
@@ -23,7 +28,14 @@ public class SellModel(ITransactionDataService transactionDataService, ICustomer
         return Page();
     }
 
-    private void LoadCustomers() => Customers = customerDataService.GetAll().ToList();
+    private void LoadCustomers()
+    {
+        Customers = customerDataService.GetAll().ToList();
+        Products = phoneDataService.GetSelectableProducts(TransactionDirection.Sell)
+            .Concat(appleIdDataService.GetSelectableProducts(TransactionDirection.Sell))
+            .OrderBy(product => product.Name)
+            .ToList();
+    }
 
     public class InputModel
     {

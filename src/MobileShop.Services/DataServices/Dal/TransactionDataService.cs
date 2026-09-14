@@ -74,6 +74,7 @@ public class TransactionDataService(
         return ordered
             .Take(Math.Clamp(take, 1, 500))
             .Select(transaction => new TransactionListItemViewModel(
+                transaction.Id,
                 transaction.Date,
                 transaction.Direction,
                 ProductLabel(transaction),
@@ -116,6 +117,20 @@ public class TransactionDataService(
                 SellerLabel(transaction),
                 CustomerLabel(transaction)))
             .ToList();
+
+    public TransactionDetailsViewModel? GetDetails(int id)
+    {
+        var transaction = _transactionRepo.GetAll(t => t.Id == id).FirstOrDefault();
+        return transaction is null
+            ? null
+            : new TransactionDetailsViewModel(
+                transaction.Date,
+                transaction.Direction,
+                transaction.FinishedPrice,
+                ProductLabel(transaction),
+                SellerLabel(transaction),
+                CustomerLabel(transaction));
+    }
 
     // ── Products bought / sold by the shop ────────────────
 

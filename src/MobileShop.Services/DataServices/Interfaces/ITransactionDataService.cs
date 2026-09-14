@@ -14,6 +14,7 @@ public interface ITransactionDataService : IDataService<Transaction>
     IReadOnlyList<ProfitLossRowViewModel> GetProfitLossRows(DateTime? from, DateTime? to);
     decimal GetProfitLossTotal(DateTime? from, DateTime? to);
     IReadOnlyList<ProductTransactionViewModel> GetProductTransactions(int productId);
+    TransactionDetailsViewModel? GetDetails(int id);
 
     // TODO: eager-load Product (+ Phone/AppleId profiles) when reports need full details
     IEnumerable<Product> GetProductsBoughtByShop(Expression<Func<Product, bool>>? predicate = null);

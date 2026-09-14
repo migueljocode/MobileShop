@@ -3,6 +3,7 @@
 public interface IPhoneDataService : IDataService<Phone>
 {
     IReadOnlyList<ProductListItemViewModel> GetInventoryRows();
+    IReadOnlyList<ProductListItemViewModel> GetSelectableProducts(TransactionDirection direction);
     ProductDetailsViewModel? GetDetails(int id);
 
     bool ImeiExists(string imei1);

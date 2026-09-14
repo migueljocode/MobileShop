@@ -1,10 +1,9 @@
 namespace MobileShop.Models.ViewModels.Web;
 
-public sealed record TransactionListItemViewModel(
-    int Id,
+public sealed record TransactionDetailsViewModel(
     DateTime Date,
     TransactionDirection Direction,
-    string ProductLabel,
     decimal FinishedPrice,
+    string ProductLabel,
     string SellerLabel,
     string CustomerLabel);
