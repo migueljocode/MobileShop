@@ -1,0 +1,38 @@
+@page
+@model MobileShop.Web.Pages.Products.IndexModel
+@{
+    ViewData["Title"] = "Products";
+}
+
+<h1>Products</h1>
+<div class="btn-group mb-3" role="group">
+    <a class="btn @(Model.Type == "all" ? "btn-primary" : "btn-outline-primary")" asp-route-type="all">All</a>
+    <a class="btn @(Model.Type == "phone" ? "btn-primary" : "btn-outline-primary")" asp-route-type="phone">Phones</a>
+    <a class="btn @(Model.Type == "appleid" ? "btn-primary" : "btn-outline-primary")" asp-route-type="appleid">Apple IDs</a>
+</div>
+
+@if (Model.Products.Count == 0)
+{
+    <p class="text-muted">No products found.</p>
+}
+else
+{
+    <table class="table table-striped">
+        <thead><tr><th>Type</th><th>Product</th><th>Identifier</th><th>Status</th><th></th></tr></thead>
+        <tbody>
+        @foreach (var product in Model.Products)
+        {
+            <tr>
+                <td>@product.Type</td>
+                <td>@product.Name</td>
+                <td>@product.Identifier</td>
+                <td>
+                    <span class="badge @(product.IsSold ? "text-bg-secondary" : "text-bg-success")">@(product.IsSold ? "Sold" : "Available")</span>
+                    @if (product.IsSecondHand) { <span class="badge text-bg-warning">Second-hand</span> }
+                </td>
+                <td><a asp-page="/Products/Details" asp-route-id="@product.EntityId" asp-route-type="@product.Type.ToLowerInvariant().Replace(" ", "")">Details</a></td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}

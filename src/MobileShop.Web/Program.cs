@@ -8,16 +8,7 @@ builder.ConfigureSerilog();
 builder.Services.AddRazorPages();
 builder.Services.AddMobileShop(builder.Configuration);
 
-// Cookie-based authentication - the shop's internal users sign in with their User account.
-builder.Services
-    .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-    .AddCookie(options =>
-    {
-        options.LoginPath = "/Account/Login";
-        options.AccessDeniedPath = "/Account/Login";
-        options.ExpireTimeSpan = TimeSpan.FromHours(8);
-        options.SlidingExpiration = true;
-    });
+// TODO(security): restore cookie authentication and UseAuthentication/UseAuthorization
 
 var app = builder.Build();
 
@@ -27,18 +18,10 @@ if (app.Environment.IsDevelopment())
 }
 else
 {
-    app.UseExceptionHandler("/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-    app.UseHsts();
+    // TODO(production): exception handler, HSTS, HTTPS redirection
 }
 
-app.UseHttpsRedirection();
-
 app.UseRouting();
-
-app.UseAuthentication();
-
-app.UseAuthorization();
 
 app.MapStaticAssets();
 app.MapRazorPages().WithStaticAssets();

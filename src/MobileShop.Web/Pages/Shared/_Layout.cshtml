@@ -21,28 +21,22 @@
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-page="/Index">Home</a>
+                            <a class="nav-link text-dark" asp-area="" asp-page="/Index">Dashboard</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-page="/Privacy">Privacy</a>
+                            <a class="nav-link text-dark" asp-area="" asp-page="/Products/Index">Products</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-page="/Transactions/Index">Transactions</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-page="/People/Customers">People</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-page="/Reports/ProfitLoss">Reports</a>
                         </li>
                     </ul>
-                    <ul class="navbar-nav ms-auto">
-                        @if (Context.User?.Identity?.IsAuthenticated == true)
-                        {
-                            <li class="nav-item">
-                                <form class="d-inline" method="post" asp-page="/Account/Logout">
-                                    <button type="submit" class="btn btn-link nav-link text-dark">Sign out (@Context.User.Identity.Name)</button>
-                                </form>
-                            </li>
-                        }
-                        else
-                        {
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-page="/Account/Login">Sign in</a>
-                            </li>
-                        }
-                    </ul>
+                    @* TODO(security): restore Sign in / Sign out *@
                 </div>
             </div>
         </nav>
