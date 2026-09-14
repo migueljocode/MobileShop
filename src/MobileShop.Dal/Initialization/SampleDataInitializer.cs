@@ -47,6 +47,7 @@ public static class SampleDataInitializer
         }
         catch (Exception ex)
         {
+            // i think exception should be thrown to catch by serilog in upper layer.
             Console.WriteLine(ex);
             throw;
         }
@@ -75,5 +76,17 @@ public static class SampleDataInitializer
     {
         ClearData(context);
         SeedData(context);
+    }
+
+    /// <summary>
+    /// Non-destructive seeding for app startup - applies the bundled sample data only when the
+    /// database is empty, so re-runs never wipe existing rows. Called from the Web app's startup.
+    /// </summary>
+    public static void SeedIfEmpty(AppDbContext context)
+    {
+        if (!context.People.Any())
+        {
+            SeedData(context);
+        }
     }
 }

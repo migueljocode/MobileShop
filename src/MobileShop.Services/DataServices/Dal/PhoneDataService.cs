@@ -15,6 +15,20 @@ public class PhoneDataService(
     public Task<bool> ImeiExistsAsync(string imei1)
         => _phoneRepo.ImeiExistsAsync(imei1);
 
+    // ── Status flags ──────────────────────────────────────
+
+    public bool IsSold(int id)
+        => _phoneRepo.IsSold(id);
+
+    public Task<bool> IsSoldAsync(int id)
+        => _phoneRepo.IsSoldAsync(id);
+
+    public bool IsSecondHand(int id)
+        => _phoneRepo.IsSecondHand(id);
+
+    public Task<bool> IsSecondHandAsync(int id)
+        => _phoneRepo.IsSecondHandAsync(id);
+
     // ── Owner (null ⇒ not sold) ───────────────────────────
 
     public Customer? GetOwner(int id)

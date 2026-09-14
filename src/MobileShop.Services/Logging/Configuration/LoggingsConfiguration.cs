@@ -15,7 +15,7 @@ public static class LoggingsConfiguration
         builder.Logging.ClearProviders();
         var config = builder.Configuration; // maybe used when we created json configuration per project (Web/Api)
         
-        var log = new LoggerConfiguration()
+        var logger = new LoggerConfiguration()
         .MinimumLevel.Debug() // this can be change according to json config later
         .Enrich.FromLogContext()
         .WriteTo.Console(
@@ -24,8 +24,9 @@ public static class LoggingsConfiguration
         .WriteTo.File(
             path: "logs/app-.log", // this can be change according to json config later
             rollingInterval: RollingInterval.Day,
-            outputTemplate: FileOutputTemplate);
+            outputTemplate: FileOutputTemplate)
+        .CreateLogger();
         
-        builder.Logging.AddSerilog(log.CreateLogger());
+        builder.Logging.AddSerilog(logger);
     }
 }

@@ -5,6 +5,13 @@ public interface IPhoneDataService : IDataService<Phone>
     bool ImeiExists(string imei1);
     Task<bool> ImeiExistsAsync(string imei1);
 
+    // true ⇒ has a Sell-direction transaction / carries a SecondHand profile
+    bool IsSold(int id);
+    Task<bool> IsSoldAsync(int id);
+
+    bool IsSecondHand(int id);
+    Task<bool> IsSecondHandAsync(int id);
+
     // null ⇒ not sold
     // TODO: eager-load PersonNavigation when UI needs full customer details
     Customer? GetOwner(int id);
