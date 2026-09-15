@@ -154,10 +154,10 @@ public class PhoneDataService(
         => _phoneRepo.Quantity();
 
     public int SecondHandQuantity()
-        => _phoneRepo.GetAll(p => p.ProductNavigation.SecondHandProfile != null).Count();
+        => _phoneRepo.FindAll(p => p.ProductNavigation.SecondHandProfile != null).Count();
 
     public int AvailableSecondHandQuantity()
-        => _phoneRepo.GetAll(p =>
+        => _phoneRepo.FindAll(p =>
                 p.ProductNavigation.SecondHandProfile != null &&
                 !p.ProductNavigation.Transactions.Any(t => t.Direction == TransactionDirection.Sell))
             .Count();
@@ -166,10 +166,10 @@ public class PhoneDataService(
         => _phoneRepo.QuantityAsync();
 
     public async Task<int> SecondHandQuantityAsync()
-        => (await _phoneRepo.GetAllAsync(p => p.ProductNavigation.SecondHandProfile != null)).Count();
+        => (await _phoneRepo.FindAllAsync(p => p.ProductNavigation.SecondHandProfile != null)).Count();
 
     public async Task<int> AvailableSecondHandQuantityAsync()
-        => (await _phoneRepo.GetAllAsync(p =>
+        => (await _phoneRepo.FindAllAsync(p =>
                 p.ProductNavigation.SecondHandProfile != null &&
                 !p.ProductNavigation.Transactions.Any(t => t.Direction == TransactionDirection.Sell)))
             .Count();
@@ -177,18 +177,18 @@ public class PhoneDataService(
     // ── Lists ─────────────────────────────────────────────
 
     public IEnumerable<Phone> GetSecondHand()
-        => _phoneRepo.GetAll(p => p.ProductNavigation.SecondHandProfile != null);
+        => _phoneRepo.FindAll(p => p.ProductNavigation.SecondHandProfile != null);
 
     public IEnumerable<Phone> GetAvailableSecondHand()
-        => _phoneRepo.GetAll(p =>
+        => _phoneRepo.FindAll(p =>
             p.ProductNavigation.SecondHandProfile != null &&
             !p.ProductNavigation.Transactions.Any(t => t.Direction == TransactionDirection.Sell));
 
     public Task<IEnumerable<Phone>> GetSecondHandAsync()
-        => _phoneRepo.GetAllAsync(p => p.ProductNavigation.SecondHandProfile != null);
+        => _phoneRepo.FindAllAsync(p => p.ProductNavigation.SecondHandProfile != null);
 
     public Task<IEnumerable<Phone>> GetAvailableSecondHandAsync()
-        => _phoneRepo.GetAllAsync(p =>
+        => _phoneRepo.FindAllAsync(p =>
             p.ProductNavigation.SecondHandProfile != null &&
             !p.ProductNavigation.Transactions.Any(t => t.Direction == TransactionDirection.Sell));
 }

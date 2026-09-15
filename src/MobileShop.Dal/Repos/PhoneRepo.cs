@@ -17,7 +17,7 @@ public class PhoneRepo(AppDbContext context) : BaseRepo<Phone>(context), IPhoneR
                 .ThenInclude(p => p.SecondHandProfile)
             .FirstOrDefaultAsync(p => p.Id == id);
 
-    public override IEnumerable<Phone> GetAll(Expression<Func<Phone, bool>>? predicate = null)
+    public override IEnumerable<Phone> FindAll(Expression<Func<Phone, bool>>? predicate = null)
     {
         IQueryable<Phone> query = Table
             .Include(p => p.ProductNavigation).ThenInclude(p => p.Transactions)
@@ -25,13 +25,17 @@ public class PhoneRepo(AppDbContext context) : BaseRepo<Phone>(context), IPhoneR
         return (predicate is null ? query : query.Where(predicate)).ToList();
     }
 
-    public override async Task<IEnumerable<Phone>> GetAllAsync(Expression<Func<Phone, bool>>? predicate = null)
+    public override async Task<IEnumerable<Phone>> FindAllAsync(Expression<Func<Phone, bool>>? predicate = null)
     {
         IQueryable<Phone> query = Table
             .Include(p => p.ProductNavigation).ThenInclude(p => p.Transactions)
             .Include(p => p.ProductNavigation).ThenInclude(p => p.SecondHandProfile);
         return await (predicate is null ? query : query.Where(predicate)).ToListAsync();
     }
+
+    public override IEnumerable<Phone> GetAll(Expression<Func<Phone, bool>>? predicate = null) => FindAll(predicate);
+
+    public override Task<IEnumerable<Phone>> GetAllAsync(Expression<Func<Phone, bool>>? predicate = null) => FindAllAsync(predicate);
 
     /// <inheritdoc />
     public Guarantee? GetGuarantee(int id)

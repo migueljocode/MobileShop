@@ -13,6 +13,13 @@ public abstract class DataServiceBase<TService, TEntity>(
     protected IBaseRepo<TEntity> Repo { get; } = repo;
     protected ILogger<TService> Logger { get; } = logger;
 
+    public virtual IEnumerable<TEntity> FindAll(Expression<Func<TEntity, bool>>? predicate = null)
+        => Repo.FindAll(predicate);
+
+    public virtual Task<IEnumerable<TEntity>> FindAllAsync(
+        Expression<Func<TEntity, bool>>? predicate = null)
+        => Repo.FindAllAsync(predicate);
+
     public virtual IEnumerable<TEntity> GetAll(Expression<Func<TEntity, bool>>? predicate = null)
         => Repo.GetAll(predicate);
 

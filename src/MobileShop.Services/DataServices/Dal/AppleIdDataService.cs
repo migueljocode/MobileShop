@@ -148,10 +148,10 @@ public class AppleIdDataService(
         => _appleIdRepo.Quantity();
 
     public int SecondHandQuantity()
-        => _appleIdRepo.GetAll(a => a.ProductNavigation.SecondHandProfile != null).Count();
+        => _appleIdRepo.FindAll(a => a.ProductNavigation.SecondHandProfile != null).Count();
 
     public int AvailableSecondHandQuantity()
-        => _appleIdRepo.GetAll(a =>
+        => _appleIdRepo.FindAll(a =>
                 a.ProductNavigation.SecondHandProfile != null &&
                 !a.ProductNavigation.Transactions.Any(t => t.Direction == TransactionDirection.Sell))
             .Count();
@@ -160,10 +160,10 @@ public class AppleIdDataService(
         => _appleIdRepo.QuantityAsync();
 
     public async Task<int> SecondHandQuantityAsync()
-        => (await _appleIdRepo.GetAllAsync(a => a.ProductNavigation.SecondHandProfile != null)).Count();
+        => (await _appleIdRepo.FindAllAsync(a => a.ProductNavigation.SecondHandProfile != null)).Count();
 
     public async Task<int> AvailableSecondHandQuantityAsync()
-        => (await _appleIdRepo.GetAllAsync(a =>
+        => (await _appleIdRepo.FindAllAsync(a =>
                 a.ProductNavigation.SecondHandProfile != null &&
                 !a.ProductNavigation.Transactions.Any(t => t.Direction == TransactionDirection.Sell)))
             .Count();
@@ -171,18 +171,18 @@ public class AppleIdDataService(
     // ── Lists ─────────────────────────────────────────────
 
     public IEnumerable<AppleId> GetSecondHand()
-        => _appleIdRepo.GetAll(a => a.ProductNavigation.SecondHandProfile != null);
+        => _appleIdRepo.FindAll(a => a.ProductNavigation.SecondHandProfile != null);
 
     public IEnumerable<AppleId> GetAvailableSecondHand()
-        => _appleIdRepo.GetAll(a =>
+        => _appleIdRepo.FindAll(a =>
             a.ProductNavigation.SecondHandProfile != null &&
             !a.ProductNavigation.Transactions.Any(t => t.Direction == TransactionDirection.Sell));
 
     public Task<IEnumerable<AppleId>> GetSecondHandAsync()
-        => _appleIdRepo.GetAllAsync(a => a.ProductNavigation.SecondHandProfile != null);
+        => _appleIdRepo.FindAllAsync(a => a.ProductNavigation.SecondHandProfile != null);
 
     public Task<IEnumerable<AppleId>> GetAvailableSecondHandAsync()
-        => _appleIdRepo.GetAllAsync(a =>
+        => _appleIdRepo.FindAllAsync(a =>
             a.ProductNavigation.SecondHandProfile != null &&
             !a.ProductNavigation.Transactions.Any(t => t.Direction == TransactionDirection.Sell));
 }

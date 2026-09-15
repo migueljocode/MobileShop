@@ -57,27 +57,27 @@ public abstract class BaseRepoTests<TEntity, TRepo> : RepoTestBase
         => Assert.Null(await CreateRepo().FindAsync(-1));
 
     [Fact]
-    public void GetAll_ReturnsEmpty_WhenNoData()
-        => Assert.Empty(CreateRepo().GetAll());
+    public void FindAll_ReturnsEmpty_WhenNoData()
+        => Assert.Empty(CreateRepo().FindAll());
 
     [Fact]
-    public void GetAll_ReturnsAllEntities_WhenDataExists()
+    public void FindAll_ReturnsAllEntities_WhenDataExists()
     {
         var repo = CreateRepo();
         repo.Add(CreateValidEntity());
         repo.Add(CreateValidEntity());
 
-        Assert.Equal(2, repo.GetAll().Count());
+        Assert.Equal(2, repo.FindAll().Count());
     }
 
     [Fact]
-    public async Task GetAllAsync_ReturnsAllEntities_WhenDataExists()
+    public async Task FindAllAsync_ReturnsAllEntities_WhenDataExists()
     {
         var repo = CreateRepo();
         await repo.AddAsync(CreateValidEntity());
         await repo.AddAsync(CreateValidEntity());
 
-        Assert.Equal(2, (await repo.GetAllAsync()).Count());
+        Assert.Equal(2, (await repo.FindAllAsync()).Count());
     }
 
     [Fact]
@@ -161,7 +161,7 @@ public abstract class BaseRepoTests<TEntity, TRepo> : RepoTestBase
 
         Assert.True(entity.IsDeleted);
         Assert.Null(repo.Find(entity.Id));
-        Assert.Empty(repo.GetAll());
+        Assert.Empty(repo.FindAll());
     }
 
     [Fact]
@@ -175,7 +175,7 @@ public abstract class BaseRepoTests<TEntity, TRepo> : RepoTestBase
 
         Assert.True(entity.IsDeleted);
         Assert.Null(await repo.FindAsync(entity.Id));
-        Assert.Empty(await repo.GetAllAsync());
+        Assert.Empty(await repo.FindAllAsync());
     }
 
     [Fact]
@@ -237,28 +237,28 @@ public abstract class BaseRepoTests<TEntity, TRepo> : RepoTestBase
         => Assert.Null(await CreateRepo().FindAsync(e => e.Id == -1));
 
     [Fact]
-    public void GetAll_Predicate_FiltersResults()
+    public void FindAll_Predicate_FiltersResults()
     {
         var repo = CreateRepo();
         var match = CreateValidEntity();
         repo.Add(match);
         repo.Add(CreateValidEntity());
 
-        var results = repo.GetAll(e => e.Id == match.Id).ToList();
+        var results = repo.FindAll(e => e.Id == match.Id).ToList();
 
         Assert.Single(results);
         Assert.Equal(match.Id, results[0].Id);
     }
 
     [Fact]
-    public async Task GetAllAsync_Predicate_FiltersResults()
+    public async Task FindAllAsync_Predicate_FiltersResults()
     {
         var repo = CreateRepo();
         var match = CreateValidEntity();
         await repo.AddAsync(match);
         await repo.AddAsync(CreateValidEntity());
 
-        var results = (await repo.GetAllAsync(e => e.Id == match.Id)).ToList();
+        var results = (await repo.FindAllAsync(e => e.Id == match.Id)).ToList();
 
         Assert.Single(results);
         Assert.Equal(match.Id, results[0].Id);

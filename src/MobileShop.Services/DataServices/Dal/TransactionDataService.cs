@@ -31,19 +31,19 @@ public class TransactionDataService(
 
     public IEnumerable<Transaction> GetRecent(int count = 20)
         => _transactionRepo
-            .GetAll()
+            .FindAll()
             .OrderByDescending(t => t.Date)
             .Take(count)
             .ToList();
 
     public async Task<IEnumerable<Transaction>> GetRecentAsync(int count = 20)
-        => (await _transactionRepo.GetAllAsync())
+        => (await _transactionRepo.FindAllAsync())
             .OrderByDescending(t => t.Date)
             .Take(count)
             .ToList();
 
     public IReadOnlyList<TransactionCardViewModel> GetRecentCards(int count = 20)
-        => _transactionRepo.GetAll()
+        => _transactionRepo.FindAll()
             .OrderByDescending(t => t.Date)
             .Take(count)
             .Select(transaction => new TransactionCardViewModel(
@@ -61,7 +61,7 @@ public class TransactionDataService(
         int take,
         bool ascending)
     {
-        var query = _transactionRepo.GetAll();
+        var query = _transactionRepo.FindAll();
         if (string.Equals(direction, "buy", StringComparison.OrdinalIgnoreCase))
             query = query.Where(t => t.Direction == TransactionDirection.Buy);
         else if (string.Equals(direction, "sell", StringComparison.OrdinalIgnoreCase))
@@ -86,7 +86,7 @@ public class TransactionDataService(
 
     public IReadOnlyList<ProfitLossRowViewModel> GetProfitLossRows(DateTime? from, DateTime? to)
     {
-        var transactions = _transactionRepo.GetAll()
+        var transactions = _transactionRepo.FindAll()
             .Where(t => (!from.HasValue || t.Date.Date >= from.Value.Date) &&
                         (!to.HasValue || t.Date.Date <= to.Value.Date));
 
@@ -120,7 +120,7 @@ public class TransactionDataService(
 
     public TransactionDetailsViewModel? GetDetails(int id)
     {
-        var transaction = _transactionRepo.GetAll(t => t.Id == id).FirstOrDefault();
+        var transaction = _transactionRepo.FindAll(t => t.Id == id).FirstOrDefault();
         return transaction is null
             ? null
             : new TransactionDetailsViewModel(
@@ -138,7 +138,7 @@ public class TransactionDataService(
         Expression<Func<Product, bool>>? predicate = null)
     {
         var products = _transactionRepo
-            .GetAll(t => t.Direction == TransactionDirection.Buy)
+            .FindAll(t => t.Direction == TransactionDirection.Buy)
             .Select(t => t.ProductNavigation)
             .Where(p => p is not null)
             .Distinct()
@@ -154,7 +154,7 @@ public class TransactionDataService(
         Expression<Func<Product, bool>>? predicate = null)
     {
         var products = _transactionRepo
-            .GetAll(t => t.Direction == TransactionDirection.Sell)
+            .FindAll(t => t.Direction == TransactionDirection.Sell)
             .Select(t => t.ProductNavigation)
             .Where(p => p is not null)
             .Distinct()
@@ -170,7 +170,7 @@ public class TransactionDataService(
         Expression<Func<Product, bool>>? predicate = null)
     {
         var products = (await _transactionRepo
-                .GetAllAsync(t => t.Direction == TransactionDirection.Buy))
+                .FindAllAsync(t => t.Direction == TransactionDirection.Buy))
             .Select(t => t.ProductNavigation)
             .Where(p => p is not null)
             .Distinct()
@@ -186,7 +186,7 @@ public class TransactionDataService(
         Expression<Func<Product, bool>>? predicate = null)
     {
         var products = (await _transactionRepo
-                .GetAllAsync(t => t.Direction == TransactionDirection.Sell))
+                .FindAllAsync(t => t.Direction == TransactionDirection.Sell))
             .Select(t => t.ProductNavigation)
             .Where(p => p is not null)
             .Distinct()

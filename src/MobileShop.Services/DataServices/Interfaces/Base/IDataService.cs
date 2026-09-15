@@ -2,6 +2,9 @@
 
 public interface IDataService<T> where T : BaseEntity
 {
+    IEnumerable<T> FindAll(Expression<Func<T, bool>>? predicate = null);
+    Task<IEnumerable<T>> FindAllAsync(Expression<Func<T, bool>>? predicate = null);
+
     IEnumerable<T> GetAll(Expression<Func<T, bool>>? predicate = null);
     Task<IEnumerable<T>> GetAllAsync(Expression<Func<T, bool>>? predicate = null);
 

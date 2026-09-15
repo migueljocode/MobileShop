@@ -11,17 +11,21 @@ public class SellerRepo(AppDbContext context) : BaseRepo<Seller>(context), ISell
         => await Table.Include(s => s.PersonNavigation)
             .FirstOrDefaultAsync(s => s.Id == id);
 
-    public override IEnumerable<Seller> GetAll(Expression<Func<Seller, bool>>? predicate = null)
+    public override IEnumerable<Seller> FindAll(Expression<Func<Seller, bool>>? predicate = null)
     {
         IQueryable<Seller> query = Table.Include(s => s.PersonNavigation);
         return (predicate is null ? query : query.Where(predicate)).ToList();
     }
 
-    public override async Task<IEnumerable<Seller>> GetAllAsync(Expression<Func<Seller, bool>>? predicate = null)
+    public override async Task<IEnumerable<Seller>> FindAllAsync(Expression<Func<Seller, bool>>? predicate = null)
     {
         IQueryable<Seller> query = Table.Include(s => s.PersonNavigation);
         return await (predicate is null ? query : query.Where(predicate)).ToListAsync();
     }
+
+    public override IEnumerable<Seller> GetAll(Expression<Func<Seller, bool>>? predicate = null) => FindAll(predicate);
+
+    public override Task<IEnumerable<Seller>> GetAllAsync(Expression<Func<Seller, bool>>? predicate = null) => FindAllAsync(predicate);
 
     /// <inheritdoc />
     public IEnumerable<Product>? SoldProducts(int sellerId)

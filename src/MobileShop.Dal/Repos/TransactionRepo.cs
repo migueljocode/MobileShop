@@ -3,7 +3,7 @@ namespace MobileShop.Dal.Repos;
 /// <inheritdoc cref="ITransactionRepo" />
 public class TransactionRepo(AppDbContext context) : BaseRepo<Transaction>(context), ITransactionRepo
 {
-    public override IEnumerable<Transaction> GetAll(Expression<Func<Transaction, bool>>? predicate = null)
+    public override IEnumerable<Transaction> FindAll(Expression<Func<Transaction, bool>>? predicate = null)
     {
         IQueryable<Transaction> query = Table
             .Include(t => t.ProductNavigation)
@@ -12,7 +12,7 @@ public class TransactionRepo(AppDbContext context) : BaseRepo<Transaction>(conte
         return (predicate is null ? query : query.Where(predicate)).ToList();
     }
 
-    public override async Task<IEnumerable<Transaction>> GetAllAsync(
+    public override async Task<IEnumerable<Transaction>> FindAllAsync(
         Expression<Func<Transaction, bool>>? predicate = null)
     {
         IQueryable<Transaction> query = Table
@@ -21,6 +21,10 @@ public class TransactionRepo(AppDbContext context) : BaseRepo<Transaction>(conte
             .Include(t => t.CustomerNavigation).ThenInclude(c => c.PersonNavigation);
         return await (predicate is null ? query : query.Where(predicate)).ToListAsync();
     }
+
+    public override IEnumerable<Transaction> GetAll(Expression<Func<Transaction, bool>>? predicate = null) => FindAll(predicate);
+
+    public override Task<IEnumerable<Transaction>> GetAllAsync(Expression<Func<Transaction, bool>>? predicate = null) => FindAllAsync(predicate);
 
     /// <inheritdoc />
     public IEnumerable<Transaction> GetByProduct(int productId)

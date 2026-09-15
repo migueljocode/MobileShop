@@ -17,7 +17,7 @@ public class AppleIdRepo(AppDbContext context) : BaseRepo<AppleId>(context), IAp
                 .ThenInclude(p => p.SecondHandProfile)
             .FirstOrDefaultAsync(a => a.Id == id);
 
-    public override IEnumerable<AppleId> GetAll(Expression<Func<AppleId, bool>>? predicate = null)
+    public override IEnumerable<AppleId> FindAll(Expression<Func<AppleId, bool>>? predicate = null)
     {
         IQueryable<AppleId> query = Table
             .Include(a => a.ProductNavigation).ThenInclude(p => p.Transactions)
@@ -25,13 +25,17 @@ public class AppleIdRepo(AppDbContext context) : BaseRepo<AppleId>(context), IAp
         return (predicate is null ? query : query.Where(predicate)).ToList();
     }
 
-    public override async Task<IEnumerable<AppleId>> GetAllAsync(Expression<Func<AppleId, bool>>? predicate = null)
+    public override async Task<IEnumerable<AppleId>> FindAllAsync(Expression<Func<AppleId, bool>>? predicate = null)
     {
         IQueryable<AppleId> query = Table
             .Include(a => a.ProductNavigation).ThenInclude(p => p.Transactions)
             .Include(a => a.ProductNavigation).ThenInclude(p => p.SecondHandProfile);
         return await (predicate is null ? query : query.Where(predicate)).ToListAsync();
     }
+
+    public override IEnumerable<AppleId> GetAll(Expression<Func<AppleId, bool>>? predicate = null) => FindAll(predicate);
+
+    public override Task<IEnumerable<AppleId>> GetAllAsync(Expression<Func<AppleId, bool>>? predicate = null) => FindAllAsync(predicate);
 
     /// <inheritdoc />
     public AppleId? Find(string email)

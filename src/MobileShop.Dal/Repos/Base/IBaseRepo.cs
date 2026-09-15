@@ -7,91 +7,45 @@ namespace MobileShop.Dal.Repos.Base;
 /// <typeparam name="T">The entity type, which must derive from <see cref="BaseEntity"/>.</typeparam>
 public interface IBaseRepo<T> where T : BaseEntity
 {
-    /// <summary>
-    /// Finds an entity by its primary key. Always reflects the current query filter state (a
-    /// soft-deleted entity is never returned), even if that entity is already tracked in this
-    /// context - unlike <c>DbSet.Find</c> itself, which would return it anyway.
-    /// </summary>
-    /// <param name="id">The entity's Id.</param>
-    /// <returns>The entity, or <see langword="null"/> if no match is found.</returns>
     T? Find(int id);
-
-    /// <summary>
-    /// Finds the first entity that matches the given predicate.
-    /// </summary>
-    /// <param name="predicate">The filter expression.</param>
-    /// <returns>The entity, or <see langword="null"/> if no match is found.</returns>
     T? Find(Expression<Func<T, bool>> predicate);
+    IEnumerable<T> FindAll(Expression<Func<T, bool>>? predicate = null);
+    TResult? Select<TResult>(int id, Expression<Func<T, TResult>> selector);
+    TResult? Select<TResult>(Expression<Func<T, bool>> predicate, Expression<Func<T, TResult>> selector);
+    IEnumerable<TResult> SelectAll<TResult>(Expression<Func<T, TResult>> selector);
+    IEnumerable<TResult> SelectAll<TResult>(Expression<Func<T, bool>> predicate, Expression<Func<T, TResult>> selector);
 
-    /// <summary>
-    /// Returns every entity of this type (soft-deleted rows are excluded automatically).
-    /// An optional predicate can be supplied to filter the results in the database.
-    /// </summary>
-    /// <param name="predicate">Optional filter expression. When null, all entities are returned.</param>
-    /// <returns>All matching entities.</returns>
-    IEnumerable<T> GetAll(Expression<Func<T, bool>>? predicate = null);
-
-    /// <summary>Marks a new entity for insertion.</summary>
-    /// <param name="entity">The entity to add.</param>
-    /// <param name="persist">If <see langword="true"/>, calls <see cref="SaveChanges"/> immediately.</param>
-    /// <returns>The number of rows written, or 0 if <paramref name="persist"/> is <see langword="false"/>.</returns>
     int Add(T entity, bool persist = true);
-
-    /// <summary>Marks an existing entity as modified.</summary>
-    /// <param name="entity">The entity to update.</param>
-    /// <param name="persist">If <see langword="true"/>, calls <see cref="SaveChanges"/> immediately.</param>
-    /// <returns>The number of rows written, or 0 if <paramref name="persist"/> is <see langword="false"/>.</returns>
+    int AddRange(IEnumerable<T> entities, bool persist = true);
     int Update(T entity, bool persist = true);
-
-    /// <summary>
-    /// Soft-deletes an entity by setting <see cref="BaseEntity.IsDeleted"/> to <see langword="true"/> -
-    /// the row is never physically removed.
-    /// </summary>
-    /// <param name="entity">The entity to soft-delete.</param>
-    /// <param name="persist">If <see langword="true"/>, calls <see cref="SaveChanges"/> immediately.</param>
-    /// <returns>The number of rows written, or 0 if <paramref name="persist"/> is <see langword="false"/>.</returns>
+    int UpdateRange(IEnumerable<T> entities, bool persist = true);
     int Delete(T entity, bool persist = true);
-
-    /// <summary>Persists all pending changes tracked by the underlying context.</summary>
-    /// <returns>The number of rows written.</returns>
+    int DeleteRange(IEnumerable<T> entities, bool persist = true);
+    int DeleteRange(Expression<Func<T, bool>> predicate, bool persist = true);
     int SaveChanges();
 
-    /// <summary>Asynchronous version of <see cref="Find"/>.</summary>
-    /// <param name="id">The entity's Id.</param>
-    /// <returns>The entity, or <see langword="null"/> if no match is found.</returns>
     Task<T?> FindAsync(int id);
-
-    /// <summary>
-    /// Asynchronous version of <see cref="Find(Expression{Func{T, bool}})"/>.
-    /// </summary>
-    /// <param name="predicate">The filter expression.</param>
-    /// <returns>The entity, or <see langword="null"/> if no match is found.</returns>
     Task<T?> FindAsync(Expression<Func<T, bool>> predicate);
+    Task<IEnumerable<T>> FindAllAsync(Expression<Func<T, bool>>? predicate = null);
+    Task<TResult?> SelectAsync<TResult>(int id, Expression<Func<T, TResult>> selector);
+    Task<TResult?> SelectAsync<TResult>(Expression<Func<T, bool>> predicate, Expression<Func<T, TResult>> selector);
+    Task<IEnumerable<TResult>> SelectAllAsync<TResult>(Expression<Func<T, TResult>> selector);
+    Task<IEnumerable<TResult>> SelectAllAsync<TResult>(Expression<Func<T, bool>> predicate, Expression<Func<T, TResult>> selector);
 
-    /// <summary>Asynchronous version of <see cref="GetAll"/>.</summary>
-    /// <param name="predicate">Optional filter expression. When null, all entities are returned.</param>
-    /// <returns>All matching entities.</returns>
-    Task<IEnumerable<T>> GetAllAsync(Expression<Func<T, bool>>? predicate = null);
-
-    /// <summary>Asynchronous version of <see cref="Add"/>.</summary>
-    /// <param name="entity">The entity to add.</param>
-    /// <param name="persist">If <see langword="true"/>, calls <see cref="SaveChangesAsync"/> immediately.</param>
-    /// <returns>The number of rows written, or 0 if <paramref name="persist"/> is <see langword="false"/>.</returns>
     Task<int> AddAsync(T entity, bool persist = true);
-
-    /// <summary>Asynchronous version of <see cref="Update"/>.</summary>
-    /// <param name="entity">The entity to update.</param>
-    /// <param name="persist">If <see langword="true"/>, calls <see cref="SaveChangesAsync"/> immediately.</param>
-    /// <returns>The number of rows written, or 0 if <paramref name="persist"/> is <see langword="false"/>.</returns>
+    Task<int> AddRangeAsync(IEnumerable<T> entities, bool persist = true);
     Task<int> UpdateAsync(T entity, bool persist = true);
-
-    /// <summary>Asynchronous version of <see cref="Delete"/> - also a soft delete, not a physical removal.</summary>
-    /// <param name="entity">The entity to soft-delete.</param>
-    /// <param name="persist">If <see langword="true"/>, calls <see cref="SaveChangesAsync"/> immediately.</param>
-    /// <returns>The number of rows written, or 0 if <paramref name="persist"/> is <see langword="false"/>.</returns>
+    Task<int> UpdateRangeAsync(IEnumerable<T> entities, bool persist = true);
     Task<int> DeleteAsync(T entity, bool persist = true);
-
-    /// <summary>Asynchronous version of <see cref="SaveChanges"/>.</summary>
-    /// <returns>The number of rows written.</returns>
+    Task<int> DeleteRangeAsync(IEnumerable<T> entities, bool persist = true);
+    Task<int> DeleteRangeAsync(Expression<Func<T, bool>> predicate, bool persist = true);
     Task<int> SaveChangesAsync();
+
+    bool Any(Expression<Func<T, bool>>? predicate = null);
+    Task<bool> AnyAsync(Expression<Func<T, bool>>? predicate = null);
+    int Count(Expression<Func<T, bool>>? predicate = null);
+    Task<int> CountAsync(Expression<Func<T, bool>>? predicate = null);
+
+    IEnumerable<T> GetAll(Expression<Func<T, bool>>? predicate = null);
+    Task<IEnumerable<T>> GetAllAsync(Expression<Func<T, bool>>? predicate = null);
 }
