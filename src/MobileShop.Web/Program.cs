@@ -1,3 +1,5 @@
-var builder = WebApplication.CreateBuilder(args).AddMobileShopWeb();
-var app = builder.Build().UseMobileShopWeb();
+var builder = CreateBuilder(args)
+                .ConfigureBuilder();
+var app = builder.Build()
+                .ConfigureApp();
 app.Run();

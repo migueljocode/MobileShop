@@ -13,3 +13,5 @@ global using MobileShop.Services.Logging.Configuration;
 global using MobileShop.Services.Security;
 global using MobileShop.Web;
 global using MobileShop.Web.Extensions;
+global using System.Diagnostics;
+global using static Microsoft.AspNetCore.Builder.WebApplication;

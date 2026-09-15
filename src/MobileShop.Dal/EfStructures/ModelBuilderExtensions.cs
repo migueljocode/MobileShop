@@ -1,5 +1,3 @@
-using System.Linq.Expressions;
-
 namespace MobileShop.Dal.EfStructures;
 
 /// <summary>

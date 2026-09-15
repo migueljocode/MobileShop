@@ -8,7 +8,7 @@ public static class WebApplicationBuilderExtensions
     /// <summary>
     /// Registers logging, Razor Pages, the database, repositories and data services.
     /// </summary>
-    public static WebApplicationBuilder AddMobileShopWeb(this WebApplicationBuilder builder)
+    public static WebApplicationBuilder ConfigureBuilder(this WebApplicationBuilder builder)
     {
         builder.ConfigureSerilog();
         builder.Services.AddRazorPages();
@@ -19,7 +19,7 @@ public static class WebApplicationBuilderExtensions
     /// <summary>
     /// Configures the web request pipeline without enabling authentication.
     /// </summary>
-    public static WebApplication UseMobileShopWeb(this WebApplication app)
+    public static WebApplication ConfigureApp(this WebApplication app)
     {
         if (app.Environment.IsDevelopment())
         {

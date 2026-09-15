@@ -1,5 +1,4 @@
-﻿
-namespace MobileShop.Services.DataServices.Dal;
+﻿namespace MobileShop.Services.DataServices.Dal;
 
 public class UserDataService(
     IUserRepo userRepo,

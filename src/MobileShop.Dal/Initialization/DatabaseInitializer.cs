@@ -1,7 +1,3 @@
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
-using MobileShop.Dal.EfStructures;
-
 namespace MobileShop.Dal.Initialization;
 
 /// <summary>

@@ -10,3 +10,6 @@ global using MobileShop.Models.Entities;
 global using MobileShop.Models.Entities.Base;
 global using MobileShop.Models.Entities.Configuration;
 global using MobileShop.Models.Enums;
+global using Microsoft.Extensions.DependencyInjection;
+global using System.Text.Json;
+global using System.Text.Json.Serialization;
