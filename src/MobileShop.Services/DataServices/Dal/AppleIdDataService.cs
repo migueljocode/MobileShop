@@ -8,65 +8,87 @@ public class AppleIdDataService(
     private readonly IAppleIdRepo _appleIdRepo = appleIdRepo;
 
     public IReadOnlyList<ProductListItemViewModel> GetInventoryRows()
-        => GetAll()
-            .OrderBy(appleId => appleId.ProductId)
-            .Select(ToInventoryRow)
+        => _appleIdRepo.SelectAll(appleId => new ProductListItemViewModel(
+                appleId.Id,
+                appleId.ProductId,
+                "Apple ID",
+                appleId.ProductNavigation.Manufacturer + " " + appleId.ProductNavigation.Model,
+                appleId.Email,
+                null,
+                appleId.ProductNavigation.Transactions.Any(t => t.Direction == TransactionDirection.Sell),
+                appleId.ProductNavigation.SecondHandProfile != null))
+            .OrderBy(row => row.ProductId)
             .ToList();
 
     public IReadOnlyList<ProductListItemViewModel> GetSelectableProducts(TransactionDirection direction)
-        => GetAll()
-            .Where(appleId => appleId.ProductNavigation.Transactions.All(transaction => transaction.Direction != direction))
-            .OrderBy(appleId => appleId.ProductId)
-            .Select(ToInventoryRow)
+        => _appleIdRepo
+            .SelectAll(
+                appleId => appleId.ProductNavigation.Transactions.All(transaction => transaction.Direction != direction),
+                appleId => new ProductListItemViewModel(
+                    appleId.Id,
+                    appleId.ProductId,
+                    "Apple ID",
+                    appleId.ProductNavigation.Manufacturer + " " + appleId.ProductNavigation.Model,
+                    appleId.Email,
+                    null,
+                    appleId.ProductNavigation.Transactions.Any(t => t.Direction == TransactionDirection.Sell),
+                    appleId.ProductNavigation.SecondHandProfile != null))
+            .OrderBy(row => row.ProductId)
             .ToList();
 
     public IReadOnlyList<ProductListItemViewModel> GetSecondHandRows()
-        => GetAll()
-            .Where(appleId => appleId.ProductNavigation.SecondHandProfile is not null)
-            .OrderBy(appleId => appleId.ProductId)
-            .Select(ToInventoryRow)
+        => _appleIdRepo
+            .SelectAll(
+                appleId => appleId.ProductNavigation.SecondHandProfile != null,
+                appleId => new ProductListItemViewModel(
+                    appleId.Id,
+                    appleId.ProductId,
+                    "Apple ID",
+                    appleId.ProductNavigation.Manufacturer + " " + appleId.ProductNavigation.Model,
+                    appleId.Email,
+                    null,
+                    appleId.ProductNavigation.Transactions.Any(t => t.Direction == TransactionDirection.Sell),
+                    appleId.ProductNavigation.SecondHandProfile != null))
+            .OrderBy(row => row.ProductId)
             .ToList();
 
     public IReadOnlyList<ProductListItemViewModel> GetAvailableSecondHandRows()
-        => GetAll()
-            .Where(appleId => appleId.ProductNavigation.SecondHandProfile is not null &&
-                             !appleId.ProductNavigation.Transactions.Any(transaction => transaction.Direction == TransactionDirection.Sell))
-            .OrderBy(appleId => appleId.ProductId)
-            .Select(ToInventoryRow)
+        => _appleIdRepo
+            .SelectAll(
+                appleId => appleId.ProductNavigation.SecondHandProfile != null &&
+                          !appleId.ProductNavigation.Transactions.Any(transaction => transaction.Direction == TransactionDirection.Sell),
+                appleId => new ProductListItemViewModel(
+                    appleId.Id,
+                    appleId.ProductId,
+                    "Apple ID",
+                    appleId.ProductNavigation.Manufacturer + " " + appleId.ProductNavigation.Model,
+                    appleId.Email,
+                    null,
+                    appleId.ProductNavigation.Transactions.Any(t => t.Direction == TransactionDirection.Sell),
+                    appleId.ProductNavigation.SecondHandProfile != null))
+            .OrderBy(row => row.ProductId)
             .ToList();
 
-    private static ProductListItemViewModel ToInventoryRow(AppleId appleId)
-        => new(
-            appleId.Id,
-            appleId.ProductId,
-            "Apple ID",
-            appleId.ProductNavigation is null
-                ? appleId.Email
-                : $"{appleId.ProductNavigation.Manufacturer} {appleId.ProductNavigation.Model}",
-            appleId.Email,
-            null,
-            appleId.ProductNavigation?.Transactions.Any(t => t.Direction == TransactionDirection.Sell) ?? false,
-            appleId.ProductNavigation?.SecondHandProfile is not null);
-
     public ProductDetailsViewModel? GetDetails(int id)
-    {
-        var appleId = Find(id);
-        if (appleId is null)
-            return null;
-
-        var owner = GetOwner(id);
-        var guarantee = GetGuarantee(id);
-        return new ProductDetailsViewModel(
-            "Apple ID",
-            appleId.ProductId,
-            appleId.ProductNavigation?.Manufacturer ?? "Apple",
-            appleId.ProductNavigation?.Model ?? appleId.Email,
-            appleId.Email,
-            null,
-            owner?.PersonNavigation is { } person ? $"{person.FirstName} {person.LastName}" : "Not sold",
-            guarantee is null ? "None" : $"{guarantee.Corporation} until {guarantee.ExpirationDate:d}",
-            GetSecondHandInfo(id) is not null);
-    }
+        => _appleIdRepo.Select(
+            id,
+            appleId => new ProductDetailsViewModel(
+                "Apple ID",
+                appleId.ProductId,
+                appleId.ProductNavigation.Manufacturer,
+                appleId.ProductNavigation.Model,
+                appleId.Email,
+                null,
+                appleId.ProductNavigation.Transactions
+                    .Where(t => t.Direction == TransactionDirection.Sell)
+                    .OrderByDescending(t => t.Date)
+                    .Select(t => t.CustomerNavigation.PersonNavigation)
+                    .Select(person => person.FirstName + " " + person.LastName)
+                    .FirstOrDefault() ?? "Not sold",
+                appleId.ProductNavigation.GuaranteeProfile == null
+                    ? "None"
+                    : appleId.ProductNavigation.GuaranteeProfile.Corporation + " until " + appleId.ProductNavigation.GuaranteeProfile.ExpirationDate,
+                appleId.ProductNavigation.SecondHandProfile != null));
 
     // ── Email ─────────────────────────────────────────────
 
@@ -77,96 +99,98 @@ public class AppleIdDataService(
         => _appleIdRepo.FindAsync(email);
 
     public bool IsSold(int id)
-        => _appleIdRepo.IsSold(id);
+        => _appleIdRepo.Any(appleId => appleId.Id == id &&
+            appleId.ProductNavigation.Transactions.Any(transaction => transaction.Direction == TransactionDirection.Sell));
 
     public Task<bool> IsSoldAsync(int id)
-        => _appleIdRepo.IsSoldAsync(id);
+        => _appleIdRepo.AnyAsync(appleId => appleId.Id == id &&
+            appleId.ProductNavigation.Transactions.Any(transaction => transaction.Direction == TransactionDirection.Sell));
 
     // ── Owner (null ⇒ not sold) ───────────────────────────
 
     public Customer? GetOwner(int id)
-        => _appleIdRepo.GetOwner(id);
+        => _appleIdRepo.Select(
+            appleId => appleId.Id == id,
+            appleId => appleId.ProductNavigation.Transactions
+                .Where(transaction => transaction.Direction == TransactionDirection.Sell)
+                .OrderByDescending(transaction => transaction.Date)
+                .Select(transaction => transaction.CustomerNavigation)
+                .FirstOrDefault());
 
     public Customer? GetOwner(Expression<Func<AppleId, bool>> predicate)
-    {
-        var appleId = _appleIdRepo.Find(predicate);
-        return appleId is null ? null : _appleIdRepo.GetOwner(appleId.Id);
-    }
+        => _appleIdRepo.Select(predicate, appleId => appleId.ProductNavigation.Transactions
+            .Where(transaction => transaction.Direction == TransactionDirection.Sell)
+            .OrderByDescending(transaction => transaction.Date)
+            .Select(transaction => transaction.CustomerNavigation)
+            .FirstOrDefault());
 
     public Task<Customer?> GetOwnerAsync(int id)
-        => _appleIdRepo.GetOwnerAsync(id);
+        => _appleIdRepo.SelectAsync(
+            appleId => appleId.Id == id,
+            appleId => appleId.ProductNavigation.Transactions
+                .Where(transaction => transaction.Direction == TransactionDirection.Sell)
+                .OrderByDescending(transaction => transaction.Date)
+                .Select(transaction => transaction.CustomerNavigation)
+                .FirstOrDefault());
 
     public async Task<Customer?> GetOwnerAsync(Expression<Func<AppleId, bool>> predicate)
-    {
-        var appleId = await _appleIdRepo.FindAsync(predicate);
-        return appleId is null ? null : await _appleIdRepo.GetOwnerAsync(appleId.Id);
-    }
+        => await _appleIdRepo.SelectAsync(predicate, appleId => appleId.ProductNavigation.Transactions
+            .Where(transaction => transaction.Direction == TransactionDirection.Sell)
+            .OrderByDescending(transaction => transaction.Date)
+            .Select(transaction => transaction.CustomerNavigation)
+            .FirstOrDefault());
 
     // ── Guarantee ─────────────────────────────────────────
 
     public Guarantee? GetGuarantee(int id)
-        => _appleIdRepo.GetGuarantee(id);
+        => _appleIdRepo.Select(appleId => appleId.Id == id, appleId => appleId.ProductNavigation.GuaranteeProfile);
 
     public Guarantee? GetGuarantee(Expression<Func<AppleId, bool>> predicate)
-    {
-        var appleId = _appleIdRepo.Find(predicate);
-        return appleId is null ? null : _appleIdRepo.GetGuarantee(appleId.Id);
-    }
+        => _appleIdRepo.Select(predicate, appleId => appleId.ProductNavigation.GuaranteeProfile);
 
     public Task<Guarantee?> GetGuaranteeAsync(int id)
-        => _appleIdRepo.GetGuaranteeAsync(id);
+        => _appleIdRepo.SelectAsync(appleId => appleId.Id == id, appleId => appleId.ProductNavigation.GuaranteeProfile);
 
     public async Task<Guarantee?> GetGuaranteeAsync(Expression<Func<AppleId, bool>> predicate)
-    {
-        var appleId = await _appleIdRepo.FindAsync(predicate);
-        return appleId is null ? null : await _appleIdRepo.GetGuaranteeAsync(appleId.Id);
-    }
+        => await _appleIdRepo.SelectAsync(predicate, appleId => appleId.ProductNavigation.GuaranteeProfile);
 
     // ── Second-hand (null ⇒ not second-hand) ──────────────
 
     public SecondHand? GetSecondHandInfo(int id)
-        => _appleIdRepo.GetSecondHandInfo(id);
+        => _appleIdRepo.Select(appleId => appleId.Id == id, appleId => appleId.ProductNavigation.SecondHandProfile);
 
     public SecondHand? GetSecondHandInfo(Expression<Func<AppleId, bool>> predicate)
-    {
-        var appleId = _appleIdRepo.Find(predicate);
-        return appleId is null ? null : _appleIdRepo.GetSecondHandInfo(appleId.Id);
-    }
+        => _appleIdRepo.Select(predicate, appleId => appleId.ProductNavigation.SecondHandProfile);
 
     public Task<SecondHand?> GetSecondHandInfoAsync(int id)
-        => _appleIdRepo.GetSecondHandInfoAsync(id);
+        => _appleIdRepo.SelectAsync(appleId => appleId.Id == id, appleId => appleId.ProductNavigation.SecondHandProfile);
 
     public async Task<SecondHand?> GetSecondHandInfoAsync(Expression<Func<AppleId, bool>> predicate)
-    {
-        var appleId = await _appleIdRepo.FindAsync(predicate);
-        return appleId is null ? null : await _appleIdRepo.GetSecondHandInfoAsync(appleId.Id);
-    }
+        => await _appleIdRepo.SelectAsync(predicate, appleId => appleId.ProductNavigation.SecondHandProfile);
 
     // ── Quantities ────────────────────────────────────────
 
     public int Quantity()
-        => _appleIdRepo.Quantity();
+        => _appleIdRepo.Count();
 
     public int SecondHandQuantity()
-        => _appleIdRepo.FindAll(a => a.ProductNavigation.SecondHandProfile != null).Count();
+        => _appleIdRepo.Count(a => a.ProductNavigation.SecondHandProfile != null);
 
     public int AvailableSecondHandQuantity()
-        => _appleIdRepo.FindAll(a =>
+        => _appleIdRepo.Count(a =>
                 a.ProductNavigation.SecondHandProfile != null &&
-                !a.ProductNavigation.Transactions.Any(t => t.Direction == TransactionDirection.Sell))
-            .Count();
+                !a.ProductNavigation.Transactions.Any(t => t.Direction == TransactionDirection.Sell));
 
     public Task<int> QuantityAsync()
-        => _appleIdRepo.QuantityAsync();
+        => _appleIdRepo.CountAsync();
 
     public async Task<int> SecondHandQuantityAsync()
-        => (await _appleIdRepo.FindAllAsync(a => a.ProductNavigation.SecondHandProfile != null)).Count();
+        => await _appleIdRepo.CountAsync(a => a.ProductNavigation.SecondHandProfile != null);
 
     public async Task<int> AvailableSecondHandQuantityAsync()
-        => (await _appleIdRepo.FindAllAsync(a =>
+        => await _appleIdRepo.CountAsync(a =>
                 a.ProductNavigation.SecondHandProfile != null &&
-                !a.ProductNavigation.Transactions.Any(t => t.Direction == TransactionDirection.Sell)))
-            .Count();
+                !a.ProductNavigation.Transactions.Any(t => t.Direction == TransactionDirection.Sell));
 
     // ── Lists ─────────────────────────────────────────────
 

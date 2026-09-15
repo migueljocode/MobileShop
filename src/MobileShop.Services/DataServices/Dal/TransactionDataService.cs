@@ -43,17 +43,21 @@ public class TransactionDataService(
             .ToList();
 
     public IReadOnlyList<TransactionCardViewModel> GetRecentCards(int count = 20)
-        => _transactionRepo.FindAll()
-            .OrderByDescending(t => t.Date)
-            .Take(count)
-            .Select(transaction => new TransactionCardViewModel(
+        => _transactionRepo
+            .SelectAll(transaction => new TransactionCardViewModel(
                 transaction.Date,
                 transaction.Direction,
                 transaction.FinishedPrice,
-                ProductLabel(transaction),
+                transaction.ProductNavigation.Manufacturer + " " + transaction.ProductNavigation.Model,
                 transaction.Direction == TransactionDirection.Buy
-                    ? $"From: {SellerLabel(transaction)}"
-                    : $"To: {CustomerLabel(transaction)}"))
+                    ? "From: " + (transaction.SellerNavigation.PersonNavigation == null
+                        ? "Shop"
+                        : transaction.SellerNavigation.PersonNavigation.FirstName + " " + transaction.SellerNavigation.PersonNavigation.LastName)
+                    : "To: " + (transaction.CustomerNavigation.PersonNavigation == null
+                        ? "Shop"
+                        : transaction.CustomerNavigation.PersonNavigation.FirstName + " " + transaction.CustomerNavigation.PersonNavigation.LastName)))
+            .OrderByDescending(card => card.Date)
+            .Take(count)
             .ToList();
 
     public IReadOnlyList<TransactionListItemViewModel> GetList(
@@ -61,11 +65,23 @@ public class TransactionDataService(
         int take,
         bool ascending)
     {
-        var query = _transactionRepo.FindAll();
+        var query = _transactionRepo.SelectAll(transaction => new TransactionListItemViewModel(
+                transaction.Id,
+                transaction.Date,
+                transaction.Direction,
+                transaction.ProductNavigation.Manufacturer + " " + transaction.ProductNavigation.Model,
+                transaction.FinishedPrice,
+                transaction.SellerNavigation.PersonNavigation == null
+                    ? "Shop"
+                    : transaction.SellerNavigation.PersonNavigation.FirstName + " " + transaction.SellerNavigation.PersonNavigation.LastName,
+                transaction.CustomerNavigation.PersonNavigation == null
+                    ? "Shop"
+                    : transaction.CustomerNavigation.PersonNavigation.FirstName + " " + transaction.CustomerNavigation.PersonNavigation.LastName));
+
         if (string.Equals(direction, "buy", StringComparison.OrdinalIgnoreCase))
-            query = query.Where(t => t.Direction == TransactionDirection.Buy);
+            query = query.Where(t => t.Direction == TransactionDirection.Buy).ToList();
         else if (string.Equals(direction, "sell", StringComparison.OrdinalIgnoreCase))
-            query = query.Where(t => t.Direction == TransactionDirection.Sell);
+            query = query.Where(t => t.Direction == TransactionDirection.Sell).ToList();
 
         var ordered = ascending
             ? query.OrderBy(t => t.Date)
@@ -73,14 +89,6 @@ public class TransactionDataService(
 
         return ordered
             .Take(Math.Clamp(take, 1, 500))
-            .Select(transaction => new TransactionListItemViewModel(
-                transaction.Id,
-                transaction.Date,
-                transaction.Direction,
-                ProductLabel(transaction),
-                transaction.FinishedPrice,
-                SellerLabel(transaction),
-                CustomerLabel(transaction)))
             .ToList();
     }
 
@@ -109,28 +117,36 @@ public class TransactionDataService(
         => GetProfitLossRows(from, to).Sum(row => row.Profit);
 
     public IReadOnlyList<ProductTransactionViewModel> GetProductTransactions(int productId)
-        => _transactionRepo.GetByProduct(productId)
-            .Select(transaction => new ProductTransactionViewModel(
-                transaction.Date,
-                transaction.Direction,
-                transaction.FinishedPrice,
-                SellerLabel(transaction),
-                CustomerLabel(transaction)))
+        => _transactionRepo
+            .SelectAll(
+                transaction => transaction.ProductId == productId,
+                transaction => new ProductTransactionViewModel(
+                    transaction.Date,
+                    transaction.Direction,
+                    transaction.FinishedPrice,
+                    transaction.SellerNavigation.PersonNavigation == null
+                        ? "Shop"
+                        : transaction.SellerNavigation.PersonNavigation.FirstName + " " + transaction.SellerNavigation.PersonNavigation.LastName,
+                    transaction.CustomerNavigation.PersonNavigation == null
+                        ? "Shop"
+                        : transaction.CustomerNavigation.PersonNavigation.FirstName + " " + transaction.CustomerNavigation.PersonNavigation.LastName))
+            .OrderByDescending(item => item.Date)
             .ToList();
 
     public TransactionDetailsViewModel? GetDetails(int id)
-    {
-        var transaction = _transactionRepo.FindAll(t => t.Id == id).FirstOrDefault();
-        return transaction is null
-            ? null
-            : new TransactionDetailsViewModel(
+        => _transactionRepo.Select(
+            id,
+            transaction => new TransactionDetailsViewModel(
                 transaction.Date,
                 transaction.Direction,
                 transaction.FinishedPrice,
-                ProductLabel(transaction),
-                SellerLabel(transaction),
-                CustomerLabel(transaction));
-    }
+                transaction.ProductNavigation.Manufacturer + " " + transaction.ProductNavigation.Model,
+                transaction.SellerNavigation.PersonNavigation == null
+                    ? "Shop"
+                    : transaction.SellerNavigation.PersonNavigation.FirstName + " " + transaction.SellerNavigation.PersonNavigation.LastName,
+                transaction.CustomerNavigation.PersonNavigation == null
+                    ? "Shop"
+                    : transaction.CustomerNavigation.PersonNavigation.FirstName + " " + transaction.CustomerNavigation.PersonNavigation.LastName));
 
     // ── Products bought / sold by the shop ────────────────
 
