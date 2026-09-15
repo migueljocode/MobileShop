@@ -7,163 +7,228 @@ public class PhoneDataService(
 {
     private readonly IPhoneRepo _phoneRepo = phoneRepo;
 
+    /// <inheritdoc />
     public IReadOnlyList<ProductListItemViewModel> GetInventoryRows()
-        => GetAll()
-            .OrderBy(phone => phone.ProductId)
-            .Select(phone => new ProductListItemViewModel(
+        => _phoneRepo.SelectAll(phone => new ProductListItemViewModel(
                 phone.Id,
                 phone.ProductId,
                 "Phone",
-                $"{phone.ProductNavigation.Manufacturer} {phone.ProductNavigation.Model}",
-                $"IMEI: {phone.IMEI1}",
+                phone.ProductNavigation.Manufacturer + " " + phone.ProductNavigation.Model,
+                "IMEI: " + phone.IMEI1,
                 phone.Color,
                 phone.ProductNavigation.Transactions.Any(t => t.Direction == TransactionDirection.Sell),
-                phone.ProductNavigation.SecondHandProfile is not null))
+                phone.ProductNavigation.SecondHandProfile != null))
+            .OrderBy(row => row.ProductId)
             .ToList();
 
-    public ProductDetailsViewModel? GetDetails(int id)
-    {
-        var phone = Find(id);
-        if (phone is null)
-            return null;
+    /// <inheritdoc />
+    public IReadOnlyList<ProductListItemViewModel> GetSelectableProducts(TransactionDirection direction)
+        => _phoneRepo
+            .SelectAll(
+                phone => phone.ProductNavigation.Transactions.All(transaction => transaction.Direction != direction),
+                phone => new ProductListItemViewModel(
+                    phone.Id,
+                    phone.ProductId,
+                    "Phone",
+                    phone.ProductNavigation.Manufacturer + " " + phone.ProductNavigation.Model,
+                    "IMEI: " + phone.IMEI1,
+                    phone.Color,
+                    phone.ProductNavigation.Transactions.Any(t => t.Direction == TransactionDirection.Sell),
+                    phone.ProductNavigation.SecondHandProfile != null))
+            .OrderBy(row => row.ProductId)
+            .ToList();
 
-        var owner = GetOwner(id);
-        var guarantee = GetGuarantee(id);
-        return new ProductDetailsViewModel(
-            "Phone",
+    /// <inheritdoc />
+    public IReadOnlyList<ProductListItemViewModel> GetSecondHandRows()
+        => _phoneRepo
+            .SelectAll(
+                phone => phone.ProductNavigation.SecondHandProfile != null,
+                phone => new ProductListItemViewModel(
+                    phone.Id,
+                    phone.ProductId,
+                    "Phone",
+                    phone.ProductNavigation.Manufacturer + " " + phone.ProductNavigation.Model,
+                    "IMEI: " + phone.IMEI1,
+                    phone.Color,
+                    phone.ProductNavigation.Transactions.Any(t => t.Direction == TransactionDirection.Sell),
+                    phone.ProductNavigation.SecondHandProfile != null))
+            .OrderBy(row => row.ProductId)
+            .ToList();
+
+    /// <inheritdoc />
+    public IReadOnlyList<ProductListItemViewModel> GetAvailableSecondHandRows()
+        => _phoneRepo
+            .SelectAll(
+                phone => phone.ProductNavigation.SecondHandProfile != null &&
+                         !phone.ProductNavigation.Transactions.Any(transaction => transaction.Direction == TransactionDirection.Sell),
+                phone => new ProductListItemViewModel(
+                    phone.Id,
+                    phone.ProductId,
+                    "Phone",
+                    phone.ProductNavigation.Manufacturer + " " + phone.ProductNavigation.Model,
+                    "IMEI: " + phone.IMEI1,
+                    phone.Color,
+                    phone.ProductNavigation.Transactions.Any(t => t.Direction == TransactionDirection.Sell),
+                    phone.ProductNavigation.SecondHandProfile != null))
+            .OrderBy(row => row.ProductId)
+            .ToList();
+
+    private static ProductListItemViewModel ToInventoryRow(Phone phone)
+        => new(
+            phone.Id,
             phone.ProductId,
-            phone.ProductNavigation?.Manufacturer ?? "Phone",
-            phone.ProductNavigation?.Model ?? $"Phone #{id}",
-            $"IMEI: {phone.IMEI1}" + (phone.IMEI2 is null ? string.Empty : $" / {phone.IMEI2}"),
+            "Phone",
+            phone.ProductNavigation.Manufacturer + " " + phone.ProductNavigation.Model,
+            "IMEI: " + phone.IMEI1,
             phone.Color,
-            owner?.PersonNavigation is { } person ? $"{person.FirstName} {person.LastName}" : "Not sold",
-            guarantee is null ? "None" : $"{guarantee.Corporation} until {guarantee.ExpirationDate:d}",
-            GetSecondHandInfo(id) is not null);
-    }
+            phone.ProductNavigation.Transactions.Any(t => t.Direction == TransactionDirection.Sell),
+            phone.ProductNavigation.SecondHandProfile != null);
+
+    /// <inheritdoc />
+    public ProductDetailsViewModel? GetDetails(int id)
+        => _phoneRepo.Select(
+            id,
+            phone => new ProductDetailsViewModel(
+                "Phone",
+                phone.ProductId,
+                phone.ProductNavigation.Manufacturer,
+                phone.ProductNavigation.Model,
+                string.IsNullOrWhiteSpace(phone.IMEI2)
+                    ? "IMEI: " + phone.IMEI1
+                    : "IMEI: " + phone.IMEI1 + " / " + phone.IMEI2,
+                phone.Color,
+                phone.ProductNavigation.Transactions
+                    .Where(t => t.Direction == TransactionDirection.Sell)
+                    .OrderByDescending(t => t.Date)
+                    .Select(t => t.CustomerNavigation.PersonNavigation)
+                    .Select(person => person.FirstName + " " + person.LastName)
+                    .FirstOrDefault() ?? "Not sold",
+                phone.ProductNavigation.GuaranteeProfile == null
+                    ? "None"
+                    : phone.ProductNavigation.GuaranteeProfile.Corporation + " until " + phone.ProductNavigation.GuaranteeProfile.ExpirationDate.ToString("d"),
+                phone.ProductNavigation.SecondHandProfile != null));
 
     // ── IMEI ──────────────────────────────────────────────
 
+    /// <inheritdoc />
     public bool ImeiExists(string imei1)
-        => _phoneRepo.ImeiExists(imei1);
+        => _phoneRepo.Any(phone => phone.IMEI1 == imei1);
 
+    /// <inheritdoc />
     public Task<bool> ImeiExistsAsync(string imei1)
-        => _phoneRepo.ImeiExistsAsync(imei1);
+        => _phoneRepo.AnyAsync(phone => phone.IMEI1 == imei1);
 
     // ── Status flags ──────────────────────────────────────
 
+    /// <inheritdoc />
     public bool IsSold(int id)
-        => _phoneRepo.IsSold(id);
+        => _phoneRepo.Any(phone => phone.Id == id &&
+            phone.ProductNavigation.Transactions.Any(transaction => transaction.Direction == TransactionDirection.Sell));
 
+    /// <inheritdoc />
     public Task<bool> IsSoldAsync(int id)
-        => _phoneRepo.IsSoldAsync(id);
+        => _phoneRepo.AnyAsync(phone => phone.Id == id &&
+            phone.ProductNavigation.Transactions.Any(transaction => transaction.Direction == TransactionDirection.Sell));
 
+    /// <inheritdoc />
     public bool IsSecondHand(int id)
-        => _phoneRepo.IsSecondHand(id);
+        => _phoneRepo.Any(phone => phone.Id == id && phone.ProductNavigation.SecondHandProfile != null);
 
+    /// <inheritdoc />
     public Task<bool> IsSecondHandAsync(int id)
-        => _phoneRepo.IsSecondHandAsync(id);
+        => _phoneRepo.AnyAsync(phone => phone.Id == id && phone.ProductNavigation.SecondHandProfile != null);
 
     // ── Owner (null ⇒ not sold) ───────────────────────────
 
+    /// <inheritdoc />
     public Customer? GetOwner(int id)
-        => _phoneRepo.GetOwner(id);
+        => _phoneRepo.Select(
+            phone => phone.Id == id,
+            phone => phone.ProductNavigation.Transactions
+                .Where(transaction => transaction.Direction == TransactionDirection.Sell)
+                .OrderByDescending(transaction => transaction.Date)
+                .Select(transaction => transaction.CustomerNavigation)
+                .FirstOrDefault());
 
-    public Customer? GetOwner(Expression<Func<Phone, bool>> predicate)
-    {
-        var phone = _phoneRepo.Find(predicate);
-        return phone is null ? null : _phoneRepo.GetOwner(phone.Id);
-    }
-
+    /// <inheritdoc />
     public Task<Customer?> GetOwnerAsync(int id)
-        => _phoneRepo.GetOwnerAsync(id);
-
-    public async Task<Customer?> GetOwnerAsync(Expression<Func<Phone, bool>> predicate)
-    {
-        var phone = await _phoneRepo.FindAsync(predicate);
-        return phone is null ? null : await _phoneRepo.GetOwnerAsync(phone.Id);
-    }
+        => _phoneRepo.SelectAsync(
+            phone => phone.Id == id,
+            phone => phone.ProductNavigation.Transactions
+                .Where(transaction => transaction.Direction == TransactionDirection.Sell)
+                .OrderByDescending(transaction => transaction.Date)
+                .Select(transaction => transaction.CustomerNavigation)
+                .FirstOrDefault());
 
     // ── Guarantee ─────────────────────────────────────────
 
+    /// <inheritdoc />
     public Guarantee? GetGuarantee(int id)
-        => _phoneRepo.GetGuarantee(id);
+        => _phoneRepo.Select(phone => phone.Id == id, phone => phone.ProductNavigation.GuaranteeProfile);
 
-    public Guarantee? GetGuarantee(Expression<Func<Phone, bool>> predicate)
-    {
-        var phone = _phoneRepo.Find(predicate);
-        return phone is null ? null : _phoneRepo.GetGuarantee(phone.Id);
-    }
-
+    /// <inheritdoc />
     public Task<Guarantee?> GetGuaranteeAsync(int id)
-        => _phoneRepo.GetGuaranteeAsync(id);
-
-    public async Task<Guarantee?> GetGuaranteeAsync(Expression<Func<Phone, bool>> predicate)
-    {
-        var phone = await _phoneRepo.FindAsync(predicate);
-        return phone is null ? null : await _phoneRepo.GetGuaranteeAsync(phone.Id);
-    }
+        => _phoneRepo.SelectAsync(phone => phone.Id == id, phone => phone.ProductNavigation.GuaranteeProfile);
 
     // ── Second-hand (null ⇒ not second-hand) ──────────────
 
+    /// <inheritdoc />
     public SecondHand? GetSecondHandInfo(int id)
-        => _phoneRepo.GetSecondHandInfo(id);
+        => _phoneRepo.Select(phone => phone.Id == id, phone => phone.ProductNavigation.SecondHandProfile);
 
-    public SecondHand? GetSecondHandInfo(Expression<Func<Phone, bool>> predicate)
-    {
-        var phone = _phoneRepo.Find(predicate);
-        return phone is null ? null : _phoneRepo.GetSecondHandInfo(phone.Id);
-    }
-
+    /// <inheritdoc />
     public Task<SecondHand?> GetSecondHandInfoAsync(int id)
-        => _phoneRepo.GetSecondHandInfoAsync(id);
-
-    public async Task<SecondHand?> GetSecondHandInfoAsync(Expression<Func<Phone, bool>> predicate)
-    {
-        var phone = await _phoneRepo.FindAsync(predicate);
-        return phone is null ? null : await _phoneRepo.GetSecondHandInfoAsync(phone.Id);
-    }
+        => _phoneRepo.SelectAsync(phone => phone.Id == id, phone => phone.ProductNavigation.SecondHandProfile);
 
     // ── Quantities ────────────────────────────────────────
 
+    /// <inheritdoc />
     public int Quantity()
-        => _phoneRepo.Quantity();
+        => _phoneRepo.Count();
 
+    /// <inheritdoc />
     public int SecondHandQuantity()
-        => _phoneRepo.GetAll(p => p.ProductNavigation.SecondHandProfile != null).Count();
+        => _phoneRepo.Count(phone => phone.ProductNavigation.SecondHandProfile != null);
 
+    /// <inheritdoc />
     public int AvailableSecondHandQuantity()
-        => _phoneRepo.GetAll(p =>
-                p.ProductNavigation.SecondHandProfile != null &&
-                !p.ProductNavigation.Transactions.Any(t => t.Direction == TransactionDirection.Sell))
-            .Count();
+        => _phoneRepo.Count(phone =>
+            phone.ProductNavigation.SecondHandProfile != null &&
+            !phone.ProductNavigation.Transactions.Any(transaction => transaction.Direction == TransactionDirection.Sell));
 
+    /// <inheritdoc />
     public Task<int> QuantityAsync()
-        => _phoneRepo.QuantityAsync();
+        => _phoneRepo.CountAsync();
 
-    public async Task<int> SecondHandQuantityAsync()
-        => (await _phoneRepo.GetAllAsync(p => p.ProductNavigation.SecondHandProfile != null)).Count();
+    /// <inheritdoc />
+    public Task<int> SecondHandQuantityAsync()
+        => _phoneRepo.CountAsync(phone => phone.ProductNavigation.SecondHandProfile != null);
 
-    public async Task<int> AvailableSecondHandQuantityAsync()
-        => (await _phoneRepo.GetAllAsync(p =>
-                p.ProductNavigation.SecondHandProfile != null &&
-                !p.ProductNavigation.Transactions.Any(t => t.Direction == TransactionDirection.Sell)))
-            .Count();
+    /// <inheritdoc />
+    public Task<int> AvailableSecondHandQuantityAsync()
+        => _phoneRepo.CountAsync(phone =>
+            phone.ProductNavigation.SecondHandProfile != null &&
+            !phone.ProductNavigation.Transactions.Any(transaction => transaction.Direction == TransactionDirection.Sell));
 
     // ── Lists ─────────────────────────────────────────────
 
+    /// <inheritdoc />
     public IEnumerable<Phone> GetSecondHand()
-        => _phoneRepo.GetAll(p => p.ProductNavigation.SecondHandProfile != null);
+        => _phoneRepo.FindAll(phone => phone.ProductNavigation.SecondHandProfile != null);
 
+    /// <inheritdoc />
     public IEnumerable<Phone> GetAvailableSecondHand()
-        => _phoneRepo.GetAll(p =>
-            p.ProductNavigation.SecondHandProfile != null &&
-            !p.ProductNavigation.Transactions.Any(t => t.Direction == TransactionDirection.Sell));
+        => _phoneRepo.FindAll(phone =>
+            phone.ProductNavigation.SecondHandProfile != null &&
+            !phone.ProductNavigation.Transactions.Any(transaction => transaction.Direction == TransactionDirection.Sell));
 
+    /// <inheritdoc />
     public Task<IEnumerable<Phone>> GetSecondHandAsync()
-        => _phoneRepo.GetAllAsync(p => p.ProductNavigation.SecondHandProfile != null);
+        => _phoneRepo.FindAllAsync(phone => phone.ProductNavigation.SecondHandProfile != null);
 
+    /// <inheritdoc />
     public Task<IEnumerable<Phone>> GetAvailableSecondHandAsync()
-        => _phoneRepo.GetAllAsync(p =>
-            p.ProductNavigation.SecondHandProfile != null &&
-            !p.ProductNavigation.Transactions.Any(t => t.Direction == TransactionDirection.Sell));
+        => _phoneRepo.FindAllAsync(phone =>
+            phone.ProductNavigation.SecondHandProfile != null &&
+            !phone.ProductNavigation.Transactions.Any(transaction => transaction.Direction == TransactionDirection.Sell));
 }

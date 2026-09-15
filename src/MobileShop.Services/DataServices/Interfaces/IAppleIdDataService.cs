@@ -1,45 +1,70 @@
-﻿namespace MobileShop.Services.DataServices.Interfaces;
+namespace MobileShop.Services.DataServices.Interfaces;
 
+/// <summary>
+/// Defines the public contract for IAppleIdDataService.
+/// </summary>
 public interface IAppleIdDataService : IDataService<AppleId>
 {
+    /// <summary>Gets Apple ID inventory rows for the product list.</summary>
     IReadOnlyList<ProductListItemViewModel> GetInventoryRows();
+    /// <summary>Gets Apple IDs eligible for the specified transaction direction.</summary>
+    /// <param name="direction">The transaction direction to check.</param>
+    IReadOnlyList<ProductListItemViewModel> GetSelectableProducts(TransactionDirection direction);
+    /// <summary>Gets all second-hand Apple ID inventory rows.</summary>
+    IReadOnlyList<ProductListItemViewModel> GetSecondHandRows();
+    /// <summary>Gets available second-hand Apple ID inventory rows.</summary>
+    IReadOnlyList<ProductListItemViewModel> GetAvailableSecondHandRows();
+    /// <summary>Gets Apple ID details, or <see langword="null"/> when not found.</summary>
+    /// <param name="id">The Apple ID identifier.</param>
     ProductDetailsViewModel? GetDetails(int id);
-
+    /// <summary>Finds an Apple ID by email, or <see langword="null"/> when not found.</summary>
+    /// <param name="email">The Apple ID email address.</param>
     AppleId? FindByEmail(string email);
+    /// <summary>Finds an Apple ID by email asynchronously.</summary>
+    /// <param name="email">The Apple ID email address.</param>
     Task<AppleId?> FindByEmailAsync(string email);
-
+    /// <summary>Determines whether the Apple ID has been sold.</summary>
+    /// <param name="id">The Apple ID identifier.</param>
     bool IsSold(int id);
+    /// <summary>Determines asynchronously whether the Apple ID has been sold.</summary>
+    /// <param name="id">The Apple ID identifier.</param>
     Task<bool> IsSoldAsync(int id);
-
-    // null ⇒ not sold
-    // TODO: eager-load PersonNavigation when UI needs full customer details
+    /// <summary>Gets the customer owner, or <see langword="null"/> when not sold.</summary>
+    /// <param name="id">The Apple ID identifier.</param>
     Customer? GetOwner(int id);
-    Customer? GetOwner(Expression<Func<AppleId, bool>> predicate);
+    /// <summary>Gets the customer owner asynchronously, or <see langword="null"/> when not sold.</summary>
+    /// <param name="id">The Apple ID identifier.</param>
     Task<Customer?> GetOwnerAsync(int id);
-    Task<Customer?> GetOwnerAsync(Expression<Func<AppleId, bool>> predicate);
-
-    // TODO: eager-load Product when needed
+    /// <summary>Gets the guarantee, or <see langword="null"/> when none exists.</summary>
+    /// <param name="id">The Apple ID identifier.</param>
     Guarantee? GetGuarantee(int id);
-    Guarantee? GetGuarantee(Expression<Func<AppleId, bool>> predicate);
+    /// <summary>Gets the guarantee asynchronously, or <see langword="null"/> when none exists.</summary>
+    /// <param name="id">The Apple ID identifier.</param>
     Task<Guarantee?> GetGuaranteeAsync(int id);
-    Task<Guarantee?> GetGuaranteeAsync(Expression<Func<AppleId, bool>> predicate);
-
-    // null ⇒ not second-hand
+    /// <summary>Gets second-hand information, or <see langword="null"/> when not second-hand.</summary>
+    /// <param name="id">The Apple ID identifier.</param>
     SecondHand? GetSecondHandInfo(int id);
-    SecondHand? GetSecondHandInfo(Expression<Func<AppleId, bool>> predicate);
+    /// <summary>Gets second-hand information asynchronously, or <see langword="null"/> when not second-hand.</summary>
+    /// <param name="id">The Apple ID identifier.</param>
     Task<SecondHand?> GetSecondHandInfoAsync(int id);
-    Task<SecondHand?> GetSecondHandInfoAsync(Expression<Func<AppleId, bool>> predicate);
-
+    /// <summary>Counts Apple IDs in inventory.</summary>
     int Quantity();
+    /// <summary>Counts second-hand Apple IDs.</summary>
     int SecondHandQuantity();
+    /// <summary>Counts available second-hand Apple IDs.</summary>
     int AvailableSecondHandQuantity();
+    /// <summary>Counts Apple IDs in inventory asynchronously.</summary>
     Task<int> QuantityAsync();
+    /// <summary>Counts second-hand Apple IDs asynchronously.</summary>
     Task<int> SecondHandQuantityAsync();
+    /// <summary>Counts available second-hand Apple IDs asynchronously.</summary>
     Task<int> AvailableSecondHandQuantityAsync();
-
-    // TODO: explicit Include paths when list pages need related data
+    /// <summary>Gets second-hand Apple IDs.</summary>
     IEnumerable<AppleId> GetSecondHand();
+    /// <summary>Gets available second-hand Apple IDs.</summary>
     IEnumerable<AppleId> GetAvailableSecondHand();
+    /// <summary>Gets second-hand Apple IDs asynchronously.</summary>
     Task<IEnumerable<AppleId>> GetSecondHandAsync();
+    /// <summary>Gets available second-hand Apple IDs asynchronously.</summary>
     Task<IEnumerable<AppleId>> GetAvailableSecondHandAsync();
 }

@@ -7,27 +7,35 @@ public class CustomerDataService(
 {
     private readonly ICustomerRepo _customerRepo = customerRepo;
 
+    /// <inheritdoc />
+    public IReadOnlyList<PartyOptionViewModel> GetPartyOptions()
+        => _customerRepo
+            .SelectAll(customer => new PartyOptionViewModel(
+                customer.Id,
+                customer.PersonNavigation.FirstName + " " + customer.PersonNavigation.LastName,
+                customer.PersonNavigation.PhoneNumber))
+            .OrderBy(row => row.Label)
+            .ToList();
+
     // ── Purchased products ────────────────────────────────
 
+    /// <inheritdoc />
     public IEnumerable<Product> PurchasedProducts(int customerId)
-        => _customerRepo.PurchasedProducts(customerId) ?? [];
+        => _customerRepo
+            .FindAll(customer => customer.Id == customerId)
+            .SelectMany(customer => customer.Transactions)
+            .Where(transaction => transaction.Direction == TransactionDirection.Sell)
+            .Select(transaction => transaction.ProductNavigation)
+            .Distinct()
+            .ToList();
 
-    public IEnumerable<Product> PurchasedProducts(
-        int customerId,
-        Expression<Func<Product, bool>> predicate)
-    {
-        var products = PurchasedProducts(customerId);
-        return products.AsQueryable().Where(predicate).ToList();
-    }
-
+    /// <inheritdoc />
     public async Task<IEnumerable<Product>> PurchasedProductsAsync(int customerId)
-        => await _customerRepo.PurchasedProductsAsync(customerId) ?? [];
+        => (await _customerRepo.FindAllAsync(customer => customer.Id == customerId))
+            .SelectMany(customer => customer.Transactions)
+            .Where(transaction => transaction.Direction == TransactionDirection.Sell)
+            .Select(transaction => transaction.ProductNavigation)
+            .Distinct()
+            .ToList();
 
-    public async Task<IEnumerable<Product>> PurchasedProductsAsync(
-        int customerId,
-        Expression<Func<Product, bool>> predicate)
-    {
-        var products = await PurchasedProductsAsync(customerId);
-        return products.AsQueryable().Where(predicate).ToList();
-    }
 }

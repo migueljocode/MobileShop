@@ -1,6 +1,4 @@
-﻿using Isopoh.Cryptography.Argon2;
-
-namespace MobileShop.Services.Security;
+﻿namespace MobileShop.Services.Security;
 
 public class PasswordHasher : IPasswordHasher
 {

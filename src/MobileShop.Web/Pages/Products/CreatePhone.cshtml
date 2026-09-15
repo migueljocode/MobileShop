@@ -1,0 +1,93 @@
+@page
+@model MobileShop.Web.Pages.Products.CreatePhoneModel
+@{
+    ViewData["Title"] = "Create phone";
+}
+
+<h1>Create phone</h1>
+
+<form method="post" class="row g-3 col-lg-7">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+    <div class="col-md-6">
+        <label asp-for="Input.Manufacturer" class="form-label"></label>
+        <input asp-for="Input.Manufacturer" class="form-control" />
+        <span asp-validation-for="Input.Manufacturer" class="text-danger"></span>
+    </div>
+
+    <div class="col-md-6">
+        <label asp-for="Input.Model" class="form-label"></label>
+        <input asp-for="Input.Model" class="form-control" />
+        <span asp-validation-for="Input.Model" class="text-danger"></span>
+    </div>
+
+    <div class="col-md-4">
+        <label asp-for="Input.Price" class="form-label"></label>
+        <input asp-for="Input.Price" class="form-control" />
+        <span asp-validation-for="Input.Price" class="text-danger"></span>
+    </div>
+
+    <div class="col-md-4">
+        <label asp-for="Input.Color" class="form-label"></label>
+        <input asp-for="Input.Color" class="form-control" />
+        <span asp-validation-for="Input.Color" class="text-danger"></span>
+    </div>
+
+    <div class="col-md-4">
+        <label asp-for="Input.TestPeriodDays" class="form-label">Second-hand test days</label>
+        <input asp-for="Input.TestPeriodDays" class="form-control" />
+        <span asp-validation-for="Input.TestPeriodDays" class="text-danger"></span>
+    </div>
+
+    <div class="col-md-6">
+        <label asp-for="Input.IMEI1" class="form-label"></label>
+        <input asp-for="Input.IMEI1" class="form-control" />
+        <span asp-validation-for="Input.IMEI1" class="text-danger"></span>
+    </div>
+
+    <div class="col-md-6">
+        <label asp-for="Input.IMEI2" class="form-label"></label>
+        <input asp-for="Input.IMEI2" class="form-control" />
+        <span asp-validation-for="Input.IMEI2" class="text-danger"></span>
+    </div>
+
+    <div class="col-12">
+        <div class="form-check">
+            <input asp-for="Input.IsSecondHand" class="form-check-input" />
+            <label asp-for="Input.IsSecondHand" class="form-check-label">Second-hand item</label>
+        </div>
+    </div>
+
+    <div class="col-12">
+        <div class="form-check">
+            <input asp-for="Input.HasGuarantee" class="form-check-input" />
+            <label asp-for="Input.HasGuarantee" class="form-check-label">Has guarantee</label>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <label asp-for="Input.GuaranteeCorporation" class="form-label">Guarantee corporation</label>
+        <input asp-for="Input.GuaranteeCorporation" class="form-control" />
+        <span asp-validation-for="Input.GuaranteeCorporation" class="text-danger"></span>
+    </div>
+
+    <div class="col-md-6">
+        <label asp-for="Input.GuaranteeExpiry" class="form-label">Guarantee expiry</label>
+        <input asp-for="Input.GuaranteeExpiry" class="form-control" />
+        <span asp-validation-for="Input.GuaranteeExpiry" class="text-danger"></span>
+    </div>
+
+    <div class="col-12">
+        <button class="btn btn-primary" type="submit">Save phone</button>
+        <a asp-page="/Products/Index" class="btn btn-outline-secondary ms-2">Back to products</a>
+    </div>
+</form>
+
+@if (!string.IsNullOrWhiteSpace(Model.Message))
+{
+    <div class="alert alert-danger mt-3">@Model.Message</div>
+}
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

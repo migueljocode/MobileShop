@@ -1,5 +1,4 @@
-﻿
-namespace MobileShop.Services.DataServices.Dal;
+﻿namespace MobileShop.Services.DataServices.Dal;
 
 public class UserDataService(
     IUserRepo userRepo,
@@ -10,12 +9,15 @@ public class UserDataService(
     private readonly IUserRepo _userRepo = userRepo;
     private readonly IPasswordHasher _passwordHasher = passwordHasher;
 
+    /// <inheritdoc />
     public User? FindByUsername(string username)
         => _userRepo.FindByUsername(username);
 
+    /// <inheritdoc />
     public Task<User?> FindByUsernameAsync(string username)
         => _userRepo.FindByUsernameAsync(username);
 
+    /// <inheritdoc />
     public bool ValidateCredentials(string username, string plainPassword)
     {
         var user = _userRepo.FindByUsername(username);
@@ -34,6 +36,7 @@ public class UserDataService(
         return ok;
     }
 
+    /// <inheritdoc />
     public async Task<bool> ValidateCredentialsAsync(string username, string plainPassword)
     {
         var user = await _userRepo.FindByUsernameAsync(username);
@@ -52,6 +55,7 @@ public class UserDataService(
         return ok;
     }
 
+    /// <inheritdoc />
     public bool ChangePassword(int userId, string plainNewPassword)
     {
         var hash = _passwordHasher.Hash(plainNewPassword);
@@ -63,6 +67,7 @@ public class UserDataService(
         return ok;
     }
 
+    /// <inheritdoc />
     public bool ChangePassword(string username, string plainNewPassword)
     {
         var hash = _passwordHasher.Hash(plainNewPassword);
@@ -74,6 +79,7 @@ public class UserDataService(
         return ok;
     }
 
+    /// <inheritdoc />
     public async Task<bool> ChangePasswordAsync(int userId, string plainNewPassword)
     {
         var hash = _passwordHasher.Hash(plainNewPassword);
@@ -85,6 +91,7 @@ public class UserDataService(
         return ok;
     }
 
+    /// <inheritdoc />
     public async Task<bool> ChangePasswordAsync(string username, string plainNewPassword)
     {
         var hash = _passwordHasher.Hash(plainNewPassword);
@@ -96,12 +103,14 @@ public class UserDataService(
         return ok;
     }
 
+    /// <inheritdoc />
     public bool Create(User user, string plainPassword)
     {
         user.PasswordHash = _passwordHasher.Hash(plainPassword);
         return Add(user);
     }
 
+    /// <inheritdoc />
     public Task<bool> CreateAsync(User user, string plainPassword)
     {
         user.PasswordHash = _passwordHasher.Hash(plainPassword);

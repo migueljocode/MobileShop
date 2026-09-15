@@ -13,23 +13,39 @@ public abstract class DataServiceBase<TService, TEntity>(
     protected IBaseRepo<TEntity> Repo { get; } = repo;
     protected ILogger<TService> Logger { get; } = logger;
 
+    /// <inheritdoc />
+    public virtual IEnumerable<TEntity> FindAll(Expression<Func<TEntity, bool>>? predicate = null)
+        => Repo.FindAll(predicate);
+
+    /// <inheritdoc />
+    public virtual Task<IEnumerable<TEntity>> FindAllAsync(
+        Expression<Func<TEntity, bool>>? predicate = null)
+        => Repo.FindAllAsync(predicate);
+
+    /// <inheritdoc />
     public virtual IEnumerable<TEntity> GetAll(Expression<Func<TEntity, bool>>? predicate = null)
         => Repo.GetAll(predicate);
 
+    /// <inheritdoc />
     public virtual Task<IEnumerable<TEntity>> GetAllAsync(
         Expression<Func<TEntity, bool>>? predicate = null)
         => Repo.GetAllAsync(predicate);
 
+    /// <inheritdoc />
     public virtual TEntity? Find(int id) => Repo.Find(id);
 
+    /// <inheritdoc />
     public virtual TEntity? Find(Expression<Func<TEntity, bool>> predicate)
         => Repo.Find(predicate);
 
+    /// <inheritdoc />
     public virtual Task<TEntity?> FindAsync(int id) => Repo.FindAsync(id);
 
+    /// <inheritdoc />
     public virtual Task<TEntity?> FindAsync(Expression<Func<TEntity, bool>> predicate)
         => Repo.FindAsync(predicate);
 
+    /// <inheritdoc />
     public virtual bool Add(TEntity entity)
     {
         var result = Repo.Add(entity) > 0;
@@ -40,6 +56,7 @@ public abstract class DataServiceBase<TService, TEntity>(
         return result;
     }
 
+    /// <inheritdoc />
     public virtual bool Update(TEntity entity)
     {
         var result = Repo.Update(entity) > 0;
@@ -50,6 +67,7 @@ public abstract class DataServiceBase<TService, TEntity>(
         return result;
     }
 
+    /// <inheritdoc />
     public virtual bool Delete(TEntity entity)
     {
         var result = Repo.Delete(entity) > 0;
@@ -60,6 +78,7 @@ public abstract class DataServiceBase<TService, TEntity>(
         return result;
     }
 
+    /// <inheritdoc />
     public virtual bool Delete(int id)
     {
         var entity = Repo.Find(id);
@@ -71,6 +90,7 @@ public abstract class DataServiceBase<TService, TEntity>(
         return Delete(entity);
     }
 
+    /// <inheritdoc />
     public virtual async Task<bool> AddAsync(TEntity entity)
     {
         var result = await Repo.AddAsync(entity) > 0;
@@ -81,6 +101,7 @@ public abstract class DataServiceBase<TService, TEntity>(
         return result;
     }
 
+    /// <inheritdoc />
     public virtual async Task<bool> UpdateAsync(TEntity entity)
     {
         var result = await Repo.UpdateAsync(entity) > 0;
@@ -91,6 +112,7 @@ public abstract class DataServiceBase<TService, TEntity>(
         return result;
     }
 
+    /// <inheritdoc />
     public virtual async Task<bool> DeleteAsync(TEntity entity)
     {
         var result = await Repo.DeleteAsync(entity) > 0;
@@ -101,6 +123,7 @@ public abstract class DataServiceBase<TService, TEntity>(
         return result;
     }
 
+    /// <inheritdoc />
     public virtual async Task<bool> DeleteAsync(int id)
     {
         var entity = await Repo.FindAsync(id);

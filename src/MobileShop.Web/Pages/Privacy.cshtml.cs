@@ -1,12 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
-
-namespace MobileShop.Web.Pages;
+﻿namespace MobileShop.Web.Pages;
 
 public class PrivacyModel : PageModel
 {
-    public void OnGet()
-    {
-    }
+    public void OnGet() { }
 }
 

@@ -19,3 +19,4 @@ global using MobileShop.Services.DataServices.Interfaces;
 global using MobileShop.Services.Security;
 global using MobileShop.Models.Enums;
 global using MobileShop.Models.ViewModels.Web;
+global using Isopoh.Cryptography.Argon2;

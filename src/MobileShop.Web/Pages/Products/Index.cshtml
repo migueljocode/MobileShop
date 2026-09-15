@@ -5,10 +5,15 @@
 }
 
 <h1>Products</h1>
-<div class="btn-group mb-3" role="group">
-    <a class="btn @(Model.Type == "all" ? "btn-primary" : "btn-outline-primary")" asp-route-type="all">All</a>
-    <a class="btn @(Model.Type == "phone" ? "btn-primary" : "btn-outline-primary")" asp-route-type="phone">Phones</a>
-    <a class="btn @(Model.Type == "appleid" ? "btn-primary" : "btn-outline-primary")" asp-route-type="appleid">Apple IDs</a>
+<div class="d-flex flex-wrap gap-2 mb-3">
+    <div class="btn-group" role="group">
+        <a class="btn @(Model.Type == "all" ? "btn-primary" : "btn-outline-primary")" asp-route-type="all">All</a>
+        <a class="btn @(Model.Type == "phone" ? "btn-primary" : "btn-outline-primary")" asp-route-type="phone">Phones</a>
+        <a class="btn @(Model.Type == "appleid" ? "btn-primary" : "btn-outline-primary")" asp-route-type="appleid">Apple IDs</a>
+    </div>
+    <a asp-page="/Products/SecondHand" class="btn btn-outline-warning">Second-hand</a>
+    <a asp-page="/Products/CreatePhone" class="btn btn-success">Create phone</a>
+    <a asp-page="/Products/CreateAppleId" class="btn btn-success">Create Apple ID</a>
 </div>
 
 @if (Model.Products.Count == 0)

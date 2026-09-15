@@ -1,0 +1,49 @@
+{
+  "people": [
+    { "id": 1, "firstName": "Mohammad", "lastName": "Karimi", "phoneNumber": "09120000001", "notes": "Shop owner" },
+    { "id": 2, "firstName": "Ali", "lastName": "Rezaei", "phoneNumber": "09120000002", "notes": "Regular supplier" },
+    { "id": 3, "firstName": "Sara", "lastName": "Ahmadi", "phoneNumber": "09120000003" }
+  ],
+  "sellers": [
+    { "id": 1, "personId": 1, "entityType": "Real" },
+    { "id": 2, "personId": 2, "entityType": "Real" }
+  ],
+  "customers": [
+    { "id": 1, "personId": 1, "nationalId": "0000000000" },
+    { "id": 2, "personId": 3, "nationalId": "0012345678" }
+  ],
+  "users": [
+    { "id": 1, "personId": 1, "username": "admin", "passwordHash": "REPLACE_WITH_REAL_HASH" }
+  ],
+  "products": [
+    { "id": 1, "price": 45000000, "manufacturer": "Apple", "model": "iPhone 13 128GB" },
+    { "id": 2, "price": 32000000, "manufacturer": "Samsung", "model": "Galaxy S24" },
+    { "id": 3, "price": 18000000, "manufacturer": "Apple", "model": "iPhone 11 (Used)" },
+    { "id": 4, "price": 1200000, "manufacturer": "Anker", "model": "20W USB-C Charger" }
+  ],
+  "transactions": [
+    { "id": 1, "date": "2026-01-10T00:00:00", "sellerId": 2, "customerId": 1, "productId": 1, "finishedPrice": 42000000, "direction": "Buy" },
+    { "id": 2, "date": "2026-01-15T00:00:00", "sellerId": 1, "customerId": 2, "productId": 1, "finishedPrice": 45000000, "direction": "Sell" },
+    { "id": 3, "date": "2026-01-12T00:00:00", "sellerId": 2, "customerId": 1, "productId": 2, "finishedPrice": 29000000, "direction": "Buy" },
+    { "id": 4, "date": "2026-01-05T00:00:00", "sellerId": 2, "customerId": 1, "productId": 3, "finishedPrice": 15000000, "direction": "Buy" },
+    { "id": 5, "date": "2026-01-20T00:00:00", "sellerId": 2, "customerId": 1, "productId": 4, "finishedPrice": 900000, "direction": "Buy" }
+  ],
+  "appleIds": [
+    { "id": 1, "email": "shop.appleid1@example.com", "password": "samplepass1", "notes": "Comes with iPhone 13", "productId": 1 }
+  ],
+  "phones": [
+    { "id": 1, "imei1": "123456789012345", "color": "Midnight", "productId": 1 },
+    { "id": 2, "imei1": "234567890123456", "imei2": "234567890123457", "color": "Black", "productId": 2 },
+    { "id": 3, "imei1": "345678901234567", "color": "Green", "ownershipTransferred": true, "productId": 3 }
+  ],
+  "secondHands": [
+    { "id": 1, "testPeriodDays": 7, "usedDurationDays": 730, "productId": 3 }
+  ],
+  "guarantees": [
+    { "id": 1, "startDate": "2026-01-10T00:00:00", "expirationDate": "2027-01-10T00:00:00", "corporation": "Apple", "productId": 1 }
+  ],
+  "iPhones": [
+    { "id": 1, "phoneId": 1, "batteryHealth": 98, "chargeCycle": 45 },
+    { "id": 2, "phoneId": 3, "batteryHealth": 87, "chargeCycle": 612 }
+  ]
+}

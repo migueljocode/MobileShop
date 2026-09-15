@@ -1,16 +1,21 @@
 namespace MobileShop.Web.Pages.Transactions;
 
-public class SellModel(ITransactionDataService transactionDataService, ICustomerDataService customerDataService) : PageModel
+public class SellModel(
+    ITransactionDataService transactionDataService,
+    ICustomerDataService customerDataService,
+    IPhoneDataService phoneDataService,
+    IAppleIdDataService appleIdDataService) : PageModel
 {
-    [BindProperty] public InputModel Input { get; set; } = new();
-    public IReadOnlyList<Customer> Customers { get; private set; } = [];
+    [BindProperty] public SellInputModel Input { get; set; } = new();
+    public IReadOnlyList<PartyOptionViewModel> Customers { get; private set; } = [];
+    public IReadOnlyList<ProductListItemViewModel> Products { get; private set; } = [];
     public string? Message { get; private set; }
 
-    public void OnGet() => LoadCustomers();
+    public void OnGet() => LoadSelections();
 
     public IActionResult OnPost()
     {
-        LoadCustomers();
+        LoadSelections();
         if (!ModelState.IsValid) return Page();
         if (!transactionDataService.RecordSell(Input.ProductId, Input.CustomerId, Input.Price, Input.Date))
         {
@@ -23,13 +28,13 @@ public class SellModel(ITransactionDataService transactionDataService, ICustomer
         return Page();
     }
 
-    private void LoadCustomers() => Customers = customerDataService.GetAll().ToList();
-
-    public class InputModel
+    private void LoadSelections()
     {
-        [Range(1, int.MaxValue)] public int ProductId { get; set; }
-        [Range(1, int.MaxValue)] public int CustomerId { get; set; }
-        [Range(0, double.MaxValue)] public decimal Price { get; set; }
-        [DataType(DataType.DateTime)] public DateTime? Date { get; set; }
+        Customers = customerDataService.GetPartyOptions();
+        Products = phoneDataService.GetSelectableProducts(TransactionDirection.Sell)
+            .Concat(appleIdDataService.GetSelectableProducts(TransactionDirection.Sell))
+            .OrderBy(product => product.Name)
+            .ToList();
     }
+
 }

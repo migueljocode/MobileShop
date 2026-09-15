@@ -1,0 +1,61 @@
+@page
+@model MobileShop.Web.Pages.Products.CreateAppleIdModel
+@{
+    ViewData["Title"] = "Create Apple ID";
+}
+
+<h1>Create Apple ID</h1>
+
+<form method="post" class="row g-3 col-lg-7">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+    <div class="col-md-6">
+        <label asp-for="Input.Manufacturer" class="form-label"></label>
+        <input asp-for="Input.Manufacturer" class="form-control" />
+        <span asp-validation-for="Input.Manufacturer" class="text-danger"></span>
+    </div>
+
+    <div class="col-md-6">
+        <label asp-for="Input.Model" class="form-label"></label>
+        <input asp-for="Input.Model" class="form-control" />
+        <span asp-validation-for="Input.Model" class="text-danger"></span>
+    </div>
+
+    <div class="col-md-4">
+        <label asp-for="Input.Price" class="form-label"></label>
+        <input asp-for="Input.Price" class="form-control" />
+        <span asp-validation-for="Input.Price" class="text-danger"></span>
+    </div>
+
+    <div class="col-md-8">
+        <label asp-for="Input.Email" class="form-label"></label>
+        <input asp-for="Input.Email" class="form-control" />
+        <span asp-validation-for="Input.Email" class="text-danger"></span>
+    </div>
+
+    <div class="col-12">
+        <label asp-for="Input.Password" class="form-label"></label>
+        <input asp-for="Input.Password" class="form-control" />
+        <span asp-validation-for="Input.Password" class="text-danger"></span>
+    </div>
+
+    <div class="col-12">
+        <label asp-for="Input.Notes" class="form-label"></label>
+        <textarea asp-for="Input.Notes" class="form-control" rows="3"></textarea>
+        <span asp-validation-for="Input.Notes" class="text-danger"></span>
+    </div>
+
+    <div class="col-12">
+        <button class="btn btn-primary" type="submit">Save Apple ID</button>
+        <a asp-page="/Products/Index" class="btn btn-outline-secondary ms-2">Back to products</a>
+    </div>
+</form>
+
+@if (!string.IsNullOrWhiteSpace(Model.Message))
+{
+    <div class="alert alert-danger mt-3">@Model.Message</div>
+}
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -1,10 +1,16 @@
-﻿namespace MobileShop.Services.DataServices.Interfaces;
+namespace MobileShop.Services.DataServices.Interfaces;
 
+/// <summary>
+/// Defines the public contract for ICustomerDataService.
+/// </summary>
 public interface ICustomerDataService : IDataService<Customer>
 {
-    // TODO: eager-load Product details when history page needs them
+    /// <summary>Gets customer options for transaction selectors.</summary>
+    IReadOnlyList<PartyOptionViewModel> GetPartyOptions();
+    /// <summary>Gets products purchased by a customer.</summary>
+    /// <param name="customerId">The customer identifier.</param>
     IEnumerable<Product> PurchasedProducts(int customerId);
-    IEnumerable<Product> PurchasedProducts(int customerId, Expression<Func<Product, bool>> predicate);
+    /// <summary>Gets products purchased by a customer asynchronously.</summary>
+    /// <param name="customerId">The customer identifier.</param>
     Task<IEnumerable<Product>> PurchasedProductsAsync(int customerId);
-    Task<IEnumerable<Product>> PurchasedProductsAsync(int customerId, Expression<Func<Product, bool>> predicate);
 }

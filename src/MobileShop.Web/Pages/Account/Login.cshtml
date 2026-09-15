@@ -29,6 +29,10 @@
 
                     <button type="submit" class="btn btn-primary w-100">Sign in</button>
                 </form>
+                @if (!string.IsNullOrWhiteSpace(Model.Message))
+                {
+                    <div class="alert alert-success mt-3">@Model.Message</div>
+                }
             </div>
         </div>
     </div>

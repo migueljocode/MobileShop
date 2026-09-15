@@ -18,49 +18,6 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     {
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(BaseEntity).Assembly);
 
-        // global soft-delete filter for every entity type that derives from BaseEntity - one place, not repeated per Configuration class
-        foreach (var entityType in modelBuilder.Model.GetEntityTypes())
-        {
-            if (!typeof(BaseEntity).IsAssignableFrom(entityType.ClrType))
-                continue;
-
-            var parameter = Expression.Parameter(entityType.ClrType, "e");
-            var isDeletedProperty = Expression.Property(parameter, nameof(BaseEntity.IsDeleted));
-            var filter = Expression.Lambda(Expression.Not(isDeletedProperty), parameter);
-
-            modelBuilder.Entity(entityType.ClrType).HasQueryFilter(filter);
-        }
-    }
-
-    public override int SaveChanges()
-    {
-        try
-        {
-            return base.SaveChanges();
-        }
-        catch (DbUpdateConcurrencyException ex)
-        {
-            throw new CustomConcurrencyException("record was changed by another operation.", ex);
-        }
-        catch (DbUpdateException ex)
-        {
-            throw new CustomDbUpdateException("saving in database encountered an issue.", ex);
-        }
-    }
-
-    public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
-    {
-        try
-        {
-            return await base.SaveChangesAsync(cancellationToken);
-        }
-        catch (DbUpdateConcurrencyException ex)
-        {
-            throw new CustomConcurrencyException("record was changed by another operation.", ex);
-        }
-        catch (DbUpdateException ex)
-        {
-            throw new CustomDbUpdateException("saving in database encountered an issue.", ex);
-        }
+        modelBuilder.ApplySoftDeleteForEntities();
     }
 }

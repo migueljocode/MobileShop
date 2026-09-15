@@ -7,41 +7,54 @@ public class SellerDataService(
 {
     private readonly ISellerRepo _sellerRepo = sellerRepo;
 
+    /// <inheritdoc />
+    public IReadOnlyList<PartyOptionViewModel> GetPartyOptions()
+        => _sellerRepo
+            .SelectAll(seller => new PartyOptionViewModel(
+                seller.Id,
+                seller.PersonNavigation.FirstName + " " + seller.PersonNavigation.LastName,
+                seller.EntityType.ToString()))
+            .OrderBy(row => row.Label)
+            .ToList();
+
     // ── Sold products (both directions) ───────────────────
 
+    /// <inheritdoc />
     public IEnumerable<Product> SoldProducts(int sellerId)
-        => _sellerRepo.SoldProducts(sellerId) ?? [];
+        => _sellerRepo
+            .FindAll(seller => seller.Id == sellerId)
+            .SelectMany(seller => seller.Transactions)
+            .Select(transaction => transaction.ProductNavigation)
+            .Distinct()
+            .ToList();
 
-    public IEnumerable<Product> SoldProducts(int sellerId, Expression<Func<Product, bool>> predicate)
-        => SoldProducts(sellerId).AsQueryable().Where(predicate).ToList();
-
+    /// <inheritdoc />
     public async Task<IEnumerable<Product>> SoldProductsAsync(int sellerId)
-        => await _sellerRepo.SoldProductsAsync(sellerId) ?? [];
-
-    public async Task<IEnumerable<Product>> SoldProductsAsync(
-        int sellerId,
-        Expression<Func<Product, bool>> predicate)
-    {
-        var products = await SoldProductsAsync(sellerId);
-        return products.AsQueryable().Where(predicate).ToList();
-    }
+        => (await _sellerRepo.FindAllAsync(seller => seller.Id == sellerId))
+            .SelectMany(seller => seller.Transactions)
+            .Select(transaction => transaction.ProductNavigation)
+            .Distinct()
+            .ToList();
 
     // ── Supplied to shop (Buy-direction only) ─────────────
 
+    /// <inheritdoc />
     public IEnumerable<Product> SoldToShop(int sellerId)
-        => _sellerRepo.SoldToShop(sellerId) ?? [];
+        => _sellerRepo
+            .FindAll(seller => seller.Id == sellerId)
+            .SelectMany(seller => seller.Transactions)
+            .Where(transaction => transaction.Direction == TransactionDirection.Buy)
+            .Select(transaction => transaction.ProductNavigation)
+            .Distinct()
+            .ToList();
 
-    public IEnumerable<Product> SoldToShop(int sellerId, Expression<Func<Product, bool>> predicate)
-        => SoldToShop(sellerId).AsQueryable().Where(predicate).ToList();
-
+    /// <inheritdoc />
     public async Task<IEnumerable<Product>> SoldToShopAsync(int sellerId)
-        => await _sellerRepo.SoldToShopAsync(sellerId) ?? [];
+        => (await _sellerRepo.FindAllAsync(seller => seller.Id == sellerId))
+            .SelectMany(seller => seller.Transactions)
+            .Where(transaction => transaction.Direction == TransactionDirection.Buy)
+            .Select(transaction => transaction.ProductNavigation)
+            .Distinct()
+            .ToList();
 
-    public async Task<IEnumerable<Product>> SoldToShopAsync(
-        int sellerId,
-        Expression<Func<Product, bool>> predicate)
-    {
-        var products = await SoldToShopAsync(sellerId);
-        return products.AsQueryable().Where(predicate).ToList();
-    }
 }

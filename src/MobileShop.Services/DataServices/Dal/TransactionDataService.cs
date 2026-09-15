@@ -15,57 +15,81 @@ public class TransactionDataService(
 
     // ── By product ────────────────────────────────────────
 
+    /// <inheritdoc />
     public IEnumerable<Transaction> GetByProduct(int productId)
         => _transactionRepo.GetByProduct(productId);
 
+    /// <inheritdoc />
     public IEnumerable<Transaction> GetByProduct(Product product)
         => GetByProduct(product.Id);
 
+    /// <inheritdoc />
     public Task<IEnumerable<Transaction>> GetByProductAsync(int productId)
         => _transactionRepo.GetByProductAsync(productId);
 
+    /// <inheritdoc />
     public Task<IEnumerable<Transaction>> GetByProductAsync(Product product)
         => GetByProductAsync(product.Id);
 
     // ── Recent ────────────────────────────────────────────
 
+    /// <inheritdoc />
     public IEnumerable<Transaction> GetRecent(int count = 20)
         => _transactionRepo
-            .GetAll()
+            .FindAll()
             .OrderByDescending(t => t.Date)
             .Take(count)
             .ToList();
 
+    /// <inheritdoc />
     public async Task<IEnumerable<Transaction>> GetRecentAsync(int count = 20)
-        => (await _transactionRepo.GetAllAsync())
+        => (await _transactionRepo.FindAllAsync())
             .OrderByDescending(t => t.Date)
             .Take(count)
             .ToList();
 
+    /// <inheritdoc />
     public IReadOnlyList<TransactionCardViewModel> GetRecentCards(int count = 20)
-        => _transactionRepo.GetAll()
-            .OrderByDescending(t => t.Date)
-            .Take(count)
-            .Select(transaction => new TransactionCardViewModel(
+        => _transactionRepo
+            .SelectAll(transaction => new TransactionCardViewModel(
                 transaction.Date,
                 transaction.Direction,
                 transaction.FinishedPrice,
-                ProductLabel(transaction),
+                transaction.ProductNavigation.Manufacturer + " " + transaction.ProductNavigation.Model,
                 transaction.Direction == TransactionDirection.Buy
-                    ? $"From: {SellerLabel(transaction)}"
-                    : $"To: {CustomerLabel(transaction)}"))
+                    ? "From: " + (transaction.SellerNavigation.PersonNavigation == null
+                        ? "Shop"
+                        : transaction.SellerNavigation.PersonNavigation.FirstName + " " + transaction.SellerNavigation.PersonNavigation.LastName)
+                    : "To: " + (transaction.CustomerNavigation.PersonNavigation == null
+                        ? "Shop"
+                        : transaction.CustomerNavigation.PersonNavigation.FirstName + " " + transaction.CustomerNavigation.PersonNavigation.LastName)))
+            .OrderByDescending(card => card.Date)
+            .Take(count)
             .ToList();
 
+    /// <inheritdoc />
     public IReadOnlyList<TransactionListItemViewModel> GetList(
         string? direction,
         int take,
         bool ascending)
     {
-        var query = _transactionRepo.GetAll();
+        var query = _transactionRepo.SelectAll(transaction => new TransactionListItemViewModel(
+                transaction.Id,
+                transaction.Date,
+                transaction.Direction,
+                transaction.ProductNavigation.Manufacturer + " " + transaction.ProductNavigation.Model,
+                transaction.FinishedPrice,
+                transaction.SellerNavigation.PersonNavigation == null
+                    ? "Shop"
+                    : transaction.SellerNavigation.PersonNavigation.FirstName + " " + transaction.SellerNavigation.PersonNavigation.LastName,
+                transaction.CustomerNavigation.PersonNavigation == null
+                    ? "Shop"
+                    : transaction.CustomerNavigation.PersonNavigation.FirstName + " " + transaction.CustomerNavigation.PersonNavigation.LastName));
+
         if (string.Equals(direction, "buy", StringComparison.OrdinalIgnoreCase))
-            query = query.Where(t => t.Direction == TransactionDirection.Buy);
+            query = query.Where(t => t.Direction == TransactionDirection.Buy).ToList();
         else if (string.Equals(direction, "sell", StringComparison.OrdinalIgnoreCase))
-            query = query.Where(t => t.Direction == TransactionDirection.Sell);
+            query = query.Where(t => t.Direction == TransactionDirection.Sell).ToList();
 
         var ordered = ascending
             ? query.OrderBy(t => t.Date)
@@ -73,19 +97,13 @@ public class TransactionDataService(
 
         return ordered
             .Take(Math.Clamp(take, 1, 500))
-            .Select(transaction => new TransactionListItemViewModel(
-                transaction.Date,
-                transaction.Direction,
-                ProductLabel(transaction),
-                transaction.FinishedPrice,
-                SellerLabel(transaction),
-                CustomerLabel(transaction)))
             .ToList();
     }
 
+    /// <inheritdoc />
     public IReadOnlyList<ProfitLossRowViewModel> GetProfitLossRows(DateTime? from, DateTime? to)
     {
-        var transactions = _transactionRepo.GetAll()
+        var transactions = _transactionRepo.FindAll()
             .Where(t => (!from.HasValue || t.Date.Date >= from.Value.Date) &&
                         (!to.HasValue || t.Date.Date <= to.Value.Date));
 
@@ -104,26 +122,52 @@ public class TransactionDataService(
             .ToList();
     }
 
+    /// <inheritdoc />
     public decimal GetProfitLossTotal(DateTime? from, DateTime? to)
         => GetProfitLossRows(from, to).Sum(row => row.Profit);
 
+    /// <inheritdoc />
     public IReadOnlyList<ProductTransactionViewModel> GetProductTransactions(int productId)
-        => _transactionRepo.GetByProduct(productId)
-            .Select(transaction => new ProductTransactionViewModel(
+        => _transactionRepo
+            .SelectAll(
+                transaction => transaction.ProductId == productId,
+                transaction => new ProductTransactionViewModel(
+                    transaction.Date,
+                    transaction.Direction,
+                    transaction.FinishedPrice,
+                    transaction.SellerNavigation.PersonNavigation == null
+                        ? "Shop"
+                        : transaction.SellerNavigation.PersonNavigation.FirstName + " " + transaction.SellerNavigation.PersonNavigation.LastName,
+                    transaction.CustomerNavigation.PersonNavigation == null
+                        ? "Shop"
+                        : transaction.CustomerNavigation.PersonNavigation.FirstName + " " + transaction.CustomerNavigation.PersonNavigation.LastName))
+            .OrderByDescending(item => item.Date)
+            .ToList();
+
+    /// <inheritdoc />
+    public TransactionDetailsViewModel? GetDetails(int id)
+        => _transactionRepo.Select(
+            id,
+            transaction => new TransactionDetailsViewModel(
                 transaction.Date,
                 transaction.Direction,
                 transaction.FinishedPrice,
-                SellerLabel(transaction),
-                CustomerLabel(transaction)))
-            .ToList();
+                transaction.ProductNavigation.Manufacturer + " " + transaction.ProductNavigation.Model,
+                transaction.SellerNavigation.PersonNavigation == null
+                    ? "Shop"
+                    : transaction.SellerNavigation.PersonNavigation.FirstName + " " + transaction.SellerNavigation.PersonNavigation.LastName,
+                transaction.CustomerNavigation.PersonNavigation == null
+                    ? "Shop"
+                    : transaction.CustomerNavigation.PersonNavigation.FirstName + " " + transaction.CustomerNavigation.PersonNavigation.LastName));
 
     // ── Products bought / sold by the shop ────────────────
 
+    /// <inheritdoc />
     public IEnumerable<Product> GetProductsBoughtByShop(
         Expression<Func<Product, bool>>? predicate = null)
     {
         var products = _transactionRepo
-            .GetAll(t => t.Direction == TransactionDirection.Buy)
+            .FindAll(t => t.Direction == TransactionDirection.Buy)
             .Select(t => t.ProductNavigation)
             .Where(p => p is not null)
             .Distinct()
@@ -135,11 +179,12 @@ public class TransactionDataService(
         return products.ToList();
     }
 
+    /// <inheritdoc />
     public IEnumerable<Product> GetProductsSoldByShop(
         Expression<Func<Product, bool>>? predicate = null)
     {
         var products = _transactionRepo
-            .GetAll(t => t.Direction == TransactionDirection.Sell)
+            .FindAll(t => t.Direction == TransactionDirection.Sell)
             .Select(t => t.ProductNavigation)
             .Where(p => p is not null)
             .Distinct()
@@ -151,11 +196,12 @@ public class TransactionDataService(
         return products.ToList();
     }
 
+    /// <inheritdoc />
     public async Task<IEnumerable<Product>> GetProductsBoughtByShopAsync(
         Expression<Func<Product, bool>>? predicate = null)
     {
         var products = (await _transactionRepo
-                .GetAllAsync(t => t.Direction == TransactionDirection.Buy))
+                .FindAllAsync(t => t.Direction == TransactionDirection.Buy))
             .Select(t => t.ProductNavigation)
             .Where(p => p is not null)
             .Distinct()
@@ -167,11 +213,12 @@ public class TransactionDataService(
         return products.ToList();
     }
 
+    /// <inheritdoc />
     public async Task<IEnumerable<Product>> GetProductsSoldByShopAsync(
         Expression<Func<Product, bool>>? predicate = null)
     {
         var products = (await _transactionRepo
-                .GetAllAsync(t => t.Direction == TransactionDirection.Sell))
+                .FindAllAsync(t => t.Direction == TransactionDirection.Sell))
             .Select(t => t.ProductNavigation)
             .Where(p => p is not null)
             .Distinct()
@@ -185,6 +232,7 @@ public class TransactionDataService(
 
     // ── Record buy / sell ─────────────────────────────────
 
+    /// <inheritdoc />
     public bool RecordBuy(
         int productId,
         int sellerId,
@@ -229,6 +277,7 @@ public class TransactionDataService(
         return ok;
     }
 
+    /// <inheritdoc />
     public bool RecordSell(
         int productId,
         int customerId,
@@ -272,6 +321,7 @@ public class TransactionDataService(
         return ok;
     }
 
+    /// <inheritdoc />
     public Task<bool> RecordBuyAsync(
         int productId,
         int sellerId,
@@ -282,6 +332,7 @@ public class TransactionDataService(
         return Task.FromResult(RecordBuy(productId, sellerId, finishedPrice, date));
     }
 
+    /// <inheritdoc />
     public Task<bool> RecordSellAsync(
         int productId,
         int customerId,

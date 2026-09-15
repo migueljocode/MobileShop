@@ -1,0 +1,47 @@
+@page
+@model MobileShop.Web.Pages.Products.SecondHandModel
+@{
+    ViewData["Title"] = "Second-hand";
+}
+
+<h1>Second-hand items</h1>
+
+<div class="mb-3">
+    <a asp-page="/Products/Index" class="btn btn-outline-secondary">Back to products</a>
+</div>
+
+@if (Model.Products.Count == 0)
+{
+    <p class="text-muted">No second-hand items are currently listed.</p>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Type</th>
+                <th>Product</th>
+                <th>Identifier</th>
+                <th>Color</th>
+                <th>Status</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var product in Model.Products)
+            {
+                <tr>
+                    <td>@product.Type</td>
+                    <td>@product.Name</td>
+                    <td>@product.Identifier</td>
+                    <td>@(product.Color ?? "—")</td>
+                    <td>
+                        <span class="badge @(product.IsSold ? "text-bg-secondary" : "text-bg-success")">@(product.IsSold ? "Sold" : "Available")</span>
+                        <span class="badge text-bg-warning ms-1">Second-hand</span>
+                    </td>
+                    <td><a asp-page="/Products/Details" asp-route-id="@product.EntityId" asp-route-type="@product.Type.ToLowerInvariant().Replace(" ", "")">Details</a></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

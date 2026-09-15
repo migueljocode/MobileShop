@@ -16,5 +16,5 @@ else
 {
     <table class="table table-striped"><thead><tr><th>Date</th><th>Direction</th><th>Product</th><th>Price</th><th>Seller</th><th>Customer</th></tr></thead>
     <tbody>@foreach (var transaction in Model.Transactions)
-    { <tr><td>@transaction.Date.ToString("yyyy-MM-dd HH:mm")</td><td>@transaction.Direction</td><td>@transaction.ProductLabel</td><td>@transaction.FinishedPrice.ToString("N0")</td><td>@transaction.SellerLabel</td><td>@transaction.CustomerLabel</td></tr> }</tbody></table>
+    { <tr><td>@transaction.Date.ToString("yyyy-MM-dd HH:mm")</td><td>@transaction.Direction</td><td>@transaction.ProductLabel</td><td>@transaction.FinishedPrice.ToString("N0")</td><td>@transaction.SellerLabel</td><td>@transaction.CustomerLabel</td><td><a asp-page="/Transactions/Details" asp-route-id="@transaction.Id">Details</a></td></tr> }</tbody></table>
 }

@@ -23,14 +23,26 @@
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-page="/Index">Dashboard</a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-page="/Products/Index">Products</a>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle text-dark" href="#" id="productsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">Products</a>
+                            <ul class="dropdown-menu" aria-labelledby="productsDropdown">
+                                <li><a class="dropdown-item" asp-page="/Products/Index">All</a></li>
+                                <li><a class="dropdown-item" asp-page="/Products/SecondHand">Second-hand</a></li>
+                                <li><a class="dropdown-item" asp-page="/Products/CreatePhone">Create phone</a></li>
+                                <li><a class="dropdown-item" asp-page="/Products/CreateAppleId">Create Apple ID</a></li>
+                            </ul>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-page="/Transactions/Index">Transactions</a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-page="/People/Customers">People</a>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle text-dark" href="#" id="peopleDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">People</a>
+                            <ul class="dropdown-menu" aria-labelledby="peopleDropdown">
+                                <li><a class="dropdown-item" asp-page="/People/Customers">Customers</a></li>
+                                <li><a class="dropdown-item" asp-page="/People/Sellers">Sellers</a></li>
+                                <li><a class="dropdown-item" asp-page="/People/CreateCustomer">Add customer</a></li>
+                                <li><a class="dropdown-item" asp-page="/People/CreateSeller">Add seller</a></li>
+                            </ul>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-page="/Reports/ProfitLoss">Reports</a>

@@ -4,7 +4,7 @@ public static class SecondHandExtensions
 {
     // display helper - converts the raw day count on demand, using 365/30-day approximations
     // since there's no start date on record to do real calendar arithmetic against
-    public static (int Years, int Months, int Days) GetUsedDurationBreakdown(this Entities.SecondHand secondHand)
+    public static (int Years, int Months, int Days) GetUsedDurationBreakdown(this SecondHand secondHand)
     {
         var totalDays = secondHand.UsedDurationDays ?? 0;
         var years = totalDays / 365;

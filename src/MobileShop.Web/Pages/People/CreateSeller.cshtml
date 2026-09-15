@@ -1,0 +1,55 @@
+@page
+@model MobileShop.Web.Pages.People.CreateSellerModel
+@{
+    ViewData["Title"] = "Create seller";
+}
+
+<h1>Create seller</h1>
+
+<form method="post" class="row g-3 col-lg-6">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+    <div class="col-md-6">
+        <label asp-for="Input.FirstName" class="form-label"></label>
+        <input asp-for="Input.FirstName" class="form-control" />
+        <span asp-validation-for="Input.FirstName" class="text-danger"></span>
+    </div>
+
+    <div class="col-md-6">
+        <label asp-for="Input.LastName" class="form-label"></label>
+        <input asp-for="Input.LastName" class="form-control" />
+        <span asp-validation-for="Input.LastName" class="text-danger"></span>
+    </div>
+
+    <div class="col-md-6">
+        <label asp-for="Input.PhoneNumber" class="form-label"></label>
+        <input asp-for="Input.PhoneNumber" class="form-control" />
+        <span asp-validation-for="Input.PhoneNumber" class="text-danger"></span>
+    </div>
+
+    <div class="col-md-6">
+        <label asp-for="Input.EntityType" class="form-label"></label>
+        <select asp-for="Input.EntityType" asp-items="Html.GetEnumSelectList<SellerEntityType>()" class="form-select"></select>
+        <span asp-validation-for="Input.EntityType" class="text-danger"></span>
+    </div>
+
+    <div class="col-12">
+        <label asp-for="Input.Notes" class="form-label"></label>
+        <textarea asp-for="Input.Notes" class="form-control" rows="3"></textarea>
+        <span asp-validation-for="Input.Notes" class="text-danger"></span>
+    </div>
+
+    <div class="col-12">
+        <button class="btn btn-primary" type="submit">Save seller</button>
+        <a asp-page="/People/Sellers" class="btn btn-outline-secondary ms-2">Back to sellers</a>
+    </div>
+</form>
+
+@if (!string.IsNullOrWhiteSpace(Model.Message))
+{
+    <div class="alert alert-danger mt-3">@Model.Message</div>
+}
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

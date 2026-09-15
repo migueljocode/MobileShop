@@ -10,61 +10,55 @@ public static class SampleDataInitializer
 
     internal static void ClearData(AppDbContext context)
     {
-        // IgnoreQueryFilters() matters here - without it, the soft-delete filter would leave
-        // already-deleted rows behind, and this is meant to wipe everything for a clean reseed.
-        // Deepest-dependency-first, mirroring the FK graph.
-        context.IPhones.IgnoreQueryFilters().ExecuteDelete();
-        context.Guarantees.IgnoreQueryFilters().ExecuteDelete();
-        context.SecondHands.IgnoreQueryFilters().ExecuteDelete();
-        context.AppleIds.IgnoreQueryFilters().ExecuteDelete();
-        context.Phones.IgnoreQueryFilters().ExecuteDelete();
-        context.Transactions.IgnoreQueryFilters().ExecuteDelete();
-        context.Products.IgnoreQueryFilters().ExecuteDelete();
-        context.Users.IgnoreQueryFilters().ExecuteDelete();
-        context.Customers.IgnoreQueryFilters().ExecuteDelete();
-        context.Sellers.IgnoreQueryFilters().ExecuteDelete();
-        context.People.IgnoreQueryFilters().ExecuteDelete();
+        // FK-safe order (dependents first). IgnoreQueryFilters so soft-deleted rows go too.
+        ClearSet<IPhone>(context);
+        ClearSet<Guarantee>(context);
+        ClearSet<SecondHand>(context);
+        ClearSet<AppleId>(context);
+        ClearSet<Phone>(context);
+        ClearSet<Transaction>(context);
+        ClearSet<Product>(context);
+        ClearSet<User>(context);
+        ClearSet<Customer>(context);
+        ClearSet<Seller>(context);
+        ClearSet<Person>(context);
 
-        // SQLite tracks its own autoincrement counters in sqlite_sequence - reset them so re-seeded IDs start clean
         context.Database.ExecuteSqlRaw("DELETE FROM sqlite_sequence");
+        
+        static void ClearSet<TEntity>(AppDbContext context) where TEntity : class
+            => context.Set<TEntity>().IgnoreQueryFilters().ExecuteDelete();
     }
+
 
     internal static void SeedData(AppDbContext context)
     {
-        try
-        {
-            ProcessInsert(context, context.People, SampleData.People);
-            ProcessInsert(context, context.Sellers, SampleData.Sellers);
-            ProcessInsert(context, context.Customers, SampleData.Customers);
-            ProcessInsert(context, context.Users, SampleData.Users);
-            ProcessInsert(context, context.Products, SampleData.Products);
-            ProcessInsert(context, context.Transactions, SampleData.Transactions);
-            ProcessInsert(context, context.AppleIds, SampleData.AppleIds);
-            ProcessInsert(context, context.Phones, SampleData.Phones);
-            ProcessInsert(context, context.SecondHands, SampleData.SecondHands);
-            ProcessInsert(context, context.Guarantees, SampleData.Guarantees);
-            ProcessInsert(context, context.IPhones, SampleData.IPhones);
-        }
-        catch (Exception ex)
-        {
-            // i think exception should be thrown to catch by serilog in upper layer.
-            Console.WriteLine(ex);
-            throw;
-        }
+        var data = SampleDataLoader.Load();
 
-        // SQLite lets you insert explicit values into an integer primary key directly - unlike SQL
-        // Server, there's no IDENTITY_INSERT ceremony needed to seed rows with fixed, known Ids
-        static void ProcessInsert<TEntity>(AppDbContext context, DbSet<TEntity> table, List<TEntity> records) where TEntity : BaseEntity
+        ProcessInsert(context, context.People, data.People);
+        ProcessInsert(context, context.Sellers, data.Sellers);
+        ProcessInsert(context, context.Customers, data.Customers);
+        ProcessInsert(context, context.Users, data.Users);
+        ProcessInsert(context, context.Products, data.Products);
+        ProcessInsert(context, context.Transactions, data.Transactions);
+        ProcessInsert(context, context.AppleIds, data.AppleIds);
+        ProcessInsert(context, context.Phones, data.Phones);
+        ProcessInsert(context, context.SecondHands, data.SecondHands);
+        ProcessInsert(context, context.Guarantees, data.Guarantees);
+        ProcessInsert(context, context.IPhones, data.IPhones);
+        
+        static void ProcessInsert<TEntity>(
+            AppDbContext context,
+            DbSet<TEntity> table,
+            IReadOnlyList<TEntity> records) where TEntity : BaseEntity
         {
             if (table.Any())
-            {
                 return;
-            }
 
             table.AddRange(records);
             context.SaveChanges();
         }
     }
+
 
     public static void InitializeData(AppDbContext context)
     {

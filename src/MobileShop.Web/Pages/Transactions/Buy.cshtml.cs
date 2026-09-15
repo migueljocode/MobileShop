@@ -1,16 +1,21 @@
 namespace MobileShop.Web.Pages.Transactions;
 
-public class BuyModel(ITransactionDataService transactionDataService, ISellerDataService sellerDataService) : PageModel
+public class BuyModel(
+    ITransactionDataService transactionDataService,
+    ISellerDataService sellerDataService,
+    IPhoneDataService phoneDataService,
+    IAppleIdDataService appleIdDataService) : PageModel
 {
-    [BindProperty] public InputModel Input { get; set; } = new();
-    public IReadOnlyList<Seller> Sellers { get; private set; } = [];
+    [BindProperty] public BuyInputModel Input { get; set; } = new();
+    public IReadOnlyList<PartyOptionViewModel> Sellers { get; private set; } = [];
+    public IReadOnlyList<ProductListItemViewModel> Products { get; private set; } = [];
     public string? Message { get; private set; }
 
-    public void OnGet() => LoadSellers();
+    public void OnGet() => LoadSelections();
 
     public IActionResult OnPost()
     {
-        LoadSellers();
+        LoadSelections();
         if (!ModelState.IsValid) return Page();
         if (!transactionDataService.RecordBuy(Input.ProductId, Input.SellerId, Input.Price, Input.Date))
         {
@@ -23,13 +28,13 @@ public class BuyModel(ITransactionDataService transactionDataService, ISellerDat
         return Page();
     }
 
-    private void LoadSellers() => Sellers = sellerDataService.GetAll().ToList();
-
-    public class InputModel
+    private void LoadSelections()
     {
-        [Range(1, int.MaxValue)] public int ProductId { get; set; }
-        [Range(1, int.MaxValue)] public int SellerId { get; set; }
-        [Range(0, double.MaxValue)] public decimal Price { get; set; }
-        [DataType(DataType.DateTime)] public DateTime? Date { get; set; }
+        Sellers = sellerDataService.GetPartyOptions();
+        Products = phoneDataService.GetSelectableProducts(TransactionDirection.Buy)
+            .Concat(appleIdDataService.GetSelectableProducts(TransactionDirection.Buy))
+            .OrderBy(product => product.Name)
+            .ToList();
     }
+
 }

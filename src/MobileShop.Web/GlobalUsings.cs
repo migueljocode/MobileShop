@@ -1,10 +1,6 @@
-global using Microsoft.AspNetCore.Authentication;
-global using Microsoft.AspNetCore.Authentication.Cookies;
-global using Microsoft.AspNetCore.Authorization;
 global using Microsoft.AspNetCore.Mvc;
 global using Microsoft.AspNetCore.Mvc.RazorPages;
 global using Microsoft.EntityFrameworkCore;
-global using System.Security.Claims;
 global using MobileShop.Dal.EfStructures;
 global using MobileShop.Dal.Initialization;
 global using MobileShop.Models.Enums;
@@ -16,3 +12,6 @@ global using MobileShop.Services.DataServices.Interfaces;
 global using MobileShop.Services.Logging.Configuration;
 global using MobileShop.Services.Security;
 global using MobileShop.Web;
+global using MobileShop.Web.Extensions;
+global using System.Diagnostics;
+global using static Microsoft.AspNetCore.Builder.WebApplication;
