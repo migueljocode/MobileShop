@@ -4,7 +4,7 @@ public static class LoggingsConfiguration
 {
     // Console: Colored [LogLevel] first, followed by time, aligned source, and message
     private const string ConsoleOutputTemplate = 
-        "[{Level:u3}] {Timestamp:HH:mm:ss} {SourceContext,-35} | {Message:lj}{NewLine}{Exception}";
+        "[ {Level:u3} ] {Timestamp:HH:mm:ss} {SourceContext,-35} | {Message:lj}{NewLine}{Exception}";
 
     // File: Tab-delimited single-line format optimized for Linux tools (grep, cut, awk)
     private const string FileOutputTemplate = 
