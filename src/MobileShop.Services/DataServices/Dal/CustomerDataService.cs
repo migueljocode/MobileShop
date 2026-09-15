@@ -7,6 +7,7 @@ public class CustomerDataService(
 {
     private readonly ICustomerRepo _customerRepo = customerRepo;
 
+    /// <inheritdoc />
     public IReadOnlyList<PartyOptionViewModel> GetPartyOptions()
         => _customerRepo
             .SelectAll(customer => new PartyOptionViewModel(
@@ -18,6 +19,7 @@ public class CustomerDataService(
 
     // ── Purchased products ────────────────────────────────
 
+    /// <inheritdoc />
     public IEnumerable<Product> PurchasedProducts(int customerId)
         => _customerRepo
             .FindAll(customer => customer.Id == customerId)
@@ -27,6 +29,7 @@ public class CustomerDataService(
             .Distinct()
             .ToList();
 
+    /// <inheritdoc />
     public async Task<IEnumerable<Product>> PurchasedProductsAsync(int customerId)
         => (await _customerRepo.FindAllAsync(customer => customer.Id == customerId))
             .SelectMany(customer => customer.Transactions)

@@ -7,6 +7,7 @@ public class SellerDataService(
 {
     private readonly ISellerRepo _sellerRepo = sellerRepo;
 
+    /// <inheritdoc />
     public IReadOnlyList<PartyOptionViewModel> GetPartyOptions()
         => _sellerRepo
             .SelectAll(seller => new PartyOptionViewModel(
@@ -18,6 +19,7 @@ public class SellerDataService(
 
     // ── Sold products (both directions) ───────────────────
 
+    /// <inheritdoc />
     public IEnumerable<Product> SoldProducts(int sellerId)
         => _sellerRepo
             .FindAll(seller => seller.Id == sellerId)
@@ -26,6 +28,7 @@ public class SellerDataService(
             .Distinct()
             .ToList();
 
+    /// <inheritdoc />
     public async Task<IEnumerable<Product>> SoldProductsAsync(int sellerId)
         => (await _sellerRepo.FindAllAsync(seller => seller.Id == sellerId))
             .SelectMany(seller => seller.Transactions)
@@ -35,6 +38,7 @@ public class SellerDataService(
 
     // ── Supplied to shop (Buy-direction only) ─────────────
 
+    /// <inheritdoc />
     public IEnumerable<Product> SoldToShop(int sellerId)
         => _sellerRepo
             .FindAll(seller => seller.Id == sellerId)
@@ -44,6 +48,7 @@ public class SellerDataService(
             .Distinct()
             .ToList();
 
+    /// <inheritdoc />
     public async Task<IEnumerable<Product>> SoldToShopAsync(int sellerId)
         => (await _sellerRepo.FindAllAsync(seller => seller.Id == sellerId))
             .SelectMany(seller => seller.Transactions)

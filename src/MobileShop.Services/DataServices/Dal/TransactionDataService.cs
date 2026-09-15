@@ -15,20 +15,25 @@ public class TransactionDataService(
 
     // ── By product ────────────────────────────────────────
 
+    /// <inheritdoc />
     public IEnumerable<Transaction> GetByProduct(int productId)
         => _transactionRepo.GetByProduct(productId);
 
+    /// <inheritdoc />
     public IEnumerable<Transaction> GetByProduct(Product product)
         => GetByProduct(product.Id);
 
+    /// <inheritdoc />
     public Task<IEnumerable<Transaction>> GetByProductAsync(int productId)
         => _transactionRepo.GetByProductAsync(productId);
 
+    /// <inheritdoc />
     public Task<IEnumerable<Transaction>> GetByProductAsync(Product product)
         => GetByProductAsync(product.Id);
 
     // ── Recent ────────────────────────────────────────────
 
+    /// <inheritdoc />
     public IEnumerable<Transaction> GetRecent(int count = 20)
         => _transactionRepo
             .FindAll()
@@ -36,12 +41,14 @@ public class TransactionDataService(
             .Take(count)
             .ToList();
 
+    /// <inheritdoc />
     public async Task<IEnumerable<Transaction>> GetRecentAsync(int count = 20)
         => (await _transactionRepo.FindAllAsync())
             .OrderByDescending(t => t.Date)
             .Take(count)
             .ToList();
 
+    /// <inheritdoc />
     public IReadOnlyList<TransactionCardViewModel> GetRecentCards(int count = 20)
         => _transactionRepo
             .SelectAll(transaction => new TransactionCardViewModel(
@@ -60,6 +67,7 @@ public class TransactionDataService(
             .Take(count)
             .ToList();
 
+    /// <inheritdoc />
     public IReadOnlyList<TransactionListItemViewModel> GetList(
         string? direction,
         int take,
@@ -92,6 +100,7 @@ public class TransactionDataService(
             .ToList();
     }
 
+    /// <inheritdoc />
     public IReadOnlyList<ProfitLossRowViewModel> GetProfitLossRows(DateTime? from, DateTime? to)
     {
         var transactions = _transactionRepo.FindAll()
@@ -113,9 +122,11 @@ public class TransactionDataService(
             .ToList();
     }
 
+    /// <inheritdoc />
     public decimal GetProfitLossTotal(DateTime? from, DateTime? to)
         => GetProfitLossRows(from, to).Sum(row => row.Profit);
 
+    /// <inheritdoc />
     public IReadOnlyList<ProductTransactionViewModel> GetProductTransactions(int productId)
         => _transactionRepo
             .SelectAll(
@@ -133,6 +144,7 @@ public class TransactionDataService(
             .OrderByDescending(item => item.Date)
             .ToList();
 
+    /// <inheritdoc />
     public TransactionDetailsViewModel? GetDetails(int id)
         => _transactionRepo.Select(
             id,
@@ -150,6 +162,7 @@ public class TransactionDataService(
 
     // ── Products bought / sold by the shop ────────────────
 
+    /// <inheritdoc />
     public IEnumerable<Product> GetProductsBoughtByShop(
         Expression<Func<Product, bool>>? predicate = null)
     {
@@ -166,6 +179,7 @@ public class TransactionDataService(
         return products.ToList();
     }
 
+    /// <inheritdoc />
     public IEnumerable<Product> GetProductsSoldByShop(
         Expression<Func<Product, bool>>? predicate = null)
     {
@@ -182,6 +196,7 @@ public class TransactionDataService(
         return products.ToList();
     }
 
+    /// <inheritdoc />
     public async Task<IEnumerable<Product>> GetProductsBoughtByShopAsync(
         Expression<Func<Product, bool>>? predicate = null)
     {
@@ -198,6 +213,7 @@ public class TransactionDataService(
         return products.ToList();
     }
 
+    /// <inheritdoc />
     public async Task<IEnumerable<Product>> GetProductsSoldByShopAsync(
         Expression<Func<Product, bool>>? predicate = null)
     {
@@ -216,6 +232,7 @@ public class TransactionDataService(
 
     // ── Record buy / sell ─────────────────────────────────
 
+    /// <inheritdoc />
     public bool RecordBuy(
         int productId,
         int sellerId,
@@ -260,6 +277,7 @@ public class TransactionDataService(
         return ok;
     }
 
+    /// <inheritdoc />
     public bool RecordSell(
         int productId,
         int customerId,
@@ -303,6 +321,7 @@ public class TransactionDataService(
         return ok;
     }
 
+    /// <inheritdoc />
     public Task<bool> RecordBuyAsync(
         int productId,
         int sellerId,
@@ -313,6 +332,7 @@ public class TransactionDataService(
         return Task.FromResult(RecordBuy(productId, sellerId, finishedPrice, date));
     }
 
+    /// <inheritdoc />
     public Task<bool> RecordSellAsync(
         int productId,
         int customerId,
