@@ -7,6 +7,16 @@ public class SellerDataService(
 {
     private readonly ISellerRepo _sellerRepo = sellerRepo;
 
+    public IReadOnlyList<PartyOptionViewModel> GetPartyOptions()
+        => GetAll()
+            .OrderBy(seller => seller.PersonNavigation.LastName)
+            .ThenBy(seller => seller.PersonNavigation.FirstName)
+            .Select(seller => new PartyOptionViewModel(
+                seller.Id,
+                $"{seller.PersonNavigation.FirstName} {seller.PersonNavigation.LastName}",
+                seller.EntityType.ToString()))
+            .ToList();
+
     // ── Sold products (both directions) ───────────────────
 
     public IEnumerable<Product> SoldProducts(int sellerId)

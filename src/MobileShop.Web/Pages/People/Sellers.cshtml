@@ -2,6 +2,9 @@
 @model MobileShop.Web.Pages.People.SellersModel
 @{ ViewData["Title"] = "Sellers"; }
 <h1>Sellers</h1>
+<div class="mb-3">
+    <a asp-page="/People/CreateSeller" class="btn btn-success">Add seller</a>
+</div>
 <table class="table table-striped"><thead><tr><th>Name</th><th>Phone</th><th>Type</th><th></th></tr></thead><tbody>
 @foreach (var seller in Model.Sellers)
 { <tr><td>@seller.PersonNavigation.FirstName @seller.PersonNavigation.LastName</td><td>@seller.PersonNavigation.PhoneNumber</td><td>@seller.EntityType</td><td><a asp-page="/People/SellerDetails" asp-route-id="@seller.Id">Details</a></td></tr> }

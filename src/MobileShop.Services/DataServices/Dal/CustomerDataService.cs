@@ -7,6 +7,16 @@ public class CustomerDataService(
 {
     private readonly ICustomerRepo _customerRepo = customerRepo;
 
+    public IReadOnlyList<PartyOptionViewModel> GetPartyOptions()
+        => GetAll()
+            .OrderBy(customer => customer.PersonNavigation.LastName)
+            .ThenBy(customer => customer.PersonNavigation.FirstName)
+            .Select(customer => new PartyOptionViewModel(
+                customer.Id,
+                $"{customer.PersonNavigation.FirstName} {customer.PersonNavigation.LastName}",
+                customer.PersonNavigation.PhoneNumber))
+            .ToList();
+
     // ── Purchased products ────────────────────────────────
 
     public IEnumerable<Product> PurchasedProducts(int customerId)

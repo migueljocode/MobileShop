@@ -7,15 +7,15 @@ public class SellModel(
     IAppleIdDataService appleIdDataService) : PageModel
 {
     [BindProperty] public InputModel Input { get; set; } = new();
-    public IReadOnlyList<Customer> Customers { get; private set; } = [];
+    public IReadOnlyList<PartyOptionViewModel> Customers { get; private set; } = [];
     public IReadOnlyList<ProductListItemViewModel> Products { get; private set; } = [];
     public string? Message { get; private set; }
 
-    public void OnGet() => LoadCustomers();
+    public void OnGet() => LoadSelections();
 
     public IActionResult OnPost()
     {
-        LoadCustomers();
+        LoadSelections();
         if (!ModelState.IsValid) return Page();
         if (!transactionDataService.RecordSell(Input.ProductId, Input.CustomerId, Input.Price, Input.Date))
         {
@@ -28,9 +28,9 @@ public class SellModel(
         return Page();
     }
 
-    private void LoadCustomers()
+    private void LoadSelections()
     {
-        Customers = customerDataService.GetAll().ToList();
+        Customers = customerDataService.GetPartyOptions();
         Products = phoneDataService.GetSelectableProducts(TransactionDirection.Sell)
             .Concat(appleIdDataService.GetSelectableProducts(TransactionDirection.Sell))
             .OrderBy(product => product.Name)

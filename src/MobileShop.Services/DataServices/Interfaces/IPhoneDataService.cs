@@ -4,6 +4,8 @@ public interface IPhoneDataService : IDataService<Phone>
 {
     IReadOnlyList<ProductListItemViewModel> GetInventoryRows();
     IReadOnlyList<ProductListItemViewModel> GetSelectableProducts(TransactionDirection direction);
+    IReadOnlyList<ProductListItemViewModel> GetSecondHandRows();
+    IReadOnlyList<ProductListItemViewModel> GetAvailableSecondHandRows();
     ProductDetailsViewModel? GetDetails(int id);
 
     bool ImeiExists(string imei1);

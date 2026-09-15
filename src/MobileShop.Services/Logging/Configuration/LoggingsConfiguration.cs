@@ -14,14 +14,14 @@ public static class LoggingsConfiguration
     {
         builder.Logging.ClearProviders();
         var config = builder.Configuration;
-        // Serilog:MinimumLevel:Default sets the global floor; Console and File can be tuned separately.
-        // Example: "Serilog": { "MinimumLevel": { "Default": "Debug", "Console": "Information", "File": "Debug" } }
-        var defaultLevel = ParseLevel(config["Serilog:MinimumLevel:Default"] ?? config["Logging:LogLevel:Default"]);
-        var consoleLevel = ParseLevel(config["Serilog:MinimumLevel:Console"] ?? config["Logging:LogLevel:Default"]);
-        var fileLevel = ParseLevel(config["Serilog:MinimumLevel:File"] ?? config["Logging:LogLevel:Default"]);
+        // Serilog config keys: Serilog:MinimumLevel:Default, Serilog:MinimumLevel:Console, Serilog:MinimumLevel:File.
+        var defaultLevel = ParseLevel(config["Serilog:MinimumLevel:Default"] ?? "Debug");
+        var consoleLevel = ParseLevel(config["Serilog:MinimumLevel:Console"] ?? "Information");
+        var fileLevel = ParseLevel(config["Serilog:MinimumLevel:File"] ?? "Debug");
 
         var logger = new LoggerConfiguration()
             .MinimumLevel.Is(defaultLevel)
+            .MinimumLevel.Override("Microsoft.AspNetCore", Serilog.Events.LogEventLevel.Warning)
             .Enrich.FromLogContext()
             .WriteTo.Console(
                 outputTemplate: ConsoleOutputTemplate,

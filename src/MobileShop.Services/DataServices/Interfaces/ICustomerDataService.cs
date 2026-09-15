@@ -2,6 +2,8 @@
 
 public interface ICustomerDataService : IDataService<Customer>
 {
+    IReadOnlyList<PartyOptionViewModel> GetPartyOptions();
+
     // TODO: eager-load Product details when history page needs them
     IEnumerable<Product> PurchasedProducts(int customerId);
     IEnumerable<Product> PurchasedProducts(int customerId, Expression<Func<Product, bool>> predicate);

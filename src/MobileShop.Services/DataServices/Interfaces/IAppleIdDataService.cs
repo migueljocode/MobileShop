@@ -4,6 +4,8 @@ public interface IAppleIdDataService : IDataService<AppleId>
 {
     IReadOnlyList<ProductListItemViewModel> GetInventoryRows();
     IReadOnlyList<ProductListItemViewModel> GetSelectableProducts(TransactionDirection direction);
+    IReadOnlyList<ProductListItemViewModel> GetSecondHandRows();
+    IReadOnlyList<ProductListItemViewModel> GetAvailableSecondHandRows();
     ProductDetailsViewModel? GetDetails(int id);
 
     AppleId? FindByEmail(string email);

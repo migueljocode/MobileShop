@@ -20,6 +20,21 @@ public class PhoneDataService(
             .Select(ToInventoryRow)
             .ToList();
 
+    public IReadOnlyList<ProductListItemViewModel> GetSecondHandRows()
+        => GetAll()
+            .Where(phone => phone.ProductNavigation.SecondHandProfile is not null)
+            .OrderBy(phone => phone.ProductId)
+            .Select(ToInventoryRow)
+            .ToList();
+
+    public IReadOnlyList<ProductListItemViewModel> GetAvailableSecondHandRows()
+        => GetAll()
+            .Where(phone => phone.ProductNavigation.SecondHandProfile is not null &&
+                           !phone.ProductNavigation.Transactions.Any(transaction => transaction.Direction == TransactionDirection.Sell))
+            .OrderBy(phone => phone.ProductId)
+            .Select(ToInventoryRow)
+            .ToList();
+
     private static ProductListItemViewModel ToInventoryRow(Phone phone)
         => new(
             phone.Id,

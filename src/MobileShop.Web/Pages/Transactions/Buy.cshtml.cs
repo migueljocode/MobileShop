@@ -7,15 +7,15 @@ public class BuyModel(
     IAppleIdDataService appleIdDataService) : PageModel
 {
     [BindProperty] public InputModel Input { get; set; } = new();
-    public IReadOnlyList<Seller> Sellers { get; private set; } = [];
+    public IReadOnlyList<PartyOptionViewModel> Sellers { get; private set; } = [];
     public IReadOnlyList<ProductListItemViewModel> Products { get; private set; } = [];
     public string? Message { get; private set; }
 
-    public void OnGet() => LoadSellers();
+    public void OnGet() => LoadSelections();
 
     public IActionResult OnPost()
     {
-        LoadSellers();
+        LoadSelections();
         if (!ModelState.IsValid) return Page();
         if (!transactionDataService.RecordBuy(Input.ProductId, Input.SellerId, Input.Price, Input.Date))
         {
@@ -28,9 +28,9 @@ public class BuyModel(
         return Page();
     }
 
-    private void LoadSellers()
+    private void LoadSelections()
     {
-        Sellers = sellerDataService.GetAll().ToList();
+        Sellers = sellerDataService.GetPartyOptions();
         Products = phoneDataService.GetSelectableProducts(TransactionDirection.Buy)
             .Concat(appleIdDataService.GetSelectableProducts(TransactionDirection.Buy))
             .OrderBy(product => product.Name)

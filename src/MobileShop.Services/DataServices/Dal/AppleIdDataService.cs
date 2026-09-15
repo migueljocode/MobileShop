@@ -20,6 +20,21 @@ public class AppleIdDataService(
             .Select(ToInventoryRow)
             .ToList();
 
+    public IReadOnlyList<ProductListItemViewModel> GetSecondHandRows()
+        => GetAll()
+            .Where(appleId => appleId.ProductNavigation.SecondHandProfile is not null)
+            .OrderBy(appleId => appleId.ProductId)
+            .Select(ToInventoryRow)
+            .ToList();
+
+    public IReadOnlyList<ProductListItemViewModel> GetAvailableSecondHandRows()
+        => GetAll()
+            .Where(appleId => appleId.ProductNavigation.SecondHandProfile is not null &&
+                             !appleId.ProductNavigation.Transactions.Any(transaction => transaction.Direction == TransactionDirection.Sell))
+            .OrderBy(appleId => appleId.ProductId)
+            .Select(ToInventoryRow)
+            .ToList();
+
     private static ProductListItemViewModel ToInventoryRow(AppleId appleId)
         => new(
             appleId.Id,

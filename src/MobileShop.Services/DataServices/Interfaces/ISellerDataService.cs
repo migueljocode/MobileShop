@@ -2,6 +2,8 @@
 
 public interface ISellerDataService : IDataService<Seller>
 {
+    IReadOnlyList<PartyOptionViewModel> GetPartyOptions();
+
     // both directions - what this seller supplied to the shop AND what it sold on (shop's own sentinel Seller)
     IEnumerable<Product> SoldProducts(int sellerId);
     IEnumerable<Product> SoldProducts(int sellerId, Expression<Func<Product, bool>> predicate);
