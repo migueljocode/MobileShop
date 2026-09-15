@@ -1,3 +1,4 @@
+
 namespace MobileShop.Services.DataServices.Interfaces;
 
 /// <summary>
