@@ -14,27 +14,33 @@ public static class LoggingsConfiguration
     {
         builder.Logging.ClearProviders();
         var config = builder.Configuration;
-        // Logging:LogLevel:Default controls Serilog's minimum level; Information is the safe fallback.
-        var configuredLevel = config["Logging:LogLevel:Default"];
-        var minimumLevel = Enum.TryParse<Serilog.Events.LogEventLevel>(
-            configuredLevel,
-            ignoreCase: true,
-            out var parsedLevel)
-            ? parsedLevel
-            : Serilog.Events.LogEventLevel.Information;
+        // Serilog:MinimumLevel:Default sets the global floor; Console and File can be tuned separately.
+        // Example: "Serilog": { "MinimumLevel": { "Default": "Debug", "Console": "Information", "File": "Debug" } }
+        var defaultLevel = ParseLevel(config["Serilog:MinimumLevel:Default"] ?? config["Logging:LogLevel:Default"]);
+        var consoleLevel = ParseLevel(config["Serilog:MinimumLevel:Console"] ?? config["Logging:LogLevel:Default"]);
+        var fileLevel = ParseLevel(config["Serilog:MinimumLevel:File"] ?? config["Logging:LogLevel:Default"]);
 
         var logger = new LoggerConfiguration()
-        .MinimumLevel.Is(minimumLevel)
-        .Enrich.FromLogContext()
-        .WriteTo.Console(
-            outputTemplate: ConsoleOutputTemplate, 
-            theme: AnsiConsoleTheme.Literate)
-        .WriteTo.File(
-            path: "logs/app-.log", // this can be change according to json config later
-            rollingInterval: RollingInterval.Day,
-            outputTemplate: FileOutputTemplate)
-        .CreateLogger();
-        
+            .MinimumLevel.Is(defaultLevel)
+            .Enrich.FromLogContext()
+            .WriteTo.Console(
+                outputTemplate: ConsoleOutputTemplate,
+                restrictedToMinimumLevel: consoleLevel,
+                theme: AnsiConsoleTheme.Literate)
+            .WriteTo.File(
+                path: "logs/app-.log",
+                rollingInterval: RollingInterval.Day,
+                restrictedToMinimumLevel: fileLevel,
+                outputTemplate: FileOutputTemplate)
+            .CreateLogger();
+
         builder.Logging.AddSerilog(logger);
+    }
+
+    private static Serilog.Events.LogEventLevel ParseLevel(string? configuredLevel)
+    {
+        return Enum.TryParse<Serilog.Events.LogEventLevel>(configuredLevel, ignoreCase: true, out var parsedLevel)
+            ? parsedLevel
+            : Serilog.Events.LogEventLevel.Information;
     }
 }

@@ -14,7 +14,7 @@ var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
 {
-    DatabaseInitializer.InitializeForDevelopment(app);
+    DatabaseInitializer.InitializeForDevelopment(app.Services);
 }
 else
 {
