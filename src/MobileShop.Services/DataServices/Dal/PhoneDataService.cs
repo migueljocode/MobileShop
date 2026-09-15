@@ -138,13 +138,6 @@ public class PhoneDataService(
                 .Select(transaction => transaction.CustomerNavigation)
                 .FirstOrDefault());
 
-    public Customer? GetOwner(Expression<Func<Phone, bool>> predicate)
-        => _phoneRepo.Select(predicate, phone => phone.ProductNavigation.Transactions
-            .Where(transaction => transaction.Direction == TransactionDirection.Sell)
-            .OrderByDescending(transaction => transaction.Date)
-            .Select(transaction => transaction.CustomerNavigation)
-            .FirstOrDefault());
-
     public Task<Customer?> GetOwnerAsync(int id)
         => _phoneRepo.SelectAsync(
             phone => phone.Id == id,
@@ -154,40 +147,21 @@ public class PhoneDataService(
                 .Select(transaction => transaction.CustomerNavigation)
                 .FirstOrDefault());
 
-    public async Task<Customer?> GetOwnerAsync(Expression<Func<Phone, bool>> predicate)
-        => await _phoneRepo.SelectAsync(predicate, phone => phone.ProductNavigation.Transactions
-            .Where(transaction => transaction.Direction == TransactionDirection.Sell)
-            .OrderByDescending(transaction => transaction.Date)
-            .Select(transaction => transaction.CustomerNavigation)
-            .FirstOrDefault());
-
     // ── Guarantee ─────────────────────────────────────────
 
     public Guarantee? GetGuarantee(int id)
         => _phoneRepo.Select(phone => phone.Id == id, phone => phone.ProductNavigation.GuaranteeProfile);
 
-    public Guarantee? GetGuarantee(Expression<Func<Phone, bool>> predicate)
-        => _phoneRepo.Select(predicate, phone => phone.ProductNavigation.GuaranteeProfile);
-
     public Task<Guarantee?> GetGuaranteeAsync(int id)
         => _phoneRepo.SelectAsync(phone => phone.Id == id, phone => phone.ProductNavigation.GuaranteeProfile);
-
-    public async Task<Guarantee?> GetGuaranteeAsync(Expression<Func<Phone, bool>> predicate)
-        => await _phoneRepo.SelectAsync(predicate, phone => phone.ProductNavigation.GuaranteeProfile);
 
     // ── Second-hand (null ⇒ not second-hand) ──────────────
 
     public SecondHand? GetSecondHandInfo(int id)
         => _phoneRepo.Select(phone => phone.Id == id, phone => phone.ProductNavigation.SecondHandProfile);
 
-    public SecondHand? GetSecondHandInfo(Expression<Func<Phone, bool>> predicate)
-        => _phoneRepo.Select(predicate, phone => phone.ProductNavigation.SecondHandProfile);
-
     public Task<SecondHand?> GetSecondHandInfoAsync(int id)
         => _phoneRepo.SelectAsync(phone => phone.Id == id, phone => phone.ProductNavigation.SecondHandProfile);
-
-    public async Task<SecondHand?> GetSecondHandInfoAsync(Expression<Func<Phone, bool>> predicate)
-        => await _phoneRepo.SelectAsync(predicate, phone => phone.ProductNavigation.SecondHandProfile);
 
     // ── Quantities ────────────────────────────────────────
 

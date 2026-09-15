@@ -40,12 +40,7 @@ public class CustomerDataServiceTests : RepoTestBase
         var purchased = _service.PurchasedProducts(customer.Id).ToList();
         Assert.Equal(2, purchased.Count);
 
-        var filtered = _service.PurchasedProducts(customer.Id, p => p.Manufacturer == "Apple").ToList();
-        Assert.Equal(2, filtered.Count);
-
-        var asyncFiltered = await _service.PurchasedProductsAsync(customer.Id, p => p.Model == "iPad");
-        var list = asyncFiltered.ToList();
-        Assert.Single(list);
-        Assert.Equal("iPad", list[0].Model);
+        var asyncPurchased = (await _service.PurchasedProductsAsync(customer.Id)).ToList();
+        Assert.Equal(2, asyncPurchased.Count);
     }
 }

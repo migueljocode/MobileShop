@@ -39,13 +39,13 @@ public class SellerDataServiceTests : RepoTestBase
         var soldProducts = _service.SoldProducts(seller.Id).ToList();
         Assert.Contains(soldProducts, p => p.Id == product.Id);
 
-        var soldToShop = _service.SoldToShop(seller.Id, p => p.Price >= 500m).ToList();
+        var soldToShop = _service.SoldToShop(seller.Id).ToList();
         Assert.Contains(soldToShop, p => p.Id == product.Id);
 
         var asyncSoldProducts = (await _service.SoldProductsAsync(seller.Id)).ToList();
         Assert.Contains(asyncSoldProducts, p => p.Id == product.Id);
 
-        var asyncSoldToShop = (await _service.SoldToShopAsync(seller.Id, p => p.Price >= 500m)).ToList();
+        var asyncSoldToShop = (await _service.SoldToShopAsync(seller.Id)).ToList();
         Assert.Contains(asyncSoldToShop, p => p.Id == product.Id);
     }
 }

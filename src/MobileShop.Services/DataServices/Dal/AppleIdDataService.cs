@@ -117,13 +117,6 @@ public class AppleIdDataService(
                 .Select(transaction => transaction.CustomerNavigation)
                 .FirstOrDefault());
 
-    public Customer? GetOwner(Expression<Func<AppleId, bool>> predicate)
-        => _appleIdRepo.Select(predicate, appleId => appleId.ProductNavigation.Transactions
-            .Where(transaction => transaction.Direction == TransactionDirection.Sell)
-            .OrderByDescending(transaction => transaction.Date)
-            .Select(transaction => transaction.CustomerNavigation)
-            .FirstOrDefault());
-
     public Task<Customer?> GetOwnerAsync(int id)
         => _appleIdRepo.SelectAsync(
             appleId => appleId.Id == id,
@@ -133,40 +126,21 @@ public class AppleIdDataService(
                 .Select(transaction => transaction.CustomerNavigation)
                 .FirstOrDefault());
 
-    public async Task<Customer?> GetOwnerAsync(Expression<Func<AppleId, bool>> predicate)
-        => await _appleIdRepo.SelectAsync(predicate, appleId => appleId.ProductNavigation.Transactions
-            .Where(transaction => transaction.Direction == TransactionDirection.Sell)
-            .OrderByDescending(transaction => transaction.Date)
-            .Select(transaction => transaction.CustomerNavigation)
-            .FirstOrDefault());
-
     // ── Guarantee ─────────────────────────────────────────
 
     public Guarantee? GetGuarantee(int id)
         => _appleIdRepo.Select(appleId => appleId.Id == id, appleId => appleId.ProductNavigation.GuaranteeProfile);
 
-    public Guarantee? GetGuarantee(Expression<Func<AppleId, bool>> predicate)
-        => _appleIdRepo.Select(predicate, appleId => appleId.ProductNavigation.GuaranteeProfile);
-
     public Task<Guarantee?> GetGuaranteeAsync(int id)
         => _appleIdRepo.SelectAsync(appleId => appleId.Id == id, appleId => appleId.ProductNavigation.GuaranteeProfile);
-
-    public async Task<Guarantee?> GetGuaranteeAsync(Expression<Func<AppleId, bool>> predicate)
-        => await _appleIdRepo.SelectAsync(predicate, appleId => appleId.ProductNavigation.GuaranteeProfile);
 
     // ── Second-hand (null ⇒ not second-hand) ──────────────
 
     public SecondHand? GetSecondHandInfo(int id)
         => _appleIdRepo.Select(appleId => appleId.Id == id, appleId => appleId.ProductNavigation.SecondHandProfile);
 
-    public SecondHand? GetSecondHandInfo(Expression<Func<AppleId, bool>> predicate)
-        => _appleIdRepo.Select(predicate, appleId => appleId.ProductNavigation.SecondHandProfile);
-
     public Task<SecondHand?> GetSecondHandInfoAsync(int id)
         => _appleIdRepo.SelectAsync(appleId => appleId.Id == id, appleId => appleId.ProductNavigation.SecondHandProfile);
-
-    public async Task<SecondHand?> GetSecondHandInfoAsync(Expression<Func<AppleId, bool>> predicate)
-        => await _appleIdRepo.SelectAsync(predicate, appleId => appleId.ProductNavigation.SecondHandProfile);
 
     // ── Quantities ────────────────────────────────────────
 

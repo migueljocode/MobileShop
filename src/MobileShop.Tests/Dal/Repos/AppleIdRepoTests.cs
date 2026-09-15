@@ -1,10 +1,8 @@
 namespace MobileShop.Tests.Dal.Repos;
 
-public class AppleIdRepoTests : ForSaleRepoTests<AppleId, IAppleIdRepo>
+public class AppleIdRepoTests : BaseRepoTests<AppleId, IAppleIdRepo>
 {
     protected override IAppleIdRepo CreateRepo() => new AppleIdRepo(Context);
-
-    protected override int GetProductId(AppleId entity) => entity.ProductId;
 
     protected override AppleId CreateValidEntity()
     {

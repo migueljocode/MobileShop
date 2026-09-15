@@ -27,11 +27,6 @@ public class CustomerDataService(
             .Distinct()
             .ToList();
 
-    public IEnumerable<Product> PurchasedProducts(
-        int customerId,
-        Expression<Func<Product, bool>> predicate)
-        => PurchasedProducts(customerId).AsQueryable().Where(predicate).ToList();
-
     public async Task<IEnumerable<Product>> PurchasedProductsAsync(int customerId)
         => (await _customerRepo.FindAllAsync(customer => customer.Id == customerId))
             .SelectMany(customer => customer.Transactions)
@@ -40,11 +35,4 @@ public class CustomerDataService(
             .Distinct()
             .ToList();
 
-    public async Task<IEnumerable<Product>> PurchasedProductsAsync(
-        int customerId,
-        Expression<Func<Product, bool>> predicate)
-    {
-        var products = await PurchasedProductsAsync(customerId);
-        return products.AsQueryable().Where(predicate).ToList();
-    }
 }
