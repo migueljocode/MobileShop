@@ -10,7 +10,7 @@ public static class ModelBuilderExtensions
     /// <summary>
     /// Applies a global query filter that hides soft-deleted entities.
     /// </summary>
-    public static ModelBuilder ApplySoftDeleteQueryFilters(this ModelBuilder modelBuilder)
+    public static ModelBuilder ApplySoftDeleteForEntities(this ModelBuilder modelBuilder)
     {
         foreach (var entityType in modelBuilder.Model.GetEntityTypes())
         {

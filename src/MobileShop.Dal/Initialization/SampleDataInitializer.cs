@@ -13,17 +13,25 @@ public static class SampleDataInitializer
         // IgnoreQueryFilters() matters here - without it, the soft-delete filter would leave
         // already-deleted rows behind, and this is meant to wipe everything for a clean reseed.
         // Deepest-dependency-first, mirroring the FK graph.
-        context.IPhones.IgnoreQueryFilters().ExecuteDelete();
-        context.Guarantees.IgnoreQueryFilters().ExecuteDelete();
-        context.SecondHands.IgnoreQueryFilters().ExecuteDelete();
-        context.AppleIds.IgnoreQueryFilters().ExecuteDelete();
-        context.Phones.IgnoreQueryFilters().ExecuteDelete();
-        context.Transactions.IgnoreQueryFilters().ExecuteDelete();
-        context.Products.IgnoreQueryFilters().ExecuteDelete();
-        context.Users.IgnoreQueryFilters().ExecuteDelete();
-        context.Customers.IgnoreQueryFilters().ExecuteDelete();
-        context.Sellers.IgnoreQueryFilters().ExecuteDelete();
-        context.People.IgnoreQueryFilters().ExecuteDelete();
+        var deleteOperations = new Action[]
+        {
+            () => context.IPhones.IgnoreQueryFilters().ExecuteDelete(),
+            () => context.Guarantees.IgnoreQueryFilters().ExecuteDelete(),
+            () => context.SecondHands.IgnoreQueryFilters().ExecuteDelete(),
+            () => context.AppleIds.IgnoreQueryFilters().ExecuteDelete(),
+            () => context.Phones.IgnoreQueryFilters().ExecuteDelete(),
+            () => context.Transactions.IgnoreQueryFilters().ExecuteDelete(),
+            () => context.Products.IgnoreQueryFilters().ExecuteDelete(),
+            () => context.Users.IgnoreQueryFilters().ExecuteDelete(),
+            () => context.Customers.IgnoreQueryFilters().ExecuteDelete(),
+            () => context.Sellers.IgnoreQueryFilters().ExecuteDelete(),
+            () => context.People.IgnoreQueryFilters().ExecuteDelete()
+        };
+
+        foreach (var delete in deleteOperations)
+        {
+            delete();
+        }
 
         // SQLite tracks its own autoincrement counters in sqlite_sequence - reset them so re-seeded IDs start clean
         context.Database.ExecuteSqlRaw("DELETE FROM sqlite_sequence");

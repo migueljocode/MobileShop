@@ -18,6 +18,6 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     {
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(BaseEntity).Assembly);
 
-        modelBuilder.ApplySoftDeleteQueryFilters();
+        modelBuilder.ApplySoftDeleteForEntities();
     }
 }
