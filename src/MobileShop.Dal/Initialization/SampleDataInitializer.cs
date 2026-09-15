@@ -31,29 +31,27 @@ public static class SampleDataInitializer
 
     internal static void SeedData(AppDbContext context)
     {
-        try
+        var data = SampleDataLoader.Load();
+        var seedOperations = new Action[]
         {
-            ProcessInsert(context, context.People, SampleData.People);
-            ProcessInsert(context, context.Sellers, SampleData.Sellers);
-            ProcessInsert(context, context.Customers, SampleData.Customers);
-            ProcessInsert(context, context.Users, SampleData.Users);
-            ProcessInsert(context, context.Products, SampleData.Products);
-            ProcessInsert(context, context.Transactions, SampleData.Transactions);
-            ProcessInsert(context, context.AppleIds, SampleData.AppleIds);
-            ProcessInsert(context, context.Phones, SampleData.Phones);
-            ProcessInsert(context, context.SecondHands, SampleData.SecondHands);
-            ProcessInsert(context, context.Guarantees, SampleData.Guarantees);
-            ProcessInsert(context, context.IPhones, SampleData.IPhones);
-        }
-        catch (Exception ex)
+            () => ProcessInsert(context, context.People, data.People),
+            () => ProcessInsert(context, context.Sellers, data.Sellers),
+            () => ProcessInsert(context, context.Customers, data.Customers),
+            () => ProcessInsert(context, context.Users, data.Users),
+            () => ProcessInsert(context, context.Products, data.Products),
+            () => ProcessInsert(context, context.Transactions, data.Transactions),
+            () => ProcessInsert(context, context.AppleIds, data.AppleIds),
+            () => ProcessInsert(context, context.Phones, data.Phones),
+            () => ProcessInsert(context, context.SecondHands, data.SecondHands),
+            () => ProcessInsert(context, context.Guarantees, data.Guarantees),
+            () => ProcessInsert(context, context.IPhones, data.IPhones)
+        };
+
+        foreach (var seed in seedOperations)
         {
-            // i think exception should be thrown to catch by serilog in upper layer.
-            Console.WriteLine(ex);
-            throw;
+            seed();
         }
 
-        // SQLite lets you insert explicit values into an integer primary key directly - unlike SQL
-        // Server, there's no IDENTITY_INSERT ceremony needed to seed rows with fixed, known Ids
         static void ProcessInsert<TEntity>(AppDbContext context, DbSet<TEntity> table, List<TEntity> records) where TEntity : BaseEntity
         {
             if (table.Any())

@@ -1,5 +1,8 @@
 namespace MobileShop.Services.DataServices.Interfaces;
 
+/// <summary>
+/// Defines the public contract for IAppleIdDataService.
+/// </summary>
 public interface IAppleIdDataService : IDataService<AppleId>
 {
     IReadOnlyList<ProductListItemViewModel> GetInventoryRows();

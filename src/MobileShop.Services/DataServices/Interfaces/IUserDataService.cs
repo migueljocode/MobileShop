@@ -1,5 +1,8 @@
-﻿namespace MobileShop.Services.DataServices.Interfaces;
+namespace MobileShop.Services.DataServices.Interfaces;
 
+/// <summary>
+/// Defines the public contract for IUserDataService.
+/// </summary>
 public interface IUserDataService : IDataService<User>
 {
     User? FindByUsername(string username);

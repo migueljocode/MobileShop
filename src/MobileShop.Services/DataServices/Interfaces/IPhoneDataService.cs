@@ -1,5 +1,8 @@
 namespace MobileShop.Services.DataServices.Interfaces;
 
+/// <summary>
+/// Defines the public contract for IPhoneDataService.
+/// </summary>
 public interface IPhoneDataService : IDataService<Phone>
 {
     IReadOnlyList<ProductListItemViewModel> GetInventoryRows();

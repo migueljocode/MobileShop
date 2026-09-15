@@ -1,6 +1,5 @@
 namespace MobileShop.Web.Pages.Account;
 
-[AllowAnonymous]
 public class LoginModel(IUserDataService userDataService) : PageModel
 {
     private readonly IUserDataService _userDataService = userDataService;
@@ -12,6 +11,7 @@ public class LoginModel(IUserDataService userDataService) : PageModel
     public string Password { get; set; } = string.Empty;
 
     public string? ReturnUrl { get; set; }
+    public string? Message { get; private set; }
 
     public void OnGet(string? returnUrl = null)
         => ReturnUrl = returnUrl ?? Url.Content("~/");
@@ -24,24 +24,14 @@ public class LoginModel(IUserDataService userDataService) : PageModel
             return Page();
         }
 
-        var user = _userDataService.FindByUsername(Username);
-        if (user is null || !_userDataService.ValidateCredentials(Username, Password))
+        if (!await _userDataService.ValidateCredentialsAsync(Username, Password))
         {
             ModelState.AddModelError(string.Empty, "Invalid username or password.");
             return Page();
         }
 
-        var claims = new[]
-        {
-            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-            new Claim(ClaimTypes.Name, user.Username)
-        };
-        var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-
-        await HttpContext.SignInAsync(
-            CookieAuthenticationDefaults.AuthenticationScheme,
-            new ClaimsPrincipal(identity));
-
-        return LocalRedirect(ReturnUrl);
+        Message = "Credentials validated. Authentication is not enabled in this stage.";
+        ModelState.Clear();
+        return Page();
     }
 }

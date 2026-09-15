@@ -6,7 +6,7 @@ public class BuyModel(
     IPhoneDataService phoneDataService,
     IAppleIdDataService appleIdDataService) : PageModel
 {
-    [BindProperty] public InputModel Input { get; set; } = new();
+    [BindProperty] public BuyInputModel Input { get; set; } = new();
     public IReadOnlyList<PartyOptionViewModel> Sellers { get; private set; } = [];
     public IReadOnlyList<ProductListItemViewModel> Products { get; private set; } = [];
     public string? Message { get; private set; }
@@ -37,11 +37,4 @@ public class BuyModel(
             .ToList();
     }
 
-    public class InputModel
-    {
-        [Range(1, int.MaxValue)] public int ProductId { get; set; }
-        [Range(1, int.MaxValue)] public int SellerId { get; set; }
-        [Range(0, double.MaxValue)] public decimal Price { get; set; }
-        [DataType(DataType.DateTime)] public DateTime? Date { get; set; }
-    }
 }

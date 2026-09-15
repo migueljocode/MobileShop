@@ -2,7 +2,7 @@ namespace MobileShop.Web.Pages.Products;
 
 public class CreateAppleIdModel(IAppleIdDataService appleIdDataService) : PageModel
 {
-    [BindProperty] public InputModel Input { get; set; } = new();
+    [BindProperty] public CreateAppleIdInputModel Input { get; set; } = new();
     public string? Message { get; private set; }
 
     public IActionResult OnPost()
@@ -43,28 +43,4 @@ public class CreateAppleIdModel(IAppleIdDataService appleIdDataService) : PageMo
         return RedirectToPage("/Products/Details", new { id = appleId.Id, type = "appleid" });
     }
 
-    public sealed class InputModel
-    {
-        [Required]
-        [StringLength(100)]
-        public string Manufacturer { get; set; } = string.Empty;
-
-        [Required]
-        [StringLength(100)]
-        public string Model { get; set; } = string.Empty;
-
-        [Range(0, double.MaxValue)]
-        public decimal Price { get; set; }
-
-        [Required]
-        [EmailAddress]
-        public string Email { get; set; } = string.Empty;
-
-        [Required]
-        [StringLength(100)]
-        public string Password { get; set; } = string.Empty;
-
-        [StringLength(500)]
-        public string? Notes { get; set; }
-    }
 }

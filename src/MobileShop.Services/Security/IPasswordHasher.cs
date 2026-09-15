@@ -1,6 +1,9 @@
-﻿namespace MobileShop.Services.Security;
+namespace MobileShop.Services.Security;
 
 // should be used in DataServices.Interfaces.ISerDataService Implementation
+/// <summary>
+/// Defines the public contract for IPasswordHasher.
+/// </summary>
 public interface IPasswordHasher
 {
     string Hash(string password);

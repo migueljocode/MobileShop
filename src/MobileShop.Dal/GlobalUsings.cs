@@ -2,7 +2,6 @@ global using System.Linq.Expressions;
 global using Microsoft.EntityFrameworkCore;
 global using Microsoft.EntityFrameworkCore.Design;
 global using MobileShop.Dal.EfStructures;
-global using MobileShop.Dal.Exceptions;
 global using MobileShop.Models.Extensions;
 global using MobileShop.Dal.Initialization;
 global using MobileShop.Dal.Repos.Base;

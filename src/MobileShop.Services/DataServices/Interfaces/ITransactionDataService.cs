@@ -1,5 +1,8 @@
-﻿namespace MobileShop.Services.DataServices.Interfaces;
+namespace MobileShop.Services.DataServices.Interfaces;
 
+/// <summary>
+/// Defines the public contract for ITransactionDataService.
+/// </summary>
 public interface ITransactionDataService : IDataService<Transaction>
 {
     IEnumerable<Transaction> GetByProduct(int productId);

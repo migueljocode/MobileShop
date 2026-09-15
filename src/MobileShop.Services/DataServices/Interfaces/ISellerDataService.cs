@@ -1,5 +1,8 @@
 namespace MobileShop.Services.DataServices.Interfaces;
 
+/// <summary>
+/// Defines the public contract for ISellerDataService.
+/// </summary>
 public interface ISellerDataService : IDataService<Seller>
 {
     IReadOnlyList<PartyOptionViewModel> GetPartyOptions();

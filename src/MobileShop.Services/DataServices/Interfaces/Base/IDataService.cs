@@ -1,5 +1,8 @@
-﻿namespace MobileShop.Services.DataServices.Interfaces.Base;
+namespace MobileShop.Services.DataServices.Interfaces.Base;
 
+/// <summary>
+/// Defines the public contract for IDataService.
+/// </summary>
 public interface IDataService<T> where T : BaseEntity
 {
     IEnumerable<T> FindAll(Expression<Func<T, bool>>? predicate = null);

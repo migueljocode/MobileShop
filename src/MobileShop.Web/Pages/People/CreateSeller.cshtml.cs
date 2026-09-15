@@ -2,7 +2,7 @@ namespace MobileShop.Web.Pages.People;
 
 public class CreateSellerModel(ISellerDataService sellerDataService) : PageModel
 {
-    [BindProperty] public InputModel Input { get; set; } = new();
+    [BindProperty] public CreateSellerInputModel Input { get; set; } = new();
     public string? Message { get; private set; }
 
     public IActionResult OnPost()
@@ -33,24 +33,4 @@ public class CreateSellerModel(ISellerDataService sellerDataService) : PageModel
         return RedirectToPage("/People/Sellers");
     }
 
-    public sealed class InputModel
-    {
-        [Required]
-        [StringLength(50)]
-        public string FirstName { get; set; } = string.Empty;
-
-        [Required]
-        [StringLength(50)]
-        public string LastName { get; set; } = string.Empty;
-
-        [Required]
-        [StringLength(20)]
-        public string PhoneNumber { get; set; } = string.Empty;
-
-        [Required]
-        public SellerEntityType EntityType { get; set; } = SellerEntityType.Real;
-
-        [StringLength(500)]
-        public string? Notes { get; set; }
-    }
 }
