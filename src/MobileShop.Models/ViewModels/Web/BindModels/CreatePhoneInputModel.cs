@@ -1,4 +1,4 @@
-namespace MobileShop.Models.ViewModels.Web;
+namespace MobileShop.Models.ViewModels.Web.BindModels;
 
 /// <summary>Input submitted when creating a phone product.</summary>
 public sealed class CreatePhoneInputModel

@@ -10,7 +10,7 @@ public class UserRepoTests : BaseRepoTests<User, IUserRepo>
         Context.People.Add(person);
         Context.SaveChanges();
 
-        // Username is unique - randomize so multiple calls (e.g. in GetAll tests) don't collide
+        // Username is unique - randomize so multiple calls (e.g. in FindAll tests) don't collide
         return new User { PersonId = person.Id, Username = $"user_{Guid.NewGuid():N}", PasswordHash = "hashed" };
     }
 

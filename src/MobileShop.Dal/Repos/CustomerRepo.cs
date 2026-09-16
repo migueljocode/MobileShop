@@ -15,10 +15,6 @@ public class CustomerRepo(AppDbContext context) : BaseRepo<Customer>(context), I
         return await (predicate is null ? query : query.Where(predicate)).ToListAsync();
     }
 
-    public override IEnumerable<Customer> GetAll(Expression<Func<Customer, bool>>? predicate = null) => FindAll(predicate);
-
-    public override Task<IEnumerable<Customer>> GetAllAsync(Expression<Func<Customer, bool>>? predicate = null) => FindAllAsync(predicate);
-
     public override Customer? Find(int id)
         => Table.Include(x => x.PersonNavigation)
             .FirstOrDefault(x => x.Id == id);

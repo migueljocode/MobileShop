@@ -17,7 +17,7 @@ internal sealed class SampleDataSet
 
 internal static class SampleDataLoader
 {
-    private const string RelativePath = "SeedData/sample-data.json";
+    private const string RelativePath = "Initialization/sample-data.json";
     private static readonly JsonSerializerOptions Options = new()
     {
         PropertyNameCaseInsensitive = true,

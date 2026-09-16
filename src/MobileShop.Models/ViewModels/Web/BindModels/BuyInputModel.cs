@@ -1,4 +1,4 @@
-namespace MobileShop.Models.ViewModels.Web;
+namespace MobileShop.Models.ViewModels.Web.BindModels;
 
 /// <summary>Input submitted when recording a purchase.</summary>
 public sealed class BuyInputModel

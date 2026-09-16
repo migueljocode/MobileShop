@@ -30,10 +30,4 @@ public class SellerRepo(AppDbContext context) : BaseRepo<Seller>(context), ISell
         IQueryable<Seller> query = Table.Include(s => s.PersonNavigation);
         return await (predicate is null ? query : query.Where(predicate)).ToListAsync();
     }
-
-    /// <inheritdoc />
-    public override IEnumerable<Seller> GetAll(Expression<Func<Seller, bool>>? predicate = null) => FindAll(predicate);
-
-    /// <inheritdoc />
-    public override Task<IEnumerable<Seller>> GetAllAsync(Expression<Func<Seller, bool>>? predicate = null) => FindAllAsync(predicate);
 }

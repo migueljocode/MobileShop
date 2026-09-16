@@ -40,10 +40,4 @@ public class PhoneRepo(AppDbContext context) : BaseRepo<Phone>(context), IPhoneR
             .Include(p => p.ProductNavigation).ThenInclude(p => p.SecondHandProfile);
         return await (predicate is null ? query : query.Where(predicate)).ToListAsync();
     }
-
-    /// <inheritdoc />
-    public override IEnumerable<Phone> GetAll(Expression<Func<Phone, bool>>? predicate = null) => FindAll(predicate);
-
-    /// <inheritdoc />
-    public override Task<IEnumerable<Phone>> GetAllAsync(Expression<Func<Phone, bool>>? predicate = null) => FindAllAsync(predicate);
 }

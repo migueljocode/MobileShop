@@ -23,15 +23,6 @@ public abstract class DataServiceBase<TService, TEntity>(
         => Repo.FindAllAsync(predicate);
 
     /// <inheritdoc />
-    public virtual IEnumerable<TEntity> GetAll(Expression<Func<TEntity, bool>>? predicate = null)
-        => Repo.GetAll(predicate);
-
-    /// <inheritdoc />
-    public virtual Task<IEnumerable<TEntity>> GetAllAsync(
-        Expression<Func<TEntity, bool>>? predicate = null)
-        => Repo.GetAllAsync(predicate);
-
-    /// <inheritdoc />
     public virtual TEntity? Find(int id) => Repo.Find(id);
 
     /// <inheritdoc />

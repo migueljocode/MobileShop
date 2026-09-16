@@ -27,16 +27,10 @@ public class TransactionRepo(AppDbContext context) : BaseRepo<Transaction>(conte
     }
 
     /// <inheritdoc />
-    public override IEnumerable<Transaction> GetAll(Expression<Func<Transaction, bool>>? predicate = null) => FindAll(predicate);
-
-    /// <inheritdoc />
-    public override Task<IEnumerable<Transaction>> GetAllAsync(Expression<Func<Transaction, bool>>? predicate = null) => FindAllAsync(predicate);
-
-    /// <inheritdoc />
     public IEnumerable<Transaction> GetByProduct(int productId)
-        => GetAll(t => t.ProductId == productId);
+        => FindAll(t => t.ProductId == productId);
 
     /// <inheritdoc />
     public async Task<IEnumerable<Transaction>> GetByProductAsync(int productId)
-        => await GetAllAsync(t => t.ProductId == productId);
+        => await FindAllAsync(t => t.ProductId == productId);
 }

@@ -173,13 +173,4 @@ public interface IBaseRepo<T> where T : BaseEntity
     /// <param name="predicate">The optional database-translatable filter.</param>
     /// <returns>The number of matching entities.</returns>
     Task<int> CountAsync(Expression<Func<T, bool>>? predicate = null);
-
-    /// <summary>Gets all entities through the legacy compatibility name.</summary>
-    /// <param name="predicate">The optional database-translatable filter.</param>
-    /// <returns>The matching, non-deleted entities.</returns>
-    IEnumerable<T> GetAll(Expression<Func<T, bool>>? predicate = null);
-    /// <summary>Gets all entities asynchronously through the legacy compatibility name.</summary>
-    /// <param name="predicate">The optional database-translatable filter.</param>
-    /// <returns>The matching, non-deleted entities.</returns>
-    Task<IEnumerable<T>> GetAllAsync(Expression<Func<T, bool>>? predicate = null);
 }

@@ -1,4 +1,4 @@
-namespace MobileShop.Models.ViewModels.Web;
+namespace MobileShop.Models.ViewModels.Web.BindModels;
 
 /// <summary>Input submitted when creating an Apple ID product.</summary>
 public sealed class CreateAppleIdInputModel

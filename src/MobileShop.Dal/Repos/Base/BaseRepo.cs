@@ -224,10 +224,4 @@ public abstract class BaseRepo<T>(AppDbContext context) : IBaseRepo<T> where T :
         IQueryable<T> query = Table;
         return predicate is null ? await query.CountAsync() : await query.CountAsync(predicate);
     }
-
-    /// <inheritdoc />
-    public virtual IEnumerable<T> GetAll(Expression<Func<T, bool>>? predicate = null) => FindAll(predicate);
-
-    /// <inheritdoc />
-    public virtual Task<IEnumerable<T>> GetAllAsync(Expression<Func<T, bool>>? predicate = null) => FindAllAsync(predicate);
 }

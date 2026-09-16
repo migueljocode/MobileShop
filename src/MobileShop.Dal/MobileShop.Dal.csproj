@@ -13,9 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="..\MobileShop.Models\SeedData\sample-data.json"
-          Link="SeedData\sample-data.json"
-          CopyToOutputDirectory="PreserveNewest" />
+    <None Update="Initialization\sample-data.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
   <PropertyGroup>

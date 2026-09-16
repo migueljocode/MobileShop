@@ -14,15 +14,6 @@ public interface IDataService<T> where T : BaseEntity
     /// <returns>The matching, non-deleted entities.</returns>
     Task<IEnumerable<T>> FindAllAsync(Expression<Func<T, bool>>? predicate = null);
 
-    /// <summary>Gets all entities through the compatibility API.</summary>
-    /// <param name="predicate">An optional database-translatable filter.</param>
-    /// <returns>The matching, non-deleted entities.</returns>
-    IEnumerable<T> GetAll(Expression<Func<T, bool>>? predicate = null);
-    /// <summary>Gets all entities asynchronously through the compatibility API.</summary>
-    /// <param name="predicate">An optional database-translatable filter.</param>
-    /// <returns>The matching, non-deleted entities.</returns>
-    Task<IEnumerable<T>> GetAllAsync(Expression<Func<T, bool>>? predicate = null);
-
     /// <summary>Finds an entity by identifier.</summary>
     /// <param name="id">The entity identifier.</param>
     /// <returns>The entity, or <see langword="null"/> when not found.</returns>

@@ -41,12 +41,6 @@ public class AppleIdRepo(AppDbContext context) : BaseRepo<AppleId>(context), IAp
         return await (predicate is null ? query : query.Where(predicate)).ToListAsync();
     }
 
-    /// <inheritdoc />
-    public override IEnumerable<AppleId> GetAll(Expression<Func<AppleId, bool>>? predicate = null) => FindAll(predicate);
-
-    /// <inheritdoc />
-    public override Task<IEnumerable<AppleId>> GetAllAsync(Expression<Func<AppleId, bool>>? predicate = null) => FindAllAsync(predicate);
-
     public AppleId? Find(string email)
         => Table.FirstOrDefault(x => x.Email.ToLower() == email.ToLower());
 
