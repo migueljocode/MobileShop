@@ -7,8 +7,9 @@ namespace MobileShop.Dal.Initialization;
 public static class DatabaseInitializer
 {
     /// <summary>
-    /// Applies the committed EF Core migrations and seeds a fresh database with the bundled
-    /// sample data when the database is empty.
+    /// Recreates the development database from the current model on every startup (drop and
+    /// create - no migrations) and seeds the bundled sample data. Because nothing persists
+    /// between runs, seeding and the default admin password are applied unconditionally.
     /// </summary>
     public static void InitializeForDevelopment(IServiceProvider services)
     {
@@ -16,25 +17,23 @@ public static class DatabaseInitializer
         var scopedServices = scope.ServiceProvider;
         var context = scopedServices.GetRequiredService<AppDbContext>();
 
-        context.Database.Migrate();
+        // Dev workflow: drop and recreate on every run - there is no persisted state to protect.
+        context.Database.EnsureDeleted();
+        context.Database.EnsureCreated();
         SampleDataInitializer.SeedIfEmpty(context);
         EnsureDefaultAdminPassword(scopedServices, context);
     }
 
     /// <summary>
-    /// First run only: the bundled sample data ships with a placeholder hash, so give the admin
-    /// account a real Argon2 hash of a working default password.
+    /// Gives the admin account a real Argon2 hash of the default development password. The sample
+    /// data ships with a placeholder and the database is recreated on every run, so this is
+    /// applied unconditionally.
     /// </summary>
     private static void EnsureDefaultAdminPassword(IServiceProvider services, AppDbContext context)
     {
-        const string Placeholder = "REPLACE_WITH_REAL_HASH";
         const string DefaultPassword = "Admin@123";
 
-        var admin = context.Users.FirstOrDefault(user => user.Username == "admin");
-        if (admin is null || admin.PasswordHash != Placeholder)
-        {
-            return;
-        }
+        var admin = context.Users.Single(user => user.Username == "admin");
 
         var hasher = ResolvePasswordHasher(services);
         var hashMethod = hasher.GetType().GetMethod("Hash", new[] { typeof(string) });

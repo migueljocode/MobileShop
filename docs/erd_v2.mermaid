@@ -1,0 +1,218 @@
+erDiagram
+    PERSON ||--o| SELLER : "may be"
+    PERSON ||--o| CUSTOMER : "may be"
+    PERSON ||--o| USER : "may be"
+    SELLER ||--o{ TRANSACTION : "sells in"
+    CUSTOMER ||--o{ TRANSACTION : "buys in"
+    PRODUCT ||--o{ TRANSACTION : "involved in"
+
+    MANUFACTURER ||--o{ MODEL : "makes"
+    CATEGORY ||--o{ MODEL : "classifies"
+    MODEL ||--o{ PRODUCT : "identifies"
+    COLOR ||--o{ PRODUCT : "colors"
+    STORAGE_CAPACITY ||--o{ DEVICE_SPEC : "sizes"
+    STORAGE_CAPACITY ||--o{ PORTABLE_STORAGE : "sizes"
+
+    PRODUCT ||--o| DEVICE_SPEC : "may have"
+    PRODUCT ||--o| APPLE_INFO : "may have"
+    PRODUCT ||--o| GUARANTEE : "may have"
+    PRODUCT ||--o| SECOND_HAND : "may be"
+    PRODUCT ||--o| PHONE : "may be"
+    PRODUCT ||--o| TABLET : "may be"
+    PRODUCT ||--o| SMART_WATCH : "may be"
+    PRODUCT ||--o| LAPTOP : "may be"
+    PRODUCT ||--o| APPLE_ID : "may be"
+    PRODUCT ||--o| CABLE : "may be"
+    PRODUCT ||--o| CHARGER : "may be"
+    PRODUCT ||--o| POWER_BANK : "may be"
+    PRODUCT ||--o| PORTABLE_STORAGE : "may be"
+    PRODUCT ||--o| CASE : "may be"
+    PRODUCT ||--o| GLASS : "may be"
+
+    CASE ||--o{ CASE_MODEL_FIT : "fits"
+    MODEL ||--o{ CASE_MODEL_FIT : "fitted by"
+    GLASS ||--o{ GLASS_MODEL_FIT : "fits"
+    MODEL ||--o{ GLASS_MODEL_FIT : "fitted by"
+
+    PERSON {
+        int Id PK
+        string FirstName
+        string LastName
+        string PhoneNumber
+        string Notes
+    }
+    SELLER {
+        int Id PK
+        int PersonId FK
+        enum EntityType "Real / Legal"
+    }
+    CUSTOMER {
+        int Id PK
+        int PersonId FK
+        string NationalId
+    }
+    USER {
+        int Id PK
+        string Username
+        string PasswordHash
+        int PersonId FK
+    }
+    TRANSACTION {
+        int Id PK
+        DateTime Date
+        int SellerId FK
+        int CustomerId FK
+        int ProductId FK
+        decimal FinishedPrice
+        enum Direction "Buy / Sell"
+    }
+
+    MANUFACTURER {
+        int Id PK
+        string Name
+    }
+    CATEGORY {
+        int Id PK
+        string Name
+    }
+    MODEL {
+        int Id PK
+        int ManufacturerId FK
+        int CategoryId FK
+        string Name
+        string ModelNumber
+    }
+    COLOR {
+        int Id PK
+        string Name
+    }
+    STORAGE_CAPACITY {
+        int Id PK
+        int Gb
+    }
+
+    PRODUCT {
+        int Id PK
+        int ModelId FK
+        int ColorId FK
+        decimal Price
+        string Barcode
+    }
+
+    DEVICE_SPEC {
+        int Id PK
+        int ProductId FK
+        int Ram "GB"
+        int StorageCapacityId FK
+        int ChargeSpeed "Watts"
+    }
+    APPLE_INFO {
+        int Id PK
+        int ProductId FK
+        int BatteryHealth
+        int ChargeCycle
+        string Notes
+    }
+    GUARANTEE {
+        int Id PK
+        int ProductId FK
+        DateTime StartDate
+        DateTime ExpirationDate
+        string Corporation
+        string Notes
+    }
+    SECOND_HAND {
+        int Id PK
+        int ProductId FK
+        int TestPeriodDays
+        int UsedDurationDays
+        string Notes
+    }
+
+    PHONE {
+        int Id PK
+        int ProductId FK
+        string IMEI1
+        string IMEI2
+        bool OwnershipTransferred
+        string Notes
+    }
+    TABLET {
+        int Id PK
+        int ProductId FK
+        string Notes
+    }
+    SMART_WATCH {
+        int Id PK
+        int ProductId FK
+        string Notes
+    }
+    LAPTOP {
+        int Id PK
+        int ProductId FK
+        string Cpu
+        string Gpu
+        decimal DisplaySize
+        string Notes
+    }
+    APPLE_ID {
+        int Id PK
+        int ProductId FK
+        string Email
+        string Password
+        string Notes
+    }
+    CABLE {
+        int Id PK
+        int ProductId FK
+        enum Connector1
+        enum Connector2
+        decimal Length
+        string Notes
+    }
+    CHARGER {
+        int Id PK
+        int ProductId FK
+        int Wattage
+        bool Pd
+        int PortCount
+        string Notes
+    }
+    POWER_BANK {
+        int Id PK
+        int ProductId FK
+        int CapacityMah
+        int MaxWattage
+        int PortCount
+        bool Pd
+        string Notes
+    }
+    PORTABLE_STORAGE {
+        int Id PK
+        int ProductId FK
+        enum Kind "SSD / HDD / MicroSD / SD / MiniSD / USB-Flash / CF / Other"
+        int StorageCapacityId FK
+        int Speed
+        string Notes
+    }
+    CASE {
+        int Id PK
+        int ProductId FK
+        string Notes
+    }
+    GLASS {
+        int Id PK
+        int ProductId FK
+        string Notes
+    }
+
+    CASE_MODEL_FIT {
+        int Id PK
+        int CaseId FK
+        int ModelId FK
+    }
+    GLASS_MODEL_FIT {
+        int Id PK
+        int GlassId FK
+        int ModelId FK
+    }
