@@ -25,7 +25,8 @@ public static class ServiceCollectionExtensions
             .AddMobileShopDbContext()
             .AddMobileShopRepositories()
             .AddMobileShopSecurity()
-            .AddMobileShopDataServices(useApi);
+            .AddMobileShopDataServices(useApi)
+            .AddMobileShopSeeding();
     }
 
     /// <summary>Registers the EF Core context over the SQLite database living next to the solution.</summary>
@@ -57,6 +58,13 @@ public static class ServiceCollectionExtensions
     private static IServiceCollection AddMobileShopSecurity(this IServiceCollection services)
     {
         services.AddSingleton<IPasswordHasher, PasswordHasher>();
+        return services;
+    }
+
+    /// <summary>Registers the development-time seeders.</summary>
+    private static IServiceCollection AddMobileShopSeeding(this IServiceCollection services)
+    {
+        services.AddScoped<AdminSeeder>();
         return services;
     }
 
