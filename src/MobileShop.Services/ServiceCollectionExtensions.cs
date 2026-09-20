@@ -102,6 +102,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ISellerDataService, SellerDataService>();
         services.AddScoped<ITransactionDataService, TransactionDataService>();
         services.AddScoped<IProductDataService, ProductDataService>();
+        services.AddScoped<IInvoiceDataService, InvoiceDataService>();
         services.AddScoped<IPhoneDataService, PhoneDataService>();
         services.AddScoped<IAppleIdDataService, AppleIdDataService>();
         return services;
