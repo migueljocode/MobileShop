@@ -12,7 +12,6 @@ internal sealed class SampleDataSet
     public List<Phone> Phones { get; init; } = [];
     public List<SecondHand> SecondHands { get; init; } = [];
     public List<Guarantee> Guarantees { get; init; } = [];
-    public List<IPhone> IPhones { get; init; } = [];
 }
 
 internal static class SampleDataLoader
@@ -41,8 +40,7 @@ internal static class SampleDataLoader
             AppleIds = Deserialize<AppleId>(root, "appleIds"),
             Phones = Deserialize<Phone>(root, "phones"),
             SecondHands = Deserialize<SecondHand>(root, "secondHands"),
-            Guarantees = Deserialize<Guarantee>(root, "guarantees"),
-            IPhones = Deserialize<IPhone>(root, "iPhones")
+            Guarantees = Deserialize<Guarantee>(root, "guarantees")
         };
     }
 

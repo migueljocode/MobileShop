@@ -13,6 +13,9 @@ public class Guarantee : BaseEntity
     [StringLength(100, ErrorMessage = "{0} cannot exceed {1} characters.")]
     public string Corporation { get; set; } = string.Empty;
 
+    [StringLength(500, ErrorMessage = "{0} cannot exceed {1} characters.")]
+    public string? Notes { get; set; }
+
     public int ProductId { get; set; }
     public virtual Product ProductNavigation { get; set; } = null!;
 }

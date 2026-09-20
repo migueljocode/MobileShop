@@ -11,7 +11,6 @@ public static class SampleDataInitializer
     internal static void ClearData(AppDbContext context)
     {
         // FK-safe order (dependents first). IgnoreQueryFilters so soft-deleted rows go too.
-        ClearSet<IPhone>(context);
         ClearSet<Guarantee>(context);
         ClearSet<SecondHand>(context);
         ClearSet<AppleId>(context);
@@ -44,7 +43,6 @@ public static class SampleDataInitializer
         ProcessInsert(context, context.Phones, data.Phones);
         ProcessInsert(context, context.SecondHands, data.SecondHands);
         ProcessInsert(context, context.Guarantees, data.Guarantees);
-        ProcessInsert(context, context.IPhones, data.IPhones);
         
         static void ProcessInsert<TEntity>(
             AppDbContext context,

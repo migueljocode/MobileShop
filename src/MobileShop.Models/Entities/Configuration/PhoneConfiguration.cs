@@ -9,9 +9,6 @@ public class PhoneConfiguration : IEntityTypeConfiguration<Phone>
             .IsUnique()
             .HasFilter("IsDeleted = 0"); /* SQLite */
 
-        builder.Property(p => p.Color)
-            .HasMaxLength(50);
-
         builder.HasOne(p => p.ProductNavigation)
             .WithOne(product => product.PhoneProfile)
             .HasForeignKey<Phone>(p => p.ProductId)

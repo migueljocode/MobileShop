@@ -50,7 +50,6 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IPhoneRepo, PhoneRepo>();
         services.AddScoped<ISecondHandRepo, SecondHandRepo>();
         services.AddScoped<IGuaranteeRepo, GuaranteeRepo>();
-        services.AddScoped<IIPhoneProfileRepo, IPhoneProfileRepo>();
         return services;
     }
 

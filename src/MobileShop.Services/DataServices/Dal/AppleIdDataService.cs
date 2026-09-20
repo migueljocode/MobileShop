@@ -13,7 +13,7 @@ public class AppleIdDataService(
                 appleId.Id,
                 appleId.ProductId,
                 "Apple ID",
-                appleId.ProductNavigation.Manufacturer + " " + appleId.ProductNavigation.Model,
+                appleId.ProductNavigation.ModelNavigation.ManufacturerNavigation.Name + " " + appleId.ProductNavigation.ModelNavigation.Name,
                 appleId.Email,
                 null,
                 appleId.ProductNavigation.Transactions.Any(t => t.Direction == TransactionDirection.Sell),
