@@ -25,8 +25,19 @@ public static class ServiceCollectionExtensions
             .AddMobileShopDbContext()
             .AddMobileShopRepositories()
             .AddMobileShopSecurity()
+            .AddMobileShopPdf(configuration)
             .AddMobileShopDataServices(useApi)
             .AddMobileShopSeeding();
+    }
+
+    private static IServiceCollection AddMobileShopPdf(
+        this IServiceCollection services,
+        IConfiguration configuration)
+    {
+        services.Configure<MobileShop.Services.PDF.Settings.PdfSettings>(
+            configuration.GetSection("Pdf"));
+        services.AddScoped<MobileShop.Services.PDF.IPdfGenerator, MobileShop.Services.PDF.QuestPdfGenerator>();
+        return services;
     }
 
     /// <summary>Registers the EF Core context over the SQLite database living next to the solution.</summary>
