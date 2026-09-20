@@ -14,7 +14,7 @@ context-switch. 8–9 depend on the new schema existing, so they're last.
 |---|------|------------|
 | 1 | Drop-and-recreate DB for dev | — |
 | 2 | Kill reflection `Hash()`, move admin seeding to Services | — |
-| 3 | Trim eager `Find`/`FindAll` overrides | — |
+| 3 | Consolidate startup guard + trim eager `Find`/`FindAll` overrides | — |
 | 4 | New entities, enums, Product/Model/Phone/Guarantee/SecondHand updates | 1–3 |
 | 5 | Migration + seed data rewrite | 4 |
 | 6 | One stub repo (`Manufacturer`) for DI | 4 |
@@ -44,15 +44,40 @@ context-switch. 8–9 depend on the new schema existing, so they're last.
 > `IUserDataService` normally through the service provider. Delete the reflection code
 > entirely and call `_passwordHasher.Hash(...)` directly instead.
 
-## Prompt 3 — Trim eager Find/FindAll overrides
+## Prompt 3 — Consolidate startup guard + trim eager Find/FindAll overrides
 
-> In `AppleIdRepo`, `PhoneRepo`, `CustomerRepo`, `SellerRepo`, and `TransactionRepo`, remove
-> the overridden `Find`/`FindAll` (and their Async versions) that eagerly `.Include()`
-> related data — let them fall back to `BaseRepo<T>`'s plain implementation. Search
-> `MobileShop.Services.DataServices` for anywhere that currently depends on `Find`/`FindAll`
-> returning eagerly-loaded navigation properties, and change those call sites to use the
-> existing `Select`/`SelectAll` projection overloads instead, shaped to fetch exactly the
-> data that method needs.
+> Two independent changes in one pass — do them in this order and report each separately.
+>
+> **Part A — Consolidate the startup guard.** Move the `AdminSeeder.EnsureDefaultAdmin()`
+> call out of `Program.cs` and into `WebApplicationBuilderExtensions.ConfigureApp()`, placed
+> directly after the `DatabaseInitializer.InitializeForDevelopment(app.Services)` call,
+> inside the same `if (app.Environment.IsDevelopment())` block, using a scope the same way
+> `Program.cs` currently does. `Program.cs` should end up as just:
+> ```csharp
+> var builder = CreateBuilder(args).ConfigureBuilder();
+> var app = builder.Build().ConfigureApp();
+> app.Run();
+> ```
+>
+> **Part B — Trim eager Find/FindAll overrides.** In `AppleIdRepo`, `PhoneRepo`,
+> `CustomerRepo`, `SellerRepo`, and `TransactionRepo`, remove the overridden `Find`/
+> `FindAll` (and their Async versions) that eagerly `.Include()` related data — let them
+> fall back to `BaseRepo<T>`'s plain implementation.
+>
+> This removal will not cause a compile error on its own — any call site relying on a
+> populated navigation property from the old eager-loaded `Find`/`FindAll` will still build,
+> but will get `null` back at runtime instead. So: search **every** class in
+> `MobileShop.Services.DataServices` (AppleId, Customer, Phone, Seller, Transaction, User,
+> and any others — not just the ones touched in earlier prompts) for every call to `Find`/
+> `FindAll`/their Async versions, and for each one check whether it dereferences a
+> navigation property afterward (e.g. `.ProductNavigation`, `.PersonNavigation`,
+> `.Transactions`). Where it does, convert that call to the existing `Select`/`SelectAll`
+> projection overloads instead, shaped to fetch exactly the data that method needs — don't
+> just re-add `.Include()` at the call site.
+>
+> Report back explicitly which DataService methods you found and converted, not just that
+> the build passed — a clean build proves less here than in the last two prompts, since
+> this is the first change that can break at runtime without breaking compilation.
 
 ## Prompt 4 — Schema normalization
 

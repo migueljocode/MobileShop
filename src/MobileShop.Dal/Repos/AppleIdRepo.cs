@@ -3,44 +3,6 @@ namespace MobileShop.Dal.Repos;
 /// <inheritdoc cref="IAppleIdRepo" />
 public class AppleIdRepo(AppDbContext context) : BaseRepo<AppleId>(context), IAppleIdRepo
 {
-    /// <inheritdoc />
-    /// <remarks>Includes the product transactions and second-hand profile.</remarks>
-    public override AppleId? Find(int id)
-        => Table.Include(a => a.ProductNavigation)
-                .ThenInclude(p => p.Transactions)
-            .Include(a => a.ProductNavigation)
-                .ThenInclude(p => p.SecondHandProfile)
-            .FirstOrDefault(a => a.Id == id);
-
-    /// <inheritdoc />
-    /// <remarks>Includes the product transactions and second-hand profile.</remarks>
-    public override async Task<AppleId?> FindAsync(int id)
-        => await Table.Include(a => a.ProductNavigation)
-                .ThenInclude(p => p.Transactions)
-            .Include(a => a.ProductNavigation)
-                .ThenInclude(p => p.SecondHandProfile)
-            .FirstOrDefaultAsync(a => a.Id == id);
-
-    /// <inheritdoc />
-    /// <remarks>Includes the product transactions and second-hand profile.</remarks>
-    public override IEnumerable<AppleId> FindAll(Expression<Func<AppleId, bool>>? predicate = null)
-    {
-        IQueryable<AppleId> query = Table
-            .Include(a => a.ProductNavigation).ThenInclude(p => p.Transactions)
-            .Include(a => a.ProductNavigation).ThenInclude(p => p.SecondHandProfile);
-        return (predicate is null ? query : query.Where(predicate)).ToList();
-    }
-
-    /// <inheritdoc />
-    /// <remarks>Includes the product transactions and second-hand profile.</remarks>
-    public override async Task<IEnumerable<AppleId>> FindAllAsync(Expression<Func<AppleId, bool>>? predicate = null)
-    {
-        IQueryable<AppleId> query = Table
-            .Include(a => a.ProductNavigation).ThenInclude(p => p.Transactions)
-            .Include(a => a.ProductNavigation).ThenInclude(p => p.SecondHandProfile);
-        return await (predicate is null ? query : query.Where(predicate)).ToListAsync();
-    }
-
     public AppleId? Find(string email)
         => Table.FirstOrDefault(x => x.Email.ToLower() == email.ToLower());
 

@@ -22,17 +22,23 @@ public class SellerDataService(
     /// <inheritdoc />
     public IEnumerable<Product> SoldProducts(int sellerId)
         => _sellerRepo
-            .FindAll(seller => seller.Id == sellerId)
-            .SelectMany(seller => seller.Transactions)
-            .Select(transaction => transaction.ProductNavigation)
+            .SelectAll(
+                seller => seller.Id == sellerId,
+                seller => seller.Transactions
+                    .Select(transaction => transaction.ProductNavigation)
+                    .ToList())
+            .SelectMany(products => products)
             .Distinct()
             .ToList();
 
     /// <inheritdoc />
     public async Task<IEnumerable<Product>> SoldProductsAsync(int sellerId)
-        => (await _sellerRepo.FindAllAsync(seller => seller.Id == sellerId))
-            .SelectMany(seller => seller.Transactions)
-            .Select(transaction => transaction.ProductNavigation)
+        => (await _sellerRepo.SelectAllAsync(
+                seller => seller.Id == sellerId,
+                seller => seller.Transactions
+                    .Select(transaction => transaction.ProductNavigation)
+                    .ToList()))
+            .SelectMany(products => products)
             .Distinct()
             .ToList();
 
@@ -41,19 +47,25 @@ public class SellerDataService(
     /// <inheritdoc />
     public IEnumerable<Product> SoldToShop(int sellerId)
         => _sellerRepo
-            .FindAll(seller => seller.Id == sellerId)
-            .SelectMany(seller => seller.Transactions)
-            .Where(transaction => transaction.Direction == TransactionDirection.Buy)
-            .Select(transaction => transaction.ProductNavigation)
+            .SelectAll(
+                seller => seller.Id == sellerId,
+                seller => seller.Transactions
+                    .Where(transaction => transaction.Direction == TransactionDirection.Buy)
+                    .Select(transaction => transaction.ProductNavigation)
+                    .ToList())
+            .SelectMany(products => products)
             .Distinct()
             .ToList();
 
     /// <inheritdoc />
     public async Task<IEnumerable<Product>> SoldToShopAsync(int sellerId)
-        => (await _sellerRepo.FindAllAsync(seller => seller.Id == sellerId))
-            .SelectMany(seller => seller.Transactions)
-            .Where(transaction => transaction.Direction == TransactionDirection.Buy)
-            .Select(transaction => transaction.ProductNavigation)
+        => (await _sellerRepo.SelectAllAsync(
+                seller => seller.Id == sellerId,
+                seller => seller.Transactions
+                    .Where(transaction => transaction.Direction == TransactionDirection.Buy)
+                    .Select(transaction => transaction.ProductNavigation)
+                    .ToList()))
+            .SelectMany(products => products)
             .Distinct()
             .ToList();
 

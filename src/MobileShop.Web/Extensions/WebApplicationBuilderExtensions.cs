@@ -24,6 +24,10 @@ public static class WebApplicationBuilderExtensions
         if (app.Environment.IsDevelopment())
         {
             DatabaseInitializer.InitializeForDevelopment(app.Services);
+
+            // Dev-only: the freshly seeded sample data ships a placeholder hash, so give the admin a real one.
+            using var scope = app.Services.CreateScope();
+            scope.ServiceProvider.GetRequiredService<AdminSeeder>().EnsureDefaultAdmin();
         }
 
         app.UseRouting();

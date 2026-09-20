@@ -103,18 +103,28 @@ public class TransactionDataService(
     /// <inheritdoc />
     public IReadOnlyList<ProfitLossRowViewModel> GetProfitLossRows(DateTime? from, DateTime? to)
     {
-        var transactions = _transactionRepo.FindAll()
-            .Where(t => (!from.HasValue || t.Date.Date >= from.Value.Date) &&
-                        (!to.HasValue || t.Date.Date <= to.Value.Date));
+        // Projected so the product navigation is read inside the query instead of relying on
+        // eager-loaded entities.
+        var transactions = _transactionRepo
+            .SelectAll(transaction => new
+            {
+                transaction.ProductId,
+                transaction.Date,
+                transaction.Direction,
+                transaction.FinishedPrice,
+                ProductLabel = transaction.ProductNavigation.Manufacturer + " " + transaction.ProductNavigation.Model
+            })
+            .Where(transaction => (!from.HasValue || transaction.Date.Date >= from.Value.Date) &&
+                                  (!to.HasValue || transaction.Date.Date <= to.Value.Date));
 
         return transactions
-            .GroupBy(t => t.ProductId)
+            .GroupBy(transaction => transaction.ProductId)
             .Select(group =>
             {
                 var first = group.First();
                 return new ProfitLossRowViewModel(
                     group.Key,
-                    ProductLabel(first),
+                    first.ProductLabel,
                     group.Where(t => t.Direction == TransactionDirection.Buy).Sum(t => t.FinishedPrice),
                     group.Where(t => t.Direction == TransactionDirection.Sell).Sum(t => t.FinishedPrice));
             })
@@ -167,9 +177,10 @@ public class TransactionDataService(
         Expression<Func<Product, bool>>? predicate = null)
     {
         var products = _transactionRepo
-            .FindAll(t => t.Direction == TransactionDirection.Buy)
-            .Select(t => t.ProductNavigation)
-            .Where(p => p is not null)
+            .SelectAll(
+                transaction => transaction.Direction == TransactionDirection.Buy,
+                transaction => transaction.ProductNavigation)
+            .Where(product => product is not null)
             .Distinct()
             .AsQueryable();
 
@@ -184,9 +195,10 @@ public class TransactionDataService(
         Expression<Func<Product, bool>>? predicate = null)
     {
         var products = _transactionRepo
-            .FindAll(t => t.Direction == TransactionDirection.Sell)
-            .Select(t => t.ProductNavigation)
-            .Where(p => p is not null)
+            .SelectAll(
+                transaction => transaction.Direction == TransactionDirection.Sell,
+                transaction => transaction.ProductNavigation)
+            .Where(product => product is not null)
             .Distinct()
             .AsQueryable();
 
@@ -201,9 +213,10 @@ public class TransactionDataService(
         Expression<Func<Product, bool>>? predicate = null)
     {
         var products = (await _transactionRepo
-                .FindAllAsync(t => t.Direction == TransactionDirection.Buy))
-            .Select(t => t.ProductNavigation)
-            .Where(p => p is not null)
+                .SelectAllAsync(
+                    transaction => transaction.Direction == TransactionDirection.Buy,
+                    transaction => transaction.ProductNavigation))
+            .Where(product => product is not null)
             .Distinct()
             .AsQueryable();
 
@@ -218,9 +231,10 @@ public class TransactionDataService(
         Expression<Func<Product, bool>>? predicate = null)
     {
         var products = (await _transactionRepo
-                .FindAllAsync(t => t.Direction == TransactionDirection.Sell))
-            .Select(t => t.ProductNavigation)
-            .Where(p => p is not null)
+                .SelectAllAsync(
+                    transaction => transaction.Direction == TransactionDirection.Sell,
+                    transaction => transaction.ProductNavigation))
+            .Where(product => product is not null)
             .Distinct()
             .AsQueryable();
 
@@ -339,11 +353,6 @@ public class TransactionDataService(
         decimal finishedPrice,
         DateTime? date = null)
         => Task.FromResult(RecordSell(productId, customerId, finishedPrice, date));
-
-    private static string ProductLabel(Transaction transaction)
-        => transaction.ProductNavigation is null
-            ? $"Product #{transaction.ProductId}"
-            : $"{transaction.ProductNavigation.Manufacturer} {transaction.ProductNavigation.Model}";
 
     private static string SellerLabel(Transaction transaction)
         => transaction.SellerId == ShopSellerId

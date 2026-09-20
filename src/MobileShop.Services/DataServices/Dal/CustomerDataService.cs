@@ -22,19 +22,25 @@ public class CustomerDataService(
     /// <inheritdoc />
     public IEnumerable<Product> PurchasedProducts(int customerId)
         => _customerRepo
-            .FindAll(customer => customer.Id == customerId)
-            .SelectMany(customer => customer.Transactions)
-            .Where(transaction => transaction.Direction == TransactionDirection.Sell)
-            .Select(transaction => transaction.ProductNavigation)
+            .SelectAll(
+                customer => customer.Id == customerId,
+                customer => customer.Transactions
+                    .Where(transaction => transaction.Direction == TransactionDirection.Sell)
+                    .Select(transaction => transaction.ProductNavigation)
+                    .ToList())
+            .SelectMany(products => products)
             .Distinct()
             .ToList();
 
     /// <inheritdoc />
     public async Task<IEnumerable<Product>> PurchasedProductsAsync(int customerId)
-        => (await _customerRepo.FindAllAsync(customer => customer.Id == customerId))
-            .SelectMany(customer => customer.Transactions)
-            .Where(transaction => transaction.Direction == TransactionDirection.Sell)
-            .Select(transaction => transaction.ProductNavigation)
+        => (await _customerRepo.SelectAllAsync(
+                customer => customer.Id == customerId,
+                customer => customer.Transactions
+                    .Where(transaction => transaction.Direction == TransactionDirection.Sell)
+                    .Select(transaction => transaction.ProductNavigation)
+                    .ToList()))
+            .SelectMany(products => products)
             .Distinct()
             .ToList();
 
