@@ -15,11 +15,39 @@
   "users": [
     { "id": 1, "personId": 1, "username": "admin", "passwordHash": "REPLACE_WITH_REAL_HASH" }
   ],
+  "manufacturers": [
+    { "id": 1, "name": "Apple" },
+    { "id": 2, "name": "Samsung" },
+    { "id": 3, "name": "Anker" },
+    { "id": 4, "name": "Spigen" }
+  ],
+  "categories": [
+    { "id": 1, "name": "Phone" },
+    { "id": 2, "name": "Charger" },
+    { "id": 3, "name": "Glass" }
+  ],
+  "colors": [
+    { "id": 1, "name": "Midnight" },
+    { "id": 2, "name": "Black" },
+    { "id": 3, "name": "Green" }
+  ],
+  "storageCapacities": [
+    { "id": 1, "gb": 128 },
+    { "id": 2, "gb": 256 }
+  ],
+  "models": [
+    { "id": 1, "manufacturerId": 1, "categoryId": 1, "name": "iPhone 13" },
+    { "id": 2, "manufacturerId": 2, "categoryId": 1, "name": "Galaxy S24" },
+    { "id": 3, "manufacturerId": 1, "categoryId": 1, "name": "iPhone 11" },
+    { "id": 4, "manufacturerId": 3, "categoryId": 2, "name": "20W USB-C Charger" },
+    { "id": 5, "manufacturerId": 4, "categoryId": 3, "name": "iPhone 13 Glass" }
+  ],
   "products": [
-    { "id": 1, "price": 45000000, "manufacturer": "Apple", "model": "iPhone 13 128GB" },
-    { "id": 2, "price": 32000000, "manufacturer": "Samsung", "model": "Galaxy S24" },
-    { "id": 3, "price": 18000000, "manufacturer": "Apple", "model": "iPhone 11 (Used)" },
-    { "id": 4, "price": 1200000, "manufacturer": "Anker", "model": "20W USB-C Charger" }
+    { "id": 1, "price": 45000000, "modelId": 1, "colorId": 1, "barcode": "8900000000001" },
+    { "id": 2, "price": 32000000, "modelId": 2, "colorId": 2, "barcode": "8900000000002" },
+    { "id": 3, "price": 18000000, "modelId": 3, "colorId": 3, "barcode": "8900000000003" },
+    { "id": 4, "price": 1200000, "modelId": 4, "barcode": "8900000000004" },
+    { "id": 5, "price": 350000, "modelId": 5, "barcode": "8900000000005" }
   ],
   "transactions": [
     { "id": 1, "date": "2026-01-10T00:00:00", "sellerId": 2, "customerId": 1, "productId": 1, "finishedPrice": 42000000, "direction": "Buy" },
@@ -28,18 +56,42 @@
     { "id": 4, "date": "2026-01-05T00:00:00", "sellerId": 2, "customerId": 1, "productId": 3, "finishedPrice": 15000000, "direction": "Buy" },
     { "id": 5, "date": "2026-01-20T00:00:00", "sellerId": 2, "customerId": 1, "productId": 4, "finishedPrice": 900000, "direction": "Buy" }
   ],
+  "appleInfos": [
+    { "id": 1, "batteryHealth": 98, "chargeCycle": 120, "notes": "Excellent condition", "productId": 1 }
+  ],
   "appleIds": [
     { "id": 1, "email": "shop.appleid1@example.com", "password": "samplepass1", "notes": "Comes with iPhone 13", "productId": 1 }
   ],
   "phones": [
-    { "id": 1, "imei1": "123456789012345", "color": "Midnight", "productId": 1 },
-    { "id": 2, "imei1": "234567890123456", "imei2": "234567890123457", "color": "Black", "productId": 2 },
-    { "id": 3, "imei1": "345678901234567", "color": "Green", "ownershipTransferred": true, "productId": 3 }
+    { "id": 1, "imei1": "123456789012345", "productId": 1 },
+    { "id": 2, "imei1": "234567890123456", "imei2": "234567890123457", "productId": 2 },
+    { "id": 3, "imei1": "345678901234567", "ownershipTransferred": true, "productId": 3 }
   ],
   "secondHands": [
     { "id": 1, "testPeriodDays": 7, "usedDurationDays": 730, "productId": 3 }
   ],
   "guarantees": [
     { "id": 1, "startDate": "2026-01-10T00:00:00", "expirationDate": "2027-01-10T00:00:00", "corporation": "Apple", "productId": 1 }
+  ],
+  "deviceSpecs": [
+    { "id": 1, "ram": 6, "storageCapacityId": 1, "chargeSpeed": 20, "productId": 1 },
+    { "id": 2, "ram": 8, "storageCapacityId": 2, "chargeSpeed": 25, "productId": 2 }
+  ],
+  "tablets": [],
+  "smartWatches": [],
+  "laptops": [],
+  "cables": [],
+  "chargers": [
+    { "id": 1, "wattage": 20, "pd": true, "portCount": 1, "productId": 4 }
+  ],
+  "powerBanks": [],
+  "portableStorages": [],
+  "cases": [],
+  "caseModelFits": [],
+  "glasses": [
+    { "id": 1, "notes": "Tempered glass", "productId": 5 }
+  ],
+  "glassModelFits": [
+    { "id": 1, "glassId": 1, "modelId": 1 }
   ]
 }

@@ -14,9 +14,26 @@ public static class SampleDataInitializer
         ClearSet<Guarantee>(context);
         ClearSet<SecondHand>(context);
         ClearSet<AppleId>(context);
+        ClearSet<DeviceSpec>(context);
+        ClearSet<Tablet>(context);
+        ClearSet<SmartWatch>(context);
+        ClearSet<Laptop>(context);
+        ClearSet<Cable>(context);
+        ClearSet<Charger>(context);
+        ClearSet<PowerBank>(context);
+        ClearSet<PortableStorage>(context);
+        ClearSet<CaseModelFit>(context);
+        ClearSet<Case>(context);
+        ClearSet<GlassModelFit>(context);
+        ClearSet<Glass>(context);
         ClearSet<Phone>(context);
         ClearSet<Transaction>(context);
         ClearSet<Product>(context);
+        ClearSet<Model>(context);
+        ClearSet<StorageCapacity>(context);
+        ClearSet<Color>(context);
+        ClearSet<Category>(context);
+        ClearSet<Manufacturer>(context);
         ClearSet<User>(context);
         ClearSet<Customer>(context);
         ClearSet<Seller>(context);
@@ -37,12 +54,29 @@ public static class SampleDataInitializer
         ProcessInsert(context, context.Sellers, data.Sellers);
         ProcessInsert(context, context.Customers, data.Customers);
         ProcessInsert(context, context.Users, data.Users);
+        ProcessInsert(context, context.Manufacturers, data.Manufacturers);
+        ProcessInsert(context, context.Categories, data.Categories);
+        ProcessInsert(context, context.Colors, data.Colors);
+        ProcessInsert(context, context.StorageCapacities, data.StorageCapacities);
+        ProcessInsert(context, context.Models, data.Models);
         ProcessInsert(context, context.Products, data.Products);
         ProcessInsert(context, context.Transactions, data.Transactions);
         ProcessInsert(context, context.AppleIds, data.AppleIds);
         ProcessInsert(context, context.Phones, data.Phones);
         ProcessInsert(context, context.SecondHands, data.SecondHands);
         ProcessInsert(context, context.Guarantees, data.Guarantees);
+        ProcessInsert(context, context.DeviceSpecs, data.DeviceSpecs);
+        ProcessInsert(context, context.Tablets, data.Tablets);
+        ProcessInsert(context, context.SmartWatches, data.SmartWatches);
+        ProcessInsert(context, context.Laptops, data.Laptops);
+        ProcessInsert(context, context.Cables, data.Cables);
+        ProcessInsert(context, context.Chargers, data.Chargers);
+        ProcessInsert(context, context.PowerBanks, data.PowerBanks);
+        ProcessInsert(context, context.PortableStorages, data.PortableStorages);
+        ProcessInsert(context, context.Cases, data.Cases);
+        ProcessInsert(context, context.CaseModelFits, data.CaseModelFits);
+        ProcessInsert(context, context.Glasses, data.Glasses);
+        ProcessInsert(context, context.GlassModelFits, data.GlassModelFits);
         
         static void ProcessInsert<TEntity>(
             AppDbContext context,
