@@ -28,10 +28,8 @@ public class CustomerDataServiceTests : RepoTestBase
         Context.Customers.Add(customer);
         Context.SaveChanges();
 
-        var product1 = new Product { Manufacturer = "Apple", Model = "Mac", Price = 100m };
-        var product2 = new Product { Manufacturer = "Apple", Model = "iPad", Price = 200m };
-        Context.Products.AddRange(product1, product2);
-        Context.SaveChanges();
+        var product1 = TestDataHelpers.CreateProduct(Context, 100m);
+        var product2 = TestDataHelpers.CreateProduct(Context, 200m);
 
         Context.Transactions.Add(new Transaction { ProductId = product1.Id, ProductNavigation = product1, SellerId = seller.Id, SellerNavigation = seller, CustomerId = customer.Id, CustomerNavigation = customer, FinishedPrice = 100m, Date = DateTime.UtcNow, Direction = TransactionDirection.Sell });
         Context.Transactions.Add(new Transaction { ProductId = product2.Id, ProductNavigation = product2, SellerId = seller.Id, SellerNavigation = seller, CustomerId = customer.Id, CustomerNavigation = customer, FinishedPrice = 200m, Date = DateTime.UtcNow.AddMinutes(1), Direction = TransactionDirection.Sell });

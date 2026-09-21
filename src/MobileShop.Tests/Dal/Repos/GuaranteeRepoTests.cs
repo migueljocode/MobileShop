@@ -6,9 +6,7 @@ public class GuaranteeRepoTests : BaseRepoTests<Guarantee, IGuaranteeRepo>
 
     protected override Guarantee CreateValidEntity()
     {
-        var product = new Product { Price = 100, Manufacturer = "TestCo", Model = "G" };
-        Context.Products.Add(product);
-        Context.SaveChanges();
+        var product = TestDataHelpers.CreateProduct(Context);
 
         return new Guarantee
         {

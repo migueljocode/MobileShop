@@ -7,6 +7,11 @@ public interface ICustomerDataService : IDataService<Customer>
 {
     /// <summary>Gets customer options for transaction selectors.</summary>
     IReadOnlyList<PartyOptionViewModel> GetPartyOptions();
+    /// <summary>Gets customer rows for the customers list.</summary>
+    IReadOnlyList<CustomerListItemViewModel> GetListRows();
+    /// <summary>Gets flattened customer details, or <see langword="null"/> when not found.</summary>
+    /// <param name="id">The customer identifier.</param>
+    CustomerDetailsViewModel? GetDetails(int id);
     /// <summary>Gets products purchased by a customer.</summary>
     /// <param name="customerId">The customer identifier.</param>
     IEnumerable<Product> PurchasedProducts(int customerId);

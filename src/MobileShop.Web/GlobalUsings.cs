@@ -3,6 +3,7 @@ global using Microsoft.AspNetCore.Mvc.RazorPages;
 global using Microsoft.EntityFrameworkCore;
 global using MobileShop.Dal.EfStructures;
 global using MobileShop.Dal.Initialization;
+global using MobileShop.Dal.Repos.Interfaces;
 global using MobileShop.Models.Enums;
 global using MobileShop.Models.Entities;
 global using System.ComponentModel.DataAnnotations;

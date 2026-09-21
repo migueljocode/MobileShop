@@ -55,7 +55,7 @@ public class TransactionDataService(
                 transaction.Date,
                 transaction.Direction,
                 transaction.FinishedPrice,
-                transaction.ProductNavigation.Manufacturer + " " + transaction.ProductNavigation.Model,
+                transaction.ProductNavigation.ModelNavigation.ManufacturerNavigation.Name + " " + transaction.ProductNavigation.ModelNavigation.Name,
                 transaction.Direction == TransactionDirection.Buy
                     ? "From: " + (transaction.SellerNavigation.PersonNavigation == null
                         ? "Shop"
@@ -77,7 +77,7 @@ public class TransactionDataService(
                 transaction.Id,
                 transaction.Date,
                 transaction.Direction,
-                transaction.ProductNavigation.Manufacturer + " " + transaction.ProductNavigation.Model,
+                transaction.ProductNavigation.ModelNavigation.ManufacturerNavigation.Name + " " + transaction.ProductNavigation.ModelNavigation.Name,
                 transaction.FinishedPrice,
                 transaction.SellerNavigation.PersonNavigation == null
                     ? "Shop"
@@ -112,7 +112,7 @@ public class TransactionDataService(
                 transaction.Date,
                 transaction.Direction,
                 transaction.FinishedPrice,
-                ProductLabel = transaction.ProductNavigation.Manufacturer + " " + transaction.ProductNavigation.Model
+                ProductLabel = transaction.ProductNavigation.ModelNavigation.ManufacturerNavigation.Name + " " + transaction.ProductNavigation.ModelNavigation.Name
             })
             .Where(transaction => (!from.HasValue || transaction.Date.Date >= from.Value.Date) &&
                                   (!to.HasValue || transaction.Date.Date <= to.Value.Date));
@@ -162,7 +162,7 @@ public class TransactionDataService(
                 transaction.Date,
                 transaction.Direction,
                 transaction.FinishedPrice,
-                transaction.ProductNavigation.Manufacturer + " " + transaction.ProductNavigation.Model,
+                transaction.ProductNavigation.ModelNavigation.ManufacturerNavigation.Name + " " + transaction.ProductNavigation.ModelNavigation.Name,
                 transaction.SellerNavigation.PersonNavigation == null
                     ? "Shop"
                     : transaction.SellerNavigation.PersonNavigation.FirstName + " " + transaction.SellerNavigation.PersonNavigation.LastName,

@@ -7,5 +7,5 @@
 </div>
 <table class="table table-striped"><thead><tr><th>Name</th><th>Phone</th><th>Type</th><th></th></tr></thead><tbody>
 @foreach (var seller in Model.Sellers)
-{ <tr><td>@seller.PersonNavigation.FirstName @seller.PersonNavigation.LastName</td><td>@seller.PersonNavigation.PhoneNumber</td><td>@seller.EntityType</td><td><a asp-page="/People/SellerDetails" asp-route-id="@seller.Id">Details</a></td></tr> }
+{ <tr><td>@seller.Name</td><td>@seller.PhoneNumber</td><td>@seller.EntityType</td><td><a asp-page="/People/SellerDetails" asp-route-id="@seller.Id">Details</a></td></tr> }
 </tbody></table>

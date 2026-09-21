@@ -13,9 +13,9 @@ public class PhoneDataService(
                 phone.Id,
                 phone.ProductId,
                 "Phone",
-                phone.ProductNavigation.Manufacturer + " " + phone.ProductNavigation.Model,
+                phone.ProductNavigation.ModelNavigation.ManufacturerNavigation.Name + " " + phone.ProductNavigation.ModelNavigation.Name,
                 "IMEI: " + phone.IMEI1,
-                phone.Color,
+                (phone.ProductNavigation.ColorNavigation == null ? null : phone.ProductNavigation.ColorNavigation.Name),
                 phone.ProductNavigation.Transactions.Any(t => t.Direction == TransactionDirection.Sell),
                 phone.ProductNavigation.SecondHandProfile != null))
             .OrderBy(row => row.ProductId)
@@ -30,9 +30,9 @@ public class PhoneDataService(
                     phone.Id,
                     phone.ProductId,
                     "Phone",
-                    phone.ProductNavigation.Manufacturer + " " + phone.ProductNavigation.Model,
+                    phone.ProductNavigation.ModelNavigation.ManufacturerNavigation.Name + " " + phone.ProductNavigation.ModelNavigation.Name,
                     "IMEI: " + phone.IMEI1,
-                    phone.Color,
+                    (phone.ProductNavigation.ColorNavigation == null ? null : phone.ProductNavigation.ColorNavigation.Name),
                     phone.ProductNavigation.Transactions.Any(t => t.Direction == TransactionDirection.Sell),
                     phone.ProductNavigation.SecondHandProfile != null))
             .OrderBy(row => row.ProductId)
@@ -47,9 +47,9 @@ public class PhoneDataService(
                     phone.Id,
                     phone.ProductId,
                     "Phone",
-                    phone.ProductNavigation.Manufacturer + " " + phone.ProductNavigation.Model,
+                    phone.ProductNavigation.ModelNavigation.ManufacturerNavigation.Name + " " + phone.ProductNavigation.ModelNavigation.Name,
                     "IMEI: " + phone.IMEI1,
-                    phone.Color,
+                    (phone.ProductNavigation.ColorNavigation == null ? null : phone.ProductNavigation.ColorNavigation.Name),
                     phone.ProductNavigation.Transactions.Any(t => t.Direction == TransactionDirection.Sell),
                     phone.ProductNavigation.SecondHandProfile != null))
             .OrderBy(row => row.ProductId)
@@ -65,9 +65,9 @@ public class PhoneDataService(
                     phone.Id,
                     phone.ProductId,
                     "Phone",
-                    phone.ProductNavigation.Manufacturer + " " + phone.ProductNavigation.Model,
+                    phone.ProductNavigation.ModelNavigation.ManufacturerNavigation.Name + " " + phone.ProductNavigation.ModelNavigation.Name,
                     "IMEI: " + phone.IMEI1,
-                    phone.Color,
+                    (phone.ProductNavigation.ColorNavigation == null ? null : phone.ProductNavigation.ColorNavigation.Name),
                     phone.ProductNavigation.Transactions.Any(t => t.Direction == TransactionDirection.Sell),
                     phone.ProductNavigation.SecondHandProfile != null))
             .OrderBy(row => row.ProductId)
@@ -78,9 +78,9 @@ public class PhoneDataService(
             phone.Id,
             phone.ProductId,
             "Phone",
-            phone.ProductNavigation.Manufacturer + " " + phone.ProductNavigation.Model,
+            phone.ProductNavigation.ModelNavigation.ManufacturerNavigation.Name + " " + phone.ProductNavigation.ModelNavigation.Name,
             "IMEI: " + phone.IMEI1,
-            phone.Color,
+            (phone.ProductNavigation.ColorNavigation == null ? null : phone.ProductNavigation.ColorNavigation.Name),
             phone.ProductNavigation.Transactions.Any(t => t.Direction == TransactionDirection.Sell),
             phone.ProductNavigation.SecondHandProfile != null);
 
@@ -91,12 +91,12 @@ public class PhoneDataService(
             phone => new ProductDetailsViewModel(
                 "Phone",
                 phone.ProductId,
-                phone.ProductNavigation.Manufacturer,
-                phone.ProductNavigation.Model,
+                phone.ProductNavigation.ModelNavigation.ManufacturerNavigation.Name,
+                phone.ProductNavigation.ModelNavigation.Name,
                 string.IsNullOrWhiteSpace(phone.IMEI2)
                     ? "IMEI: " + phone.IMEI1
                     : "IMEI: " + phone.IMEI1 + " / " + phone.IMEI2,
-                phone.Color,
+                (phone.ProductNavigation.ColorNavigation == null ? null : phone.ProductNavigation.ColorNavigation.Name),
                 phone.ProductNavigation.Transactions
                     .Where(t => t.Direction == TransactionDirection.Sell)
                     .OrderByDescending(t => t.Date)

@@ -17,6 +17,26 @@ public class CustomerDataService(
             .OrderBy(row => row.Label)
             .ToList();
 
+    /// <inheritdoc />
+    public IReadOnlyList<CustomerListItemViewModel> GetListRows()
+        => _customerRepo
+            .SelectAll(customer => new CustomerListItemViewModel(
+                customer.Id,
+                customer.PersonNavigation.FirstName + " " + customer.PersonNavigation.LastName,
+                customer.PersonNavigation.PhoneNumber,
+                customer.NationalId))
+            .OrderBy(row => row.Name)
+            .ToList();
+
+    /// <inheritdoc />
+    public CustomerDetailsViewModel? GetDetails(int id)
+        => _customerRepo.Select(
+            id,
+            customer => new CustomerDetailsViewModel(
+                customer.PersonNavigation.FirstName + " " + customer.PersonNavigation.LastName,
+                customer.PersonNavigation.PhoneNumber,
+                customer.NationalId));
+
     // ── Purchased products ────────────────────────────────
 
     /// <inheritdoc />

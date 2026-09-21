@@ -62,6 +62,9 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ISecondHandRepo, SecondHandRepo>();
         services.AddScoped<IGuaranteeRepo, GuaranteeRepo>();
         services.AddScoped<IManufacturerRepo, ManufacturerRepo>();
+        services.AddScoped<IModelRepo, ModelRepo>();
+        services.AddScoped<ICategoryRepo, CategoryRepo>();
+        services.AddScoped<IColorRepo, ColorRepo>();
         return services;
     }
 

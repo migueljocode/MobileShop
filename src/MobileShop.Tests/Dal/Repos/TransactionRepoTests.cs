@@ -13,10 +13,9 @@ public class TransactionRepoTests : BaseRepoTests<Transaction, ITransactionRepo>
 
         var seller = new Seller { PersonId = sellerPerson.Id, EntityType = SellerEntityType.Real };
         var customer = new Customer { PersonId = customerPerson.Id, NationalId = "2222222222" };
-        var product = new Product { Price = 500, Manufacturer = "TestCo", Model = "X" };
+        var product = TestDataHelpers.CreateProduct(Context, 500);
         Context.Sellers.Add(seller);
         Context.Customers.Add(customer);
-        Context.Products.Add(product);
         Context.SaveChanges();
 
         return new Transaction

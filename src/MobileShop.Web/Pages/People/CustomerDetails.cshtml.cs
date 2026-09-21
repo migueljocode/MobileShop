@@ -1,15 +1,24 @@
 namespace MobileShop.Web.Pages.People;
 
-public class CustomerDetailsModel(ICustomerDataService customerDataService) : PageModel
+public class CustomerDetailsModel(
+    ICustomerDataService customerDataService,
+    IProductDataService productDataService) : PageModel
 {
-    public Customer? Customer { get; private set; }
-    public IReadOnlyList<Product> Products { get; private set; } = [];
+    public CustomerDetailsViewModel? Customer { get; private set; }
+    public IReadOnlyList<ProductListItemViewModel> Products { get; private set; } = [];
 
     public IActionResult OnGet(int id)
     {
-        Customer = customerDataService.Find(id);
+        Customer = customerDataService.GetDetails(id);
         if (Customer is null) return NotFound();
-        Products = customerDataService.PurchasedProducts(id).ToList();
+
+        var purchasedProductIds = customerDataService.PurchasedProducts(id)
+            .Select(product => product.Id)
+            .ToHashSet();
+        Products = productDataService.GetInventoryRows()
+            .Where(row => purchasedProductIds.Contains(row.ProductId))
+            .ToList();
+
         return Page();
     }
 }

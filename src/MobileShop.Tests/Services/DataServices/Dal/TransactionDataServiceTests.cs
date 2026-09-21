@@ -28,9 +28,7 @@ public class TransactionDataServiceTests : RepoTestBase
         Context.Customers.Add(customer);
         Context.SaveChanges();
 
-        var product = new Product { Manufacturer = "Samsung", Model = "Galaxy", Price = 320m };
-        Context.Products.Add(product);
-        Context.SaveChanges();
+        var product = TestDataHelpers.CreateProduct(Context, 320m);
 
         var bought = _service.RecordBuy(product.Id, seller.Id, 280m, DateTime.UtcNow);
         Assert.True(bought);

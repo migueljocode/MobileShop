@@ -24,7 +24,8 @@
   "categories": [
     { "id": 1, "name": "Phone" },
     { "id": 2, "name": "Charger" },
-    { "id": 3, "name": "Glass" }
+    { "id": 3, "name": "Glass" },
+    { "id": 4, "name": "AppleId" }
   ],
   "colors": [
     { "id": 1, "name": "Midnight" },

@@ -28,9 +28,7 @@ public class PhoneDataServiceTests : RepoTestBase
         Context.Customers.Add(customer);
         Context.SaveChanges();
 
-        var product = new Product { Manufacturer = "Nokia", Model = "Brick", Price = 50m };
-        Context.Products.Add(product);
-        Context.SaveChanges();
+        var product = TestDataHelpers.CreateProduct(Context, 50m);
 
         var phone = new Phone { ProductId = product.Id, ProductNavigation = product, IMEI1 = "123456789012345", IMEI2 = "123456789012346", OwnershipTransferred = false };
         Context.Phones.Add(phone);

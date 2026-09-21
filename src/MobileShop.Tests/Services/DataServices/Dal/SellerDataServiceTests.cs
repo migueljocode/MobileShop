@@ -28,9 +28,7 @@ public class SellerDataServiceTests : RepoTestBase
         Context.Customers.Add(customer);
         Context.SaveChanges();
 
-        var product = new Product { Manufacturer = "Apple", Model = "iPhone", Price = 500m };
-        Context.Products.Add(product);
-        Context.SaveChanges();
+        var product = TestDataHelpers.CreateProduct(Context, 500m);
 
         Context.Transactions.Add(new Transaction { ProductId = product.Id, ProductNavigation = product, SellerId = seller.Id, SellerNavigation = seller, CustomerId = customer.Id, CustomerNavigation = customer, FinishedPrice = 500m, Date = DateTime.UtcNow, Direction = TransactionDirection.Buy });
         Context.Transactions.Add(new Transaction { ProductId = product.Id, ProductNavigation = product, SellerId = seller.Id, SellerNavigation = seller, CustomerId = customer.Id, CustomerNavigation = customer, FinishedPrice = 600m, Date = DateTime.UtcNow.AddMinutes(1), Direction = TransactionDirection.Sell });

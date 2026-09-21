@@ -6,9 +6,7 @@ public class PhoneRepoTests : BaseRepoTests<Phone, IPhoneRepo>
 
     protected override Phone CreateValidEntity()
     {
-        var product = new Product { Price = 100, Manufacturer = "TestCo", Model = "P" };
-        Context.Products.Add(product);
-        Context.SaveChanges();
+        var product = TestDataHelpers.CreateProduct(Context);
 
         return new Phone { IMEI1 = TestDataHelpers.GenerateImei(), ProductId = product.Id };
     }

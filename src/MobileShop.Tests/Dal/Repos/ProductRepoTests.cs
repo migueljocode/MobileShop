@@ -4,12 +4,8 @@ public class ProductRepoTests : BaseRepoTests<Product, IProductRepo>
 {
     protected override IProductRepo CreateRepo() => new ProductRepo(Context);
 
-    protected override Product CreateValidEntity() => new()
-    {
-        Price = 1_000_000,
-        Manufacturer = "TestCo",
-        Model = "TestModel"
-    };
+    protected override Product CreateValidEntity()
+        => TestDataHelpers.CreateProduct(Context, 1_000_000, persist: false);
 
     [Fact]
     public void IsInStock_ReturnsTrue_WhenNoSellTransactionExists()

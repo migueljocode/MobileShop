@@ -28,9 +28,7 @@ public class AppleIdDataServiceTests : RepoTestBase
         Context.Customers.Add(customer);
         Context.SaveChanges();
 
-        var product = new Product { Manufacturer = "Apple", Model = "iCloud", Price = 60m };
-        Context.Products.Add(product);
-        Context.SaveChanges();
+        var product = TestDataHelpers.CreateProduct(Context, 60m);
 
         var appleId = new AppleId { ProductId = product.Id, ProductNavigation = product, Email = "owner@example.com", Password = "secret", Notes = "owner note" };
         Context.AppleIds.Add(appleId);
