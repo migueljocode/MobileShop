@@ -8,3 +8,19 @@ Runtime sweep: every Razor Page and tested detail route returned HTTP 200.
 Fixed normalized catalog references, repository registrations, product creation, people-page projections, and test fixtures.
 Fixed one test-helper issue discovered during verification where persisted products were being added twice.
 One unrelated worktree change remains: docs/catalog-normalization-roadmap.md is currently deleted. I did not alter it because that deletion was already present in the agent’s uncommitted changes.
+
+this is the output:
+```bash
+clear; dotnet build | tail -n 5; separator; dotnet test | tail -n 5
+```
+`Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:04.20
+----------------------------------------------------------------------------------------------------
+
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+
+Passed!  - Failed:     0, Passed:   271, Skipped:     0, Total:   271, Duration: 24 s - MobileShop.Tests.dll (net10.0)`
