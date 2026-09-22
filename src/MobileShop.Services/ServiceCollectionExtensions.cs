@@ -9,7 +9,7 @@ namespace MobileShop.Services;
 /// appsettings.json of the hosting app (Web or Api):
 /// <list type="bullet">
 /// <item><see langword="false"/> (default) → the production-ready <c>MobileShop.Services.DataServices.Dal</c> services.</item>
-/// <item><see langword="true"/> → the <c>MobileShop.Services.DataServices.Api</c> services (implemented later - not yet available).</item>
+/// <item><see langword="true"/> → the <c>MobileShop.Services.DataServices.Api</c> services, which currently expose stub implementations whose members throw <see cref="NotImplementedException"/>.</item>
 /// </list>
 /// </remarks>
 public static class ServiceCollectionExtensions
@@ -85,11 +85,15 @@ public static class ServiceCollectionExtensions
     {
         if (useApi)
         {
-            throw new NotSupportedException(
-                "\"UseApi\": true selects the Api data services " +
-                "(MobileShop.Services.DataServices.Api), but they are not implemented yet. " +
-                "Set \"UseApi\": false in appsettings.json to use the production-ready " +
-                "Dal data services instead.");
+            services.AddScoped<IUserDataService, MobileShop.Services.DataServices.Api.ApiUserDataService>();
+            services.AddScoped<ICustomerDataService, MobileShop.Services.DataServices.Api.ApiCustomerDataService>();
+            services.AddScoped<ISellerDataService, MobileShop.Services.DataServices.Api.ApiSellerDataService>();
+            services.AddScoped<ITransactionDataService, MobileShop.Services.DataServices.Api.ApiTransactionDataService>();
+            services.AddScoped<IProductDataService, MobileShop.Services.DataServices.Api.ApiProductDataService>();
+            services.AddScoped<IInvoiceDataService, MobileShop.Services.DataServices.Api.ApiInvoiceDataService>();
+            services.AddScoped<IPhoneDataService, MobileShop.Services.DataServices.Api.ApiPhoneDataService>();
+            services.AddScoped<IAppleIdDataService, MobileShop.Services.DataServices.Api.ApiAppleIdDataService>();
+            return services;
         }
 
         services.AddScoped<IUserDataService, UserDataService>();
