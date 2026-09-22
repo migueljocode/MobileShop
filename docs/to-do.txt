@@ -1,8 +1,8 @@
-## Step 1 — Finish applying the global-usings convention to the Api layer (2026-09-22)
+## Step 2 — Prove the sale-invoice PDF renders the two new rows (2026-09-22)
 
-- Files: src/MobileShop.Services/GlobalUsings.cs, src/MobileShop.Services/ServiceCollectionExtensions.cs, src/MobileShop.Services/Logging/Settings/AppLoggingSettings.cs, src/MobileShop.Services/DataServices/Api/*.cs
-- Commit message: refactor(services): apply the global usings convention to the Api registrations and stubs
+- Files: none
+- Commit message: docs: record the sale invoice render verification
 - Build: 0 errors / 0 warnings. Tests: 271 passed, 0 failed.
-- Checks: dotnet build src/MobileShop.slnx --no-incremental → Build succeeded; dotnet test src/MobileShop.slnx --nologo → Passed (271/271); grep -c 'DataServices.Api' src/MobileShop.Services/GlobalUsings.cs → 1; grep -rn 'DataServices\.Api\.Api' src/MobileShop.Services/ServiceCollectionExtensions.cs → no output; grep -rc 'System.Linq.Expressions' src/MobileShop.Services/DataServices/Api/*.cs | grep -v ':0' → no output; grep -rc 'inheritdoc' src/MobileShop.Services/DataServices/Api/*.cs → 196 total across the 8 Api files; grep -rn '^using ' src --include=*.cs | grep -v /obj/ | grep -v Migrations → no output.
+- Checks: curl -s -o /tmp/invoice-sale.pdf -w '%{http_code}\n' http://localhost:5070/pdf-smoke/2 → 200; curl -s -o /tmp/invoice-purchase.pdf -w '%{http_code}\n' http://localhost:5070/pdf-smoke/1 → 200; head -c 5 /tmp/invoice-sale.pdf → %PDF-; pdftotext -layout /tmp/invoice-sale.pdf - | grep -nE 'Sale invoice|National ID: 0012345678|Ownership: Not transferred|Count: 1|Price: 45,000,000|Apple iPhone 13|Signature: ______|Notes:' → showed Sale invoice, National ID: 0012345678, Apple iPhone 13, Price: 45,000,000, Count: 1, Ownership: Not transferred, and Signature: ______; pdftotext -layout /tmp/invoice-purchase.pdf - | grep -nE 'Purchase invoice|National ID:|Ownership:|Count: 1|Signature: ______' → showed Purchase invoice, Count: 1, Signature: ______, and no National ID/Ownership line.
 - Deviations: none
-- Next: Step 2 — Prove the sale-invoice PDF renders the two new rows
+- Next: Step 3 — Document how the AppLogging section is bound
