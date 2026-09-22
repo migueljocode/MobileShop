@@ -26,8 +26,7 @@ public static class ServiceCollectionExtensions
             .AddMobileShopRepositories()
             .AddMobileShopSecurity()
             .AddMobileShopPdf(configuration)
-            .AddMobileShopDataServices(useApi)
-            .AddMobileShopSeeding();
+            .AddMobileShopDataServices(useApi);
     }
 
     private static IServiceCollection AddMobileShopPdf(
@@ -75,17 +74,10 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
-    /// <summary>Registers the development-time seeders.</summary>
-    private static IServiceCollection AddMobileShopSeeding(this IServiceCollection services)
-    {
-        services.AddScoped<AdminSeeder>();
-        return services;
-    }
-
     /// <summary>
     /// Registers the data services behind their interfaces.
     /// <paramref name="useApi"/> decides between the Dal implementations (production-ready)
-    /// and the Api implementations (not implemented yet).
+    /// and the Api implementations whose members currently throw <see cref="NotImplementedException"/>.
     /// </summary>
     private static IServiceCollection AddMobileShopDataServices(
         this IServiceCollection services,

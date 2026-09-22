@@ -6,8 +6,25 @@ public class UserDataService(
     ILogger<UserDataService> logger)
     : DataServiceBase<UserDataService, User>(userRepo, logger), IUserDataService
 {
+    /// <summary>The username of the seeded admin account.</summary>
+    public const string DefaultAdminUsername = "admin";
+
+    /// <summary>The development password assigned to the seeded admin account.</summary>
+    public const string DefaultAdminPassword = "Admin@123";
+
     private readonly IUserRepo _userRepo = userRepo;
     private readonly IPasswordHasher _passwordHasher = passwordHasher;
+
+    /// <inheritdoc />
+    public void EnsureAdminUser()
+    {
+        var admin = _userRepo.FindByUsername(DefaultAdminUsername)
+            ?? throw new InvalidOperationException(
+                $"The default admin account '{DefaultAdminUsername}' was not found - seed the sample data first.");
+
+        admin.PasswordHash = _passwordHasher.Hash(DefaultAdminPassword);
+        _userRepo.Update(admin);
+    }
 
     /// <inheritdoc />
     public User? FindByUsername(string username)

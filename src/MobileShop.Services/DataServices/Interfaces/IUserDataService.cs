@@ -5,6 +5,12 @@ namespace MobileShop.Services.DataServices.Interfaces;
 /// </summary>
 public interface IUserDataService : IDataService<User>
 {
+    /// <summary>
+    /// Finds the seeded admin account, replaces its stored password with a real hash of the default
+    /// development password, and throws <see cref="InvalidOperationException"/> when the account is missing.
+    /// </summary>
+    void EnsureAdminUser();
+
     /// <summary>Finds a user by username.</summary>
     /// <param name="username">The username.</param>
     /// <returns>The user, or <see langword="null"/> when not found.</returns>

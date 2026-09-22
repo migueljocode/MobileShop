@@ -11,7 +11,6 @@ global using MobileShop.Models.ViewModels.Web;
 global using MobileShop.Models.ViewModels.Web.BindModels;
 global using MobileShop.Services;
 global using MobileShop.Services.DataServices.Interfaces;
-global using MobileShop.Services.Initialization;
 global using MobileShop.Services.Logging.Configuration;
 global using MobileShop.Services.PDF;
 global using MobileShop.Services.Security;
