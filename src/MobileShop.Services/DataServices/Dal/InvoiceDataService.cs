@@ -24,7 +24,7 @@ public sealed class InvoiceDataService(
             .Include(t => t.ProductNavigation).ThenInclude(p => p.PortableStorageProfile)
             .Include(t => t.ProductNavigation)
                 .ThenInclude(p => p.PortableStorageProfile)
-                .ThenInclude(s => s.StorageCapacityNavigation)
+                .ThenInclude(s => s!.StorageCapacityNavigation)
             .Include(t => t.ProductNavigation).ThenInclude(p => p.CaseProfile)
             .Include(t => t.ProductNavigation).ThenInclude(p => p.GlassProfile)
             .Include(t => t.ProductNavigation).ThenInclude(p => p.TabletProfile)

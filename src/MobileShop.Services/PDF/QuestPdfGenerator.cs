@@ -1,9 +1,3 @@
-using QuestPDF.Fluent;
-using QuestPDF.Helpers;
-using QuestPDF.Infrastructure;
-using MobileShop.Services.PDF.Settings;
-using Microsoft.Extensions.Options;
-
 namespace MobileShop.Services.PDF;
 
 /// <summary>QuestPDF-backed invoice generator.</summary>
