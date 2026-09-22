@@ -10,6 +10,7 @@ public static class WebApplicationBuilderExtensions
     /// </summary>
     public static WebApplicationBuilder ConfigureBuilder(this WebApplicationBuilder builder)
     {
+        QuestPdfSetup.UseCommunityLicense();
         builder.ConfigureSerilog();
         builder.Services.AddRazorPages();
         builder.Services.AddMobileShop(builder.Configuration);
