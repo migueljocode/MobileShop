@@ -10,6 +10,11 @@ public static class LoggingsConfiguration
         "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz}\t{Level:u3}\t{SourceContext}\t{Message:lj}{NewLine}{Exception}";
 
     /// <summary>Configures console and rolling-file Serilog sinks from application settings.</summary>
+    /// <remarks>
+    /// Reads the <c>AppLogging</c> section, keeps the framework's own <c>Logging</c> section out of play
+    /// via <c>ClearProviders()</c> and <c>AddSerilog(...)</c>, and pins <c>Microsoft.AspNetCore</c> to
+    /// <c>Warning</c> via an override.
+    /// </remarks>
     public static WebApplicationBuilder ConfigureSerilog(this WebApplicationBuilder builder)
     {
         builder.Logging.ClearProviders();

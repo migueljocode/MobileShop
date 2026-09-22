@@ -1,8 +1,8 @@
-## Step 2 — Prove the sale-invoice PDF renders the two new rows (2026-09-22)
+## Step 3 — Document how the AppLogging section is bound (2026-09-22)
 
-- Files: none
-- Commit message: docs: record the sale invoice render verification
+- Files: src/MobileShop.Services/Logging/Settings/AppLoggingSettings.cs, src/MobileShop.Services/Logging/Configuration/LoggingsConfiguration.cs
+- Commit message: docs(services): document how the AppLogging section is bound
 - Build: 0 errors / 0 warnings. Tests: 271 passed, 0 failed.
-- Checks: curl -s -o /tmp/invoice-sale.pdf -w '%{http_code}\n' http://localhost:5070/pdf-smoke/2 → 200; curl -s -o /tmp/invoice-purchase.pdf -w '%{http_code}\n' http://localhost:5070/pdf-smoke/1 → 200; head -c 5 /tmp/invoice-sale.pdf → %PDF-; pdftotext -layout /tmp/invoice-sale.pdf - | grep -nE 'Sale invoice|National ID: 0012345678|Ownership: Not transferred|Count: 1|Price: 45,000,000|Apple iPhone 13|Signature: ______|Notes:' → showed Sale invoice, National ID: 0012345678, Apple iPhone 13, Price: 45,000,000, Count: 1, Ownership: Not transferred, and Signature: ______; pdftotext -layout /tmp/invoice-purchase.pdf - | grep -nE 'Purchase invoice|National ID:|Ownership:|Count: 1|Signature: ______' → showed Purchase invoice, Count: 1, Signature: ______, and no National ID/Ownership line.
+- Checks: git diff -- src/MobileShop.Services/Logging/Settings/AppLoggingSettings.cs src/MobileShop.Services/Logging/Configuration/LoggingsConfiguration.cs → only added XML comments; dotnet build src/MobileShop.slnx --no-incremental → Build succeeded.
 - Deviations: none
-- Next: Step 3 — Document how the AppLogging section is bound
+- Next: —
