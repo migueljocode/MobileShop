@@ -10,6 +10,7 @@ global using Serilog.Sinks.SystemConsole.Themes;
 global using QuestPDF.Fluent;
 global using QuestPDF.Helpers;
 global using QuestPDF.Infrastructure;
+global using static QuestPDF.Fluent.Document;
 global using System.Linq.Expressions;
 global using MobileShop.Models.Entities.Base;
 global using MobileShop.Services.DataServices.Interfaces.Base;

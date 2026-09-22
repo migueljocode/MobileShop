@@ -1,8 +1,0 @@
-## Step 3 — Document how the AppLogging section is bound (2026-09-22)
-
-- Files: src/MobileShop.Services/Logging/Settings/AppLoggingSettings.cs, src/MobileShop.Services/Logging/Configuration/LoggingsConfiguration.cs
-- Commit message: docs(services): document how the AppLogging section is bound
-- Build: 0 errors / 0 warnings. Tests: 271 passed, 0 failed.
-- Checks: git diff -- src/MobileShop.Services/Logging/Settings/AppLoggingSettings.cs src/MobileShop.Services/Logging/Configuration/LoggingsConfiguration.cs → only added XML comments; dotnet build src/MobileShop.slnx --no-incremental → Build succeeded.
-- Deviations: none
-- Next: —
