@@ -1,26 +1,8 @@
-Final verdict for Claude:
+## Step 1 — Finish applying the global-usings convention to the Api layer (2026-09-22)
 
-The compile-fix prompt is complete and verified.
-
-Full solution build: passed with 0 warnings/errors.
-Full test suite: 271 passed, 0 failed.
-Runtime sweep: every Razor Page and tested detail route returned HTTP 200.
-Fixed normalized catalog references, repository registrations, product creation, people-page projections, and test fixtures.
-Fixed one test-helper issue discovered during verification where persisted products were being added twice.
-One unrelated worktree change remains: docs/catalog-normalization-roadmap.md is currently deleted. I did not alter it because that deletion was already present in the agent’s uncommitted changes.
-
-this is the output:
-```bash
-clear; dotnet build | tail -n 5; separator; dotnet test | tail -n 5
-```
-`Build succeeded.
-    0 Warning(s)
-    0 Error(s)
-
-Time Elapsed 00:00:04.20
-----------------------------------------------------------------------------------------------------
-
-Starting test execution, please wait...
-A total of 1 test files matched the specified pattern.
-
-Passed!  - Failed:     0, Passed:   271, Skipped:     0, Total:   271, Duration: 24 s - MobileShop.Tests.dll (net10.0)`
+- Files: src/MobileShop.Services/GlobalUsings.cs, src/MobileShop.Services/ServiceCollectionExtensions.cs, src/MobileShop.Services/Logging/Settings/AppLoggingSettings.cs, src/MobileShop.Services/DataServices/Api/*.cs
+- Commit message: refactor(services): apply the global usings convention to the Api registrations and stubs
+- Build: 0 errors / 0 warnings. Tests: 271 passed, 0 failed.
+- Checks: dotnet build src/MobileShop.slnx --no-incremental → Build succeeded; dotnet test src/MobileShop.slnx --nologo → Passed (271/271); grep -c 'DataServices.Api' src/MobileShop.Services/GlobalUsings.cs → 1; grep -rn 'DataServices\.Api\.Api' src/MobileShop.Services/ServiceCollectionExtensions.cs → no output; grep -rc 'System.Linq.Expressions' src/MobileShop.Services/DataServices/Api/*.cs | grep -v ':0' → no output; grep -rc 'inheritdoc' src/MobileShop.Services/DataServices/Api/*.cs → 196 total across the 8 Api files; grep -rn '^using ' src --include=*.cs | grep -v /obj/ | grep -v Migrations → no output.
+- Deviations: none
+- Next: Step 2 — Prove the sale-invoice PDF renders the two new rows

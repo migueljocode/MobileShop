@@ -33,9 +33,9 @@ public static class ServiceCollectionExtensions
         this IServiceCollection services,
         IConfiguration configuration)
     {
-        services.Configure<MobileShop.Services.PDF.Settings.PdfSettings>(
+        services.Configure<PdfSettings>(
             configuration.GetSection("Pdf"));
-        services.AddScoped<MobileShop.Services.PDF.IPdfGenerator, MobileShop.Services.PDF.QuestPdfGenerator>();
+        services.AddScoped<IPdfGenerator, QuestPdfGenerator>();
         return services;
     }
 
@@ -85,14 +85,14 @@ public static class ServiceCollectionExtensions
     {
         if (useApi)
         {
-            services.AddScoped<IUserDataService, MobileShop.Services.DataServices.Api.ApiUserDataService>();
-            services.AddScoped<ICustomerDataService, MobileShop.Services.DataServices.Api.ApiCustomerDataService>();
-            services.AddScoped<ISellerDataService, MobileShop.Services.DataServices.Api.ApiSellerDataService>();
-            services.AddScoped<ITransactionDataService, MobileShop.Services.DataServices.Api.ApiTransactionDataService>();
-            services.AddScoped<IProductDataService, MobileShop.Services.DataServices.Api.ApiProductDataService>();
-            services.AddScoped<IInvoiceDataService, MobileShop.Services.DataServices.Api.ApiInvoiceDataService>();
-            services.AddScoped<IPhoneDataService, MobileShop.Services.DataServices.Api.ApiPhoneDataService>();
-            services.AddScoped<IAppleIdDataService, MobileShop.Services.DataServices.Api.ApiAppleIdDataService>();
+            services.AddScoped<IUserDataService, ApiUserDataService>();
+            services.AddScoped<ICustomerDataService, ApiCustomerDataService>();
+            services.AddScoped<ISellerDataService, ApiSellerDataService>();
+            services.AddScoped<ITransactionDataService, ApiTransactionDataService>();
+            services.AddScoped<IProductDataService, ApiProductDataService>();
+            services.AddScoped<IInvoiceDataService, ApiInvoiceDataService>();
+            services.AddScoped<IPhoneDataService, ApiPhoneDataService>();
+            services.AddScoped<IAppleIdDataService, ApiAppleIdDataService>();
             return services;
         }
 
