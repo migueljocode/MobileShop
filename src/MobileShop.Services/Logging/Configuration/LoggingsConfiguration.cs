@@ -13,34 +13,27 @@ public static class LoggingsConfiguration
     public static WebApplicationBuilder ConfigureSerilog(this WebApplicationBuilder builder)
     {
         builder.Logging.ClearProviders();
-        var config = builder.Configuration;
-        var defaultLevel = ParseLevel(config["Serilog:MinimumLevel:Default"] ?? "Debug");
-        var consoleLevel = ParseLevel(config["Serilog:MinimumLevel:Console"] ?? "Information");
-        var fileLevel = ParseLevel(config["Serilog:MinimumLevel:File"] ?? "Debug");
+
+        var settings = builder.Configuration
+            .GetSection("AppLogging")
+            .Get<AppLoggingSettings>() ?? new AppLoggingSettings();
 
         var logger = new LoggerConfiguration()
-            .MinimumLevel.Is(defaultLevel)
-            .MinimumLevel.Override("Microsoft.AspNetCore", Serilog.Events.LogEventLevel.Warning)
+            .MinimumLevel.Is(settings.Default)
+            .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Warning)
             .Enrich.FromLogContext()
             .WriteTo.Console(
                 outputTemplate: ConsoleOutputTemplate,
-                restrictedToMinimumLevel: consoleLevel,
+                restrictedToMinimumLevel: settings.Console,
                 theme: AnsiConsoleTheme.Literate)
             .WriteTo.File(
                 path: "logs/app-.log",
                 rollingInterval: RollingInterval.Day,
-                restrictedToMinimumLevel: fileLevel,
+                restrictedToMinimumLevel: settings.File,
                 outputTemplate: FileOutputTemplate)
             .CreateLogger();
 
         builder.Logging.AddSerilog(logger);
         return builder;
-    }
-
-    private static Serilog.Events.LogEventLevel ParseLevel(string? configuredLevel)
-    {
-        return Enum.TryParse<Serilog.Events.LogEventLevel>(configuredLevel, ignoreCase: true, out var parsedLevel)
-            ? parsedLevel
-            : Serilog.Events.LogEventLevel.Information;
     }
 }

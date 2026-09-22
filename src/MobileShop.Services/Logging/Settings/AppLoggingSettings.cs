@@ -1,6 +1,14 @@
 ﻿namespace MobileShop.Services.Logging.Settings;
 
-// a class representing for json settings in appsettings.json that should be done later
-// according to configuration we need as json.
+/// <summary>Application logging levels for Serilog sinks.</summary>
+public class AppLoggingSettings
+{
+    /// <summary>Default minimum log level.</summary>
+    public Serilog.Events.LogEventLevel Default { get; set; } = Serilog.Events.LogEventLevel.Debug;
 
-public class AppLoggingSettings { }
+    /// <summary>Minimum log level for the console sink.</summary>
+    public Serilog.Events.LogEventLevel Console { get; set; } = Serilog.Events.LogEventLevel.Information;
+
+    /// <summary>Minimum log level for the file sink.</summary>
+    public Serilog.Events.LogEventLevel File { get; set; } = Serilog.Events.LogEventLevel.Debug;
+}
