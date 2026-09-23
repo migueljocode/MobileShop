@@ -15,7 +15,7 @@ public abstract class BaseRepo<T>(AppDbContext context) : IBaseRepo<T> where T :
     /// <inheritdoc />
     public virtual IEnumerable<T> FindAll(Expression<Func<T, bool>>? predicate = null)
     {
-        IQueryable<T> query = Table;
+        IQueryable<T> query = Table.AsNoTracking();
         if (predicate is not null)
             query = query.Where(predicate);
         return query.ToList();
@@ -31,11 +31,11 @@ public abstract class BaseRepo<T>(AppDbContext context) : IBaseRepo<T> where T :
 
     /// <inheritdoc />
     public virtual IEnumerable<TResult> SelectAll<TResult>(Expression<Func<T, TResult>> selector)
-        => Table.Select(selector).ToList();
+        => Table.AsNoTracking().Select(selector).ToList();
 
     /// <inheritdoc />
     public virtual IEnumerable<TResult> SelectAll<TResult>(Expression<Func<T, bool>> predicate, Expression<Func<T, TResult>> selector)
-        => Table.Where(predicate).Select(selector).ToList();
+        => Table.AsNoTracking().Where(predicate).Select(selector).ToList();
 
     /// <inheritdoc />
     public virtual int Add(T entity, bool persist = true)
@@ -111,7 +111,7 @@ public abstract class BaseRepo<T>(AppDbContext context) : IBaseRepo<T> where T :
     /// <inheritdoc />
     public virtual async Task<IEnumerable<T>> FindAllAsync(Expression<Func<T, bool>>? predicate = null)
     {
-        IQueryable<T> query = Table;
+        IQueryable<T> query = Table.AsNoTracking();
         if (predicate is not null)
             query = query.Where(predicate);
         return await query.ToListAsync();
@@ -127,11 +127,11 @@ public abstract class BaseRepo<T>(AppDbContext context) : IBaseRepo<T> where T :
 
     /// <inheritdoc />
     public virtual async Task<IEnumerable<TResult>> SelectAllAsync<TResult>(Expression<Func<T, TResult>> selector)
-        => await Table.Select(selector).ToListAsync();
+        => await Table.AsNoTracking().Select(selector).ToListAsync();
 
     /// <inheritdoc />
     public virtual async Task<IEnumerable<TResult>> SelectAllAsync<TResult>(Expression<Func<T, bool>> predicate, Expression<Func<T, TResult>> selector)
-        => await Table.Where(predicate).Select(selector).ToListAsync();
+        => await Table.AsNoTracking().Where(predicate).Select(selector).ToListAsync();
 
     /// <inheritdoc />
     public virtual async Task<int> AddAsync(T entity, bool persist = true)
@@ -200,28 +200,28 @@ public abstract class BaseRepo<T>(AppDbContext context) : IBaseRepo<T> where T :
     /// <inheritdoc />
     public virtual bool Any(Expression<Func<T, bool>>? predicate = null)
     {
-        IQueryable<T> query = Table;
+        IQueryable<T> query = Table.AsNoTracking();
         return predicate is null ? query.Any() : query.Any(predicate);
     }
 
     /// <inheritdoc />
     public virtual async Task<bool> AnyAsync(Expression<Func<T, bool>>? predicate = null)
     {
-        IQueryable<T> query = Table;
+        IQueryable<T> query = Table.AsNoTracking();
         return predicate is null ? await query.AnyAsync() : await query.AnyAsync(predicate);
     }
 
     /// <inheritdoc />
     public virtual int Count(Expression<Func<T, bool>>? predicate = null)
     {
-        IQueryable<T> query = Table;
+        IQueryable<T> query = Table.AsNoTracking();
         return predicate is null ? query.Count() : query.Count(predicate);
     }
 
     /// <inheritdoc />
     public virtual async Task<int> CountAsync(Expression<Func<T, bool>>? predicate = null)
     {
-        IQueryable<T> query = Table;
+        IQueryable<T> query = Table.AsNoTracking();
         return predicate is null ? await query.CountAsync() : await query.CountAsync(predicate);
     }
 }
