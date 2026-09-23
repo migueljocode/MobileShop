@@ -35,7 +35,7 @@ The important dependency flow is:
 
 - `Web` and `Api` hosts call `AddMobileShop(...)`.
 - `AddMobileShop(...)` registers the EF Core `AppDbContext`, repositories, password hashing, PDF generation, and the selected data-service implementations.
-- The default configuration is `UseApi: false`, which means the production-ready DAL data services are used. `UseApi: true` selects the `MobileShop.Services.DataServices.Api` services, which are currently stubs whose members throw `NotImplementedException`.
+- The Web host configures `UseApi` in its appsettings; the Api host does not set the flag at all and falls back to the default. `UseApi: false` (the default) means the production-ready DAL data services are used. `UseApi: true` selects the `MobileShop.Services.DataServices.Api` services, which are currently stubs whose members throw `NotImplementedException`.
 - `AppDbContext` is the central EF Core model; it exposes the domain sets for users, products, transactions, people, and product-profile tables.
 - `DatabaseInitializer.InitializeForDevelopment(...)` wipes and re-creates the SQLite dev database and seeds bundled sample data only in development, while the app startup path is intentionally non-destructive in normal use.
 
@@ -63,6 +63,6 @@ The database is SQLite and is stored next to the solution root via `SolutionPath
 
 ## Project-specific cues
 
-- The app's `UseApi` flag is a switch used by `AddMobileShop(...)`; when it is set to `true`, it selects the `MobileShop.Services.DataServices.Api` implementations, which are currently stubbed and throw `NotImplementedException` on every data call. The default remains `false`.
+- The `UseApi` flag is a switch read by `AddMobileShop(...)`; it is set only in `src/MobileShop.Web/appsettings.json` (the Api host omits the key and relies on the `false` default). When it is `true`, it selects the `MobileShop.Services.DataServices.Api` implementations, which are currently stubbed and throw `NotImplementedException` on every data call.
 - Default admin/login setup is dev-only and depends on the sample seed data; the app now calls `IUserDataService.EnsureAdminUser()` from the Web host's Development-only startup path instead of using a separate `AdminSeeder` class.
 - PDF generation is included in the service stack (`QuestPdfGenerator`), so invoice/report changes may require updates across the services and app configuration settings.

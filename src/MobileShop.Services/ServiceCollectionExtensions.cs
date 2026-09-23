@@ -5,8 +5,9 @@ namespace MobileShop.Services;
 /// password hashing and the data-service layer.
 /// </summary>
 /// <remarks>
-/// The concrete data services that get registered are chosen by the <c>UseApi</c> flag in
-/// appsettings.json of the hosting app (Web or Api):
+/// The concrete data services that get registered are chosen by the <c>UseApi</c> flag. Only the Web
+/// host sets it in appsettings.json; the Api host does not carry the key and therefore falls back to
+/// the default (<see langword="false"/>), which selects the production-ready Dal services.
 /// <list type="bullet">
 /// <item><see langword="false"/> (default) → the production-ready <c>MobileShop.Services.DataServices.Dal</c> services.</item>
 /// <item><see langword="true"/> → the <c>MobileShop.Services.DataServices.Api</c> services, which currently expose stub implementations whose members throw <see cref="NotImplementedException"/>.</item>
