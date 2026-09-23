@@ -29,6 +29,7 @@ internal sealed class SampleDataSet
     public List<CaseModelFit> CaseModelFits { get; init; } = [];
     public List<Glass> Glasses { get; init; } = [];
     public List<GlassModelFit> GlassModelFits { get; init; } = [];
+    public List<Employee> Employees { get; init; } = [];
 }
 
 internal static class SampleDataLoader
@@ -74,7 +75,8 @@ internal static class SampleDataLoader
             Cases = Deserialize<Case>(root, "cases"),
             CaseModelFits = Deserialize<CaseModelFit>(root, "caseModelFits"),
             Glasses = Deserialize<Glass>(root, "glasses"),
-            GlassModelFits = Deserialize<GlassModelFit>(root, "glassModelFits")
+            GlassModelFits = Deserialize<GlassModelFit>(root, "glassModelFits"),
+            Employees = Deserialize<Employee>(root, "employees")
         };
     }
 

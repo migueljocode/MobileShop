@@ -22,4 +22,5 @@ public class Person : BaseEntity
     public virtual Seller? SellerProfile { get; set; }
     public virtual Customer? CustomerProfile { get; set; }
     public virtual User? UserProfile { get; set; }
+    public virtual Employee? EmployeeProfile { get; set; }
 }

@@ -12,6 +12,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public virtual DbSet<SecondHand> SecondHands => Set<SecondHand>();
     public virtual DbSet<Guarantee> Guarantees => Set<Guarantee>();
     public virtual DbSet<User> Users => Set<User>();
+    public virtual DbSet<Employee> Employees => Set<Employee>();
 
     // lookups
     public virtual DbSet<Manufacturer> Manufacturers => Set<Manufacturer>();

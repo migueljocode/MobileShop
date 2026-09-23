@@ -37,6 +37,7 @@ public static class SampleDataInitializer
         ClearSet<User>(context);
         ClearSet<Customer>(context);
         ClearSet<Seller>(context);
+        ClearSet<Employee>(context);
         ClearSet<Person>(context);
 
         context.Database.ExecuteSqlRaw("DELETE FROM sqlite_sequence");
@@ -77,6 +78,7 @@ public static class SampleDataInitializer
         ProcessInsert(context, context.CaseModelFits, data.CaseModelFits);
         ProcessInsert(context, context.Glasses, data.Glasses);
         ProcessInsert(context, context.GlassModelFits, data.GlassModelFits);
+        ProcessInsert(context, context.Employees, data.Employees);
         
         static void ProcessInsert<TEntity>(
             AppDbContext context,
