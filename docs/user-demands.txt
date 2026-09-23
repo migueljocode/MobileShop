@@ -1,0 +1,24 @@
+These are my next demands; organize them wipe out the current contents of cline-verdict.md and put your generated step by step promts inside cline-verdict.md
+
+1. ApiDataServiceBase does not implementing IDataService it is not a big deal anyway we should touch it when we actually create ApiWrappers and MobileShop.Api project but implementing it may reduce the amount of code in derived DataServices 
+
+2. Normalize QuestPdfGenerator with clean code principles 
+
+3. QuestPdfSetup and QuestPdfGenerator should go to newly created Configuration directory perhaps move all the static methods or all the methods definition to QuestPdfSetup class
+
+4. Pdf section in appsettings.json in MobileShop.Web should also clone to MobileShop.Api
+
+5. UI should use SF Round Pro font
+
+6. Remove the useapi flag from MobileShop.Api/appsettings.json as it always false by default and or it is not exist
+
+7. Weekly or monthly income/outcome analyze audit and given the percentage calculate each employee salary and investment amount of money like full income 100$ employee1 by default 50% so it will take 50$ employee2 is 30% so should take 30$ and whatever left 20% should be invested for shop 20$. There is no employee yet just default user we may need to add other users for this purpose or add simple person, it depends on other employees can have access to main users panel or not if they can the website pagss is stay simple and we need person entity for new employees maybe create new entity named Employee and relate it to Persons
+
+8. Add a profile page for watching details about current admin user and changing passwords etc
+
+9. Use AsNoTracking and IAsyncEnumerable where possible for improvement of overall app performance
+
+10. To-do.md should contain checkbox for each entity and checked entity should be strike-through so we just need to-do.md for organizing our todos between agent and programmer and cline-verdict.md each time cleared and rewrite for new instructions to copilot and copilot appends them and make them checked in to-do.md and not remove old ones 
+
+11. Add test for each method that not tested yet
+
