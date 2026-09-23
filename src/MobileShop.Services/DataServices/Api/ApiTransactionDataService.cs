@@ -1,6 +1,6 @@
 namespace MobileShop.Services.DataServices.Api;
 
-public class ApiTransactionDataService : ITransactionDataService
+public class ApiTransactionDataService : ApiDataServiceBase<Transaction>, ITransactionDataService
 {
     /// <inheritdoc />
     public IEnumerable<Transaction> GetByProduct(int productId)
@@ -80,61 +80,5 @@ public class ApiTransactionDataService : ITransactionDataService
 
     /// <inheritdoc />
     public Task<bool> RecordSellAsync(int productId, int customerId, decimal finishedPrice, DateTime? date = null)
-        => throw new NotImplementedException("ApiTransactionDataService is not implemented yet.");
-
-    /// <inheritdoc />
-    public IEnumerable<Transaction> FindAll(Expression<Func<Transaction, bool>>? predicate = null)
-        => throw new NotImplementedException("ApiTransactionDataService is not implemented yet.");
-
-    /// <inheritdoc />
-    public Task<IEnumerable<Transaction>> FindAllAsync(Expression<Func<Transaction, bool>>? predicate = null)
-        => throw new NotImplementedException("ApiTransactionDataService is not implemented yet.");
-
-    /// <inheritdoc />
-    public Transaction? Find(int id)
-        => throw new NotImplementedException("ApiTransactionDataService is not implemented yet.");
-
-    /// <inheritdoc />
-    public Transaction? Find(Expression<Func<Transaction, bool>> predicate)
-        => throw new NotImplementedException("ApiTransactionDataService is not implemented yet.");
-
-    /// <inheritdoc />
-    public Task<Transaction?> FindAsync(int id)
-        => throw new NotImplementedException("ApiTransactionDataService is not implemented yet.");
-
-    /// <inheritdoc />
-    public Task<Transaction?> FindAsync(Expression<Func<Transaction, bool>> predicate)
-        => throw new NotImplementedException("ApiTransactionDataService is not implemented yet.");
-
-    /// <inheritdoc />
-    public bool Add(Transaction entity)
-        => throw new NotImplementedException("ApiTransactionDataService is not implemented yet.");
-
-    /// <inheritdoc />
-    public bool Update(Transaction entity)
-        => throw new NotImplementedException("ApiTransactionDataService is not implemented yet.");
-
-    /// <inheritdoc />
-    public bool Delete(int id)
-        => throw new NotImplementedException("ApiTransactionDataService is not implemented yet.");
-
-    /// <inheritdoc />
-    public bool Delete(Transaction entity)
-        => throw new NotImplementedException("ApiTransactionDataService is not implemented yet.");
-
-    /// <inheritdoc />
-    public Task<bool> AddAsync(Transaction entity)
-        => throw new NotImplementedException("ApiTransactionDataService is not implemented yet.");
-
-    /// <inheritdoc />
-    public Task<bool> UpdateAsync(Transaction entity)
-        => throw new NotImplementedException("ApiTransactionDataService is not implemented yet.");
-
-    /// <inheritdoc />
-    public Task<bool> DeleteAsync(int id)
-        => throw new NotImplementedException("ApiTransactionDataService is not implemented yet.");
-
-    /// <inheritdoc />
-    public Task<bool> DeleteAsync(Transaction entity)
         => throw new NotImplementedException("ApiTransactionDataService is not implemented yet.");
 }

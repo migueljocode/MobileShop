@@ -1,6 +1,6 @@
-﻿namespace MobileShop.Services.DataServices.Api;
+namespace MobileShop.Services.DataServices.Api;
 
-public class ApiAppleIdDataService : IAppleIdDataService
+public class ApiAppleIdDataService : ApiDataServiceBase<AppleId>, IAppleIdDataService
 {
     /// <inheritdoc />
     public IReadOnlyList<ProductListItemViewModel> GetInventoryRows()
@@ -100,61 +100,5 @@ public class ApiAppleIdDataService : IAppleIdDataService
 
     /// <inheritdoc />
     public Task<IEnumerable<AppleId>> GetAvailableSecondHandAsync()
-        => throw new NotImplementedException("ApiAppleIdDataService is not implemented yet.");
-
-    /// <inheritdoc />
-    public IEnumerable<AppleId> FindAll(Expression<Func<AppleId, bool>>? predicate = null)
-        => throw new NotImplementedException("ApiAppleIdDataService is not implemented yet.");
-
-    /// <inheritdoc />
-    public Task<IEnumerable<AppleId>> FindAllAsync(Expression<Func<AppleId, bool>>? predicate = null)
-        => throw new NotImplementedException("ApiAppleIdDataService is not implemented yet.");
-
-    /// <inheritdoc />
-    public AppleId? Find(int id)
-        => throw new NotImplementedException("ApiAppleIdDataService is not implemented yet.");
-
-    /// <inheritdoc />
-    public AppleId? Find(Expression<Func<AppleId, bool>> predicate)
-        => throw new NotImplementedException("ApiAppleIdDataService is not implemented yet.");
-
-    /// <inheritdoc />
-    public Task<AppleId?> FindAsync(int id)
-        => throw new NotImplementedException("ApiAppleIdDataService is not implemented yet.");
-
-    /// <inheritdoc />
-    public Task<AppleId?> FindAsync(Expression<Func<AppleId, bool>> predicate)
-        => throw new NotImplementedException("ApiAppleIdDataService is not implemented yet.");
-
-    /// <inheritdoc />
-    public bool Add(AppleId entity)
-        => throw new NotImplementedException("ApiAppleIdDataService is not implemented yet.");
-
-    /// <inheritdoc />
-    public bool Update(AppleId entity)
-        => throw new NotImplementedException("ApiAppleIdDataService is not implemented yet.");
-
-    /// <inheritdoc />
-    public bool Delete(int id)
-        => throw new NotImplementedException("ApiAppleIdDataService is not implemented yet.");
-
-    /// <inheritdoc />
-    public bool Delete(AppleId entity)
-        => throw new NotImplementedException("ApiAppleIdDataService is not implemented yet.");
-
-    /// <inheritdoc />
-    public Task<bool> AddAsync(AppleId entity)
-        => throw new NotImplementedException("ApiAppleIdDataService is not implemented yet.");
-
-    /// <inheritdoc />
-    public Task<bool> UpdateAsync(AppleId entity)
-        => throw new NotImplementedException("ApiAppleIdDataService is not implemented yet.");
-
-    /// <inheritdoc />
-    public Task<bool> DeleteAsync(int id)
-        => throw new NotImplementedException("ApiAppleIdDataService is not implemented yet.");
-
-    /// <inheritdoc />
-    public Task<bool> DeleteAsync(AppleId entity)
         => throw new NotImplementedException("ApiAppleIdDataService is not implemented yet.");
 }

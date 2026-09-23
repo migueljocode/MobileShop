@@ -1,6 +1,6 @@
-﻿namespace MobileShop.Services.DataServices.Api;
+namespace MobileShop.Services.DataServices.Api;
 
-public class ApiPhoneDataService : IPhoneDataService
+public class ApiPhoneDataService : ApiDataServiceBase<Phone>, IPhoneDataService
 {
     /// <inheritdoc />
     public IReadOnlyList<ProductListItemViewModel> GetInventoryRows()
@@ -108,61 +108,5 @@ public class ApiPhoneDataService : IPhoneDataService
 
     /// <inheritdoc />
     public Task<IEnumerable<Phone>> GetAvailableSecondHandAsync()
-        => throw new NotImplementedException("ApiPhoneDataService is not implemented yet.");
-
-    /// <inheritdoc />
-    public IEnumerable<Phone> FindAll(Expression<Func<Phone, bool>>? predicate = null)
-        => throw new NotImplementedException("ApiPhoneDataService is not implemented yet.");
-
-    /// <inheritdoc />
-    public Task<IEnumerable<Phone>> FindAllAsync(Expression<Func<Phone, bool>>? predicate = null)
-        => throw new NotImplementedException("ApiPhoneDataService is not implemented yet.");
-
-    /// <inheritdoc />
-    public Phone? Find(int id)
-        => throw new NotImplementedException("ApiPhoneDataService is not implemented yet.");
-
-    /// <inheritdoc />
-    public Phone? Find(Expression<Func<Phone, bool>> predicate)
-        => throw new NotImplementedException("ApiPhoneDataService is not implemented yet.");
-
-    /// <inheritdoc />
-    public Task<Phone?> FindAsync(int id)
-        => throw new NotImplementedException("ApiPhoneDataService is not implemented yet.");
-
-    /// <inheritdoc />
-    public Task<Phone?> FindAsync(Expression<Func<Phone, bool>> predicate)
-        => throw new NotImplementedException("ApiPhoneDataService is not implemented yet.");
-
-    /// <inheritdoc />
-    public bool Add(Phone entity)
-        => throw new NotImplementedException("ApiPhoneDataService is not implemented yet.");
-
-    /// <inheritdoc />
-    public bool Update(Phone entity)
-        => throw new NotImplementedException("ApiPhoneDataService is not implemented yet.");
-
-    /// <inheritdoc />
-    public bool Delete(int id)
-        => throw new NotImplementedException("ApiPhoneDataService is not implemented yet.");
-
-    /// <inheritdoc />
-    public bool Delete(Phone entity)
-        => throw new NotImplementedException("ApiPhoneDataService is not implemented yet.");
-
-    /// <inheritdoc />
-    public Task<bool> AddAsync(Phone entity)
-        => throw new NotImplementedException("ApiPhoneDataService is not implemented yet.");
-
-    /// <inheritdoc />
-    public Task<bool> UpdateAsync(Phone entity)
-        => throw new NotImplementedException("ApiPhoneDataService is not implemented yet.");
-
-    /// <inheritdoc />
-    public Task<bool> DeleteAsync(int id)
-        => throw new NotImplementedException("ApiPhoneDataService is not implemented yet.");
-
-    /// <inheritdoc />
-    public Task<bool> DeleteAsync(Phone entity)
         => throw new NotImplementedException("ApiPhoneDataService is not implemented yet.");
 }
