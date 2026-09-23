@@ -51,9 +51,9 @@ Working agreement for this file (shared by the agent and the programmer):
 
 ### Performance
 
-- [ ] **(9)** Use `AsNoTracking` where possible. `IAsyncEnumerable` is **deferred** — it would ripple through
+- [x] ~~**(9)** Use `AsNoTracking` where possible. `IAsyncEnumerable` is **deferred** — it would ripple through
       9 interfaces / 98 members / 12 pages / 271 tests, and the pages need materialized lists; record the
-      reasoning in the log when the `AsNoTracking` work lands.
+      reasoning in the log when the `AsNoTracking` work lands.~~ — `b08c2c5`, 2026-09-24.
 
 ### Tests
 
@@ -144,6 +144,18 @@ Working agreement for this file (shared by the agent and the programmer):
 - Work: Moved both `QuestPdfGenerator.cs` and `QuestPdfSetup.cs` to `PDF/Configuration/`; `IPdfGenerator` and `PdfSettings` remain in the parent `PDF/` directory. `QuestPdfGenerator` is now normalized: extracted a resolved `InvoicePresentation` record so all null/empty handling and business logic lives in one place (`Resolve` method); render methods are now class-level private methods (`RenderHeader`, `RenderContent`, `RenderPartyInfo`, `RenderProductInfo`, `RenderGuaranteeInfo`, `RenderNotesAndSignature`, `RenderFooter`, `ParsePageSize`) instead of nested local functions; removed the camelCase passthrough methods (`renderPage`/`ComposePage`, `renderHeader`/`RenderHeader`, etc.); kept the static `ParsePageSize` helper. `QuestPdfSetup` is unchanged except for the namespace move. Updated namespaces to `MobileShop.Services.PDF.Configuration`; `GlobalUsings` in Services and Web include the new namespace. Dropped `global using static QuestPDF.Fluent.Document` (was redundant after the refactor).
 - Build: 0 errors / 0 warnings. Tests: 271 passed, 0 failed.
 - Checks: `grep -c 'class.*Configuration' src/MobileShop.Services/PDF/Configuration/*.cs` → 2 classes; `grep 'namespace.*Configuration' src/MobileShop.Services/PDF/Configuration/*.cs` → both present; `grep 'global using.*PDF.Configuration' src/MobileShop.Services/GlobalUsings.cs src/MobileShop.Web/GlobalUsings.cs` → both present; `grep -c 'NotImplementedException'` no longer in QuestPdfGenerator.
+- Deviations: none.
+
+</details>
+
+<details open>
+<summary>✅ (9) AsNoTracking added to read-only query methods in BaseRepo (2026-09-24)</summary>
+
+- Files: `src/MobileShop.Dal/Repos/Base/BaseRepo.cs`
+- Commit: `b08c2c5` `perf(dal): add AsNoTracking to read-only query methods in BaseRepo`
+- Work: Added `AsNoTracking()` to all read-only query methods in `BaseRepo`: `FindAll` / `FindAllAsync`, `SelectAll` / `SelectAllAsync` (both overloads), `Any` / `AnyAsync`, `Count` / `CountAsync`. These methods are used for read-only queries (display, lists, counts) and do not modify entities, so tracking is unnecessary overhead. `Find` / `FindAsync` / `Select` / `SelectAsync` are NOT changed because they return tracked entities that may be modified and saved.
+- Build: 0 errors / 0 warnings. Tests: 271 passed, 0 failed.
+- Checks: `grep -c 'AsNoTracking' src/MobileShop.Dal/Repos/Base/BaseRepo.cs` → 10 occurrences; `grep -c 'FindAll' src/MobileShop.Dal/Repos/Base/BaseRepo.cs` → 2 methods (sync + async); tests 271 passed.
 - Deviations: none.
 
 </details>
