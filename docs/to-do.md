@@ -15,8 +15,8 @@ Working agreement for this file (shared by the agent and the programmer):
 
 ### Refactors
 
-- [ ] **(1)** `ApiDataServiceBase` should implement `IDataService<T>` so the derived Api data services only
-      declare their own members (196 member bodies → ~84).
+- [x] ~~**(1)** `ApiDataServiceBase` should implement `IDataService<T>` so the derived Api data services only
+      declare their own members (196 member bodies → ~84).~~ — `b93581d`, 2026-09-23.
 - [ ] **(2)** Normalize `QuestPdfGenerator` with clean code principles. The composition refactor left nested
       local functions and camelCase passthrough methods (`renderPage` → `ComposePage`, `renderHeader` →
       `RenderHeader`, …); redo it with class-level private methods plus a small resolved-presentation record.
@@ -120,6 +120,18 @@ Working agreement for this file (shared by the agent and the programmer):
 - Work: deleted the key from both Api appsettings (the host never selects the Api-backed services and `AddMobileShop` already defaults it to `false`), and corrected the two places that described the flag as "the hosting app (Web or Api)" — the `ServiceCollectionExtensions` `<remarks>` and both `UseApi` bullets in the Copilot instructions, which now state that only the Web host sets it.
 - Build: 0 errors / 0 warnings. Tests: 271 passed, 0 failed.
 - Checks: both Api appsettings parse and `grep -c UseApi` → 0 for each; the Web appsettings still contain the key in both files; the Api host booted with 0 errors (`Now listening on: http://localhost:5169`, Development launch profile, where the host validates the service provider on build, so the Dal registrations resolve without the key).
+- Deviations: none.
+
+</details>
+
+<details open>
+<summary>✅ (1) ApiDataServiceBase now implements IDataService<T> (2026-09-23)</summary>
+
+- Files: `src/MobileShop.Services/DataServices/Api/Base/ApiDataServiceBase.cs`, `src/MobileShop.Services/DataServices/Api/Api*.cs` (7 files), `src/MobileShop.Services/GlobalUsings.cs`
+- Commit: `b93581d` `refactor(services): make ApiDataServiceBase implement IDataService<T> and shrink the stubs`
+- Work: `ApiDataServiceBase<T>` now implements the 14 `IDataService<T>` members virtually (all throwing `NotImplementedException`), so the 7 concrete `Api*DataService` classes only declare their own interface-specific members. Added `global using MobileShop.Services.DataServices.Api.Base;` to `GlobalUsings.cs`. A migration script verified each stub keeps exactly its interface's own-method count; total bodies dropped from 196 to 96.
+- Build: 0 errors / 0 warnings. Tests: 271 passed, 0 failed.
+- Checks: `grep -c 'NotImplementedException' src/MobileShop.Services/DataServices/Api/*.cs` → 96 total; `grep -c 'class.*:.*ApiDataServiceBase'` → 7 classes; `grep 'global using.*Api.Base' src/MobileShop.Services/GlobalUsings.cs` → present.
 - Deviations: none.
 
 </details>
