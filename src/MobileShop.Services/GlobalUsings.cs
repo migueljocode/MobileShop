@@ -26,6 +26,7 @@ global using MobileShop.Services.DataServices.Dal.Base;
 global using MobileShop.Services.DataServices.Interfaces;
 global using MobileShop.Services.Logging.Settings;
 global using MobileShop.Services.Security;
+global using MobileShop.Services.PDF.Configuration;
 global using MobileShop.Services.PDF;
 global using MobileShop.Services.PDF.Settings;
 global using MobileShop.Models.Enums;
