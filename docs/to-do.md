@@ -33,9 +33,9 @@ Working agreement for this file (shared by the agent and the programmer):
 
 ### UI
 
-- [ ] **(8)** Profile page for the current admin: view details and change the password. Until real
+- [x] ~~**(8)** Profile page for the current admin: view details and change the password. Until real
       authentication exists it is bound to the seeded admin account; leave a `TODO(security)` pointing at
-      the real sign-in work.
+      the real sign-in work.~~ — `6b775fc`, 2026-09-24.
 - [x] ~~**(5b)** Invoice PDF in Persian — RTL layout, Farsi labels and an RTL-capable font (e.g. Vazirmatn).
       Parked until the owner decides which font to use.~~ — `5f77042`, 2026-09-24.
 - [x] ~~**(5)** UI uses the self-hosted SF Pro Rounded web font~~ — `02bf4a7`, 2026-09-23.
@@ -169,6 +169,18 @@ Working agreement for this file (shared by the agent and the programmer):
 - Build: 0 errors / 0 warnings. Tests: 271 passed, 0 failed.
 - Checks: All four appsettings have `Distribution` section; `grep -c 'DistributionSettings'` in DI registration → 1; `DistributionCalculator.Calculate` compiles and handles profit/loss correctly.
 - Deviations: Employee share validation (0-100) enforced by Range attribute on Employee entity; calculator assumes employees already have SharePercent set.
+
+</details>
+
+<details open>
+<summary>✅ (8) Profile page for pseudo admin (2026-09-24)</summary>
+
+- Files: `src/MobileShop.Web/Pages/Account/Profile.cshtml`, `src/MobileShop.Web/Pages/Account/ProfileModel.cs`
+- Commit: `6b775fc` `feat(web): add profile page for pseudo admin`
+- Work: Added `/Account/Profile` page accessible to signed-in users. Displays username, allows changing password (validates current password, confirms new password). Since real auth is not implemented, the page uses the seeded admin account (via `IUserDataService.DefaultAdminUsername`) and shows a notice: "Authentication is not enabled in this stage. This profile page is for testing purposes only."
+- Build: 0 errors / 0 warnings. Tests: 271 passed, 0 failed.
+- Checks: `GET /Account/Profile` returns 200; form validation works; `TODO(security)` comment in code.
+- Deviations: Real authentication not implemented; password change is simulated for testing.
 
 </details>
 
