@@ -35,6 +35,7 @@ public static class ServiceCollectionExtensions
         this IServiceCollection services,
         IConfiguration configuration)
     {
+        QuestPdfSetup.UseCommunityLicense();
         services.Configure<PdfSettings>(
             configuration.GetSection("Pdf"));
         services.AddScoped<IPdfGenerator, QuestPdfGenerator>();
