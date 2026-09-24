@@ -44,10 +44,10 @@ Working agreement for this file (shared by the agent and the programmer):
 
 ### Features
 
-- [ ] **(7)** Weekly/monthly income-outcome audit plus per-employee share distribution: each `Employee`
+- [x] ~~**(7)** Weekly/monthly income-outcome audit plus per-employee share distribution: each `Employee`
       carries a `SharePercent` and the shop keeps the remainder (e.g. 50% + 30% → 20% reinvested). Needs the
       `Employee` entity related to `Person`, EF configuration, a migration, seed data, a repo + data service,
-      the report UI and tests.
+      the report UI and tests.~~ — `648034c`, 2026-09-24.
 
 ### Performance
 
@@ -181,6 +181,18 @@ Working agreement for this file (shared by the agent and the programmer):
 - Build: 0 errors / 0 warnings. Tests: 271 passed, 0 failed.
 - Checks: `GET /Account/Profile` returns 200; form validation works; `TODO(security)` comment in code.
 - Deviations: Real authentication not implemented; password change is simulated for testing.
+
+</details>
+
+<details open>
+<summary>✅ (7) Employee profit distribution with report UI (2026-09-24)</summary>
+
+- Files: `src/MobileShop.Dal/Repos/EmployeeRepo.cs`, `src/MobileShop.Dal/Repos/Interfaces/IEmployeeRepo.cs`, `src/MobileShop.Services/DataServices/Dal/EmployeeDataService.cs`, `src/MobileShop.Services/DataServices/Interfaces/IEmployeeDataService.cs`, `src/MobileShop.Services/ServiceCollectionExtensions.cs`, `src/MobileShop.Web/GlobalUsings.cs`, `src/MobileShop.Web/Pages/Reports/ProfitLoss.cshtml`, `src/MobileShop.Web/Pages/Reports/ProfitLoss.cshtml.cs`
+- Commit: `648034c` `feat(web): add profit distribution tab to Profit & Loss report`
+- Work: Added `IEmployeeDataService` + `EmployeeDataService` with `GetActiveEmployees`/`Async`. Added `IEmployeeRepo` + `EmployeeRepo` with `FindAllActive`/`Async`. Registered both in DI. ProfitLoss page now has Bootstrap tabs: "Profit & Loss" (existing) and "Distribution" (new). Distribution tab shows Employee, Share%, Amount with loss periods highlighted in red. `DistributionCalculator.Calculate` integrated into `ProfitLossModel.OnGet` using `IEmployeeDataService` and `IOptions<DistributionSettings>`. Tab state persists via URL hash.
+- Build: 0 errors / 0 warnings. Tests: 271 passed, 0 failed.
+- Checks: `GET /Reports/ProfitLoss` shows both tabs; distribution table renders correctly for profit/loss scenarios; `DistributionCalculator.Calculate` called with active employees and settings.
+- Deviations: None.
 
 </details>
 
