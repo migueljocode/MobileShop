@@ -341,6 +341,44 @@ namespace MobileShop.Dal.Migrations
                     b.ToTable("DeviceSpecs");
                 });
 
+            modelBuilder.Entity("MobileShop.Models.Entities.Employee", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("HireDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("PersonId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("SharePercent")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<byte[]>("TimeStamp")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("BLOB");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PersonId")
+                        .IsUnique();
+
+                    b.ToTable("Employees");
+                });
+
             modelBuilder.Entity("MobileShop.Models.Entities.Glass", b =>
                 {
                     b.Property<int>("Id")
@@ -1093,6 +1131,17 @@ namespace MobileShop.Dal.Migrations
                     b.Navigation("StorageCapacityNavigation");
                 });
 
+            modelBuilder.Entity("MobileShop.Models.Entities.Employee", b =>
+                {
+                    b.HasOne("MobileShop.Models.Entities.Person", "PersonNavigation")
+                        .WithOne("EmployeeProfile")
+                        .HasForeignKey("MobileShop.Models.Entities.Employee", "PersonId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("PersonNavigation");
+                });
+
             modelBuilder.Entity("MobileShop.Models.Entities.Glass", b =>
                 {
                     b.HasOne("MobileShop.Models.Entities.Product", "ProductNavigation")
@@ -1347,6 +1396,8 @@ namespace MobileShop.Dal.Migrations
             modelBuilder.Entity("MobileShop.Models.Entities.Person", b =>
                 {
                     b.Navigation("CustomerProfile");
+
+                    b.Navigation("EmployeeProfile");
 
                     b.Navigation("SellerProfile");
 
