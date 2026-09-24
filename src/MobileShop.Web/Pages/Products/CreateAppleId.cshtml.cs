@@ -23,13 +23,19 @@ public class CreateAppleIdModel(
             return Page();
         }
 
+        // Apple IDs are all manufactured by Apple
+        const string appleManufacturerName = "Apple";
+        var manufacturer = manufacturerRepo.Find(m => m.Name == appleManufacturerName)
+            ?? new Manufacturer { Name = appleManufacturerName };
+
+        if (manufacturer.Id == 0)
+        {
+            manufacturerRepo.Add(manufacturer);
+        }
+
         // the catalog categories come from the seed data - never created here
         var category = categoryRepo.Find(c => c.Name == "AppleId")
             ?? throw new InvalidOperationException("The 'AppleId' category is missing from the catalog seed data.");
-
-        var manufacturerName = Input.Manufacturer.Trim();
-        var manufacturer = manufacturerRepo.Find(m => m.Name == manufacturerName)
-            ?? AddManufacturer(manufacturerName);
 
         var modelName = Input.Model.Trim();
         var model = modelRepo.Find(m => m.ManufacturerId == manufacturer.Id && m.Name == modelName)
@@ -44,7 +50,7 @@ public class CreateAppleIdModel(
 
         var appleId = new AppleId
         {
-            Email = email,
+            Email = Input.Email.Trim(),
             Password = Input.Password.Trim(),
             Notes = string.IsNullOrWhiteSpace(Input.Notes) ? null : Input.Notes.Trim(),
             ProductNavigation = product,
@@ -57,13 +63,6 @@ public class CreateAppleIdModel(
         }
 
         return RedirectToPage("/Products/Details", new { id = appleId.Id, type = "appleid" });
-    }
-
-    private Manufacturer AddManufacturer(string name)
-    {
-        var manufacturer = new Manufacturer { Name = name };
-        manufacturerRepo.Add(manufacturer);
-        return manufacturer;
     }
 
     private Model AddModel(int manufacturerId, int categoryId, string name)

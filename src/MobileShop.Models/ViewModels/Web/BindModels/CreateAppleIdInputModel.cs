@@ -5,10 +5,6 @@ public sealed class CreateAppleIdInputModel
 {
     [Required]
     [StringLength(100)]
-    public string Manufacturer { get; set; } = string.Empty;
-
-    [Required]
-    [StringLength(100)]
     public string Model { get; set; } = string.Empty;
 
     [Range(0, double.MaxValue)]
