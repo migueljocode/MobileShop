@@ -1,6 +1,7 @@
 global using Microsoft.AspNetCore.Mvc;
 global using Microsoft.AspNetCore.Mvc.RazorPages;
 global using Microsoft.EntityFrameworkCore;
+global using Microsoft.Extensions.Options;
 global using MobileShop.Dal.EfStructures;
 global using MobileShop.Dal.Initialization;
 global using MobileShop.Dal.Repos.Interfaces;
@@ -12,6 +13,7 @@ global using MobileShop.Models.ViewModels.Web.BindModels;
 global using MobileShop.Services;
 global using MobileShop.Services.DataServices.Interfaces;
 global using MobileShop.Services.Logging.Configuration;
+global using MobileShop.Services.Logging.Settings;
 global using MobileShop.Services.PDF.Configuration;
 global using MobileShop.Services.PDF;
 global using MobileShop.Services.Security;

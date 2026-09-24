@@ -74,6 +74,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IModelRepo, ModelRepo>();
         services.AddScoped<ICategoryRepo, CategoryRepo>();
         services.AddScoped<IColorRepo, ColorRepo>();
+        services.AddScoped<IEmployeeRepo, EmployeeRepo>();
         return services;
     }
 
@@ -114,6 +115,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IInvoiceDataService, InvoiceDataService>();
         services.AddScoped<IPhoneDataService, PhoneDataService>();
         services.AddScoped<IAppleIdDataService, AppleIdDataService>();
+        services.AddScoped<IEmployeeDataService, EmployeeDataService>();
         return services;
     }
 }

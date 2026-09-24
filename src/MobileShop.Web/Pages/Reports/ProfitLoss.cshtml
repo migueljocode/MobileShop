@@ -7,8 +7,36 @@
     <div class="col-md-3"><label class="form-label">To</label><input class="form-control" type="date" asp-for="To" /></div>
     <div class="col-md-2 align-self-end"><button class="btn btn-primary">Apply</button></div>
 </form>
-<p class="lead">Total profit: <strong>@Model.TotalProfit.ToString("N0")</strong></p>
-<table class="table table-striped"><thead><tr><th>Product</th><th>Bought</th><th>Sold</th><th>Profit / loss</th></tr></thead><tbody>
+
+<ul class="nav nav-tabs mb-3" id="profitLossTabs" role="tablist">
+    <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="profit-tab" data-bs-toggle="tab" data-bs-target="#profit" type="button" role="tab">Profit & Loss</button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="distribution-tab" data-bs-toggle="tab" data-bs-target="#distribution" type="button" role="tab">Distribution</button>
+    </li>
+</ul>
+
+<div class="tab-content" id="profitLossTabsContent">
+    <div class="tab-pane fade show active" id="profit" role="tabpanel">
+        <p class="lead">Total profit: <strong>@Model.TotalProfit.ToString("N0")</strong></p>
+        <table class="table table-striped"><thead><tr><th>Product</th><th>Bought</th><th>Sold</th><th>Profit / loss</th></tr></thead><tbody>
 @foreach (var row in Model.Rows)
 { <tr><td>@row.ProductLabel</td><td>@row.Bought.ToString("N0")</td><td>@row.Sold.ToString("N0")</td><td>@row.Profit.ToString("N0")</td></tr> }
 </tbody></table>
+    </div>
+
+    <div class="tab-pane fade" id="distribution" role="tabpanel">
+        <p class="lead">Total profit: <strong>@Model.TotalProfit.ToString("N0")</strong></p>
+        <table class="table table-striped"><thead><tr><th>Employee</th><th>Share %</th><th>Amount</th></tr></thead><tbody>
+@foreach (var row in Model.DistributionRows)
+{
+    <tr class="@(row.IsLossPeriod ? "table-danger" : "")">
+        <td>@row.EmployeeName</td>
+        <td>@row.SharePercent%</td>
+        <td>@row.CalculatedAmount.ToString("N0")</td>
+    </tr>
+}
+</tbody></table>
+    </div>
+</div>
