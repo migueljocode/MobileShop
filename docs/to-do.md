@@ -46,7 +46,7 @@ Working agreement for this file (shared by the agent and the programmer):
 
 ### UI (Remaining)
 
-- [ ] **(3)** Profile Page is not visible in Navbar — add Profile link to navbar after Reports link.
+- [x] ~~**(3)** Profile Page is not visible in Navbar — add Profile link to navbar after Reports link.~~ — `4757ae8`, 2026-09-24.
 - [ ] **(7)** http://localhost:5043/Transactions now can enable Print and Download PDF buttons.
 - [x] ~~**(8)** http://localhost:5043/Reports/ProfitLoss shows an exception and wont load — fix the NullReferenceException in DistributionCalculator by adding `.Include(e => e.PersonNavigation)` to `EmployeeRepo.FindAllActive()` and `FindAllActiveAsync()`.~~ — `a02b0a5`, 2026-09-24.
 
@@ -211,6 +211,18 @@ Working agreement for this file (shared by the agent and the programmer):
 - Work: Added `.Include(e => e.PersonNavigation)` to `EmployeeRepo.FindAllActive()` and `FindAllActiveAsync()`. Simplified `EmployeeDataService.GetActiveEmployees()` to use repo's `FindAllActive()`. Updated `ProfitLossModel.OnGet()` to use `GetActiveEmployees()` instead of `FindAll().Where()`.
 - Build: 0 errors / 0 warnings. Tests: 271 passed, 0 failed.
 - Checks: `grep -c 'Include.*PersonNavigation' src/MobileShop.Dal/Repos/EmployeeRepo.cs` → 2 occurrences; Reports page loads with HTTP 200; `DistributionCalculator.Calculate` no longer throws NRE.
+- Deviations: None.
+
+</details>
+
+<details open>
+<summary>✅ (3) Profile link added to Navbar (2026-09-24)</summary>
+
+- Files: `src/MobileShop.Web/Pages/Shared/_Layout.cshtml`
+- Commit: `4757ae8` `feat(web): add Profile link to navbar`
+- Work: Added Profile link to navbar after Reports link (`<li class="nav-item"><a class="nav-link text-dark" asp-page="/Account/Profile">Profile</a></li>`). Profile page was already implemented but not accessible from navbar.
+- Build: 0 errors / 0 warnings. Tests: 271 passed, 0 failed.
+- Checks: `GET /Account/Profile` returns 200; Profile link visible in navbar after Reports; clicking navigates to profile page.
 - Deviations: None.
 
 </details>
