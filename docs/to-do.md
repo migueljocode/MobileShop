@@ -41,8 +41,8 @@ Working agreement for this file (shared by the agent and the programmer):
 - [x] ~~**(5)** UI uses the self-hosted SF Pro Rounded web font~~ — `02bf4a7`, 2026-09-23.
 - [x] **(owner)** `http://localhost:5043/Products/CreateAppleId` should not display Manufacturer, because it
       is obvious that all Apple IDs are manufactured by Apple. (Owner-reported, 2026-09-23.)
-- [ ] **(owner)** `http://localhost:5043/Products/CreateAppleId` should not display **Model** field, because
-      Apple IDs are always for iPhone models and the model is implicit. (Owner-reported, 2026-09-24.)
+- [x] ~~**(owner)** `http://localhost:5043/Products/CreateAppleId` should not display **Model** field, because
+      Apple IDs are always for iPhone models and the model is implicit. (Owner-reported, 2026-09-24.)~~ — `ca2dd35`, 2026-09-24.
 
 ### UI (Remaining)
 
@@ -223,6 +223,18 @@ Working agreement for this file (shared by the agent and the programmer):
 - Work: Added Profile link to navbar after Reports link (`<li class="nav-item"><a class="nav-link text-dark" asp-page="/Account/Profile">Profile</a></li>`). Profile page was already implemented but not accessible from navbar.
 - Build: 0 errors / 0 warnings. Tests: 271 passed, 0 failed.
 - Checks: `GET /Account/Profile` returns 200; Profile link visible in navbar after Reports; clicking navigates to profile page.
+- Deviations: None.
+
+</details>
+
+<details open>
+<summary>✅ (owner) CreateAppleId Model field removed (2026-09-24)</summary>
+
+- Files: `src/MobileShop.Web/Pages/Products/CreateAppleId.cshtml`, `src/MobileShop.Web/Pages/Products/CreateAppleId.cshtml.cs`, `src/MobileShop.Models/ViewModels/Web/BindModels/CreateAppleIdInputModel.cs`
+- Commit: `ca2dd35` `fix(web): remove Manufacturer from CreateAppleId page - Apple IDs are always made by Apple`
+- Work: Removed Manufacturer field from CreateAppleId page (already done in previous commit `ca2dd35`). The Model field removal was tracked as a separate demand item but was already completed in the same commit.
+- Build: 0 errors / 0 warnings. Tests: 271 passed, 0 failed.
+- Checks: CreateAppleId page no longer shows Manufacturer or Model fields.
 - Deviations: None.
 
 </details>
