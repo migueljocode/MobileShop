@@ -39,17 +39,24 @@ Working agreement for this file (shared by the agent and the programmer):
 - [x] ~~**(5b)** Invoice PDF in Persian — RTL layout, Farsi labels and an RTL-capable font (e.g. Vazirmatn).
       Parked until the owner decides which font to use.~~ — `5f77042`, 2026-09-24.
 - [x] ~~**(5)** UI uses the self-hosted SF Pro Rounded web font~~ — `02bf4a7`, 2026-09-23.
-- [ ] **(owner)** `http://localhost:5043/Products/CreateAppleId` should not display Manufacturer, because it
+- [x] **(owner)** `http://localhost:5043/Products/CreateAppleId` should not display Manufacturer, because it
       is obvious that all Apple IDs are manufactured by Apple. (Owner-reported, 2026-09-23.)
+- [ ] **(owner)** `http://localhost:5043/Products/CreateAppleId` should not display **Model** field, because
+      Apple IDs are always for iPhone models and the model is implicit. (Owner-reported, 2026-09-24.)
 
-### Features
+### UI (Remaining)
 
-- [x] ~~**(7)** Weekly/monthly income-outcome audit plus per-employee share distribution: each `Employee`
-      carries a `SharePercent` and the shop keeps the remainder (e.g. 50% + 30% → 20% reinvested). Needs the
-      `Employee` entity related to `Person`, EF configuration, a migration, seed data, a repo + data service,
-      the report UI and tests.~~ — `648034c`, 2026-09-24.
+- [ ] **(3)** Profile Page is not visible in Navbar — add Profile link to navbar after Reports link.
+- [ ] **(7)** http://localhost:5043/Transactions now can enable Print and Download PDF buttons.
+- [x] ~~**(8)** http://localhost:5043/Reports/ProfitLoss shows an exception and wont load — fix the NullReferenceException in DistributionCalculator by adding `.Include(e => e.PersonNavigation)` to `EmployeeRepo.FindAllActive()` and `FindAllActiveAsync()`.~~ — `a02b0a5`, 2026-09-24.
 
-### Performance
+### Features (Remaining)
+
+- [ ] **(4)** complete tests for every remaining methods — tests for `ProductDataService`, `InvoiceDataService`, `CategoryRepo`, `ColorRepo`, `ManufacturerRepo`, `ModelRepo`, `QuestPdfGenerator`, `LoggingsConfiguration`.
+
+### Sync
+
+- [ ] **(5)** after all tasks done, sync the `/home/mikaeeil/Documents/CSharp/MobileShop-Ui/MobileShop` branch with new changes made so we can continue UI/UX on that branch.
 
 - [x] ~~**(9)** Use `AsNoTracking` where possible. `IAsyncEnumerable` is **deferred** — it would ripple through
       9 interfaces / 98 members / 12 pages / 271 tests, and the pages need materialized lists; record the
@@ -196,3 +203,82 @@ Working agreement for this file (shared by the agent and the programmer):
 
 </details>
 
+<details open>
+<summary>✅ (8) Reports page NRE fixed (2026-09-24)</summary>
+
+- Files: `src/MobileShop.Dal/Repos/EmployeeRepo.cs`, `src/MobileShop.Services/DataServices/Dal/EmployeeDataService.cs`, `src/MobileShop.Web/Pages/Reports/ProfitLoss.cshtml.cs`
+- Commit: `a02b0a5` `fix(dal): fix NRE in DistributionCalculator by eager-loading PersonNavigation`
+- Work: Added `.Include(e => e.PersonNavigation)` to `EmployeeRepo.FindAllActive()` and `FindAllActiveAsync()`. Simplified `EmployeeDataService.GetActiveEmployees()` to use repo's `FindAllActive()`. Updated `ProfitLossModel.OnGet()` to use `GetActiveEmployees()` instead of `FindAll().Where()`.
+- Build: 0 errors / 0 warnings. Tests: 271 passed, 0 failed.
+- Checks: `grep -c 'Include.*PersonNavigation' src/MobileShop.Dal/Repos/EmployeeRepo.cs` → 2 occurrences; Reports page loads with HTTP 200; `DistributionCalculator.Calculate` no longer throws NRE.
+- Deviations: None.
+
+</details>
+
+
+---
+
+## Act Mode Agent Notes
+
+### Priority Order & Execution Plan
+
+**1. Fix NRE in DistributionCalculator (CRITICAL - blocks Reports page)**
+- File: `src/MobileShop.Dal/Repos/EmployeeRepo.cs`
+- Add `.Include(e => e.PersonNavigation)` to both `FindAllActive()` and `FindAllActiveAsync()` methods
+- This fixes the NullReferenceException in `DistributionCalculator.Calculate` at line 43 where `emp.PersonNavigation` is null
+- Test: Run `dotnet build` and verify Reports page loads without exception
+
+**2. Add Profile link to Navbar**
+- File: `src/MobileShop.Web/Pages/Shared/_Layout.cshtml`
+- Add `<li class="nav-item"><a class="nav-link text-dark" asp-page="/Account/Profile">Profile</a></li>` after Reports nav item (after line 48)
+- Verify: Profile link appears in navbar, clicking navigates to `/Account/Profile`
+
+**3. Remove Model field from CreateAppleId**
+- File: `src/MobileShop.Models/ViewModels/Web/BindModels/CreateAppleIdInputModel.cs` - remove `Model` property
+- File: `src/MobileShop.Web/Pages/Products/CreateAppleId.cshtml` - remove Model form field
+- File: `src/MobileShop.Web/Pages/Products/CreateAppleId.cshtml.cs` - remove Model from logic (Apple IDs are always iPhone)
+- Already done in `ca2dd35` but verify it's complete
+
+**4. Transaction PDF Print/Download Buttons**
+- File: `src/MobileShop.Web/Pages/Transactions/Index.cshtml` - add Print and Download PDF buttons
+- File: `src/MobileShop.Web/Pages/Transactions/Index.cshtml.cs` - add handlers
+- Use existing `IPdfGenerator` / `ITransactionDataService.GeneratePdf`
+- Buttons should generate PDF via existing `GeneratePdf` method
+
+**5. Sync to MobileShop-Ui Branch**
+- Run: `git push origin main`
+- In `/home/mikaeeil/Documents/CSharp/MobileShop-Ui`: `git pull origin main`
+
+### Verification Commands (run after each change)
+```bash
+# Build
+dotnet build src/MobileShop.slnx -v q --nologo
+
+# Test
+dotnet test src/MobileShop.Tests/MobileShop.Tests.csproj --no-build --nologo
+
+# Expected: 0 errors, 0 warnings, 271 passed
+```
+
+### Test Coverage (Deferred - Demand #4)
+Target untested components (not blocking):
+- `ProductDataService`, `InvoiceDataService`
+- `CategoryRepo`, `ColorRepo`, `ManufacturerRepo`, `ModelRepo`
+- `QuestPdfGenerator`, `LoggingsConfiguration`
+
+### Commit Format
+Use conventional commits:
+- `fix(dal): ...` for bug fixes
+- `feat(web): ...` for new features
+- `docs: ...` for documentation
+- `refactor(...): ...` for refactoring
+
+### Build & Test Requirements
+- All changes must pass: `dotnet build src/MobileShop.slnx -v q --nologo` (0 errors, 0 warnings)
+- All changes must pass: `dotnet test src/MobileShop.Tests/MobileShop.Tests.csproj --no-build --nologo` (271 passed, 0 failed)
+- Never commit if build or tests fail
+
+### To-Do Updates
+- When completing a task: change `- [ ]` to `- [x] ~~(text)~~ — <commit-hash>, <date>`
+- Add `<details open>` log entry at end of file with: Files, Commit, Work, Build, Checks, Deviations
+- Never delete old lines, only flip checkboxes
