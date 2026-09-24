@@ -2,11 +2,13 @@
 
 public class TransactionDataService(
     ITransactionRepo transactionRepo,
-    ILogger<TransactionDataService> logger)
+    ILogger<TransactionDataService> logger,
+    IPdfGenerator pdfGenerator)
     : DataServiceBase<TransactionDataService, Transaction>(transactionRepo, logger),
       ITransactionDataService
 {
     private readonly ITransactionRepo _transactionRepo = transactionRepo;
+    private readonly IPdfGenerator _pdfGenerator = pdfGenerator;
 
     // Shop sentinel records (Person/Seller/Customer Id = 1 in sample data).
     // TODO: move to configuration when the shop entity is configurable.
@@ -367,4 +369,30 @@ public class TransactionDataService(
             : transaction.CustomerNavigation?.PersonNavigation is { } person
                 ? $"{person.FirstName} {person.LastName}"
                 : "Customer";
+
+    /// <inheritdoc />
+    public byte[] GenerateTransactionsPdf(string? direction, int take, string order)
+    {
+        var kind = direction == "buy" ? "Purchase List" : direction == "sell" ? "Sales List" : "Transactions List";
+        var info = $"Transactions ({(direction ?? "all")}, {take}, {order})";
+        var notes = $"Generated on {DateTime.UtcNow:yyyy-MM-dd HH:mm} UTC";
+
+        var model = new InvoiceViewModel(
+            BuyerName: null,
+            BuyerNationalId: null,
+            BuyerPhoneNumber: null,
+            SellerName: null,
+            SellerPhoneNumber: null,
+            TransactionDate: DateTime.UtcNow,
+            FinishedPrice: 0,
+            ProductCount: take,
+            ProductInformation: info,
+            ProductExtras: [],
+            GuaranteeInformation: [],
+            OwnershipTransferred: null,
+            Notes: notes
+        );
+
+        return _pdfGenerator.Generate(model);
+    }
 }

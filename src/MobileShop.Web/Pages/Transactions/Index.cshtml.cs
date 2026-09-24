@@ -14,4 +14,16 @@ public class IndexModel(ITransactionDataService transactionDataService) : PageMo
         Take = Math.Clamp(take, 1, 500);
         Transactions = transactionDataService.GetList(Direction, Take, Order == "asc");
     }
+
+    public IActionResult OnGetPrint()
+    {
+        var pdfBytes = transactionDataService.GenerateTransactionsPdf(Direction, Take, Order);
+        return File(pdfBytes, "application/pdf", "transactions.pdf");
+    }
+
+    public IActionResult OnGetDownloadPdf()
+    {
+        var pdfBytes = transactionDataService.GenerateTransactionsPdf(Direction, Take, Order);
+        return File(pdfBytes, "application/pdf", $"transactions-{DateTime.UtcNow:yyyyMMdd}.pdf");
+    }
 }

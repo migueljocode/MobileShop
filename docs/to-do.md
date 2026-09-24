@@ -47,7 +47,7 @@ Working agreement for this file (shared by the agent and the programmer):
 ### UI (Remaining)
 
 - [x] ~~**(3)** Profile Page is not visible in Navbar — add Profile link to navbar after Reports link.~~ — `4757ae8`, 2026-09-24.
-- [ ] **(7)** http://localhost:5043/Transactions now can enable Print and Download PDF buttons.
+- [x] ~~**(7)** `http://localhost:5043/Transactions` now can enable Print and Download PDF buttons.~~ — `2026-09-24`.
 - [x] ~~**(8)** http://localhost:5043/Reports/ProfitLoss shows an exception and wont load — fix the NullReferenceException in DistributionCalculator by adding `.Include(e => e.PersonNavigation)` to `EmployeeRepo.FindAllActive()` and `FindAllActiveAsync()`.~~ — `a02b0a5`, 2026-09-24.
 
 ### Features (Remaining)
@@ -235,6 +235,17 @@ Working agreement for this file (shared by the agent and the programmer):
 - Work: Removed Manufacturer field from CreateAppleId page (already done in previous commit `ca2dd35`). The Model field removal was tracked as a separate demand item but was already completed in the same commit.
 - Build: 0 errors / 0 warnings. Tests: 271 passed, 0 failed.
 - Checks: CreateAppleId page no longer shows Manufacturer or Model fields.
+- Deviations: None.
+
+</details>
+
+<details open>
+<summary>✅ (7) Transaction Print and Download PDF buttons (2026-09-24)</summary>
+
+- Files: `src/MobileShop.Services/DataServices/Interfaces/ITransactionDataService.cs`, `src/MobileShop.Services/DataServices/Dal/TransactionDataService.cs`, `src/MobileShop.Services/DataServices/Api/ApiTransactionDataService.cs`, `src/MobileShop.Web/Pages/Transactions/Index.cshtml`, `src/MobileShop.Web/Pages/Transactions/Index.cshtml.cs`, `src/MobileShop.Tests/MobileShop.Tests.csproj`, `src/MobileShop.Tests/Services/DataServices/Dal/TransactionDataServiceTests.cs`
+- Work: Added `GenerateTransactionsPdf` method to `ITransactionDataService` and implemented it in `TransactionDataService`. The method generates a PDF report of transactions filtered by direction, count, and order using the existing `IPdfGenerator` and `InvoiceViewModel`. Added Print and Download PDF buttons to the Transactions page that call `OnGetPrint` and `OnGetDownloadPdf` handlers. Updated `ApiTransactionDataService` with a stub implementation. Added Moq to test project and updated tests to mock `IPdfGenerator`.
+- Build: 0 errors / 0 warnings. Tests: 271 passed, 0 failed.
+- Checks: Print and Download PDF buttons visible on Transactions page; handlers return PDF bytes with correct content type.
 - Deviations: None.
 
 </details>

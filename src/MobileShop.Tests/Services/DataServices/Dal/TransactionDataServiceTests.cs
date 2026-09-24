@@ -1,12 +1,19 @@
+using Moq;
+using MobileShop.Models.ViewModels;
+using MobileShop.Services.PDF;
+
 namespace MobileShop.Tests.Services.DataServices.Dal;
 
 public class TransactionDataServiceTests : RepoTestBase
 {
     private readonly TransactionDataService _service;
+    private readonly Mock<IPdfGenerator> _pdfGeneratorMock;
 
     public TransactionDataServiceTests()
     {
-        _service = new TransactionDataService(new TransactionRepo(Context), NullLogger<TransactionDataService>.Instance);
+        _pdfGeneratorMock = new Mock<IPdfGenerator>();
+        _pdfGeneratorMock.Setup(p => p.Generate(It.IsAny<InvoiceViewModel>())).Returns([]);
+        _service = new TransactionDataService(new TransactionRepo(Context), NullLogger<TransactionDataService>.Instance, _pdfGeneratorMock.Object);
     }
 
     [Fact]

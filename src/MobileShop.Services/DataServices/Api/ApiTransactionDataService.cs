@@ -81,4 +81,8 @@ public class ApiTransactionDataService : ApiDataServiceBase<Transaction>, ITrans
     /// <inheritdoc />
     public Task<bool> RecordSellAsync(int productId, int customerId, decimal finishedPrice, DateTime? date = null)
         => throw new NotImplementedException("ApiTransactionDataService is not implemented yet.");
+
+    /// <inheritdoc />
+    public byte[] GenerateTransactionsPdf(string? direction, int take, string order)
+        => throw new NotImplementedException("ApiTransactionDataService is not implemented yet.");
 }

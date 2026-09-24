@@ -85,4 +85,10 @@ public interface ITransactionDataService : IDataService<Transaction>
     /// <param name="finishedPrice">The sale price.</param>
     /// <param name="date">The optional transaction date.</param>
     Task<bool> RecordSellAsync(int productId, int customerId, decimal finishedPrice, DateTime? date = null);
+/// <summary>Generates a PDF report of transactions filtered by direction, count, and order.</summary>
+    /// <param name="direction">The optional buy or sell filter.</param>
+    /// <param name="take">The maximum number of transactions.</param>
+    /// <param name="order">The order direction (asc or desc).</param>
+    /// <returns>The generated PDF bytes.</returns>
+    byte[] GenerateTransactionsPdf(string? direction, int take, string order);
 }

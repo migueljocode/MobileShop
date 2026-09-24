@@ -4,7 +4,7 @@
     ViewData["Title"] = "Transactions";
 }
 <h1>Transactions</h1>
-<p><a class="btn btn-primary" asp-page="/Transactions/Buy">Record Buy</a> <a class="btn btn-dark" asp-page="/Transactions/Sell">Record Sell</a> <button class="btn btn-outline-secondary" disabled title="TODO(print)">Print</button> <button class="btn btn-outline-secondary" disabled title="TODO(pdf)">Download PDF</button></p>
+<p><a class="btn btn-primary" asp-page="/Transactions/Buy">Record Buy</a> <a class="btn btn-dark" asp-page="/Transactions/Sell">Record Sell</a> <a class="btn btn-outline-secondary" asp-page="/Transactions" asp-page-handler="Print">Print</a> <a class="btn btn-outline-secondary" asp-page="/Transactions" asp-page-handler="DownloadPdf">Download PDF</a></p>
 <form method="get" class="row g-2 mb-3">
     <div class="col-md-3"><label class="form-label">Direction</label><select name="direction" class="form-select"><option value="all">All</option><option value="buy" selected="@(Model.Direction == "buy")">Buy</option><option value="sell" selected="@(Model.Direction == "sell")">Sell</option></select></div>
     <div class="col-md-2"><label class="form-label">Count</label><input class="form-control" type="number" name="take" min="1" max="500" value="@Model.Take" /></div>
