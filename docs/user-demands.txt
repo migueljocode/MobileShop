@@ -1,18 +1,3 @@
-1. reports page don't load and encounter error
-3. Profile Page is not visible in Navbar 
-4. complete tests for every remaining methods
-5. after all tasks done, sync the /home/mikaeeil/Documents/CSharp/MobileShop-Ui/MobileShop branch with new changes made so we can continue UI/UX on that branch
-6. http://localhost:5043/Products/CreateAppleId contain field for **Model** that should not be displayed. 
-7. http://localhost:5043/Transactions now can enable Print and Download PDF buttons 
-8. http://localhost:5043/Reports/ProfitLoss shows an exception and wont load, here is the exception:
-```plaintext
-NullReferenceException: Object reference not set to an instance of an object.
-
-    MobileShop.Services.Logging.Settings.DistributionCalculator.Calculate(decimal totalProfit, IEnumerable<Employee> employees, DistributionSettings settings) in DistributionSettings.cs
-    +
-                        rows.Add(new DistributionRow
-    MobileShop.Web.Pages.Reports.ProfitLossModel.OnGet() in ProfitLoss.cshtml.cs
-    +
-                DistributionRows = DistributionCalculator.Calculate(TotalProfit, employees, distributionSettings.Value);
-...
-```
+inside http://localhost:5043/Products/CreateAppleId we still have Model textbox that user should not see
+print and Download PDF is not working 
+Profile page need polishing
