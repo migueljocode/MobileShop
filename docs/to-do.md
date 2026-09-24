@@ -28,8 +28,8 @@ Working agreement for this file (shared by the agent and the programmer):
 
 - [x] ~~**(4)** Clone the `Pdf` section from `MobileShop.Web`'s appsettings into `MobileShop.Api`'s.~~ — `c36e5b4`, 2026-09-23.
 - [x] ~~**(6)** Remove the `UseApi` flag from `MobileShop.Api`'s appsettings — it is always `false` there.~~ — `b59c75d`, 2026-09-23.
-- [ ] **(7c)** Add a `Distribution` section (employee share defaults, e.g. `DefaultSharePercent: 50`) to both
-      hosts' appsettings, bound through a settings class like `PdfSettings`/`AppLoggingSettings`.
+- [x] ~~**(7c)** Add a `Distribution` section (employee share defaults, e.g. `DefaultSharePercent: 50`) to both
+      hosts' appsettings, bound through a settings class like `PdfSettings`/`AppLoggingSettings`.~~ — `03507d6`, 2026-09-24.
 
 ### UI
 
@@ -157,6 +157,18 @@ Working agreement for this file (shared by the agent and the programmer):
 - Build: 0 errors / 0 warnings. Tests: 271 passed, 0 failed.
 - Checks: Font files served at `/fonts/vazirmatn-*.woff2` with `Content-Type: font/woff2`; `GeneratePersian` method compiles and is callable.
 - Deviations: Persian numerals not yet auto-converted (standard .NET formatting used); Vazirmatn has no italic face.
+
+</details>
+
+<details open>
+<summary>✅ (7c) Distribution settings and calculator (2026-09-24)</summary>
+
+- Files: `src/MobileShop.Services/Logging/Settings/DistributionSettings.cs`, `src/MobileShop.Services/Logging/Configuration/DistributionConfiguration.cs`, `src/MobileShop.Services/ServiceCollectionExtensions.cs`, `src/MobileShop.Web/appsettings.json`, `src/MobileShop.Web/appsettings.Development.json`, `src/MobileShop.Api/appsettings.json`, `src/MobileShop.Api/appsettings.Development.json`
+- Commit: `03507d6` `feat(services): add Distribution settings and calculator`
+- Work: Created `DistributionSettings` with `DefaultSharePercent` (50) and `MaxTotalSharePercent` (100). Added `DistributionCalculator.Calculate` static method that distributes profit by employee `SharePercent`, shop keeps remainder (reinvestment), loss periods pay zero. Integer math (floor) for clean currency. Added `DistributionConfiguration` to bind from `Distribution` section in appsettings. Updated all four appsettings files with `Distribution` section (`DefaultSharePercent: 50`, `MaxTotalSharePercent: 100`). Registered via `AddMobileShopDistribution` in DI.
+- Build: 0 errors / 0 warnings. Tests: 271 passed, 0 failed.
+- Checks: All four appsettings have `Distribution` section; `grep -c 'DistributionSettings'` in DI registration → 1; `DistributionCalculator.Calculate` compiles and handles profit/loss correctly.
+- Deviations: Employee share validation (0-100) enforced by Range attribute on Employee entity; calculator assumes employees already have SharePercent set.
 
 </details>
 
