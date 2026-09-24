@@ -19,7 +19,7 @@ public class ProfitLossModel(
         TotalProfit = transactionDataService.GetProfitLossTotal(From, To);
 
         // Calculate distribution
-        var employees = employeeDataService.FindAll().Where(e => e.IsActive).ToList();
+        var employees = employeeDataService.GetActiveEmployees();
         DistributionRows = DistributionCalculator.Calculate(TotalProfit, employees, distributionSettings.Value);
     }
 }

@@ -6,6 +6,7 @@ public class EmployeeRepo(AppDbContext context) : BaseRepo<Employee>(context), I
     public IReadOnlyList<Employee> FindAllActive()
         => Table
             .Where(e => e.IsActive)
+            .Include(e => e.PersonNavigation)
             .OrderBy(e => e.PersonNavigation.FirstName)
             .ThenBy(e => e.PersonNavigation.LastName)
             .ToList();
@@ -14,6 +15,7 @@ public class EmployeeRepo(AppDbContext context) : BaseRepo<Employee>(context), I
     {
         var employees = await Table
             .Where(e => e.IsActive)
+            .Include(e => e.PersonNavigation)
             .OrderBy(e => e.PersonNavigation.FirstName)
             .ThenBy(e => e.PersonNavigation.LastName)
             .ToListAsync();
