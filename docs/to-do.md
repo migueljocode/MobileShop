@@ -96,32 +96,49 @@ literally and complete the stages in order.
 
 ## Stage 2 — Make transaction PDF/factor generation work for selected records
 
-- [ ] Refactor transaction PDF generation so it represents real transaction data,
+- [x] ~~Refactor transaction PDF generation so it represents real transaction data,
   not a fabricated single invoice summary. Keep the existing English/Persian PDF
   generator boundaries and create the smallest appropriate report/invoice view
-  model or document composition needed for multiple transactions.
+  model or document composition needed for multiple transactions.~~
+  - Completed: `src/MobileShop.Models/ViewModels/Web/TransactionFactorRowViewModel.cs`,
+    `src/MobileShop.Models/ViewModels/Web/TransactionFactorViewModel.cs`,
+    `src/MobileShop.Models/Extensions/TransactionFactorExtensions.cs`,
+    `src/MobileShop.Services/PDF/IPdfGenerator.cs`,
+    `src/MobileShop.Services/PDF/Configuration/QuestPdfGenerator.cs`,
+    `src/MobileShop.Services/DataServices/Dal/TransactionDataService.cs`,
+    `src/MobileShop.Web/GlobalUsings.cs`,
+    `src/MobileShop.Web/Pages/Transactions/Index.cshtml`,
+    `src/MobileShop.Web/Pages/Transactions/Index.cshtml.cs`,
+    `src/MobileShop.Web/Pages/Transactions/Details.cshtml`,
+    `src/MobileShop.Web/Pages/Transactions/Details.cshtml.cs`. Commit `8723671`.
+  - Validation: focused tests across `IndexModelTests`, `DetailsModelTests`,
+    `TransactionDataServiceTests`, `QuestPdfGeneratorTests`, and
+    `TransactionFactorExtensionsTests` (20 passed, 2 skipped Persian);
+    `dotnet build src/MobileShop.slnx` 0 errors / 0 warnings;
+    `dotnet test src/MobileShop.Tests/MobileShop.Tests.csproj` 327 passed, 2 skipped, 0 failed.
+  - Notes: Factor includes date, direction, product, price, and relevant party
+    (Customer on sales, Seller on purchases). Print returns inline printable PDF,
+    Download returns named attachment `transactions-factor-YYYYMMdd-HHmmss.pdf`.
+    Multi-select works via checkboxes, details page provides single-record factor,
+    missing IDs trigger validation and redisplay without PDF emission, empty
+    selection falls back to direction/count/order filters. `MobileShop.Api` untouched.
 
-  Acceptance criteria:
-  - A user can generate a factor for one transaction selected from the Transactions
-    list or transaction details.
-  - A user can select multiple transactions manually from the Transactions list
-    and generate one combined factor/report for exactly those records.
-  - Each selected record includes its date, direction, product, price, and the
-    relevant customer or seller/person information.
-  - Invalid, missing, duplicate, or unauthorized-by-selection IDs are handled
-    explicitly; no unrelated records are silently included.
-  - Existing direction/count/order filters continue to work when no manual
-    selection is supplied.
-  - Print opens or returns a browser-printable PDF response; Download returns a
-    correctly named downloadable PDF response with `application/pdf`.
-  - Query-string filters and manual selections survive validation errors and page
-    redisplay.
-  - Do not change `MobileShop.Api`.
-
-- [ ] Add focused tests for the transaction selection, filtering, person association,
+- [x] ~~Add focused tests for the transaction selection, filtering, person association,
   PDF data composition, empty selection behavior, and PDF response metadata. Test
   the actual required output shape/data rather than only checking that a byte array
-  is non-empty.
+  is non-empty.~~
+  - Completed: `src/MobileShop.Tests/Models/Extensions/TransactionFactorExtensionsTests.cs`,
+    `src/MobileShop.Tests/Services/DataServices/Dal/TransactionDataServiceTests.cs`,
+    `src/MobileShop.Tests/PDF/QuestPdfGeneratorTests.cs`,
+    `src/MobileShop.Tests/Web/Pages/Transactions/DetailsModelTests.cs`,
+    `src/MobileShop.Tests/Web/Pages/Transactions/IndexModelTests.cs`,
+    `src/MobileShop.Tests/Dal/BaseClass/TestDataHelpers.cs`,
+    `src/MobileShop.Tests/GlobalUsings.cs`. Commit `8723671`.
+  - Validation: 20 focused tests verify factor row mappings, total price calculation,
+    PDF generator input shape, deduplication, unknown-ID error reporting, filter fallback,
+    single-transaction factor, printable vs download responses, and validation redisplay.
+  - Notes: Tests inspect the captured `TransactionFactorViewModel` and response metadata
+    directly instead of only asserting non-empty byte arrays. All 327 tests pass.
 
 ## Stage 3 — Fix the development profile page UX and behavior
 
