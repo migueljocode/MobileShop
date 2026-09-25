@@ -170,8 +170,9 @@ literally and complete the stages in order.
   - Profile markup is valid and responsive using the existing site styling.
 
   - Completion note:
-  - Changes: `src/MobileShop.Web/Pages/Account/Profile.cshtml` (fixed `</dt>`/`<dd>`
-    mismatch, added `asp-validation-summary="All"`, success-message alert, dev-only
+  - Changes: `src/MobileShop.Web/Pages/Account/Profile.cshtml` (fixed both `dd`/`dt`
+    markup mismatches — Username and Email rows now close with `</dd>`, added
+    `asp-validation-summary="All"`, success-message alert, dev-only
     footnote, `_validationScriptsPartial`), `src/MobileShop.Web/Pages/Account/ProfileModel.cs`
     (GET resolves seeded dev admin via `FindByUsernameAsync("admin")` — no
     `User.Identity.Name`; POST validates required/length/confirmation attributes,
@@ -180,8 +181,8 @@ literally and complete the stages in order.
     removed unused `IPasswordHasher` and placeholder messaging).
   - Validation: build 0 warnings/0 errors; 6 focused `ProfileModelTests` pass
     (GET resolves admin, successful change with message, invalid current password,
-    mismatched confirmation, short password, missing password); full suite
-    333 passed, 2 skipped, 0 failed.
+    mismatched confirmation, short password, missing password); full suite run
+    through a persistent session until completion: 333 passed, 2 skipped, 0 failed.
   - Notes: No cookie auth, claims, authorization attributes, or API changes
     introduced. Password hashing remains owned by the data service.
 
@@ -191,7 +192,8 @@ literally and complete the stages in order.
   - Completion note:
   - Changes: `src/MobileShop.Tests/Web/Pages/Account/ProfileModelTests.cs` (new, 6 tests
     using Moq `IUserDataService`; catch-all mock setups registered before specific
-    setups so exact-argument setups win).
+    setups so exact-argument setups win; success test explicitly verifies
+    `ChangePasswordAsync("admin", "NewPass123")` was called exactly once).
   - Validation: `--filter FullyQualifiedName~ProfileModelTests` → 6/6 passed.
   - Notes: Attribute-driven validation is asserted through a `ValidateModel` helper
     that runs `Validator.TryValidateProperty` into `ModelState`, mirroring MVC model

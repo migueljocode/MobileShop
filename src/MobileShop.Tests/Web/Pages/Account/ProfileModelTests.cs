@@ -61,6 +61,7 @@ public class ProfileModelTests : RepoTestBase
         Assert.Null(_model.CurrentPassword);
         Assert.Null(_model.NewPassword);
         Assert.Null(_model.ConfirmPassword);
+        _userDataServiceMock.Verify(u => u.ChangePasswordAsync("admin", "NewPass123"), Times.Once);
     }
 
     [Fact]
