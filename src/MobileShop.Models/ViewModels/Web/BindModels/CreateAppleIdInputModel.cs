@@ -3,10 +3,6 @@ namespace MobileShop.Models.ViewModels.Web.BindModels;
 /// <summary>Input submitted when creating an Apple ID product.</summary>
 public sealed class CreateAppleIdInputModel
 {
-    [Required]
-    [StringLength(100)]
-    public string Model { get; set; } = string.Empty;
-
     [Range(0, double.MaxValue)]
     public decimal Price { get; set; }
 

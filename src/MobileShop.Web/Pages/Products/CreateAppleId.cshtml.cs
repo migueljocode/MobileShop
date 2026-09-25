@@ -6,6 +6,11 @@ public class CreateAppleIdModel(
     IModelRepo modelRepo,
     ICategoryRepo categoryRepo) : PageModel
 {
+    // Apple IDs are always for the same implicit Apple iPhone model, so the user never picks one.
+    private const string AppleManufacturerName = "Apple";
+    private const string ImplicitAppleIdModelName = "iPhone";
+    private const string AppleIdCategoryName = "AppleId";
+
     [BindProperty] public CreateAppleIdInputModel Input { get; set; } = new();
     public string? Message { get; private set; }
 
@@ -24,9 +29,8 @@ public class CreateAppleIdModel(
         }
 
         // Apple IDs are all manufactured by Apple
-        const string appleManufacturerName = "Apple";
-        var manufacturer = manufacturerRepo.Find(m => m.Name == appleManufacturerName)
-            ?? new Manufacturer { Name = appleManufacturerName };
+        var manufacturer = manufacturerRepo.Find(m => m.Name == AppleManufacturerName)
+            ?? new Manufacturer { Name = AppleManufacturerName };
 
         if (manufacturer.Id == 0)
         {
@@ -34,12 +38,15 @@ public class CreateAppleIdModel(
         }
 
         // the catalog categories come from the seed data - never created here
-        var category = categoryRepo.Find(c => c.Name == "AppleId")
+        var category = categoryRepo.Find(c => c.Name == AppleIdCategoryName)
             ?? throw new InvalidOperationException("The 'AppleId' category is missing from the catalog seed data.");
 
-        var modelName = Input.Model.Trim();
-        var model = modelRepo.Find(m => m.ManufacturerId == manufacturer.Id && m.Name == modelName)
-            ?? AddModel(manufacturer.Id, category.Id, modelName);
+        // Apple IDs always hang off one shared implicit Apple iPhone model inside the AppleId category
+        var model = modelRepo.Find(m =>
+                m.ManufacturerId == manufacturer.Id &&
+                m.CategoryId == category.Id &&
+                m.Name == ImplicitAppleIdModelName)
+            ?? AddModel(manufacturer.Id, category.Id, ImplicitAppleIdModelName);
 
         var product = new Product
         {
@@ -50,7 +57,7 @@ public class CreateAppleIdModel(
 
         var appleId = new AppleId
         {
-            Email = Input.Email.Trim(),
+            Email = email,
             Password = Input.Password.Trim(),
             Notes = string.IsNullOrWhiteSpace(Input.Notes) ? null : Input.Notes.Trim(),
             ProductNavigation = product,
