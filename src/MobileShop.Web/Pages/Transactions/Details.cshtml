@@ -14,4 +14,6 @@
         <dt class="col-sm-3">Seller</dt><dd class="col-sm-9">@Model.Transaction.SellerLabel</dd>
         <dt class="col-sm-3">Customer</dt><dd class="col-sm-9">@Model.Transaction.CustomerLabel</dd>
     </dl>
+    <a asp-page="/Transactions/Details" asp-page-handler="Factor" asp-route-id="@Model.Id" class="btn btn-outline-secondary">Factor</a>
+    <a asp-page="/Transactions" class="btn btn-outline-primary ms-2">Back to transactions</a>
 }

@@ -42,4 +42,47 @@ internal static class TestDataHelpers
 
         return product;
     }
+
+    /// <summary>
+    /// Seeds the sentinel Shop person, seller, and customer records (id = 1) expected by
+    /// <see cref="TransactionDataService"/> when recording buy/sell operations.
+    /// </summary>
+    internal static void SeedShopSentinels(AppDbContext context)
+    {
+        if (context.People.Any(p => p.Id == 1))
+            return;
+
+        var shopPerson = new Person
+        {
+            Id = 1,
+            FirstName = "Shop",
+            LastName = "Owner",
+            PhoneNumber = "09120000001"
+        };
+        context.People.Add(shopPerson);
+        context.SaveChanges();
+
+        if (!context.Sellers.Any(s => s.Id == 1))
+        {
+            context.Sellers.Add(new Seller
+            {
+                Id = 1,
+                PersonId = 1,
+                EntityType = SellerEntityType.Legal
+            });
+        }
+
+        if (!context.Customers.Any(c => c.Id == 1))
+        {
+            context.Customers.Add(new Customer
+            {
+                Id = 1,
+                PersonId = 1,
+                NationalId = "0000000000"
+            });
+        }
+
+        context.SaveChanges();
+    }
+
 }

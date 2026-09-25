@@ -13,6 +13,7 @@ public class TransactionDataServiceTests : RepoTestBase
     {
         _pdfGeneratorMock = new Mock<IPdfGenerator>();
         _pdfGeneratorMock.Setup(p => p.Generate(It.IsAny<InvoiceViewModel>())).Returns([]);
+        _pdfGeneratorMock.Setup(p => p.GenerateTransactionFactor(It.IsAny<TransactionFactorViewModel>())).Returns([0x25, 0x50, 0x44, 0x46]);
         _service = new TransactionDataService(new TransactionRepo(Context), NullLogger<TransactionDataService>.Instance, _pdfGeneratorMock.Object);
     }
 
@@ -63,5 +64,40 @@ public class TransactionDataServiceTests : RepoTestBase
         var recordSellAsync = await _service.RecordSellAsync(product.Id, customer.Id, 420m, DateTime.UtcNow.AddMinutes(3));
         Assert.False(recordBuyAsync);
         Assert.False(recordSellAsync);
+    }
+
+    [Fact]
+    public void GenerateTransactionsPdf_passes_real_factor_rows_to_pdf_generator()
+    {
+        TestDataHelpers.SeedShopSentinels(Context);
+
+
+        var sellerPerson = new Person { FirstName = "Seller", LastName = "Pdf", PhoneNumber = "09120000003" };
+        Context.People.Add(sellerPerson);
+        Context.SaveChanges();
+
+        var seller = new Seller { PersonId = sellerPerson.Id, EntityType = SellerEntityType.Real };
+        Context.Sellers.Add(seller);
+        Context.SaveChanges();
+
+        var product = TestDataHelpers.CreateProduct(Context, 500m);
+        _service.RecordBuy(product.Id, seller.Id, 450m, DateTime.UtcNow);
+
+        TransactionFactorViewModel? capturedModel = null;
+        _pdfGeneratorMock
+            .Setup(p => p.GenerateTransactionFactor(It.IsAny<TransactionFactorViewModel>()))
+            .Callback<TransactionFactorViewModel>(m => capturedModel = m)
+            .Returns([0x25, 0x50, 0x44, 0x46]);
+
+        var bytes = _service.GenerateTransactionsPdf("buy", 10, "desc");
+
+        Assert.NotEmpty(bytes);
+        Assert.NotNull(capturedModel);
+        Assert.Single(capturedModel!.Rows);
+        var row = capturedModel.Rows[0];
+        Assert.Equal(TransactionDirection.Buy, row.Direction);
+        Assert.Equal(450m, row.FinishedPrice);
+        Assert.Equal("Seller", row.PersonRole);
+        Assert.Equal("Seller Pdf", row.PersonLabel);
     }
 }

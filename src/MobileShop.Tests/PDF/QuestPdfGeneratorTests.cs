@@ -96,4 +96,30 @@ public class QuestPdfGeneratorTests
     {
         Assert.Throws<ArgumentNullException>(() => _generator.GeneratePersian(null!));
     }
+
+    [Fact]
+    public void GenerateTransactionFactor_returns_valid_pdf_payload()
+    {
+        var model = new TransactionFactorViewModel(
+            [
+                new TransactionFactorRowViewModel(1, DateTime.UtcNow, TransactionDirection.Buy, "iPhone 13", 42_000_000m, "Seller", "Ali"),
+                new TransactionFactorRowViewModel(2, DateTime.UtcNow, TransactionDirection.Sell, "iPhone 13", 45_000_000m, "Customer", "Sara")
+            ],
+            DateTime.UtcNow);
+
+        var bytes = _generator.GenerateTransactionFactor(model);
+
+        Assert.NotNull(bytes);
+        Assert.NotEmpty(bytes);
+        Assert.Equal(0x25, bytes[0]);
+        Assert.Equal(0x50, bytes[1]);
+        Assert.Equal(0x44, bytes[2]);
+        Assert.Equal(0x46, bytes[3]);
+    }
+
+    [Fact]
+    public void GenerateTransactionFactor_throws_for_null_model()
+    {
+        Assert.Throws<ArgumentNullException>(() => _generator.GenerateTransactionFactor(null!));
+    }
 }

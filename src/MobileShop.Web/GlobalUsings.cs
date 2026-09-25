@@ -7,6 +7,7 @@ global using MobileShop.Dal.Initialization;
 global using MobileShop.Dal.Repos.Interfaces;
 global using MobileShop.Models.Enums;
 global using MobileShop.Models.Entities;
+global using MobileShop.Models.Extensions;
 global using System.ComponentModel.DataAnnotations;
 global using MobileShop.Models.ViewModels.Web;
 global using MobileShop.Models.ViewModels.Web.BindModels;

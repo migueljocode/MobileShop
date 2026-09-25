@@ -4,17 +4,85 @@
     ViewData["Title"] = "Transactions";
 }
 <h1>Transactions</h1>
-<p><a class="btn btn-primary" asp-page="/Transactions/Buy">Record Buy</a> <a class="btn btn-dark" asp-page="/Transactions/Sell">Record Sell</a> <a class="btn btn-outline-secondary" asp-page="/Transactions" asp-page-handler="Print">Print</a> <a class="btn btn-outline-secondary" asp-page="/Transactions" asp-page-handler="DownloadPdf">Download PDF</a></p>
-<form method="get" class="row g-2 mb-3">
-    <div class="col-md-3"><label class="form-label">Direction</label><select name="direction" class="form-select"><option value="all">All</option><option value="buy" selected="@(Model.Direction == "buy")">Buy</option><option value="sell" selected="@(Model.Direction == "sell")">Sell</option></select></div>
-    <div class="col-md-2"><label class="form-label">Count</label><input class="form-control" type="number" name="take" min="1" max="500" value="@Model.Take" /></div>
-    <div class="col-md-3"><label class="form-label">Order</label><select name="order" class="form-select"><option value="desc" selected="@(Model.Order == "desc")">Newest first</option><option value="asc" selected="@(Model.Order == "asc")">Oldest first</option></select></div>
-    <div class="col-md-2 align-self-end"><button class="btn btn-outline-primary">Apply</button></div>
+
+<form method="get">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+    <div class="row g-2 mb-3">
+        <div class="col-md-3">
+            <label class="form-label" for="direction">Direction</label>
+            <select id="direction" name="direction" class="form-select">
+                <option value="all">All</option>
+                <option value="buy" selected="@(Model.Direction == "buy")">Buy</option>
+                <option value="sell" selected="@(Model.Direction == "sell")">Sell</option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            <label class="form-label" for="take">Count</label>
+            <input id="take" class="form-control" type="number" name="take" min="1" max="500" value="@Model.Take" />
+        </div>
+        <div class="col-md-3">
+            <label class="form-label" for="order">Order</label>
+            <select id="order" name="order" class="form-select">
+                <option value="desc" selected="@(Model.Order == "desc")">Newest first</option>
+                <option value="asc" selected="@(Model.Order == "asc")">Oldest first</option>
+            </select>
+        </div>
+    </div>
+
+    <p class="d-flex flex-wrap gap-2">
+        <a class="btn btn-primary" asp-page="/Transactions/Buy">Record Buy</a>
+        <a class="btn btn-dark" asp-page="/Transactions/Sell">Record Sell</a>
+        <button type="submit" class="btn btn-outline-primary">Apply filters</button>
+        <button type="submit" asp-page-handler="Print" class="btn btn-outline-secondary">Print</button>
+        <button type="submit" asp-page-handler="Download" class="btn btn-outline-secondary">Download PDF</button>
+    </p>
+
+    @if (Model.Transactions.Count == 0)
+    {
+        <p class="text-muted">No transactions found.</p>
+    }
+    else
+    {
+        <p class="text-muted small">
+            Tick one or more rows to build a factor for exactly those transactions, or leave every row
+            unticked to use the direction/count/order filters above.
+        </p>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th scope="col"><span class="visually-hidden">Select</span></th>
+                    <th scope="col">Date</th>
+                    <th scope="col">Direction</th>
+                    <th scope="col">Product</th>
+                    <th scope="col">Price</th>
+                    <th scope="col">Seller</th>
+                    <th scope="col">Customer</th>
+                    <th scope="col">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var transaction in Model.Transactions)
+                {
+                    <tr>
+                        <td>
+                            <input class="form-check-input" type="checkbox" name="selectedIds" value="@transaction.Id"
+                                   checked="@Model.SelectedIds.Contains(transaction.Id)" />
+                        </td>
+                        <td>@transaction.Date.ToString("yyyy-MM-dd HH:mm")</td>
+                        <td>@transaction.Direction</td>
+                        <td>@transaction.ProductLabel</td>
+                        <td>@transaction.FinishedPrice.ToString("N0")</td>
+                        <td>@transaction.SellerLabel</td>
+                        <td>@transaction.CustomerLabel</td>
+                        <td>
+                            <a asp-page="/Transactions/Details" asp-route-id="@transaction.Id">Details</a>
+                            |
+                            <a asp-page="/Transactions" asp-page-handler="Print" asp-route-selectedIds="@transaction.Id">Factor</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
 </form>
-@if (Model.Transactions.Count == 0) { <p class="text-muted">No transactions found.</p> }
-else
-{
-    <table class="table table-striped"><thead><tr><th>Date</th><th>Direction</th><th>Product</th><th>Price</th><th>Seller</th><th>Customer</th></tr></thead>
-    <tbody>@foreach (var transaction in Model.Transactions)
-    { <tr><td>@transaction.Date.ToString("yyyy-MM-dd HH:mm")</td><td>@transaction.Direction</td><td>@transaction.ProductLabel</td><td>@transaction.FinishedPrice.ToString("N0")</td><td>@transaction.SellerLabel</td><td>@transaction.CustomerLabel</td><td><a asp-page="/Transactions/Details" asp-route-id="@transaction.Id">Details</a></td></tr> }</tbody></table>
-}

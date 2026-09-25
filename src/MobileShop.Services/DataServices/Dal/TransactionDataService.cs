@@ -373,26 +373,12 @@ public class TransactionDataService(
     /// <inheritdoc />
     public byte[] GenerateTransactionsPdf(string? direction, int take, string order)
     {
-        var kind = direction == "buy" ? "Purchase List" : direction == "sell" ? "Sales List" : "Transactions List";
-        var info = $"Transactions ({(direction ?? "all")}, {take}, {order})";
-        var notes = $"Generated on {DateTime.UtcNow:yyyy-MM-dd HH:mm} UTC";
+        var ascending = string.Equals(order, "asc", StringComparison.OrdinalIgnoreCase);
+        var rows = GetList(direction, take, ascending)
+            .Select(transaction => transaction.ToFactorRow())
+            .ToList();
 
-        var model = new InvoiceViewModel(
-            BuyerName: null,
-            BuyerNationalId: null,
-            BuyerPhoneNumber: null,
-            SellerName: null,
-            SellerPhoneNumber: null,
-            TransactionDate: DateTime.UtcNow,
-            FinishedPrice: 0,
-            ProductCount: take,
-            ProductInformation: info,
-            ProductExtras: [],
-            GuaranteeInformation: [],
-            OwnershipTransferred: null,
-            Notes: notes
-        );
-
-        return _pdfGenerator.Generate(model);
+        var model = new TransactionFactorViewModel(rows, DateTime.UtcNow);
+        return _pdfGenerator.GenerateTransactionFactor(model);
     }
 }

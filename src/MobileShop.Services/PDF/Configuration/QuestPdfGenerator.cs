@@ -30,6 +30,50 @@ public sealed class QuestPdfGenerator(IOptions<PdfSettings> options) : IPdfGener
         void renderPage(PageDescriptor page) => ComposePagePersian(page, presentation);
     }
 
+    /// <inheritdoc />
+    public byte[] GenerateTransactionFactor(TransactionFactorViewModel model)
+    {
+        ArgumentNullException.ThrowIfNull(model);
+        return Create(renderDocument).GeneratePdf();
+
+        void renderDocument(IDocumentContainer container) => container.Page(renderPage);
+        void renderPage(PageDescriptor page) => ComposeFactorPage(page, model);
+    }
+
+    private void ComposeFactorPage(PageDescriptor page, TransactionFactorViewModel model)
+    {
+        page.Size(ParsePageSize(_settings.PageSize));
+        page.MarginTop(_settings.MarginTop);
+        page.MarginRight(_settings.MarginRight);
+        page.MarginBottom(_settings.MarginBottom);
+        page.MarginLeft(_settings.MarginLeft);
+
+        page.Header().Column(RenderFactorHeader);
+        page.Content().Column(column => RenderFactorContent(column, model));
+        page.Footer().AlignCenter().Text(t => RenderFooter(t));
+    }
+
+    private void RenderFactorHeader(ColumnDescriptor column)
+    {
+        column.Item().Text(_settings.ShopName).Bold().FontSize(18);
+        column.Item().Text("Transactions factor").FontSize(14);
+    }
+
+    private static void RenderFactorContent(ColumnDescriptor column, TransactionFactorViewModel model)
+    {
+        column.Item().Text($"Generated: {model.GeneratedAt:yyyy-MM-dd HH:mm}");
+
+        foreach (var row in model.Rows)
+        {
+            column.Item().PaddingTop(8).Text($"{row.Date:yyyy-MM-dd HH:mm} | {row.Direction} | {row.ProductLabel}");
+            column.Item().Text($"Price: {row.FinishedPrice:N0} | {row.PersonRole}: {row.PersonLabel}");
+        }
+
+        column.Item().PaddingTop(8).Text($"Records: {model.Rows.Count}");
+        column.Item().Text($"Total: {model.TotalPrice:N0}");
+        column.Item().PaddingTop(8).AlignRight().Text("Signature: ______");
+    }
+
     private void ComposePage(PageDescriptor page, InvoicePresentation p)
     {
         page.Size(ParsePageSize(_settings.PageSize));
