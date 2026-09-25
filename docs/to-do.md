@@ -36,6 +36,13 @@ literally and complete the stages in order.
    and
    `dotnet test src/MobileShop.slnx --nologo`.
    Do not claim a task is complete when validation is failing.
+   If a command can exceed the agent's 30-second command window, do not cancel it
+   or report a timeout as a test failure: start it as an attached background
+   command, keep its returned shell/session identifier, and read that same session
+   until it finishes. Do not use shell `&`, `nohup`, `disown`, or detached
+   processes. If the command still cannot be completed reliably, run the focused
+   test project or several narrow `--filter` commands separately, then run the
+   full build/test through the same attached-background procedure before completion.
 9. Never silently swallow errors or return success-shaped fallbacks. Preserve the
    repository's logging and user-facing error patterns, and report missing data
    explicitly.
@@ -142,12 +149,12 @@ literally and complete the stages in order.
 
 ## Stage 3 — Fix the development profile page UX and behavior
 
-- [ ] Polish `/Account/Profile` for development mode without adding authentication
+- [x] ~~Polish `/Account/Profile` for development mode without adding authentication
   middleware or security boilerplate. Use the seeded development admin explicitly
   and consistently instead of relying on an unavailable authenticated identity.
   Fix malformed markup, improve layout and labels, preserve validation errors,
   provide clear success/error feedback, and make the password-change test flow
-  actually call the existing user data-service change method.
+  actually call the existing user data-service change method.~~
 
   Acceptance criteria:
   - GET reliably displays the development admin profile.
@@ -162,8 +169,33 @@ literally and complete the stages in order.
     introduced.
   - Profile markup is valid and responsive using the existing site styling.
 
-- [ ] Add or update focused profile/user-service tests for the successful change,
-  invalid current password, mismatched confirmation, and redisplay behavior.
+  - Completion note:
+  - Changes: `src/MobileShop.Web/Pages/Account/Profile.cshtml` (fixed `</dt>`/`<dd>`
+    mismatch, added `asp-validation-summary="All"`, success-message alert, dev-only
+    footnote, `_validationScriptsPartial`), `src/MobileShop.Web/Pages/Account/ProfileModel.cs`
+    (GET resolves seeded dev admin via `FindByUsernameAsync("admin")` — no
+    `User.Identity.Name`; POST validates required/length/confirmation attributes,
+    verifies current password via `ValidateCredentialsAsync`, calls
+    `ChangePasswordAsync` for persistence, sets success message and clears fields;
+    removed unused `IPasswordHasher` and placeholder messaging).
+  - Validation: build 0 warnings/0 errors; 6 focused `ProfileModelTests` pass
+    (GET resolves admin, successful change with message, invalid current password,
+    mismatched confirmation, short password, missing password); full suite
+    333 passed, 2 skipped, 0 failed.
+  - Notes: No cookie auth, claims, authorization attributes, or API changes
+    introduced. Password hashing remains owned by the data service.
+
+- [x] ~~Add or update focused profile/user-service tests for the successful change,
+  invalid current password, mismatched confirmation, and redisplay behavior.~~
+
+  - Completion note:
+  - Changes: `src/MobileShop.Tests/Web/Pages/Account/ProfileModelTests.cs` (new, 6 tests
+    using Moq `IUserDataService`; catch-all mock setups registered before specific
+    setups so exact-argument setups win).
+  - Validation: `--filter FullyQualifiedName~ProfileModelTests` → 6/6 passed.
+  - Notes: Attribute-driven validation is asserted through a `ValidateModel` helper
+    that runs `Validator.TryValidateProperty` into `ModelState`, mirroring MVC model
+    binding since page-model unit tests bypass the binder.
 
 ## Stage 4 — Expand realistic development seed data
 
