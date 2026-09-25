@@ -1,3 +1,1 @@
-inside http://localhost:5043/Products/CreateAppleId we still have Model textbox that user should not see
-print and Download PDF is not working 
-Profile page need polishing
+
