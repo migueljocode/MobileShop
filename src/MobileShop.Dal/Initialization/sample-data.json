@@ -19,6 +19,34 @@
       "firstName": "Sara",
       "lastName": "Ahmadi",
       "phoneNumber": "09120000003"
+    },
+    {
+      "id": 4,
+      "firstName": "Reza",
+      "lastName": "Mousavi",
+      "phoneNumber": "09120000004",
+      "notes": "Second supplier - legal entity contracts"
+    },
+    {
+      "id": 5,
+      "firstName": "Niloufar",
+      "lastName": "Hosseini",
+      "phoneNumber": "09120000005",
+      "notes": "Walk-in customer"
+    },
+    {
+      "id": 6,
+      "firstName": "Omid",
+      "lastName": "Bahrami",
+      "phoneNumber": "09120000006",
+      "notes": "Repeat customer"
+    },
+    {
+      "id": 7,
+      "firstName": "Fereshteh",
+      "lastName": "Kazemi",
+      "phoneNumber": "09120000007",
+      "notes": "Former sales employee - inactive"
     }
   ],
   "sellers": [
@@ -31,6 +59,11 @@
       "id": 2,
       "personId": 2,
       "entityType": "Real"
+    },
+    {
+      "id": 3,
+      "personId": 4,
+      "entityType": "Legal"
     }
   ],
   "customers": [
@@ -43,6 +76,16 @@
       "id": 2,
       "personId": 3,
       "nationalId": "0012345678"
+    },
+    {
+      "id": 3,
+      "personId": 5,
+      "nationalId": "0023456789"
+    },
+    {
+      "id": 4,
+      "personId": 6,
+      "nationalId": "0034567890"
     }
   ],
   "users": [
@@ -69,6 +112,14 @@
     {
       "id": 4,
       "name": "Spigen"
+    },
+    {
+      "id": 5,
+      "name": "Xiaomi"
+    },
+    {
+      "id": 6,
+      "name": "Baseus"
     }
   ],
   "categories": [
@@ -87,6 +138,18 @@
     {
       "id": 4,
       "name": "AppleId"
+    },
+    {
+      "id": 5,
+      "name": "Cable"
+    },
+    {
+      "id": 6,
+      "name": "Case"
+    },
+    {
+      "id": 7,
+      "name": "PowerBank"
     }
   ],
   "colors": [
@@ -101,6 +164,18 @@
     {
       "id": 3,
       "name": "Green"
+    },
+    {
+      "id": 4,
+      "name": "White"
+    },
+    {
+      "id": 5,
+      "name": "Blue"
+    },
+    {
+      "id": 6,
+      "name": "Silver"
     }
   ],
   "storageCapacities": [
@@ -111,6 +186,14 @@
     {
       "id": 2,
       "gb": 256
+    },
+    {
+      "id": 3,
+      "gb": 64
+    },
+    {
+      "id": 4,
+      "gb": 512
     }
   ],
   "models": [
@@ -118,19 +201,22 @@
       "id": 1,
       "manufacturerId": 1,
       "categoryId": 1,
-      "name": "iPhone 13"
+      "name": "iPhone 13",
+      "modelNumber": "A2890"
     },
     {
       "id": 2,
       "manufacturerId": 2,
       "categoryId": 1,
-      "name": "Galaxy S24"
+      "name": "Galaxy S24",
+      "modelNumber": "SM-S921B"
     },
     {
       "id": 3,
       "manufacturerId": 1,
       "categoryId": 1,
-      "name": "iPhone 11"
+      "name": "iPhone 11",
+      "modelNumber": "A2111"
     },
     {
       "id": 4,
@@ -143,6 +229,76 @@
       "manufacturerId": 4,
       "categoryId": 3,
       "name": "iPhone 13 Glass"
+    },
+    {
+      "id": 6,
+      "manufacturerId": 1,
+      "categoryId": 1,
+      "name": "iPhone 14",
+      "modelNumber": "A3090"
+    },
+    {
+      "id": 7,
+      "manufacturerId": 2,
+      "categoryId": 1,
+      "name": "Galaxy A55",
+      "modelNumber": "SM-A556B"
+    },
+    {
+      "id": 8,
+      "manufacturerId": 5,
+      "categoryId": 1,
+      "name": "Redmi Note 13",
+      "modelNumber": "23124RA7EO"
+    },
+    {
+      "id": 9,
+      "manufacturerId": 3,
+      "categoryId": 2,
+      "name": "65W GaN Charger"
+    },
+    {
+      "id": 10,
+      "manufacturerId": 4,
+      "categoryId": 3,
+      "name": "Galaxy S24 Glass"
+    },
+    {
+      "id": 11,
+      "manufacturerId": 1,
+      "categoryId": 4,
+      "name": "iPhone"
+    },
+    {
+      "id": 12,
+      "manufacturerId": 6,
+      "categoryId": 5,
+      "name": "USB-C Braided Cable"
+    },
+    {
+      "id": 13,
+      "manufacturerId": 4,
+      "categoryId": 6,
+      "name": "iPhone 13 Clear Case"
+    },
+    {
+      "id": 14,
+      "manufacturerId": 3,
+      "categoryId": 7,
+      "name": "PowerCore 20000"
+    },
+    {
+      "id": 15,
+      "manufacturerId": 6,
+      "categoryId": 5,
+      "name": "Lightning to USB-A Cable"
+    },
+    {
+      "id": 16,
+      "manufacturerId": 1,
+      "categoryId": 1,
+      "name": "iPhone 15",
+      "modelNumber": "A3094"
     }
   ],
   "products": [
@@ -178,6 +334,82 @@
       "price": 350000,
       "modelId": 5,
       "barcode": "8900000000005"
+    },
+    {
+      "id": 6,
+      "price": 55000000,
+      "modelId": 6,
+      "colorId": 4,
+      "barcode": "8900000000006"
+    },
+    {
+      "id": 7,
+      "price": 21000000,
+      "modelId": 7,
+      "colorId": 5,
+      "barcode": "8900000000007"
+    },
+    {
+      "id": 8,
+      "price": 9500000,
+      "modelId": 8,
+      "colorId": 2,
+      "barcode": "8900000000008"
+    },
+    {
+      "id": 9,
+      "price": 1800000,
+      "modelId": 9,
+      "barcode": "8900000000009"
+    },
+    {
+      "id": 10,
+      "price": 450000,
+      "modelId": 10,
+      "barcode": "8900000000010"
+    },
+    {
+      "id": 11,
+      "price": 800000,
+      "modelId": 11,
+      "barcode": "8900000000011"
+    },
+    {
+      "id": 12,
+      "price": 650000,
+      "modelId": 12,
+      "barcode": "8900000000012"
+    },
+    {
+      "id": 13,
+      "price": 750000,
+      "modelId": 13,
+      "barcode": "8900000000013"
+    },
+    {
+      "id": 14,
+      "price": 2200000,
+      "modelId": 14,
+      "barcode": "8900000000014"
+    },
+    {
+      "id": 15,
+      "price": 450000,
+      "modelId": 15,
+      "barcode": "8900000000015"
+    },
+    {
+      "id": 16,
+      "price": 800000,
+      "modelId": 11,
+      "barcode": "8900000000016"
+    },
+    {
+      "id": 17,
+      "price": 65000000,
+      "modelId": 16,
+      "colorId": 5,
+      "barcode": "8900000000017"
     }
   ],
   "transactions": [
@@ -225,6 +457,195 @@
       "productId": 4,
       "finishedPrice": 900000,
       "direction": "Buy"
+    },
+    {
+      "id": 6,
+      "date": "2026-01-18T00:00:00",
+      "sellerId": 3,
+      "customerId": 1,
+      "productId": 7,
+      "finishedPrice": 18500000,
+      "direction": "Buy"
+    },
+    {
+      "id": 7,
+      "date": "2026-02-05T00:00:00",
+      "sellerId": 1,
+      "customerId": 3,
+      "productId": 7,
+      "finishedPrice": 22500000,
+      "direction": "Sell"
+    },
+    {
+      "id": 8,
+      "date": "2026-01-25T00:00:00",
+      "sellerId": 2,
+      "customerId": 1,
+      "productId": 8,
+      "finishedPrice": 7800000,
+      "direction": "Buy"
+    },
+    {
+      "id": 9,
+      "date": "2026-02-10T00:00:00",
+      "sellerId": 1,
+      "customerId": 4,
+      "productId": 8,
+      "finishedPrice": 9900000,
+      "direction": "Sell"
+    },
+    {
+      "id": 10,
+      "date": "2026-02-01T00:00:00",
+      "sellerId": 3,
+      "customerId": 1,
+      "productId": 9,
+      "finishedPrice": 1400000,
+      "direction": "Buy"
+    },
+    {
+      "id": 11,
+      "date": "2026-02-14T00:00:00",
+      "sellerId": 1,
+      "customerId": 2,
+      "productId": 9,
+      "finishedPrice": 1800000,
+      "direction": "Sell"
+    },
+    {
+      "id": 12,
+      "date": "2026-02-01T00:00:00",
+      "sellerId": 2,
+      "customerId": 1,
+      "productId": 12,
+      "finishedPrice": 480000,
+      "direction": "Buy"
+    },
+    {
+      "id": 13,
+      "date": "2026-02-18T00:00:00",
+      "sellerId": 1,
+      "customerId": 3,
+      "productId": 12,
+      "finishedPrice": 650000,
+      "direction": "Sell"
+    },
+    {
+      "id": 14,
+      "date": "2026-02-20T00:00:00",
+      "sellerId": 3,
+      "customerId": 1,
+      "productId": 14,
+      "finishedPrice": 1750000,
+      "direction": "Buy"
+    },
+    {
+      "id": 15,
+      "date": "2026-01-30T00:00:00",
+      "sellerId": 2,
+      "customerId": 1,
+      "productId": 13,
+      "finishedPrice": 520000,
+      "direction": "Buy"
+    },
+    {
+      "id": 16,
+      "date": "2026-02-22T00:00:00",
+      "sellerId": 1,
+      "customerId": 4,
+      "productId": 13,
+      "finishedPrice": 750000,
+      "direction": "Sell"
+    },
+    {
+      "id": 17,
+      "date": "2026-01-28T00:00:00",
+      "sellerId": 1,
+      "customerId": 4,
+      "productId": 2,
+      "finishedPrice": 34000000,
+      "direction": "Sell"
+    },
+    {
+      "id": 18,
+      "date": "2026-02-25T00:00:00",
+      "sellerId": 3,
+      "customerId": 1,
+      "productId": 6,
+      "finishedPrice": 50000000,
+      "direction": "Buy"
+    },
+    {
+      "id": 19,
+      "date": "2026-01-30T00:00:00",
+      "sellerId": 2,
+      "customerId": 1,
+      "productId": 10,
+      "finishedPrice": 300000,
+      "direction": "Buy"
+    },
+    {
+      "id": 20,
+      "date": "2026-02-22T00:00:00",
+      "sellerId": 1,
+      "customerId": 3,
+      "productId": 10,
+      "finishedPrice": 450000,
+      "direction": "Sell"
+    },
+    {
+      "id": 21,
+      "date": "2026-01-08T00:00:00",
+      "sellerId": 2,
+      "customerId": 1,
+      "productId": 5,
+      "finishedPrice": 250000,
+      "direction": "Buy"
+    },
+    {
+      "id": 22,
+      "date": "2026-02-16T00:00:00",
+      "sellerId": 1,
+      "customerId": 2,
+      "productId": 5,
+      "finishedPrice": 400000,
+      "direction": "Sell"
+    },
+    {
+      "id": 23,
+      "date": "2026-02-08T00:00:00",
+      "sellerId": 1,
+      "customerId": 3,
+      "productId": 4,
+      "finishedPrice": 1200000,
+      "direction": "Sell"
+    },
+    {
+      "id": 24,
+      "date": "2026-02-24T00:00:00",
+      "sellerId": 1,
+      "customerId": 3,
+      "productId": 11,
+      "finishedPrice": 800000,
+      "direction": "Sell"
+    },
+    {
+      "id": 25,
+      "date": "2026-02-26T00:00:00",
+      "sellerId": 2,
+      "customerId": 1,
+      "productId": 15,
+      "finishedPrice": 320000,
+      "direction": "Buy"
+    },
+    {
+      "id": 26,
+      "date": "2026-03-05T00:00:00",
+      "sellerId": 1,
+      "customerId": 4,
+      "productId": 6,
+      "finishedPrice": 57000000,
+      "direction": "Sell"
     }
   ],
   "appleInfos": [
@@ -243,6 +664,20 @@
       "password": "samplepass1",
       "notes": "Comes with iPhone 13",
       "productId": 1
+    },
+    {
+      "id": 2,
+      "email": "shop.appleid2@example.com",
+      "password": "samplepass2",
+      "notes": "Sold Apple ID - account attached to iPhone 14 listing",
+      "productId": 11
+    },
+    {
+      "id": 3,
+      "email": "shop.appleid3@example.com",
+      "password": "samplepass3",
+      "notes": "In-stock Apple ID - available for sale",
+      "productId": 16
     }
   ],
   "phones": [
@@ -262,6 +697,28 @@
       "imei1": "345678901234567",
       "ownershipTransferred": true,
       "productId": 3
+    },
+    {
+      "id": 4,
+      "imei1": "456789012345678",
+      "productId": 6
+    },
+    {
+      "id": 5,
+      "imei1": "567890123456789",
+      "imei2": "567890123456790",
+      "productId": 7
+    },
+    {
+      "id": 6,
+      "imei1": "678901234567890",
+      "ownershipTransferred": true,
+      "productId": 8
+    },
+    {
+      "id": 7,
+      "imei1": "789012345678901",
+      "productId": 17
     }
   ],
   "secondHands": [
@@ -270,6 +727,13 @@
       "testPeriodDays": 7,
       "usedDurationDays": 730,
       "productId": 3
+    },
+    {
+      "id": 2,
+      "testPeriodDays": 7,
+      "usedDurationDays": 730,
+      "notes": "Trade-in unit sold as secondhand",
+      "productId": 2
     }
   ],
   "guarantees": [
@@ -279,6 +743,28 @@
       "expirationDate": "2027-01-10T00:00:00",
       "corporation": "Apple",
       "productId": 1
+    },
+    {
+      "id": 2,
+      "startDate": "2026-02-25T00:00:00",
+      "expirationDate": "2027-02-25T00:00:00",
+      "corporation": "Apple",
+      "productId": 6
+    },
+    {
+      "id": 3,
+      "startDate": "2026-01-18T00:00:00",
+      "expirationDate": "2027-01-18T00:00:00",
+      "corporation": "Samsung",
+      "productId": 7
+    },
+    {
+      "id": 4,
+      "startDate": "2024-06-01T00:00:00",
+      "expirationDate": "2025-06-01T00:00:00",
+      "corporation": "Apple",
+      "notes": "Expired warranty - kept for date filtering coverage",
+      "productId": 3
     }
   ],
   "deviceSpecs": [
@@ -295,12 +781,63 @@
       "storageCapacityId": 2,
       "chargeSpeed": 25,
       "productId": 2
+    },
+    {
+      "id": 3,
+      "ram": 6,
+      "storageCapacityId": 4,
+      "chargeSpeed": 20,
+      "productId": 6
+    },
+    {
+      "id": 4,
+      "ram": 8,
+      "storageCapacityId": 2,
+      "chargeSpeed": 25,
+      "productId": 7
+    },
+    {
+      "id": 5,
+      "ram": 8,
+      "storageCapacityId": 1,
+      "chargeSpeed": 33,
+      "productId": 8
+    },
+    {
+      "id": 6,
+      "ram": 4,
+      "storageCapacityId": 3,
+      "chargeSpeed": 18,
+      "productId": 3
+    },
+    {
+      "id": 7,
+      "ram": 6,
+      "storageCapacityId": 2,
+      "chargeSpeed": 20,
+      "productId": 17
     }
   ],
   "tablets": [],
   "smartWatches": [],
   "laptops": [],
-  "cables": [],
+  "cables": [
+    {
+      "id": 1,
+      "connector1": "UsbC",
+      "connector2": "UsbC",
+      "length": 1.8,
+      "notes": "Braided charging cable",
+      "productId": 12
+    },
+    {
+      "id": 2,
+      "connector1": "Lightning",
+      "connector2": "UsbA",
+      "length": 1.0,
+      "productId": 15
+    }
+  ],
   "chargers": [
     {
       "id": 1,
@@ -308,17 +845,52 @@
       "pd": true,
       "portCount": 1,
       "productId": 4
+    },
+    {
+      "id": 2,
+      "wattage": 65,
+      "pd": true,
+      "portCount": 2,
+      "notes": "GaN fast charger with two ports",
+      "productId": 9
     }
   ],
-  "powerBanks": [],
+  "powerBanks": [
+    {
+      "id": 1,
+      "capacityMah": 20000,
+      "maxWattage": 30,
+      "portCount": 2,
+      "pd": true,
+      "notes": "Bought but not yet sold - stays in inventory",
+      "productId": 14
+    }
+  ],
   "portableStorages": [],
-  "cases": [],
-  "caseModelFits": [],
+  "cases": [
+    {
+      "id": 1,
+      "notes": "Clear protective case",
+      "productId": 13
+    }
+  ],
+  "caseModelFits": [
+    {
+      "id": 1,
+      "caseId": 1,
+      "modelId": 1
+    }
+  ],
   "glasses": [
     {
       "id": 1,
       "notes": "Tempered glass",
       "productId": 5
+    },
+    {
+      "id": 2,
+      "notes": "Privacy tempered glass",
+      "productId": 10
     }
   ],
   "glassModelFits": [
@@ -326,6 +898,11 @@
       "id": 1,
       "glassId": 1,
       "modelId": 1
+    },
+    {
+      "id": 2,
+      "glassId": 2,
+      "modelId": 2
     }
   ],
   "employees": [
@@ -352,6 +929,14 @@
       "hireDate": "2023-06-01T00:00:00",
       "isActive": true,
       "notes": "Junior sales - 20% share"
+    },
+    {
+      "id": 4,
+      "personId": 7,
+      "sharePercent": 0,
+      "hireDate": "2024-04-01T00:00:00",
+      "isActive": false,
+      "notes": "Inactive employee - excluded from distribution"
     }
   ]
 }

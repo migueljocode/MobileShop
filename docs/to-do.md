@@ -201,12 +201,12 @@ literally and complete the stages in order.
 
 ## Stage 4 — Expand realistic development seed data
 
-- [ ] Expand `src/MobileShop.Dal/Initialization/sample-data.json` using the
+- [x] ~~Expand `src/MobileShop.Dal/Initialization/sample-data.json` using the
   existing loader/schema. Add realistic but deterministic data covering multiple
   manufacturers and models, phone colors/specifications, Apple IDs, customers,
   sellers, employees, guarantees, bought and sold products, and varied
   transactions suitable for inventory, profile, profit/loss, filtering, and PDF
-  testing.
+  testing.~~
 
   Rules for seed data:
   - Respect every configured relationship, required field, enum, unique index, and
@@ -225,6 +225,40 @@ literally and complete the stages in order.
     multi-record cases.
   - Seed-data loading has focused coverage or validation proving relationships
     and required records are valid.
+
+  - Completion note:
+  - Changes: `src/MobileShop.Dal/Initialization/sample-data.json` expanded from
+    5 to 17 products and 5 to 26 transactions (14 Buy / 12 Sell, total profit
+    +6,230,000 so distribution shows a profitable period): 7 people (3 suppliers /
+    customers + inactive employee), 3 sellers (Real + Legal), 4 customers,
+    6 manufacturers, 7 categories (Phone/Charger/Glass/AppleId/Cable/Case/PowerBank),
+    6 colors, 4 storage capacities, 16 models incl. implicit AppleId `iPhone`
+    model (matches Stage 1's find-or-create), 3 Apple IDs (plaintext passwords,
+    sold + unsold states), 7 phones (unique IMEIs, dual-SIM, ownership-transferred),
+    4 guarantees (3 active + 1 expired for date filtering), 7 device specs,
+    2 second-hand units (sold + available), 2 cables, 2 chargers, 1 power bank,
+    1 case + fit, 2 glasses + fits, 4 employees (3 active summing to exactly 100%
+    + 1 inactive excluded from distribution). All sentinel rules hold: seller 1
+    and customer 1 are person 1 (shop), every Buy has customerId 1, every Sell has
+    sellerId 1. `src/MobileShop.Tests/Dal/Initialization/SampleDataSeedTests.cs`
+    (new, 6 tests against a real SQLite database via the literal
+    `DatabaseInitializer.InitializeForDevelopment` entry point).
+  - Validation: a standalone validation script checked every FK target, unique
+    index (barcode/username/manufacturer+model/GB/IMEI/fit pairs), required field,
+    enum value, string length bound, date range, and sentinel rule before the
+    commit; build 0 warnings/0 errors; focused `SampleDataSeedTests` 6/6 passed;
+    full suite run through a persistent session until completion: 339 passed,
+    2 skipped, 0 failed.
+  - Notes: dev startup recreate+seed is proven by the test invoking
+    `DatabaseInitializer.InitializeForDevelopment` (EnsureDeleted → EnsureCreated →
+    SeedIfEmpty) on SQLite; idempotency proven by re-running SeedIfEmpty (no-op)
+    and `ClearAndReseedDatabase` on a fresh context (matching how scoped dev
+    tooling calls it - the initializer's destructive path is unchanged). Loader and
+    initializer code untouched. The pre-existing `appleInfos` array remains
+    intentionally unused: the existing loader has no `AppleInfos` collection, and
+    extending it would change initialization behavior beyond this stage's scope.
+    Seed contains no secrets, real personal data, or production credentials
+    (example.com emails, sequential 0912xxxxxxxx numbers, fake national IDs).
 
 ## Stage 5 — Async consistency and performance review
 
