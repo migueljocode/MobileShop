@@ -241,9 +241,23 @@ literally and complete the stages in order.
 
 ## Stage 4 — Limit profit distribution to Mikaeeil, Anis, and the Shop
 
-- [ ] Configure the Profit/Loss distribution to include only Mikaeeil Jorjany at
+- [x] ~~Configure the Profit/Loss distribution to include only Mikaeeil Jorjany at
   40%, Anis Sahabi at 50%, and the Shop with the remaining 10%, and seed the
-  development data to support those rows.
+  development data to support those rows.~~
+  - Completed: `src/MobileShop.Services/Logging/Settings/DistributionSettings.cs`,
+    `src/MobileShop.Dal/Initialization/sample-data.json`,
+    `src/MobileShop.Tests/Services/Logging/DistributionCalculatorTests.cs`,
+    `src/MobileShop.Tests/Dal/Initialization/SampleDataSeedTests.cs`,
+    `src/MobileShop.Tests/Web/Pages/Reports/ProfitLossTests.cs`.
+  - Validation: `dotnet build src/MobileShop.slnx --nologo` — 0 warnings, 0 errors; calculator
+    tests 11/11 passed; seed tests 6/6 passed; full suite 386 passed, 2 skipped, 0 failed.
+  - Notes: 11 focused calculator tests (plan listed 9; added two extra:
+    `Profit_SharePercentAlways40_50_10EvenWhenEmployeesHaveDifferentShares`,
+    `InactiveMikaeeil_DoesNotSatisfyRequirement`, and `InactiveAnis_DoesNotSatisfyRequirement`
+    to strengthen active-employee and inactive-rejection coverage). The `ProfitLossTests.CreateModel`
+    mock was updated to return Mikaeeil and Anis as active employees, since the calculator
+    now requires them. API files, configuration, and the development-only seed policy are
+    unchanged.
 
   Implementation requirements:
   - Update `src/MobileShop.Services/Logging/Settings/DistributionSettings.cs` and
