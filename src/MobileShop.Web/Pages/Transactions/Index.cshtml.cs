@@ -1,6 +1,8 @@
 namespace MobileShop.Web.Pages.Transactions;
 
-public class IndexModel(ITransactionDataService transactionDataService) : PageModel
+public class IndexModel(
+    ITransactionDataService transactionDataService,
+    IPdfGenerator pdfGenerator) : PageModel
 {
     public IReadOnlyList<TransactionListItemViewModel> Transactions { get; private set; } = [];
     public string Direction { get; private set; } = "all";
@@ -14,37 +16,30 @@ public class IndexModel(ITransactionDataService transactionDataService) : PageMo
     [BindProperty(SupportsGet = true)]
     public int[] SelectedIds { get; set; } = [];
 
-    /// <summary>
-    /// When true, the page renders the printable factor HTML and triggers the browser's
-    /// native print dialog instead of the normal transaction list UI.
-    /// </summary>
-    public bool IsPrintMode { get; private set; }
-
-    /// <summary>The resolved factor rows to render in print mode.</summary>
-    public IReadOnlyList<TransactionFactorRowViewModel> PrintFactorRows { get; private set; } = [];
-
     public async Task OnGetAsync(string? direction = null, int take = 50, string? order = null)
         => await LoadAsync(direction, take, order);
 
-    /// <summary>
-    /// Returns the factor as a browser-printable HTML page. The browser's native print
-    /// dialog handles printing or saving as PDF — no server-side PDF generation.
-    /// </summary>
-    public async Task<IActionResult> OnGetPrintFactorAsync(string? direction = null, int take = 50, string? order = null)
+    /// <summary>Generates a downloadable PDF factor for the selected or filtered transactions.</summary>
+    public async Task<IActionResult> OnGetDownloadFactorAsync(
+        string? direction = null,
+        int take = 50,
+        string? order = null)
     {
         await LoadAsync(direction, take, order);
 
         var rows = ResolveFactorRows();
         if (rows.Count == 0)
         {
-            // ModelState already populated with the validation error; redisplay.
-            IsPrintMode = false;
+            if (ModelState.IsValid)
+                ModelState.AddModelError(string.Empty, "No transactions match the current filters.");
+
             return Page();
         }
 
-        PrintFactorRows = rows;
-        IsPrintMode = true;
-        return Page();
+        var factor = new TransactionFactorViewModel(rows, DateTime.UtcNow);
+        var pdfBytes = pdfGenerator.GenerateTransactionFactor(factor);
+
+        return File(pdfBytes, "application/pdf", "transactions-factor.pdf");
     }
 
     private async Task LoadAsync(string? direction, int take, string? order)

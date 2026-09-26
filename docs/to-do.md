@@ -1,369 +1,109 @@
 # MobileShop execution checklist
 
-This file is the authoritative work order for the next act-mode agent. Follow it
-literally and complete the stages in order.
+This file is the authoritative work order for the next act-mode agent. The
+previous UI/UX roadmap is complete; this task replaces the transaction-list
+factor's native-print-only behavior with a direct PDF download.
 
 ## Strict rules for the agent
 
-1. Work only on the first unchecked task whose prerequisites are complete. Do not
-   skip ahead, combine unrelated stages, or redesign completed work.
-2. Read the relevant existing code, tests, configuration, and seed-data structure
-   before editing. Follow the repository's existing naming, layering, global-usings,
-   repository, service, Razor Pages, and test conventions.
-3. The scope is the development Web application only. Do not modify
-   `src/MobileShop.Api`, API service stubs, API configuration, or API endpoints
-   unless a later task explicitly adds that scope.
-4. Do not add production authentication, authorization, cookie middleware, claims,
-   login security, or other security boilerplate in these stages. Profile behavior
-   is intentionally development-adapted so it can be exercised without real
-   authentication.
-5. Apple ID inventory passwords are intentionally stored as plaintext because the
-   shop must be able to recover them for customers. Do not hash, encrypt, hide from
-   the inventory workflow, or otherwise change this requirement. This does not
-   change the separate hashed-password behavior for application users.
-6. Preserve existing behavior outside the task. Do not perform broad refactors,
-   rename public contracts unnecessarily, change database initialization policy, or
-   edit generated build output, `bin`, or `obj` files.
-7. Use async repository/service methods when an async equivalent already exists.
-   Add async methods only when they fit the existing abstraction and can be used
-   end-to-end. Use `IAsyncEnumerable` only for genuinely streaming/deferred
-   collection flows; do not force it into Razor Page request handlers, small
-   in-memory selections, or APIs that require materialized lists.
-8. Every behavior change must have focused tests where practical. Run the smallest
-   relevant test first, then run:
-   `dotnet build src/MobileShop.slnx --nologo`
-   and
-   `dotnet test src/MobileShop.slnx --nologo`.
-   Do not claim a task is complete when validation is failing.
-   If a command can exceed the agent's 30-second command window, do not cancel it
-   or report a timeout as a test failure: start it as an attached background
-   command, keep its returned shell/session identifier, and read that same session
-   until it finishes. Do not use shell `&`, `nohup`, `disown`, or detached
-   processes. If the command still cannot be completed reliably, run the focused
-   test project or several narrow `--filter` commands separately, then run the
-   full build/test through the same attached-background procedure before completion.
-9. Never silently swallow errors or return success-shaped fallbacks. Preserve the
-   repository's logging and user-facing error patterns, and report missing data
-   explicitly.
-10. Do not delete a checklist item or completion evidence during ordinary stage
-    work. The repository owner explicitly requested resetting the previous roadmap
-    for this new set of demands; that reset is the only exception. Add future work
-    at the end of the appropriate stage.
-11. Only after implementation and validation are complete, change that task from
-    `- [ ]` to `- [x]` and wrap the complete task text in Markdown strikethrough:
-    `- [x] ~~task text~~`. Add a short indented completion note immediately below
-    it containing the files changed, validation performed, and any intentional
-    limitation.
-12. Never check a parent task while any acceptance criterion or dependent task is
-    unfinished. Do not check a task merely because the page compiles or a button
-    renders; verify the requested behavior.
-13. If a requirement is ambiguous or implementation would conflict with these
-    rules, stop before editing and report the exact conflict. Do not invent a new
-    product decision.
-14. After each completed task, create and persist a separate Git commit before
-    starting the next task. Use a clear Conventional Commits message in the
-    existing project style, for example `fix(web): remove implicit Apple ID model`
-    or `feat(web): generate factors for selected transactions`. The commit must
-    contain only that task's related changes, must be created only after focused
-    validation passes, and must include this trailer unless the user explicitly
-    says otherwise:
-    `Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>`.
-15. Do not push, reset, amend, or revert commits unless the user explicitly asks
-    for that operation. If unrelated pre-existing changes are present, do not
-    include them in the task commit.
+1. Implement only the unchecked task below. Do not reopen completed roadmap
+   stages or make unrelated changes.
+2. Read the relevant page, service, PDF generator, tests, and configuration
+   before editing. Follow the existing layering, naming, async, and test
+   conventions.
+3. Limit implementation changes to the development Web application's
+   transaction-list factor flow and directly related tests. Do not modify
+   `src/MobileShop.Api`, API service stubs, API configuration, or endpoints.
+4. Do not add authentication, authorization, cookie middleware, or unrelated
+   security changes. Do not edit generated output, `bin`, or `obj`.
+5. Preserve the existing transaction filter, ordering, count limit, selected
+   row behavior, Details page factor action, and all unrelated application
+   behavior.
+6. Add focused tests for changed behavior. Run the smallest relevant tests,
+   then `dotnet build src/MobileShop.slnx --nologo` and
+   `dotnet test src/MobileShop.slnx --nologo`. Do not claim completion if
+   validation fails.
+7. Surface errors explicitly using the existing user-facing validation pattern;
+   do not silently omit invalid or missing selected transactions.
+8. Only mark the task complete after the acceptance criteria pass. Wrap its
+   completed text in Markdown strikethrough and add a completion note with files,
+   validation, and any limitation.
+9. Do not push, reset, amend, or revert commits. Do not add a co-author trailer.
 
-## Stage 1 — Use the browser's native print flow for transaction factors
+## Task — Download transaction factors directly as PDF
 
-- [x] ~~Replace the Transactions Index's separate Print and Download PDF actions
-  with one working `Print Factor` action. Keep the current direction, count, order,
-  and row-selection behavior, but stop generating a server-side PDF from this page.~~
+- [x] ~~Replace the transaction list's browser-native `Print Factor` action with a
+  direct PDF download. Clicking the action must return a downloadable PDF response
+  without opening the browser print dialog or requiring the user to select
+  “Save as PDF.”~~
+  - Completed: `src/MobileShop.Web/Pages/Transactions/Index.cshtml`,
+    `Index.cshtml.cs`, and
+    `src/MobileShop.Tests/Web/Pages/Transactions/IndexModelTests.cs`.
+  - Validation: Focused transaction page tests — 8 passed; solution build — 0
+    warnings and 0 errors; full test suite — 384 passed, 2 skipped, 0 failed.
+  - Endpoint smoke test: Production-mode Web returned HTTP 200 with
+    `Content-Type: application/pdf`, attachment filename
+    `transactions-factor.pdf`, and a valid `%PDF-` payload.
+  - Notes: The rendered button targets `?handler=DownloadFactor`; browser
+    interaction was not manually exercised, but its endpoint and attachment
+    response were smoke-tested over HTTP.
 
-  Implementation requirements:
+  ### Implementation requirements
+
   - Update `src/MobileShop.Web/Pages/Transactions/Index.cshtml` and
-    `Index.cshtml.cs`. Remove the `IPdfGenerator` dependency, both old Print and
-    Download handlers, and all QuestPDF calls from this page. Do not remove or
-    change the separate transaction Details factor flow.
-  - Provide one GET page handler for `Print Factor`. Ensure the submitted
-    `direction`, `take`, `order`, and repeated `selectedIds` values are bound on
-    handler requests; do not depend on implicit binding that the tests do not prove.
-  - Load the filtered, ordered, count-limited transaction list once. If no IDs are
-    selected, print every transaction in that loaded list. If IDs are selected,
-    print exactly those distinct positive IDs, in the submitted selection order,
-    only when every ID exists in that loaded snapshot. If any selected ID is
-    invalid or absent, redisplay with a visible validation error and do not enter
-    print mode or print a partial factor.
-  - Add an `IsPrintMode` (or equivalent) page state and an HTML factor layout that
-    contains the selected/listed transaction date, direction, product, price, and
-    relevant party information. In print mode hide filters, navigation/actions,
-    checkboxes, and other screen-only chrome with `@media print`; keep the factor
-    readable on paper and in the browser's Save as PDF output.
-  - In print mode only, call `window.print()` after the factor HTML has rendered.
-    Use the browser's native print dialog for printing or saving as PDF; do not
-    return a PDF file, invoke QuestPDF, or create a download response.
-  - Give the single button a clear enabled primary style and visible
-    `Print Factor` label. Preserve the existing apply-filters and record
-    buy/sell actions.
+    `Index.cshtml.cs`, plus focused tests under
+    `src/MobileShop.Tests/Web/Pages/Transactions/`.
+  - Use the existing `IPdfGenerator` / `GenerateTransactionFactor` path and the
+    existing `TransactionFactorViewModel`; do not introduce another PDF library
+    or change the PDF generator implementation. The Web service registration
+    already registers `IPdfGenerator`.
+  - Keep the filtering and selection semantics:
+    - Submit the current `direction`, `take`, and `order` filters with the action.
+    - With no selected IDs, include every transaction in the filtered, ordered,
+      count-limited list loaded for the request.
+    - With selected IDs, include exactly the distinct selected transactions, in
+      submitted order, and only if every ID is positive and present in that same
+      loaded list snapshot. Do not silently discard invalid/missing IDs or return
+      a partial PDF.
+    - Load the transaction list once per download request and derive PDF rows
+      from that snapshot; do not issue per-ID detail queries or load a second
+      independent snapshot.
+  - Return the generated bytes as an attachment using an appropriate PDF content
+    type and a stable, user-friendly `.pdf` filename. The browser must initiate a
+    file download, not render an HTML print page or trigger `window.print()`.
+  - Replace the button label with an explicit download action such as
+    `Download Factor (PDF)`. Retain the existing row checkboxes, filter controls,
+    record-buy/sell actions, details links, and per-row factor functionality;
+    ensure a per-row factor link still carries the active filter values and
+    downloads only that transaction.
+  - Invalid or out-of-snapshot selections must redisplay the list with a visible
+    validation message and no file response. If no transactions match the active
+    filters and no IDs are selected, show a clear message and do not generate or
+    download an empty PDF.
+  - Remove the Index page's print-only HTML, `IsPrintMode` state,
+    `window.print()` script, and print CSS if no longer used. Keep the separate
+    `/Transactions/Details` factor flow unchanged.
+  - Prefer injecting `IPdfGenerator` into `IndexModel` and generating from the
+    already-loaded rows. Do not use the existing
+    `GenerateTransactionsPdf(direction, take, order)` method for selected rows:
+    it performs its own list read and cannot represent the manual selection.
 
-  Acceptance criteria:
-  - The single action submits all active filters and all checked IDs.
-  - Empty selection uses exactly the currently filtered/ordered/take-limited page
-    list; non-empty selection uses only the selected rows from that same snapshot.
-  - Invalid or out-of-snapshot IDs produce an error and no printable factor.
-  - The response is HTML in print mode and triggers native browser printing;
-    server-side PDF generation is absent from the Transactions Index path.
-  - Focused page-model tests cover empty selection, one and multiple IDs,
-    invalid/missing IDs, handler inputs, and print-mode state/content composition.
-    Update `Transactions/IndexModelTests.cs` and add view/render coverage if the
-        existing test setup supports it.
+  ### Acceptance criteria
 
-  - 2026-01-01T00:00:00Z — Completion note:
-    - Files changed: `src/MobileShop.Web/Pages/Transactions/Index.cshtml`,
-      `Index.cshtml.cs`, `src/MobileShop.Tests/Web/Pages/Transactions/IndexModelTests.cs`
-    - Removed `IPdfGenerator` dependency from `IndexModel` constructor; removed
-      `OnGetPrintAsync`, `OnGetDownloadAsync`, `GenerateFactorAsync` handlers.
-    - Added `OnGetPrintFactorAsync` handler returning same `.cshtml` page with
-      `IsPrintMode=true` and `PrintFactorRows` populated — no QuestPDF, no file download.
-    - Added non-positive-ID rejection: any `id <= 0` → ModelState error, `IsPrintMode=false`.
-    - Print CSS hides layout `header`/`footer`/`nav` via `@media print`; auto-triggers
-      `window.print()` after factor HTML renders in `window.onload`.
-    - Per-row "Factor" link passes `direction`/`take`/`order` route params to preserve filters.
-    - `IndexModelTests.cs` rewritten: 10 tests, all passing (0 failed, 0 skipped).
-    - Build: 0 errors, 0 warnings. Full suite: 350 passed, 0 failed, 2 skipped.
-    - Intentional limitation: no browser-level screenshot/render test for the print CSS;
-      verified via HTML structure and CSS class names in markup.
-
-## Stage 2 — Show profit/loss percentage and color-coded results
-
-- [x] ~~Add a `By percent` result column immediately after `Profit / loss` on
-  `/Reports/ProfitLoss` and color both result values according to their sign.~~
-
-  Implementation requirements:
-  - Update `src/MobileShop.Models/ViewModels/Web/ProfitLossRowViewModel.cs` with
-    a computed `ProfitPercent` property: when `Bought` is non-zero, calculate
-    `(Profit / Bought) * 100`; when `Bought` is zero, return `0` to avoid division
-    by zero. Preserve the existing `Profit` property and constructor.
-  - Update `src/MobileShop.Web/Pages/Reports/ProfitLoss.cshtml`: put the heading
-    `By percent` directly after `Profit / loss`; render `ProfitPercent` as a
-    percentage with two decimal places and the culture-appropriate number format.
-  - Apply Bootstrap `text-success` to both row values when `Profit >= 0` and
-    `text-danger` to both when `Profit < 0`. Do not color Bought or Sold columns.
-
-  Acceptance criteria:
-  - Positive, zero, and negative profit values render with the specified color;
-    the percentage formula uses Bought as its denominator and returns zero when
-    Bought is zero.
-  - The percentage column is immediately after Profit / loss and shows two
-    fractional digits followed by `%`.
-    - Add focused unit tests for the computed percentage at positive, zero,
-    negative, and zero-Bought cases, and verify column order and both Bootstrap
-    color classes via Razor markup review.
-
-  - 2026-01-01T00:00:00Z — Completion note:
-    - Files changed: `src/MobileShop.Models/ViewModels/Web/ProfitLossRowViewModel.cs`,
-    `src/MobileShop.Web/Pages/Reports/ProfitLoss.cshtml`,
-    `src/MobileShop.Tests/Models/ViewModels/ProfitLossRowViewModelTests.cs` (new)
-    - Added `ProfitPercent` computed property: `(Profit / Bought) * 100m`, returns
-      0m when `Bought == 0` (no division by zero, no rounding in view model).
-    - Added "By percent" column immediately after "Profit / loss" header.
-    - Row cells: `class="@profitClass"` where `profitClass = Profit >= 0 ?
-      "text-success" : "text-danger"` — applied to both Profit and By percent cells.
-      Zero profit treated as text-success.
-    - Rendering: `@row.ProfitPercent.ToString("F2")%` — 2 fractional digits + %.
-    - Bought/Sold columns and Distribution tab unchanged.
-    - Unit tests (4): positive/zero/negative profit, zero-Bought edge case — all pass.
-    - Column order and CSS classes verified via Razor markup review (no runtime HTML capture).
-    - Build: 0 errors, 0 warnings. Full suite: 354 passed, 0 failed, 2 skipped.
-
-## Stage 3 — Add manual and automatic Profit/Loss date ranges
-
-- [x] ~~Keep the From/To date pickers and add a manual/automatic range selector,
-  defaulting to automatic current-month reporting. In manual mode, default missing
-  From/To values to the earliest transaction date and today respectively.~~
-  - Completed: `src/MobileShop.Dal/Repos/Interfaces/ITransactionRepo.cs`,
-    `src/MobileShop.Dal/Repos/TransactionRepo.cs`,
-    `src/MobileShop.Services/DataServices/Interfaces/ITransactionDataService.cs`,
-    `src/MobileShop.Services/DataServices/Dal/TransactionDataService.cs`,
-    `src/MobileShop.Web/Pages/Reports/ProfitLoss.cshtml.cs`,
-    `src/MobileShop.Web/Pages/Reports/ProfitLoss.cshtml`,
-    `src/MobileShop.Tests/Dal/Repos/TransactionRepoTests.cs`,
-    `src/MobileShop.Tests/Services/DataServices/Dal/TransactionDataServiceTests.cs`,
-    `src/MobileShop.Tests/Web/Pages/Reports/ProfitLossTests.cs`.
-  - Validation: `dotnet build src/MobileShop.slnx --nologo` (0 errors, 0 warnings);
-    focused tests — 21 new tests across repo/service/page-model (54 total focused, all pass);
-    `dotnet test src/MobileShop.slnx --nologo` — 375 passed, 2 skipped, 0 failed.
-  - Notes: Monday-based week uses `((int)today.DayOfWeek + 6) % 7`; nullable `DateTime?`
-    projection in repo ensures `null` on empty table; manual defaults written back to
-    bound `From`/`To` so date pickers show the same values used for filtering; API
-    service stub inherits default-interface `NotImplementedException` — no API files touched.
-    Added service-level inclusive-boundary tests proving transactions on From and To
-    dates are included, outside dates excluded, and total matches row sum.
-
-  Implementation requirements:
-  - Update `src/MobileShop.Web/Pages/Reports/ProfitLoss.cshtml` and
-    `ProfitLoss.cshtml.cs`; add focused tests under
-    `src/MobileShop.Tests/Web/Pages/Reports/`.
-  - Add a bound date mode with `Automatic` and `Manual` values. Missing mode means
-    `Automatic`; missing automatic preset means `Month`. Provide automatic presets
-    `Today`, `Week`, `Month`, and `Year`, and retain From and To date inputs for
-    manual selection.
-  - Automatic bounds are inclusive calendar dates: Today is today-to-today;
-    Week starts Monday and ends today; Month starts on the first day of this month
-    and ends today; Year starts January 1 of this year and ends today. Use the
-    current local date, not UTC date truncation. Ignore manual From/To values while
-    Automatic mode is selected.
-  - In Manual mode, preserve supplied From and To values. For each missing bound,
-    default From to the earliest transaction date in the database and To to
-    today's local date. Add the smallest appropriate async method to the existing
-    transaction service/repository abstraction to get the earliest transaction
-    date without loading full transaction entities. Return an explicit nullable
-    result for an empty transaction table; in that case default From to today and
-    display a clear non-error note that no transactions exist yet.
-  - If adding a service interface member, use a default-interface implementation
-    that throws the existing API service's standard `NotImplementedException`
-    message so API service stub files remain untouched. Do not modify API projects,
-    API service stubs, or API configuration.
-  - Pass the effective bounds to both profit/loss rows and total calculations.
-    Ensure the automatic/manual controls preserve their selected state after Apply
-    and after validation/redisplay. Use accessible labels and show the relevant
-    controls for the selected mode without removing the manual date pickers.
-  - Do not change the transaction filtering's existing inclusive date semantics.
-
-  Acceptance criteria:
-  - First visit defaults to Automatic + Month and computes first-of-month through
-    today; each other preset returns the exact bounds specified above.
-  - Switching to Manual with empty date values defaults to earliest transaction
-    date through today. Supplied manual dates are preserved independently, and
-    empty-database behavior is explicit and usable.
-  - Both report rows and total use identical effective bounds.
-  - Tests cover all four automatic presets, default mode/preset, each missing
-    manual bound, preserved manual overrides, empty transaction data, and
-    inclusive range behavior.
-
-## Stage 4 — Limit profit distribution to Mikaeeil, Anis, and the Shop
-
-- [x] ~~Configure the Profit/Loss distribution to include only Mikaeeil Jorjany at
-  40%, Anis Sahabi at 50%, and the Shop with the remaining 10%, and seed the
-  development data to support those rows.~~
-  - Completed: `src/MobileShop.Services/Logging/Settings/DistributionSettings.cs`,
-    `src/MobileShop.Dal/Initialization/sample-data.json`,
-    `src/MobileShop.Tests/Services/Logging/DistributionCalculatorTests.cs`,
-    `src/MobileShop.Tests/Dal/Initialization/SampleDataSeedTests.cs`,
-    `src/MobileShop.Tests/Web/Pages/Reports/ProfitLossTests.cs`.
-  - Validation: `dotnet build src/MobileShop.slnx --nologo` — 0 warnings, 0 errors; calculator
-    tests 11/11 passed; seed tests 6/6 passed; full suite 386 passed, 2 skipped, 0 failed.
-  - Notes: 11 focused calculator tests (plan listed 9; added two extra:
-    `Profit_SharePercentAlways40_50_10EvenWhenEmployeesHaveDifferentShares`,
-    `InactiveMikaeeil_DoesNotSatisfyRequirement`, and `InactiveAnis_DoesNotSatisfyRequirement`
-    to strengthen active-employee and inactive-rejection coverage). The `ProfitLossTests.CreateModel`
-    mock was updated to return Mikaeeil and Anis as active employees, since the calculator
-    now requires them. API files, configuration, and the development-only seed policy are
-    unchanged.
-
-  Implementation requirements:
-  - Update `src/MobileShop.Services/Logging/Settings/DistributionSettings.cs` and
-    `DistributionCalculator.Calculate` (or the smallest suitable adjacent layer)
-    so the distribution result is limited to the two named employees and the
-    Shop. Use the exact full names `Mikaeeil Jorjany` and `Anis Sahabi`; exclude
-    every other active or inactive employee from the displayed distribution.
-  - The two named employees' shares are 40% and 50% respectively; the Shop's
-    displayed remainder is 10%. Do not derive shares from unrelated seeded
-    employees or display the shop owner as an employee row.
-  - For positive profit, calculate the named employee amounts from the total using
-    their shares, round down to whole currency units consistently with the current
-    calculator, and give the Shop the remainder including rounding differences.
-    Preserve the current loss behavior: employees receive zero and the Shop
-    absorbs the entire loss. Keep the displayed percentages at 40%, 50%, and 10%
-    so the configured shares still sum to 100%.
-  - Update `src/MobileShop.Dal/Initialization/sample-data.json` to contain active
-    employee records for these names with the stated shares. Retain stable shop,
-    seller, customer, product, and transaction IDs/references. Set any unrelated
-    seeded employee records inactive or remove them from the employee collection
-    so the distribution cannot accidentally include them.
-  - Update seed-data validation/tests for changed people/employee counts and
-    relationships. Add focused calculator tests proving the exact three rows,
-    names, share percentages, amounts/remainder, unrelated-employee exclusion,
-    and loss behavior.
-  - Preserve the existing development-only seed initialization policy; do not
-    change production behavior or add real contact details/credentials for the
-    named employees.
-
-  Acceptance criteria:
-  - The Distribution tab contains exactly Mikaeeil Jorjany (40%), Anis Sahabi
-    (50%), and Shop (10%) for a positive-profit period; no other employee appears.
-  - Their calculated amounts plus the Shop amount equal the total profit exactly.
-  - Loss periods retain the no-employee-payout behavior, assign the complete loss
-    to the Shop, and keep the displayed 40%/50%/10% shares summing to 100%.
-  - A fresh development database seed and the focused seed/calculator tests pass.
-
-## Stage 5 — Fix Profile username wrapping and improve layout
-
-- [x] ~~Improve the Profile page layout so the `Username` label stays on one line
-  and profile details remain readable on narrow screens.~~
-  - Completed: `src/MobileShop.Web/Pages/Account/Profile.cshtml`.
-  - Changed `<dl>` label column from `col-sm-2` to `col-sm-3`, value column from
-    `col-sm-10` to `col-sm-9`. Added `text-nowrap` to both `<dt>` elements to keep
-    the `Username` and `Email` labels single-line. Added `text-break` to both `<dd>`
-    value elements so long unbroken usernames wrap instead of overflowing.
-  - Validation: `dotnet build src/MobileShop.slnx --nologo` — 0 warnings, 0 errors;
-    Profile page tests 6/6 passed; full suite 386 passed, 2 skipped, 0 failed.
-  - Notes: No markup-only tests exist in the repo; added no tests per the acceptance
-    criteria. Bootstrap 5 `text-nowrap` and `text-break` utility classes are already
-    available in the project's stylesheet.
-
-  Implementation requirements:
-  - Update only the relevant markup in
-    `src/MobileShop.Web/Pages/Account/Profile.cshtml` unless tests require a
-    directly related change.
-  - Give the definition-list label enough responsive width (for example,
-    `col-sm-3` with a matching `col-sm-9` value column) and prevent the
-    `Username` label itself from wrapping. Keep long username values readable by
-    allowing the value column to wrap as needed.
-  - Preserve the existing development-only profile/password-change behavior,
-    validation feedback, labels, and responsive Bootstrap styling. Do not add
-    authentication or security middleware.
-
-  Acceptance criteria:
-  - `Username` remains a single-line label at desktop and mobile widths.
-  - Username/email values and password form remain readable and responsive.
-  - Any existing Profile page tests continue to pass; add markup coverage only if
-    the existing test conventions support it.
-
-## Final validation
-
-- [x] ~~Run the full solution build and test commands after Stages 1–5, and inspect
-  all failures.~~
-  - Completed: `dotnet build src/MobileShop.slnx --nologo` and
-    `dotnet test src/MobileShop.slnx --nologo`.
-  - Validation: Build succeeded with 0 warnings and 0 errors; 386 tests passed,
-    2 PDF tests skipped, and 0 failed.
-- [ ] Manually verify the changed Web flows in a running development Web app:
-  Transactions filter/order/count, no-selection Print Factor, single/multi-select
-  Print Factor, invalid selection handling, native print dialog and Save as PDF;
-  Profit/Loss percentage/color display, all automatic date presets, manual date
-  defaults/overrides, distribution rows/amounts; and Profile layout/password flow.
-  - Limitation: Browser-based verification is unavailable in this headless
-    environment, so this item remains unchecked.
-- [x] ~~Review the final diff and worktree for accidental API or out-of-scope
-  changes, generated files, secrets, plaintext application-user passwords,
-  incorrect checklist formatting, and unchecked acceptance criteria.~~
-  - Completed: Reviewed the full Stage 1–5 diff from `708be04` through `HEAD`
-    (20 files); no API project, generated-file, or unrelated changes were found.
-  - Validation: `git diff --check` passed; Stage 1–5 checklist entries are
-    completed in the required format. No introduced secrets or plaintext
-    application-user passwords were found. Worktree was clean before this
-    validation note was recorded.
-
-## Checklist completion format
-
-Every completed item must look like this:
-
-```text
-- [x] ~~Implement the completed task text.~~
-  - Completed: `path/to/file.cs`, `path/to/test.cs`.
-  - Validation: `dotnet test ...`; behavior manually verified.
-  - Notes: intentional limitations or follow-up.
-```
-
-Never use `- [x]` without `~~...~~`, never leave completed text unstruck, and
-never remove the completion note except during an explicitly owner-requested
-checklist reset.
+  - Clicking the list action returns a PDF attachment with the correct content
+    type and download filename; it does not return the regular HTML page or open
+    the native print dialog.
+  - No-selection downloads contain exactly the active filtered/ordered/take-
+    limited rows; single- and multi-selection downloads contain exactly the
+    selected rows in submitted order.
+  - Invalid, non-positive, duplicate/missing/out-of-snapshot IDs are handled
+    consistently: duplicates are de-duplicated; invalid or missing IDs produce
+    a visible error and no partial file.
+  - Empty result sets do not produce an empty PDF.
+  - Focused tests verify response result type, content type, filename, generated
+    factor row content, filter/selection binding, invalid-selection behavior,
+    and that the generator is not called for invalid or empty results. Preserve
+    existing Details page factor tests and behavior.
+  - Run the solution build and full test suite. If browser verification is
+    available, verify a real download; otherwise record the limitation without
+    claiming that manual browser behavior was tested.
