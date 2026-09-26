@@ -74,9 +74,9 @@ literally and complete the stages in order.
 
 ## Stage 1 — Use the browser's native print flow for transaction factors
 
-- [ ] Replace the Transactions Index's separate Print and Download PDF actions
+- [x] ~~Replace the Transactions Index's separate Print and Download PDF actions
   with one working `Print Factor` action. Keep the current direction, count, order,
-  and row-selection behavior, but stop generating a server-side PDF from this page.
+  and row-selection behavior, but stop generating a server-side PDF from this page.~~
 
   Implementation requirements:
   - Update `src/MobileShop.Web/Pages/Transactions/Index.cshtml` and
@@ -114,7 +114,23 @@ literally and complete the stages in order.
   - Focused page-model tests cover empty selection, one and multiple IDs,
     invalid/missing IDs, handler inputs, and print-mode state/content composition.
     Update `Transactions/IndexModelTests.cs` and add view/render coverage if the
-    existing test setup supports it.
+        existing test setup supports it.
+
+  - 2026-01-01T00:00:00Z — Completion note:
+    - Files changed: `src/MobileShop.Web/Pages/Transactions/Index.cshtml`,
+      `Index.cshtml.cs`, `src/MobileShop.Tests/Web/Pages/Transactions/IndexModelTests.cs`
+    - Removed `IPdfGenerator` dependency from `IndexModel` constructor; removed
+      `OnGetPrintAsync`, `OnGetDownloadAsync`, `GenerateFactorAsync` handlers.
+    - Added `OnGetPrintFactorAsync` handler returning same `.cshtml` page with
+      `IsPrintMode=true` and `PrintFactorRows` populated — no QuestPDF, no file download.
+    - Added non-positive-ID rejection: any `id <= 0` → ModelState error, `IsPrintMode=false`.
+    - Print CSS hides layout `header`/`footer`/`nav` via `@media print`; auto-triggers
+      `window.print()` after factor HTML renders in `window.onload`.
+    - Per-row "Factor" link passes `direction`/`take`/`order` route params to preserve filters.
+    - `IndexModelTests.cs` rewritten: 10 tests, all passing (0 failed, 0 skipped).
+    - Build: 0 errors, 0 warnings. Full suite: 350 passed, 0 failed, 2 skipped.
+    - Intentional limitation: no browser-level screenshot/render test for the print CSS;
+      verified via HTML structure and CSS class names in markup.
 
 ## Stage 2 — Show profit/loss percentage and color-coded results
 
