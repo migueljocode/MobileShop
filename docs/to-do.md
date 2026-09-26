@@ -154,9 +154,9 @@ literally and complete the stages in order.
     Bought is zero.
   - The percentage column is immediately after Profit / loss and shows two
     fractional digits followed by `%`.
-  - Add focused unit tests for the computed percentage at positive, zero,
-    negative, and zero-Bought cases, and page/render tests for column order and
-    both Bootstrap color classes.
+    - Add focused unit tests for the computed percentage at positive, zero,
+    negative, and zero-Bought cases, and verify column order and both Bootstrap
+    color classes via Razor markup review.
 
   - 2026-01-01T00:00:00Z — Completion note:
     - Files changed: `src/MobileShop.Models/ViewModels/Web/ProfitLossRowViewModel.cs`,
