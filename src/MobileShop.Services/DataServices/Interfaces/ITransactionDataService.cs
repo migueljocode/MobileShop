@@ -56,6 +56,13 @@ public interface ITransactionDataService : IDataService<Transaction>
     /// <param name="from">The inclusive start date.</param>
     /// <param name="to">The inclusive end date.</param>
     Task<decimal> GetProfitLossTotalAsync(DateTime? from, DateTime? to) => throw new NotImplementedException("ApiTransactionDataService is not implemented yet.");
+
+    /// <summary>
+    /// Returns the earliest non-deleted transaction date (normalized to date-only),
+    /// or <see langword="null"/> when no transactions exist.
+    /// </summary>
+    Task<DateTime?> GetEarliestTransactionDateAsync() => throw new NotImplementedException("ApiTransactionDataService is not implemented yet.");
+
     /// <summary>Gets transaction rows for a product.</summary>
     /// <param name="productId">The product identifier.</param>
     IReadOnlyList<ProductTransactionViewModel> GetProductTransactions(int productId);

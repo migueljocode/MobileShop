@@ -55,4 +55,54 @@ public class TransactionRepoTests : BaseRepoTests<Transaction, ITransactionRepo>
         Assert.Single(results);
         Assert.Equal(transaction.Id, results[0].Id);
     }
+
+    [Fact]
+    public async Task GetEarliestTransactionDateAsync_ReturnsEarliestNonDeletedDate()
+    {
+        var repo = CreateRepo();
+
+        // Insert a later transaction first, then an earlier one
+        var later = CreateValidEntity();
+        later.Date = new DateTime(2026, 3, 15);
+        await repo.AddAsync(later);
+
+        var earlier = CreateValidEntity();
+        earlier.Date = new DateTime(2026, 1, 5);
+        await repo.AddAsync(earlier);
+
+        var earliest = await repo.GetEarliestTransactionDateAsync();
+
+        Assert.NotNull(earliest);
+        Assert.Equal(new DateTime(2026, 1, 5), earliest!.Value);
+    }
+
+    [Fact]
+    public async Task GetEarliestTransactionDateAsync_ReturnsNull_WhenTableEmpty()
+    {
+        var repo = CreateRepo();
+
+        var result = await repo.GetEarliestTransactionDateAsync();
+
+        Assert.Null(result);
+    }
+
+    [Fact]
+    public async Task GetEarliestTransactionDateAsync_ExcludesSoftDeletedTransactions()
+    {
+        var repo = CreateRepo();
+
+        var deleted = CreateValidEntity();
+        deleted.Date = new DateTime(2025, 1, 1);
+        await repo.AddAsync(deleted);
+        await repo.DeleteAsync(deleted);
+
+        var active = CreateValidEntity();
+        active.Date = new DateTime(2026, 6, 1);
+        await repo.AddAsync(active);
+
+        var earliest = await repo.GetEarliestTransactionDateAsync();
+
+        Assert.NotNull(earliest);
+        Assert.Equal(new DateTime(2026, 6, 1), earliest!.Value);
+    }
 }

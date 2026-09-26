@@ -176,9 +176,25 @@ literally and complete the stages in order.
 
 ## Stage 3 — Add manual and automatic Profit/Loss date ranges
 
-- [ ] Keep the From/To date pickers and add a manual/automatic range selector,
+- [x] ~~Keep the From/To date pickers and add a manual/automatic range selector,
   defaulting to automatic current-month reporting. In manual mode, default missing
-  From/To values to the earliest transaction date and today respectively.
+  From/To values to the earliest transaction date and today respectively.~~
+  - Completed: `src/MobileShop.Dal/Repos/Interfaces/ITransactionRepo.cs`,
+    `src/MobileShop.Dal/Repos/TransactionRepo.cs`,
+    `src/MobileShop.Services/DataServices/Interfaces/ITransactionDataService.cs`,
+    `src/MobileShop.Services/DataServices/Dal/TransactionDataService.cs`,
+    `src/MobileShop.Web/Pages/Reports/ProfitLoss.cshtml.cs`,
+    `src/MobileShop.Web/Pages/Reports/ProfitLoss.cshtml`,
+    `src/MobileShop.Tests/Dal/Repos/TransactionRepoTests.cs`,
+    `src/MobileShop.Tests/Services/DataServices/Dal/TransactionDataServiceTests.cs`,
+    `src/MobileShop.Tests/Web/Pages/Reports/ProfitLossTests.cs`.
+  - Validation: `dotnet build src/MobileShop.slnx --nologo` (0 errors, 0 warnings);
+    focused tests — 19 new tests across repo/service/page-model (51 total focused, all pass);
+    `dotnet test src/MobileShop.slnx --nologo` — 372 passed, 2 skipped, 0 failed.
+  - Notes: Monday-based week uses `((int)today.DayOfWeek + 6) % 7`; nullable `DateTime?`
+    projection in repo ensures `null` on empty table; manual defaults written back to
+    bound `From`/`To` so date pickers show the same values used for filtering; API
+    service stub inherits default-interface `NotImplementedException` — no API files touched.
 
   Implementation requirements:
   - Update `src/MobileShop.Web/Pages/Reports/ProfitLoss.cshtml` and

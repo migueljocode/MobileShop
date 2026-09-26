@@ -3,14 +3,72 @@
 @{ ViewData["Title"] = "Profit and loss"; }
 <h1>Profit and loss</h1>
 <form method="get" class="row g-2 mb-3">
-    <div class="col-md-3"><label class="form-label">From</label><input class="form-control" type="date" asp-for="From" /></div>
-    <div class="col-md-3"><label class="form-label">To</label><input class="form-control" type="date" asp-for="To" /></div>
-    <div class="col-md-2 align-self-end"><button class="btn btn-primary">Apply</button></div>
+    <fieldset class="col-12">
+        <legend class="form-label mb-1">Date range mode:</legend>
+        <div class="btn-group" role="group" aria-label="Date range mode">
+            <input type="radio" class="btn-check" name="Mode" id="mode-auto" value="Automatic"
+                   @(Model.Mode == DateRangeMode.Automatic ? "checked" : "") autocomplete="off" />
+            <label class="btn btn-outline-primary" for="mode-auto">Automatic</label>
+
+            <input type="radio" class="btn-check" name="Mode" id="mode-manual" value="Manual"
+                   @(Model.Mode == DateRangeMode.Manual ? "checked" : "") autocomplete="off" />
+            <label class="btn btn-outline-primary" for="mode-manual">Manual</label>
+        </div>
+    </fieldset>
+
+    <div id="auto-controls" class="@(Model.Mode == DateRangeMode.Automatic ? "" : "d-none") col-12">
+        <label class="form-label mb-1" asp-for="Preset">Preset:</label>
+        <select asp-for="Preset" class="form-select" style="max-width: 150px;">
+            <option value="Today">Today</option>
+            <option value="Week">Week</option>
+            <option value="Month">Month</option>
+            <option value="Year">Year</option>
+        </select>
+    </div>
+
+    <div id="manual-controls" class="@(Model.Mode == DateRangeMode.Manual ? "" : "d-none") row g-2">
+        <div class="col-md-3"><label class="form-label" asp-for="From">From</label><input asp-for="From" type="date" class="form-control" /></div>
+        <div class="col-md-3"><label class="form-label" asp-for="To">To</label><input asp-for="To" type="date" class="form-control" /></div>
+    </div>
+
+    <div class="col-12 align-self-end">
+        <button class="btn btn-primary">Apply</button>
+    </div>
+
+    @if (Model.EmptyDatabaseNote is not null)
+    {
+        <div class="col-12">
+            <p class="text-info mb-0">@Model.EmptyDatabaseNote</p>
+        </div>
+    }
 </form>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const autoRadio = document.getElementById('mode-auto');
+        const manualRadio = document.getElementById('mode-manual');
+        const autoControls = document.getElementById('auto-controls');
+        const manualControls = document.getElementById('manual-controls');
+
+        function updateVisibility() {
+            if (autoRadio.checked) {
+                autoControls.classList.remove('d-none');
+                manualControls.classList.add('d-none');
+            } else if (manualRadio.checked) {
+                autoControls.classList.add('d-none');
+                manualControls.classList.remove('d-none');
+            }
+        }
+
+        autoRadio.addEventListener('change', updateVisibility);
+        manualRadio.addEventListener('change', updateVisibility);
+        updateVisibility();
+    });
+</script>
 
 <ul class="nav nav-tabs mb-3" id="profitLossTabs" role="tablist">
     <li class="nav-item" role="presentation">
-        <button class="nav-link active" id="profit-tab" data-bs-toggle="tab" data-bs-target="#profit" type="button" role="tab">Profit & Loss</button>
+        <button class="nav-link active" id="profit-tab" data-bs-toggle="tab" data-bs-target="#profit" type="button" role="tab">Profit &amp; Loss</button>
     </li>
     <li class="nav-item" role="presentation">
         <button class="nav-link" id="distribution-tab" data-bs-toggle="tab" data-bs-target="#distribution" type="button" role="tab">Distribution</button>

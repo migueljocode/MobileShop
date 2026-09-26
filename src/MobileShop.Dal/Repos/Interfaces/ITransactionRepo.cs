@@ -15,4 +15,10 @@ public interface ITransactionRepo : IBaseRepo<Transaction>
     /// <param name="productId">The Id of the product.</param>
     /// <returns>The transactions involving that product.</returns>
     Task<IEnumerable<Transaction>> GetByProductAsync(int productId);
+
+    /// <summary>
+    /// Returns the earliest non-deleted transaction date, or <see langword="null"/>
+    /// when the table is empty.
+    /// </summary>
+    Task<DateTime?> GetEarliestTransactionDateAsync();
 }

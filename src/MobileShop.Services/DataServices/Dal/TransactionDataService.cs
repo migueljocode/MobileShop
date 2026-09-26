@@ -239,6 +239,13 @@ public class TransactionDataService(
         => (await GetProfitLossRowsAsync(from, to)).Sum(row => row.Profit);
 
     /// <inheritdoc />
+    public async Task<DateTime?> GetEarliestTransactionDateAsync()
+    {
+        var earliest = await _transactionRepo.GetEarliestTransactionDateAsync();
+        return earliest?.Date;
+    }
+
+    /// <inheritdoc />
     public IReadOnlyList<ProductTransactionViewModel> GetProductTransactions(int productId)
         => _transactionRepo
             .SelectAll(

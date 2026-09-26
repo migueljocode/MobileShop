@@ -175,4 +175,31 @@ public class TransactionDataServiceTests : RepoTestBase
         Assert.False(result);
         Assert.Empty(Context.Transactions);
     }
+
+    [Fact]
+    public async Task GetEarliestTransactionDateAsync_returns_date_only_normalized()
+    {
+        TestDataHelpers.SeedShopSentinels(Context);
+        var product1 = TestDataHelpers.CreateProduct(Context, 500m);
+        var product2 = TestDataHelpers.CreateProduct(Context, 500m);
+
+        var laterDate = new DateTime(2026, 3, 15, 14, 30, 0);
+        var earlierDate = new DateTime(2026, 1, 5, 9, 15, 0);
+        await _service.RecordBuyAsync(product1.Id, 1, 300m, laterDate);
+        await _service.RecordBuyAsync(product2.Id, 1, 300m, earlierDate);
+
+        var earliest = await _service.GetEarliestTransactionDateAsync();
+
+        Assert.NotNull(earliest);
+        Assert.Equal(earlierDate.Date, earliest!.Value);
+        Assert.Equal(TimeSpan.Zero, earliest!.Value.TimeOfDay);
+    }
+
+    [Fact]
+    public async Task GetEarliestTransactionDateAsync_returns_null_when_empty()
+    {
+        var result = await _service.GetEarliestTransactionDateAsync();
+
+        Assert.Null(result);
+    }
 }
