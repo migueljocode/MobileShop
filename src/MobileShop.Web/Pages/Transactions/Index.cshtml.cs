@@ -16,29 +16,29 @@ public class IndexModel(
     [BindProperty(SupportsGet = true)]
     public int[] SelectedIds { get; set; } = [];
 
-    public void OnGet(string? direction = null, int take = 50, string? order = null)
-        => Load(direction, take, order);
+    public async Task OnGetAsync(string? direction = null, int take = 50, string? order = null)
+        => await LoadAsync(direction, take, order);
 
     /// <summary>Returns the factor as a browser-printable, inline PDF response.</summary>
-    public IActionResult OnGetPrint(string? direction = null, int take = 50, string? order = null)
-        => GenerateFactor(direction, take, order, download: false);
+    public async Task<IActionResult> OnGetPrintAsync(string? direction = null, int take = 50, string? order = null)
+        => await GenerateFactorAsync(direction, take, order, download: false);
 
     /// <summary>Returns the factor as a named, downloadable PDF response.</summary>
-    public IActionResult OnGetDownload(string? direction = null, int take = 50, string? order = null)
-        => GenerateFactor(direction, take, order, download: true);
+    public async Task<IActionResult> OnGetDownloadAsync(string? direction = null, int take = 50, string? order = null)
+        => await GenerateFactorAsync(direction, take, order, download: true);
 
-    private void Load(string? direction, int take, string? order)
+    private async Task LoadAsync(string? direction, int take, string? order)
     {
         Direction = string.IsNullOrWhiteSpace(direction) ? "all" : direction.ToLowerInvariant();
         Order = string.Equals(order, "asc", StringComparison.OrdinalIgnoreCase) ? "asc" : "desc";
         Take = Math.Clamp(take, 1, 500);
-        Transactions = transactionDataService.GetList(Direction, Take, Order == "asc");
+        Transactions = await transactionDataService.GetListAsync(Direction, Take, Order == "asc");
     }
 
-    private IActionResult GenerateFactor(string? direction, int take, string? order, bool download)
+    private async Task<IActionResult> GenerateFactorAsync(string? direction, int take, string? order, bool download)
     {
-        // keep the filters and the ticked rows on screen when the request has to be redisplayed
-        Load(direction, take, order);
+        // Keep the filters and the ticked rows on screen when the request has to be redisplayed.
+        await LoadAsync(direction, take, order);
 
         var rows = ResolveFactorRows();
         if (rows.Count == 0)
@@ -60,6 +60,16 @@ public class IndexModel(
     /// supplied, otherwise the filtered list. Unknown or unusable identifiers are reported, never
     /// silently dropped, so a partial factor is never produced.
     /// </summary>
+    /// <remarks>
+    /// When selected IDs are supplied, they are resolved from the in-memory <see cref="Transactions"/>
+    /// snapshot loaded by <see cref="LoadAsync"/> — a single consistent database read for the entire
+    /// factor. IDs absent from the snapshot (e.g. from a different page or filter) are reported as
+    /// missing rather than fetched individually, preserving the single-snapshot guarantee.
+    ///
+    /// This means the normal case (IDs selected from the current page) requires zero extra DB
+    /// round-trips, and even cross-page IDs never trigger a per-ID <see cref="ITransactionDataService.GetDetailsAsync"/>
+    /// call.
+    /// </remarks>
     private IReadOnlyList<TransactionFactorRowViewModel> ResolveFactorRows()
     {
         if (SelectedIds.Length == 0)
@@ -72,15 +82,24 @@ public class IndexModel(
             return [];
         }
 
+        // Build the lookup from the single snapshot loaded by LoadAsync so that
+        // the normal case (IDs selected from the current page) requires zero
+        // extra database round-trips and uses one consistent read.
+        var snapshot = Transactions.ToDictionary(t => t.Id);
+
         var rows = new List<TransactionFactorRowViewModel>(requested.Count);
         var missing = new List<int>();
         foreach (var id in requested)
         {
-            var details = transactionDataService.GetDetails(id);
-            if (details is null)
-                missing.Add(id);
-            else
-                rows.Add(details.ToFactorRow(id));
+            if (snapshot.TryGetValue(id, out var transaction))
+            {
+                rows.Add(transaction.ToFactorRow());
+                continue;
+            }
+
+            // IDs not in the current snapshot are reported as missing rather than
+            // fetched individually, preserving the single-snapshot guarantee.
+            missing.Add(id);
         }
 
         if (missing.Count > 0)

@@ -21,4 +21,18 @@ public sealed class ProductDataService(
                 product.SecondHandProfile != null))
             .OrderBy(row => row.ProductId)
             .ToList();
+
+    /// <inheritdoc />
+    public async Task<IReadOnlyList<ProductListItemViewModel>> GetInventoryRowsAsync()
+        => (await _productRepo.SelectAllAsync(product => new ProductListItemViewModel(
+                product.Id,
+                product.Id,
+                product.ModelNavigation.CategoryNavigation.Name,
+                product.ModelNavigation.ManufacturerNavigation.Name + " " + product.ModelNavigation.Name,
+                product.Barcode,
+                product.ColorNavigation == null ? null : product.ColorNavigation.Name,
+                product.Transactions.Any(transaction => transaction.Direction == TransactionDirection.Sell),
+                product.SecondHandProfile != null)))
+            .OrderBy(row => row.ProductId)
+            .ToList();
 }

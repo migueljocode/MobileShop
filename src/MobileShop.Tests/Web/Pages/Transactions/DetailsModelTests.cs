@@ -31,7 +31,7 @@ public class DetailsModelTests : RepoTestBase
     }
 
     [Fact]
-    public void OnGetFactor_returns_printable_pdf_for_the_requested_transaction()
+    public async Task OnGetFactor_returns_printable_pdf_for_the_requested_transaction()
     {
         TestDataHelpers.SeedShopSentinels(Context);
 
@@ -63,7 +63,7 @@ public class DetailsModelTests : RepoTestBase
             .Callback<TransactionFactorViewModel>(m => captured = m)
             .Returns([0x25, 0x50, 0x44, 0x46]);
 
-        var result = _model.OnGetFactor(transaction.Id);
+        var result = await _model.OnGetFactorAsync(transaction.Id);
 
         var fileResult = Assert.IsType<FileContentResult>(result);
         Assert.Equal("application/pdf", fileResult.ContentType);
@@ -79,9 +79,9 @@ public class DetailsModelTests : RepoTestBase
     }
 
     [Fact]
-    public void OnGetFactor_returns_not_found_when_transaction_missing()
+    public async Task OnGetFactor_returns_not_found_when_transaction_missing()
     {
-        var result = _model.OnGetFactor(99_999);
+        var result = await _model.OnGetFactorAsync(99_999);
         Assert.IsType<NotFoundResult>(result);
         _pdfGeneratorMock.Verify(p => p.GenerateTransactionFactor(It.IsAny<TransactionFactorViewModel>()), Times.Never);
     }

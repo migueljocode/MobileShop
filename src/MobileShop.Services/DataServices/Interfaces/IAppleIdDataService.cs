@@ -7,16 +7,28 @@ public interface IAppleIdDataService : IDataService<AppleId>
 {
     /// <summary>Gets Apple ID inventory rows for the product list.</summary>
     IReadOnlyList<ProductListItemViewModel> GetInventoryRows();
+    /// <summary>Gets Apple ID inventory rows for the product list asynchronously.</summary>
+    Task<IReadOnlyList<ProductListItemViewModel>> GetInventoryRowsAsync() => throw new NotImplementedException("ApiAppleIdDataService is not implemented yet.");
     /// <summary>Gets Apple IDs eligible for the specified transaction direction.</summary>
     /// <param name="direction">The transaction direction to check.</param>
     IReadOnlyList<ProductListItemViewModel> GetSelectableProducts(TransactionDirection direction);
+    /// <summary>Gets Apple IDs eligible for the specified transaction direction asynchronously.</summary>
+    /// <param name="direction">The transaction direction to check.</param>
+    Task<IReadOnlyList<ProductListItemViewModel>> GetSelectableProductsAsync(TransactionDirection direction) => throw new NotImplementedException("ApiAppleIdDataService is not implemented yet.");
     /// <summary>Gets all second-hand Apple ID inventory rows.</summary>
     IReadOnlyList<ProductListItemViewModel> GetSecondHandRows();
+    /// <summary>Gets all second-hand Apple ID inventory rows asynchronously.</summary>
+    Task<IReadOnlyList<ProductListItemViewModel>> GetSecondHandRowsAsync() => throw new NotImplementedException("ApiAppleIdDataService is not implemented yet.");
     /// <summary>Gets available second-hand Apple ID inventory rows.</summary>
     IReadOnlyList<ProductListItemViewModel> GetAvailableSecondHandRows();
+    /// <summary>Gets available second-hand Apple ID inventory rows asynchronously.</summary>
+    Task<IReadOnlyList<ProductListItemViewModel>> GetAvailableSecondHandRowsAsync() => throw new NotImplementedException("ApiAppleIdDataService is not implemented yet.");
     /// <summary>Gets Apple ID details, or <see langword="null"/> when not found.</summary>
     /// <param name="id">The Apple ID identifier.</param>
     ProductDetailsViewModel? GetDetails(int id);
+    /// <summary>Gets Apple ID details asynchronously, or <see langword="null"/> when not found.</summary>
+    /// <param name="id">The Apple ID identifier.</param>
+    Task<ProductDetailsViewModel?> GetDetailsAsync(int id) => throw new NotImplementedException("ApiAppleIdDataService is not implemented yet.");
     /// <summary>Finds an Apple ID by email, or <see langword="null"/> when not found.</summary>
     /// <param name="email">The Apple ID email address.</param>
     AppleId? FindByEmail(string email);

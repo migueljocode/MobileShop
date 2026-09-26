@@ -18,6 +18,16 @@ public class SellerDataService(
             .ToList();
 
     /// <inheritdoc />
+    public async Task<IReadOnlyList<PartyOptionViewModel>> GetPartyOptionsAsync()
+        => (await _sellerRepo
+            .SelectAllAsync(seller => new PartyOptionViewModel(
+                seller.Id,
+                seller.PersonNavigation.FirstName + " " + seller.PersonNavigation.LastName,
+                seller.EntityType.ToString())))
+            .OrderBy(row => row.Label)
+            .ToList();
+
+    /// <inheritdoc />
     public IReadOnlyList<SellerListItemViewModel> GetListRows()
         => _sellerRepo
             .SelectAll(seller => new SellerListItemViewModel(
@@ -29,8 +39,28 @@ public class SellerDataService(
             .ToList();
 
     /// <inheritdoc />
+    public async Task<IReadOnlyList<SellerListItemViewModel>> GetListRowsAsync()
+        => (await _sellerRepo
+            .SelectAllAsync(seller => new SellerListItemViewModel(
+                seller.Id,
+                seller.PersonNavigation.FirstName + " " + seller.PersonNavigation.LastName,
+                seller.PersonNavigation.PhoneNumber,
+                seller.EntityType.ToString())))
+            .OrderBy(row => row.Name)
+            .ToList();
+
+    /// <inheritdoc />
     public SellerDetailsViewModel? GetDetails(int id)
         => _sellerRepo.Select(
+            id,
+            seller => new SellerDetailsViewModel(
+                seller.PersonNavigation.FirstName + " " + seller.PersonNavigation.LastName,
+                seller.PersonNavigation.PhoneNumber,
+                seller.EntityType.ToString()));
+
+    /// <inheritdoc />
+    public Task<SellerDetailsViewModel?> GetDetailsAsync(int id)
+        => _sellerRepo.SelectAsync(
             id,
             seller => new SellerDetailsViewModel(
                 seller.PersonNavigation.FirstName + " " + seller.PersonNavigation.LastName,

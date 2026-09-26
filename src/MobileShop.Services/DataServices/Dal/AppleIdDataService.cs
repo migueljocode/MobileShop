@@ -22,6 +22,20 @@ public class AppleIdDataService(
             .ToList();
 
     /// <inheritdoc />
+    public async Task<IReadOnlyList<ProductListItemViewModel>> GetInventoryRowsAsync()
+        => (await _appleIdRepo.SelectAllAsync(appleId => new ProductListItemViewModel(
+                appleId.Id,
+                appleId.ProductId,
+                "Apple ID",
+                appleId.ProductNavigation.ModelNavigation.ManufacturerNavigation.Name + " " + appleId.ProductNavigation.ModelNavigation.Name,
+                appleId.Email,
+                null,
+                appleId.ProductNavigation.Transactions.Any(t => t.Direction == TransactionDirection.Sell),
+                appleId.ProductNavigation.SecondHandProfile != null)))
+            .OrderBy(row => row.ProductId)
+            .ToList();
+
+    /// <inheritdoc />
     public IReadOnlyList<ProductListItemViewModel> GetSelectableProducts(TransactionDirection direction)
         => _appleIdRepo
             .SelectAll(
@@ -35,6 +49,23 @@ public class AppleIdDataService(
                     null,
                     appleId.ProductNavigation.Transactions.Any(t => t.Direction == TransactionDirection.Sell),
                     appleId.ProductNavigation.SecondHandProfile != null))
+                        .OrderBy(row => row.ProductId)
+            .ToList();
+
+    /// <inheritdoc />
+    public async Task<IReadOnlyList<ProductListItemViewModel>> GetSelectableProductsAsync(TransactionDirection direction)
+        => (await _appleIdRepo
+            .SelectAllAsync(
+                appleId => appleId.ProductNavigation.Transactions.All(transaction => transaction.Direction != direction),
+                appleId => new ProductListItemViewModel(
+                    appleId.Id,
+                    appleId.ProductId,
+                    "Apple ID",
+                    appleId.ProductNavigation.ModelNavigation.ManufacturerNavigation.Name + " " + appleId.ProductNavigation.ModelNavigation.Name,
+                    appleId.Email,
+                    null,
+                    appleId.ProductNavigation.Transactions.Any(t => t.Direction == TransactionDirection.Sell),
+                    appleId.ProductNavigation.SecondHandProfile != null)))
             .OrderBy(row => row.ProductId)
             .ToList();
 
@@ -52,6 +83,23 @@ public class AppleIdDataService(
                     null,
                     appleId.ProductNavigation.Transactions.Any(t => t.Direction == TransactionDirection.Sell),
                     appleId.ProductNavigation.SecondHandProfile != null))
+                        .OrderBy(row => row.ProductId)
+            .ToList();
+
+    /// <inheritdoc />
+    public async Task<IReadOnlyList<ProductListItemViewModel>> GetSecondHandRowsAsync()
+        => (await _appleIdRepo
+            .SelectAllAsync(
+                appleId => appleId.ProductNavigation.SecondHandProfile != null,
+                appleId => new ProductListItemViewModel(
+                    appleId.Id,
+                    appleId.ProductId,
+                    "Apple ID",
+                    appleId.ProductNavigation.ModelNavigation.ManufacturerNavigation.Name + " " + appleId.ProductNavigation.ModelNavigation.Name,
+                    appleId.Email,
+                    null,
+                    appleId.ProductNavigation.Transactions.Any(t => t.Direction == TransactionDirection.Sell),
+                    appleId.ProductNavigation.SecondHandProfile != null)))
             .OrderBy(row => row.ProductId)
             .ToList();
 
@@ -70,12 +118,52 @@ public class AppleIdDataService(
                     null,
                     appleId.ProductNavigation.Transactions.Any(t => t.Direction == TransactionDirection.Sell),
                     appleId.ProductNavigation.SecondHandProfile != null))
+                        .OrderBy(row => row.ProductId)
+            .ToList();
+
+    /// <inheritdoc />
+    public async Task<IReadOnlyList<ProductListItemViewModel>> GetAvailableSecondHandRowsAsync()
+        => (await _appleIdRepo
+            .SelectAllAsync(
+                appleId => appleId.ProductNavigation.SecondHandProfile != null &&
+                            !appleId.ProductNavigation.Transactions.Any(t => t.Direction == TransactionDirection.Sell),
+                appleId => new ProductListItemViewModel(
+                    appleId.Id,
+                    appleId.ProductId,
+                    "Apple ID",
+                    appleId.ProductNavigation.ModelNavigation.ManufacturerNavigation.Name + " " + appleId.ProductNavigation.ModelNavigation.Name,
+                    appleId.Email,
+                    null,
+                    appleId.ProductNavigation.Transactions.Any(t => t.Direction == TransactionDirection.Sell),
+                    appleId.ProductNavigation.SecondHandProfile != null)))
             .OrderBy(row => row.ProductId)
             .ToList();
 
     /// <inheritdoc />
     public ProductDetailsViewModel? GetDetails(int id)
         => _appleIdRepo.Select(
+            id,
+            appleId => new ProductDetailsViewModel(
+                "Apple ID",
+                appleId.ProductId,
+                appleId.ProductNavigation.ModelNavigation.ManufacturerNavigation.Name,
+                appleId.ProductNavigation.ModelNavigation.Name,
+                appleId.Email,
+                null,
+                appleId.ProductNavigation.Transactions
+                    .Where(t => t.Direction == TransactionDirection.Sell)
+                    .OrderByDescending(t => t.Date)
+                    .Select(t => t.CustomerNavigation.PersonNavigation)
+                    .Select(person => person.FirstName + " " + person.LastName)
+                    .FirstOrDefault() ?? "Not sold",
+                appleId.ProductNavigation.GuaranteeProfile == null
+                    ? "None"
+                    : appleId.ProductNavigation.GuaranteeProfile.Corporation + " until " + appleId.ProductNavigation.GuaranteeProfile.ExpirationDate,
+                appleId.ProductNavigation.SecondHandProfile != null));
+
+    /// <inheritdoc />
+    public Task<ProductDetailsViewModel?> GetDetailsAsync(int id)
+        => _appleIdRepo.SelectAsync(
             id,
             appleId => new ProductDetailsViewModel(
                 "Apple ID",

@@ -54,11 +54,11 @@ public class CreateAppleIdModelTests : RepoTestBase
     }
 
     [Fact]
-    public void Valid_post_creates_apple_id_on_the_implicit_apple_iphone_model()
+    public async Task Valid_post_creates_apple_id_on_the_implicit_apple_iphone_model()
     {
         _model.Input = ValidInput("new.appleid@example.com");
 
-        var result = _model.OnPost();
+        var result = await _model.OnPostAsync();
 
         var redirect = Assert.IsType<RedirectToPageResult>(result);
         Assert.Equal("/Products/Details", redirect.PageName);
@@ -81,15 +81,15 @@ public class CreateAppleIdModelTests : RepoTestBase
     }
 
     [Fact]
-    public void Duplicate_email_is_rejected_and_creates_nothing()
+    public async Task Duplicate_email_is_rejected_and_creates_nothing()
     {
         _model.Input = ValidInput("duplicate@example.com");
-        _model.OnPost();
+        await _model.OnPostAsync();
 
         var appleIdsBefore = Context.AppleIds.Count();
 
         _model.Input = ValidInput("duplicate@example.com");
-        var result = _model.OnPost();
+        var result = await _model.OnPostAsync();
 
         Assert.IsType<PageResult>(result);
         Assert.False(_model.ModelState.IsValid);
@@ -100,12 +100,12 @@ public class CreateAppleIdModelTests : RepoTestBase
     }
 
     [Fact]
-    public void Invalid_model_state_redisplays_without_creating()
+    public async Task Invalid_model_state_redisplays_without_creating()
     {
         _model.Input = ValidInput("invalid@example.com");
         _model.ModelState.AddModelError(nameof(CreateAppleIdInputModel.Email), "The Email field is required.");
 
-        var result = _model.OnPost();
+        var result = await _model.OnPostAsync();
 
         Assert.IsType<PageResult>(result);
         Assert.Empty(Context.AppleIds.Where(a => a.Email == "invalid@example.com"));
@@ -113,13 +113,13 @@ public class CreateAppleIdModelTests : RepoTestBase
     }
 
     [Fact]
-    public void Consecutive_posts_reuse_the_single_implicit_model()
+    public async Task Consecutive_posts_reuse_the_single_implicit_model()
     {
         _model.Input = ValidInput("first@example.com");
-        _model.OnPost();
+        await _model.OnPostAsync();
 
         _model.Input = ValidInput("second@example.com");
-        _model.OnPost();
+        await _model.OnPostAsync();
 
         var implicitModels = Context.Models.Where(m => m.Name == ImplicitModelName).ToList();
         Assert.Single(implicitModels);

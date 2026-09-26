@@ -8,19 +8,19 @@ public class DetailsModel(
     public ProductDetailsViewModel? Product { get; private set; }
     public IReadOnlyList<ProductTransactionViewModel> Transactions { get; private set; } = [];
 
-    public IActionResult OnGet(int id, string? type = null)
+    public async Task<IActionResult> OnGetAsync(int id, string? type = null)
     {
         if (string.Equals(type, "appleid", StringComparison.OrdinalIgnoreCase))
         {
-            Product = appleIdDataService.GetDetails(id);
+            Product = await appleIdDataService.GetDetailsAsync(id);
         }
         else
         {
-            Product = phoneDataService.GetDetails(id);
+            Product = await phoneDataService.GetDetailsAsync(id);
         }
 
         if (Product is null) return NotFound();
-        Transactions = transactionDataService.GetProductTransactions(Product.ProductId);
+        Transactions = await transactionDataService.GetProductTransactionsAsync(Product.ProductId);
         return Page();
     }
 }

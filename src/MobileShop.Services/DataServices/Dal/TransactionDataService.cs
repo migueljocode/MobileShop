@@ -69,6 +69,67 @@ public class TransactionDataService(
             .Take(count)
             .ToList();
 
+            /// <inheritdoc />
+    public async Task<IReadOnlyList<TransactionListItemViewModel>> GetListAsync(
+        string? direction,
+        int take,
+        bool ascending)
+    {
+        Expression<Func<Transaction, TransactionListItemViewModel>> selector = transaction => new TransactionListItemViewModel(
+            transaction.Id,
+            transaction.Date,
+            transaction.Direction,
+            transaction.ProductNavigation.ModelNavigation.ManufacturerNavigation.Name + " " + transaction.ProductNavigation.ModelNavigation.Name,
+            transaction.FinishedPrice,
+            transaction.SellerNavigation.PersonNavigation == null
+                ? "Shop"
+                : transaction.SellerNavigation.PersonNavigation.FirstName + " " + transaction.SellerNavigation.PersonNavigation.LastName,
+            transaction.CustomerNavigation.PersonNavigation == null
+                ? "Shop"
+                : transaction.CustomerNavigation.PersonNavigation.FirstName + " " + transaction.CustomerNavigation.PersonNavigation.LastName);
+
+        // Push the direction filter to the database via the repo predicate overload.
+        // Ordering and Take remain in-memory because SelectAllAsync materializes.
+        IEnumerable<TransactionListItemViewModel> query;
+        if (string.Equals(direction, "buy", StringComparison.OrdinalIgnoreCase))
+            query = await _transactionRepo.SelectAllAsync(t => t.Direction == TransactionDirection.Buy, selector);
+        else if (string.Equals(direction, "sell", StringComparison.OrdinalIgnoreCase))
+            query = await _transactionRepo.SelectAllAsync(t => t.Direction == TransactionDirection.Sell, selector);
+        else
+            query = await _transactionRepo.SelectAllAsync(selector);
+
+        var ordered = ascending
+            ? query.OrderBy(t => t.Date)
+            : query.OrderByDescending(t => t.Date);
+
+        return ordered
+            .Take(Math.Clamp(take, 1, 500))
+            .ToList();
+    }
+
+    /// <inheritdoc />
+    public async Task<IReadOnlyList<TransactionCardViewModel>> GetRecentCardsAsync(int count = 20)
+    {
+        var cards = await _transactionRepo
+            .SelectAllAsync(transaction => new TransactionCardViewModel(
+                transaction.Date,
+                transaction.Direction,
+                transaction.FinishedPrice,
+                transaction.ProductNavigation.ModelNavigation.ManufacturerNavigation.Name + " " + transaction.ProductNavigation.ModelNavigation.Name,
+                transaction.Direction == TransactionDirection.Buy
+                    ? "From: " + (transaction.SellerNavigation.PersonNavigation == null
+                        ? "Shop"
+                        : transaction.SellerNavigation.PersonNavigation.FirstName + " " + transaction.SellerNavigation.PersonNavigation.LastName)
+                    : "To: " + (transaction.CustomerNavigation.PersonNavigation == null
+                        ? "Shop"
+                        : transaction.CustomerNavigation.PersonNavigation.FirstName + " " + transaction.CustomerNavigation.PersonNavigation.LastName)));
+
+        return cards
+            .OrderByDescending(card => card.Date)
+            .Take(count)
+            .ToList();
+    }
+
     /// <inheritdoc />
     public IReadOnlyList<TransactionListItemViewModel> GetList(
         string? direction,
@@ -135,8 +196,47 @@ public class TransactionDataService(
     }
 
     /// <inheritdoc />
+    public async Task<IReadOnlyList<ProfitLossRowViewModel>> GetProfitLossRowsAsync(DateTime? from, DateTime? to)
+    {
+        // Projected so the product navigation is read inside the query instead of relying on
+        // eager-loaded entities.
+        var transactions = await _transactionRepo
+            .SelectAllAsync(transaction => new
+            {
+                transaction.ProductId,
+                transaction.Date,
+                transaction.Direction,
+                transaction.FinishedPrice,
+                ProductLabel = transaction.ProductNavigation.ModelNavigation.ManufacturerNavigation.Name + " " + transaction.ProductNavigation.ModelNavigation.Name
+            })
+            .ConfigureAwait(false);
+
+        var filtered = transactions
+            .Where(transaction => (!from.HasValue || transaction.Date.Date >= from.Value.Date) &&
+                                  (!to.HasValue || transaction.Date.Date <= to.Value.Date));
+
+        return filtered
+            .GroupBy(transaction => transaction.ProductId)
+            .Select(group =>
+            {
+                var first = group.First();
+                return new ProfitLossRowViewModel(
+                    group.Key,
+                    first.ProductLabel,
+                    group.Where(t => t.Direction == TransactionDirection.Buy).Sum(t => t.FinishedPrice),
+                    group.Where(t => t.Direction == TransactionDirection.Sell).Sum(t => t.FinishedPrice));
+            })
+            .OrderBy(row => row.ProductId)
+            .ToList();
+    }
+
+    /// <inheritdoc />
     public decimal GetProfitLossTotal(DateTime? from, DateTime? to)
         => GetProfitLossRows(from, to).Sum(row => row.Profit);
+
+    /// <inheritdoc />
+    public async Task<decimal> GetProfitLossTotalAsync(DateTime? from, DateTime? to)
+        => (await GetProfitLossRowsAsync(from, to)).Sum(row => row.Profit);
 
     /// <inheritdoc />
     public IReadOnlyList<ProductTransactionViewModel> GetProductTransactions(int productId)
@@ -157,8 +257,42 @@ public class TransactionDataService(
             .ToList();
 
     /// <inheritdoc />
+    public async Task<IReadOnlyList<ProductTransactionViewModel>> GetProductTransactionsAsync(int productId)
+        => (await _transactionRepo
+            .SelectAllAsync(
+                transaction => transaction.ProductId == productId,
+                transaction => new ProductTransactionViewModel(
+                    transaction.Date,
+                    transaction.Direction,
+                    transaction.FinishedPrice,
+                    transaction.SellerNavigation.PersonNavigation == null
+                        ? "Shop"
+                        : transaction.SellerNavigation.PersonNavigation.FirstName + " " + transaction.SellerNavigation.PersonNavigation.LastName,
+                    transaction.CustomerNavigation.PersonNavigation == null
+                        ? "Shop"
+                        : transaction.CustomerNavigation.PersonNavigation.FirstName + " " + transaction.CustomerNavigation.PersonNavigation.LastName)))
+            .OrderByDescending(item => item.Date)
+            .ToList();
+
+    /// <inheritdoc />
     public TransactionDetailsViewModel? GetDetails(int id)
         => _transactionRepo.Select(
+            id,
+            transaction => new TransactionDetailsViewModel(
+                transaction.Date,
+                transaction.Direction,
+                transaction.FinishedPrice,
+                transaction.ProductNavigation.ModelNavigation.ManufacturerNavigation.Name + " " + transaction.ProductNavigation.ModelNavigation.Name,
+                transaction.SellerNavigation.PersonNavigation == null
+                    ? "Shop"
+                    : transaction.SellerNavigation.PersonNavigation.FirstName + " " + transaction.SellerNavigation.PersonNavigation.LastName,
+                transaction.CustomerNavigation.PersonNavigation == null
+                    ? "Shop"
+                    : transaction.CustomerNavigation.PersonNavigation.FirstName + " " + transaction.CustomerNavigation.PersonNavigation.LastName));
+
+    /// <inheritdoc />
+    public Task<TransactionDetailsViewModel?> GetDetailsAsync(int id)
+        => _transactionRepo.SelectAsync(
             id,
             transaction => new TransactionDetailsViewModel(
                 transaction.Date,
@@ -338,23 +472,90 @@ public class TransactionDataService(
     }
 
     /// <inheritdoc />
-    public Task<bool> RecordBuyAsync(
+    public async Task<bool> RecordBuyAsync(
         int productId,
         int sellerId,
         decimal finishedPrice,
         DateTime? date = null)
     {
-        // Keep logic in one place — sync path is fine for now; can fully async later.
-        return Task.FromResult(RecordBuy(productId, sellerId, finishedPrice, date));
+        if (finishedPrice < 0)
+        {
+            Logger.LogWarning("RecordBuyAsync rejected: negative price {Price}", finishedPrice);
+            return false;
+        }
+
+        var existingBuy = (await _transactionRepo.GetByProductAsync(productId))
+            .Any(t => t.Direction == TransactionDirection.Buy);
+
+        if (existingBuy)
+        {
+            Logger.LogWarning(
+                "RecordBuyAsync rejected: product Id={ProductId} already has a Buy transaction",
+                productId);
+            return false;
+        }
+
+        var transaction = new Transaction
+        {
+            ProductId = productId,
+            SellerId = sellerId,
+            CustomerId = ShopCustomerId,
+            FinishedPrice = finishedPrice,
+            Date = date ?? DateTime.UtcNow,
+            Direction = TransactionDirection.Buy
+        };
+
+        var ok = await AddAsync(transaction);
+        if (ok)
+            Logger.LogInformation(
+                "Recorded Buy: ProductId={ProductId}, SellerId={SellerId}, Price={Price}",
+                productId, sellerId, finishedPrice);
+
+        return ok;
     }
 
     /// <inheritdoc />
-    public Task<bool> RecordSellAsync(
+    public async Task<bool> RecordSellAsync(
         int productId,
         int customerId,
         decimal finishedPrice,
         DateTime? date = null)
-        => Task.FromResult(RecordSell(productId, customerId, finishedPrice, date));
+    {
+        if (finishedPrice < 0)
+        {
+            Logger.LogWarning("RecordSellAsync rejected: negative price {Price}", finishedPrice);
+            return false;
+        }
+
+        var alreadySold = (await _transactionRepo.GetByProductAsync(productId))
+            .Any(t => t.Direction == TransactionDirection.Sell);
+
+        if (alreadySold)
+        {
+            Logger.LogWarning(
+                "RecordSellAsync rejected: product Id={ProductId} already sold",
+                productId);
+            return false;
+        }
+
+        var transaction = new Transaction
+        {
+            ProductId = productId,
+            SellerId = ShopSellerId,
+            CustomerId = customerId,
+            FinishedPrice = finishedPrice,
+            Date = date ?? DateTime.UtcNow,
+            Direction = TransactionDirection.Sell
+        };
+
+        var ok = await AddAsync(transaction);
+        if (ok)
+            Logger.LogInformation(
+                "Recorded Sell: ProductId={ProductId}, CustomerId={CustomerId}, Price={Price}",
+                productId, customerId, finishedPrice);
+
+        return ok;
+    }
 
     private static string SellerLabel(Transaction transaction)
         => transaction.SellerId == ShopSellerId
@@ -371,6 +572,11 @@ public class TransactionDataService(
                 : "Customer";
 
     /// <inheritdoc />
+    /// <remarks>
+    /// Remains synchronous: the public contract returns <c>byte[]</code> (not <c>Task&lt;byte[]&gt;</c>).
+    /// The data snapshot is consistent because GetList is called once per invocation.
+    /// This method is not in the Web request pipeline path — pages use LoadAsync + pdfGenerator directly.
+    /// </remarks>
     public byte[] GenerateTransactionsPdf(string? direction, int take, string order)
     {
         var ascending = string.Equals(order, "asc", StringComparison.OrdinalIgnoreCase);

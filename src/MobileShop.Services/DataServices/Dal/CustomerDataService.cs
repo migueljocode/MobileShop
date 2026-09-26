@@ -18,6 +18,16 @@ public class CustomerDataService(
             .ToList();
 
     /// <inheritdoc />
+    public async Task<IReadOnlyList<PartyOptionViewModel>> GetPartyOptionsAsync()
+        => (await _customerRepo
+            .SelectAllAsync(customer => new PartyOptionViewModel(
+                customer.Id,
+                customer.PersonNavigation.FirstName + " " + customer.PersonNavigation.LastName,
+                customer.PersonNavigation.PhoneNumber)))
+            .OrderBy(row => row.Label)
+            .ToList();
+
+        /// <inheritdoc />
     public IReadOnlyList<CustomerListItemViewModel> GetListRows()
         => _customerRepo
             .SelectAll(customer => new CustomerListItemViewModel(
@@ -29,8 +39,28 @@ public class CustomerDataService(
             .ToList();
 
     /// <inheritdoc />
+    public async Task<IReadOnlyList<CustomerListItemViewModel>> GetListRowsAsync()
+        => (await _customerRepo
+            .SelectAllAsync(customer => new CustomerListItemViewModel(
+                customer.Id,
+                customer.PersonNavigation.FirstName + " " + customer.PersonNavigation.LastName,
+                customer.PersonNavigation.PhoneNumber,
+                customer.NationalId)))
+            .OrderBy(row => row.Name)
+            .ToList();
+
+    /// <inheritdoc />
     public CustomerDetailsViewModel? GetDetails(int id)
         => _customerRepo.Select(
+            id,
+            customer => new CustomerDetailsViewModel(
+                customer.PersonNavigation.FirstName + " " + customer.PersonNavigation.LastName,
+                customer.PersonNavigation.PhoneNumber,
+                customer.NationalId));
+
+    /// <inheritdoc />
+    public Task<CustomerDetailsViewModel?> GetDetailsAsync(int id)
+        => _customerRepo.SelectAsync(
             id,
             customer => new CustomerDetailsViewModel(
                 customer.PersonNavigation.FirstName + " " + customer.PersonNavigation.LastName,

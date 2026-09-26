@@ -10,7 +10,7 @@ public class CreatePhoneModel(
     [BindProperty] public CreatePhoneInputModel Input { get; set; } = new();
     public string? Message { get; private set; }
 
-    public IActionResult OnPost()
+    public async Task<IActionResult> OnPostAsync()
     {
         if (!ModelState.IsValid)
         {
@@ -18,28 +18,28 @@ public class CreatePhoneModel(
         }
 
         var imei1 = Input.IMEI1.Trim();
-        if (phoneDataService.ImeiExists(imei1))
+        if (await phoneDataService.ImeiExistsAsync(imei1))
         {
             ModelState.AddModelError(nameof(Input.IMEI1), "A phone with this IMEI already exists.");
             return Page();
         }
 
         // the catalog categories come from the seed data - never created here
-        var category = categoryRepo.Find(c => c.Name == "Phone")
+        var category = await categoryRepo.FindAsync(c => c.Name == "Phone")
             ?? throw new InvalidOperationException("The 'Phone' category is missing from the catalog seed data.");
 
         var manufacturerName = Input.Manufacturer.Trim();
-        var manufacturer = manufacturerRepo.Find(m => m.Name == manufacturerName)
-            ?? AddManufacturer(manufacturerName);
+        var manufacturer = await manufacturerRepo.FindAsync(m => m.Name == manufacturerName)
+            ?? await AddManufacturerAsync(manufacturerName);
 
         var modelName = Input.Model.Trim();
-        var model = modelRepo.Find(m => m.ManufacturerId == manufacturer.Id && m.Name == modelName)
-            ?? AddModel(manufacturer.Id, category.Id, modelName);
+        var model = await modelRepo.FindAsync(m => m.ManufacturerId == manufacturer.Id && m.Name == modelName)
+            ?? await AddModelAsync(manufacturer.Id, category.Id, modelName);
 
         var colorName = Input.Color?.Trim();
         var color = string.IsNullOrWhiteSpace(colorName)
             ? null
-            : colorRepo.Find(c => c.Name == colorName) ?? AddColor(colorName);
+            : await colorRepo.FindAsync(c => c.Name == colorName) ?? await AddColorAsync(colorName);
 
         var product = new Product
         {
@@ -68,7 +68,8 @@ public class CreatePhoneModel(
             ProductNavigation = product,
         };
 
-        if (!phoneDataService.Add(phone))
+        var ok = await phoneDataService.AddAsync(phone);
+        if (!ok)
         {
             Message = "The phone could not be saved. Check the details and try again.";
             return Page();
@@ -77,24 +78,24 @@ public class CreatePhoneModel(
         return RedirectToPage("/Products/Details", new { id = phone.Id, type = "phone" });
     }
 
-    private Manufacturer AddManufacturer(string name)
+    private async Task<Manufacturer> AddManufacturerAsync(string name)
     {
         var manufacturer = new Manufacturer { Name = name };
-        manufacturerRepo.Add(manufacturer);
+        await manufacturerRepo.AddAsync(manufacturer);
         return manufacturer;
     }
 
-    private Model AddModel(int manufacturerId, int categoryId, string name)
+    private async Task<Model> AddModelAsync(int manufacturerId, int categoryId, string name)
     {
         var model = new Model { ManufacturerId = manufacturerId, CategoryId = categoryId, Name = name };
-        modelRepo.Add(model);
+        await modelRepo.AddAsync(model);
         return model;
     }
 
-    private Color AddColor(string name)
+    private async Task<Color> AddColorAsync(string name)
     {
         var color = new Color { Name = name };
-        colorRepo.Add(color);
+        await colorRepo.AddAsync(color);
         return color;
     }
 }

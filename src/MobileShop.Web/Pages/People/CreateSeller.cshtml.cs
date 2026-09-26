@@ -5,7 +5,7 @@ public class CreateSellerModel(ISellerDataService sellerDataService) : PageModel
     [BindProperty] public CreateSellerInputModel Input { get; set; } = new();
     public string? Message { get; private set; }
 
-    public IActionResult OnPost()
+    public async Task<IActionResult> OnPostAsync()
     {
         if (!ModelState.IsValid)
         {
@@ -24,7 +24,7 @@ public class CreateSellerModel(ISellerDataService sellerDataService) : PageModel
             },
         };
 
-        if (!sellerDataService.Add(seller))
+        if (!await sellerDataService.AddAsync(seller))
         {
             Message = "The seller could not be created.";
             return Page();

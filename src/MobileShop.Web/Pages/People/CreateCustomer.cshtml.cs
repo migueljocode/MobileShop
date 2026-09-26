@@ -5,7 +5,7 @@ public class CreateCustomerModel(ICustomerDataService customerDataService) : Pag
     [BindProperty] public CreateCustomerInputModel Input { get; set; } = new();
     public string? Message { get; private set; }
 
-    public IActionResult OnPost()
+    public async Task<IActionResult> OnPostAsync()
     {
         if (!ModelState.IsValid)
         {
@@ -24,7 +24,7 @@ public class CreateCustomerModel(ICustomerDataService customerDataService) : Pag
             },
         };
 
-        if (!customerDataService.Add(customer))
+        if (!await customerDataService.AddAsync(customer))
         {
             Message = "The customer could not be created.";
             return Page();

@@ -100,4 +100,79 @@ public class TransactionDataServiceTests : RepoTestBase
         Assert.Equal("Seller", row.PersonRole);
         Assert.Equal("Seller Pdf", row.PersonLabel);
     }
+
+    [Fact]
+    public async Task RecordBuyAsync_successfully_persists_buy_transaction()
+    {
+        TestDataHelpers.SeedShopSentinels(Context);
+
+        var product = TestDataHelpers.CreateProduct(Context, 500m);
+
+        var result = await _service.RecordBuyAsync(product.Id, 1, 450m, new DateTime(2026, 1, 15, 12, 0, 0, DateTimeKind.Utc));
+
+        Assert.True(result);
+
+        var transaction = Context.Transactions.Single(t => t.ProductId == product.Id);
+        Assert.Equal(TransactionDirection.Buy, transaction.Direction);
+        Assert.Equal(450m, transaction.FinishedPrice);
+        Assert.Equal(1, transaction.SellerId);
+        Assert.Equal(1, transaction.CustomerId);
+        Assert.Equal(new DateTime(2026, 1, 15, 12, 0, 0, DateTimeKind.Utc), transaction.Date);
+    }
+
+    [Fact]
+    public async Task RecordSellAsync_successfully_persists_sell_transaction_after_buy()
+    {
+        TestDataHelpers.SeedShopSentinels(Context);
+
+        var product = TestDataHelpers.CreateProduct(Context, 500m);
+        await _service.RecordBuyAsync(product.Id, 1, 450m, new DateTime(2026, 1, 15, 12, 0, 0, DateTimeKind.Utc));
+
+        var customerPerson = new Person { FirstName = "Buyer", LastName = "Test", PhoneNumber = "09120000099" };
+        Context.People.Add(customerPerson);
+        Context.SaveChanges();
+        var customer = new Customer { PersonId = customerPerson.Id, NationalId = "9999999999" };
+        Context.Customers.Add(customer);
+        Context.SaveChanges();
+
+        var result = await _service.RecordSellAsync(product.Id, customer.Id, 600m, new DateTime(2026, 1, 20, 14, 0, 0, DateTimeKind.Utc));
+
+        Assert.True(result);
+
+        var transactions = Context.Transactions.Where(t => t.ProductId == product.Id).OrderBy(t => t.Direction).ToList();
+        Assert.Equal(2, transactions.Count);
+        Assert.Equal(TransactionDirection.Buy, transactions[0].Direction);
+        Assert.Equal(450m, transactions[0].FinishedPrice);
+        Assert.Equal(TransactionDirection.Sell, transactions[1].Direction);
+        Assert.Equal(600m, transactions[1].FinishedPrice);
+        Assert.Equal(customer.Id, transactions[1].CustomerId);
+    }
+
+    [Theory]
+    [InlineData((double)-100)]
+    [InlineData((double)-0.01)]
+    public async Task RecordBuyAsync_rejects_negative_price(double price)
+    {
+        TestDataHelpers.SeedShopSentinels(Context);
+        var product = TestDataHelpers.CreateProduct(Context, 500m);
+
+        var result = await _service.RecordBuyAsync(product.Id, 1, (decimal)price);
+
+        Assert.False(result);
+        Assert.Empty(Context.Transactions);
+    }
+
+    [Theory]
+    [InlineData((double)-100)]
+    [InlineData((double)-0.01)]
+    public async Task RecordSellAsync_rejects_negative_price(double price)
+    {
+        TestDataHelpers.SeedShopSentinels(Context);
+        var product = TestDataHelpers.CreateProduct(Context, 500m);
+
+        var result = await _service.RecordSellAsync(product.Id, 1, (decimal)price);
+
+        Assert.False(result);
+        Assert.Empty(Context.Transactions);
+    }
 }

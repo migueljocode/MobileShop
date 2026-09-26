@@ -7,15 +7,15 @@ public class CustomerDetailsModel(
     public CustomerDetailsViewModel? Customer { get; private set; }
     public IReadOnlyList<ProductListItemViewModel> Products { get; private set; } = [];
 
-    public IActionResult OnGet(int id)
+    public async Task<IActionResult> OnGetAsync(int id)
     {
-        Customer = customerDataService.GetDetails(id);
+        Customer = await customerDataService.GetDetailsAsync(id);
         if (Customer is null) return NotFound();
 
-        var purchasedProductIds = customerDataService.PurchasedProducts(id)
+        var purchasedProductIds = (await customerDataService.PurchasedProductsAsync(id))
             .Select(product => product.Id)
             .ToHashSet();
-        Products = productDataService.GetInventoryRows()
+        Products = (await productDataService.GetInventoryRowsAsync())
             .Where(row => purchasedProductIds.Contains(row.ProductId))
             .ToList();
 

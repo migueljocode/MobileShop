@@ -11,13 +11,14 @@ public class BuyModel(
     public IReadOnlyList<ProductListItemViewModel> Products { get; private set; } = [];
     public string? Message { get; private set; }
 
-    public void OnGet() => LoadSelections();
+    public async Task<IActionResult> OnGetAsync()
+        => await LoadSelectionsAsync();
 
-    public IActionResult OnPost()
+    public async Task<IActionResult> OnPostAsync()
     {
-        LoadSelections();
+        await LoadSelectionsAsync();
         if (!ModelState.IsValid) return Page();
-        if (!transactionDataService.RecordBuy(Input.ProductId, Input.SellerId, Input.Price, Input.Date))
+        if (!await transactionDataService.RecordBuyAsync(Input.ProductId, Input.SellerId, Input.Price, Input.Date))
         {
             ModelState.AddModelError(string.Empty, "The buy could not be recorded. Check the product and price.");
             return Page();
@@ -28,13 +29,14 @@ public class BuyModel(
         return Page();
     }
 
-    private void LoadSelections()
+    private async Task<IActionResult> LoadSelectionsAsync()
     {
-        Sellers = sellerDataService.GetPartyOptions();
-        Products = phoneDataService.GetSelectableProducts(TransactionDirection.Buy)
-            .Concat(appleIdDataService.GetSelectableProducts(TransactionDirection.Buy))
+        Sellers = await sellerDataService.GetPartyOptionsAsync();
+        Products = (await phoneDataService.GetSelectableProductsAsync(TransactionDirection.Buy))
+            .Concat(await appleIdDataService.GetSelectableProductsAsync(TransactionDirection.Buy))
             .OrderBy(product => product.Name)
             .ToList();
+        return Page();
     }
 
 }

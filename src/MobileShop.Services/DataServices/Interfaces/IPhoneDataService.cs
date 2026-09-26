@@ -8,16 +8,28 @@ public interface IPhoneDataService : IDataService<Phone>
 {
     /// <summary>Gets phone inventory rows for the product list.</summary>
     IReadOnlyList<ProductListItemViewModel> GetInventoryRows();
+    /// <summary>Gets phone inventory rows for the product list asynchronously.</summary>
+    Task<IReadOnlyList<ProductListItemViewModel>> GetInventoryRowsAsync() => throw new NotImplementedException("ApiPhoneDataService is not implemented yet.");
     /// <summary>Gets phones eligible for the specified transaction direction.</summary>
     /// <param name="direction">The transaction direction to check.</param>
     IReadOnlyList<ProductListItemViewModel> GetSelectableProducts(TransactionDirection direction);
+    /// <summary>Gets phones eligible for the specified transaction direction asynchronously.</summary>
+    /// <param name="direction">The transaction direction to check.</param>
+    Task<IReadOnlyList<ProductListItemViewModel>> GetSelectableProductsAsync(TransactionDirection direction) => throw new NotImplementedException("ApiPhoneDataService is not implemented yet.");
     /// <summary>Gets all second-hand phone inventory rows.</summary>
     IReadOnlyList<ProductListItemViewModel> GetSecondHandRows();
+    /// <summary>Gets all second-hand phone inventory rows asynchronously.</summary>
+    Task<IReadOnlyList<ProductListItemViewModel>> GetSecondHandRowsAsync() => throw new NotImplementedException("ApiPhoneDataService is not implemented yet.");
     /// <summary>Gets available second-hand phone inventory rows.</summary>
     IReadOnlyList<ProductListItemViewModel> GetAvailableSecondHandRows();
+    /// <summary>Gets available second-hand phone inventory rows asynchronously.</summary>
+    Task<IReadOnlyList<ProductListItemViewModel>> GetAvailableSecondHandRowsAsync() => throw new NotImplementedException("ApiPhoneDataService is not implemented yet.");
     /// <summary>Gets phone details, or <see langword="null"/> when not found.</summary>
     /// <param name="id">The phone identifier.</param>
     ProductDetailsViewModel? GetDetails(int id);
+    /// <summary>Gets phone details asynchronously, or <see langword="null"/> when not found.</summary>
+    /// <param name="id">The phone identifier.</param>
+    Task<ProductDetailsViewModel?> GetDetailsAsync(int id) => throw new NotImplementedException("ApiPhoneDataService is not implemented yet.");
 
     /// <summary>Determines whether an IMEI is already registered.</summary>
     /// <param name="imei1">The primary IMEI.</param>

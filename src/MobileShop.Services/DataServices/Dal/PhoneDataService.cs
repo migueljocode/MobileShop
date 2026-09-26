@@ -22,6 +22,20 @@ public class PhoneDataService(
             .ToList();
 
     /// <inheritdoc />
+    public async Task<IReadOnlyList<ProductListItemViewModel>> GetInventoryRowsAsync()
+        => (await _phoneRepo.SelectAllAsync(phone => new ProductListItemViewModel(
+                phone.Id,
+                phone.ProductId,
+                "Phone",
+                phone.ProductNavigation.ModelNavigation.ManufacturerNavigation.Name + " " + phone.ProductNavigation.ModelNavigation.Name,
+                "IMEI: " + phone.IMEI1,
+                (phone.ProductNavigation.ColorNavigation == null ? null : phone.ProductNavigation.ColorNavigation.Name),
+                phone.ProductNavigation.Transactions.Any(t => t.Direction == TransactionDirection.Sell),
+                phone.ProductNavigation.SecondHandProfile != null)))
+            .OrderBy(row => row.ProductId)
+            .ToList();
+
+    /// <inheritdoc />
     public IReadOnlyList<ProductListItemViewModel> GetSelectableProducts(TransactionDirection direction)
         => _phoneRepo
             .SelectAll(
@@ -35,6 +49,23 @@ public class PhoneDataService(
                     (phone.ProductNavigation.ColorNavigation == null ? null : phone.ProductNavigation.ColorNavigation.Name),
                     phone.ProductNavigation.Transactions.Any(t => t.Direction == TransactionDirection.Sell),
                     phone.ProductNavigation.SecondHandProfile != null))
+            .OrderBy(row => row.ProductId)
+            .ToList();
+
+    /// <inheritdoc />
+    public async Task<IReadOnlyList<ProductListItemViewModel>> GetSelectableProductsAsync(TransactionDirection direction)
+        => (await _phoneRepo
+            .SelectAllAsync(
+                phone => phone.ProductNavigation.Transactions.All(transaction => transaction.Direction != direction),
+                phone => new ProductListItemViewModel(
+                    phone.Id,
+                    phone.ProductId,
+                    "Phone",
+                    phone.ProductNavigation.ModelNavigation.ManufacturerNavigation.Name + " " + phone.ProductNavigation.ModelNavigation.Name,
+                    "IMEI: " + phone.IMEI1,
+                    (phone.ProductNavigation.ColorNavigation == null ? null : phone.ProductNavigation.ColorNavigation.Name),
+                    phone.ProductNavigation.Transactions.Any(t => t.Direction == TransactionDirection.Sell),
+                    phone.ProductNavigation.SecondHandProfile != null)))
             .OrderBy(row => row.ProductId)
             .ToList();
 
@@ -56,6 +87,23 @@ public class PhoneDataService(
             .ToList();
 
     /// <inheritdoc />
+    public async Task<IReadOnlyList<ProductListItemViewModel>> GetSecondHandRowsAsync()
+        => (await _phoneRepo
+            .SelectAllAsync(
+                phone => phone.ProductNavigation.SecondHandProfile != null,
+                phone => new ProductListItemViewModel(
+                    phone.Id,
+                    phone.ProductId,
+                    "Phone",
+                    phone.ProductNavigation.ModelNavigation.ManufacturerNavigation.Name + " " + phone.ProductNavigation.ModelNavigation.Name,
+                    "IMEI: " + phone.IMEI1,
+                    (phone.ProductNavigation.ColorNavigation == null ? null : phone.ProductNavigation.ColorNavigation.Name),
+                    phone.ProductNavigation.Transactions.Any(t => t.Direction == TransactionDirection.Sell),
+                    phone.ProductNavigation.SecondHandProfile != null)))
+            .OrderBy(row => row.ProductId)
+            .ToList();
+
+    /// <inheritdoc />
     public IReadOnlyList<ProductListItemViewModel> GetAvailableSecondHandRows()
         => _phoneRepo
             .SelectAll(
@@ -73,6 +121,24 @@ public class PhoneDataService(
             .OrderBy(row => row.ProductId)
             .ToList();
 
+    /// <inheritdoc />
+    public async Task<IReadOnlyList<ProductListItemViewModel>> GetAvailableSecondHandRowsAsync()
+        => (await _phoneRepo
+            .SelectAllAsync(
+                phone => phone.ProductNavigation.SecondHandProfile != null &&
+                         !phone.ProductNavigation.Transactions.Any(t => t.Direction == TransactionDirection.Sell),
+                phone => new ProductListItemViewModel(
+                    phone.Id,
+                    phone.ProductId,
+                    "Phone",
+                    phone.ProductNavigation.ModelNavigation.ManufacturerNavigation.Name + " " + phone.ProductNavigation.ModelNavigation.Name,
+                    "IMEI: " + phone.IMEI1,
+                    (phone.ProductNavigation.ColorNavigation == null ? null : phone.ProductNavigation.ColorNavigation.Name),
+                    phone.ProductNavigation.Transactions.Any(t => t.Direction == TransactionDirection.Sell),
+                    phone.ProductNavigation.SecondHandProfile != null)))
+            .OrderBy(row => row.ProductId)
+            .ToList();
+
     private static ProductListItemViewModel ToInventoryRow(Phone phone)
         => new(
             phone.Id,
@@ -87,6 +153,30 @@ public class PhoneDataService(
     /// <inheritdoc />
     public ProductDetailsViewModel? GetDetails(int id)
         => _phoneRepo.Select(
+            id,
+            phone => new ProductDetailsViewModel(
+                "Phone",
+                phone.ProductId,
+                phone.ProductNavigation.ModelNavigation.ManufacturerNavigation.Name,
+                phone.ProductNavigation.ModelNavigation.Name,
+                string.IsNullOrWhiteSpace(phone.IMEI2)
+                    ? "IMEI: " + phone.IMEI1
+                    : "IMEI: " + phone.IMEI1 + " / " + phone.IMEI2,
+                (phone.ProductNavigation.ColorNavigation == null ? null : phone.ProductNavigation.ColorNavigation.Name),
+                phone.ProductNavigation.Transactions
+                    .Where(t => t.Direction == TransactionDirection.Sell)
+                    .OrderByDescending(t => t.Date)
+                    .Select(t => t.CustomerNavigation.PersonNavigation)
+                    .Select(person => person.FirstName + " " + person.LastName)
+                    .FirstOrDefault() ?? "Not sold",
+                phone.ProductNavigation.GuaranteeProfile == null
+                    ? "None"
+                    : phone.ProductNavigation.GuaranteeProfile.Corporation + " until " + phone.ProductNavigation.GuaranteeProfile.ExpirationDate.ToString("d"),
+                phone.ProductNavigation.SecondHandProfile != null));
+
+    /// <inheritdoc />
+    public Task<ProductDetailsViewModel?> GetDetailsAsync(int id)
+        => _phoneRepo.SelectAsync(
             id,
             phone => new ProductDetailsViewModel(
                 "Phone",

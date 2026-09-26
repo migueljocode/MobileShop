@@ -1,6 +1,6 @@
 namespace MobileShop.Web.Pages;
 
-public class IndexModel(
+    public class IndexModel(
     IPhoneDataService phoneDataService,
     IAppleIdDataService appleIdDataService,
     ITransactionDataService transactionDataService) : PageModel
@@ -8,13 +8,13 @@ public class IndexModel(
     public DashboardStockSummary Stock { get; private set; } = new(0, 0, 0, 0);
     public IReadOnlyList<TransactionCardViewModel> RecentTransactions { get; private set; } = [];
 
-    public void OnGet()
+    public async Task OnGetAsync()
     {
         Stock = new DashboardStockSummary(
-            phoneDataService.Quantity(),
-            phoneDataService.SecondHandQuantity(),
-            phoneDataService.AvailableSecondHandQuantity(),
-            appleIdDataService.Quantity());
-        RecentTransactions = transactionDataService.GetRecentCards();
+            await phoneDataService.QuantityAsync(),
+            await phoneDataService.SecondHandQuantityAsync(),
+            await phoneDataService.AvailableSecondHandQuantityAsync(),
+            await appleIdDataService.QuantityAsync());
+        RecentTransactions = await transactionDataService.GetRecentCardsAsync();
     }
 }

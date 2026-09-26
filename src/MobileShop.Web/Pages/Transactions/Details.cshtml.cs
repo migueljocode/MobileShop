@@ -9,17 +9,17 @@ public class DetailsModel(
     /// <summary>The identifier of the transaction being displayed.</summary>
     public int Id { get; private set; }
 
-    public IActionResult OnGet(int id)
+    public async Task<IActionResult> OnGetAsync(int id)
     {
         Id = id;
-        Transaction = transactionDataService.GetDetails(id);
+        Transaction = await transactionDataService.GetDetailsAsync(id);
         return Transaction is null ? NotFound() : Page();
     }
 
     /// <summary>Returns the factor for exactly this transaction as a browser-printable PDF.</summary>
-    public IActionResult OnGetFactor(int id)
+    public async Task<IActionResult> OnGetFactorAsync(int id)
     {
-        var details = transactionDataService.GetDetails(id);
+        var details = await transactionDataService.GetDetailsAsync(id);
         if (details is null)
             return NotFound();
 

@@ -27,25 +27,47 @@ public interface ITransactionDataService : IDataService<Transaction>
     /// <summary>Gets recent transactions shaped for dashboard cards.</summary>
     /// <param name="count">The maximum number of cards.</param>
     IReadOnlyList<TransactionCardViewModel> GetRecentCards(int count = 20);
+    /// <summary>Gets recent transactions shaped for dashboard cards asynchronously.</summary>
+    /// <param name="count">The maximum number of cards.</param>
+    Task<IReadOnlyList<TransactionCardViewModel>> GetRecentCardsAsync(int count = 20) => throw new NotImplementedException("ApiTransactionDataService is not implemented yet.");
     /// <summary>Gets transaction list rows with optional direction and ordering.</summary>
     /// <param name="direction">The optional buy or sell filter.</param>
     /// <param name="take">The maximum number of rows.</param>
     /// <param name="ascending">Whether to order by oldest first.</param>
     IReadOnlyList<TransactionListItemViewModel> GetList(string? direction, int take, bool ascending);
+    /// <summary>Gets transaction list rows with optional direction and ordering asynchronously.</summary>
+    /// <param name="direction">The optional buy or sell filter.</param>
+    /// <param name="take">The maximum number of rows.</param>
+    /// <param name="ascending">Whether to order by oldest first.</param>
+    Task<IReadOnlyList<TransactionListItemViewModel>> GetListAsync(string? direction, int take, bool ascending) => throw new NotImplementedException("ApiTransactionDataService is not implemented yet.");
     /// <summary>Gets profit and loss rows within an optional date range.</summary>
     /// <param name="from">The inclusive start date.</param>
     /// <param name="to">The inclusive end date.</param>
     IReadOnlyList<ProfitLossRowViewModel> GetProfitLossRows(DateTime? from, DateTime? to);
+    /// <summary>Gets profit and loss rows within an optional date range asynchronously.</summary>
+    /// <param name="from">The inclusive start date.</param>
+    /// <param name="to">The inclusive end date.</param>
+    Task<IReadOnlyList<ProfitLossRowViewModel>> GetProfitLossRowsAsync(DateTime? from, DateTime? to) => throw new NotImplementedException("ApiTransactionDataService is not implemented yet.");
     /// <summary>Calculates total profit and loss within an optional date range.</summary>
     /// <param name="from">The inclusive start date.</param>
     /// <param name="to">The inclusive end date.</param>
     decimal GetProfitLossTotal(DateTime? from, DateTime? to);
+    /// <summary>Calculates total profit and loss within an optional date range asynchronously.</summary>
+    /// <param name="from">The inclusive start date.</param>
+    /// <param name="to">The inclusive end date.</param>
+    Task<decimal> GetProfitLossTotalAsync(DateTime? from, DateTime? to) => throw new NotImplementedException("ApiTransactionDataService is not implemented yet.");
     /// <summary>Gets transaction rows for a product.</summary>
     /// <param name="productId">The product identifier.</param>
     IReadOnlyList<ProductTransactionViewModel> GetProductTransactions(int productId);
+    /// <summary>Gets transaction rows for a product asynchronously.</summary>
+    /// <param name="productId">The product identifier.</param>
+    Task<IReadOnlyList<ProductTransactionViewModel>> GetProductTransactionsAsync(int productId) => throw new NotImplementedException("ApiTransactionDataService is not implemented yet.");
     /// <summary>Gets transaction details, or <see langword="null"/> when not found.</summary>
     /// <param name="id">The transaction identifier.</param>
     TransactionDetailsViewModel? GetDetails(int id);
+    /// <summary>Gets transaction details asynchronously, or <see langword="null"/> when not found.</summary>
+    /// <param name="id">The transaction identifier.</param>
+    Task<TransactionDetailsViewModel?> GetDetailsAsync(int id) => throw new NotImplementedException("ApiTransactionDataService is not implemented yet.");
 
     // TODO: eager-load Product (+ Phone/AppleId profiles) when reports need full details
     /// <summary>Gets products bought by the shop.</summary>
@@ -85,7 +107,7 @@ public interface ITransactionDataService : IDataService<Transaction>
     /// <param name="finishedPrice">The sale price.</param>
     /// <param name="date">The optional transaction date.</param>
     Task<bool> RecordSellAsync(int productId, int customerId, decimal finishedPrice, DateTime? date = null);
-/// <summary>Generates a PDF report of transactions filtered by direction, count, and order.</summary>
+    /// <summary>Generates a PDF report of transactions filtered by direction, count, and order.</summary>
     /// <param name="direction">The optional buy or sell filter.</param>
     /// <param name="take">The maximum number of transactions.</param>
     /// <param name="order">The order direction (asc or desc).</param>

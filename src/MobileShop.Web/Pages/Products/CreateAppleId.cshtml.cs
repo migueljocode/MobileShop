@@ -14,7 +14,7 @@ public class CreateAppleIdModel(
     [BindProperty] public CreateAppleIdInputModel Input { get; set; } = new();
     public string? Message { get; private set; }
 
-    public IActionResult OnPost()
+    public async Task<IActionResult> OnPostAsync()
     {
         if (!ModelState.IsValid)
         {
@@ -22,31 +22,31 @@ public class CreateAppleIdModel(
         }
 
         var email = Input.Email.Trim();
-        if (appleIdDataService.FindByEmail(email) is not null)
+        if (await appleIdDataService.FindByEmailAsync(email) is not null)
         {
             ModelState.AddModelError(nameof(Input.Email), "This Apple ID email already exists.");
             return Page();
         }
 
         // Apple IDs are all manufactured by Apple
-        var manufacturer = manufacturerRepo.Find(m => m.Name == AppleManufacturerName)
+        var manufacturer = await manufacturerRepo.FindAsync(m => m.Name == AppleManufacturerName)
             ?? new Manufacturer { Name = AppleManufacturerName };
 
         if (manufacturer.Id == 0)
         {
-            manufacturerRepo.Add(manufacturer);
+            await manufacturerRepo.AddAsync(manufacturer);
         }
 
         // the catalog categories come from the seed data - never created here
-        var category = categoryRepo.Find(c => c.Name == AppleIdCategoryName)
+        var category = await categoryRepo.FindAsync(c => c.Name == AppleIdCategoryName)
             ?? throw new InvalidOperationException("The 'AppleId' category is missing from the catalog seed data.");
 
         // Apple IDs always hang off one shared implicit Apple iPhone model inside the AppleId category
-        var model = modelRepo.Find(m =>
+        var model = await modelRepo.FindAsync(m =>
                 m.ManufacturerId == manufacturer.Id &&
                 m.CategoryId == category.Id &&
                 m.Name == ImplicitAppleIdModelName)
-            ?? AddModel(manufacturer.Id, category.Id, ImplicitAppleIdModelName);
+            ?? await AddModelAsync(manufacturer.Id, category.Id, ImplicitAppleIdModelName);
 
         var product = new Product
         {
@@ -63,7 +63,8 @@ public class CreateAppleIdModel(
             ProductNavigation = product,
         };
 
-        if (!appleIdDataService.Add(appleId))
+        var ok = await appleIdDataService.AddAsync(appleId);
+        if (!ok)
         {
             Message = "The Apple ID could not be saved.";
             return Page();
@@ -72,10 +73,10 @@ public class CreateAppleIdModel(
         return RedirectToPage("/Products/Details", new { id = appleId.Id, type = "appleid" });
     }
 
-    private Model AddModel(int manufacturerId, int categoryId, string name)
+    private async Task<Model> AddModelAsync(int manufacturerId, int categoryId, string name)
     {
         var model = new Model { ManufacturerId = manufacturerId, CategoryId = categoryId, Name = name };
-        modelRepo.Add(model);
+        await modelRepo.AddAsync(model);
         return model;
     }
 }

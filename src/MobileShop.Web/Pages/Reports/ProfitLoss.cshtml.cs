@@ -13,13 +13,13 @@ public class ProfitLossModel(
     // Distribution
     public IReadOnlyList<DistributionRow> DistributionRows { get; private set; } = [];
 
-    public void OnGet()
+    public async Task OnGetAsync()
     {
-        Rows = transactionDataService.GetProfitLossRows(From, To);
-        TotalProfit = transactionDataService.GetProfitLossTotal(From, To);
+        Rows = await transactionDataService.GetProfitLossRowsAsync(From, To);
+        TotalProfit = await transactionDataService.GetProfitLossTotalAsync(From, To);
 
         // Calculate distribution
-        var employees = employeeDataService.GetActiveEmployees();
+        var employees = await employeeDataService.GetActiveEmployeesAsync();
         DistributionRows = DistributionCalculator.Calculate(TotalProfit, employees, distributionSettings.Value);
     }
 }

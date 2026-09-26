@@ -6,10 +6,10 @@ public class SecondHandModel(
 {
     public IReadOnlyList<ProductListItemViewModel> Products { get; private set; } = [];
 
-    public void OnGet()
+    public async Task OnGetAsync()
     {
-        var rows = phoneDataService.GetSecondHandRows()
-            .Concat(appleIdDataService.GetSecondHandRows())
+        var rows = (await phoneDataService.GetSecondHandRowsAsync())
+            .Concat(await appleIdDataService.GetSecondHandRowsAsync())
             .OrderBy(product => product.Name)
             .ToList();
 
