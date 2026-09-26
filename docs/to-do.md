@@ -297,8 +297,18 @@ literally and complete the stages in order.
 
 ## Stage 5 — Fix Profile username wrapping and improve layout
 
-- [ ] Improve the Profile page layout so the `Username` label stays on one line
-  and profile details remain readable on narrow screens.
+- [x] ~~Improve the Profile page layout so the `Username` label stays on one line
+  and profile details remain readable on narrow screens.~~
+  - Completed: `src/MobileShop.Web/Pages/Account/Profile.cshtml`.
+  - Changed `<dl>` label column from `col-sm-2` to `col-sm-3`, value column from
+    `col-sm-10` to `col-sm-9`. Added `text-nowrap` to both `<dt>` elements to keep
+    the `Username` and `Email` labels single-line. Added `text-break` to both `<dd>`
+    value elements so long unbroken usernames wrap instead of overflowing.
+  - Validation: `dotnet build src/MobileShop.slnx --nologo` — 0 warnings, 0 errors;
+    Profile page tests 6/6 passed; full suite 386 passed, 2 skipped, 0 failed.
+  - Notes: No markup-only tests exist in the repo; added no tests per the acceptance
+    criteria. Bootstrap 5 `text-nowrap` and `text-break` utility classes are already
+    available in the project's stylesheet.
 
   Implementation requirements:
   - Update only the relevant markup in
