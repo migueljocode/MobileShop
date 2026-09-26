@@ -50,7 +50,7 @@ public class SampleDataSeedTests : IDisposable
         var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
         // Assert: every collection the loader consumes lands with the expected record count.
-        Assert.Equal(7, context.People.Count());
+        Assert.Equal(9, context.People.Count());
         Assert.Equal(3, context.Sellers.Count());
         Assert.Equal(4, context.Customers.Count());
         Assert.Equal(1, context.Users.Count());
@@ -73,7 +73,18 @@ public class SampleDataSeedTests : IDisposable
         Assert.Equal(1, context.CaseModelFits.Count());
         Assert.Equal(2, context.Glasses.Count());
         Assert.Equal(2, context.GlassModelFits.Count());
-        Assert.Equal(4, context.Employees.Count());
+        Assert.Equal(6, context.Employees.Count());
+        Assert.Equal(2, context.Employees.Count(e => e.IsActive));
+
+        // The only active employees must be exactly Mikaeeil Jorjany (40%) and Anis Sahabi (50%)
+        var activeEmployees = context.Employees.Include(e => e.PersonNavigation).Where(e => e.IsActive).ToList();
+        Assert.Equal(2, activeEmployees.Count);
+        Assert.Contains(activeEmployees,
+            e => e.PersonNavigation.FirstName == "Mikaeeil" && e.PersonNavigation.LastName == "Jorjany"
+                && e.SharePercent == 40);
+        Assert.Contains(activeEmployees,
+            e => e.PersonNavigation.FirstName == "Anis" && e.PersonNavigation.LastName == "Sahabi"
+                && e.SharePercent == 50);
 
         // Collections intentionally left empty for empty-state page coverage.
         Assert.Equal(0, context.Tablets.Count());
@@ -159,7 +170,7 @@ public class SampleDataSeedTests : IDisposable
         });
 
         var employees = context.Employees.Include(employee => employee.PersonNavigation).ToList();
-        Assert.Equal(4, employees.Count);
+        Assert.Equal(6, employees.Count);
         Assert.All(employees, employee => Assert.NotNull(employee.PersonNavigation));
 
         // Glass fits must reference a Phone/Tablet/SmartWatch model (service rule).
@@ -229,9 +240,9 @@ public class SampleDataSeedTests : IDisposable
         Assert.Contains(context.Guarantees, guarantee => guarantee.ExpirationDate > new DateTime(2027, 1, 1));
 
         // Employee distribution: active and inactive rows both exist.
-        Assert.Equal(3, context.Employees.Count(employee => employee.IsActive));
-        Assert.Equal(1, context.Employees.Count(employee => !employee.IsActive));
-        Assert.Equal(100, context.Employees
+        Assert.Equal(2, context.Employees.Count(employee => employee.IsActive));
+        Assert.Equal(4, context.Employees.Count(employee => !employee.IsActive));
+        Assert.Equal(90, context.Employees
             .Where(employee => employee.IsActive)
             .Sum(employee => employee.SharePercent));
 
@@ -272,7 +283,7 @@ public class SampleDataSeedTests : IDisposable
             Assert.False(string.IsNullOrWhiteSpace(appleId.Password));
             Assert.Contains("@", appleId.Email);
         });
-    }
+        }
 
     [Fact]
     public void Seed_data_can_be_reloaded_repeatedly_with_stable_ids()
@@ -283,7 +294,7 @@ public class SampleDataSeedTests : IDisposable
             var productsBefore = context.Products.Count();
             SampleDataInitializer.SeedIfEmpty(context);
             Assert.Equal(productsBefore, context.Products.Count());
-            Assert.Equal(7, context.People.Count());
+            Assert.Equal(9, context.People.Count());
         }
 
         // The destructive dev reseed runs in its own scope with a fresh context (the same
@@ -292,10 +303,11 @@ public class SampleDataSeedTests : IDisposable
         using (var freshContext = CreateContext())
         {
             SampleDataInitializer.ClearAndReseedDatabase(freshContext);
-            Assert.Equal(7, freshContext.People.Count());
+            Assert.Equal(9, freshContext.People.Count());
             Assert.Equal(17, freshContext.Products.Count());
             Assert.Equal(26, freshContext.Transactions.Count());
-            Assert.Equal(4, freshContext.Employees.Count());
+            Assert.Equal(6, freshContext.Employees.Count());
+            Assert.Equal(2, freshContext.Employees.Count(e => e.IsActive));
             Assert.Equal(1, freshContext.Users.Single(user => user.Username == "admin").Id);
             Assert.Equal(1, freshContext.Sellers.Single(seller => seller.Id == 1).PersonId);
             Assert.Equal(17, freshContext.Products.Select(product => product.Id).Distinct().Count());

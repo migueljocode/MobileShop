@@ -47,6 +47,18 @@
       "lastName": "Kazemi",
       "phoneNumber": "09120000007",
       "notes": "Former sales employee - inactive"
+    },
+    {
+      "id": 8,
+      "firstName": "Mikaeeil",
+      "lastName": "Jorjany",
+      "phoneNumber": "09120000008"
+    },
+    {
+      "id": 9,
+      "firstName": "Anis",
+      "lastName": "Sahabi",
+      "phoneNumber": "09120000009"
     }
   ],
   "sellers": [
@@ -911,7 +923,7 @@
       "personId": 1,
       "sharePercent": 50,
       "hireDate": "2023-01-15T00:00:00",
-      "isActive": true,
+      "isActive": false,
       "notes": "Shop owner - default 50% share"
     },
     {
@@ -919,7 +931,7 @@
       "personId": 2,
       "sharePercent": 30,
       "hireDate": "2023-03-10T00:00:00",
-      "isActive": true,
+      "isActive": false,
       "notes": "Senior sales - 30% share"
     },
     {
@@ -927,7 +939,7 @@
       "personId": 3,
       "sharePercent": 20,
       "hireDate": "2023-06-01T00:00:00",
-      "isActive": true,
+      "isActive": false,
       "notes": "Junior sales - 20% share"
     },
     {
@@ -937,6 +949,22 @@
       "hireDate": "2024-04-01T00:00:00",
       "isActive": false,
       "notes": "Inactive employee - excluded from distribution"
+    },
+    {
+      "id": 5,
+      "personId": 8,
+      "sharePercent": 40,
+      "hireDate": "2024-01-15T00:00:00",
+      "isActive": true,
+      "notes": "Mikaeeil Jorjany - 40% share"
+    },
+    {
+      "id": 6,
+      "personId": 9,
+      "sharePercent": 50,
+      "hireDate": "2024-01-15T00:00:00",
+      "isActive": true,
+      "notes": "Anis Sahabi - 50% share"
     }
   ]
 }

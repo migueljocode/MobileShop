@@ -24,7 +24,23 @@ public class ProfitLossTests
     {
         employeeMock ??= new Mock<IEmployeeDataService>();
         employeeMock.Setup(e => e.GetActiveEmployeesAsync())
-            .ReturnsAsync([]);
+            .ReturnsAsync(new[]
+            {
+                new Employee
+                {
+                    Id = 1,
+                    PersonNavigation = new Person { Id = 101, FirstName = "Mikaeeil", LastName = "Jorjany" },
+                    SharePercent = 50,
+                    IsActive = true
+                },
+                new Employee
+                {
+                    Id = 2,
+                    PersonNavigation = new Person { Id = 102, FirstName = "Anis", LastName = "Sahabi" },
+                    SharePercent = 50,
+                    IsActive = true
+                }
+            });
 
         var options = Options.Create(new DistributionSettings());
 
