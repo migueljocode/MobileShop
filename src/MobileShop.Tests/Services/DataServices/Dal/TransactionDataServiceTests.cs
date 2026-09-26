@@ -202,4 +202,71 @@ public class TransactionDataServiceTests : RepoTestBase
 
         Assert.Null(result);
     }
+
+    [Fact]
+    public async Task GetProfitLossRowsAsync_inclusive_bounds_include_transactions_on_both_From_and_To()
+    {
+        TestDataHelpers.SeedShopSentinels(Context);
+
+        var product1 = TestDataHelpers.CreateProduct(Context, 100m);
+        var product2 = TestDataHelpers.CreateProduct(Context, 200m);
+        var product3 = TestDataHelpers.CreateProduct(Context, 300m);
+
+        var fromDate = new DateTime(2025, 6, 15);
+        var toDate = new DateTime(2025, 6, 20);
+        var beforeFrom = fromDate.AddDays(-1);
+        var afterTo = toDate.AddDays(1);
+
+        // Buy transactions (cost) - we only care about sell (revenue) for profit calculation
+        // Record buy for each product so we can record sell
+        await _service.RecordBuyAsync(product1.Id, 1, 80m, fromDate);       // On From date
+        await _service.RecordBuyAsync(product2.Id, 1, 150m, toDate);         // On To date
+        await _service.RecordBuyAsync(product3.Id, 1, 250m, beforeFrom);     // Before From
+
+        // Sell transactions (revenue)
+        await _service.RecordSellAsync(product1.Id, 1, 120m, fromDate);      // On From date - should be included
+        await _service.RecordSellAsync(product2.Id, 1, 250m, toDate);        // On To date - should be included
+        await _service.RecordSellAsync(product3.Id, 1, 300m, afterTo);       // After To - should be excluded
+
+        var rows = await _service.GetProfitLossRowsAsync(fromDate, toDate);
+
+        // Only product1 (From date) and product2 (To date) should be in results
+        // product3 (after To) should be excluded
+        Assert.Equal(2, rows.Count);
+        Assert.Contains(rows, r => r.ProductId == product1.Id);
+        Assert.Contains(rows, r => r.ProductId == product2.Id);
+        Assert.DoesNotContain(rows, r => r.ProductId == product3.Id);
+
+        // Verify profit calculations are correct for included transactions
+        var row1 = rows.First(r => r.ProductId == product1.Id);
+        Assert.Equal(120m - 80m, row1.Profit); // 40 profit
+
+        var row2 = rows.First(r => r.ProductId == product2.Id);
+        Assert.Equal(250m - 150m, row2.Profit); // 100 profit
+    }
+
+    [Fact]
+    public async Task GetProfitLossTotalAsync_inclusive_bounds_sum_matches_rows()
+    {
+        TestDataHelpers.SeedShopSentinels(Context);
+
+        var product1 = TestDataHelpers.CreateProduct(Context, 100m);
+        var product2 = TestDataHelpers.CreateProduct(Context, 200m);
+
+        var fromDate = new DateTime(2025, 6, 15);
+        var toDate = new DateTime(2025, 6, 20);
+
+        await _service.RecordBuyAsync(product1.Id, 1, 80m, fromDate);
+        await _service.RecordBuyAsync(product2.Id, 1, 150m, toDate);
+
+        await _service.RecordSellAsync(product1.Id, 1, 120m, fromDate);
+        await _service.RecordSellAsync(product2.Id, 1, 250m, toDate);
+
+        var total = await _service.GetProfitLossTotalAsync(fromDate, toDate);
+        var rows = await _service.GetProfitLossRowsAsync(fromDate, toDate);
+
+        // Total should equal sum of row profits
+        Assert.Equal(rows.Sum(r => r.Profit), total);
+        Assert.Equal(40m + 100m, total); // 140 total profit
+    }
 }
