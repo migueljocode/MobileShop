@@ -134,8 +134,8 @@ literally and complete the stages in order.
 
 ## Stage 2 — Show profit/loss percentage and color-coded results
 
-- [ ] Add a `By percent` result column immediately after `Profit / loss` on
-  `/Reports/ProfitLoss` and color both result values according to their sign.
+- [x] ~~Add a `By percent` result column immediately after `Profit / loss` on
+  `/Reports/ProfitLoss` and color both result values according to their sign.~~
 
   Implementation requirements:
   - Update `src/MobileShop.Models/ViewModels/Web/ProfitLossRowViewModel.cs` with
@@ -157,6 +157,22 @@ literally and complete the stages in order.
   - Add focused unit tests for the computed percentage at positive, zero,
     negative, and zero-Bought cases, and page/render tests for column order and
     both Bootstrap color classes.
+
+  - 2026-01-01T00:00:00Z — Completion note:
+    - Files changed: `src/MobileShop.Models/ViewModels/Web/ProfitLossRowViewModel.cs`,
+    `src/MobileShop.Web/Pages/Reports/ProfitLoss.cshtml`,
+    `src/MobileShop.Tests/Models/ViewModels/ProfitLossRowViewModelTests.cs` (new)
+    - Added `ProfitPercent` computed property: `(Profit / Bought) * 100m`, returns
+      0m when `Bought == 0` (no division by zero, no rounding in view model).
+    - Added "By percent" column immediately after "Profit / loss" header.
+    - Row cells: `class="@profitClass"` where `profitClass = Profit >= 0 ?
+      "text-success" : "text-danger"` — applied to both Profit and By percent cells.
+      Zero profit treated as text-success.
+    - Rendering: `@row.ProfitPercent.ToString("F2")%` — 2 fractional digits + %.
+    - Bought/Sold columns and Distribution tab unchanged.
+    - Unit tests (4): positive/zero/negative profit, zero-Bought edge case — all pass.
+    - Column order and CSS classes verified via Razor markup review (no runtime HTML capture).
+    - Build: 0 errors, 0 warnings. Full suite: 354 passed, 0 failed, 2 skipped.
 
 ## Stage 3 — Add manual and automatic Profit/Loss date ranges
 
