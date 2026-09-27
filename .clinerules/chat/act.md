@@ -1,7 +1,7 @@
 # Act Report — Step 5: Sorting on Customers & Sellers pages
 
 ## Commit
-- **Hash**: pending (will be recorded in follow-up)
+- **Hash**: 3de5feb
 - **Message**: feat(web): add sortable Name/Phone/Count column headers on Customers & Sellers pages
 
 ## Status
