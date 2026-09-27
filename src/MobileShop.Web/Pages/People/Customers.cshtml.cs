@@ -4,5 +4,14 @@ public class CustomersModel(ICustomerDataService customerDataService) : PageMode
 {
     public IReadOnlyList<CustomerListItemViewModel> Customers { get; private set; } = [];
 
-    public async Task OnGetAsync() => Customers = await customerDataService.GetListRowsAsync();
+    public string SortBy { get; private set; } = "Name";
+
+    public bool Ascending { get; private set; } = true;
+
+    public async Task OnGetAsync(string sortBy = "Name", bool ascending = true)
+    {
+        SortBy = sortBy;
+        Ascending = ascending;
+        Customers = await customerDataService.GetListRowsAsync(sortBy, ascending);
+    }
 }

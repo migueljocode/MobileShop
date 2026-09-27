@@ -7,7 +7,7 @@ public class ApiSellerDataService : ApiDataServiceBase<Seller>, ISellerDataServi
         => throw new NotImplementedException("ApiSellerDataService is not implemented yet.");
 
     /// <inheritdoc />
-    public IReadOnlyList<SellerListItemViewModel> GetListRows()
+    public IReadOnlyList<SellerListItemViewModel> GetListRows(string sortBy = "Name", bool ascending = true)
         => throw new NotImplementedException("ApiSellerDataService is not implemented yet.");
 
     /// <inheritdoc />

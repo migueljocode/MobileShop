@@ -7,7 +7,7 @@ public class ApiCustomerDataService : ApiDataServiceBase<Customer>, ICustomerDat
         => throw new NotImplementedException("ApiCustomerDataService is not implemented yet.");
 
     /// <inheritdoc />
-    public IReadOnlyList<CustomerListItemViewModel> GetListRows()
+    public IReadOnlyList<CustomerListItemViewModel> GetListRows(string sortBy = "Name", bool ascending = true)
         => throw new NotImplementedException("ApiCustomerDataService is not implemented yet.");
 
     /// <inheritdoc />

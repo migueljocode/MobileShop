@@ -10,9 +10,13 @@ public interface ISellerDataService : IDataService<Seller>
     /// <summary>Gets seller options for transaction selectors asynchronously.</summary>
     Task<IReadOnlyList<PartyOptionViewModel>> GetPartyOptionsAsync() => throw new NotImplementedException("ApiSellerDataService is not implemented yet.");
     /// <summary>Gets seller rows for the sellers list.</summary>
-    IReadOnlyList<SellerListItemViewModel> GetListRows();
+    /// <param name="sortBy">Sort column: "Name", "Phone", or "Count". Invalid values fall back to "Name".</param>
+    /// <param name="ascending">Whether to sort ascending; descending otherwise.</param>
+    IReadOnlyList<SellerListItemViewModel> GetListRows(string sortBy = "Name", bool ascending = true);
     /// <summary>Gets seller rows for the sellers list asynchronously.</summary>
-    Task<IReadOnlyList<SellerListItemViewModel>> GetListRowsAsync() => throw new NotImplementedException("ApiSellerDataService is not implemented yet.");
+    /// <param name="sortBy">Sort column: "Name", "Phone", or "Count". Invalid values fall back to "Name".</param>
+    /// <param name="ascending">Whether to sort ascending; descending otherwise.</param>
+    Task<IReadOnlyList<SellerListItemViewModel>> GetListRowsAsync(string sortBy = "Name", bool ascending = true) => throw new NotImplementedException("ApiSellerDataService is not implemented yet.");
     /// <summary>Gets flattened seller details, or <see langword="null"/> when not found.</summary>
     /// <param name="id">The seller identifier.</param>
     SellerDetailsViewModel? GetDetails(int id);

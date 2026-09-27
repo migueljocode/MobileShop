@@ -5,7 +5,13 @@
 <div class="mb-3">
     <a asp-page="/People/CreateCustomer" class="btn btn-success">Add customer</a>
 </div>
-<table class="table table-striped"><thead><tr><th>Name</th><th>Phone</th><th>National ID</th><th>Purchased</th><th></th></tr></thead><tbody>
+<table class="table table-striped"><thead><tr>
+    <th><a asp-route-sortBy="Name" asp-route-ascending="@(Model.SortBy == "Name" && Model.Ascending ? "false" : "true")">Name</a></th>
+    <th><a asp-route-sortBy="Phone" asp-route-ascending="@(Model.SortBy == "Phone" && Model.Ascending ? "false" : "true")">Phone</a></th>
+    <th>National ID</th>
+    <th><a asp-route-sortBy="Count" asp-route-ascending="@(Model.SortBy == "Count" && Model.Ascending ? "false" : "true")">Purchased</a></th>
+    <th></th>
+</tr></thead><tbody>
 @foreach (var customer in Model.Customers)
 { <tr><td>@customer.Name</td><td>@customer.PhoneNumber</td><td>@customer.NationalId</td><td>@customer.PurchasedCount</td><td><a asp-page="/People/CustomerDetails" asp-route-id="@customer.Id">Details</a></td></tr> }
 </tbody></table>

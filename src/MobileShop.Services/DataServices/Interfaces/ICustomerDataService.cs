@@ -10,9 +10,13 @@ public interface ICustomerDataService : IDataService<Customer>
     /// <summary>Gets customer options for transaction selectors asynchronously.</summary>
     Task<IReadOnlyList<PartyOptionViewModel>> GetPartyOptionsAsync() => throw new NotImplementedException("ApiCustomerDataService is not implemented yet.");
     /// <summary>Gets customer rows for the customers list.</summary>
-    IReadOnlyList<CustomerListItemViewModel> GetListRows();
+    /// <param name="sortBy">Sort column: "Name", "Phone", or "Count". Invalid values fall back to "Name".</param>
+    /// <param name="ascending">Whether to sort ascending; descending otherwise.</param>
+    IReadOnlyList<CustomerListItemViewModel> GetListRows(string sortBy = "Name", bool ascending = true);
     /// <summary>Gets customer rows for the customers list asynchronously.</summary>
-    Task<IReadOnlyList<CustomerListItemViewModel>> GetListRowsAsync() => throw new NotImplementedException("ApiCustomerDataService is not implemented yet.");
+    /// <param name="sortBy">Sort column: "Name", "Phone", or "Count". Invalid values fall back to "Name".</param>
+    /// <param name="ascending">Whether to sort ascending; descending otherwise.</param>
+    Task<IReadOnlyList<CustomerListItemViewModel>> GetListRowsAsync(string sortBy = "Name", bool ascending = true) => throw new NotImplementedException("ApiCustomerDataService is not implemented yet.");
     /// <summary>Gets flattened customer details, or <see langword="null"/> when not found.</summary>
     /// <param name="id">The customer identifier.</param>
     CustomerDetailsViewModel? GetDetails(int id);

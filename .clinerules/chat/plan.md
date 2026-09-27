@@ -2,7 +2,7 @@
 
 Copied verbatim from .clinerules/to-do.md. Full stage list: to-do.md → # To-do — UI/UX Enhancements (7 Actionable Demands — Step 7 Already Implemented).
 
-## [ ] Step 5 — Sorting on Customers & Sellers pages (Name, Phone, Count)
+## ~~[x] Step 5 — Sorting on Customers & Sellers pages (Name, Phone, Count)~~
 - **Files**: 
   - modify: `src/MobileShop.Web/Pages/People/Customers.cshtml.cs`, `src/MobileShop.Web/Pages/People/Customers.cshtml`, `src/MobileShop.Web/Pages/People/Sellers.cshtml.cs`, `src/MobileShop.Web/Pages/People/Sellers.cshtml`
   - modify: `src/MobileShop.Services/DataServices/Interfaces/ICustomerDataService.cs`, `src/MobileShop.Services/DataServices/Interfaces/ISellerDataService.cs`

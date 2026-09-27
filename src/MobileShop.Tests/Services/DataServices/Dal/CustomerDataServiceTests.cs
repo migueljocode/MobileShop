@@ -94,4 +94,81 @@ public class CustomerDataServiceTests : RepoTestBase
         var asyncRows = await _service.GetListRowsAsync();
         Assert.Equal(0, asyncRows.Single(r => r.Id == customer.Id).PurchasedCount);
     }
+
+    [Fact]
+    public async Task GetListRows_sorts_by_name_phone_and_count_in_both_directions()
+    {
+        // Alice 0912...11, 0 purchases; Bob 0912...09, 2 purchases; carol 0912...10, 1 purchase
+        var alicePerson = new Person { FirstName = "Alice", LastName = "A", PhoneNumber = "09120000021" };
+        var bobPerson = new Person { FirstName = "Bob", LastName = "B", PhoneNumber = "09120000019" };
+        var carolPerson = new Person { FirstName = "Carol", LastName = "C", PhoneNumber = "09120000020" };
+        Context.People.AddRange(alicePerson, bobPerson, carolPerson);
+        Context.SaveChanges();
+
+        var alice = new Customer { PersonId = alicePerson.Id, NationalId = "2000000001" };
+        var bob = new Customer { PersonId = bobPerson.Id, NationalId = "2000000002" };
+        var carol = new Customer { PersonId = carolPerson.Id, NationalId = "2000000003" };
+        Context.Customers.AddRange(alice, bob, carol);
+        Context.SaveChanges();
+
+        var sellerPerson = new Person { FirstName = "Seller", LastName = "ForSort", PhoneNumber = "09120000022" };
+        Context.People.Add(sellerPerson);
+        Context.SaveChanges();
+        var seller = new Seller { PersonId = sellerPerson.Id, EntityType = SellerEntityType.Real };
+        Context.Sellers.Add(seller);
+        Context.SaveChanges();
+
+        var product = TestDataHelpers.CreateProduct(Context, 100m);
+        Transaction Tx(Customer c, int minutes) => new()
+        {
+            ProductId = product.Id,
+            ProductNavigation = product,
+            SellerId = seller.Id,
+            SellerNavigation = seller,
+            CustomerId = c.Id,
+            CustomerNavigation = c,
+            FinishedPrice = 100m,
+            Date = DateTime.UtcNow.AddMinutes(minutes),
+            Direction = TransactionDirection.Sell
+        };
+        Context.Transactions.Add(Tx(bob, 1));
+        Context.Transactions.Add(Tx(bob, 2));
+        Context.Transactions.Add(Tx(carol, 3));
+        Context.SaveChanges();
+
+        // Name asc: Alice, Bob, Carol
+        var byName = _service.GetListRows("Name");
+        Assert.Equal(new[] { "Alice A", "Bob B", "Carol C" }, byName.Select(r => r.Name));
+
+        // Name desc: Carol, Bob, Alice
+        var byNameDesc = _service.GetListRows("Name", ascending: false);
+        Assert.Equal(new[] { "Carol C", "Bob B", "Alice A" }, byNameDesc.Select(r => r.Name));
+
+        // Phone asc: 09120000019 Bob, 09120000020 Carol, 09120000021 Alice
+        var byPhone = _service.GetListRows("Phone");
+        Assert.Equal(new[] { "Bob B", "Carol C", "Alice A" }, byPhone.Select(r => r.Name));
+
+        // Phone desc
+        var byPhoneDesc = _service.GetListRows("Phone", ascending: false);
+        Assert.Equal(new[] { "Alice A", "Carol C", "Bob B" }, byPhoneDesc.Select(r => r.Name));
+
+        // Count asc: Alice 0, Carol 1, Bob 2
+        var byCount = _service.GetListRows("Count");
+        Assert.Equal(new[] { "Alice A", "Carol C", "Bob B" }, byCount.Select(r => r.Name));
+        Assert.Equal(new[] { 0, 1, 2 }, byCount.Select(r => r.PurchasedCount));
+
+        // Count desc
+        var byCountDesc = _service.GetListRows("Count", ascending: false);
+        Assert.Equal(new[] { 2, 1, 0 }, byCountDesc.Select(r => r.PurchasedCount));
+
+        // Invalid sortBy falls back to Name
+        var invalid = _service.GetListRows("Bogus");
+        Assert.Equal(new[] { "Alice A", "Bob B", "Carol C" }, invalid.Select(r => r.Name));
+
+        // async variants match sync
+        var asyncByName = await _service.GetListRowsAsync("Name");
+        Assert.Equal(new[] { "Alice A", "Bob B", "Carol C" }, asyncByName.Select(r => r.Name));
+        var asyncByCountDesc = await _service.GetListRowsAsync("Count", ascending: false);
+        Assert.Equal(new[] { 2, 1, 0 }, asyncByCountDesc.Select(r => r.PurchasedCount));
+    }
 }

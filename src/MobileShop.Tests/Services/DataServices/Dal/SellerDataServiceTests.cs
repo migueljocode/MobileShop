@@ -99,4 +99,76 @@ public class SellerDataServiceTests : RepoTestBase
         var asyncRows = await _service.GetListRowsAsync();
         Assert.Equal(0, asyncRows.Single(r => r.Id == seller.Id).SoldCount);
     }
+
+    [Fact]
+    public async Task GetListRows_sorts_by_name_phone_and_count_in_both_directions()
+    {
+        // Ava 09120000031, 0 purchases; Ben 09120000029, 2 purchases; zoe 09120000030, 1 purchase
+        var avaPerson = new Person { FirstName = "Ava", LastName = "A", PhoneNumber = "09120000031" };
+        var benPerson = new Person { FirstName = "Ben", LastName = "B", PhoneNumber = "09120000029" };
+        var zoePerson = new Person { FirstName = "Zoe", LastName = "Z", PhoneNumber = "09120000030" };
+        Context.People.AddRange(avaPerson, benPerson, zoePerson);
+        Context.SaveChanges();
+
+        var ava = new Seller { PersonId = avaPerson.Id, EntityType = SellerEntityType.Real };
+        var ben = new Seller { PersonId = benPerson.Id, EntityType = SellerEntityType.Real };
+        var zoe = new Seller { PersonId = zoePerson.Id, EntityType = SellerEntityType.Real };
+        Context.Sellers.AddRange(ava, ben, zoe);
+        Context.SaveChanges();
+
+        var customerPerson = new Person { FirstName = "Customer", LastName = "ForSort", PhoneNumber = "09120000032" };
+        Context.People.Add(customerPerson);
+        Context.SaveChanges();
+        var customer = new Customer { PersonId = customerPerson.Id, NationalId = "3000000001" };
+        Context.Customers.Add(customer);
+        Context.SaveChanges();
+
+        var product = TestDataHelpers.CreateProduct(Context, 100m);
+        Transaction Tx(Seller s, int minutes) => new()
+        {
+            ProductId = product.Id,
+            ProductNavigation = product,
+            SellerId = s.Id,
+            SellerNavigation = s,
+            CustomerId = customer.Id,
+            CustomerNavigation = customer,
+            FinishedPrice = 100m,
+            Date = DateTime.UtcNow.AddMinutes(minutes),
+            Direction = TransactionDirection.Buy
+        };
+        Context.Transactions.Add(Tx(ben, 1));
+        Context.Transactions.Add(Tx(ben, 2));
+        Context.Transactions.Add(Tx(zoe, 3));
+        Context.SaveChanges();
+
+        // Name asc: Ava, Ben, Zoe
+        var byName = _service.GetListRows("Name");
+        Assert.Equal(new[] { "Ava A", "Ben B", "Zoe Z" }, byName.Select(r => r.Name));
+
+        // Phone asc: 09120000029 Ben, 09120000030 Zoe, 09120000031 Ava
+        var byPhone = _service.GetListRows("Phone");
+        Assert.Equal(new[] { "Ben B", "Zoe Z", "Ava A" }, byPhone.Select(r => r.Name));
+
+        // Count asc: Ava 0, Zoe 1, Ben 2
+        var byCount = _service.GetListRows("Count");
+        Assert.Equal(new[] { 0, 1, 2 }, byCount.Select(r => r.SoldCount));
+
+        // Count desc: Ben 2, Zoe 1, Ava 0
+        var byCountDesc = _service.GetListRows("Count", ascending: false);
+        Assert.Equal(new[] { 2, 1, 0 }, byCountDesc.Select(r => r.SoldCount));
+
+        // Name desc
+        var byNameDesc = _service.GetListRows("Name", ascending: false);
+        Assert.Equal(new[] { "Zoe Z", "Ben B", "Ava A" }, byNameDesc.Select(r => r.Name));
+
+        // Invalid sortBy falls back to Name
+        var invalid = _service.GetListRows("Bogus");
+        Assert.Equal(new[] { "Ava A", "Ben B", "Zoe Z" }, invalid.Select(r => r.Name));
+
+        // async variants match sync
+        var asyncByPhone = await _service.GetListRowsAsync("Phone");
+        Assert.Equal(new[] { "Ben B", "Zoe Z", "Ava A" }, asyncByPhone.Select(r => r.Name));
+        var asyncByCountDesc = await _service.GetListRowsAsync("Count", ascending: false);
+        Assert.Equal(new[] { 2, 1, 0 }, asyncByCountDesc.Select(r => r.SoldCount));
+    }
 }
