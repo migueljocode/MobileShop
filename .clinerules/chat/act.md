@@ -1,7 +1,7 @@
 # Act Report — Step 4
 
 ## Commit
-- **Hash**: (filled after commit)
+- **Hash**: 80c2e5d
 - **Message**: feat(web): add Purchased/Sold count columns on Customers & Sellers list pages
 
 ## Status
