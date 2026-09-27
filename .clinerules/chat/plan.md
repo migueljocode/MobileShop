@@ -2,7 +2,7 @@
 
 Copied verbatim from .clinerules/to-do.md. Full stage list: to-do.md → # To-do — UI/UX Enhancements (7 Actionable Demands — Step 7 Already Implemented).
 
-## [ ] Step 6 — Reports page: Total Profit sign/color + Distribution sort by Share%
+## ~~[x] Step 6 — Reports page: Total Profit sign/color + Distribution sort by Share%~~
 - **Files**: 
   - modify: `src/MobileShop.Web/Pages/Reports/ProfitLoss.cshtml`
   - modify: `src/MobileShop.Services/Logging/Settings/DistributionSettings.cs` (DistributionCalculator)

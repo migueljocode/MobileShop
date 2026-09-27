@@ -1,27 +1,25 @@
-# Act Report — Step 5: Sorting on Customers & Sellers pages
+# Act Report — Step 6: Reports page Total Profit sign/color + Distribution sort
 
 ## Commit
-- **Hash**: 3de5feb
-- **Message**: feat(web): add sortable Name/Phone/Count column headers on Customers & Sellers pages
+- **Hash**: pending (recorded in follow-up)
+- **Message**: feat(web): show signed Total Profit and sort Distribution rows by Share%
 
 ## Status
 COMPLETE
 
 ## Changes
-- `ICustomerDataService` / `ISellerDataService`: `GetListRows` / `GetListRowsAsync` now take `string sortBy = "Name", bool ascending = true`. Async default bodies rethrow `NotImplementedException` with the new signature.
-- `CustomerDataService` / `SellerDataService`: materialize rows then order via tuple switch on (`Phone`|`Count`|default Name) × direction; invalid `sortBy` falls back to Name.
-- `CustomersModel` / `SellersModel`: `OnGetAsync(string sortBy = "Name", bool ascending = true)` stores `SortBy`/`Ascending` for the view and passes them through to the service.
-- `Customers.cshtml` / `Sellers.cshtml`: Name/Phone/count (Purchased/Sold) headers are now `<a asp-route-sortBy=... asp-route-ascending=...>` toggles that flip direction when the active column is clicked.
-- `ApiCustomerDataService` / `ApiSellerDataService`: sync `GetListRows` signature updated to match the interface (plan said "no edit needed", but they explicitly override the *sync* member and the build failed with CS0535 — a one-line signature fix was required; behavior still throws `NotImplementedException`).
-- New tests: `CustomersModelTests`, `SellersModelTests` (page-model sort param handling, Moq-based) and ordering tests appended to `CustomerDataServiceTests` / `SellerDataServiceTests` (Name/Phone/Count × asc/desc, invalid fallback, async parity).
+- `ProfitLoss.cshtml` (both renderings, lines 80 & 91): Total profit wrapped in `<span class="@(Model.TotalProfit >= 0 ? "text-success" : "text-danger")">@(Model.TotalProfit > 0 ? "+" : "")@Model.TotalProfit.ToString("N0")</span>` — `+` only when strictly positive (zero renders plain `0`), green when `>= 0`, red when negative.
+- `DistributionCalculator.Calculate()`: removed the early `return rows;` in the `totalProfit <= 0` branch and added `if (totalProfit > 0) { ... }` around the profit block so both paths reach a single exit: `return rows.OrderByDescending(r => r.SharePercent).ThenBy(r => r.EmployeeName).ToList();`.
+  - Note: simply deleting the early return broke the control flow (loss rows AND profit rows both added → 6 rows, 2 tests failed). Fixed by gating the profit block with `if (totalProfit > 0)`, keeping the single sorted exit the plan requires.
+- `DistributionCalculatorTests.cs`: re-indexed all four test methods (five assertion groups) to Anis (50%) → Mikaeeil (40%) → Shop (10%): names, shares, and amounts (Block 2: 50m/40m/11m for `Calculate(101m, …)`; loss case: 0/0/loss). Order-independent blocks (sum checks) untouched.
 
 ## Verification
 - `dotnet build src/MobileShop.slnx --nologo` → Build succeeded, 0 Warning(s), 0 Error(s)
-- `dotnet test src/MobileShop.slnx --nologo --filter "CustomerDataServiceTests|SellerDataServiceTests|CustomersModelTests|SellersModelTests"` → Passed: 14, Failed: 0
+- `dotnet test src/MobileShop.slnx --nologo --filter "DistributionCalculatorTests"` → Passed: 11, Failed: 0
 - `dotnet test src/MobileShop.slnx --nologo` (full suite) → Passed: 405, Failed: 0, Skipped: 2 (pre-existing QuestPDF skips)
 
 ## Friction noted
-- Plan's "Api stub classes need no edit" was wrong for the sync `GetListRows` — stubs override it explicitly, so CS0535 forced a signature update. Minimal fix applied.
+- Plan's instruction "delete the early `return rows;`" alone was incomplete — without gating the profit block the loss branch fell through and appended the profit rows (6 rows instead of 3). The minimal fix (adding `if (totalProfit > 0)`) preserves the plan's single-exit-point requirement; flagged here in case the plan text should be amended.
 
 ## Problems
 - None beyond the above.

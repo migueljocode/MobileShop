@@ -42,20 +42,20 @@ public class DistributionCalculatorTests
 
         Assert.Equal(3, rows.Count);
 
-        // Verify exact row names
-        Assert.Equal("Mikaeeil Jorjany", rows[0].EmployeeName);
-        Assert.Equal("Anis Sahabi", rows[1].EmployeeName);
+        // Verify exact row names — sorted by SharePercent desc: Anis (50), Mikaeeil (40), Shop (10)
+        Assert.Equal("Anis Sahabi", rows[0].EmployeeName);
+        Assert.Equal("Mikaeeil Jorjany", rows[1].EmployeeName);
         Assert.Equal("Shop", rows[2].EmployeeName);
 
         // Verify fixed shares sum to 100%
-        Assert.Equal(40, rows[0].SharePercent);
-        Assert.Equal(50, rows[1].SharePercent);
+        Assert.Equal(50, rows[0].SharePercent);
+        Assert.Equal(40, rows[1].SharePercent);
         Assert.Equal(10, rows[2].SharePercent);
         Assert.Equal(100, rows.Sum(r => r.SharePercent));
 
         // Verify amounts with floor rounding
-        Assert.Equal(40m, rows[0].CalculatedAmount);
-        Assert.Equal(50m, rows[1].CalculatedAmount);
+        Assert.Equal(50m, rows[0].CalculatedAmount);
+        Assert.Equal(40m, rows[1].CalculatedAmount);
         Assert.Equal(11m, rows[2].CalculatedAmount);
 
         // Shop gets remainder
@@ -77,8 +77,8 @@ public class DistributionCalculatorTests
         var rows = DistributionCalculator.Calculate(100m, employees, _settings);
 
         Assert.Equal(3, rows.Count);
-        Assert.Equal(40, rows[0].SharePercent);
-        Assert.Equal(50, rows[1].SharePercent);
+        Assert.Equal(50, rows[0].SharePercent);
+        Assert.Equal(40, rows[1].SharePercent);
         Assert.Equal(10, rows[2].SharePercent);
         Assert.Equal(100m, rows.Sum(r => r.CalculatedAmount)); // 40 + 50 + 10 = 100
     }
@@ -92,12 +92,13 @@ public class DistributionCalculatorTests
         var rows = DistributionCalculator.Calculate(0m, employees, _settings);
 
         Assert.Equal(3, rows.Count);
-        Assert.Equal("Mikaeeil Jorjany", rows[0].EmployeeName);
-        Assert.Equal("Anis Sahabi", rows[1].EmployeeName);
+        // Sorted by SharePercent desc: Anis (50), Mikaeeil (40), Shop (10)
+        Assert.Equal("Anis Sahabi", rows[0].EmployeeName);
+        Assert.Equal("Mikaeeil Jorjany", rows[1].EmployeeName);
         Assert.Equal("Shop", rows[2].EmployeeName);
 
-        Assert.Equal(40, rows[0].SharePercent);
-        Assert.Equal(50, rows[1].SharePercent);
+        Assert.Equal(50, rows[0].SharePercent);
+        Assert.Equal(40, rows[1].SharePercent);
         Assert.Equal(10, rows[2].SharePercent);
 
         Assert.All(rows, r => Assert.Equal(0m, r.CalculatedAmount));
@@ -116,12 +117,13 @@ public class DistributionCalculatorTests
         var rows = DistributionCalculator.Calculate(loss, employees, _settings);
 
         Assert.Equal(3, rows.Count);
-        Assert.Equal("Mikaeeil Jorjany", rows[0].EmployeeName);
-        Assert.Equal("Anis Sahabi", rows[1].EmployeeName);
+        // Sorted by SharePercent desc: Anis (50), Mikaeeil (40), Shop (10)
+        Assert.Equal("Anis Sahabi", rows[0].EmployeeName);
+        Assert.Equal("Mikaeeil Jorjany", rows[1].EmployeeName);
         Assert.Equal("Shop", rows[2].EmployeeName);
 
-        Assert.Equal(40, rows[0].SharePercent);
-        Assert.Equal(50, rows[1].SharePercent);
+        Assert.Equal(50, rows[0].SharePercent);
+        Assert.Equal(40, rows[1].SharePercent);
         Assert.Equal(10, rows[2].SharePercent);
 
         // Employees get nothing, shop absorbs entire loss

@@ -77,7 +77,7 @@
 
 <div class="tab-content" id="profitLossTabsContent">
     <div class="tab-pane fade show active" id="profit" role="tabpanel">
-        <p class="lead">Total profit: <strong>@Model.TotalProfit.ToString("N0")</strong></p>
+        <p class="lead">Total profit: <strong><span class="@(Model.TotalProfit >= 0 ? "text-success" : "text-danger")">@(Model.TotalProfit > 0 ? "+" : "")@Model.TotalProfit.ToString("N0")</span></strong></p>
         <table class="table table-striped"><thead><tr><th>Product</th><th>Bought</th><th>Sold</th><th>Profit / loss</th><th>By percent</th></tr></thead><tbody>
 @foreach (var row in Model.Rows)
 {
@@ -88,7 +88,7 @@
     </div>
 
     <div class="tab-pane fade" id="distribution" role="tabpanel">
-        <p class="lead">Total profit: <strong>@Model.TotalProfit.ToString("N0")</strong></p>
+        <p class="lead">Total profit: <strong><span class="@(Model.TotalProfit >= 0 ? "text-success" : "text-danger")">@(Model.TotalProfit > 0 ? "+" : "")@Model.TotalProfit.ToString("N0")</span></strong></p>
         <table class="table table-striped"><thead><tr><th>Employee</th><th>Share %</th><th>Amount</th></tr></thead><tbody>
 @foreach (var row in Model.DistributionRows)
 {

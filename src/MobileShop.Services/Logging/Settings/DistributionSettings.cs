@@ -96,10 +96,10 @@ public static class DistributionCalculator
                 CalculatedAmount = totalProfit, // Entire loss goes to shop
                 IsLossPeriod = true
             });
-
-            return rows;
         }
 
+        if (totalProfit > 0)
+        {
         // Profit case - fixed shares 40/50/10 with floor rounding for employees
         var mikaeeilAmount = Math.Floor(totalProfit * 0.40m);
         var anisAmount = Math.Floor(totalProfit * 0.50m);
@@ -129,8 +129,12 @@ public static class DistributionCalculator
             CalculatedAmount = shopAmount,
             IsLossPeriod = false
         });
+        }
 
-        return rows;
+        return rows
+            .OrderByDescending(r => r.SharePercent)
+            .ThenBy(r => r.EmployeeName)
+            .ToList();
     }
 }
 
