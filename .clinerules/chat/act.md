@@ -1,7 +1,7 @@
 # Act Report — Step 8: Sticky/fixed navbar on scroll
 
 ## Commit
-- **Hash**: pending (recorded in follow-up)
+- **Hash**: 16b1f99
 - **Message**: feat(web): make navbar sticky on scroll
 
 ## Status
