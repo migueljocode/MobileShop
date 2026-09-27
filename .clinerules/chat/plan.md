@@ -1,35 +1,36 @@
-# Plan — UI/UX Enhancements — Step 4 of 7
+# Plan — UI/UX Enhancements — Step 5 of 7
 
 Copied verbatim from .clinerules/to-do.md. Full stage list: to-do.md → # To-do — UI/UX Enhancements (7 Actionable Demands — Step 7 Already Implemented).
 
-## ~~[x] Step 4 — Purchased/Sold count columns on Customers & Sellers list pages~~
+## [ ] Step 5 — Sorting on Customers & Sellers pages (Name, Phone, Count)
 - **Files**: 
-  - modify: `src/MobileShop.Models/ViewModels/Web/CustomerListItemViewModel.cs`, `src/MobileShop.Models/ViewModels/Web/SellerListItemViewModel.cs`
   - modify: `src/MobileShop.Web/Pages/People/Customers.cshtml.cs`, `src/MobileShop.Web/Pages/People/Customers.cshtml`, `src/MobileShop.Web/Pages/People/Sellers.cshtml.cs`, `src/MobileShop.Web/Pages/People/Sellers.cshtml`
-  - modify: `src/MobileShop.Services/DataServices/Dal/CustomerDataService.cs`, `src/MobileShop.Services/DataServices/Dal/SellerDataService.cs`
   - modify: `src/MobileShop.Services/DataServices/Interfaces/ICustomerDataService.cs`, `src/MobileShop.Services/DataServices/Interfaces/ISellerDataService.cs`
+  - modify: `src/MobileShop.Services/DataServices/Dal/CustomerDataService.cs`, `src/MobileShop.Services/DataServices/Dal/SellerDataService.cs`
+  - create: `src/MobileShop.Tests/Web/Pages/People/CustomersModelTests.cs`, `src/MobileShop.Tests/Web/Pages/People/SellersModelTests.cs` (mirror `IndexModelTests.cs` pattern)
+  - do not touch: `ApiCustomerDataService.cs`, `ApiSellerDataService.cs` (they inherit default interface implementation; no edit needed)
 - **Symbols**: 
-  - `CustomerListItemViewModel` — add `int PurchasedCount { get; init; }` as last parameter in positional record
-  - `SellerListItemViewModel` — add `int SoldCount { get; init; }` as last parameter in positional record
-  - `ICustomerDataService.GetListRowsAsync()` — project `PurchasedCount` via repo `SelectAll(c => new CustomerListItemViewModel(..., c.Transactions.Count(t => t.Direction == TransactionDirection.Sell && !t.IsDeleted)))` — no DbContext in service layer
-  - `ISellerDataService.GetListRowsAsync()` — project `SoldCount` via repo `SelectAll(s => new SellerListItemViewModel(..., s.Transactions.Count(t => t.Direction == TransactionDirection.Buy && !t.IsDeleted)))`
-  - `ICustomerDataService.GetListRows()` — same projection for sync method
-  - `ISellerDataService.GetListRows()` — same projection for sync method
-- **Current → Desired**: Tables show only Name/Phone/NationalId/Type → add count column with sortable header.
+  - Add `sortBy` (string: "Name", "Phone", "Count") and `ascending` (bool = true default) parameters to `GetListRowsAsync` and page `OnGetAsync`
+  - PageModel: bind `[FromQuery] string sortBy`, `bool ascending = true`; default `Name`, `true` (so omitted `ascending` param = ascending)
+  - Razor: make column headers `<a>` with toggled sort dir; preserve other query params via `asp-route-*`
+- **Current → Desired**: Static tables → clickable column headers that toggle asc/desc; URL reflects sort state.
 - **Change**: 
-  1. Extend both VM records with count property appended last (no default value; all 4 call sites updated).
-  2. Update **both sync and async** service projections using repo `SelectAll` with navigation property count + `!t.IsDeleted` filter (soft-deleted transactions excluded).
-  3. **Count definition**: raw transaction count (not distinct products) — a customer buying same product twice shows 2. "Counts match detail pages" criterion dropped.
-  4. Update `.cshtml` tables: add `<th>Purchased</th>` / `<th>Sold</th>` and `<td>@customer.PurchasedCount</td>`.
+  1. Extend service interface: `Task<IReadOnlyList<CustomerListItemViewModel>> GetListRowsAsync(string sortBy, bool ascending = true)`
+  2. Implement ordering in `CustomerDataService`/`SellerDataService` using `OrderBy`/`OrderByDescending` on projected VM properties.
+  3. `ICustomerDataService.cs:15` / `ISellerDataService.cs:15` default bodies keep throwing `NotImplementedException` with the new parameter list; the Api stub classes need no edit.
+  4. PageModel `OnGetAsync` accepts sort params with `ascending = true` default, passes to service, stores current sort for View.
+  5. Razor: `<th><a asp-route-sortBy="Name" asp-route-ascending="@(Model.SortBy=="Name" && Model.Ascending ? "false" : "true")">Name</a></th>` etc. (lowercase "true"/"false" for clean URLs).
 - **Edge cases**: 
-  - Customers/Sellers with zero transactions → show 0
-  - Soft-deleted transactions excluded from count
-  - Performance: use `AsNoTracking` and server-side count projection; avoid client-side evaluation
+  - Invalid sortBy → default to Name
+  - Omitted `ascending` query param binds to `false` in ASP.NET; handler default `ascending = true` ensures ascending is the effective default.
+  - Preserve sort across pagination (none yet) and filter (none yet)
 - **Tests**: 
-  - Add new tests in `CustomerDataServiceTests` / `SellerDataServiceTests` to assert count column values (raw count, excludes soft-deleted)
-- **Verify**: `dotnet build src/MobileShop.slnx --nologo && dotnet test src/MobileShop.slnx --nologo --filter "CustomerDataServiceTests|SellerDataServiceTests"`
-- **Done when**: Both list pages display correct raw transaction counts; soft-deleted transactions excluded.
-- **Risk**: LOW | **Confidence**: HIGH
+  - Create `CustomersModelTests.cs` / `SellersModelTests.cs` for sort param binding and header links
+  - Service tests for ordering
+- **Verify**: `dotnet build src/MobileShop.slnx --nologo && dotnet test src/MobileShop.slnx --nologo --filter "CustomerDataServiceTests|SellerDataServiceTests|CustomersModelTests|SellersModelTests"`
+- **Done when**: Clicking Name/Phone/Count headers sorts table; URL updates; direction toggles; API stubs compile; new web tests pass.
+- **Risk**: MEDIUM | **Confidence**: MEDIUM
+
 
 ## Execution notes
 - Work fast: combine independent shell commands (`&&`).
