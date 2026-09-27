@@ -38,15 +38,19 @@ factor's native-print-only behavior with a direct PDF download.
   “Save as PDF.”~~
   - Completed: `src/MobileShop.Web/Pages/Transactions/Index.cshtml`,
     `Index.cshtml.cs`, and
-    `src/MobileShop.Tests/Web/Pages/Transactions/IndexModelTests.cs`.
-  - Validation: Focused transaction page tests — 8 passed; solution build — 0
+    `src/MobileShop.Tests/Web/Pages/Transactions/IndexModelTests.cs`;
+    follow-up route fixes in `src/MobileShop.Web/Pages/Transactions/Details.cshtml`.
+  - Validation: Focused transaction page tests — 10 passed; solution build — 0
     warnings and 0 errors; full test suite — 384 passed, 2 skipped, 0 failed.
   - Endpoint smoke test: Production-mode Web returned HTTP 200 with
     `Content-Type: application/pdf`, attachment filename
     `transactions-factor.pdf`, and a valid `%PDF-` payload.
-  - Notes: The rendered button targets `?handler=DownloadFactor`; browser
-    interaction was not manually exercised, but its endpoint and attachment
-    response were smoke-tested over HTTP.
+  - Follow-up: Replaced the per-row factor link with an explicitly generated
+    Index handler URL after rendered markup showed its `href` was empty. The
+    Details page now opens its inline Factor PDF in a new tab and routes
+    “Back to transactions” explicitly to `/Transactions`.
+  - Validation: Re-rendered links have working URLs; the Index and Details pages
+    return HTTP 200; selected-row download returns a valid PDF attachment.
 
   ### Implementation requirements
 

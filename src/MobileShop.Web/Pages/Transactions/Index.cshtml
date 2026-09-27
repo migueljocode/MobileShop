@@ -79,7 +79,7 @@
                             <td>
                                 <a asp-page="/Transactions/Details" asp-route-id="@transaction.Id">Details</a>
                                 |
-                                <a asp-page="/Transactions" asp-page-handler="DownloadFactor" asp-route-direction="@Model.Direction" asp-route-take="@Model.Take" asp-route-order="@Model.Order" asp-route-selectedIds="@transaction.Id">Download Factor</a>
+                                <a href="@Url.Page("/Transactions/Index", "DownloadFactor", new { direction = Model.Direction, take = Model.Take, order = Model.Order, selectedIds = transaction.Id })">Download Factor</a>
                             </td>
                         </tr>
                     }
