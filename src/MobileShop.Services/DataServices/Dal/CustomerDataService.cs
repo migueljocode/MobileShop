@@ -34,7 +34,8 @@ public class CustomerDataService(
                 customer.Id,
                 customer.PersonNavigation.FirstName + " " + customer.PersonNavigation.LastName,
                 customer.PersonNavigation.PhoneNumber,
-                customer.NationalId))
+                customer.NationalId,
+                customer.Transactions.Count(t => t.Direction == TransactionDirection.Sell && !t.IsDeleted)))
             .OrderBy(row => row.Name)
             .ToList();
 
@@ -45,7 +46,8 @@ public class CustomerDataService(
                 customer.Id,
                 customer.PersonNavigation.FirstName + " " + customer.PersonNavigation.LastName,
                 customer.PersonNavigation.PhoneNumber,
-                customer.NationalId)))
+                customer.NationalId,
+                customer.Transactions.Count(t => t.Direction == TransactionDirection.Sell && !t.IsDeleted))))
             .OrderBy(row => row.Name)
             .ToList();
 

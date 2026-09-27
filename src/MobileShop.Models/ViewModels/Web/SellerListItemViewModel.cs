@@ -5,4 +5,5 @@ public sealed record SellerListItemViewModel(
     int Id,
     string Name,
     string PhoneNumber,
-    string EntityType);
+    string EntityType,
+    int SoldCount);

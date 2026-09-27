@@ -34,7 +34,8 @@ public class SellerDataService(
                 seller.Id,
                 seller.PersonNavigation.FirstName + " " + seller.PersonNavigation.LastName,
                 seller.PersonNavigation.PhoneNumber,
-                seller.EntityType.ToString()))
+                seller.EntityType.ToString(),
+                seller.Transactions.Count(t => t.Direction == TransactionDirection.Buy && !t.IsDeleted)))
             .OrderBy(row => row.Name)
             .ToList();
 
@@ -45,7 +46,8 @@ public class SellerDataService(
                 seller.Id,
                 seller.PersonNavigation.FirstName + " " + seller.PersonNavigation.LastName,
                 seller.PersonNavigation.PhoneNumber,
-                seller.EntityType.ToString())))
+                seller.EntityType.ToString(),
+                seller.Transactions.Count(t => t.Direction == TransactionDirection.Buy && !t.IsDeleted))))
             .OrderBy(row => row.Name)
             .ToList();
 

@@ -5,4 +5,5 @@ public sealed record CustomerListItemViewModel(
     int Id,
     string Name,
     string PhoneNumber,
-    string NationalId);
+    string NationalId,
+    int PurchasedCount);

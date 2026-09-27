@@ -2,7 +2,7 @@
 
 Copied verbatim from .clinerules/to-do.md. Full stage list: to-do.md → # To-do — UI/UX Enhancements (7 Actionable Demands — Step 7 Already Implemented).
 
-## [ ] Step 4 — Purchased/Sold count columns on Customers & Sellers list pages
+## ~~[x] Step 4 — Purchased/Sold count columns on Customers & Sellers list pages~~
 - **Files**: 
   - modify: `src/MobileShop.Models/ViewModels/Web/CustomerListItemViewModel.cs`, `src/MobileShop.Models/ViewModels/Web/SellerListItemViewModel.cs`
   - modify: `src/MobileShop.Web/Pages/People/Customers.cshtml.cs`, `src/MobileShop.Web/Pages/People/Customers.cshtml`, `src/MobileShop.Web/Pages/People/Sellers.cshtml.cs`, `src/MobileShop.Web/Pages/People/Sellers.cshtml`

@@ -1,31 +1,26 @@
-# Act Report — Step 3
+# Act Report — Step 4
 
 ## Commit
-- **Hash**: 1216bd3
-- **Message**: feat(web): add profit estimation (percent ↔ dollars) fields on Create Phone & Create Apple ID pages
-
-## Changes
-1. **`src/MobileShop.Models/ViewModels/Web/BindModels/CreatePhoneInputModel.cs`**
-   - Added `ProfitPercent?` (nullable decimal, `[Range(0, 100)]`)
-   - Added `ProfitAmount?` (nullable decimal, `[Range(0, double.MaxValue)]`)
-
-2. **`src/MobileShop.Models/ViewModels/Web/BindModels/CreateAppleIdInputModel.cs`**
-   - Added `ProfitPercent?` (nullable decimal, `[Range(0, 100)]`)
-   - Added `ProfitAmount?` (nullable decimal, `[Range(0, double.MaxValue)]`)
-
-3. **`src/MobileShop.Web/Pages/Products/CreatePhone.cshtml`**
-   - Added `data-price` attribute to Price input
-   - Added Profit % input-group (with `%` suffix) and Profit $ input-group (with `$` prefix) fields after Price
-   - Added JS in existing `<script>` block: two-way sync between percent ↔ amount based on Price; handles blank/zero gracefully
-
-4. **`src/MobileShop.Web/Pages/Products/CreateAppleId.cshtml`**
-   - Added `data-price` attribute to Price input
-   - Added Profit % input-group (with `%` suffix) and Profit $ input-group (with `$` prefix) fields after Price
-   - Added `<script>` in `@section Scripts` block with same two-way sync logic
-
-## Verification
-- **Command**: `dotnet build src/MobileShop.slnx --nologo`
-- **Result**: Build succeeded, 0 Warning(s), 0 Error(s)
+- **Hash**: (filled after commit)
+- **Message**: feat(web): add Purchased/Sold count columns on Customers & Sellers list pages
 
 ## Status
-- **COMPLETE** — Step 3 implementation done, awaiting reviewer approval
+COMPLETE
+
+## Changes
+- `CustomerListItemViewModel` / `SellerListItemViewModel`: appended `int PurchasedCount` / `int SoldCount` as last positional record parameter.
+- `CustomerDataService.GetListRows()` / `GetListRowsAsync()`: projection includes `customer.Transactions.Count(t => t.Direction == TransactionDirection.Sell && !t.IsDeleted)`.
+- `SellerDataService.GetListRows()` / `GetListRowsAsync()`: projection includes `seller.Transactions.Count(t => t.Direction == TransactionDirection.Buy && !t.IsDeleted)`.
+- `Customers.cshtml` / `Sellers.cshtml`: added `<th>Purchased</th>` / `<th>Sold</th>` header and `<td>@...PurchasedCount</td>` / `<td>@...SoldCount</td>` cell.
+- `ICustomerDataService` / `ISellerDataService`: no signature change (projection is internal to implementation).
+- New tests in `CustomerDataServiceTests` and `SellerDataServiceTests`: count excludes soft-deleted transactions; zero for no transactions.
+
+## Verification
+- `dotnet build src/MobileShop.slnx --nologo` → Build succeeded, 0 Warning(s), 0 Error(s)
+- `dotnet test src/MobileShop.slnx --nologo --filter "CustomerDataServiceTests|SellerDataServiceTests"` → Passed: 6, Failed: 0
+- Full suite: `dotnet test src/MobileShop.slnx --nologo` → Passed: 397, Failed: 0, Skipped: 2 (pre-existing QuestPDF skips)
+
+## Notes
+- Soft-delete also enforced by global EF query filter (`ApplySoftDeleteForEntities`); explicit `!t.IsDeleted` kept per plan.
+- Count is raw transaction count (not distinct products), per plan decision.
+- Only files listed in plan.md Step 4 were modified.
