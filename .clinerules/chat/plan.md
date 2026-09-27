@@ -1,39 +1,35 @@
-# Plan — UI/UX Enhancements — Step 2 of 7
+# Plan — UI/UX Enhancements — Step 4 of 7
 
 Copied verbatim from .clinerules/to-do.md. Full stage list: to-do.md → # To-do — UI/UX Enhancements (7 Actionable Demands — Step 7 Already Implemented).
 
-## ~~[ ] Step 2 — Manufacturer & Model dropdowns with "Add New" on Create Phone page~~
+## [ ] Step 4 — Purchased/Sold count columns on Customers & Sellers list pages
 - **Files**: 
-  - inspect: `src/MobileShop.Dal/Repos/Interfaces/IManufacturerRepo.cs`, `IModelRepo.cs`, `BaseRepo.cs`
-  - modify: `src/MobileShop.Web/Pages/Products/CreatePhone.cshtml.cs`, `src/MobileShop.Web/Pages/Products/CreatePhone.cshtml`, `src/MobileShop.Models/ViewModels/Web/BindModels/CreatePhoneInputModel.cs`
-  - create: `src/MobileShop.Tests/Web/Pages/Products/CreatePhoneModelTests.cs` (mirrors `CreateAppleIdModelTests.cs`)
-  - do not touch: migrations
+  - modify: `src/MobileShop.Models/ViewModels/Web/CustomerListItemViewModel.cs`, `src/MobileShop.Models/ViewModels/Web/SellerListItemViewModel.cs`
+  - modify: `src/MobileShop.Web/Pages/People/Customers.cshtml.cs`, `src/MobileShop.Web/Pages/People/Customers.cshtml`, `src/MobileShop.Web/Pages/People/Sellers.cshtml.cs`, `src/MobileShop.Web/Pages/People/Sellers.cshtml`
+  - modify: `src/MobileShop.Services/DataServices/Dal/CustomerDataService.cs`, `src/MobileShop.Services/DataServices/Dal/SellerDataService.cs`
+  - modify: `src/MobileShop.Services/DataServices/Interfaces/ICustomerDataService.cs`, `src/MobileShop.Services/DataServices/Interfaces/ISellerDataService.cs`
 - **Symbols**: 
-  - `IManufacturerRepo` / `ManufacturerRepo` — reuse `FindAllAsync()` for all manufacturers
-  - `IModelRepo` / `ModelRepo` — add `GetByManufacturerAsync(int manufacturerId)` returning `IEnumerable<Model>`
-  - `ICategoryRepo` / `CategoryRepo` — inject to resolve "Phone" category by name server-side
-  - `CreatePhoneModel` — inject `IManufacturerRepo`, `IModelRepo`, `ICategoryRepo`; load manufacturers on GET; load models via AJAX on manufacturer change
-  - `CreatePhoneInputModel` — change `Manufacturer` from `string` to `int ManufacturerId`; change `Model` from `string` to `int ModelId`; add `[Required]` validation
-- **Current → Desired**: Text inputs → `<select>` dropdowns; "Add New" buttons open modals with POST handlers that create entities and return JSON for dropdown refresh.
+  - `CustomerListItemViewModel` — add `int PurchasedCount { get; init; }` as last parameter in positional record
+  - `SellerListItemViewModel` — add `int SoldCount { get; init; }` as last parameter in positional record
+  - `ICustomerDataService.GetListRowsAsync()` — project `PurchasedCount` via repo `SelectAll(c => new CustomerListItemViewModel(..., c.Transactions.Count(t => t.Direction == TransactionDirection.Sell && !t.IsDeleted)))` — no DbContext in service layer
+  - `ISellerDataService.GetListRowsAsync()` — project `SoldCount` via repo `SelectAll(s => new SellerListItemViewModel(..., s.Transactions.Count(t => t.Direction == TransactionDirection.Buy && !t.IsDeleted)))`
+  - `ICustomerDataService.GetListRows()` — same projection for sync method
+  - `ISellerDataService.GetListRows()` — same projection for sync method
+- **Current → Desired**: Tables show only Name/Phone/NationalId/Type → add count column with sortable header.
 - **Change**: 
-  1. Update `CreatePhoneInputModel`: `ManufacturerId` (required), `ModelId` (required), remove `Manufacturer`/`Model` strings.
-  2. In `CreatePhoneModel.OnGetAsync`: load all manufacturers into `Manufacturers` property (IEnumerable<Manufacturer>).
-  3. Add `OnGetModelsAsync(int manufacturerId)` handler returning `JsonResult` of models for that manufacturer (for cascading dropdown).
-  4. Add "Add Manufacturer" modal with form posting to `OnPostCreateManufacturerAsync(string name)` — creates Manufacturer via repo, returns JSON { id, name }.
-  5. Add "Add Model" modal with form posting to `OnPostCreateModelAsync(int manufacturerId, string name)` — resolves "Phone" category via `ICategoryRepo.FindAsync(c => c.Name == "Phone")`, creates Model via repo, returns JSON { id, name }. Category ID is NOT client-supplied.
-  6. In `OnPostAsync` (main form): look up manufacturer/model by ID via repo; if not found, add ModelState error.
-  7. On validation failure in `OnPostAsync`, repopulate `Manufacturers` and (if manufacturer selected) `Models` for the view.
+  1. Extend both VM records with count property appended last (no default value; all 4 call sites updated).
+  2. Update **both sync and async** service projections using repo `SelectAll` with navigation property count + `!t.IsDeleted` filter (soft-deleted transactions excluded).
+  3. **Count definition**: raw transaction count (not distinct products) — a customer buying same product twice shows 2. "Counts match detail pages" criterion dropped.
+  4. Update `.cshtml` tables: add `<th>Purchased</th>` / `<th>Sold</th>` and `<td>@customer.PurchasedCount</td>`.
 - **Edge cases**: 
-  - Manufacturer/Model not found → validation error on main form
-  - Cascading: when manufacturer changes, reset model dropdown via JS fetch to `OnGetModelsAsync`
-  - "Add New" modals must re-fetch dropdowns on success (fetch + DOM update)
-  - Category for new Model: resolved server-side by name "Phone" (seeded)
+  - Customers/Sellers with zero transactions → show 0
+  - Soft-deleted transactions excluded from count
+  - Performance: use `AsNoTracking` and server-side count projection; avoid client-side evaluation
 - **Tests**: 
-  - Create `CreatePhoneModelTests.cs` for dropdown population, cascading, and modal POST handlers
-  - Verify `OnPostAsync` with valid IDs creates phone correctly
-- **Verify**: `dotnet build src/MobileShop.slnx --nologo && dotnet test src/MobileShop.slnx --nologo --filter "CreatePhoneModelTests"`
-- **Done when**: Create Phone page shows dropdowns; changing manufacturer updates models; "Add New" modals create entities and refresh dropdowns; form submits with IDs.
-- **Risk**: HIGH | **Confidence**: MEDIUM
+  - Add new tests in `CustomerDataServiceTests` / `SellerDataServiceTests` to assert count column values (raw count, excludes soft-deleted)
+- **Verify**: `dotnet build src/MobileShop.slnx --nologo && dotnet test src/MobileShop.slnx --nologo --filter "CustomerDataServiceTests|SellerDataServiceTests"`
+- **Done when**: Both list pages display correct raw transaction counts; soft-deleted transactions excluded.
+- **Risk**: LOW | **Confidence**: HIGH
 
 ## Execution notes
 - Work fast: combine independent shell commands (`&&`).

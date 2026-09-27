@@ -12,6 +12,12 @@ public sealed class CreatePhoneInputModel
     [Range(0, double.MaxValue)]
     public decimal Price { get; set; }
 
+    [Range(0, 100)]
+    public decimal? ProfitPercent { get; set; }
+
+    [Range(0, double.MaxValue)]
+    public decimal? ProfitAmount { get; set; }
+
     [Required]
     [RegularExpression(@"^[0-9]{15}$", ErrorMessage = "IMEI must be exactly 15 digits.")]
     public string IMEI1 { get; set; } = string.Empty;

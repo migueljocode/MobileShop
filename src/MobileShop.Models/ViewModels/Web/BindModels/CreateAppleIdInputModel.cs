@@ -6,6 +6,12 @@ public sealed class CreateAppleIdInputModel
     [Range(0, double.MaxValue)]
     public decimal Price { get; set; }
 
+    [Range(0, 100)]
+    public decimal? ProfitPercent { get; set; }
+
+    [Range(0, double.MaxValue)]
+    public decimal? ProfitAmount { get; set; }
+
     [Required]
     [EmailAddress]
     public string Email { get; set; } = string.Empty;

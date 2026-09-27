@@ -13,63 +13,13 @@
 
 ---
 
-## [ ] Step 2 — Manufacturer & Model dropdowns with "Add New" on Create Phone page
-- **Files**: 
-  - inspect: `src/MobileShop.Dal/Repos/Interfaces/IManufacturerRepo.cs`, `IModelRepo.cs`, `BaseRepo.cs`
-  - modify: `src/MobileShop.Web/Pages/Products/CreatePhone.cshtml.cs`, `src/MobileShop.Web/Pages/Products/CreatePhone.cshtml`, `src/MobileShop.Models/ViewModels/Web/BindModels/CreatePhoneInputModel.cs`
-  - create: `src/MobileShop.Tests/Web/Pages/Products/CreatePhoneModelTests.cs` (mirrors `CreateAppleIdModelTests.cs`)
-  - do not touch: migrations
-- **Symbols**: 
-  - `IManufacturerRepo` / `ManufacturerRepo` — reuse `FindAllAsync()` for all manufacturers
-  - `IModelRepo` / `ModelRepo` — add `GetByManufacturerAsync(int manufacturerId)` returning `IEnumerable<Model>`
-  - `ICategoryRepo` / `CategoryRepo` — inject to resolve "Phone" category by name server-side
-  - `CreatePhoneModel` — inject `IManufacturerRepo`, `IModelRepo`, `ICategoryRepo`; load manufacturers on GET; load models via AJAX on manufacturer change
-  - `CreatePhoneInputModel` — change `Manufacturer` from `string` to `int ManufacturerId`; change `Model` from `string` to `int ModelId`; add `[Required]` validation
-- **Current → Desired**: Text inputs → `<select>` dropdowns; "Add New" buttons open modals with POST handlers that create entities and return JSON for dropdown refresh.
-- **Change**: 
-  1. Update `CreatePhoneInputModel`: `ManufacturerId` (required), `ModelId` (required), remove `Manufacturer`/`Model` strings.
-  2. In `CreatePhoneModel.OnGetAsync`: load all manufacturers into `Manufacturers` property (IEnumerable<Manufacturer>).
-  3. Add `OnGetModelsAsync(int manufacturerId)` handler returning `JsonResult` of models for that manufacturer (for cascading dropdown).
-  4. Add "Add Manufacturer" modal with form posting to `OnPostCreateManufacturerAsync(string name)` — creates Manufacturer via repo, returns JSON { id, name }.
-  5. Add "Add Model" modal with form posting to `OnPostCreateModelAsync(int manufacturerId, string name)` — resolves "Phone" category via `ICategoryRepo.FindAsync(c => c.Name == "Phone")`, creates Model via repo, returns JSON { id, name }. Category ID is NOT client-supplied.
-  6. In `OnPostAsync` (main form): look up manufacturer/model by ID via repo; if not found, add ModelState error.
-  7. On validation failure in `OnPostAsync`, repopulate `Manufacturers` and (if manufacturer selected) `Models` for the view.
-- **Edge cases**: 
-  - Manufacturer/Model not found → validation error on main form
-  - Cascading: when manufacturer changes, reset model dropdown via JS fetch to `OnGetModelsAsync`
-  - "Add New" modals must re-fetch dropdowns on success (fetch + DOM update)
-  - Category for new Model: resolved server-side by name "Phone" (seeded)
-- **Tests**: 
-  - Create `CreatePhoneModelTests.cs` for dropdown population, cascading, and modal POST handlers
-  - Verify `OnPostAsync` with valid IDs creates phone correctly
-- **Verify**: `dotnet build src/MobileShop.slnx --nologo && dotnet test src/MobileShop.slnx --nologo --filter "CreatePhoneModelTests"`
-- **Done when**: Create Phone page shows dropdowns; changing manufacturer updates models; "Add New" modals create entities and refresh dropdowns; form submits with IDs.
-- **Risk**: HIGH | **Confidence**: MEDIUM
+## ~~[x] Step 2 — Manufacturer & Model dropdowns with "Add New" on Create Phone page~~
+     Verified: `dotnet build src/MobileShop.slnx --nologo && dotnet test src/MobileShop.slnx --nologo --filter "CreatePhoneModelTests"` → Build succeeded, 0 Warning(s), 0 Error(s); 9 passed, 0 failed. Committed as `feat(web): manufacturer & model dropdowns with add-new modals on Create Phone page`
 
 ---
 
-## [ ] Step 3 — Profit estimation (percent ↔ dollars) on Create Phone & Create Apple ID
-- **Files**: 
-  - modify: `src/MobileShop.Models/ViewModels/Web/BindModels/CreatePhoneInputModel.cs`, `src/MobileShop.Models/ViewModels/Web/BindModels/CreateAppleIdInputModel.cs`
-  - modify: `src/MobileShop.Web/Pages/Products/CreatePhone.cshtml`, `src/MobileShop.Web/Pages/Products/CreateAppleId.cshtml`
-  - do not touch: services, repos
-- **Symbols**: 
-  - `CreatePhoneInputModel` / `CreateAppleIdInputModel` — add `ProfitPercent?` (nullable decimal, `[Range(0, 100)]`) and `ProfitAmount?` (nullable decimal, `[Range(0, double.MaxValue)]`) properties
-  - Both pages — add JS to sync: `ProfitAmount = Price * ProfitPercent / 100` and vice versa
-- **Current → Desired**: Only `Price` field → add two linked fields near Price; user enters either % or $, the other updates live.
-- **Change**: 
-  1. Add nullable `ProfitPercent` and `ProfitAmount` with `[Range]` attributes to both input models (nullable so blank is valid).
-  2. In both `.cshtml`: render both fields in an `input-group` with `%` and currency symbols; add `data-price`, `data-percent`, `data-amount` for JS binding.
-  3. Add inline `<script>` that listens `input` on either field, reads `Price`, computes the other, updates it. Handle blank/zero gracefully.
-  4. On submit, both values are posted; server ignores them (not persisted).
-- **Edge cases**: 
-  - Price = 0 or blank → percent/amount show blank
-  - User clears one field → other clears
-  - Validation: fields are optional; no server-side cross-check required
-- **Tests**: None new (UI-only). Verify manually.
-- **Verify**: `dotnet build src/MobileShop.slnx --nologo`
-- **Done when**: Both Create pages show linked Profit % / $ fields that auto-calculate; blank fields allowed.
-- **Risk**: MEDIUM | **Confidence**: MEDIUM
+## ~~[x] Step 3 — Profit estimation (percent ↔ dollars) on Create Phone & Create Apple ID~~
+     Verified: `dotnet build src/MobileShop.slnx --nologo` → Build succeeded, 0 Warning(s), 0 Error(s). Committed as `feat(web): add profit estimation (percent ↔ dollars) fields on Create Phone & Create Apple ID pages`
 
 ---
 
