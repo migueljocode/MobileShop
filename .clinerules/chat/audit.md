@@ -14,5 +14,11 @@ Accepted deviation: the plan's "Api stub classes need no edit" was wrong — bot
 
 Bookkeeping done in this pass: `to-do.md` Step 5 struck through with its instruction block trimmed to a single completion note; `plan.md` overwritten with Step 6 only.
 
+## Post-verdict plan correction (Step 6)
+While reading ahead, I found Step 6's instruction text contradicted itself in three places, and corrected it in both `to-do.md` and `plan.md` (kept byte-identical, verified with `diff`):
+1. The note "loss case already correct order" was **factually wrong** — `Loss_ReturnsThreeRowsWithEmployeesZeroShopGetsFullLoss` (tests lines ~119-125) asserts the same insertion order as the rest and must be re-indexed. All **four** test methods now named explicitly; the count of "four" referred to methods, while the five bullets were assertion groups (Blocks 1 and 2 sit inside the first method).
+2. `Calculate()` has **two** `return rows;` statements (~line 100 loss/zero branch, ~line 133 profit path). The step now requires a single exit point, otherwise the sort can be applied to only one path.
+3. The sign expression `@(Model.TotalProfit >= 0 ? "+" : "")` contradicted the stated edge case (zero should render `0`), so the sign condition is now `> 0` while the color condition stays `>= 0`.
+
 ## Next
 ## [ ] Step 6 — Reports page: Total Profit sign/color + Distribution sort by Share%
