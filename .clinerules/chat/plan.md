@@ -1,36 +1,38 @@
-# Plan — UI/UX Enhancements — Step 5 of 7
+# Plan — UI/UX Enhancements — Step 6 of 7
 
 Copied verbatim from .clinerules/to-do.md. Full stage list: to-do.md → # To-do — UI/UX Enhancements (7 Actionable Demands — Step 7 Already Implemented).
 
-## ~~[x] Step 5 — Sorting on Customers & Sellers pages (Name, Phone, Count)~~
+## [ ] Step 6 — Reports page: Total Profit sign/color + Distribution sort by Share%
 - **Files**: 
-  - modify: `src/MobileShop.Web/Pages/People/Customers.cshtml.cs`, `src/MobileShop.Web/Pages/People/Customers.cshtml`, `src/MobileShop.Web/Pages/People/Sellers.cshtml.cs`, `src/MobileShop.Web/Pages/People/Sellers.cshtml`
-  - modify: `src/MobileShop.Services/DataServices/Interfaces/ICustomerDataService.cs`, `src/MobileShop.Services/DataServices/Interfaces/ISellerDataService.cs`
-  - modify: `src/MobileShop.Services/DataServices/Dal/CustomerDataService.cs`, `src/MobileShop.Services/DataServices/Dal/SellerDataService.cs`
-  - create: `src/MobileShop.Tests/Web/Pages/People/CustomersModelTests.cs`, `src/MobileShop.Tests/Web/Pages/People/SellersModelTests.cs` (mirror `IndexModelTests.cs` pattern)
-  - do not touch: `ApiCustomerDataService.cs`, `ApiSellerDataService.cs` (they inherit default interface implementation; no edit needed)
+  - modify: `src/MobileShop.Web/Pages/Reports/ProfitLoss.cshtml`
+  - modify: `src/MobileShop.Services/Logging/Settings/DistributionSettings.cs` (DistributionCalculator)
+  - modify: `src/MobileShop.Tests/Services/Logging/DistributionCalculatorTests.cs`
 - **Symbols**: 
-  - Add `sortBy` (string: "Name", "Phone", "Count") and `ascending` (bool = true default) parameters to `GetListRowsAsync` and page `OnGetAsync`
-  - PageModel: bind `[FromQuery] string sortBy`, `bool ascending = true`; default `Name`, `true` (so omitted `ascending` param = ascending)
-  - Razor: make column headers `<a>` with toggled sort dir; preserve other query params via `asp-route-*`
-- **Current → Desired**: Static tables → clickable column headers that toggle asc/desc; URL reflects sort state.
+  - `ProfitLoss.cshtml` line 80 & 91: `@Model.TotalProfit.ToString("N0")` → add sign and conditional class
+  - `DistributionCalculator.Calculate()` — already returns List<DistributionRow>; ensure it's ordered by `SharePercent desc`, then `EmployeeName`
+  - `DistributionCalculatorTests` — four test blocks currently expect insertion order (Mikaeeil→Anis→Shop). Must re-index to descending Share%: Anis (50%), Mikaeeil (40%), Shop (10%).
+- **Current → Desired**: 
+  - Total Profit shows `+1,234` (green) or `-567` (red) with explicit sign
+  - Distribution table rows ordered: highest Share% first (Anis 50%, Mikaeeil 40%, Shop 10%)
 - **Change**: 
-  1. Extend service interface: `Task<IReadOnlyList<CustomerListItemViewModel>> GetListRowsAsync(string sortBy, bool ascending = true)`
-  2. Implement ordering in `CustomerDataService`/`SellerDataService` using `OrderBy`/`OrderByDescending` on projected VM properties.
-  3. `ICustomerDataService.cs:15` / `ISellerDataService.cs:15` default bodies keep throwing `NotImplementedException` with the new parameter list; the Api stub classes need no edit.
-  4. PageModel `OnGetAsync` accepts sort params with `ascending = true` default, passes to service, stores current sort for View.
-  5. Razor: `<th><a asp-route-sortBy="Name" asp-route-ascending="@(Model.SortBy=="Name" && Model.Ascending ? "false" : "true")">Name</a></th>` etc. (lowercase "true"/"false" for clean URLs).
+  1. In `ProfitLoss.cshtml`: wrap TotalProfit in `<span class="@(Model.TotalProfit >= 0 ? "text-success" : "text-danger")">@(Model.TotalProfit >= 0 ? "+" : "")@Model.TotalProfit.ToString("N0")</span>`
+  2. In `DistributionCalculator.Calculate()`: after building `rows`, add `.OrderByDescending(r => r.SharePercent).ThenBy(r => r.EmployeeName).ToList()` before return.
+  3. In `DistributionCalculatorTests.cs`: update **four** test blocks to Anis→Mikaeeil→Shop order with correct amounts:
+     - **Block 1 (lines ~46-53)**: `Profit_ReturnsExactlyThreeRowsWithFixedSharesAndFloorRounding` — names. Re-index `rows[0].EmployeeName == "Anis Sahabi"`, `rows[1] == "Mikaeeil Jorjany"`, `rows[2] == "Shop"`; shares 50/40/10.
+     - **Block 2 (lines ~57-59)**: same test — amounts for `Calculate(101m, …)`. Re-index `rows[0].CalculatedAmount == 50m` (Anis), `rows[1] == 40m` (Mikaeeil), `rows[2] == 11m` (Shop). **Shop = 11m**, not 10m.
+     - **Block 3 (lines ~80-82)**: `Profit_SharePercentAlways40_50_10EvenWhenEmployeesHaveDifferentShares` (100m) — **SharePercent** assertions. Re-index `rows[0].SharePercent == 50` (Anis), `rows[1] == 40` (Mikaeeil), `rows[2] == 10` (Shop). Line 83 (`Sum == 100m`) needs no change.
+     - **Block 4 (lines ~95-101)**: zero-profit case — names/shares re-indexed to Anis/Mikaeeil/Shop (50/40/10), amounts all 0m.
+     - **Block 5 (lines ~119-125)**: loss case — names/shares re-indexed to Anis/Mikaeeil/Shop (50/40/10), amounts: Anis 0, Mikaeeil 0, Shop = totalProfit (the loss).
+     - Blocks at lines ~62 (sum check) and ~128-130 (loss case already correct order) — **no change needed**.
 - **Edge cases**: 
-  - Invalid sortBy → default to Name
-  - Omitted `ascending` query param binds to `false` in ASP.NET; handler default `ascending = true` ensures ascending is the effective default.
-  - Preserve sort across pagination (none yet) and filter (none yet)
+  - TotalProfit = 0 → show `0` (no sign, default color)
+  - Distribution rows with equal Share% → stable order by EmployeeName
 - **Tests**: 
-  - Create `CustomersModelTests.cs` / `SellersModelTests.cs` for sort param binding and header links
-  - Service tests for ordering
-- **Verify**: `dotnet build src/MobileShop.slnx --nologo && dotnet test src/MobileShop.slnx --nologo --filter "CustomerDataServiceTests|SellerDataServiceTests|CustomersModelTests|SellersModelTests"`
-- **Done when**: Clicking Name/Phone/Count headers sorts table; URL updates; direction toggles; API stubs compile; new web tests pass.
-- **Risk**: MEDIUM | **Confidence**: MEDIUM
-
+  - `DistributionCalculatorTests` must pass with updated assertions
+  - Manual visual check
+- **Verify**: `dotnet build src/MobileShop.slnx --nologo && dotnet test src/MobileShop.slnx --nologo --filter "DistributionCalculatorTests"`
+- **Done when**: Total Profit shows sign/color; Distribution tab lists Anis → Mikaeeil → Shop; all tests pass.
+- **Risk**: LOW | **Confidence**: HIGH
 
 ## Execution notes
 - Work fast: combine independent shell commands (`&&`).

@@ -1,22 +1,18 @@
-# Execution Check (Job B) — Step 1
+# Audit — Step 5 (Execution Check)
 
 ## PASS
 
-Verified the change is exactly what the step asked for: one insertion in `src/MobileShop.Web/Pages/Products/Details.cshtml`, inside the existing `@if (Model.Product is not null)` guard and above the `<h1>`:
+Commit `3de5feb` implements exactly what plan.md Step 5 asked, and the step's verification genuinely passes — not just a green build.
 
-```razor
-<a asp-page="/Products/Index" asp-route-type="@(Model.Product.Type == "Apple ID" ? "appleid" : "phone")" class="btn btn-outline-secondary mb-3">Back to Products</a>
-```
+Verified against the diff: `ICustomerDataService` / `ISellerDataService` take `sortBy = "Name", bool ascending = true`; both DAL services order via a `(sortBy, ascending)` tuple switch covering `Phone`, `Count` and default `Name`, with invalid values falling back to `Name`; `CustomersModel` / `SellersModel` expose `SortBy` / `Ascending` and pass the params through; both `.cshtml` headers are `asp-route-sortBy` / `asp-route-ascending` toggles that flip direction for the active column.
 
-Explicit ternary, no `.ToLower()`; the tag helper renders `/Products/Index?type=appleid` / `?type=phone`, which `IndexModel.OnGetAsync` matches. `git diff --stat` confirms no other source file was touched, so no scope creep.
+The tests actually prove the behavior: `GetListRows_sorts_by_name_phone_and_count_in_both_directions` asserts concrete orderings for Name/Phone/Count × asc/desc, the invalid-key fallback, and sync/async parity; the new `CustomersModelTests` / `SellersModelTests` cover the default (`Name`, `true`), explicit passthrough, and the omitted-`ascending` default.
 
-Verification re-run by the reviewer rather than trusted from act.md: `dotnet build src/MobileShop.slnx --nologo` → Build succeeded, 0 Warning(s), 0 Error(s).
+Re-run by the reviewer rather than trusted from act.md: `dotnet build src/MobileShop.slnx --nologo` → 0 Warning(s), 0 Error(s); `dotnet test src/MobileShop.slnx --nologo --filter "CustomerDataServiceTests|SellerDataServiceTests|CustomersModelTests|SellersModelTests"` → 14 passed, 0 failed; full `dotnet test src/MobileShop.slnx --nologo` → 405 passed, 0 failed, 2 skipped (pre-existing QuestPDF skips). Working tree clean, commit message follows Conventional Commits and names the step, no scope creep.
 
-Template compliance: `plan.md` had been reduced to exactly one step with its header struck, and `to-do.md` held the whole stage with the Step 1 block byte-identical to plan.md's.
+Accepted deviation: the plan's "Api stub classes need no edit" was wrong — both stubs explicitly implement the **sync** `GetListRows`, so the new signature forced a one-line fix (CS0535). Behavior is unchanged (still `NotImplementedException`) and the actor reported the friction. The plan scoped only the async method while the sync one was extended too; that preserves sync/async parity, is source-compatible, and all call sites were updated. Recorded in the Step 5 completion note.
 
-No commit existed when this check started — `act.md` left the hash "pending" instead of committing as `actor.md` requires. Per the owner's decision (option A) the reviewer made the commit in this same pass. The owner also asked that everything outstanding be committed with `git add -A`, so the unrelated `docs/to-do.md` / `docs/user-demands.txt` deletions and the new `.clinerules/` tree are included in that commit — an explicit owner override of general-rules rule 15.
-
-Bookkeeping done in this pass: `to-do.md` Step 1 struck through with its instruction block trimmed to a single completion note; `plan.md` overwritten with Step 2 only.
+Bookkeeping done in this pass: `to-do.md` Step 5 struck through with its instruction block trimmed to a single completion note; `plan.md` overwritten with Step 6 only.
 
 ## Next
-## [ ] Step 2 — Manufacturer & Model dropdowns with "Add New" on Create Phone page
+## [ ] Step 6 — Reports page: Total Profit sign/color + Distribution sort by Share%
