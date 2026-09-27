@@ -1,7 +1,7 @@
 # Act Report — Step 6: Reports page Total Profit sign/color + Distribution sort
 
 ## Commit
-- **Hash**: pending (recorded in follow-up)
+- **Hash**: 2340390
 - **Message**: feat(web): show signed Total Profit and sort Distribution rows by Share%
 
 ## Status
