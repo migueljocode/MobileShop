@@ -1,9 +1,10 @@
 # MobileShop execution checklist
 
 This file is the authoritative instruction and work-order file for future
-development tasks. Completed stages and task entries have been cleared at the
-repository owner's request. No tasks are currently pending; add new tasks here
-when requested, preserving the instructions and notes below.
+development tasks. `.clinerules/to-do.md` is the master checklist holding every
+stage; `.clinerules/chat/plan.md` is the working file holding only the single
+step act mode is working on. Add new work to `to-do.md` when requested,
+preserving the instructions and notes below.
 
 ## Strict rules for the agent
 
@@ -44,11 +45,17 @@ when requested, preserving the instructions and notes below.
    missing data explicitly.
 10. Do not remove checklist items or completion evidence during ordinary work.
     Cleanup/reset is allowed only when the repository owner explicitly requests
-    it. Add future work to the appropriate section.
-11. Mark a task complete only after implementation and validation pass. Change
-    `- [ ]` to `- [x]`, wrap the complete task text in Markdown strikethrough,
-    and add an indented completion note listing changed files, validation, and
-    intentional limitations.
+    it. Add future work to the appropriate section. Trimming a completed step's
+    instruction block down to its struck-through title plus completion note
+    (rule 11) is the expected outcome, not a violation.
+11. Mark a task complete only after implementation and validation pass. The
+    actor wraps its step header in `plan.md` (which holds only the one step
+    being worked on) in strikethrough at commit time; the reviewer wraps the
+    same step in `.clinerules/to-do.md` (the master checklist that keeps every
+    stage) in strikethrough only after the execution check passes, trimming that
+    step's instruction block to the struck-through title plus an indented
+    completion note listing the commit, the validation command and its result,
+    and any intentional limitations. That completion note is never removed.
 12. Never check a parent task while an acceptance criterion or dependent task
     remains unfinished. Do not mark work complete merely because it compiles or
     a UI control renders; verify the requested behavior.
@@ -96,8 +103,8 @@ when requested, preserving the instructions and notes below.
   rather than introducing another PDF mechanism.
 - Tests use xUnit and EF Core InMemory. Prefer focused tests under
   `src/MobileShop.Tests` before running the full suite.
-
-## Current status
-
-No pending tasks. Add new requested work below this heading, with its
-requirements and acceptance criteria.
+- The working files live under `.clinerules/chat/`: `plan.md` (only the single
+  step act mode is working on — the actor strikes through its header on commit),
+  `act.md` (the actor's per-step report), and `audit.md` (the reviewer's
+  verdict). `.clinerules/to-do.md` is the master checklist holding every stage;
+  the reviewer ticks and trims each verified step there.
