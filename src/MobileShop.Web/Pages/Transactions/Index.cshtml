@@ -36,7 +36,7 @@
             <a class="btn btn-primary" asp-page="/Transactions/Buy">Record Buy</a>
             <a class="btn btn-dark" asp-page="/Transactions/Sell">Record Sell</a>
             <button type="submit" class="btn btn-outline-primary">Apply filters</button>
-            <button type="submit" asp-page-handler="DownloadFactor" class="btn btn-primary">Download Factor (PDF)</button>
+            <button type="submit" name="handler" value="DownloadFactor" class="btn btn-primary">Download Factor (PDF)</button>
         </p>
 
         @if (Model.Transactions.Count == 0)

@@ -51,6 +51,12 @@ factor's native-print-only behavior with a direct PDF download.
     “Back to transactions” explicitly to `/Transactions`.
   - Validation: Re-rendered links have working URLs; the Index and Details pages
     return HTTP 200; selected-row download returns a valid PDF attachment.
+  - Bulk-button correction: The GET form button now submits `handler=DownloadFactor`
+    as a successful form field instead of placing it only in `formaction`'s query.
+    Browsers replace a GET form action's query string with serialized form fields,
+    which previously dropped the handler and redisplayed the list. Verified the
+    rendered button and a request containing both `selectedIds=26` and
+    `selectedIds=25`; the response is a PDF attachment containing two records.
 
   ### Implementation requirements
 
