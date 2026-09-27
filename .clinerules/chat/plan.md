@@ -2,7 +2,7 @@
 
 Copied verbatim from .clinerules/to-do.md. Full stage list: to-do.md → # To-do — UI/UX Enhancements (7 Actionable Demands — Step 7 Already Implemented).
 
-## [ ] Step 8 — Sticky/fixed navbar on scroll
+## ~~[x] Step 8 — Sticky/fixed navbar on scroll~~
 - **Files**: 
   - modify: `src/MobileShop.Web/Pages/Shared/_Layout.cshtml`
   - modify: `src/MobileShop.Web/wwwroot/css/site.css`
