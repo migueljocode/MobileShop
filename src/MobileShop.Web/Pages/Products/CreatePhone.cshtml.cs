@@ -9,11 +9,63 @@ public class CreatePhoneModel(
 {
     [BindProperty] public CreatePhoneInputModel Input { get; set; } = new();
     public string? Message { get; private set; }
+    public IEnumerable<Manufacturer> Manufacturers { get; private set; } = [];
+    public IEnumerable<Model> Models { get; private set; } = [];
+
+    public async Task OnGetAsync()
+    {
+        Manufacturers = await manufacturerRepo.FindAllAsync();
+    }
+
+    public async Task<IActionResult> OnGetModelsAsync(int manufacturerId)
+    {
+        var models = await modelRepo.GetByManufacturerAsync(manufacturerId);
+        return new JsonResult(models.Select(m => new { m.Id, m.Name }));
+    }
+
+    public async Task<IActionResult> OnPostCreateManufacturerAsync(string name)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+            return new JsonResult(new { error = "Name is required." }) { StatusCode = 400 };
+
+        var trimmed = name.Trim();
+        var existing = await manufacturerRepo.FindAsync(m => m.Name == trimmed);
+        if (existing is not null)
+            return new JsonResult(new { id = existing.Id, name = existing.Name });
+
+        var manufacturer = new Manufacturer { Name = trimmed };
+        await manufacturerRepo.AddAsync(manufacturer);
+        return new JsonResult(new { id = manufacturer.Id, name = manufacturer.Name });
+    }
+
+    public async Task<IActionResult> OnPostCreateModelAsync(int manufacturerId, string name)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+            return new JsonResult(new { error = "Name is required." }) { StatusCode = 400 };
+
+        var manufacturer = await manufacturerRepo.FindAsync(manufacturerId);
+        if (manufacturer is null)
+            return new JsonResult(new { error = "Manufacturer not found." }) { StatusCode = 404 };
+
+        var category = await categoryRepo.FindAsync(c => c.Name == "Phone")
+            ?? throw new InvalidOperationException("The 'Phone' category is missing from the catalog seed data.");
+
+        var trimmed = name.Trim();
+        var existing = await modelRepo.FindAsync(m =>
+            m.ManufacturerId == manufacturerId && m.Name == trimmed && m.CategoryId == category.Id);
+        if (existing is not null)
+            return new JsonResult(new { id = existing.Id, name = existing.Name });
+
+        var model = new Model { ManufacturerId = manufacturerId, CategoryId = category.Id, Name = trimmed };
+        await modelRepo.AddAsync(model);
+        return new JsonResult(new { id = model.Id, name = model.Name });
+    }
 
     public async Task<IActionResult> OnPostAsync()
     {
         if (!ModelState.IsValid)
         {
+            await PopulateDropdownsAsync();
             return Page();
         }
 
@@ -21,20 +73,25 @@ public class CreatePhoneModel(
         if (await phoneDataService.ImeiExistsAsync(imei1))
         {
             ModelState.AddModelError(nameof(Input.IMEI1), "A phone with this IMEI already exists.");
+            await PopulateDropdownsAsync();
             return Page();
         }
 
-        // the catalog categories come from the seed data - never created here
-        var category = await categoryRepo.FindAsync(c => c.Name == "Phone")
-            ?? throw new InvalidOperationException("The 'Phone' category is missing from the catalog seed data.");
+        var manufacturer = await manufacturerRepo.FindAsync(Input.ManufacturerId);
+        if (manufacturer is null)
+        {
+            ModelState.AddModelError(nameof(Input.ManufacturerId), "Selected manufacturer not found.");
+            await PopulateDropdownsAsync();
+            return Page();
+        }
 
-        var manufacturerName = Input.Manufacturer.Trim();
-        var manufacturer = await manufacturerRepo.FindAsync(m => m.Name == manufacturerName)
-            ?? await AddManufacturerAsync(manufacturerName);
-
-        var modelName = Input.Model.Trim();
-        var model = await modelRepo.FindAsync(m => m.ManufacturerId == manufacturer.Id && m.Name == modelName)
-            ?? await AddModelAsync(manufacturer.Id, category.Id, modelName);
+        var model = await modelRepo.FindAsync(Input.ModelId);
+        if (model is null || model.ManufacturerId != manufacturer.Id)
+        {
+            ModelState.AddModelError(nameof(Input.ModelId), "Selected model not found for this manufacturer.");
+            await PopulateDropdownsAsync();
+            return Page();
+        }
 
         var colorName = Input.Color?.Trim();
         var color = string.IsNullOrWhiteSpace(colorName)
@@ -72,24 +129,18 @@ public class CreatePhoneModel(
         if (!ok)
         {
             Message = "The phone could not be saved. Check the details and try again.";
+            await PopulateDropdownsAsync();
             return Page();
         }
 
         return RedirectToPage("/Products/Details", new { id = phone.Id, type = "phone" });
     }
 
-    private async Task<Manufacturer> AddManufacturerAsync(string name)
+    private async Task PopulateDropdownsAsync()
     {
-        var manufacturer = new Manufacturer { Name = name };
-        await manufacturerRepo.AddAsync(manufacturer);
-        return manufacturer;
-    }
-
-    private async Task<Model> AddModelAsync(int manufacturerId, int categoryId, string name)
-    {
-        var model = new Model { ManufacturerId = manufacturerId, CategoryId = categoryId, Name = name };
-        await modelRepo.AddAsync(model);
-        return model;
+        Manufacturers = await manufacturerRepo.FindAllAsync();
+        if (Input.ManufacturerId > 0)
+            Models = await modelRepo.GetByManufacturerAsync(Input.ManufacturerId);
     }
 
     private async Task<Color> AddColorAsync(string name)

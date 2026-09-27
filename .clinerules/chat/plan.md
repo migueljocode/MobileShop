@@ -2,7 +2,7 @@
 
 Copied verbatim from .clinerules/to-do.md. Full stage list: to-do.md → # To-do — UI/UX Enhancements (7 Actionable Demands — Step 7 Already Implemented).
 
-## [ ] Step 2 — Manufacturer & Model dropdowns with "Add New" on Create Phone page
+## ~~[ ] Step 2 — Manufacturer & Model dropdowns with "Add New" on Create Phone page~~
 - **Files**: 
   - inspect: `src/MobileShop.Dal/Repos/Interfaces/IManufacturerRepo.cs`, `IModelRepo.cs`, `BaseRepo.cs`
   - modify: `src/MobileShop.Web/Pages/Products/CreatePhone.cshtml.cs`, `src/MobileShop.Web/Pages/Products/CreatePhone.cshtml`, `src/MobileShop.Models/ViewModels/Web/BindModels/CreatePhoneInputModel.cs`

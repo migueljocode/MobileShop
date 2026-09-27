@@ -4,12 +4,10 @@ namespace MobileShop.Models.ViewModels.Web.BindModels;
 public sealed class CreatePhoneInputModel
 {
     [Required]
-    [StringLength(100)]
-    public string Manufacturer { get; set; } = string.Empty;
+    public int ManufacturerId { get; set; }
 
     [Required]
-    [StringLength(100)]
-    public string Model { get; set; } = string.Empty;
+    public int ModelId { get; set; }
 
     [Range(0, double.MaxValue)]
     public decimal Price { get; set; }
