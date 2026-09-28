@@ -146,6 +146,41 @@ public class ProfitLossTests
     }
 
     [Fact]
+    public async Task Automatic_All_preset_resolves_from_earliest_transaction_through_today()
+    {
+        var mock = new Mock<ITransactionDataService>();
+        SetupProfitLossMocks(mock);
+        var earliest = new DateTime(2018, 4, 12);
+        mock.Setup(s => s.GetEarliestTransactionDateAsync())
+            .ReturnsAsync(earliest);
+        var model = CreateModel(mock);
+        model.Mode = DateRangeMode.Automatic;
+        model.Preset = AutomaticPreset.All;
+
+        await model.OnGetAsync();
+
+        Assert.Equal(earliest, model.EffectiveFrom);
+        Assert.Equal(DateTime.Today, model.EffectiveTo);
+    }
+
+    [Fact]
+    public async Task Automatic_All_preset_uses_today_when_no_transactions_exist()
+    {
+        var mock = new Mock<ITransactionDataService>();
+        SetupProfitLossMocks(mock);
+        mock.Setup(s => s.GetEarliestTransactionDateAsync())
+            .ReturnsAsync((DateTime?)null);
+        var model = CreateModel(mock);
+        model.Mode = DateRangeMode.Automatic;
+        model.Preset = AutomaticPreset.All;
+
+        await model.OnGetAsync();
+
+        Assert.Equal(DateTime.Today, model.EffectiveFrom);
+        Assert.Equal(DateTime.Today, model.EffectiveTo);
+    }
+
+    [Fact]
     public async Task Default_mode_is_Automatic_and_preset_is_Month()
     {
         var mock = new Mock<ITransactionDataService>();

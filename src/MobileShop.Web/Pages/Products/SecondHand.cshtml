@@ -34,7 +34,7 @@ else
                     <td>@product.Type</td>
                     <td>@product.Name</td>
                     <td>@product.Identifier</td>
-                    <td>@(product.Color ?? "—")</td>
+                    <td>@(string.IsNullOrWhiteSpace(product.Color) ? "N/A" : product.Color)</td>
                     <td>
                         <span class="badge @(product.IsSold ? "text-bg-secondary" : "text-bg-success")">@(product.IsSold ? "Sold" : "Available")</span>
                         <span class="badge text-bg-warning ms-1">Second-hand</span>

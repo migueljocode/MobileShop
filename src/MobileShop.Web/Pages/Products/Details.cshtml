@@ -11,7 +11,7 @@
     <p><strong>Type:</strong> @Model.Product.Type</p>
     <dl class="row">
         <dt class="col-sm-3">Identifier</dt><dd class="col-sm-9">@Model.Product.Identifier</dd>
-        <dt class="col-sm-3">Color</dt><dd class="col-sm-9">@(Model.Product.Color ?? "—")</dd>
+        <dt class="col-sm-3">Color</dt><dd class="col-sm-9">@(string.IsNullOrWhiteSpace(Model.Product.Color) ? "N/A" : Model.Product.Color)</dd>
         <dt class="col-sm-3">Owner</dt><dd class="col-sm-9">@Model.Product.OwnerLabel</dd>
         <dt class="col-sm-3">Second-hand</dt><dd class="col-sm-9">@(Model.Product.IsSecondHand ? "Yes" : "No")</dd>
         <dt class="col-sm-3">Guarantee</dt><dd class="col-sm-9">@Model.Product.GuaranteeLabel</dd>

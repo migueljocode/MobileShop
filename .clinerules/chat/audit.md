@@ -1,66 +1,137 @@
-# Audit — Job B (Execution Check + Stage Sign-off): Task 3 — Manual Date Range mode
+# Audit — Job A (Plan Review): Tasks 4+5 combined — Color + Corporation dropdowns
 
-**Reviewed**: `.clinerules/chat/act.md` (plan round 4, Step 2) + commits `cf34904`, `87f3c68`
-**Checklist source**: `.clinerules/to-do.md` — Task 3
-**Supersedes**: the Job A plan review previously held in this file
+**Reviewed**: `.clinerules/chat/plan.md` (Tasks 4+5 combined, Step 1 Task 4 / Step 2 Task 5)
+**Checklist source**: `.clinerules/to-do.md` — Task 4, Task 5
+**Supersedes**: prior Task-4-only APPROVED verdict below + planner handoff (that plan is replaced by this combined plan; re-review starts fresh)
 
 ## Verdict
 
-**PASS** — stage signed off.
+**APPROVED WITH CORRECTIONS** — one HIGH finding below is narrow (a wrong repo-API call the actor cannot invent around). Fix it in plan.md, then execute without another review round.
 
-## Execution check
-
-- **Scope**: `cf34904` touches exactly two files — `ProfitLoss.cshtml` (one 2-line hunk) and `plan.md`.
-  `87f3c68` touches `act.md` + the `plan.md` tick. No scope creep; no API, DAL, services, repo,
-  `DatabaseInitializer`, or other-page changes.
-- **Diff matches the plan**: both inputs lost `asp-for` + `asp-format` and gained explicit
-  `id` / `name` / `value="@(Model.X?.ToString("yyyy-MM-dd", InvariantCulture))"`, exactly as Step 1
-  specified. The labels kept `asp-for`, so `for="From"` / `for="To"` still resolve.
-- **Verification is real, not build-shaped** — re-reproduced in this session against Production runs
-  on :5202 / :5203 (DB backed up first, no reseed):
-  - `?Mode=Manual` -> `value="2026-01-05"` (From), `value="2026-09-28"` (To)
-  - **fresh load, no query string** -> the same two values (this is the original to-do demand,
-    "values must populate in the input fields on page load")
-  - `?Mode=Manual&From=&To=` -> the same two values (the model now beats an empty query string)
-  - `grep -c 'value="yyyy-MM-dd"'` -> `0`
-  - `mode-manual` radio carries `checked`; `Preset` select intact; exactly 1 `<form>`;
-    `requestSubmit` count in the served page -> `0`
-  - labels render `for="From"` / `for="To"`, resolving to the inputs' ids (no a11y regression
-    from dropping `asp-for` on the input)
-- **Build / tests**: `dotnet build` -> 0 warnings, 0 errors; suite -> 407 passed, 0 failed,
-  2 pre-existing skips.
-- **Commit messages**: Conventional Commits (`fix(reports):`, `docs(plan):`), accurate first lines,
-  no `Co-authored-by` trailer.
-- **Project rules**: none engaged or broken — no API / auth / DB-policy change, Apple ID plaintext
-  handling untouched, the change stays in the Web (Razor Pages) layer, QuestPDF untouched.
+## Checks performed (HIGH-risk steps scrutinized)
+- Step 1 claims verified: `string? Color` (`CreatePhoneInputModel.cs:28-29`), `asp-for="Input.Color"` (`CreatePhone.cshtml:59-61`), `AddColorAsync` (`CreatePhone.cshtml.cs:146-151`), `PopulateDropdownsAsync` (`:139-144`), `IColorRepo colorRepo` already injected (`:8`). All exist as claimed.
+- Step 2 claims verified: `GuaranteeCorporation string?` (`CreatePhoneInputModel.cs:38-39`), guarantee block `CreatePhone.cshtml:94-100`, `"Shop Warranty"` fallback (`CreatePhone.cshtml.cs:116`), `Corporation` Required/MaxLength-100 with no FK/entity (`Guarantee.cs:12-14`), `IGuaranteeRepo` registered (`ServiceCollectionExtensions.cs:73`) but not injected in `CreatePhoneModel`. All correct.
+- Project rules: Web/Razor layer only, no API/auth/DB-policy change. Compliant.
+- Scope: covers both to-do items fully; Step 2 correctly leaves the Guarantee POST block untouched. No scope creep.
 
 ## Findings
 
+### HIGH
+- **Step 2, Change 1 names a repo API that does not exist.** `SelectAll(g => g.Corporation).Distinct()` — `IBaseRepo.SelectAll` returns materialized `IEnumerable<TResult>` (`BaseRepo.cs:33-38` calls `.ToList()` inside), so `.Distinct()` runs client-side on the full column set, and there is no async `SelectAllAsync` overload at all. The plan's "stays IQueryable, never pull into memory" is unimplementable as written. Fix: `FindAllAsync()` (exists, `AsNoTracking`) then `.Select(g => g.Corporation).Distinct()` in memory — honest about the shape, fits the existing async convention, and the table is tiny (4 seeded rows). One-line plan fix; no architecture change.
+
 ### MEDIUM
-- **`cf34904`'s message mislabels its own evidence.** It says the defects were "confirmed by baseline
-  HTML capture (?Mode=Manual -> value="2026-01-05", value="2026-09-28" ...)" — but those are the
-  **post-fix** values; a genuine pre-fix baseline would read `value="yyyy-MM-dd"` and/or `value=""`.
-  The code change and the post-fix evidence are both sound (independently reproduced above), so this
-  is wording precision in a commit message, not a code or verification defect. No rework required.
+- **Step 2 duplicate rule contradicts itself.** Change 2 says case-insensitive dedupe against `Corporations`, but Done-when/edge wording implies the modal "persists" the name — it cannot (no row is written; a ProductId-less Guarantee would be an orphan). Tighten: handler returns existing-cased `{name}` on case-insensitive match, else echoes trimmed `{name}` with no DB write; persistence happens only on the next phone POST. The Execution notes already say this — promote it into Change 2 so the actor doesn't invent an `AddAsync`.
+- **Step 1 still omits the validation-span repoint.** Carried over from the prior review: `asp-validation-for="Input.Color"` (`CreatePhone.cshtml:61`) must become `Input.ColorId`, or ColorId errors render nowhere. One line.
+- **Final-step validation is filtered-only in both steps' Verify lines.** The Global DoD correctly demands the full chain; make Step 2's Verify run it (`dotnet build src/MobileShop.slnx --nologo && dotnet test src/MobileShop.slnx --nologo --no-build`) since Step 2 is the stage's last step — the reviewer signs off from that evidence.
 
 ### LOW
-- **No automated regression guard for view rendering.** Nothing in `MobileShop.Tests` can observe the
-  emitted `value` attribute, so this class of bug can silently return. Closing that gap needs a
-  rendering/integration harness that this project does not have — recorded, not demanded.
-- `ProfitLossTests` cover `ProfitLoss.cshtml.cs` only; that file is correctly untouched by this task.
+- Async-convention nit: Step 2 should name `FindAllAsync` / `FindAsync` (async) throughout rather than implying sync calls; the `GuaranteeCorporation` select needs no `SelectList` of objects — a plain string `asp-items` loop or `SelectList(Model.Corporations)` suffices. Actor-level detail, no plan block.
 
-## Observation (not a defect)
-- `MobileShop.db` was dropped and recreated at `20:43:23` by a Development-environment run at
-  `20:39:08` — intentional `InitializeForDevelopment` behaviour per project rules. No logical data
-  loss: the full `.dump` diff is 4 lines, entirely the dev-only admin Argon2 hash regenerated by
-  `EnsureAdminUser()`.
+## Missing Implementation Details
+- The HIGH item above (exact distinct-query call). Everything else the actor needs is present: exact files, lines, symbols, return shapes, ids, edge cases.
 
-## Stage sign-off
+## Approval Status
+**APPROVED WITH CORRECTIONS** — apply the HIGH fix (FindAllAsync + in-memory Distinct) plus the three MEDIUM tightenings directly in plan.md; no second review needed.
 
-Every step in `plan.md` is ticked, and the Global Definition of Done is met on the evidence already on
-record — the served-HTML captures, the clean build, and the green suite were all re-verified in this
-pass, so no further re-run was needed. Ticking Task 3 in `to-do.md`.
 
-Residual caveat carried into the checklist: the picker *displays* locale-formatted text
-(`01/05/2026`); the emitted and submitted value is `yyyy-MM-dd`. That is a native
-`<input type="date">` contract, documented in the plan and act report, and is not a defect.
+---
+
+## Planner handoff — Task 4 advice (ADVISORY ONLY, not a verdict)
+
+> Added at owner request so plan mode has verified input for Task 4.
+> The Job B PASS verdict above is unchanged and remains the only verdict
+> in this file. Planner: overwrite `.clinerules/chat/plan.md` fresh for
+> Task 4; do not treat this section as an approved plan.
+
+### Next stage (from to-do.md)
+
+- Task 4 — Color dropdown with "Add New" on Create Phone page. Same
+  pattern as Manufacturer/Model: `<select>` from existing Colors,
+  "Add New" button -> modal -> POST handler -> JSON refresh.
+
+### Current state (verified from source this session)
+
+- `src/MobileShop.Web/Pages/Products/CreatePhone.cshtml:58-62` — Color
+  is a free-text `<input asp-for="Input.Color">`, NOT a `<select>`.
+  Manufacturer (`:12-21`) and Model (`:23-32`) are the `<select>` +
+  `input-group` + `Add New` button + Bootstrap modal pattern to copy.
+- `src/MobileShop.Models/ViewModels/Web/BindModels/CreatePhoneInputModel.cs:28-29`
+  — `Color` is `string?` + `[StringLength(50)]`; there is NO `ColorId`.
+- `src/MobileShop.Web/Pages/Products/CreatePhone.cshtml.cs:96-99` —
+  POST resolves the string via
+  `colorRepo.FindAsync(c => c.Name == colorName) ?? AddColorAsync(colorName)`
+  (silent auto-create, exact-match). `IColorRepo colorRepo` is already
+  injected (`:8`).
+- `Color` entity (`src/MobileShop.Models/Entities/Color.cs`) is just
+  `Name` + `Products` nav; `IColorRepo`/`ColorRepo` are trivial
+  `IBaseRepo<Color>`.
+- `OnGetAsync()` (`:15-18`) loads only `Manufacturers`;
+  `PopulateDropdownsAsync()` (`:139-144`) reloads `Manufacturers` +
+  conditional `Models` — **Colors are never loaded**, so a new dropdown
+  goes empty on validation failure unless both paths are fixed.
+- `src/MobileShop.Tests/Web/Pages/Products/CreatePhoneModelTests.cs`
+  covers manufacturer/model handlers + POST but has **zero Color
+  coverage**.
+
+### Decision the plan must make (do NOT leave to the actor)
+
+- **Option A (minimal):** keep `Input.Color` as string, render `<select>`
+  of existing color *names*. Smallest diff, preserves POST logic — but
+  keeps free-text mismatch risk and invites duplicates ("Red" vs "red").
+- **Option B (cleaner, bigger):** add `Input.ColorId int?`, bind the
+  select to it, resolve via `FindAsync(id)`. Breaks the input contract;
+  touches validation + all POST tests + the auto-create path.
+- Either way state what happens to the **silent `AddColorAsync` path**
+  (keep as fallback? delete?) and define the duplicate rule explicitly:
+  current lookup is exact-match (`c.Name == colorName`), so
+  casing/whitespace duplicates are likely — require `Trim()` + a rule.
+
+### Pattern to reuse (exact references)
+
+- Modal markup `CreatePhone.cshtml:111-160`; JS fetch POST
+  `?handler=CreateManufacturer/CreateModel` (`:216-260`): trim,
+  empty-guard, `response.ok`, append `<option>`, set `select.value`,
+  `dispatchEvent(change)`, `bootstrap.Modal.hide()`, clear input.
+- Handler shape `CreatePhone.cshtml.cs:26-39`: `400` on blank, trim,
+  return-existing-on-duplicate, else `AddAsync` + `{id, name}` JSON. New
+  `OnPostCreateColorAsync(string name)` must mirror this or justify
+  deviating.
+- New `Colors` page property + `id="colorSelect"` / `addColorModal` /
+  `saveColorBtn` / `newColorName` ids must be unique on the page.
+
+### Planner must inspect before writing steps
+
+1. **Antiforgery on fetch POSTs** — existing manufacturer/model
+   `fetch(..., {method:'POST', headers:{'Content-Type':'application/json'}})`
+   sends no `RequestVerificationToken`. Check `Program.cs` / antiforgery
+   config to see why that works; require the Color handler to do exactly
+   the same (fixing all three together is scope creep — call it out).
+2. **Seed data** (`sample-data.json`, `SampleDataLoader`) — are Colors
+   seeded? If empty, the dropdown renders placeholder-only.
+3. **Task 7 interaction** — Task 7 changes null-Color display to "N/A".
+   Keep Color nullable end-to-end; do NOT make the new dropdown
+   `[Required]`.
+4. **No cascade** — Colors are global, unlike Models (per-manufacturer):
+   no `OnGetColorsAsync(manufacturerId)` equivalent. Do not copy that part.
+5. **Project rules** — stays in Web/Razor layer; no API, auth, or
+   DB-init-policy change.
+
+### Tests + verification the plan must require
+
+- Extend `CreatePhoneModelTests.cs`: create-new-color,
+  duplicate-returns-existing, blank -> 400, and
+  "validation failure repopulates Colors" (the `PopulateDropdownsAsync`
+  gap above is the highest-risk regression).
+- Include **served-HTML/browser evidence** (Task 3 proved build+tests
+  cannot see rendered widgets): options present on GET, modal adds +
+  selects without reload, POST persists. Plus the standard chain
+  `dotnet build src/MobileShop.slnx --nologo && dotnet test
+  src/MobileShop.slnx --nologo --no-build`.
+
+### Risks to label honestly
+
+- MEDIUM: the `string` vs `ColorId` contract choice — wrong pick means
+  rework of POST + tests.
+- LOW-MEDIUM: duplicate color names via casing/whitespace.
+- LOW: modal/JS id collisions; validation-failure empty dropdown.
+

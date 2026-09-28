@@ -1,7 +1,7 @@
 namespace MobileShop.Web.Pages.Reports;
 
 public enum DateRangeMode { Automatic, Manual }
-public enum AutomaticPreset { Today, Week, Month, Year }
+public enum AutomaticPreset { Today, Week, Month, Year, All }
 
 public class ProfitLossModel(
     ITransactionDataService transactionDataService,
@@ -38,6 +38,7 @@ public class ProfitLossModel(
                 AutomaticPreset.Week => (today.AddDays(-daysSinceMonday), today),
                 AutomaticPreset.Month => (new DateTime(today.Year, today.Month, 1), today),
                 AutomaticPreset.Year => (new DateTime(today.Year, 1, 1), today),
+                AutomaticPreset.All => (earliest ?? today, today),
                 _ => (new DateTime(today.Year, today.Month, 1), today)
             };
 

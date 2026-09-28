@@ -2,7 +2,7 @@
 @model MobileShop.Web.Pages.Reports.ProfitLossModel
 @{ ViewData["Title"] = "Profit and loss"; }
 <h1>Profit and loss</h1>
-<form method="get" class="row g-2 mb-3">
+<form method="get" class="row g-2 mb-3" id="profitLossFilters">
     <fieldset class="col-12">
         <legend class="form-label mb-1">Date range mode:</legend>
         <div class="btn-group" role="group" aria-label="Date range mode">
@@ -23,16 +23,13 @@
             <option value="Week">Week</option>
             <option value="Month">Month</option>
             <option value="Year">Year</option>
+            <option value="All">All</option>
         </select>
     </div>
 
     <div id="manual-controls" class="@(Model.Mode == DateRangeMode.Manual ? "" : "d-none") row g-2">
         <div class="col-md-3"><label class="form-label" asp-for="From">From</label><input type="date" id="From" name="From" class="form-control" value="@(Model.From?.ToString("yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture))" /></div>
         <div class="col-md-3"><label class="form-label" asp-for="To">To</label><input type="date" id="To" name="To" class="form-control" value="@(Model.To?.ToString("yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture))" /></div>
-    </div>
-
-    <div class="col-12 align-self-end">
-        <button class="btn btn-primary">Apply</button>
     </div>
 
     @if (Model.EmptyDatabaseNote is not null)
@@ -49,6 +46,8 @@
         const manualRadio = document.getElementById('mode-manual');
         const autoControls = document.getElementById('auto-controls');
         const manualControls = document.getElementById('manual-controls');
+        const filterForm = document.getElementById('profitLossFilters');
+
         function updateVisibility() {
             if (autoRadio.checked) {
                 autoControls.classList.remove('d-none');
@@ -59,8 +58,21 @@
             }
         }
 
-        autoRadio.addEventListener('change', updateVisibility);
-        manualRadio.addEventListener('change', updateVisibility);
+        function submitFilters() {
+            filterForm.requestSubmit();
+        }
+
+        autoRadio.addEventListener('change', () => {
+            updateVisibility();
+            submitFilters();
+        });
+        manualRadio.addEventListener('change', () => {
+            updateVisibility();
+            submitFilters();
+        });
+        document.getElementById('Preset').addEventListener('change', submitFilters);
+        document.getElementById('From').addEventListener('change', submitFilters);
+        document.getElementById('To').addEventListener('change', submitFilters);
         updateVisibility();
     });
 </script>

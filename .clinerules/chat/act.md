@@ -1,6 +1,13 @@
-# Act Report — Task 4 Step 1
-- feat(web/products): Color free-text  ColorId dropdown + Add New modal
-- build: 0 warn 0 err
-- test CreatePhoneModelTests: 16 passed 0 failed
+# Act Report — Combined Step 2 (Task 5: Corporation dropdown)
+- Commit: 14b65a9 — feat(web/products): add Corporation dropdown with Add New modal on Create Phone
+- Verification:
+  - Build: 0 warnings, 0 errors
+  - Filtered: 21/21 CreatePhoneModelTests pass
+  - Dal (315) + Web (64) + Services (51) partitions all pass (full unfiltered run exceeds 30s window; suite total 407 passed + 2 pre-existing skips per baseline)
+  - Served HTML (Production :5199, DB untouched): corporationSelect present with Apple + Samsung options, addCorporationModal x3 refs, colorSelect intact
+- Report file: .clinerules/chat/act.md
 - Limitations: None
+- Friction noted: `dotnet test` full unfiltered exceeds tool timeout — used Dal/Web/Services partitions
+- Problems: None — Guarantee POST block unchanged, no DB write from modal, Shop Warranty default intact
+- UI polish note (deferred, planner input): owner finds "-- Select color --" too long for the short Color combobox and wants combobox resize; Step 2 used "-- Select corporation --" to match; BOTH placeholders intentionally left as planned (changing them is out-of-scope UI polish for a separate step — e.g. "-- Color --"/"-- Corp. --" + col-md width tweak)
 - Status: COMPLETE

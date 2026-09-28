@@ -55,7 +55,7 @@
         <span asp-validation-for="Input.ProfitAmount" class="text-danger"></span>
     </div>
 
-    <div class="col-md-4">
+    <div class="col-md-6">
         <label asp-for="Input.ColorId" class="form-label"></label>
         <div class="input-group">
             <select asp-for="Input.ColorId" asp-items="@(new SelectList(Model.Colors, "Id", "Name"))" class="form-select" id="colorSelect">
@@ -66,7 +66,7 @@
         <span asp-validation-for="Input.ColorId" class="text-danger"></span>
     </div>
 
-    <div class="col-md-4">
+    <div class="col-md-6">
         <label asp-for="Input.TestPeriodDays" class="form-label">Second-hand test days</label>
         <input asp-for="Input.TestPeriodDays" class="form-control" />
         <span asp-validation-for="Input.TestPeriodDays" class="text-danger"></span>
