@@ -205,6 +205,38 @@ public class ProfitLossTests
     }
 
     [Fact]
+    public async Task Manual_toggle_populates_From_with_earliest_and_To_with_today()
+    {
+        // Simulates the reviewed Step-2 flow: user clicks the Manual radio on a page that
+        // loaded in Automatic mode, so both From/To arrive as null; the server's Manual
+        // branch must write back both defaults so the pickers render populated.
+        var mock = new Mock<ITransactionDataService>();
+        SetupProfitLossMocks(mock);
+        var earliestTx = new DateTime(2022, 11, 5);
+        mock.Setup(s => s.GetEarliestTransactionDateAsync())
+            .ReturnsAsync(earliestTx);
+
+        var model = CreateModel(mock);
+        model.Mode = DateRangeMode.Automatic;
+        model.From = null;
+        model.To = null;
+
+        // First load (Automatic): pickers stay empty
+        await model.OnGetAsync();
+        Assert.Null(model.From);
+        Assert.Null(model.To);
+
+        // Toggle to Manual (form GET resubmission carries Mode=Manual only)
+        model.Mode = DateRangeMode.Manual;
+        await model.OnGetAsync();
+
+        Assert.Equal(earliestTx, model.From);
+        Assert.Equal(DateTime.Today, model.To);
+        Assert.Equal(earliestTx, model.EffectiveFrom);
+        Assert.Equal(DateTime.Today, model.EffectiveTo);
+    }
+
+    [Fact]
     public async Task Manual_both_missing_default_to_earliest_and_today()
     {
         var mock = new Mock<ITransactionDataService>();

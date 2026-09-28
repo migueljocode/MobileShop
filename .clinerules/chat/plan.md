@@ -1,49 +1,78 @@
-# Plan — Fix Sticky Navbar (Task 1 of 8)
+# Plan — Fix Manual Date Range Mode (Task 3 of 8)
 
 ## Reviewer Briefing
-- **HIGH-risk**: The plan is a refactor of a previously failed change (same symptom: gap above bar, jump on pin). Root cause is `<header>` wrapper + `padding-top: 56px` on body. Both must be fixed.
-- **HIGH-confidence**: Root cause confirmed — `<header>` collapses to navbar height, trapping `sticky-top`; `padding-top` creates gap/jump. Fix is surgical.
+- **MEDIUM-risk**: JavaScript toggle fix + minor Razor adjustment; no schema changes; repo/service layers already tested and correct
+- **HIGH-confidence**: Root cause confirmed — write-back logic exists but only runs in Manual branch; page loads in Automatic mode by default; toggle doesn't submit form; JS placement bug would cause infinite reload
 
 ---
 
-## ~~[x] Step 1 — Move `sticky-top` to `<header>`, delete body `padding-top`, clean up redundant styles~~
+## ~~[x] Step 1 — Fix: populate From/To with earliest-date defaults on Manual toggle (Razor + test)~~
 - **Files**: 
-  - modify: `src/MobileShop.Web/Pages/Shared/_Layout.cshtml`
-  - modify: `src/MobileShop.Web/wwwroot/css/site.css`
-  - do not touch: any other files
-- **Symbols**: `<header class="sticky-top">`, `<nav class="navbar ...">`, `body { margin-bottom: 60px; }`
+  - inspect: `src/MobileShop.Web/Pages/Reports/ProfitLoss.cshtml.cs`
+  - modify: `src/MobileShop.Web/Pages/Reports/ProfitLoss.cshtml`
+  - modify: `src/MobileShop.Tests/Web/Pages/Reports/ProfitLossTests.cs`
+  - do not touch: services, repos
+- **Symbols**: 
+  - `ProfitLossModel.ResolveBoundsAsync()`, `From`, `To`, `EffectiveFrom`, `EffectiveTo`, `EmptyDatabaseNote`
 - **Current → Desired**: 
-  - **Current**: Navbar wrapped in `<header>` → `sticky-top` fails (trapped in zero-height container). `body { padding-top: 56px }` creates 56px gap at rest and jump on pin.
-  - **Desired**: `sticky-top` moved to `<header>` (direct child of `<body>`) → works relative to viewport. No `padding-top` → bar sits flush at top at rest, pins smoothly on scroll. No gap, no jump. `mb-3` and inline `z-index` removed. `banner` landmark preserved via `<header>`.
+  - **Current**: (a) Write-back only runs in Manual branch → Automatic load has empty From/To. (b) Toggle only toggles visibility, no submit → Manual click shows empty pickers.
+  - **Desired**: Load in Automatic mode → `From`/`To` empty. Click **Manual** radio → form submits (GET) with `Mode=Manual` → server computes `EffectiveFrom = earliest transaction date` (or today if none) and `EffectiveTo = today` → write-back populates `From`/`To` → page renders with populated pickers.
 - **Change**: 
-  1. In `_Layout.cshtml` line 13-58: **Move `sticky-top` from `<nav>` to `<header>`**. Keep `<header>` and `</header>` tags (lines 13 and 58). Add `class="sticky-top mb-0"` to `<header>`. Remove `sticky-top`, `mb-3`, and `style="z-index: 1030;"` from `<nav>`. Do NOT add inline `z-index` to `<header>` (Bootstrap's `.sticky-top` already sets `z-index: 1020`).
-  2. In `site.css` line 42-45: **Delete `padding-top: 56px;`** from `body` rule. Keep `margin-bottom: 60px;`. Result: `body { margin-bottom: 60px; }`.
+  1. **In `ProfitLoss.cshtml`**: Add `asp-format="yyyy-MM-dd"` to both date inputs (lines 30-31).
 - **Edge cases**: 
-  - Mobile collapse: `sticky-top` on `<header>` works with Bootstrap 5 dropdowns inside navbar
-  - Footer overlap: not an issue (footer is static)
-  - No JavaScript needed — pure CSS fix
-  - Accessibility: `<header>` landmark preserved
-- **Tests**: Manual browser verification only (build cannot detect CSS positioning defects):
-  - Bar stays pinned on scroll
-  - No gap above or below bar at rest (scroll position 0)
-  - No visible jump when bar pins/unpins
-  - Content not obscured by bar at any scroll position
-  - Hamburger menu usable <576px
-  - Dropdowns still overlay correctly
-- **Verify**: `dotnet build src/MobileShop.slnx --nologo` (mechanical gate only)
-- **Done when**: All manual checks pass; navbar flush at top at rest, pins smoothly on scroll, no gap/jump, content visible, dropdowns work.
-- **Risk**: LOW (after corrections) | **Confidence**: HIGH
+  - Empty DB: `earliest == null` → `EffectiveFrom = today` (correct per `.cshtml.cs:46`)
+  - User's explicit dates: form submit preserves `From`/`To` query params → `.cshtml.cs:46` preserves them via `From ?? (earliest ?? today)`
+- **Tests**: 
+  - Add test: `Manual_toggle_populates_From_with_earliest_and_To_with_today` to `ProfitLossTests.cs`
+  - Run existing `ProfitLossTests.cs` suite
+- **Verify**: `dotnet test src/MobileShop.slnx --nologo --filter "ProfitLossTests"`
+- **Done when**: All tests pass; manual check: load page → click Manual → From = earliest transaction date, To = today; no Apply click needed
+- **Risk**: LOW | **Confidence**: HIGH
+
+---
+
+## [ ] Step 2 — Add form auto-submit on Manual radio toggle (with guard to prevent infinite reload)
+- **Files**: 
+  - modify: `src/MobileShop.Web/Pages/Reports/ProfitLoss.cshtml`
+  - do not touch: backend
+- **Symbols**: `mode-manual` radio, form (`method="get"`), `updateVisibility()` function
+- **Current → Desired**: 
+  - **Current**: `updateVisibility()` only toggles `d-none` class → no form submit → defaults never populate on first Manual click
+  - **Desired**: Clicking **Manual** radio submits the form (GET) with `Mode=Manual` → server runs Manual branch → defaults populate → page renders with populated dates
+- **Change**: 
+  1. In `ProfitLoss.cshtml`, add `const form = document.querySelector('form');` at top of `DOMContentLoaded` handler.
+  2. Replace the `change` listener registration (lines 63-64) with a Manual-specific handler that calls `updateVisibility()` then submits when Manual is checked:
+     ```js
+     manualRadio.addEventListener('change', () => {
+         updateVisibility();
+         if (manualRadio.checked) document.querySelector('form').requestSubmit();
+     });
+     autoRadio.addEventListener('change', updateVisibility);
+     ```
+  3. Keep `updateVisibility()` as visibility-only (no submit logic).
+  4. Keep `d-none` toggle for UX (show/hide while submit processes).
+- **Edge cases**: 
+  - Switching back to Automatic: no submit needed (Automatic is default); just hide controls
+  - User's explicit dates: form submit preserves `From`/`To` query params → server uses them → write-back preserves them
+  - Empty DB: submit triggers Manual branch → `earliest == null` → `From` = today, `EmptyDatabaseNote` shown
+  - Apply button: becomes redundant but harmless; Task 6 will remove it
+- **Tests**: Manual browser check — click Manual → page reloads → From/To populated; toggle back/forth without infinite reload
+- **Verify**: `dotnet build src/MobileShop.slnx --nologo` + manual browser check
+- **Done when**: Clicking Manual radio loads page with populated From/To; no infinite reload; explicit dates survive round-trip
+- **Risk**: MEDIUM | **Confidence**: HIGH
 
 ---
 
 ## Global Definition of Done
-- Navbar flush at top at rest; pins smoothly on scroll; no gap, no jump
-- Content not obscured by bar at any scroll position
-- Dropdowns/hamburger work on mobile
+- Load Reports page in Automatic mode → switch to Manual → From/To immediately populated with earliest transaction date / today
+- Dates display in `yyyy-MM-dd` format in pickers
+- No infinite reload on mode toggle
 - `dotnet build src/MobileShop.slnx --nologo` → 0 errors, 0 warnings
-- No modifications to other files
+- `dotnet test src/MobileShop.slnx --nologo --filter "ProfitLossTests"` → all pass
+- No modifications to services, repos, enums, or other pages
 
 ## Execution Notes (for Actor)
-- Two file edits: `_Layout.cshtml` (move sticky-top to header with mb-0, drop mb-3/z-index), `site.css` (delete padding-top from body)
-- No JavaScript, no new CSS rules
-- Manual browser verification is the real gate — build is necessary but not sufficient
+- **Razor change only**: Add `asp-format="yyyy-MM-dd"` to both `<input asp-for="From" type="date">` (line 30) and `<input asp-for="To" type="date">` (line 31) in `ProfitLoss.cshtml`. No C# code changes needed — write-back already correct in Manual branch.
+- **JS change**: In `ProfitLoss.cshtml`, add `const form = document.querySelector('form');` in `DOMContentLoaded`, then register Manual-specific `change` handler that calls `updateVisibility()` then `form.requestSubmit()` when `manualRadio.checked`. Register `autoRadio.change` → `updateVisibility` only.
+- Run: `dotnet test src/MobileShop.slnx --nologo --filter "ProfitLossTests"` then manual browser verification
+- Add test to `ProfitLossTests.cs`: `Manual_toggle_populates_From_with_earliest_and_To_with_today`

@@ -27,8 +27,8 @@
     </div>
 
     <div id="manual-controls" class="@(Model.Mode == DateRangeMode.Manual ? "" : "d-none") row g-2">
-        <div class="col-md-3"><label class="form-label" asp-for="From">From</label><input asp-for="From" type="date" class="form-control" /></div>
-        <div class="col-md-3"><label class="form-label" asp-for="To">To</label><input asp-for="To" type="date" class="form-control" /></div>
+        <div class="col-md-3"><label class="form-label" asp-for="From">From</label><input asp-for="From" type="date" asp-format="yyyy-MM-dd" class="form-control" /></div>
+        <div class="col-md-3"><label class="form-label" asp-for="To">To</label><input asp-for="To" type="date" asp-format="yyyy-MM-dd" class="form-control" /></div>
     </div>
 
     <div class="col-12 align-self-end">
