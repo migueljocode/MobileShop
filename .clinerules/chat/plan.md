@@ -134,7 +134,7 @@ running a different range from the one the UI displays.
 
 ---
 
-## [ ] Step 2 — Full-suite regression + stage Definition of Done
+## ~~[x] Step 2 — Full-suite regression + stage Definition of Done~~
 
 - **Files**: none expected to change. If Step 1's build produced no further edits, this step
   commits only the `plan.md` tick.
