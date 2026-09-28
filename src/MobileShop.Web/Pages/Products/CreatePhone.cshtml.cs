@@ -11,10 +11,11 @@ public class CreatePhoneModel(
     public string? Message { get; private set; }
     public IEnumerable<Manufacturer> Manufacturers { get; private set; } = [];
     public IEnumerable<Model> Models { get; private set; } = [];
+    public IEnumerable<Color> Colors { get; private set; } = [];
 
     public async Task OnGetAsync()
     {
-        Manufacturers = await manufacturerRepo.FindAllAsync();
+        await PopulateDropdownsAsync();
     }
 
     public async Task<IActionResult> OnGetModelsAsync(int manufacturerId)
@@ -93,10 +94,15 @@ public class CreatePhoneModel(
             return Page();
         }
 
-        var colorName = Input.Color?.Trim();
-        var color = string.IsNullOrWhiteSpace(colorName)
+        var color = Input.ColorId is null
             ? null
-            : await colorRepo.FindAsync(c => c.Name == colorName) ?? await AddColorAsync(colorName);
+            : await colorRepo.FindAsync(Input.ColorId.Value) ?? null;
+        if (Input.ColorId.HasValue && color is null)
+        {
+            ModelState.AddModelError(nameof(Input.ColorId), "Selected color not found.");
+            await PopulateDropdownsAsync();
+            return Page();
+        }
 
         var product = new Product
         {
@@ -136,17 +142,27 @@ public class CreatePhoneModel(
         return RedirectToPage("/Products/Details", new { id = phone.Id, type = "phone" });
     }
 
+    public async Task<IActionResult> OnPostCreateColorAsync(string name)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+            return new JsonResult(new { error = "Name is required." }) { StatusCode = 400 };
+
+        var trimmed = name.Trim();
+        var existing = await colorRepo.FindAsync(c => c.Name == trimmed);
+        if (existing is not null)
+            return new JsonResult(new { id = existing.Id, name = existing.Name });
+
+        var color = new Color { Name = trimmed };
+        await colorRepo.AddAsync(color);
+        return new JsonResult(new { id = color.Id, name = color.Name });
+    }
+
     private async Task PopulateDropdownsAsync()
     {
         Manufacturers = await manufacturerRepo.FindAllAsync();
-        if (Input.ManufacturerId > 0)
-            Models = await modelRepo.GetByManufacturerAsync(Input.ManufacturerId);
-    }
-
-    private async Task<Color> AddColorAsync(string name)
-    {
-        var color = new Color { Name = name };
-        await colorRepo.AddAsync(color);
-        return color;
+        Models = Input.ManufacturerId > 0
+            ? await modelRepo.GetByManufacturerAsync(Input.ManufacturerId)
+            : [];
+        Colors = await colorRepo.FindAllAsync();
     }
 }

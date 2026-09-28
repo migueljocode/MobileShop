@@ -160,4 +160,106 @@ public class CreatePhoneModelTests : RepoTestBase
         Assert.False(_model.ModelState.IsValid);
         Assert.True(_model.ModelState.ContainsKey(nameof(CreatePhoneInputModel.ModelId)));
     }
+
+    [Fact]
+    public async Task OnGetAsync_LoadsAllColors()
+    {
+        Context.Colors.AddRange(
+            new Color { Name = "Midnight" },
+            new Color { Name = "Black" });
+        Context.SaveChanges();
+
+        await _model.OnGetAsync();
+
+        Assert.Equal(2, _model.Colors.Count());
+        Assert.Contains(_model.Colors, c => c.Name == "Midnight");
+        Assert.Contains(_model.Colors, c => c.Name == "Black");
+    }
+
+    [Fact]
+    public async Task OnPostCreateColorAsync_CreatesNewColor()
+    {
+        var result = await _model.OnPostCreateColorAsync("Green");
+
+        var jsonResult = Assert.IsType<JsonResult>(result);
+        var color = Context.Colors.FirstOrDefault(c => c.Name == "Green");
+        Assert.NotNull(color);
+    }
+
+    [Fact]
+    public async Task OnPostCreateColorAsync_ReturnsExistingIfDuplicate()
+    {
+        Context.Colors.Add(new Color { Name = "Black" });
+        await Context.SaveChangesAsync();
+        var blackBefore = Context.Colors.Single(c => c.Name == "Black");
+
+        var result = await _model.OnPostCreateColorAsync("Black");
+
+        var jsonResult = Assert.IsType<JsonResult>(result);
+        var json = System.Text.Json.JsonSerializer.Serialize(jsonResult.Value);
+        using var doc = System.Text.Json.JsonDocument.Parse(json);
+        Assert.Equal(blackBefore.Id, doc.RootElement.GetProperty("id").GetInt32());
+        Assert.Single(Context.Colors.Where(c => c.Name == "Black"));
+    }
+
+    [Fact]
+    public async Task OnPostCreateColorAsync_BlankReturns400()
+    {
+        var result = await _model.OnPostCreateColorAsync("   ");
+
+        var jsonResult = Assert.IsType<JsonResult>(result);
+        Assert.Equal(400, jsonResult.StatusCode);
+    }
+
+    [Fact]
+    public async Task OnPostAsync_WithUnknownColorId_ReturnsValidationError()
+    {
+        var apple = Context.Manufacturers.First(m => m.Name == "Apple");
+        var phoneCategory = Context.Categories.First(c => c.Name == "Phone");
+        var model = new Model { ManufacturerId = apple.Id, CategoryId = phoneCategory.Id, Name = "iPhone 15" };
+        Context.Models.Add(model);
+        Context.SaveChanges();
+
+        _model.Input = ValidInput(apple.Id, model.Id);
+        _model.Input.ColorId = 9999; // unknown id
+
+        var result = await _model.OnPostAsync();
+
+        var pageResult = Assert.IsType<PageResult>(result);
+        Assert.False(_model.ModelState.IsValid);
+        Assert.True(_model.ModelState.ContainsKey(nameof(CreatePhoneInputModel.ColorId)));
+    }
+
+    [Fact]
+    public async Task OnPostAsync_WithValidInput_PersistsColorId()
+    {
+        var apple = Context.Manufacturers.First(m => m.Name == "Apple");
+        var phoneCategory = Context.Categories.First(c => c.Name == "Phone");
+        var model = new Model { ManufacturerId = apple.Id, CategoryId = phoneCategory.Id, Name = "iPhone 15" };
+        var color = new Color { Name = "Blue" };
+        Context.Models.Add(model);
+        Context.Colors.Add(color);
+        Context.SaveChanges();
+
+        _model.Input = ValidInput(apple.Id, model.Id);
+        _model.Input.ColorId = color.Id;
+
+        await _model.OnPostAsync();
+
+        Assert.NotNull(Context.Phones.FirstOrDefault(p => p.ProductNavigation.ColorId == color.Id));
+    }
+
+    [Fact]
+    public async Task OnPostAsync_ValidationFailure_RepopulatesColors()
+    {
+        Context.Colors.Add(new Color { Name = "Black" });
+        await Context.SaveChangesAsync();
+
+        _model.Input = ValidInput(9999, 1); // invalid manufacturer triggers validation failure
+
+        await _model.OnPostAsync();
+
+        Assert.Single(_model.Colors);
+        Assert.Contains(_model.Colors, c => c.Name == "Black");
+    }
 }

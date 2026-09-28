@@ -25,8 +25,7 @@ public sealed class CreatePhoneInputModel
     [RegularExpression(@"^[0-9]{15}$", ErrorMessage = "IMEI must be exactly 15 digits.")]
     public string? IMEI2 { get; set; }
 
-    [StringLength(50)]
-    public string? Color { get; set; }
+    public int? ColorId { get; set; }
 
     public bool IsSecondHand { get; set; }
 
