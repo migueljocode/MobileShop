@@ -52,6 +52,9 @@ public class ProfitLossTests
 
     private static void SetupProfitLossMocks(Mock<ITransactionDataService> serviceMock)
     {
+        serviceMock.Setup(s => s.GetEarliestTransactionDateAsync())
+            .ReturnsAsync(new DateTime(2024, 1, 1));
+
         serviceMock.Setup(s => s.GetProfitLossRowsAsync(
             It.IsAny<DateTime?>(), It.IsAny<DateTime?>()))
             .ReturnsAsync([]);
@@ -221,10 +224,11 @@ public class ProfitLossTests
         model.From = null;
         model.To = null;
 
-        // First load (Automatic): pickers stay empty
+        // Initial load (Automatic): pickers are pre-populated server-side so the inputs
+        // render with valid values instead of the empty mm/dd/yyyy placeholder.
         await model.OnGetAsync();
-        Assert.Null(model.From);
-        Assert.Null(model.To);
+        Assert.Equal(earliestTx, model.From);
+        Assert.Equal(DateTime.Today, model.To);
 
         // Toggle to Manual (form GET resubmission carries Mode=Manual only)
         model.Mode = DateRangeMode.Manual;
@@ -234,6 +238,31 @@ public class ProfitLossTests
         Assert.Equal(DateTime.Today, model.To);
         Assert.Equal(earliestTx, model.EffectiveFrom);
         Assert.Equal(DateTime.Today, model.EffectiveTo);
+    }
+
+    [Fact]
+    public async Task Automatic_Month_populates_from_and_to_without_touching_effective_bounds()
+    {
+        var mock = new Mock<ITransactionDataService>();
+        SetupProfitLossMocks(mock);
+        var earliestTx = new DateTime(2024, 1, 1);
+        mock.Setup(s => s.GetEarliestTransactionDateAsync())
+            .ReturnsAsync(earliestTx);
+
+        var model = CreateModel(mock);
+        model.Mode = DateRangeMode.Automatic;
+        model.Preset = AutomaticPreset.Month;
+        model.From = null;
+        model.To = null;
+
+        await model.OnGetAsync();
+
+        // Effective bounds still come from the preset...
+        Assert.Equal(new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1), model.EffectiveFrom);
+        Assert.Equal(DateTime.Today, model.EffectiveTo);
+        // ...while the pickers are pre-populated independently.
+        Assert.Equal(earliestTx, model.From);
+        Assert.Equal(DateTime.Today, model.To);
     }
 
     [Fact]

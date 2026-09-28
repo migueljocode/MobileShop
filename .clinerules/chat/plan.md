@@ -1,78 +1,61 @@
-# Plan — Fix Manual Date Range Mode (Task 3 of 8)
+# Plan — Task 3: Fix Manual Date Range mode (From/To not working)
 
 ## Reviewer Briefing
-- **MEDIUM-risk**: JavaScript toggle fix + minor Razor adjustment; no schema changes; repo/service layers already tested and correct
-- **HIGH-confidence**: Root cause confirmed — write-back logic exists but only runs in Manual branch; page loads in Automatic mode by default; toggle doesn't submit form; JS placement bug would cause infinite reload
+- **Root Cause & Core Fix**: Date pickers rendered the browser's empty date placeholder `mm/dd/yyyy` because `From` and `To` were only set on the server inside the `else` (Manual mode) branch. On initial page load (`Mode == Automatic`), `From` and `To` were `null`, rendering `<input type="date">` without `value` attributes.
+- **Pre-populating on initial load**: Querying `earliest` transaction date and setting `From ??= earliest ?? today` and `To ??= today` on initial load (while strictly keeping `EffectiveFrom`/`EffectiveTo` governed by `Preset` in Automatic mode) guarantees the pickers carry valid default `value` attributes on initial page load.
+- **Client-side instant toggle (Removing JS reload hack)**: Commit `1555e24` introduced `document.querySelector('form').requestSubmit()` on the Manual radio change event to trigger a server round-trip. Because the pickers will now be pre-populated in the DOM on initial load, this reload hack is completely unnecessary and causes unwanted page reloads. Reverting it to a pure client-side `updateVisibility()` makes switching instant and clean.
+- **Test coverage**: `SetupProfitLossMocks` in `ProfitLossTests.cs` must configure a default return for `GetEarliestTransactionDateAsync()` so automatic preset tests don't receive `null`. The test asserting `Assert.Null(model.From)` on automatic load will be updated to verify pre-population.
+- **HTML5 Date Format**: Native `<input type="date">` stores and submits values in ISO format (`yyyy-MM-dd`), which is already configured via `asp-format="yyyy-MM-dd"`. When populated, the browser renders the date according to locale rather than displaying the empty placeholder `mm/dd/yyyy`.
 
 ---
 
-## ~~[x] Step 1 — Fix: populate From/To with earliest-date defaults on Manual toggle (Razor + test)~~
-- **Files**: 
-  - inspect: `src/MobileShop.Web/Pages/Reports/ProfitLoss.cshtml.cs`
-  - modify: `src/MobileShop.Web/Pages/Reports/ProfitLoss.cshtml`
+## ~~[x] Step 1 — Pre-populate From/To in page model and update tests~~
+- **Files**:
+  - modify: `src/MobileShop.Web/Pages/Reports/ProfitLoss.cshtml.cs`
   - modify: `src/MobileShop.Tests/Web/Pages/Reports/ProfitLossTests.cs`
-  - do not touch: services, repos
-- **Symbols**: 
-  - `ProfitLossModel.ResolveBoundsAsync()`, `From`, `To`, `EffectiveFrom`, `EffectiveTo`, `EmptyDatabaseNote`
-- **Current → Desired**: 
-  - **Current**: (a) Write-back only runs in Manual branch → Automatic load has empty From/To. (b) Toggle only toggles visibility, no submit → Manual click shows empty pickers.
-  - **Desired**: Load in Automatic mode → `From`/`To` empty. Click **Manual** radio → form submits (GET) with `Mode=Manual` → server computes `EffectiveFrom = earliest transaction date` (or today if none) and `EffectiveTo = today` → write-back populates `From`/`To` → page renders with populated pickers.
-- **Change**: 
-  1. **In `ProfitLoss.cshtml`**: Add `asp-format="yyyy-MM-dd"` to both date inputs (lines 30-31).
-- **Edge cases**: 
-  - Empty DB: `earliest == null` → `EffectiveFrom = today` (correct per `.cshtml.cs:46`)
-  - User's explicit dates: form submit preserves `From`/`To` query params → `.cshtml.cs:46` preserves them via `From ?? (earliest ?? today)`
-- **Tests**: 
-  - Add test: `Manual_toggle_populates_From_with_earliest_and_To_with_today` to `ProfitLossTests.cs`
-  - Run existing `ProfitLossTests.cs` suite
-- **Verify**: `dotnet test src/MobileShop.slnx --nologo --filter "ProfitLossTests"`
-- **Done when**: All tests pass; manual check: load page → click Manual → From = earliest transaction date, To = today; no Apply click needed
-- **Risk**: LOW | **Confidence**: HIGH
+  - do not touch: DAL, repositories, services
+- **Symbols**: `ProfitLossModel.ResolveBoundsAsync()`, `SetupProfitLossMocks`, `ProfitLossTests`
+- **Current -> Desired**:
+  - Current: `From` and `To` remain `null` on Automatic mode and are only populated in Manual mode.
+  - Desired: In `ResolveBoundsAsync()`, fetch `earliest = await transactionDataService.GetEarliestTransactionDateAsync();` upfront.
+    - If `Mode == DateRangeMode.Automatic`: calculate `(EffectiveFrom, EffectiveTo)` from `Preset` as before. Then pre-populate `From ??= earliest ?? today;` and `To ??= today;` so the date inputs render with default values on page load without altering `EffectiveFrom`/`EffectiveTo`.
+    - If `Mode == DateRangeMode.Manual`: `EffectiveFrom = From ?? (earliest ?? today); EffectiveTo = To ?? today; From = EffectiveFrom; To = EffectiveTo;` and set `EmptyDatabaseNote` if `earliest == null`.
+  - In `ProfitLossTests.cs`:
+    - Add `serviceMock.Setup(s => s.GetEarliestTransactionDateAsync()).ReturnsAsync(new DateTime(2024, 1, 1));` to `SetupProfitLossMocks()`.
+    - Update `Manual_toggle_populates_From_with_earliest_and_To_with_today` (line 208) to assert that on the initial Automatic load, `model.From` equals `earliestTx` and `model.To` equals `DateTime.Today` instead of `Assert.Null`.
+    - Add a test verifying that on Automatic load with preset `Month`, `model.From` and `model.To` are pre-populated while `model.EffectiveFrom` remains the 1st of the month.
+- **Verify**: `dotnet test src/MobileShop.Tests/MobileShop.Tests.csproj --filter "ProfitLossTests"`
+- **Done when**: All `ProfitLossTests` pass, verifying both preset effective filtering and picker pre-population.
+- **Risk**: LOW
+- **Confidence**: HIGH
 
 ---
 
-## ~~[x] Step 2 — Add form auto-submit on Manual radio toggle (with guard to prevent infinite reload)~~
-- **Files**: 
+## [ ] Step 2 — Remove JS form reload hack and restore instant client-side toggle
+- **Files**:
   - modify: `src/MobileShop.Web/Pages/Reports/ProfitLoss.cshtml`
   - do not touch: backend
-- **Symbols**: `mode-manual` radio, form (`method="get"`), `updateVisibility()` function
-- **Current → Desired**: 
-  - **Current**: `updateVisibility()` only toggles `d-none` class → no form submit → defaults never populate on first Manual click
-  - **Desired**: Clicking **Manual** radio submits the form (GET) with `Mode=Manual` → server runs Manual branch → defaults populate → page renders with populated dates
-- **Change**: 
-  1. In `ProfitLoss.cshtml`, add `const form = document.querySelector('form');` at top of `DOMContentLoaded` handler.
-  2. Replace the `change` listener registration (lines 63-64) with a Manual-specific handler that calls `updateVisibility()` then submits when Manual is checked:
-     ```js
-     manualRadio.addEventListener('change', () => {
-         updateVisibility();
-         if (manualRadio.checked) document.querySelector('form').requestSubmit();
-     });
-     autoRadio.addEventListener('change', updateVisibility);
-     ```
-  3. Keep `updateVisibility()` as visibility-only (no submit logic).
-  4. Keep `d-none` toggle for UX (show/hide while submit processes).
-- **Edge cases**: 
-  - Switching back to Automatic: no submit needed (Automatic is default); just hide controls
-  - User's explicit dates: form submit preserves `From`/`To` query params → server uses them → write-back preserves them
-  - Empty DB: submit triggers Manual branch → `earliest == null` → `From` = today, `EmptyDatabaseNote` shown
-  - Apply button: becomes redundant but harmless; Task 6 will remove it
-- **Tests**: Manual browser check — click Manual → page reloads → From/To populated; toggle back/forth without infinite reload
-- **Verify**: `dotnet build src/MobileShop.slnx --nologo` + manual browser check
-- **Done when**: Clicking Manual radio loads page with populated From/To; no infinite reload; explicit dates survive round-trip
-- **Risk**: MEDIUM | **Confidence**: HIGH
+- **Symbols**: `<script>` block in `ProfitLoss.cshtml`
+- **Current -> Desired**:
+  - Current: `manualRadio.addEventListener('change', () => { updateVisibility(); if (manualRadio.checked) document.querySelector('form').requestSubmit(); });`
+  - Desired: `manualRadio.addEventListener('change', updateVisibility);`
+  - Switching between Automatic and Manual becomes an instant, flicker-free client-side toggle that merely reveals or hides controls. The form submits only when the user clicks the "Apply" button.
+- **Verify**: `dotnet build src/MobileShop.slnx --nologo && dotnet test src/MobileShop.slnx --nologo --no-build`
+- **Done when**: Solution builds cleanly with 0 warnings/errors, all tests pass, and manual radio switch no longer submits the form.
+- **Risk**: LOW
+- **Confidence**: HIGH
 
 ---
 
 ## Global Definition of Done
-- Load Reports page in Automatic mode → switch to Manual → From/To immediately populated with earliest transaction date / today
-- Dates display in `yyyy-MM-dd` format in pickers
-- No infinite reload on mode toggle
-- `dotnet build src/MobileShop.slnx --nologo` → 0 errors, 0 warnings
-- `dotnet test src/MobileShop.slnx --nologo --filter "ProfitLossTests"` → all pass
-- No modifications to services, repos, enums, or other pages
+- `From` and `To` date inputs render with valid `value="yyyy-MM-dd"` on page load (no `mm/dd/yyyy` empty placeholder).
+- Automatic mode continues to filter by the selected Preset without interference from `From`/`To`.
+- Manual mode filters by `From` and `To`.
+- Toggling between Automatic and Manual mode is instant on the client side with no page reload.
+- Full build and test suite pass (`dotnet build src/MobileShop.slnx --nologo && dotnet test src/MobileShop.slnx --nologo --no-build`).
+- No extraneous files or unrelated projects modified.
 
-## Execution Notes (for Actor)
-- **Razor change only**: Add `asp-format="yyyy-MM-dd"` to both `<input asp-for="From" type="date">` (line 30) and `<input asp-for="To" type="date">` (line 31) in `ProfitLoss.cshtml`. No C# code changes needed — write-back already correct in Manual branch.
-- **JS change**: In `ProfitLoss.cshtml`, add `const form = document.querySelector('form');` in `DOMContentLoaded`, then register Manual-specific `change` handler that calls `updateVisibility()` then `form.requestSubmit()` when `manualRadio.checked`. Register `autoRadio.change` → `updateVisibility` only.
-- Run: `dotnet test src/MobileShop.slnx --nologo --filter "ProfitLossTests"` then manual browser verification
-- Add test to `ProfitLossTests.cs`: `Manual_toggle_populates_From_with_earliest_and_To_with_today`
+## Execution notes for the Actor
+- Work fast and compact.
+- Run tests directly and check results.
+- Implement exactly one step at a time, verify, commit, and report to `act.md`.

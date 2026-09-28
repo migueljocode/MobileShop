@@ -27,6 +27,7 @@ public class ProfitLossModel(
     private async Task ResolveBoundsAsync()
     {
         var today = DateTime.Today;
+        var earliest = await transactionDataService.GetEarliestTransactionDateAsync();
 
         if (Mode == DateRangeMode.Automatic)
         {
@@ -39,10 +40,14 @@ public class ProfitLossModel(
                 AutomaticPreset.Year => (new DateTime(today.Year, 1, 1), today),
                 _ => (new DateTime(today.Year, today.Month, 1), today)
             };
+
+            // Pre-populate the date pickers for initial page load; EffectiveFrom/EffectiveTo
+            // stay governed by the selected preset and are never read from From/To here.
+            From ??= earliest ?? today;
+            To ??= today;
         }
         else
         {
-            var earliest = await transactionDataService.GetEarliestTransactionDateAsync();
             EffectiveFrom = From ?? (earliest ?? today);
             EffectiveTo = To ?? today;
 
