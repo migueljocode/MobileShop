@@ -31,7 +31,7 @@
 
 ---
 
-## [ ] Step 2 — Remove JS form reload hack and restore instant client-side toggle
+## ~~[x] Step 2 — Remove JS form reload hack and restore instant client-side toggle~~
 - **Files**:
   - modify: `src/MobileShop.Web/Pages/Reports/ProfitLoss.cshtml`
   - do not touch: backend

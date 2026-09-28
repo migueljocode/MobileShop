@@ -49,7 +49,6 @@
         const manualRadio = document.getElementById('mode-manual');
         const autoControls = document.getElementById('auto-controls');
         const manualControls = document.getElementById('manual-controls');
-
         function updateVisibility() {
             if (autoRadio.checked) {
                 autoControls.classList.remove('d-none');
@@ -61,10 +60,7 @@
         }
 
         autoRadio.addEventListener('change', updateVisibility);
-        manualRadio.addEventListener('change', () => {
-            updateVisibility();
-            if (manualRadio.checked) document.querySelector('form').requestSubmit();
-        });
+        manualRadio.addEventListener('change', updateVisibility);
         updateVisibility();
     });
 </script>
