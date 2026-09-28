@@ -1,7 +1,7 @@
 # Act Report — Task 1 Step 1: Sticky navbar via `<header>` wrapper fix
 
 ## Commit
-- **Hash**: pending (recorded in follow-up)
+- **Hash**: fe8a1a4
 - **Message**: fix(web): pin navbar with sticky-top on header wrapper
 
 ## Status
