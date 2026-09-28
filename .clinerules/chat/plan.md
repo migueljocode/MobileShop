@@ -31,7 +31,7 @@
 
 ---
 
-## [ ] Step 2 — Add form auto-submit on Manual radio toggle (with guard to prevent infinite reload)
+## ~~[x] Step 2 — Add form auto-submit on Manual radio toggle (with guard to prevent infinite reload)~~
 - **Files**: 
   - modify: `src/MobileShop.Web/Pages/Reports/ProfitLoss.cshtml`
   - do not touch: backend

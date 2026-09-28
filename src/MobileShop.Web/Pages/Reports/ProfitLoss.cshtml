@@ -61,7 +61,10 @@
         }
 
         autoRadio.addEventListener('change', updateVisibility);
-        manualRadio.addEventListener('change', updateVisibility);
+        manualRadio.addEventListener('change', () => {
+            updateVisibility();
+            if (manualRadio.checked) document.querySelector('form').requestSubmit();
+        });
         updateVisibility();
     });
 </script>
