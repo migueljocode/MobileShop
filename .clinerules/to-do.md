@@ -3,9 +3,12 @@
 ## HIGH Priority (Broken Core Features)
 
 - ~~[x] Task 1 — Fix sticky navbar (currently malformed, fades on scroll)~~
+Navbar should remain fixed at top with `sticky-top` class and proper `z-index`; content needs `padding-top` to prevent hiding.
    Done: commit `fe8a1a4`. `sticky-top mb-0` moved to `<header>` (direct child of `<body>`, so the sticky range is no longer trapped in a zero-height wrapper); `mb-3` and the redundant inline `z-index` removed from `<nav>`; `body { padding-top: 56px }` deleted. `dotnet build src/MobileShop.slnx --nologo` → 0 warnings, 0 errors. Manual browser checks confirmed by the owner (bar pins, no gap/jump).
 
 - ~~[x] Task 2 — Live profit calculation (% ↔ $) on Create Phone & Create Apple ID~~
+When user enters Profit % OR Profit $, the other field should calculate live based on Price:  
+`ProfitAmount = Price * ProfitPercent / 100` and vice versa. Blank/zero handled gracefully.
    Already delivered by commit `5ae227c` — checkbox was stale, carried over from the old stage list. `CreatePhone.cshtml:163-192` and `CreateAppleId.cshtml:65-94` contain byte-identical `updateFromPercent`/`updateFromAmount` handlers bound to `data-price`/`data-percent`/`data-amount`; markup hooks at `CreatePhone.cshtml:36,43,53`. Owner confirmed the feature works as expected in the browser. No new work required; the plan for this task was rejected (REQUIRES REPLANNING) because it proposed adding code that already existed.
 
 - ~~[x] Task 3 — Fix Manual Date Range mode (From/To not working)~~
