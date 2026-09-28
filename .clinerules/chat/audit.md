@@ -1,18 +1,30 @@
-# Audit — Step 6 (Execution Check)
+# Audit — Job B (Execution Check)
 
-## PASS
+**Step**: Task 1 — Fix sticky navbar (currently malformed, fades on scroll)
+**Commit under review**: `fe8a1a4`
+**Plan reviewed against**: `.clinerules/chat/plan.md` (APPROVED, v3)
 
-Commit `2340390` implements exactly what plan.md Step 6 asked, and the step's verification genuinely passes.
+## Verdict: PASS
 
-Verified against the diff: `ProfitLoss.cshtml` lines 80 and 91 both wrap Total Profit in the signed, conditionally-coloured span, with `> 0` for the sign (so zero renders plain `0`) and `>= 0` for the class (green unless negative) — matching the corrected edge case. `Calculate()` now has a single sorted exit, and the tests were re-indexed to Anis (50) → Mikaeeil (40) → Shop (10) across all four methods, with the order-independent sum checks left alone. I also confirmed the sort actually reaches the UI: `ProfitLossModel` assigns `DistributionRows = DistributionCalculator.Calculate(...)` and the view iterates that list without re-sorting, so the calculator's ordering is what the user sees.
+### Verified (reviewer-run, not taken on trust from act.md)
 
-Re-run by the reviewer rather than trusted from act.md: `dotnet build src/MobileShop.slnx --nologo` → 0 Warning(s), 0 Error(s); `dotnet test src/MobileShop.slnx --nologo --filter "DistributionCalculatorTests"` → 11 passed, 0 failed; full `dotnet test src/MobileShop.slnx --nologo` → 405 passed, 0 failed, 2 skipped (pre-existing QuestPDF skips). Working tree clean, Conventional Commit message naming the step, only the three planned source files touched.
+- `git show fe8a1a4` — diff matches the approved plan exactly, no scope creep:
+  - `_Layout.cshtml:13` — `sticky-top` + `mb-0` moved from `<nav>` to the `<header>` wrapper, which is a direct child of `<body>`, so the sticky element now has real travel range. This was the root cause: `<header>` previously collapsed to the navbar's own height, giving a 0px sticky range.
+  - `<nav>` reduced to `navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow`; `mb-3` and the redundant inline `z-index: 1030` removed (grep confirms no remaining `z-index` in the file).
+  - `site.css` `body` rule is now only `margin-bottom: 60px` — the phantom `padding-top: 56px` is gone, removing both the 56px dead band and the jump-when-pinned.
+- `dotnet build src/MobileShop.slnx --nologo` → Build succeeded, 0 Warning(s), 0 Error(s).
+- No other Razor page, stylesheet, or `MobileShop.Api` file touched. No restyling, fonts, colours, or navbar height changes — the owner's "same overall style, UX-only" direction was honoured.
 
-Accepted deviation: the plan's "delete the early `return rows;`" was incomplete on its own — with the profit block ungated, the loss branch fell through and appended the profit rows, yielding 6 rows. The actor gated it with `if (totalProfit > 0)`, which preserves the plan's single-exit-point requirement and was reported as friction. Correct call, correctly flagged.
+### The decisive evidence
 
-**Outstanding:** the step's "Manual visual check" was not performed (headless environment). Recorded in the `to-do.md` completion note as the one item the owner should eyeball — the Razor markup is verified by inspection and compilation, not by rendering.
+Build success alone is what let the previous navbar attempt (`16b1f99`) ship broken. The acceptance criterion for this step is the manual browser behaviour, and the owner confirms the navbar now works as expected. That manual check is recorded as owner-verified, not inferred from the build.
 
-Bookkeeping done in this pass: `to-do.md` Step 6 struck through with its instruction block trimmed to a single completion note; `plan.md` overwritten with Step 8 (Step 7 was already complete).
+### Notes
 
-## Next
-## [ ] Step 8 — Sticky/fixed navbar on scroll
+- The two HIGH findings from the v1 review (delete `body { padding-top }`; do not gate "done when" on the build alone) and the MEDIUM `z-index` contradiction from the v2 review are all resolved in the code.
+- Sticky behaviour is CSS-only and has no automated test; the build is a mechanical gate, the manual scroll check is the real one.
+- Reverted-away commit `16b1f99` remains in history; the `body` padding it introduced is fully removed.
+
+### Approval Status
+
+PASS — Task 1 complete. Ticked in `.clinerules/to-do.md` and committed separately.
