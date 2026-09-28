@@ -5,13 +5,15 @@ public class CreatePhoneModel(
     IManufacturerRepo manufacturerRepo,
     IModelRepo modelRepo,
     ICategoryRepo categoryRepo,
-    IColorRepo colorRepo) : PageModel
+    IColorRepo colorRepo,
+    IGuaranteeRepo guaranteeRepo) : PageModel
 {
     [BindProperty] public CreatePhoneInputModel Input { get; set; } = new();
     public string? Message { get; private set; }
     public IEnumerable<Manufacturer> Manufacturers { get; private set; } = [];
     public IEnumerable<Model> Models { get; private set; } = [];
     public IEnumerable<Color> Colors { get; private set; } = [];
+    public IEnumerable<string> Corporations { get; private set; } = [];
 
     public async Task OnGetAsync()
     {
@@ -157,6 +159,23 @@ public class CreatePhoneModel(
         return new JsonResult(new { id = color.Id, name = color.Name });
     }
 
+    public async Task<IActionResult> OnPostCreateCorporationAsync(string name)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+            return new JsonResult(new { error = "Name is required." }) { StatusCode = 400 };
+
+        var trimmed = name.Trim();
+        if (!Corporations.Any())
+            await PopulateDropdownsAsync();
+
+        var existing = Corporations.FirstOrDefault(c =>
+            string.Equals(c, trimmed, StringComparison.OrdinalIgnoreCase));
+        if (existing is not null)
+            return new JsonResult(new { name = existing });
+
+        return new JsonResult(new { name = trimmed });
+    }
+
     private async Task PopulateDropdownsAsync()
     {
         Manufacturers = await manufacturerRepo.FindAllAsync();
@@ -164,5 +183,9 @@ public class CreatePhoneModel(
             ? await modelRepo.GetByManufacturerAsync(Input.ManufacturerId)
             : [];
         Colors = await colorRepo.FindAllAsync();
+        Corporations = (await guaranteeRepo.FindAllAsync())
+            .Select(g => g.Corporation)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .OrderBy(c => c, StringComparer.Ordinal);
     }
 }

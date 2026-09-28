@@ -32,7 +32,8 @@ public class CreatePhoneModelTests : RepoTestBase
             new ManufacturerRepo(Context),
             new ModelRepo(Context),
             new CategoryRepo(Context),
-            new ColorRepo(Context));
+            new ColorRepo(Context),
+            new GuaranteeRepo(Context));
     }
 
     private static CreatePhoneInputModel ValidInput(int manufacturerId, int modelId) => new()
@@ -261,5 +262,99 @@ public class CreatePhoneModelTests : RepoTestBase
 
         Assert.Single(_model.Colors);
         Assert.Contains(_model.Colors, c => c.Name == "Black");
+    }
+
+    [Fact]
+    public async Task OnGetAsync_LoadsDistinctCorporations()
+    {
+        var apple = Context.Manufacturers.First(m => m.Name == "Apple");
+        var phoneCategory = Context.Categories.First(c => c.Name == "Phone");
+        Context.SaveChanges();
+        var products = new[]
+        {
+            new Product { ModelId = 1, Price = 100m },
+            new Product { ModelId = 1, Price = 100m },
+            new Product { ModelId = 1, Price = 100m },
+        };
+        Context.Products.AddRange(products);
+        await Context.SaveChangesAsync();
+        Context.Guarantees.AddRange(
+            new Guarantee { ProductId = products[0].Id, ProductNavigation = products[0], StartDate = DateTime.Today, ExpirationDate = DateTime.Today.AddYears(1), Corporation = "Apple" },
+            new Guarantee { ProductId = products[1].Id, ProductNavigation = products[1], StartDate = DateTime.Today, ExpirationDate = DateTime.Today.AddYears(1), Corporation = "apple" },
+            new Guarantee { ProductId = products[2].Id, ProductNavigation = products[2], StartDate = DateTime.Today, ExpirationDate = DateTime.Today.AddYears(1), Corporation = "Samsung" });
+        await Context.SaveChangesAsync();
+
+        await _model.OnGetAsync();
+
+        Assert.Equal(2, _model.Corporations.Count());
+        Assert.Contains(_model.Corporations, c => string.Equals(c, "Apple", StringComparison.OrdinalIgnoreCase));
+        Assert.Contains(_model.Corporations, c => c == "Samsung");
+    }
+
+    [Fact]
+    public async Task OnPostCreateCorporationAsync_NewName_ReturnsNameWithoutDbWrite()
+    {
+        var before = Context.Guarantees.Count();
+
+        var result = await _model.OnPostCreateCorporationAsync("NewCorp");
+
+        var jsonResult = Assert.IsType<JsonResult>(result);
+        var json = System.Text.Json.JsonSerializer.Serialize(jsonResult.Value);
+        using var doc = System.Text.Json.JsonDocument.Parse(json);
+        Assert.Equal("NewCorp", doc.RootElement.GetProperty("name").GetString());
+        Assert.Equal(before, Context.Guarantees.Count());
+    }
+
+    [Fact]
+    public async Task OnPostCreateCorporationAsync_DuplicateCasing_ReturnsExisting()
+    {
+        var products = new[]
+        {
+            new Product { ModelId = 1, Price = 100m },
+        };
+        Context.Products.AddRange(products);
+        await Context.SaveChangesAsync();
+        Context.Guarantees.Add(new Guarantee { ProductId = products[0].Id, ProductNavigation = products[0], StartDate = DateTime.Today, ExpirationDate = DateTime.Today.AddYears(1), Corporation = "Apple" });
+        await Context.SaveChangesAsync();
+        await _model.OnGetAsync();
+
+        var result = await _model.OnPostCreateCorporationAsync("apple");
+
+        var jsonResult = Assert.IsType<JsonResult>(result);
+        var json = System.Text.Json.JsonSerializer.Serialize(jsonResult.Value);
+        using var doc = System.Text.Json.JsonDocument.Parse(json);
+        Assert.Equal("Apple", doc.RootElement.GetProperty("name").GetString());
+        Assert.Single(Context.Guarantees.Where(g => g.Corporation == "Apple"));
+    }
+
+    [Fact]
+    public async Task OnPostCreateCorporationAsync_BlankReturns400()
+    {
+        var result = await _model.OnPostCreateCorporationAsync("   ");
+
+        var jsonResult = Assert.IsType<JsonResult>(result);
+        Assert.Equal(400, jsonResult.StatusCode);
+    }
+
+    [Fact]
+    public async Task OnPostAsync_ValidationFailure_RepopulatesCorporations()
+    {
+        Context.Colors.Add(new Color { Name = "Black" });
+        var products = new[]
+        {
+            new Product { ModelId = 1, Price = 100m },
+        };
+        Context.Products.AddRange(products);
+        await Context.SaveChangesAsync();
+        Context.Guarantees.Add(new Guarantee { ProductId = products[0].Id, ProductNavigation = products[0], StartDate = DateTime.Today, ExpirationDate = DateTime.Today.AddYears(1), Corporation = "Apple" });
+        await Context.SaveChangesAsync();
+
+        _model.Input = ValidInput(9999, 1); // invalid manufacturer triggers validation failure
+
+        await _model.OnPostAsync();
+
+        Assert.Single(_model.Colors);
+        Assert.Single(_model.Corporations);
+        Assert.Contains(_model.Corporations, c => c == "Apple");
     }
 }

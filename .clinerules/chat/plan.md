@@ -25,7 +25,7 @@
 - Risk: HIGH
 - Confidence: MEDIUM
 
-## [ ] Step 2 — Task 5 (strings, no new entity): Corporation dropdown + Add New modal
+## ~~[x] Step 2 — Task 5 (strings, no new entity): Corporation dropdown + Add New modal~~
 - Files: inspect: `CreatePhone.cshtml:94-100` (guarantee block), `Guarantee.cs:12-14` (Corporation: Required/MaxLength 100 — no FK, no Corporation entity), `CreatePhone.cshtml.cs:112-117` (Guarantee POST block with "Shop Warranty" default); modify: `CreatePhone.cshtml.cs`, `CreatePhone.cshtml`, `CreatePhoneModelTests.cs`; create: none; do not touch: input model contract (`GuaranteeCorporation` stays `string?`), entities, repos, migrations, services, API, auth, DB init.
 - Symbols: `CreatePhoneModel.Corporations` (new `IEnumerable<string>`), `CreatePhoneModel.OnPostCreateCorporationAsync(string name)` (new, NO DB write), `CreatePhoneModel.PopulateDropdownsAsync()` (extend for both lists).
 - Current -> Desired: free-text `Input.GuaranteeCorporation` (`string?`, max 100) + `"Shop Warranty"` fallback at `:116` → `<select>` of distinct existing `Guarantee.Corporation` values (seeded: Apple, Samsung — 4 guarantee rows) + "Add New" modal that appends client-side only (a corporation exists only once a Guarantee row uses it); POST behavior unchanged.
