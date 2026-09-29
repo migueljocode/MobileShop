@@ -1,1 +1,8 @@
-
+- ~~[x] Stage A — Foundation: generic repo registration, area interfaces, Api stubs, DI seams~~
+- [ ] Stage B — Home: HomeDataService + dashboard
+- [ ] Stage C — Products: ProductsDataService + product pages
+- [ ] Stage D — People: PeopleDataService + customer/seller pages
+- [ ] Stage E — Transactions: TransactionsDataService + transaction/invoice/PDF
+- [ ] Stage F — Reports: ReportsDataService + profit/loss
+- [ ] Stage G — Account: AccountDataService + login/profile
+- [ ] Stage H — Cleanup: delete entity services/repos/tests, GlobalUsings, final validation
