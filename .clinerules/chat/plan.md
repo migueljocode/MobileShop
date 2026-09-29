@@ -116,8 +116,11 @@ as they are — see Step 1 for why the JSON contract must not move.
          blank ? `"Shop Warranty"` : trimmed);
       f. build `Phone` with `IMEI1 = imei1`, `IMEI2` null when blank else trimmed, `OwnershipTransferred = false`,
          `ProductNavigation = product`;
-      g. `phones.AddAsync(phone)`; on failure `Message = "The phone could not be saved. Check the details and try again."`
-         and `Succeeded = false` with a null `ErrorField`; on success `Succeeded = true` and
+      g. `phones.AddAsync(phone)`; **failure means `await phones.AddAsync(phone) <= 0`** — the same test
+         `DataServiceBase.cs:87` applies (`Repo.AddAsync(entity) > 0`) with the default `persist: true`, so do
+         not invent a different notion of "not saved". On failure:
+         `Message = "The phone could not be saved. Check the details and try again."` and `Succeeded = false`
+         with a null `ErrorField`; on success `Succeeded = true` and
          `EntityId = phone.Id` (the page redirects with it). `LogInformation` on save, `LogWarning` on failure.
   12. `CreateAppleIdAsync(CreateAppleIdInputModel input)` -> `ServiceResult`, porting `:17-81` in order:
       a. `email = input.Email.Trim()`, duplicate check using the **case-insensitive expression from
@@ -130,7 +133,9 @@ as they are — see Step 1 for why the JSON contract must not move.
       e. build `Product { ModelId, Barcode = Guid.NewGuid().ToString("N")[..12], Price = input.Price }` — no color, no profiles;
       f. build `AppleId { Email = email, Password = input.Password.Trim(), Notes = blank ? null : trimmed, ProductNavigation = product }`
          — **the password is stored plaintext by design (L8); never hash it, never trim it differently**;
-      g. `appleIds.AddAsync(appleId)`; on failure `Message = "The Apple ID could not be saved."`; on success
+      g. `appleIds.AddAsync(appleId)`; **failure means `await appleIds.AddAsync(appleId) <= 0`**, the same
+         `DataServiceBase.cs:87` test as for the phone. On failure
+         `Message = "The Apple ID could not be saved."`; on success
          `Succeeded = true`, `EntityId = appleId.Id`.
 - Depends on: Stage B (complete).
 - Edge cases / error handling: the two `InvalidOperationException` throws are load-bearing — a missing seed
@@ -157,11 +162,15 @@ as they are — see Step 1 for why the JSON contract must not move.
 - Files: create: src/MobileShop.Services/DataServices/Shared/ProductTransactionProjection.cs; modify:
   src/MobileShop.Services/DataServices/Dal/ProductsDataService.cs (add `IBaseRepo<Transaction> transactions`
   to the ctor, the three public members, and the private projection wrapper),
+  **src/MobileShop.Services/DataServices/Interfaces/IProductsDataService.cs** and
+  **src/MobileShop.Services/DataServices/Api/ApiProductsDataService.cs** (the `GetInventoryRowsAsync`
+  signature change in change 2, and the matching Api body per L7),
   src/MobileShop.Tests/Services/DataServices/Dal/ProductsDataServiceTests.cs (**its constructor changes in
   this step** — Step 1 builds the service with nine repos and this step adds the tenth, so the Step 1 test
-  file will not compile until it is updated here); do not touch: pages, views, interfaces, Api stubs, DI,
+  file will not compile until it is updated here); do not touch: pages, views, DI,
   entity services, `TransactionDataService` (it keeps its own copy until Stage E).
-- Symbols: `GetInventoryRowsAsync`, `GetSecondHandRowsAsync`, `GetDetailsAsync`; private
+- Symbols: `IProductsDataService.GetInventoryRowsAsync` (+ its `ApiProductsDataService` body);
+  `GetSecondHandRowsAsync`, `GetDetailsAsync`; private
   `GetProductTransactionsAsync`; new shared `ProductTransactionProjection`; new
   `ProductDetailsViewModel.Transactions`.
 - Current -> Desired: the list rows come from `PhoneDataService.GetInventoryRowsAsync` (`:25`),
@@ -174,14 +183,23 @@ as they are — see Step 1 for why the JSON contract must not move.
      member of `ProductDetailsViewModel` (`… bool IsSecondHand, IReadOnlyList<ProductTransactionViewModel> Transactions = []`).
      A default keeps every existing construction site compiling, including in the two entity services and in
      `PhoneDataServiceTests` / `AppleIdDataServiceTests` — those must keep passing while they still exist.
-  2. `GetInventoryRowsAsync()` = `phones.SelectAllAsync(<phone projection>)` concatenated with
-     `appleIds.SelectAllAsync(<apple-id projection>)`, both copied **verbatim** from `PhoneDataService.cs:25`
+  2. `GetInventoryRowsAsync` **gains an optional `string? type = null` parameter — do this in this step, not
+     later**, because the contract and the service change together here:
+     `Task<IReadOnlyList<ProductListItemViewModel>> GetInventoryRowsAsync(string? type = null)` in
+     `IProductsDataService` (defaulted, so no other implementation breaks) and the matching
+     `ApiProductsDataService` body, which keeps throwing `NotImplementedException` (L7).
+     Semantics — `type` is the page's already-normalised lowercase value: `null` or `"all"` returns both
+     blocks, `"phone"` phones only, `"appleid"` Apple IDs only, and any unrecognised value returns both
+     blocks (defensive; the page only ever passes those three). Build each requested block with
+     `phones.SelectAllAsync(<phone projection>)` / `appleIds.SelectAllAsync(<apple-id projection>)`, both
+     copied **verbatim** from `PhoneDataService.cs:25`
      and `AppleIdDataService.cs:25` (they build `ProductListItemViewModel`, 8 members). "Verbatim" includes
      three easy-to-normalise details: each projection ends with `.OrderBy(row => row.ProductId)`, the `Type`
      literals are `"Phone"` and `"Apple ID"` (with the space), and the `Identifier` is `"IMEI: " + IMEI1` for
-     phones but the raw `appleId.Email` for Apple IDs. The result is therefore the phone block ordered by
-     ProductId followed by the Apple-ID block ordered by ProductId — the same `rows.AddRange(...)` order as
-     `Products/Index.cshtml.cs:16-19`. Do not merge or re-sort the two blocks.
+     phones but the raw `appleId.Email` for Apple IDs. The `"all"` result is therefore the phone block ordered
+     by ProductId followed by the Apple-ID block ordered by ProductId — the same `rows.AddRange(...)` order as
+     `Products/Index.cshtml.cs:16-19`. Do not merge or re-sort the two blocks, and do not filter inside a
+     projection.
   3. `GetSecondHandRowsAsync()` = the same two `:90` projections concatenated. **The page keeps the
      `OrderBy(product => product.Name)`** — do not move it into the service and do not add it to the inventory path.
   4. `GetDetailsAsync(int id, string type)` = the phone branch is
@@ -198,11 +216,13 @@ as they are — see Step 1 for why the JSON contract must not move.
      `src/MobileShop.Services/DataServices/Shared/ProductTransactionProjection.cs` with one static
      `Expression<Func<Transaction, ProductTransactionViewModel>> Selector`, body copied verbatim from
      `TransactionDataService.cs:271-280` (the `PersonNavigation == null ? "Shop"` fallbacks included). The body
-     must stay a pure expression — property access, `?? "Shop"` and string concatenation only — so it
+     must stay a pure expression — property access, the source's ternary null-check
+     (`PersonNavigation == null ? "Shop" : …`) and string concatenation only — so it
      converts to an expression tree. Then a private `GetProductTransactionsAsync(int productId)`:
      `(await transactions.SelectAllAsync(t => t.ProductId == productId, ProductTransactionProjection.Selector)).OrderByDescending(item => item.Date).ToList()`.
-     Why here: Stage E's `TransactionsDataService` needs the identical projection, and the project rule is
-     that `Shared/` holds pure shared projections — no repos, no `DbContext`. The consumer adds
+     Why here: Stage E's `TransactionsDataService` needs the identical projection, and the architecture
+     decision approved for this migration places shared pure projections in `DataServices/Shared/` — no
+     repos, no `DbContext`. The consumer adds
      `using MobileShop.Services.DataServices.Shared;` at the top of the service file (a needed using, not a
      redundant one; do not put it in GlobalUsings for two consumers). Once nothing calls it,
      `TransactionDataService.GetProductTransactionsAsync` goes in Stage E.
@@ -214,11 +234,15 @@ as they are — see Step 1 for why the JSON contract must not move.
 - Tests: extend `ProductsDataServiceTests` with: inventory rows contain both entity types with correct
   `Type`/`Identifier`; second-hand rows contain only second-hand items; `GetDetailsAsync` for each type
   returns the right labels (`"Not sold"`, `"None"`, the IMEI variants) and carries the transaction rows in
-  descending date order with `"Shop"` fallbacks; an unknown id returns `null` **and loads no transaction
-  rows**; an uppercase `"AppleId"` still routes to the Apple-ID branch.
+  descending date order with `"Shop"` fallbacks; an unknown id returns `null`; an uppercase `"AppleId"`
+  still routes to the Apple-ID branch. And for the new `type` parameter: `null` and `"all"` return both
+  blocks, `"phone"` phones only, `"appleid"` Apple IDs only, each block still ordered by ProductId, and an
+  unrecognised value returns both blocks.
 - Verify: dotnet build src/MobileShop.slnx --nologo && dotnet test src/MobileShop.slnx --nologo --no-build
-- Done when: the three members behave identically to the entity services they replace, the existing
-  `ProductDetailsViewModel` construction sites still compile, and nothing outside the service changed.
+- Done when: the three members behave identically to the entity services they replace,
+  `GetInventoryRowsAsync` filters by `type`, the existing
+  `ProductDetailsViewModel` construction sites still compile, the shared projection exists, and the only
+  files touched are the ones this step lists.
 - Risk: MEDIUM. Confidence: HIGH.
 
 ## [ ] Step 3 — Migrate `CreatePhone` and `CreateAppleId`
@@ -287,16 +311,16 @@ as they are — see Step 1 for why the JSON contract must not move.
   Desired: one area service each, no second service, no view change.
 - Change:
   1. `IndexModel` ctor -> `(IProductsDataService dataService)`. `OnGetAsync` keeps the `Type` normalisation
-     (`string.IsNullOrWhiteSpace(type) ? "all" : type.ToLowerInvariant()`) and the same
-     `if (Type is "all" or "phone")` / `"appleid"` filter calls, but each branch now calls
-     `GetInventoryRowsAsync(type)`-equivalent behaviour. **Pin the contract:** the service member takes no
-     filter today — add an optional `string? type = null` parameter to `IProductsDataService.GetInventoryRowsAsync`
-     (and its Api body) in this step, so the page can keep filtering by type without fetching both sets.
-     That is the third and final contract addition of this stage.
+     (`string.IsNullOrWhiteSpace(type) ? "all" : type.ToLowerInvariant()`) and then calls
+     `Products = await dataService.GetInventoryRowsAsync(Type);` — one call for every case. The optional
+     `type` parameter and its filter semantics were added to the interface and the service in **Step 2**;
+     this step only passes the already-normalised value. No contract change, no service edit, no test edit
+     in this step.
   2. `DetailsModel` ctor -> `(IProductsDataService dataService)`. `OnGetAsync` becomes
      `Product = await dataService.GetDetailsAsync(id, type ?? string.Empty); if (Product is null) return NotFound();`
      `Transactions = Product.Transactions;` — the `ITransactionDataService` parameter disappears because the
-     rows now ride on the details object (Step 1's `ServiceResult`/`ProductDetailsViewModel` work). Both
+     rows now ride on the details object (Step 1's `ServiceResult` additions and Step 2's
+     `ProductDetailsViewModel.Transactions`). Both
      property types stay identical, so `Details.cshtml` is untouched.
   3. `SecondHandModel` ctor -> `(IProductsDataService dataService)`; `OnGetAsync` =
      `(await dataService.GetSecondHandRowsAsync()).OrderBy(product => product.Name).ToList()`.
