@@ -21,10 +21,9 @@ public class ProductsDataService(
     protected ILogger<ProductsDataService> Logger { get; } = logger;
 
     /// <inheritdoc />
-            public async Task<IReadOnlyList<ProductListItemViewModel>> GetInventoryRowsAsync()
+    public async Task<IReadOnlyList<ProductListItemViewModel>> GetInventoryRowsAsync()
     {
-        var rows = await phones.SelectAllAsync(
-            phone => phone.ProductNavigation.PhoneProfile != null,
+        var rows = (await phones.SelectAllAsync(
             phone => new ProductListItemViewModel(
                 phone.Id,
                 phone.ProductId,
@@ -33,10 +32,11 @@ public class ProductsDataService(
                 "IMEI: " + phone.IMEI1,
                 phone.ProductNavigation.ColorNavigation == null ? null : phone.ProductNavigation.ColorNavigation.Name,
                 phone.ProductNavigation.Transactions.Any(t => t.Direction == TransactionDirection.Sell),
-                phone.ProductNavigation.SecondHandProfile != null));
+                phone.ProductNavigation.SecondHandProfile != null)))
+            .OrderBy(row => row.ProductId)
+            .ToList();
 
-        var appleRows = await appleIds.SelectAllAsync(
-            appleId => appleId.ProductNavigation.AppleIdProfile != null,
+        var appleRows = (await appleIds.SelectAllAsync(
             appleId => new ProductListItemViewModel(
                 appleId.Id,
                 appleId.ProductId,
@@ -45,18 +45,17 @@ public class ProductsDataService(
                 appleId.Email,
                 null,
                 appleId.ProductNavigation.Transactions.Any(t => t.Direction == TransactionDirection.Sell),
-                appleId.ProductNavigation.SecondHandProfile != null));
-
-        return rows.Concat(appleRows)
+                appleId.ProductNavigation.SecondHandProfile != null)))
             .OrderBy(row => row.ProductId)
-            .ToList()
-            .AsReadOnly();
+            .ToList();
+
+        return rows.Concat(appleRows).ToList().AsReadOnly();
     }
 
     /// <inheritdoc />
     public async Task<IReadOnlyList<ProductListItemViewModel>> GetSecondHandRowsAsync()
     {
-        var phoneRows = await phones.SelectAllAsync(
+        var phoneRows = (await phones.SelectAllAsync(
             phone => phone.ProductNavigation.SecondHandProfile != null,
             phone => new ProductListItemViewModel(
                 phone.Id,
@@ -66,9 +65,11 @@ public class ProductsDataService(
                 "IMEI: " + phone.IMEI1,
                 phone.ProductNavigation.ColorNavigation == null ? null : phone.ProductNavigation.ColorNavigation.Name,
                 phone.ProductNavigation.Transactions.Any(t => t.Direction == TransactionDirection.Sell),
-                phone.ProductNavigation.SecondHandProfile != null));
+                phone.ProductNavigation.SecondHandProfile != null)))
+            .OrderBy(row => row.ProductId)
+            .ToList();
 
-        var appleRows = await appleIds.SelectAllAsync(
+        var appleRows = (await appleIds.SelectAllAsync(
             appleId => appleId.ProductNavigation.SecondHandProfile != null,
             appleId => new ProductListItemViewModel(
                 appleId.Id,
@@ -78,21 +79,20 @@ public class ProductsDataService(
                 appleId.Email,
                 null,
                 appleId.ProductNavigation.Transactions.Any(t => t.Direction == TransactionDirection.Sell),
-                appleId.ProductNavigation.SecondHandProfile != null));
-
-                return phoneRows.Concat(appleRows)
+                appleId.ProductNavigation.SecondHandProfile != null)))
             .OrderBy(row => row.ProductId)
-            .ToList()
-            .AsReadOnly();
+            .ToList();
+
+        return phoneRows.Concat(appleRows).ToList().AsReadOnly();
     }
 
     /// <inheritdoc />
     public async Task<ProductDetailsViewModel?> GetDetailsAsync(int id, string type)
     {
-                if (string.Equals(type, "appleid", StringComparison.OrdinalIgnoreCase))
+        if (string.Equals(type, "appleid", StringComparison.OrdinalIgnoreCase))
         {
-            var apple = await appleIds.SelectAsync(
-                appleId => appleId.Id == id && appleId.ProductNavigation.AppleIdProfile != null,
+            return await appleIds.SelectAsync(
+                id,
                 appleId => new ProductDetailsViewModel(
                     "Apple ID",
                     appleId.ProductId,
@@ -108,14 +108,12 @@ public class ProductsDataService(
                         .FirstOrDefault() ?? "Not sold",
                     appleId.ProductNavigation.GuaranteeProfile == null
                         ? "None"
-                        : appleId.ProductNavigation.GuaranteeProfile.Corporation + " until " + appleId.ProductNavigation.GuaranteeProfile.ExpirationDate.ToString("d"),
+                        : appleId.ProductNavigation.GuaranteeProfile.Corporation + " until " + appleId.ProductNavigation.GuaranteeProfile.ExpirationDate,
                     appleId.ProductNavigation.SecondHandProfile != null));
-
-            return apple;
         }
 
         var phone = await phones.SelectAsync(
-            p => p.Id == id && p.ProductNavigation.PhoneProfile != null,
+            id,
             phone => new ProductDetailsViewModel(
                 "Phone",
                 phone.ProductId,
@@ -136,7 +134,7 @@ public class ProductsDataService(
                     : phone.ProductNavigation.GuaranteeProfile.Corporation + " until " + phone.ProductNavigation.GuaranteeProfile.ExpirationDate.ToString("d"),
                 phone.ProductNavigation.SecondHandProfile != null));
 
-                return phone;
+        return phone;
     }
 
     /// <inheritdoc />

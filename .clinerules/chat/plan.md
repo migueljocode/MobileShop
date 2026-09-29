@@ -163,20 +163,31 @@ as they are — see Step 1 for why the JSON contract must not move.
   behaviour, the Dal line is added, the four Products FQNs are shortened, and no page or view changed.
 - Risk: HIGH. Confidence: HIGH.
 
-## [ ] Step 2 — `ProductsDataService` read members
+## [ ] Step 2 — `ProductsDataService` read members (extend with `type` + `Transactions`)
+- **Status note from Step 1:** the three read members (`GetInventoryRowsAsync`, `GetSecondHandRowsAsync`,
+  `GetDetailsAsync`) were implemented in Step 1 with the *original* entity-service semantics — profile-less
+  inventory lookups (no `PhoneProfile`/`AppleIdProfile` nav predicate), per-block `.OrderBy(row => row.ProductId)`,
+  concatenation **without** a merged OrderBy, and `GetDetailsAsync(int id, string type)` routing on `type`
+  case-insensitively exactly as `Details.cshtml.cs:13` does (no `Profile != null` filter on the lookup identity).
+  Step 2 does **not** re-add them; it *extends* them and adds the transactions wiring. The plan text that
+  previously read "Step 1 builds the service with nine repos; this step adds the tenth" was written before the
+  reviewer LOW deviation dropped the unused `IBaseRepo<Product> products` slot — Step 1 built the service with
+  **seven** repos + logger, and this step adds the eighth (`IBaseRepo<Transaction> transactions`).
 - Files: create: src/MobileShop.Services/DataServices/Shared/ProductTransactionProjection.cs; modify:
   src/MobileShop.Services/DataServices/Dal/ProductsDataService.cs (add `IBaseRepo<Transaction> transactions`
-  to the ctor, the three public members, and the private projection wrapper),
+  to the ctor, extend `GetInventoryRowsAsync` with the `type` parameter, and wrap `GetDetailsAsync` with the
+  three-phase transactions copy; the two read members already exist from Step 1),
   **src/MobileShop.Services/DataServices/Interfaces/IProductsDataService.cs** and
   **src/MobileShop.Services/DataServices/Api/ApiProductsDataService.cs** (the `GetInventoryRowsAsync`
   signature change in change 2, and the matching Api body per L7),
   src/MobileShop.Tests/Services/DataServices/Dal/ProductsDataServiceTests.cs (**its constructor changes in
-  this step** — Step 1 builds the service with nine repos and this step adds the tenth, so the Step 1 test
-  file will not compile until it is updated here); do not touch: pages, views, DI,
-  entity services, `TransactionDataService` (it keeps its own copy until Stage E).
-- Symbols: `IProductsDataService.GetInventoryRowsAsync` (+ its `ApiProductsDataService` body);
-  `GetSecondHandRowsAsync`, `GetDetailsAsync`; private
-  `GetProductTransactionsAsync`; new shared `ProductTransactionProjection`; new
+  this step** — Step 1 built the service with seven repos and this step adds the eighth, so the Step 1 test
+  file must be updated here); do not touch: pages, views, DI, entity services, `TransactionDataService`
+  (it keeps its own copy until Stage E).
+- Symbols: `IProductsDataService.GetInventoryRowsAsync` (gains an optional `string? type` param here;
+  its body already exists from Step 1) + its `ApiProductsDataService` body;
+  `GetSecondHandRowsAsync` and `GetDetailsAsync` already exist from Step 1 and are left as-is in shape;
+  new private `GetProductTransactionsAsync`; new shared `ProductTransactionProjection`; new
   `ProductDetailsViewModel.Transactions`.
 - Current -> Desired: the list rows come from `PhoneDataService.GetInventoryRowsAsync` (`:25`),
   `AppleIdDataService.GetInventoryRowsAsync` (`:25`) and the second-hand rows from their `:90` counterparts;
@@ -236,18 +247,18 @@ as they are — see Step 1 for why the JSON contract must not move.
   treat everything else as phone, as today. A missing id returns `null` and the page answers 404. The
   details projections navigate `ProductNavigation`, so an id belonging to another entity type must still
   behave as today (the projections are per-type lookups, not cross-type).
-- Tests: extend `ProductsDataServiceTests` with: inventory rows contain both entity types with correct
-  `Type`/`Identifier`; second-hand rows contain only second-hand items; `GetDetailsAsync` for each type
-  returns the right labels (`"Not sold"`, `"None"`, the IMEI variants) and carries the transaction rows in
-  descending date order with `"Shop"` fallbacks; an unknown id returns `null`; an uppercase `"AppleId"`
-  still routes to the Apple-ID branch. And for the new `type` parameter: `null` and `"all"` return both
-  blocks, `"phone"` phones only, `"appleid"` Apple IDs only, each block still ordered by ProductId, and an
-  unrecognised value returns both blocks.
+- Tests: the Step 1 tests already pin the pre-baked read semantics (inventory contains both entity types
+  with correct `Type`/`Identifier`; second-hand contains only second-hand items; `GetDetailsAsync`
+  returns the right labels and `null` for unknown ids — verified green, 477/477); they pass because Step
+  1 implemented the members with original semantics. Step 2 adds only the new `Transactions` ordering
+  test and the new `type`-parameter tests: `null` and `"all"` return both blocks, `"phone"` phones only,
+  `"appleid"` Apple IDs only, each block still ordered by ProductId, and an unrecognised value returns both
+  blocks; plus the details object carries transaction rows in descending date order with `"Shop"` fallbacks.
 - Verify: dotnet build src/MobileShop.slnx --nologo && dotnet test src/MobileShop.slnx --nologo --no-build
-- Done when: the three members behave identically to the entity services they replace,
-  `GetInventoryRowsAsync` filters by `type`, the existing
-  `ProductDetailsViewModel` construction sites still compile, the shared projection exists, and the only
-  files touched are the ones this step lists.
+- Done when: the three read members (already present from Step 1) behave identically to the entity services
+  they replace, `GetInventoryRowsAsync` filters by `type`, `GetDetailsAsync` carries `Transactions` in
+  descending date order, the existing `ProductDetailsViewModel` construction sites still compile, the shared
+  projection exists, and the only files touched are the ones this step lists.
 - Risk: MEDIUM. Confidence: HIGH.
 
 ## [ ] Step 3 — Migrate `CreatePhone` and `CreateAppleId`
