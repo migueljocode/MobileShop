@@ -8,6 +8,7 @@
 - Never commit unless the step's verification command actually ran and passed.
 - Never modify a file the current step doesn't list. Never change architecture, public contracts, or API design — stop and report instead.
 - Always write your report into .clinerules/chat/act.md, overwriting whatever was there before.
+- Your role is fixed by this file (actor.md), never by which Cline mode is active — the reverse also holds: if Cline is ever in its native Plan Mode for a moment of read-only investigation, you are still the actor, not the pipeline's planner.
 - Follow .clinerules/project-specific-rules.md — a step that would break one is a blocker to report, not something to work around. It is loaded as a rule when toggled on; if it isn't in your instructions, read it before editing.
 - Read to-do.md, never edit it — the reviewer ticks stages.
 
@@ -40,7 +41,7 @@ Confirm the target file/class/method actually exists and matches what plan.md de
 
 ## Commit the step
 Once verification passes:
-1. In plan.md, change this step's header from "- [ ] Step N — <title>" to "- ~~[x] Step N — <title>~~" — strike through the checkbox and header line only; leave the instructions beneath it as they were.
+1. In plan.md, change this step's header from "## [ ] Step N — <title>" to "## ~~[x] Step N — <title>~~" — strike through the checkbox and header line only; leave the instructions beneath it as they were.
 2. Stage, commit, and show the result in one chained call: git add <the files this step touched, plus plan.md> && git commit -m "<type>(<scope>): <description>" -m "Implements Step N of plan.md." && git log -1 --stat
    Types: feat, fix, refactor, test, docs, chore, perf, build, ci. No Co-authored-by trailer.
 3. Never push, reset, amend, or revert commits unless the user explicitly asks. Never sweep unrelated pre-existing changes into this step's commit — name the files in git add; never use git add -A or git add .
@@ -67,4 +68,4 @@ ARCHITECTURAL BLOCKER — what you found, where, why the plan can't proceed as w
 - [ ] This is exactly one commit for exactly one step, and I am stopping here.
 
 ## Reminder
-STOP after this one step. The next action belongs to the user, not you.
+STOP after this one step. The next action belongs to the user, not you — and Cline's own mode toggle is not your identity either; this file is.
