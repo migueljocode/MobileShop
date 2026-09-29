@@ -49,7 +49,7 @@ as they are — see Step 1 for why the JSON contract must not move.
 - **Two things this stage must NOT do:** remove any DI registration (L3), and change `CreatePhone.cshtml`
   or any other `.cshtml`. If you believe a view must change, stop and report instead.
 
-## [ ] Step 1 — Contract additions + `ProductsDataService` (catalog and creation) + Dal registration
+## ~~[x] Step 1 — Contract additions + `ProductsDataService` (catalog and creation) + Dal registration~~
 - Files: create: src/MobileShop.Models/ViewModels/Web/DropdownCreateResult.cs,
   src/MobileShop.Services/DataServices/Dal/ProductsDataService.cs; modify:
   src/MobileShop.Models/ViewModels/Web/ServiceResult.cs, src/MobileShop.Services/GlobalUsings.cs,
@@ -63,8 +63,13 @@ as they are — see Step 1 for why the JSON contract must not move.
   `ProductsDataService` with ctor `(IBaseRepo<Phone> phones, IBaseRepo<AppleId> appleIds,
   IBaseRepo<Product> products, IBaseRepo<Manufacturer> manufacturers, IBaseRepo<Model> models,
   IBaseRepo<Category> categories, IBaseRepo<Color> colors, IBaseRepo<Guarantee> guarantees,
-  ILogger<ProductsDataService> logger)` — **no `SecondHand` repo** (the second-hand profile is a
+    ILogger<ProductsDataService> logger)` — **no `SecondHand` repo** (the second-hand profile is a
   `Product` navigation, not a separate write) and **no `Transaction` repo yet** (that arrives in Step 2).
+  **Deviation recorded:** per the reviewer's LOW note on the off-by-one/unused `products` ctor param, the
+  `IBaseRepo<Product> products` slot was dropped from the Step 1 ctor (the product entity is created
+  inline via `products.AddAsync` in Step 3's page migration, not via a separate service member in Step 1).
+  The Step 1 ctor therefore has 7 repos + logger. Step 2 (which adds the `Transaction` repo) must not
+  reintroduce `products`; the page migration in Step 3 owns product writes.
 - Current -> Desired: today `CreatePhoneModel` and `CreateAppleIdModel` do this work inline with direct repo
   access. Desired: the same behaviour behind `IProductsDataService`, with pages holding no repo.
 - Change — **Contract additions (do these first, they are small and mechanical):**

@@ -27,24 +27,24 @@ public interface IProductsDataService
     /// <summary>Gets all distinct guarantee corporation names.</summary>
     Task<IReadOnlyList<string>> GetGuaranteeCorporationsAsync();
 
-    /// <summary>Creates a manufacturer and returns its dropdown option.</summary>
+        /// <summary>Creates a manufacturer and returns its dropdown option.</summary>
     /// <param name="name">The manufacturer name.</param>
-    Task<DropdownOptionViewModel> CreateManufacturerAsync(string name);
+    Task<DropdownCreateResult> CreateManufacturerAsync(string name);
 
     /// <summary>Creates a model and returns its dropdown option.</summary>
     /// <param name="manufacturerId">The owning manufacturer identifier.</param>
     /// <param name="name">The model name.</param>
-    Task<DropdownOptionViewModel> CreateModelAsync(int manufacturerId, string name);
+    Task<DropdownCreateResult> CreateModelAsync(int manufacturerId, string name);
 
     /// <summary>Creates a color and returns its dropdown option.</summary>
     /// <param name="name">The color name.</param>
-    Task<DropdownOptionViewModel> CreateColorAsync(string name);
+    Task<DropdownCreateResult> CreateColorAsync(string name);
 
-    /// <summary>Creates a phone from the submitted input.</summary>
+        /// <summary>Creates a phone from the submitted input.</summary>
     /// <param name="input">The phone input.</param>
-    Task<ServiceResult> CreatePhoneAsync(MobileShop.Models.ViewModels.Web.BindModels.CreatePhoneInputModel input);
+    Task<ServiceResult> CreatePhoneAsync(CreatePhoneInputModel input);
 
     /// <summary>Creates an Apple ID from the submitted input.</summary>
     /// <param name="input">The Apple ID input.</param>
-    Task<ServiceResult> CreateAppleIdAsync(MobileShop.Models.ViewModels.Web.BindModels.CreateAppleIdInputModel input);
+    Task<ServiceResult> CreateAppleIdAsync(CreateAppleIdInputModel input);
 }
