@@ -76,7 +76,7 @@ AppleIdsInStock` and `Model.RecentTransactions`, and both page properties keep t
   verbatim, and no other file is touched.
 - Risk: LOW. Confidence: HIGH.
 
-## [ ] Step 2 — Migrate IndexModel to IHomeDataService dataService
+## ~~[x] Step 2 — Migrate IndexModel to IHomeDataService dataService~~
 - Files: modify: src/MobileShop.Web/Pages/Index.cshtml.cs; do not touch: Index.cshtml, any service, any repo.
 - Symbols: `IndexModel` primary constructor; `IndexModel.OnGetAsync`.
 - Current -> Desired: ctor takes `(IPhoneDataService, IAppleIdDataService, ITransactionDataService)` and
