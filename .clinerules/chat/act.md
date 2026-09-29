@@ -1,13 +1,11 @@
-# Act Report — Combined Step 2 (Task 5: Corporation dropdown)
-- Commit: 14b65a9 — feat(web/products): add Corporation dropdown with Add New modal on Create Phone
+# Act Report — Stage A Step 6
+- Commit: None — validation step, plan header intentionally left unticked per corrected instruction.
 - Verification:
-  - Build: 0 warnings, 0 errors
-  - Filtered: 21/21 CreatePhoneModelTests pass
-  - Dal (315) + Web (64) + Services (51) partitions all pass (full unfiltered run exceeds 30s window; suite total 407 passed + 2 pre-existing skips per baseline)
-  - Served HTML (Production :5199, DB untouched): corporationSelect present with Apple + Samsung options, addCorporationModal x3 refs, colorSelect intact
-- Report file: .clinerules/chat/act.md
-- Limitations: None
-- Friction noted: `dotnet test` full unfiltered exceeds tool timeout — used Dal/Web/Services partitions
-- Problems: None — Guarantee POST block unchanged, no DB write from modal, Shop Warranty default intact
-- UI polish note (deferred, planner input): owner finds "-- Select color --" too long for the short Color combobox and wants combobox resize; Step 2 used "-- Select corporation --" to match; BOTH placeholders intentionally left as planned (changing them is out-of-scope UI polish for a separate step — e.g. "-- Color --"/"-- Corp. --" + col-md width tweak)
+  - Chain 1: `dotnet build src/MobileShop.slnx --nologo && dotnet test src/MobileShop.slnx --nologo --no-build` -> exit 0; build succeeded, 0 warnings, 0 errors; 451 passed, 0 failed, 2 skipped (453 total).
+  - Chain 2 guard: host log contained `Hosting environment: Production` before route checks.
+  - Routes: `200 /`, `200 /Products`, `200 /Products/SecondHand`, `200 /People/Customers`, `200 /People/Sellers`, `200 /Transactions`, `200 /Reports/ProfitLoss`, `200 /Account/Login`.
+  - Database: `stat -c '%s %y' MobileShop.db` before/after = `4096 2026-09-29 17:46:58.851080603 +0330`; byte-identical comparison passed.
+- Limitations: None.
+- Friction noted: The prior run without `--no-launch-profile` demonstrated the launchSettings footgun; corrected plan text now makes the Production guard mandatory.
+- Problems: None.
 - Status: COMPLETE
