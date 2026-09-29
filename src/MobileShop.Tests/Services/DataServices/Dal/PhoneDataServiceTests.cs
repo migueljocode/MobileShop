@@ -70,10 +70,6 @@ public class PhoneDataServiceTests : RepoTestBase
         Assert.NotNull(secondHandOutAsync);
         Assert.Equal(4, secondHandOutAsync!.TestPeriodDays);
 
-        Assert.True(_service.Quantity() >= 0);
-        Assert.True(_service.SecondHandQuantity() >= 1);
-        Assert.True(_service.AvailableSecondHandQuantity() >= 0);
-
         var secondHandProducts = _service.GetSecondHand().ToList();
         Assert.Contains(secondHandProducts, p => p.Id == phone.Id);
 

@@ -72,10 +72,6 @@ public class AppleIdDataServiceTests : RepoTestBase
         Assert.NotNull(secondHandOutAsync);
         Assert.Equal(7, secondHandOutAsync!.TestPeriodDays);
 
-        Assert.True(_service.Quantity() >= 0);
-        Assert.True(_service.SecondHandQuantity() >= 1);
-        Assert.True(_service.AvailableSecondHandQuantity() >= 0);
-
         var secondHandProducts = _service.GetSecondHand().ToList();
         Assert.Contains(secondHandProducts, p => p.Id == appleId.Id);
 

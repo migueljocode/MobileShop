@@ -95,7 +95,7 @@ AppleIdsInStock` and `Model.RecentTransactions`, and both page properties keep t
 - Done when: build green, `Index.cshtml` untouched, and no other page references a repo.
 - Risk: LOW. Confidence: HIGH.
 
-## [ ] Step 3 — Strengthen coverage and run Stage B validation
+## ~~[x] Step 3 — Strengthen coverage and run Stage B validation~~
 - Files: modify: src/MobileShop.Tests/Services/DataServices/Dal/HomeDataServiceTests.cs (created in Step 1);
   create: none; delete: nothing.
 - Symbols: `HomeDataServiceTests`; the two superseded inequality assertions in `PhoneDataServiceTests:74-75`

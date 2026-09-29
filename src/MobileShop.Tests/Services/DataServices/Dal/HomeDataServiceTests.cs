@@ -137,9 +137,43 @@ public class HomeDataServiceTests : RepoTestBase
         Assert.Equal(new DateTime(2025, 1, 2), card.Date);
         Assert.Equal(TransactionDirection.Sell, card.Direction);
         Assert.Equal(250m, card.FinishedPrice);
+        Assert.Equal(
+            newerProduct.ModelNavigation.ManufacturerNavigation.Name + " " + newerProduct.ModelNavigation.Name,
+            card.ProductLabel);
         Assert.StartsWith("To: ", card.PartyLabel);
         Assert.DoesNotContain("From: ", card.PartyLabel);
         Assert.DoesNotContain(cards, card => card.Date == new DateTime(2025, 1, 1));
+    }
+
+    [Fact]
+    public async Task GetRecentTransactionsAsync_uses_default_twenty_and_orders_all_cards_descending()
+    {
+        TestDataHelpers.SeedShopSentinels(Context);
+        var seller = Context.Sellers.First();
+        var customer = Context.Customers.First();
+
+        for (var index = 0; index < 21; index++)
+        {
+            var product = TestDataHelpers.CreateProduct(Context);
+            Context.Transactions.Add(new Transaction
+            {
+                ProductId = product.Id,
+                ProductNavigation = product,
+                SellerId = seller.Id,
+                CustomerId = customer.Id,
+                FinishedPrice = index,
+                Date = new DateTime(2025, 1, 1).AddDays(index),
+                Direction = TransactionDirection.Buy
+            });
+        }
+        Context.SaveChanges();
+
+        var cards = await _service.GetRecentTransactionsAsync();
+
+        Assert.Equal(20, cards.Count);
+        Assert.Equal(new DateTime(2025, 1, 21), cards[0].Date);
+        Assert.Equal(new DateTime(2025, 1, 2), cards[^1].Date);
+        Assert.True(cards.Zip(cards.Skip(1)).All(pair => pair.First.Date >= pair.Second.Date));
     }
 
     [Fact]
