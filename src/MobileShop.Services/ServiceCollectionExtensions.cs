@@ -24,7 +24,7 @@ public static class ServiceCollectionExtensions
 
         return services
             .AddMobileShopDbContext()
-            .AddMobileShopRepositories()
+            .AddMobileShopRepository()
             .AddMobileShopSecurity()
             .AddMobileShopPdf(configuration)
             .AddMobileShopDistribution(configuration)
@@ -58,8 +58,11 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
-    /// <summary>Registers every repository in the Dal layer.</summary>
-    private static IServiceCollection AddMobileShopRepositories(this IServiceCollection services)
+    /// <summary>
+    /// Registers every repository in the Dal layer.
+    /// Per-entity registrations are removed as their consumers migrate by area; any remainder is removed in Stage H.
+    /// </summary>
+    private static IServiceCollection AddMobileShopRepository(this IServiceCollection services)
     {
         services.AddScoped<IPersonRepo, PersonRepo>();
         services.AddScoped<ISellerRepo, SellerRepo>();
@@ -76,6 +79,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ICategoryRepo, CategoryRepo>();
         services.AddScoped<IColorRepo, ColorRepo>();
         services.AddScoped<IEmployeeRepo, EmployeeRepo>();
+        services.AddScoped(typeof(IBaseRepo<>), typeof(BaseRepo<>));
         return services;
     }
 

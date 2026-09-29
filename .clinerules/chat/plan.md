@@ -86,11 +86,11 @@ L9 Tests — each area stage ports the coverage from the entity-service tests it
   SelectAllAsync's read-only shape; null when nothing matches.
 - Tests: extend src/MobileShop.Tests/Dal/BaseClass/BaseRepoTests.cs (existing file).
 - Verify: dotnet build src/MobileShop.slnx --nologo && dotnet test src/MobileShop.slnx --nologo --no-build
-  --filter "FullyQualifiedName~BaseRepoTests"
+  --filter "FullyQualifiedName~UserRepoTests"
 - Done when: build green, BaseRepoTests green, no other file touched.
 - Risk: LOW. Confidence: HIGH.
 
-## [ ] Step 2 — DI: rename to AddMobileShopRepository and register the open generic
+## ~~[x] Step 2 — DI: rename to AddMobileShopRepository and register the open generic~~
 - Files: inspect: src/MobileShop.Services/ServiceCollectionExtensions.cs; modify: that file only;
   do not touch: WebApplicationBuilderExtensions.cs, ApiApplicationBuilderExtensions.cs, any repo class,
   any test.
