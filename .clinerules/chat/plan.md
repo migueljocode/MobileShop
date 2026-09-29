@@ -219,23 +219,31 @@ L9 Tests — each area stage ports the coverage from the entity-service tests it
 - Done when: build + suite green; the UseApi: false path unchanged (Step 6 proves it).
 - Risk: MEDIUM. Confidence: HIGH.
 
-## [ ] Step 6 — Stage A validation
+## ~~[x] Step 6 — Stage A validation~~
 - Files: none.
 - Symbols: N/A.
 - Current -> Desired: Stage A's changes are proven not to have broken DI or any page.
-- Change: run the standard chain, then serve the app and exercise every page. Use the Production environment
-  deliberately: Development runs DatabaseInitializer.InitializeForDevelopment, which deletes and recreates
-  MobileShop.db.
+- Change: run the standard chain, then serve the app and exercise every page. `--no-launch-profile` is
+  mandatory: launchSettings.json sets ASPNETCORE_ENVIRONMENT=Development for every profile, and without
+  this flag dotnet run applies it, which runs the destructive
+  DatabaseInitializer.InitializeForDevelopment (EnsureDeleted/EnsureCreated/seed).
 - Verify (chain 1): dotnet build src/MobileShop.slnx --nologo && dotnet test src/MobileShop.slnx --nologo --no-build
+- Verify (chain 2, guard): before anything else, confirm the host log contains
+  "Hosting environment: Production". If it says Development, stop — the pass would wipe MobileShop.db.
 - Verify (chain 2): ASPNETCORE_ENVIRONMENT=Production dotnet run --project src/MobileShop.Web
-  --urls http://localhost:5199 (keep this session attached and read it until it reports it is listening),
-  then in a second call:
+  --no-launch-profile --urls http://localhost:5199 (keep this session attached and read it until it reports
+  it is listening), then in a second call:
   for p in / /Products /Products/SecondHand /People/Customers /People/Sellers /Transactions
   /Reports/ProfitLoss /Account/Login; do printf '%s %s\n' "$(curl -s -o /dev/null -w '%{http_code}'
   http://localhost:5199$p)" "$p"; done
-- Done when: exit code 0 for build+test, every route returns 200, and `git status --short MobileShop.db` shows
-  no change (the served pass is non-destructive).
+- Done when: exit code 0 for build+test; all eight routes return 200; the host log showed
+  "Hosting environment: Production"; and `stat -c '%s %y' MobileShop.db` is byte-identical before and
+  after the pass (NOT `git status` — .gitignore excludes *.db, so git can never see this file).
 - Risk: MEDIUM. Confidence: HIGH.
+
+Fallback if --no-launch-profile misbehaves: (cd src/MobileShop.Web/bin/Debug/net10.0 && ASPNETCORE_ENVIRONMENT=Production dotnet MobileShop.Web.dll --urls http://localhost:5199) — run from the output directory so the content root resolves static assets correctly. Prefer the first; it needs no cd and no assumption about a current build.
+
+The "Hosting environment: Production" guard is deliberate: it turns a silent destructive footgun into a one-line self-check, and it's the only cheap proof that the initializer was skipped.
 
 ## Global Definition of Done (Stage A)
 - IBaseRepo<T>/BaseRepo<T> expose SelectFirstAsync; BaseRepo<T> is instantiable.
