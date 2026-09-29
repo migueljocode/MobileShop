@@ -114,7 +114,7 @@ L9 Tests — each area stage ports the coverage from the entity-service tests it
 - Done when: build + suite green and Step 6 green.
 - Risk: HIGH. Confidence: HIGH.
 
-## [ ] Step 3 — Create the six area interfaces and the two shared ViewModels
+## ~~[x] Step 3 — Create the six area interfaces and the two shared ViewModels~~
 - Files: create: src/MobileShop.Services/DataServices/Interfaces/{IHomeDataService, IProductsDataService,
   IPeopleDataService, ITransactionsDataService, IReportsDataService, IAccountDataService}.cs and
   src/MobileShop.Models/ViewModels/Web/{DropdownOptionViewModel, ServiceResult}.cs;
