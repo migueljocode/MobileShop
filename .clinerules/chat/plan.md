@@ -154,10 +154,16 @@ as they are — see Step 1 for why the JSON contract must not move.
 - Risk: HIGH. Confidence: HIGH.
 
 ## [ ] Step 2 — `ProductsDataService` read members
-- Files: modify: src/MobileShop.Services/DataServices/Dal/ProductsDataService.cs (add
-  `IBaseRepo<Transaction> transactions` to the ctor and three members); do not touch: pages, views,
-  interfaces, Api stubs, DI, entity services.
-- Symbols: `GetInventoryRowsAsync`, `GetSecondHandRowsAsync`, `GetDetailsAsync`; new `ProductDetailsViewModel.Transactions`.
+- Files: create: src/MobileShop.Services/DataServices/Shared/ProductTransactionProjection.cs; modify:
+  src/MobileShop.Services/DataServices/Dal/ProductsDataService.cs (add `IBaseRepo<Transaction> transactions`
+  to the ctor, the three public members, and the private projection wrapper),
+  src/MobileShop.Tests/Services/DataServices/Dal/ProductsDataServiceTests.cs (**its constructor changes in
+  this step** — Step 1 builds the service with nine repos and this step adds the tenth, so the Step 1 test
+  file will not compile until it is updated here); do not touch: pages, views, interfaces, Api stubs, DI,
+  entity services, `TransactionDataService` (it keeps its own copy until Stage E).
+- Symbols: `GetInventoryRowsAsync`, `GetSecondHandRowsAsync`, `GetDetailsAsync`; private
+  `GetProductTransactionsAsync`; new shared `ProductTransactionProjection`; new
+  `ProductDetailsViewModel.Transactions`.
 - Current -> Desired: the list rows come from `PhoneDataService.GetInventoryRowsAsync` (`:25`),
   `AppleIdDataService.GetInventoryRowsAsync` (`:25`) and the second-hand rows from their `:90` counterparts;
   details from `PhoneDataService.GetDetailsAsync` (`:178-200`) and `AppleIdDataService.GetDetailsAsync` (`:165`);
@@ -182,10 +188,24 @@ as they are — see Step 1 for why the JSON contract must not move.
      `phones.SelectAsync(id, <projection>)` ported from `PhoneDataService.cs:178-200` (including the
      `"IMEI: "` / `"Not sold"` / `"None"` label logic and the nested sell-transaction owner lookup), the
      apple-id branch is `appleIds.SelectAsync(id, <projection>)` from `AppleIdDataService.cs:165`, and
-     `type` is matched case-insensitively for `"appleid"` exactly as `Details.cshtml.cs:13` does. Each
-     projection now also passes `Transactions = await GetProductTransactionsAsync(productId)`.
-  5. `GetProductTransactionsAsync(int productId)` (private) = port `TransactionDataService.cs:267-282`
-     verbatim, including the `PersonNavigation == null ? "Shop"` fallbacks and the descending-date order.
+     `type` is matched case-insensitively for `"appleid"` exactly as `Details.cshtml.cs:13` does.
+     **Do not `await` inside the projection** — an expression tree cannot contain `await`, so the rows cannot
+     be fetched inside the selector. Use three phases: (1) run the projection unchanged, without
+     `Transactions`; (2) if it returned `null`, return `null` immediately; (3) otherwise
+     `var rows = await GetProductTransactionsAsync(result.ProductId); return result with { Transactions = rows };`
+     `ProductDetailsViewModel` is a positional record, so `with` is the copy mechanism.
+  5. **Shared projection (created in this stage, for Stage E's benefit).** Create
+     `src/MobileShop.Services/DataServices/Shared/ProductTransactionProjection.cs` with one static
+     `Expression<Func<Transaction, ProductTransactionViewModel>> Selector`, body copied verbatim from
+     `TransactionDataService.cs:271-280` (the `PersonNavigation == null ? "Shop"` fallbacks included). The body
+     must stay a pure expression — property access, `?? "Shop"` and string concatenation only — so it
+     converts to an expression tree. Then a private `GetProductTransactionsAsync(int productId)`:
+     `(await transactions.SelectAllAsync(t => t.ProductId == productId, ProductTransactionProjection.Selector)).OrderByDescending(item => item.Date).ToList()`.
+     Why here: Stage E's `TransactionsDataService` needs the identical projection, and the project rule is
+     that `Shared/` holds pure shared projections — no repos, no `DbContext`. The consumer adds
+     `using MobileShop.Services.DataServices.Shared;` at the top of the service file (a needed using, not a
+     redundant one; do not put it in GlobalUsings for two consumers). Once nothing calls it,
+     `TransactionDataService.GetProductTransactionsAsync` goes in Stage E.
 - Depends on: Step 1.
 - Edge cases / error handling: `type` is user-supplied query input — match `"appleid"` case-insensitively and
   treat everything else as phone, as today. A missing id returns `null` and the page answers 404. The
@@ -194,8 +214,8 @@ as they are — see Step 1 for why the JSON contract must not move.
 - Tests: extend `ProductsDataServiceTests` with: inventory rows contain both entity types with correct
   `Type`/`Identifier`; second-hand rows contain only second-hand items; `GetDetailsAsync` for each type
   returns the right labels (`"Not sold"`, `"None"`, the IMEI variants) and carries the transaction rows in
-  descending date order with `"Shop"` fallbacks; an unknown id returns `null`; an uppercase `"AppleId"`
-  still routes to the Apple-ID branch.
+  descending date order with `"Shop"` fallbacks; an unknown id returns `null` **and loads no transaction
+  rows**; an uppercase `"AppleId"` still routes to the Apple-ID branch.
 - Verify: dotnet build src/MobileShop.slnx --nologo && dotnet test src/MobileShop.slnx --nologo --no-build
 - Done when: the three members behave identically to the entity services they replace, the existing
   `ProductDetailsViewModel` construction sites still compile, and nothing outside the service changed.
@@ -342,8 +362,8 @@ as they are — see Step 1 for why the JSON contract must not move.
   `ApiProductsDataService` still `NotImplementedException` throughout.
 - No DI registration was removed — `Buy`/`Sell` still resolve `GetSelectableProductsAsync` (L3).
 - The three contract additions exist exactly as specified: `ServiceResult.ErrorField`/`.EntityId` (defaulted),
-  `DropdownCreateResult`, `ProductDetailsViewModel.Transactions` (defaulted), plus the four narrowed return
-  types (three modal creates + `GetInventoryRowsAsync`'s optional `type`).
+  `DropdownCreateResult`, `ProductDetailsViewModel.Transactions` (defaulted), plus three narrowed return
+  types (the modal creates) and one added optional parameter (`GetInventoryRowsAsync`'s `type`).
 - Behaviour is identical: IMEI/email duplicate rules, the model-belongs-to-manufacturer check, the
   `"Shop Warranty"` and second-hand defaults, the case-insensitive corporation de-dupe with ordinal ordering,
   the case-insensitive Apple-ID email lookup via `ToLower()`, the `Phone`/`AppleId` seed-category throws, the
@@ -361,6 +381,9 @@ as they are — see Step 1 for why the JSON contract must not move.
 - `IsSold`, `IsSecondHand`, `GetOwner`, `GetGuarantee`, `GetSecondHandInfo`, `GetAvailableSecondHandRows*` and
   the `Quantity*` members of the phone/Apple-ID entity services lose their page consumers in this stage, but
   **the services and their tests stay** — Stage H deletes them. Do not "tidy" them here.
+- The product-transaction projection now lives in `DataServices/Shared/ProductTransactionProjection.cs`;
+  Stage E must consume it rather than re-porting it, and
+  `TransactionDataService.GetProductTransactionsAsync` loses its last page caller in this stage.
 - The eight remaining fully-qualified `BindModels` references (People/Transactions interfaces and their Api
   stubs) are shortened in Stages D and E; the `global using` line added in Step 1 already covers them.
 - `RepoTestBase`, `TestDataHelpers` and `BaseRepoTests` stay for Stage H; the 14 `*RepoTests` and the 15
