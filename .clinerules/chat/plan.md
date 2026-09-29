@@ -199,7 +199,7 @@ L9 Tests — each area stage ports the coverage from the entity-service tests it
 - Done when: six stubs compile.
 - Risk: LOW. Confidence: HIGH.
 
-## [ ] Step 5 — Register the Api area stubs behind UseApi
+## ~~[x] Step 5 — Register the Api area stubs behind UseApi~~
 - Files: inspect/modify: src/MobileShop.Services/ServiceCollectionExtensions.cs (AddMobileShopDataServices,
   :94-121); do not touch: the else branch, appsettings, the Api host.
 - Symbols: AddMobileShopDataServices.
