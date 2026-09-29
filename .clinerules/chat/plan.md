@@ -181,7 +181,7 @@ L9 Tests — each area stage ports the coverage from the entity-service tests it
 - Done when: six interfaces + two ViewModels compile; no existing file modified.
 - Risk: LOW. Confidence: HIGH.
 
-## [ ] Step 4 — Create the six Api area stubs
+## ~~[x] Step 4 — Create the six Api area stubs~~
 - Files: create: src/MobileShop.Services/DataServices/Api/{ApiHomeDataService, ApiProductsDataService,
   ApiPeopleDataService, ApiTransactionsDataService, ApiReportsDataService, ApiAccountDataService}.cs;
   do not touch: ApiDataServiceBase<T>, the 8 existing entity Api stubs, src/MobileShop.Api.
