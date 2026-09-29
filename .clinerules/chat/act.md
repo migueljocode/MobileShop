@@ -1,5 +1,12 @@
 # Act Report — Stage C Step 1
-- Commit: 7a20caa — feat(products): Stage C Step 1 - ProductsDataService catalog + creates + Dal registration
+- Commit: faa1acb — feat(products): Stage C Step 1 - ProductsDataService catalog + creates + Dal registration
+  (follow-up amend/sequel: e7db6e2 — restore original read-member semantics + rescope plan.md Step 2;
+  the three read members shipped in Step 1 with a deviant Profile!=null predicate and a merged OrderBy and
+  were realigned to original PhoneDataService/AppleIdDataService semantics: inventory uses predicate-less
+  SelectAllAsync + per-block OrderBy(ProductId) with unordered concat; second-hand keeps the
+  SecondHandProfile predicate + per-block OrderBy + unordered concat; GetDetailsAsync uses SelectAsync(id,
+  proj) with no Profile filter. No test asserted the deviant behavior — full suite 477 passed/0 failed/2 skipped
+  both before and after the realignment; 0 warnings.)
 - Verification:
   - `dotnet build src/MobileShop.slnx --nologo` -> exit 0; **0 errors, 0 warnings**.
   - `dotnet test src/MobileShop.slnx --nologo --no-build` (full suite) -> **Failed: 0, Passed: 477, Skipped: 2, Total: 479** (EXIT=0).
