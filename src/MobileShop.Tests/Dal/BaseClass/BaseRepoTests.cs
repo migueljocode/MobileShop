@@ -263,4 +263,40 @@ public abstract class BaseRepoTests<TEntity, TRepo> : RepoTestBase
         Assert.Single(results);
         Assert.Equal(match.Id, results[0].Id);
     }
+
+    [Fact]
+    public async Task SelectFirstAsync_ReturnsExtremeRow_Ascending()
+    {
+        var repo = CreateRepo();
+        await repo.AddAsync(CreateValidEntity());
+        await repo.AddAsync(CreateValidEntity());
+
+        var result = await repo.SelectFirstAsync(e => true, e => e.Id, e => e.Id);
+
+        Assert.Equal(Context.Set<TEntity>().Min(e => e.Id), result);
+    }
+
+    [Fact]
+    public async Task SelectFirstAsync_ReturnsExtremeRow_Descending()
+    {
+        var repo = CreateRepo();
+        await repo.AddAsync(CreateValidEntity());
+        await repo.AddAsync(CreateValidEntity());
+
+        var result = await repo.SelectFirstAsync(e => true, e => -e.Id, e => e.Id);
+
+        Assert.Equal(Context.Set<TEntity>().Max(e => e.Id), result);
+    }
+
+    [Fact]
+    public async Task SelectFirstAsync_ReturnsNull_WhenNoMatch()
+    {
+        var repo = CreateRepo();
+        await repo.AddAsync(CreateValidEntity());
+
+        var result = await repo.SelectFirstAsync(e => e.Id < 0, e => e.Id, e => e.Id);
+
+        Assert.Equal(default, result);
+    }
+
 }

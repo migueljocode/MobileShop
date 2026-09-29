@@ -42,6 +42,15 @@ public interface IBaseRepo<T> where T : BaseEntity
     /// <param name="selector">The database-translatable projection.</param>
     /// <returns>The projected results.</returns>
     IEnumerable<TResult> SelectAll<TResult>(Expression<Func<T, bool>> predicate, Expression<Func<T, TResult>> selector);
+    /// <summary>Projects the first entity matching a predicate when ordered by a key.</summary>
+    /// <typeparam name="TResult">The projection result type.</typeparam>
+    /// <typeparam name="TKey">The ordering key type.</typeparam>
+    /// <param name="predicate">The database-translatable filter.</param>
+    /// <param name="orderBy">The database-translatable ascending ordering key.</param>
+    /// <param name="selector">The database-translatable projection.</param>
+    /// <returns>The first projected result, or <see langword=\"null\"/> when none exists.</returns>
+    Task<TResult?> SelectFirstAsync<TResult, TKey>(Expression<Func<T, bool>> predicate,
+        Expression<Func<T, TKey>> orderBy, Expression<Func<T, TResult>> selector);
 
     /// <summary>Adds an entity.</summary>
     /// <param name="entity">The entity to add.</param>

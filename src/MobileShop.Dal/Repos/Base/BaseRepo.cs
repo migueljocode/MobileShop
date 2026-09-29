@@ -1,7 +1,7 @@
 namespace MobileShop.Dal.Repos.Base;
 
 /// <inheritdoc cref="IBaseRepo{T}" />
-public abstract class BaseRepo<T>(AppDbContext context) : IBaseRepo<T> where T : BaseEntity
+public class BaseRepo<T>(AppDbContext context) : IBaseRepo<T> where T : BaseEntity
 {
     protected AppDbContext Context { get; } = context;
     protected DbSet<T> Table => Context.Set<T>();
@@ -132,6 +132,11 @@ public abstract class BaseRepo<T>(AppDbContext context) : IBaseRepo<T> where T :
     /// <inheritdoc />
     public virtual async Task<IEnumerable<TResult>> SelectAllAsync<TResult>(Expression<Func<T, bool>> predicate, Expression<Func<T, TResult>> selector)
         => await Table.AsNoTracking().Where(predicate).Select(selector).ToListAsync();
+
+    /// <inheritdoc />
+    public virtual async Task<TResult?> SelectFirstAsync<TResult, TKey>(Expression<Func<T, bool>> predicate,
+        Expression<Func<T, TKey>> orderBy, Expression<Func<T, TResult>> selector)
+        => await Table.AsNoTracking().Where(predicate).OrderBy(orderBy).Select(selector).FirstOrDefaultAsync();
 
     /// <inheritdoc />
     public virtual async Task<int> AddAsync(T entity, bool persist = true)
