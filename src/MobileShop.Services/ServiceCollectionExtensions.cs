@@ -127,6 +127,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IPhoneDataService, PhoneDataService>();
         services.AddScoped<IAppleIdDataService, AppleIdDataService>();
         services.AddScoped<IEmployeeDataService, EmployeeDataService>();
+        services.AddScoped<IHomeDataService, HomeDataService>();
         return services;
     }
 }
