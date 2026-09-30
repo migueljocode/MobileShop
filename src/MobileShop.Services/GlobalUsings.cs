@@ -18,7 +18,6 @@ global using MobileShop.Models.Entities;
 global using MobileShop.Dal.EfStructures;
 global using MobileShop.Dal.Repos;
 global using MobileShop.Dal.Repos.Base;
-global using MobileShop.Dal.Repos.Interfaces;
 global using MobileShop.Services.DataServices.Api;
 global using MobileShop.Services.DataServices.Api.Base;
 global using MobileShop.Services.DataServices.Dal;

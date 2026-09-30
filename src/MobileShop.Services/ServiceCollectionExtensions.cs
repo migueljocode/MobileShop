@@ -59,26 +59,11 @@ public static class ServiceCollectionExtensions
     }
 
     /// <summary>
-    /// Registers every repository in the Dal layer.
-    /// Per-entity registrations are removed as their consumers migrate by area; any remainder is removed in Stage H.
+    /// Registers the repository layer. Only the generic <see cref="IBaseRepo{T}"/> registration
+    /// remains; the per-entity repositories were removed in Stage H once their consumers had migrated.
     /// </summary>
     private static IServiceCollection AddMobileShopRepository(this IServiceCollection services)
     {
-        services.AddScoped<IPersonRepo, PersonRepo>();
-        services.AddScoped<ISellerRepo, SellerRepo>();
-        services.AddScoped<ICustomerRepo, CustomerRepo>();
-        services.AddScoped<IUserRepo, UserRepo>();
-        services.AddScoped<IProductRepo, ProductRepo>();
-        services.AddScoped<ITransactionRepo, TransactionRepo>();
-        services.AddScoped<IAppleIdRepo, AppleIdRepo>();
-        services.AddScoped<IPhoneRepo, PhoneRepo>();
-        services.AddScoped<ISecondHandRepo, SecondHandRepo>();
-        services.AddScoped<IGuaranteeRepo, GuaranteeRepo>();
-        services.AddScoped<IManufacturerRepo, ManufacturerRepo>();
-        services.AddScoped<IModelRepo, ModelRepo>();
-        services.AddScoped<ICategoryRepo, CategoryRepo>();
-        services.AddScoped<IColorRepo, ColorRepo>();
-        services.AddScoped<IEmployeeRepo, EmployeeRepo>();
         services.AddScoped(typeof(IBaseRepo<>), typeof(BaseRepo<>));
         return services;
     }
