@@ -1,7 +1,7 @@
 # Act Report — Stage H Step 2 correction (Job B MEDIUM finding #1)
 
 - Context: Job B reviewed Step 2 (`a31cb6e` + `be467fc`) and returned **PASS with no CRITICAL/HIGH findings**, but asked to "close the coverage gap before Step 3". This is that correction. **It is not Step 3** — no repository or service code was touched.
-- Commit: (filled in after commit)
+- Commit: `7f2672e` — test(people,transactions): restore soft-delete and negative-price coverage
 - Verification:
   - Targeted: `dotnet build src/MobileShop.slnx --nologo` then `dotnet test ... --filter "FullyQualifiedName~PeopleDataServiceTests|FullyQualifiedName~TransactionsDataServiceTests"` -> **Build succeeded; Failed: 0, Passed: 30, Failed: 0**.
   - Required chain: `dotnet build src/MobileShop.slnx --nologo && dotnet test src/MobileShop.slnx --nologo --no-build` -> **0 errors, 1 warning; Failed: 0, Passed: 522, Skipped: 2, Total: 524** (EXIT=0). 519 -> 522 is exactly the 3 added tests.
