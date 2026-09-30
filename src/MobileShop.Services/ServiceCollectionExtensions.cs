@@ -118,15 +118,6 @@ public static class ServiceCollectionExtensions
             return services;
         }
 
-        services.AddScoped<IUserDataService, UserDataService>();
-        services.AddScoped<ICustomerDataService, CustomerDataService>();
-        services.AddScoped<ISellerDataService, SellerDataService>();
-        services.AddScoped<ITransactionDataService, TransactionDataService>();
-        services.AddScoped<IProductDataService, ProductDataService>();
-        services.AddScoped<IInvoiceDataService, InvoiceDataService>();
-        services.AddScoped<IPhoneDataService, PhoneDataService>();
-        services.AddScoped<IAppleIdDataService, AppleIdDataService>();
-        services.AddScoped<IEmployeeDataService, EmployeeDataService>();
         services.AddScoped<IHomeDataService, HomeDataService>();
         services.AddScoped<IProductsDataService, ProductsDataService>();
         services.AddScoped<IPeopleDataService, PeopleDataService>();

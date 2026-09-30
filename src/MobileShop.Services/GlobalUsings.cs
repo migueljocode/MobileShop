@@ -22,7 +22,6 @@ global using MobileShop.Dal.Repos.Interfaces;
 global using MobileShop.Services.DataServices.Api;
 global using MobileShop.Services.DataServices.Api.Base;
 global using MobileShop.Services.DataServices.Dal;
-global using MobileShop.Services.DataServices.Dal.Base;
 global using MobileShop.Services.DataServices.Interfaces;
 global using MobileShop.Services.Logging.Settings;
 global using MobileShop.Services.Security;

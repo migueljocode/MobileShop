@@ -69,7 +69,7 @@ L8 **GlobalUsings are cleaned by evidence, not preference.** Remove only imports
 - **Risk:** MEDIUM
 - **Confidence:** MEDIUM
 
-## [ ] Step 2 — Delete obsolete DAL entity services and their tests
+## ~~[x] Step 2 — Delete obsolete DAL entity services and their tests~~
 
 - **Files:** delete `UserDataService.cs`, `CustomerDataService.cs`, `SellerDataService.cs`, `TransactionDataService.cs`, `ProductDataService.cs`, `InvoiceDataService.cs`, `PhoneDataService.cs`, `AppleIdDataService.cs`, `EmployeeDataService.cs` under `src/MobileShop.Services/DataServices/Dal/`; delete `src/MobileShop.Services/DataServices/Dal/Base/DataServiceBase.cs` after confirming no consumer remains.
 - Delete the matching obsolete DAL service tests under `src/MobileShop.Tests/Services/DataServices/Dal/`: `UserDataServiceTests.cs`, `CustomerDataServiceTests.cs`, `SellerDataServiceTests.cs`, `TransactionDataServiceTests.cs`, `ProductDataServiceTests.cs`, `InvoiceDataServiceTests.cs`, `PhoneDataServiceTests.cs`, `AppleIdDataServiceTests.cs`, and `EmployeeDataServiceTests.cs` if present.

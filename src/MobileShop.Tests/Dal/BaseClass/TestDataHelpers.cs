@@ -45,7 +45,7 @@ internal static class TestDataHelpers
 
     /// <summary>
     /// Seeds the sentinel Shop person, seller, and customer records (id = 1) expected by
-    /// <see cref="TransactionDataService"/> when recording buy/sell operations.
+    /// <see cref="TransactionsDataService"/> when recording buy/sell operations.
     /// </summary>
     internal static void SeedShopSentinels(AppDbContext context)
     {
