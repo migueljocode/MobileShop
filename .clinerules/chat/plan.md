@@ -99,7 +99,7 @@ Only if Step 1 deferred invoice Includes. If invoice + list factor already done,
 - Verify: build + full suite.
 - Risk: MEDIUM. Confidence: HIGH.
 
-## [ ] Step 4 — Stage E validation
+## ~~[x] Step 4 — Stage E validation~~
 - Chain 1: build + full suite.
 - Chain 2: Production host; **200** on `/Transactions`, `/Transactions/Buy`, `/Transactions/Sell`, `/Transactions/Details?id=1` (if seeded), regression Home/Products/People/Reports/Account.
 - Optional: factor download returns `application/pdf` for a non-empty filter.
