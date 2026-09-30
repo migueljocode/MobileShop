@@ -38,7 +38,7 @@ Entity leak today: `PurchasedProductsAsync` / `SoldToShopAsync` return `IEnumera
 - **MEDIUM — sort switches:** port verbatim from entity services.
 - **Do not** remove entity Customer/Seller DI (L3).
 
-## [ ] Step 1 — ViewModel defaults + full `PeopleDataService` skeleton (lists, creates, header-only details) + Dal registration
+## [x] Step 1 — ViewModel defaults + full `PeopleDataService` skeleton (lists, creates, header-only details) + Dal registration
 - Files:
   - modify: `src/MobileShop.Models/ViewModels/Web/CustomerDetailsViewModel.cs`, `SellerDetailsViewModel.cs`
   - create: `src/MobileShop.Services/DataServices/Dal/PeopleDataService.cs`, `src/MobileShop.Tests/Services/DataServices/Dal/PeopleDataServiceTests.cs`

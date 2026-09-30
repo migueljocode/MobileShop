@@ -4,4 +4,5 @@ namespace MobileShop.Models.ViewModels.Web;
 public sealed record SellerDetailsViewModel(
     string Name,
     string PhoneNumber,
-    string EntityType);
+    string EntityType,
+    IReadOnlyList<ProductListItemViewModel> Products = null!);

@@ -1,3 +1,17 @@
+# Act Report — Stage D Step 1
+- Verification:
+  - Chain 1: `dotnet build src/MobileShop.slnx --nologo` -> exit 0; **0 errors, 0 warnings**.
+  - Chain 1: `dotnet test src/MobileShop.slnx --nologo --no-build` -> **Failed: 0, Passed: 498, Skipped: 2, Total: 500** (EXIT=0). Filtered `PeopleDataServiceTests`: 8/8 pass.
+  - Pre-existing note: an incremental build can surface `CS9124` (ProductsDataService `transactions` captured twice) — reproduced on a stashed baseline build at HEAD, unrelated to this step; a clean incremental build after this step is 0/0.
+- What was implemented (plan Step 1 scope only):
+  - `CustomerDetailsViewModel` / `SellerDetailsViewModel` gained a last defaulted member `IReadOnlyList<ProductListItemViewModel> Products = null!`. EF expression trees cannot contain collection expressions, so the record default stays `null!` and `PeopleDataService` returns `details with { Products = [] }` post-projection — the observable contract (L10: details always carry a non-null empty `Products` in Step 1) holds.
+  - Created `PeopleDataService` with ctor `(IBaseRepo<Customer> customers, IBaseRepo<Seller> sellers, ILogger<PeopleDataService> logger)` implementing all six `IPeopleDataService` members: list rows with sort switches ported byte-for-byte from entity services (Sell count for customers, Buy count for sellers, invalid sort → Name); create paths ported from the Create pages (`AddAsync > 0` success, failure messages preserved, `LogInformation`/`LogWarning` only on create); header-only details.
+  - Registered `services.AddScoped<IPeopleDataService, PeopleDataService>();` in the Dal branch only; `if (useApi)` untouched; no entity DI removed (L3).
+  - Created `PeopleDataServiceTests` (8 tests): sort Name/Phone/Count both directions + invalid-sort fallback for both lists, details header + empty `Products` for known id, null for unknown id, create persistence for customer/seller. Seeding uses explicit `Person`-first + FK pattern per repo-test conventions.
+  - No page, `.cshtml`, repo registration, or Api stub changes (interface signatures unchanged → Api stub untouched, L7).
+- Problems: two details tests initially failed because seeding via `PersonNavigation` and `Products = null!` default both violated test/provider expectations; fixed by FK-pattern seeding and `with { Products = [] }`.
+- Status: COMPLETE
+
 # Act Report — Stage C Step 5
 - Commit: cff36bf — docs(products): complete Stage C coverage consolidation and validation
 - Verification:

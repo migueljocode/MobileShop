@@ -129,6 +129,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IEmployeeDataService, EmployeeDataService>();
         services.AddScoped<IHomeDataService, HomeDataService>();
         services.AddScoped<IProductsDataService, ProductsDataService>();
+        services.AddScoped<IPeopleDataService, PeopleDataService>();
         return services;
     }
 }
