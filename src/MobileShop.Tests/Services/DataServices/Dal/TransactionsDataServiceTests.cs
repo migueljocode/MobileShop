@@ -246,6 +246,25 @@ public class TransactionsDataServiceTests : RepoTestBase
     }
 
     [Fact]
+    public async Task RecordBuyAsync_rejects_negative_price()
+    {
+        TestDataHelpers.SeedShopSentinels(Context);
+        var product = TestDataHelpers.CreateProduct(Context);
+        var seller = AddSeller("Ali", "Zed");
+
+        var result = await _service.RecordBuyAsync(new BuyInputModel
+        {
+            ProductId = product.Id,
+            SellerId = seller.Id,
+            Price = -1m,
+        });
+
+        Assert.False(result.Succeeded);
+        Assert.Equal("The buy could not be recorded. Check the product and price.", result.Message);
+        Assert.Empty(Context.Transactions);
+    }
+
+    [Fact]
     public async Task GetSelectableProductsAsync_returns_unsold_phones_and_apple_ids_ordered_by_name()
     {
         var product = TestDataHelpers.CreateProduct(Context);

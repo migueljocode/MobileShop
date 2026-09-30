@@ -53,6 +53,30 @@ public class PeopleDataServiceTests : RepoTestBase
         Context.SaveChanges();
     }
 
+    /// <summary>Seeds a transaction and marks it soft-deleted.</summary>
+    private Transaction SeedSoftDeletedTransaction(
+        int productId,
+        int sellerId,
+        int customerId,
+        TransactionDirection direction)
+    {
+        var transaction = new Transaction
+        {
+            ProductId = productId,
+            SellerId = sellerId,
+            CustomerId = customerId,
+            FinishedPrice = 100m,
+            Date = DateTime.UtcNow,
+            Direction = direction,
+        };
+        Context.Transactions.Add(transaction);
+        Context.SaveChanges();
+
+        transaction.IsDeleted = true;
+        Context.SaveChanges();
+        return transaction;
+    }
+
     [Fact]
     public async Task GetCustomerRowsAsync_sorts_by_name_phone_and_count_with_invalid_sort_fallback()
     {
@@ -293,5 +317,45 @@ public class PeopleDataServiceTests : RepoTestBase
         var seller = Context.Sellers.Single(s => s.Id == result.EntityId);
         Assert.Equal(SellerEntityType.Real, seller.EntityType);
         Assert.Equal("Sara", Context.People.Single(p => p.Id == seller.PersonId).FirstName);
+    }
+
+    [Fact]
+    public async Task GetCustomerRowsAsync_purchased_count_ignores_soft_deleted_transactions()
+    {
+        var customer = AddCustomer("Sara", "Ahmadi", "09120000001", "1000000001");
+
+        var shopSeller = AddSeller("Shop", "Owner", "09120000009");
+        var shopCustomer = AddCustomer("Shop", "Buyer", "09120000010", "1000000002");
+        var live = TestDataHelpers.CreateProduct(Context);
+        var removed = TestDataHelpers.CreateProduct(Context);
+
+        SeedTransaction(live.Id, shopSeller.Id, customer.Id, TransactionDirection.Sell);
+        SeedSoftDeletedTransaction(removed.Id, shopSeller.Id, customer.Id, TransactionDirection.Sell);
+
+        // Sanity: the shop sentinel rows exist so nothing else is silently required.
+        Assert.NotNull(shopCustomer);
+
+        var rows = await _service.GetCustomerRowsAsync("Name", true);
+        var row = rows.Single(r => r.Id == customer.Id);
+
+        Assert.Equal(1, row.PurchasedCount);
+    }
+
+    [Fact]
+    public async Task GetSellerRowsAsync_sold_count_ignores_soft_deleted_transactions()
+    {
+        var seller = AddSeller("Sara", "Karimi", "09120000002");
+        var shopSeller = AddSeller("Shop", "Owner", "09120000009");
+        var customer = AddCustomer("Shop", "Buyer", "09120000010", "1000000003");
+        var live = TestDataHelpers.CreateProduct(Context);
+        var removed = TestDataHelpers.CreateProduct(Context);
+
+        SeedTransaction(live.Id, shopSeller.Id, customer.Id, TransactionDirection.Buy);
+        SeedSoftDeletedTransaction(removed.Id, shopSeller.Id, customer.Id, TransactionDirection.Buy);
+
+        var rows = await _service.GetSellerRowsAsync("Name", true);
+        var row = rows.Single(r => r.Id == seller.Id);
+
+        Assert.Equal(0, row.SoldCount);
     }
 }
