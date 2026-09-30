@@ -131,6 +131,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IProductsDataService, ProductsDataService>();
         services.AddScoped<IPeopleDataService, PeopleDataService>();
         services.AddScoped<ITransactionsDataService, TransactionsDataService>();
+        services.AddScoped<IReportsDataService, ReportsDataService>();
         return services;
     }
 }

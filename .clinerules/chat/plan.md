@@ -54,7 +54,7 @@ Task<IReadOnlyList<DistributionRow>> GetDistributionRowsAsync(decimal totalProfi
 - **MEDIUM:** Date-range resolution stays on the page (L5).
 - **Do not** delete entity transaction/employee DI (L3).
 
-## [ ] Step 1 — `ReportsDataService` + Dal registration
+## ~~[x] Step 1 — `ReportsDataService` + Dal registration~~
 - Files: create `src/MobileShop.Services/DataServices/Dal/ReportsDataService.cs`, `src/MobileShop.Tests/Services/DataServices/Dal/ReportsDataServiceTests.cs`; modify `ServiceCollectionExtensions` (Dal branch only: `services.AddScoped<IReportsDataService, ReportsDataService>();`).
 - Ctor: `(IBaseRepo<Transaction> transactions, …employees…, IOptions<DistributionSettings> distributionSettings, ILogger<ReportsDataService> logger)`.
 - Implement all four interface members (L10).
