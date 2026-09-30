@@ -1,6 +1,6 @@
 # Act Report — Stage F Step 1
 
-- Commit: (filled in after commit)
+- Commit: `13b18d3` — feat(reports): add ReportsDataService with profit-loss and distribution
 - Verification:
   - `dotnet build src/MobileShop.slnx --nologo` -> **Build succeeded, 0 errors, 1 warning**. The warning is the **pre-existing** `CS9124` at `src/MobileShop.Services/DataServices/Dal/ProductsDataService.cs(26,62)` — a file this stage never touched; confirmed identical to the Stage E baseline, deliberately not fixed (no unrelated refactors).
   - `dotnet test src/MobileShop.slnx --nologo --no-build` -> **Failed: 0, Passed: 538, Skipped: 2, Total: 540** (EXIT=0).
