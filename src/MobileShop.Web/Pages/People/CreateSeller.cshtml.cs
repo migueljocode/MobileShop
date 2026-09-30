@@ -1,6 +1,6 @@
 namespace MobileShop.Web.Pages.People;
 
-public class CreateSellerModel(ISellerDataService sellerDataService) : PageModel
+public class CreateSellerModel(IPeopleDataService dataService) : PageModel
 {
     [BindProperty] public CreateSellerInputModel Input { get; set; } = new();
     public string? Message { get; private set; }
@@ -12,21 +12,10 @@ public class CreateSellerModel(ISellerDataService sellerDataService) : PageModel
             return Page();
         }
 
-        var seller = new Seller
+        var result = await dataService.CreateSellerAsync(Input);
+        if (!result.Succeeded)
         {
-            EntityType = Input.EntityType,
-            PersonNavigation = new Person
-            {
-                FirstName = Input.FirstName.Trim(),
-                LastName = Input.LastName.Trim(),
-                PhoneNumber = Input.PhoneNumber.Trim(),
-                Notes = string.IsNullOrWhiteSpace(Input.Notes) ? null : Input.Notes.Trim(),
-            },
-        };
-
-        if (!await sellerDataService.AddAsync(seller))
-        {
-            Message = "The seller could not be created.";
+            Message = result.Message ?? "The seller could not be created.";
             return Page();
         }
 

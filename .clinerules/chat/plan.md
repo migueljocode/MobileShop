@@ -72,7 +72,7 @@ Entity leak today: `PurchasedProductsAsync` / `SoldToShopAsync` return `IEnumera
 - Verify: build + full suite.
 - Risk: MEDIUM. Confidence: MEDIUM.
 
-## [ ] Step 3 — Migrate all six People pages + rewire page tests
+## [x] Step 3 — Migrate all six People pages + rewire page tests
 - Files: modify: all six `Pages/People/*.cshtml.cs`; `src/MobileShop.Tests/Web/Pages/People/CustomersModelTests.cs`, `SellersModelTests.cs`; add minimal tests for creates/details if missing; do not touch `.cshtml` unless forced (stop and report).
 - Change:
   - Each ctor: `(IPeopleDataService dataService)` only.

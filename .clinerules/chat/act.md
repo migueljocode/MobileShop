@@ -1,3 +1,17 @@
+# Act Report — Stage D Step 3
+- Verification:
+  - Chain 1: `dotnet build src/MobileShop.slnx --nologo` -> exit 0; **0 errors, 0 warnings**.
+  - Chain 1: `dotnet test src/MobileShop.slnx --nologo --no-build` -> **Failed: 0, Passed: 510, Skipped: 2, Total: 512** (EXIT=0).
+  - DoD spot-checks: all six People page models inject `(IPeopleDataService dataService)` only (grep shows no entity service/repo references); `git diff --stat` on `Pages/People/*.cshtml` is empty (no view edits); entity `ICustomerDataService`/`ISellerDataService`/`IProductDataService` DI still registered in both branches (L3).
+- What was implemented (plan Step 3 scope only):
+  - `CustomersModel` / `SellersModel`: ctor → `(IPeopleDataService dataService)`; call `GetCustomerRowsAsync` / `GetSellerRowsAsync` with existing query args; `SortBy`/`Ascending` assignments unchanged.
+  - `CustomerDetailsModel` / `SellerDetailsModel`: dropped the second service (`IProductDataService`); `var details = await dataService.Get*DetailsAsync(id)`; `NotFound` if null; `Customer`/`Seller = details`; `Products = details.Products`.
+  - `CreateCustomerModel` / `CreateSellerModel`: dropped entity construction from the page; validate → `Create*Async` → `Message` on failure (service message, fallback text preserved) → redirect list on success.
+  - Page tests: `CustomersModelTests` / `SellersModelTests` rewritten to construct real `PeopleDataService` over `BaseRepo<Customer>/Seller/Product` + `NullLogger` (no Moq); added `DetailsAndCreateModelTests.cs` with minimal known-id/unknown-id tests for both details pages and valid/invalid-ModelState tests for both create pages.
+  - No `.cshtml` edits (property names `Customer`/`Seller`/`Products`/`Message` preserved).
+- Problems: `PageResult` needed `using Microsoft.AspNetCore.Mvc.RazorPages;` in the new test file (fixed before final green).
+- Status: COMPLETE
+
 # Act Report — Stage D Step 2
 - Verification:
   - Chain 1: `dotnet build src/MobileShop.slnx --nologo` -> exit 0; **0 errors**; only pre-existing `CS9124` in `ProductsDataService` (reproduced at baseline).

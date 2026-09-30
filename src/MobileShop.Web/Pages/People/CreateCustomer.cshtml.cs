@@ -1,6 +1,6 @@
 namespace MobileShop.Web.Pages.People;
 
-public class CreateCustomerModel(ICustomerDataService customerDataService) : PageModel
+public class CreateCustomerModel(IPeopleDataService dataService) : PageModel
 {
     [BindProperty] public CreateCustomerInputModel Input { get; set; } = new();
     public string? Message { get; private set; }
@@ -12,21 +12,10 @@ public class CreateCustomerModel(ICustomerDataService customerDataService) : Pag
             return Page();
         }
 
-        var customer = new Customer
+        var result = await dataService.CreateCustomerAsync(Input);
+        if (!result.Succeeded)
         {
-            NationalId = Input.NationalId.Trim(),
-            PersonNavigation = new Person
-            {
-                FirstName = Input.FirstName.Trim(),
-                LastName = Input.LastName.Trim(),
-                PhoneNumber = Input.PhoneNumber.Trim(),
-                Notes = string.IsNullOrWhiteSpace(Input.Notes) ? null : Input.Notes.Trim(),
-            },
-        };
-
-        if (!await customerDataService.AddAsync(customer))
-        {
-            Message = "The customer could not be created.";
+            Message = result.Message ?? "The customer could not be created.";
             return Page();
         }
 

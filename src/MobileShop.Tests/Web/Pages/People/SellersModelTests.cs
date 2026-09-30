@@ -1,23 +1,21 @@
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using MobileShop.Services.DataServices.Interfaces;
 using MobileShop.Web.Pages.People;
-using Moq;
 
 namespace MobileShop.Tests.Web.Pages.People;
 
-/// <summary>Verifies sort-parameter handling on the Sellers list page.</summary>
-public class SellersModelTests
+/// <summary>Verifies sort-parameter handling on the Sellers list page over the real area service.</summary>
+public class SellersModelTests : RepoTestBase
 {
-    private readonly Mock<ISellerDataService> _serviceMock;
     private readonly SellersModel _model;
 
     public SellersModelTests()
     {
-        _serviceMock = new Mock<ISellerDataService>();
-        _serviceMock
-            .Setup(service => service.GetListRowsAsync(It.IsAny<string>(), It.IsAny<bool>()))
-            .ReturnsAsync([]);
-        _model = new SellersModel(_serviceMock.Object);
+        var dataService = new PeopleDataService(
+            new BaseRepo<Customer>(Context),
+            new BaseRepo<Seller>(Context),
+            new BaseRepo<Product>(Context),
+            NullLogger<PeopleDataService>.Instance);
+        _model = new SellersModel(dataService);
     }
 
     [Fact]
@@ -27,17 +25,24 @@ public class SellersModelTests
 
         Assert.Equal("Name", _model.SortBy);
         Assert.True(_model.Ascending);
-        _serviceMock.Verify(service => service.GetListRowsAsync("Name", true), Times.Once);
+        Assert.Empty(_model.Sellers);
     }
 
     [Fact]
     public async Task OnGetAsync_PassesExplicitSortParamsThrough()
     {
+        var person = new Person { FirstName = "Sara", LastName = "Ahmadi", PhoneNumber = "09120000001" };
+        Context.People.Add(person);
+        Context.SaveChanges();
+        Context.Sellers.Add(new Seller { PersonId = person.Id, EntityType = SellerEntityType.Real });
+        Context.SaveChanges();
+
         await _model.OnGetAsync("Phone", ascending: false);
 
         Assert.Equal("Phone", _model.SortBy);
         Assert.False(_model.Ascending);
-        _serviceMock.Verify(service => service.GetListRowsAsync("Phone", false), Times.Once);
+        Assert.Single(_model.Sellers);
+        Assert.Equal("Sara Ahmadi", _model.Sellers[0].Name);
     }
 
     [Fact]
@@ -48,6 +53,6 @@ public class SellersModelTests
         await _model.OnGetAsync("Name");
 
         Assert.True(_model.Ascending);
-        _serviceMock.Verify(service => service.GetListRowsAsync("Name", true), Times.Once);
+        Assert.Empty(_model.Sellers);
     }
 }

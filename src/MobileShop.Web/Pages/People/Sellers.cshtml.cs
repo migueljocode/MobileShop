@@ -1,6 +1,6 @@
 namespace MobileShop.Web.Pages.People;
 
-public class SellersModel(ISellerDataService sellerDataService) : PageModel
+public class SellersModel(IPeopleDataService dataService) : PageModel
 {
     public IReadOnlyList<SellerListItemViewModel> Sellers { get; private set; } = [];
 
@@ -12,6 +12,6 @@ public class SellersModel(ISellerDataService sellerDataService) : PageModel
     {
         SortBy = sortBy;
         Ascending = ascending;
-        Sellers = await sellerDataService.GetListRowsAsync(sortBy, ascending);
+        Sellers = await dataService.GetSellerRowsAsync(sortBy, ascending);
     }
 }
