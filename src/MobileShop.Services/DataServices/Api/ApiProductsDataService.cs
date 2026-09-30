@@ -3,7 +3,7 @@ namespace MobileShop.Services.DataServices.Api;
 public class ApiProductsDataService : IProductsDataService
 {
     /// <inheritdoc />
-    public Task<IReadOnlyList<ProductListItemViewModel>> GetInventoryRowsAsync()
+    public Task<IReadOnlyList<ProductListItemViewModel>> GetInventoryRowsAsync(string? type = null)
         => throw new NotImplementedException("ApiProductsDataService is not implemented yet.");
 
     /// <inheritdoc />

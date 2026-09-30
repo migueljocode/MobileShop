@@ -9,4 +9,5 @@ public sealed record ProductDetailsViewModel(
     string? Color,
     string OwnerLabel,
     string GuaranteeLabel,
-    bool IsSecondHand);
+    bool IsSecondHand,
+    IReadOnlyList<ProductTransactionViewModel> Transactions = null!);

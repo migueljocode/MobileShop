@@ -163,7 +163,7 @@ as they are — see Step 1 for why the JSON contract must not move.
   behaviour, the Dal line is added, the four Products FQNs are shortened, and no page or view changed.
 - Risk: HIGH. Confidence: HIGH.
 
-## [ ] Step 2 — `ProductsDataService` read members (extend with `type` + `Transactions`)
+## ~~[x] Step 2 — `ProductsDataService` read members (extend with `type` + `Transactions`)~~
 - **Status note from Step 1:** the three read members (`GetInventoryRowsAsync`, `GetSecondHandRowsAsync`,
   `GetDetailsAsync`) were implemented in Step 1 with the *original* entity-service semantics — profile-less
   inventory lookups (no `PhoneProfile`/`AppleIdProfile` nav predicate), per-block `.OrderBy(row => row.ProductId)`,

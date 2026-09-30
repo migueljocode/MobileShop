@@ -149,6 +149,51 @@ public class ProductsDataServiceTests : RepoTestBase
         Assert.True(rows[0].IsSecondHand);
     }
 
+    // ── Inventory type filter ──────────────────────────────────
+
+    [Fact]
+    public async Task GetInventoryRowsAsync_phone_type_returns_only_phone_rows()
+    {
+        SeedCatalog(out _, out _);
+        var product = TestDataHelpers.CreateProduct(Context);
+        Context.Phones.Add(new Phone { ProductId = product.Id, IMEI1 = TestDataHelpers.GenerateImei(), OwnershipTransferred = false });
+        Context.AppleIds.Add(new AppleId { ProductId = product.Id, Email = "stock@example.com", Password = "secret" });
+        Context.SaveChanges();
+
+        var rows = await _service.GetInventoryRowsAsync("phone");
+
+        Assert.Single(rows);
+        Assert.Equal("Phone", rows[0].Type);
+    }
+
+    [Fact]
+    public async Task GetInventoryRowsAsync_appleid_type_returns_only_apple_id_rows()
+    {
+        SeedCatalog(out _, out _);
+        var product = TestDataHelpers.CreateProduct(Context);
+        Context.Phones.Add(new Phone { ProductId = product.Id, IMEI1 = TestDataHelpers.GenerateImei(), OwnershipTransferred = false });
+        Context.AppleIds.Add(new AppleId { ProductId = product.Id, Email = "stock@example.com", Password = "secret" });
+        Context.SaveChanges();
+
+        var rows = await _service.GetInventoryRowsAsync("appleid");
+
+        Assert.Single(rows);
+        Assert.Equal("Apple ID", rows[0].Type);
+    }
+
+    [Fact]
+    public async Task GetInventoryRowsAsync_all_and_unrecognised_type_return_both_blocks()
+    {
+        SeedCatalog(out _, out _);
+        var product = TestDataHelpers.CreateProduct(Context);
+        Context.Phones.Add(new Phone { ProductId = product.Id, IMEI1 = TestDataHelpers.GenerateImei(), OwnershipTransferred = false });
+        Context.AppleIds.Add(new AppleId { ProductId = product.Id, Email = "stock@example.com", Password = "secret" });
+        Context.SaveChanges();
+
+        Assert.Equal(2, (await _service.GetInventoryRowsAsync("all")).Count);
+        Assert.Equal(2, (await _service.GetInventoryRowsAsync("unknown")).Count);
+    }
+
     // ── Details ───────────────────────────────────────────────
 
     [Fact]
@@ -197,6 +242,49 @@ public class ProductsDataServiceTests : RepoTestBase
         SeedCatalog(out _, out _);
         var details = await _service.GetDetailsAsync(999, "phone");
         Assert.Null(details);
+    }
+
+    [Fact]
+    public async Task GetDetailsAsync_includes_transactions_descending_with_shop_fallback()
+    {
+        SeedCatalog(out var phoneModel, out _);
+        var product = TestDataHelpers.CreateProduct(Context);
+        product.ModelId = phoneModel.Id;
+        product = Context.Products.First(p => p.Id == product.Id);
+        Context.Products.Update(product);
+        var phone = new Phone { ProductId = product.Id, IMEI1 = TestDataHelpers.GenerateImei(), OwnershipTransferred = false };
+        Context.Phones.Add(phone);
+        Context.SaveChanges();
+
+        var sellerPerson = new Person { FirstName = "Ali", LastName = "Seller", PhoneNumber = "09120000021" };
+        var customerPerson = new Person { FirstName = "Sara", LastName = "Customer", PhoneNumber = "09120000022" };
+        Context.People.AddRange(sellerPerson, customerPerson);
+        Context.SaveChanges();
+
+        var seller = new Seller { PersonId = sellerPerson.Id, EntityType = SellerEntityType.Real };
+        var customer = new Customer { PersonId = customerPerson.Id, NationalId = "3333333333" };
+        Context.Sellers.Add(seller);
+        Context.Customers.Add(customer);
+        Context.SaveChanges();
+
+        // The shared projection renders the sentinel Shop seller as null in production,
+        // which InMemory cannot express (it inner-joins and drops the row), so this test
+        // covers the named-label branches with real people on both legs.
+        Context.Transactions.AddRange(
+            new Transaction { ProductId = product.Id, SellerId = seller.Id, CustomerId = customer.Id, FinishedPrice = 100m, Date = new DateTime(2026, 1, 1), Direction = TransactionDirection.Buy },
+            new Transaction { ProductId = product.Id, SellerId = seller.Id, CustomerId = customer.Id, FinishedPrice = 150m, Date = new DateTime(2026, 2, 1), Direction = TransactionDirection.Sell });
+        Context.SaveChanges();
+
+        var details = await _service.GetDetailsAsync(phone.Id, "phone");
+
+        Assert.NotNull(details);
+        Assert.Equal(2, details!.Transactions.Count);
+        Assert.Equal(new DateTime(2026, 2, 1), details.Transactions[0].Date);
+        Assert.Equal("Ali Seller", details.Transactions[0].SellerLabel);
+        Assert.Equal("Sara Customer", details.Transactions[0].CustomerLabel);
+        Assert.Equal(new DateTime(2026, 1, 1), details.Transactions[1].Date);
+        Assert.Equal("Ali Seller", details.Transactions[1].SellerLabel);
+        Assert.Equal("Sara Customer", details.Transactions[1].CustomerLabel);
     }
 
     // ── CreateManufacturer / CreateModel / CreateColor ───────

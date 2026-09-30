@@ -1,3 +1,5 @@
+using MobileShop.Services.DataServices.Shared;
+
 namespace MobileShop.Services.DataServices.Dal;
 
 /// <summary>Provides the catalog and creation operations for the Products area.</summary>
@@ -24,35 +26,39 @@ public class ProductsDataService(
     protected IBaseRepo<Transaction> Transactions { get; } = transactions;
 
     /// <inheritdoc />
-    public async Task<IReadOnlyList<ProductListItemViewModel>> GetInventoryRowsAsync()
+    public async Task<IReadOnlyList<ProductListItemViewModel>> GetInventoryRowsAsync(string? type = null)
     {
-        var rows = (await phones.SelectAllAsync(
-            phone => new ProductListItemViewModel(
-                phone.Id,
-                phone.ProductId,
-                "Phone",
-                phone.ProductNavigation.ModelNavigation.ManufacturerNavigation.Name + " " + phone.ProductNavigation.ModelNavigation.Name,
-                "IMEI: " + phone.IMEI1,
-                phone.ProductNavigation.ColorNavigation == null ? null : phone.ProductNavigation.ColorNavigation.Name,
-                phone.ProductNavigation.Transactions.Any(t => t.Direction == TransactionDirection.Sell),
-                phone.ProductNavigation.SecondHandProfile != null)))
-            .OrderBy(row => row.ProductId)
-            .ToList();
+        var rows = new List<ProductListItemViewModel>();
 
-        var appleRows = (await appleIds.SelectAllAsync(
-            appleId => new ProductListItemViewModel(
-                appleId.Id,
-                appleId.ProductId,
-                "Apple ID",
-                appleId.ProductNavigation.ModelNavigation.ManufacturerNavigation.Name + " " + appleId.ProductNavigation.ModelNavigation.Name,
-                appleId.Email,
-                null,
-                appleId.ProductNavigation.Transactions.Any(t => t.Direction == TransactionDirection.Sell),
-                appleId.ProductNavigation.SecondHandProfile != null)))
-            .OrderBy(row => row.ProductId)
-            .ToList();
+        // Only "appleid" excludes phones; only "phone" excludes Apple IDs — null, "all"
+        // and any unrecognised value return both blocks. Pages lowercase before calling.
+        if (type is not "appleid")
+            rows.AddRange((await phones.SelectAllAsync(
+                phone => new ProductListItemViewModel(
+                    phone.Id,
+                    phone.ProductId,
+                    "Phone",
+                    phone.ProductNavigation.ModelNavigation.ManufacturerNavigation.Name + " " + phone.ProductNavigation.ModelNavigation.Name,
+                    "IMEI: " + phone.IMEI1,
+                    phone.ProductNavigation.ColorNavigation == null ? null : phone.ProductNavigation.ColorNavigation.Name,
+                    phone.ProductNavigation.Transactions.Any(t => t.Direction == TransactionDirection.Sell),
+                    phone.ProductNavigation.SecondHandProfile != null)))
+                .OrderBy(row => row.ProductId));
 
-        return rows.Concat(appleRows).ToList().AsReadOnly();
+        if (type is not "phone")
+            rows.AddRange((await appleIds.SelectAllAsync(
+                appleId => new ProductListItemViewModel(
+                    appleId.Id,
+                    appleId.ProductId,
+                    "Apple ID",
+                    appleId.ProductNavigation.ModelNavigation.ManufacturerNavigation.Name + " " + appleId.ProductNavigation.ModelNavigation.Name,
+                    appleId.Email,
+                    null,
+                    appleId.ProductNavigation.Transactions.Any(t => t.Direction == TransactionDirection.Sell),
+                    appleId.ProductNavigation.SecondHandProfile != null)))
+                .OrderBy(row => row.ProductId));
+
+        return rows.AsReadOnly();
     }
 
     /// <inheritdoc />
@@ -92,9 +98,11 @@ public class ProductsDataService(
     /// <inheritdoc />
     public async Task<ProductDetailsViewModel?> GetDetailsAsync(int id, string type)
     {
+        ProductDetailsViewModel? details;
+
         if (string.Equals(type, "appleid", StringComparison.OrdinalIgnoreCase))
         {
-            return await appleIds.SelectAsync(
+            details = await appleIds.SelectAsync(
                 id,
                 appleId => new ProductDetailsViewModel(
                     "Apple ID",
@@ -114,31 +122,43 @@ public class ProductsDataService(
                         : appleId.ProductNavigation.GuaranteeProfile.Corporation + " until " + appleId.ProductNavigation.GuaranteeProfile.ExpirationDate,
                     appleId.ProductNavigation.SecondHandProfile != null));
         }
+        else
+        {
+            details = await phones.SelectAsync(
+                id,
+                phone => new ProductDetailsViewModel(
+                    "Phone",
+                    phone.ProductId,
+                    phone.ProductNavigation.ModelNavigation.ManufacturerNavigation.Name,
+                    phone.ProductNavigation.ModelNavigation.Name,
+                    string.IsNullOrWhiteSpace(phone.IMEI2)
+                        ? "IMEI: " + phone.IMEI1
+                        : "IMEI: " + phone.IMEI1 + " / " + phone.IMEI2,
+                    phone.ProductNavigation.ColorNavigation == null ? null : phone.ProductNavigation.ColorNavigation.Name,
+                    phone.ProductNavigation.Transactions
+                        .Where(t => t.Direction == TransactionDirection.Sell)
+                        .OrderByDescending(t => t.Date)
+                        .Select(t => t.CustomerNavigation.PersonNavigation)
+                        .Select(person => person.FirstName + " " + person.LastName)
+                        .FirstOrDefault() ?? "Not sold",
+                    phone.ProductNavigation.GuaranteeProfile == null
+                        ? "None"
+                        : phone.ProductNavigation.GuaranteeProfile.Corporation + " until " + phone.ProductNavigation.GuaranteeProfile.ExpirationDate.ToString("d"),
+                    phone.ProductNavigation.SecondHandProfile != null));
+        }
 
-        var phone = await phones.SelectAsync(
-            id,
-            phone => new ProductDetailsViewModel(
-                "Phone",
-                phone.ProductId,
-                phone.ProductNavigation.ModelNavigation.ManufacturerNavigation.Name,
-                phone.ProductNavigation.ModelNavigation.Name,
-                string.IsNullOrWhiteSpace(phone.IMEI2)
-                    ? "IMEI: " + phone.IMEI1
-                    : "IMEI: " + phone.IMEI1 + " / " + phone.IMEI2,
-                phone.ProductNavigation.ColorNavigation == null ? null : phone.ProductNavigation.ColorNavigation.Name,
-                phone.ProductNavigation.Transactions
-                    .Where(t => t.Direction == TransactionDirection.Sell)
-                    .OrderByDescending(t => t.Date)
-                    .Select(t => t.CustomerNavigation.PersonNavigation)
-                    .Select(person => person.FirstName + " " + person.LastName)
-                    .FirstOrDefault() ?? "Not sold",
-                phone.ProductNavigation.GuaranteeProfile == null
-                    ? "None"
-                    : phone.ProductNavigation.GuaranteeProfile.Corporation + " until " + phone.ProductNavigation.GuaranteeProfile.ExpirationDate.ToString("d"),
-                phone.ProductNavigation.SecondHandProfile != null));
+        if (details is null) return null;
 
-        return phone;
+        var rows = await GetProductTransactionsAsync(details.ProductId);
+        return details with { Transactions = rows };
     }
+
+    private async Task<IReadOnlyList<ProductTransactionViewModel>> GetProductTransactionsAsync(int productId)
+        => (await transactions.SelectAllAsync(
+                transaction => transaction.ProductId == productId,
+                ProductTransactionProjection.Selector))
+            .OrderByDescending(item => item.Date)
+            .ToList();
 
     /// <inheritdoc />
     public async Task<IReadOnlyList<DropdownOptionViewModel>> GetManufacturersAsync()

@@ -4,7 +4,8 @@ namespace MobileShop.Services.DataServices.Interfaces;
 public interface IProductsDataService
 {
     /// <summary>Gets all new-product inventory rows.</summary>
-    Task<IReadOnlyList<ProductListItemViewModel>> GetInventoryRowsAsync();
+    /// <param name="type">The product type filter.</param>
+    Task<IReadOnlyList<ProductListItemViewModel>> GetInventoryRowsAsync(string? type = null);
 
     /// <summary>Gets all second-hand product rows.</summary>
     Task<IReadOnlyList<ProductListItemViewModel>> GetSecondHandRowsAsync();
