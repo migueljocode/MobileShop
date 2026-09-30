@@ -1,6 +1,6 @@
 # Act Report — Stage F Step 2
 
-- Commit: (filled in after commit)
+- Commit: `5a06ffe` — refactor(reports): migrate ProfitLoss page to IReportsDataService
 - Verification:
   - `dotnet build src/MobileShop.slnx --nologo` -> **Build succeeded, 0 errors, 1 warning**. The warning is the **pre-existing** `CS9124` in `src/MobileShop.Services/DataServices/Dal/ProductsDataService.cs(26,62)` — a file this stage never touched; unchanged from the Step 1 baseline.
   - `dotnet test src/MobileShop.slnx --nologo --no-build` -> **Failed: 0, Passed: 538, Skipped: 2, Total: 540** (EXIT=0). Count unchanged from Step 1 because this step rewired existing tests rather than adding new ones — no test was deleted or skipped.
