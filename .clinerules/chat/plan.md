@@ -84,7 +84,7 @@ L8 **GlobalUsings are cleaned by evidence, not preference.** Remove only imports
 - **Risk:** HIGH
 - **Confidence:** HIGH
 
-## [ ] Step 3 — Delete specialized repositories, interfaces, and obsolete repository tests
+## ~~[x] Step 3 — Delete specialized repositories, interfaces, and obsolete repository tests~~
 
 - **Files:** after a production-consumer search, delete specialized repository implementations/interfaces under `src/MobileShop.Dal/Repos/` and `src/MobileShop.Dal/Repos/Interfaces/` that have no remaining production consumer; delete their tests under `src/MobileShop.Tests/Dal/Repos/`; remove their registrations from `AddMobileShopRepository()`.
 - **Expected removable set, subject to the final production-consumer search:** `UserRepo`, `CustomerRepo`, `SellerRepo`, `ProductRepo`, `TransactionRepo`, `AppleIdRepo`, `PhoneRepo`, `SecondHandRepo`, `GuaranteeRepo`, `ManufacturerRepo`, `ModelRepo`, `CategoryRepo`, `ColorRepo`, `EmployeeRepo`, and `PersonRepo`.
