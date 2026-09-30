@@ -25,6 +25,7 @@ public class ProductsDataServiceTests : RepoTestBase
             new BaseRepo<Category>(Context),
             new BaseRepo<MobileShop.Models.Entities.Color>(Context),
             new BaseRepo<Guarantee>(Context),
+            new BaseRepo<Transaction>(Context),
             NullLogger<ProductsDataService>.Instance);
     }
 
@@ -45,7 +46,7 @@ public class ProductsDataServiceTests : RepoTestBase
         Context.SaveChanges();
     }
 
-            [Fact]
+    [Fact]
     public async Task GetManufacturersAsync_projects_all_seed_manufacturers()
     {
         SeedCatalog(out _, out _);
@@ -56,7 +57,7 @@ public class ProductsDataServiceTests : RepoTestBase
 
         Assert.Equal(2, options.Count);
         Assert.Contains(options, o => o.Id == 1 && o.Name == "Apple");
-                Assert.Contains(options, o => o.Name == "Samsung");
+        Assert.Contains(options, o => o.Name == "Samsung");
     }
 
     [Fact]
@@ -93,15 +94,15 @@ public class ProductsDataServiceTests : RepoTestBase
     [Fact]
     public async Task GetGuaranteeCorporationsAsync_deduplicates_case_insensitively_with_ordinal_order()
     {
-                                SeedCatalog(out _, out _);
-                                var product = TestDataHelpers.CreateProduct(Context);
+        SeedCatalog(out _, out _);
+        var product = TestDataHelpers.CreateProduct(Context);
         Context.Entry(product).State = EntityState.Detached;
         Context.Guarantees.AddRange(
             new Guarantee { Corporation = "Apple", StartDate = DateTime.Today, ExpirationDate = DateTime.Today.AddYears(1), ProductId = product.Id },
             new Guarantee { Corporation = "apple", StartDate = DateTime.Today, ExpirationDate = DateTime.Today.AddYears(1), ProductId = product.Id });
         Context.SaveChanges();
 
-                var corporations = await _service.GetGuaranteeCorporationsAsync();
+        var corporations = await _service.GetGuaranteeCorporationsAsync();
 
         Assert.Single(corporations);
         Assert.Equal("apple", corporations[0], ignoreCase: true);
@@ -121,7 +122,7 @@ public class ProductsDataServiceTests : RepoTestBase
         var rows = await _service.GetInventoryRowsAsync();
 
         Assert.Equal(2, rows.Count);
-                var phoneRow = Assert.Single(rows, r => r.Type == "Phone");
+        var phoneRow = Assert.Single(rows, r => r.Type == "Phone");
         Assert.Equal($"IMEI: {phone.IMEI1}", phoneRow.Identifier);
         var appleRow = Assert.Single(rows, r => r.Type == "Apple ID");
         Assert.Equal("stock@example.com", appleRow.Identifier);
@@ -131,11 +132,11 @@ public class ProductsDataServiceTests : RepoTestBase
     public async Task GetSecondHandRowsAsync_only_returns_second_hand_products()
     {
         SeedCatalog(out _, out _);
-                        var product = TestDataHelpers.CreateProduct(Context);
+        var product = TestDataHelpers.CreateProduct(Context);
         Context.Phones.Add(new Phone { ProductId = product.Id, IMEI1 = TestDataHelpers.GenerateImei(), OwnershipTransferred = false });
         Context.SaveChanges();
 
-                                var shProduct = TestDataHelpers.CreateProduct(Context);
+        var shProduct = TestDataHelpers.CreateProduct(Context);
         shProduct = Context.Products.First(p => p.Id == shProduct.Id);
         Context.SecondHands.Add(new SecondHand { ProductId = shProduct.Id, TestPeriodDays = 3, UsedDurationDays = 1 });
         Context.Phones.Add(new Phone { ProductId = shProduct.Id, IMEI1 = TestDataHelpers.GenerateImei(), OwnershipTransferred = false });
@@ -145,7 +146,7 @@ public class ProductsDataServiceTests : RepoTestBase
 
         Assert.Single(rows);
         Assert.Equal("Phone", rows[0].Type);
-                Assert.True(rows[0].IsSecondHand);
+        Assert.True(rows[0].IsSecondHand);
     }
 
     // ── Details ───────────────────────────────────────────────
@@ -153,10 +154,10 @@ public class ProductsDataServiceTests : RepoTestBase
     [Fact]
     public async Task GetDetailsAsync_for_phone_returns_improved_imei_and_unsold_labels()
     {
-                SeedCatalog(out var phoneModel, out _);
+        SeedCatalog(out var phoneModel, out _);
         var product = TestDataHelpers.CreateProduct(Context);
         product.ModelId = phoneModel.Id;
-                product = Context.Products.First(p => p.Id == product.Id);
+        product = Context.Products.First(p => p.Id == product.Id);
         Context.Products.Update(product);
         var phone = new Phone { ProductId = product.Id, IMEI1 = TestDataHelpers.GenerateImei(), IMEI2 = TestDataHelpers.GenerateImei(), OwnershipTransferred = false };
         Context.Phones.Add(phone);
@@ -174,10 +175,10 @@ public class ProductsDataServiceTests : RepoTestBase
     [Fact]
     public async Task GetDetailsAsync_for_apple_id_routes_on_appleid_type()
     {
-                SeedCatalog(out _, out var appleIdModel);
+        SeedCatalog(out _, out var appleIdModel);
         var product = TestDataHelpers.CreateProduct(Context);
         product.ModelId = appleIdModel.Id;
-                product = Context.Products.First(p => p.Id == product.Id);
+        product = Context.Products.First(p => p.Id == product.Id);
         Context.Products.Update(product);
         var appleId = new AppleId { ProductId = product.Id, Email = "detail@example.com", Password = "secret" };
         Context.AppleIds.Add(appleId);
@@ -193,7 +194,7 @@ public class ProductsDataServiceTests : RepoTestBase
     [Fact]
     public async Task GetDetailsAsync_returns_null_for_unknown_id()
     {
-                SeedCatalog(out _, out _);
+        SeedCatalog(out _, out _);
         var details = await _service.GetDetailsAsync(999, "phone");
         Assert.Null(details);
     }
@@ -273,7 +274,7 @@ public class ProductsDataServiceTests : RepoTestBase
         Assert.NotNull(created.Option);
         Assert.Equal("Red", created.Option!.Name);
 
-                var dupe = await _service.CreateColorAsync("Black");
+        var dupe = await _service.CreateColorAsync("Black");
         Assert.True(dupe.Succeeded);
         Assert.NotNull(dupe.Option);
         Assert.Equal(black.Id, dupe.Option!.Id);
@@ -281,7 +282,7 @@ public class ProductsDataServiceTests : RepoTestBase
     }
 
     [Fact]
-        public async Task CreateColorAsync_rejects_blank_name()
+    public async Task CreateColorAsync_rejects_blank_name()
     {
         var result = await _service.CreateColorAsync("   ");
 
@@ -392,9 +393,9 @@ public class ProductsDataServiceTests : RepoTestBase
     [Fact]
     public async Task CreateAppleIdAsync_rejects_duplicate_email()
     {
-                SeedCatalog(out _, out _);
+        SeedCatalog(out _, out _);
         var product = TestDataHelpers.CreateProduct(Context);
-                product = Context.Products.First(p => p.Id == product.Id);
+        product = Context.Products.First(p => p.Id == product.Id);
         Context.AppleIds.Add(new AppleId { ProductId = product.Id, Email = "dupe@example.com", Password = "secret" });
         Context.SaveChanges();
 
@@ -410,8 +411,180 @@ public class ProductsDataServiceTests : RepoTestBase
         Assert.False(result.Succeeded);
         Assert.Equal(nameof(MobileShop.Models.ViewModels.Web.BindModels.CreateAppleIdInputModel.Email), result.ErrorField);
     }
+
+    // ── CreateModelAsync: missing category throws ────────
+
+    [Fact]
+    public async Task CreateModelAsync_throws_when_Phone_category_missing()
+    {
+        var manufacturer = new Manufacturer { Name = "Apple" };
+        Context.Manufacturers.Add(manufacturer);
+        var appleIdCategory = new Category { Name = "AppleId" };
+        Context.Categories.Add(appleIdCategory);
+        Context.SaveChanges();
+        // Note: "Phone" category intentionally absent.
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() => _service.CreateModelAsync(1, "Pixel 9"));
+    }
+
+    [Fact]
+    public async Task CreateAppleIdAsync_throws_when_AppleId_category_missing()
+    {
+        var manufacturer = new Manufacturer { Name = "Apple" };
+        Context.Manufacturers.Add(manufacturer);
+        var phoneCategory = new Category { Name = "Phone" };
+        Context.Categories.Add(phoneCategory);
+        Context.SaveChanges();
+        // Note: "AppleId" category intentionally absent.
+
+        var input = new MobileShop.Models.ViewModels.Web.BindModels.CreateAppleIdInputModel
+        {
+            Price = 99m,
+            Email = "new@example.com",
+            Password = "secret123",
+        };
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() => _service.CreateAppleIdAsync(input));
+    }
+
+    // ── CreatePhoneAsync: unknown ManufacturerId ─────────
+
+    [Fact]
+    public async Task CreatePhoneAsync_rejects_unknown_manufacturer()
+    {
+        SeedCatalog(out var phoneModel, out _);
+        var input = new MobileShop.Models.ViewModels.Web.BindModels.CreatePhoneInputModel
+        {
+            ManufacturerId = 999,
+            ModelId = phoneModel.Id,
+            Price = 999m,
+            IMEI1 = TestDataHelpers.GenerateImei(),
+        };
+
+        var result = await _service.CreatePhoneAsync(input);
+
+        Assert.False(result.Succeeded);
+        Assert.Equal(nameof(MobileShop.Models.ViewModels.Web.BindModels.CreatePhoneInputModel.ManufacturerId), result.ErrorField);
+    }
+
+    // ── CreatePhoneAsync: model belongs to another manufacturer ──
+
+    [Fact]
+    public async Task CreatePhoneAsync_rejects_model_from_another_manufacturer()
+    {
+        SeedCatalog(out var phoneModel, out _);
+        var otherManufacturer = new Manufacturer { Name = "Samsung" };
+        Context.Manufacturers.Add(otherManufacturer);
+        Context.SaveChanges();
+        var otherModel = new Model { ManufacturerId = otherManufacturer.Id, CategoryId = Context.Categories.First(c => c.Name == "Phone").Id, Name = "Galaxy S24" };
+        Context.Models.Add(otherModel);
+        Context.SaveChanges();
+
+        var input = new MobileShop.Models.ViewModels.Web.BindModels.CreatePhoneInputModel
+        {
+            ManufacturerId = 1,
+            ModelId = otherModel.Id,
+            Price = 999m,
+            IMEI1 = TestDataHelpers.GenerateImei(),
+        };
+
+        var result = await _service.CreatePhoneAsync(input);
+
+        Assert.False(result.Succeeded);
+        Assert.Equal(nameof(MobileShop.Models.ViewModels.Web.BindModels.CreatePhoneInputModel.ModelId), result.ErrorField);
+    }
+
+    // ── CreatePhoneAsync: unknown ColorId ────────────────
+
+    [Fact]
+    public async Task CreatePhoneAsync_rejects_unknown_color()
+    {
+        SeedCatalog(out var phoneModel, out _);
+        var input = new MobileShop.Models.ViewModels.Web.BindModels.CreatePhoneInputModel
+        {
+            ManufacturerId = 1,
+            ModelId = phoneModel.Id,
+            Price = 999m,
+            IMEI1 = TestDataHelpers.GenerateImei(),
+            ColorId = 999,
+        };
+
+        var result = await _service.CreatePhoneAsync(input);
+
+        Assert.False(result.Succeeded);
+        Assert.Equal(nameof(MobileShop.Models.ViewModels.Web.BindModels.CreatePhoneInputModel.ColorId), result.ErrorField);
+    }
+
+    // ── CreateAppleIdAsync: implicit model created once ──
+
+    [Fact]
+    public async Task CreateAppleIdAsync_creates_implicit_model_once_for_two_emails()
+    {
+        SeedCatalog(out _, out _);
+        var input1 = new MobileShop.Models.ViewModels.Web.BindModels.CreateAppleIdInputModel
+        {
+            Price = 99m,
+            Email = "first@example.com",
+            Password = "secret123",
+        };
+        var input2 = new MobileShop.Models.ViewModels.Web.BindModels.CreateAppleIdInputModel
+        {
+            Price = 99m,
+            Email = "second@example.com",
+            Password = "secret456",
+        };
+
+        var result1 = await _service.CreateAppleIdAsync(input1);
+        var result2 = await _service.CreateAppleIdAsync(input2);
+
+        Assert.True(result1.Succeeded);
+        Assert.True(result2.Succeeded);
+        var appleIdCategory = Context.Categories.First(c => c.Name == "AppleId");
+        var appleManufacturer = Context.Manufacturers.First(m => m.Name == "Apple");
+        Assert.Single(Context.Models.Where(m => m.ManufacturerId == appleManufacturer.Id && m.CategoryId == appleIdCategory.Id && m.Name == "iPhone"));
+    }
+
+    // ── CreateAppleIdAsync: duplicate email case-insensitive ──
+
+    [Fact]
+    public async Task CreateAppleIdAsync_rejects_duplicate_email_case_insensitive()
+    {
+        SeedCatalog(out _, out _);
+        Context.AppleIds.Add(new AppleId { ProductId = TestDataHelpers.CreateProduct(Context).Id, Email = "Dupe@Example.com", Password = "secret" });
+        Context.SaveChanges();
+
+        var input = new MobileShop.Models.ViewModels.Web.BindModels.CreateAppleIdInputModel
+        {
+            Price = 99m,
+            Email = "dupe@example.com",
+            Password = "secret123",
+        };
+
+        var result = await _service.CreateAppleIdAsync(input);
+
+        Assert.False(result.Succeeded);
+        Assert.Equal(nameof(MobileShop.Models.ViewModels.Web.BindModels.CreateAppleIdInputModel.Email), result.ErrorField);
+    }
+
+    // ── CreatePhoneAsync: barcode length ─────────────────
+
+    [Fact]
+    public async Task CreatePhoneAsync_success_barcode_length_is_12()
+    {
+        SeedCatalog(out var phoneModel, out _);
+        var input = new MobileShop.Models.ViewModels.Web.BindModels.CreatePhoneInputModel
+        {
+            ManufacturerId = 1,
+            ModelId = phoneModel.Id,
+            Price = 999m,
+            IMEI1 = TestDataHelpers.GenerateImei(),
+        };
+
+        var result = await _service.CreatePhoneAsync(input);
+
+        Assert.True(result.Succeeded);
+        Assert.NotNull(result.EntityId);
+        var product = Context.Products.First(p => p.Id == result.EntityId);
+        Assert.Equal(12, product.Barcode.Length);
+    }
 }
-
-
-
-

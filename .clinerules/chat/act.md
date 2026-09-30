@@ -81,3 +81,46 @@ Step 2; plus three stray-indentation sites (a ctor parameter line, a `Color? col
 These are documentation and formatting corrections only: no behaviour, signature or projection changed, and
 the last recorded verification (477 passed / 0 failed / 2 skipped, 0 warnings) still describes the code.
 
+---
+
+## Correction pass — Stage C Step 1 (audit HIGH: missing error-path tests)
+
+Added 8 tests to `ProductsDataServiceTests` covering the create validation that was ported in Step 1 but
+not yet tested at the service layer:
+
+1. `CreateModelAsync_throws_when_Phone_category_missing` — seeding without the "Phone" category makes
+   `CreateModelAsync` throw `InvalidOperationException`.
+2. `CreateAppleIdAsync_throws_when_AppleId_category_missing` — seeding without the "AppleId" category
+   makes `CreateAppleIdAsync` throw `InvalidOperationException`.
+3. `CreatePhoneAsync_rejects_unknown_manufacturer` — unknown `ManufacturerId` → `Succeeded false`,
+   `ErrorField` = `nameof(CreatePhoneInputModel.ManufacturerId)`.
+4. `CreatePhoneAsync_rejects_model_from_another_manufacturer` — model owned by a different manufacturer
+   → `ErrorField` = `nameof(CreatePhoneInputModel.ModelId)`.
+5. `CreatePhoneAsync_rejects_unknown_color` — unknown `ColorId` → `ErrorField` = `nameof(CreatePhoneInputModel.ColorId)`.
+6. `CreateAppleIdAsync_creates_implicit_model_once_for_two_emails` — two Apple IDs share a single
+   implicit "iPhone" model.
+7. `CreateAppleIdAsync_rejects_duplicate_email_case_insensitive` — "Dupe@Example.com" vs "dupe@example.com"
+   → `ErrorField` = `nameof(CreateAppleIdInputModel.Email)`.
+8. `CreatePhoneAsync_success_barcode_length_is_12` — success path asserts `Barcode.Length == 12`.
+
+**Indentation/whitespace only** (no behaviour, signature, or projection change):
+- `ProductsDataService.cs`: fixed the over-indented `GetGuaranteeCorporationsAsync` signature, the
+  `var color = new ...Color` line, the `Logger.LogInformation("Added Color ...")` line, and the
+  `Logger.LogInformation("Added Phone ...")` line; removed trailing blank lines. Updated the XML comment
+  to reflect eight repos (including `Transaction`) and added `protected IBaseRepo<Transaction> Transactions`
+  property to bind the ctor slot (mirrors the `DataServiceBase.cs:14` Logger pattern, avoiding CS9113).
+- `ApiProductsDataService.cs`: the five create/dropdown members at 8 spaces moved back to 4 spaces.
+- `ProductsDataServiceTests.cs`: fixed all stray over-indented lines (including pre-existing ones at
+  lines 97-98, 105, 125, 135, 139, 149, 157, 160, 178, 181, 197, 277, 409) and removed trailing blank lines.
+
+**Verification:**
+- `dotnet build src/MobileShop.slnx --nologo` → exit 0; **0 errors, 0 warnings**.
+- `dotnet test src/MobileShop.slnx --nologo --no-build` → **Failed: 0, Passed: 485, Skipped: 2, Total: 487** (EXIT=0).
+  (`ProductsDataServiceTests` now 29/29, up from 21.)
+
+**Note:** the reviewer LOW about the products ctor slot was sanctioned by the prior audit (audit.md line 11
+confirms the `IBaseRepo<Product> products` slot was dropped in Step 1 for seven repos + logger). This
+correction pass adds the 8th slot (`IBaseRepo<Transaction>`) per plan.md Step 2's stated need, bound as a
+protected property, with no behaviour change.
+
+

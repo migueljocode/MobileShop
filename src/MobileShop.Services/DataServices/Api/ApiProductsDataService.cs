@@ -31,22 +31,22 @@ public class ApiProductsDataService : IProductsDataService
         => throw new NotImplementedException("ApiProductsDataService is not implemented yet.");
 
     /// <inheritdoc />
-        public Task<DropdownCreateResult> CreateManufacturerAsync(string name)
+    public Task<DropdownCreateResult> CreateManufacturerAsync(string name)
         => throw new NotImplementedException("ApiProductsDataService is not implemented yet.");
 
     /// <inheritdoc />
-        public Task<DropdownCreateResult> CreateModelAsync(int manufacturerId, string name)
+    public Task<DropdownCreateResult> CreateModelAsync(int manufacturerId, string name)
         => throw new NotImplementedException("ApiProductsDataService is not implemented yet.");
 
     /// <inheritdoc />
-        public Task<DropdownCreateResult> CreateColorAsync(string name)
+    public Task<DropdownCreateResult> CreateColorAsync(string name)
         => throw new NotImplementedException("ApiProductsDataService is not implemented yet.");
 
     /// <inheritdoc />
-        public Task<ServiceResult> CreatePhoneAsync(CreatePhoneInputModel input)
+    public Task<ServiceResult> CreatePhoneAsync(CreatePhoneInputModel input)
         => throw new NotImplementedException("ApiProductsDataService is not implemented yet.");
 
     /// <inheritdoc />
-        public Task<ServiceResult> CreateAppleIdAsync(CreateAppleIdInputModel input)
+    public Task<ServiceResult> CreateAppleIdAsync(CreateAppleIdInputModel input)
         => throw new NotImplementedException("ApiProductsDataService is not implemented yet.");
 }

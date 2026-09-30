@@ -2,11 +2,10 @@ namespace MobileShop.Services.DataServices.Dal;
 
 /// <summary>Provides the catalog and creation operations for the Products area.</summary>
 /// <remarks>
-/// The seven repositories cover both product types plus the shared catalog entities. There is no
+/// The eight repositories cover both product types plus the shared catalog entities and transactions. There is no
 /// <see cref="Product"/> repo because each create path builds the product row inline and it is persisted by
-/// cascade through the phone or Apple-ID insert, no <see cref="SecondHand"/> repo (the second-hand profile is
-/// a <see cref="Product"/> navigation, not a separate write), and no <see cref="Transaction"/> repo yet
-/// (that arrives in Step 2, which needs the details page's transaction rows).
+/// cascade through the phone or Apple-ID insert, and no <see cref="SecondHand"/> repo (the second-hand profile is
+/// a <see cref="Product"/> navigation, not a separate write).
 /// </remarks>
 public class ProductsDataService(
     IBaseRepo<Phone> phones,
@@ -16,11 +15,13 @@ public class ProductsDataService(
     IBaseRepo<Category> categories,
     IBaseRepo<MobileShop.Models.Entities.Color> colors,
     IBaseRepo<Guarantee> guarantees,
+    IBaseRepo<Transaction> transactions,
     ILogger<ProductsDataService> logger)
     : IProductsDataService
 {
-    /// <summary>Gets the structured logger for this products service.</summary>
+        /// <summary>Gets the structured logger for this products service.</summary>
     protected ILogger<ProductsDataService> Logger { get; } = logger;
+    protected IBaseRepo<Transaction> Transactions { get; } = transactions;
 
     /// <inheritdoc />
     public async Task<IReadOnlyList<ProductListItemViewModel>> GetInventoryRowsAsync()
@@ -152,7 +153,7 @@ public class ProductsDataService(
         => (await colors.FindAllAsync()).Select(c => new DropdownOptionViewModel(c.Id, c.Name)).ToList().AsReadOnly();
 
     /// <inheritdoc />
-        public async Task<IReadOnlyList<string>> GetGuaranteeCorporationsAsync()
+    public async Task<IReadOnlyList<string>> GetGuaranteeCorporationsAsync()
         => (await guarantees.FindAllAsync())
             .Select(g => g.Corporation)
             .Distinct(StringComparer.OrdinalIgnoreCase)
@@ -219,12 +220,12 @@ public class ProductsDataService(
         if (existing is not null)
             return new DropdownCreateResult(true, new DropdownOptionViewModel(existing.Id, existing.Name), null, 200);
 
-                var color = new MobileShop.Models.Entities.Color { Name = trimmed };
+        var color = new MobileShop.Models.Entities.Color { Name = trimmed };
         var added = await colors.AddAsync(color) > 0;
         if (!added)
             return new DropdownCreateResult(false, null, "The color could not be saved.", 400);
 
-                Logger.LogInformation("Added Color Id={Id}", color.Id);
+        Logger.LogInformation("Added Color Id={Id}", color.Id);
         return new DropdownCreateResult(true, new DropdownOptionViewModel(color.Id, color.Name), null, 200);
     }
 
@@ -288,7 +289,7 @@ public class ProductsDataService(
             return new ServiceResult(false, "The phone could not be saved. Check the details and try again.", null, null);
         }
 
-                Logger.LogInformation("Added Phone Id={Id}", phone.Id);
+        Logger.LogInformation("Added Phone Id={Id}", phone.Id);
         return new ServiceResult(true, null, null, phone.Id);
     }
 
@@ -347,8 +348,3 @@ public class ProductsDataService(
         return model;
     }
 }
-
-
-
-
-
