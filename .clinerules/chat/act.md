@@ -1,7 +1,7 @@
 # Act Report — Stage H Step 2 correction, second pass (Job B MEDIUM: vacuous seller test)
 
 - Context: Job B reviewed the first correction (`7f2672e`) and returned **PASS — Step 2 is closed**, with one MEDIUM test defect it asked to be fixed. This is that fix. **No Step 3 work was performed.**
-- Commit: (filled in after commit)
+- Commit: `5601a87` — test(people): make seller soft-delete count test non-vacuous
 - Verification:
   - `dotnet build src/MobileShop.slnx --nologo && dotnet test src/MobileShop.slnx --nologo --no-build` -> **Build succeeded, 0 errors, 0 warnings; Failed: 0, Passed: 522, Skipped: 2, Total: 524** (EXIT=0). Count is unchanged from the previous pass, as expected for a fix rather than new tests.
   - Scope: single file, `PeopleDataServiceTests.cs`. `git diff --stat` over `src/MobileShop.Services`, `src/MobileShop.Web`, `src/MobileShop.Dal`, `src/MobileShop.Api` is **empty** — **tests-only**.
