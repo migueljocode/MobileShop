@@ -1,6 +1,6 @@
 # Act Report — Stage H Step 4 (GlobalUsings cleanup + final Stage H validation)
 
-- Commit: (filled in after commit)
+- Commit: `5cd80f2` — refactor: remove obsolete Dal.Repos global usings and validate Stage H
 - GlobalUsings cleanup (evidence-based, per L8):
   - Inspected all four in-scope files: `Services`, `Dal`, `Web`, `Tests`.
   - **Removed exactly one import from each of two files**: `global using MobileShop.Dal.Repos;` from `Services/GlobalUsings.cs` and `Tests/GlobalUsings.cs`. Proof of obsolescence: after Step 3 the `MobileShop.Dal.Repos` namespace contains **0** type files (`find src/MobileShop.Dal/Repos -maxdepth 1 -name '*.cs'` -> 0); only its child `Repos.Base` survives.
