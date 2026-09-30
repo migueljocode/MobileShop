@@ -1,30 +1,28 @@
-# Act Report — Stage H Step 3 (delete specialized repositories, interfaces, and their tests)
+# ACTOR PROMPT — Stage H Step 3 correction (restore BaseRepo<T> direct tests)
 
-- Commit: `e3a6622` — refactor(dal): delete specialized repositories, interfaces, and their tests
-- Verification:
-  - Required chain: `dotnet build src/MobileShop.slnx --nologo && dotnet test src/MobileShop.slnx --nologo --no-build` -> **Build succeeded, 0 errors, 1 warning; Failed: 0, Passed: 214, Skipped: 2, Total: 216** (EXIT=0, 44 s).
-  - **Warning (reported honestly, as instructed):** exactly **1** warning, identified as **`ProductsDataService.cs(26,62): warning CS9124`** — the pre-existing one that first appeared at Stage E. It is **not** caused by this step and that file was not modified. I did **not** fix it, per the explicit instruction not to touch the CS9124 backlog item (it remains Step 4's item #1).
-  - Dead-reference search after deletion: word-boundary grep for all 15 specialized repo types across `src` (`.cs`/`.cshtml`) -> **NONE**; grep for `Repos.Interfaces` -> **NONE**.
-  - `src/MobileShop.Dal/Repos/` now contains **only** `Base/BaseRepo.cs` and `Base/IBaseRepo.cs`.
-  - `git diff --cached --stat -- src/MobileShop.Api` is **empty** (API untouched).
-  - `services.AddScoped(typeof(IBaseRepo<>), typeof(BaseRepo<>));` is still registered at line 67.
-  - `git diff --diff-filter=D --name-only` lists **only** the 44 planned deletions (15 impls + 15 interfaces + 14 test files).
-- Consumer proof (re-run myself, exactly as instructed):
-  - Searched `\b(I)?(User|Customer|Seller|Product|Transaction|AppleId|Phone|SecondHand|Guarantee|Manufacturer|Model|Category|Color|Employee|Person)Repo\b` over `src` excluding `bin/obj` and `Dal/Repos/`.
-  - Result: **15 hits in `ServiceCollectionExtensions.cs`** (the DI registrations) and **14 repo test files** under `src/MobileShop.Tests/Dal/Repos/` (2 hits each). `EmployeeRepo` had no test file, as the reviewer stated.
-  - **No surviving production consumer** — no Web page, area service, initialization code, or test helper referenced any of them. Every repo therefore qualified for deletion.
-- What was deleted (44 files):
-  - **15 implementations** in `src/MobileShop.Dal/Repos/`: `AppleIdRepo`, `CategoryRepo`, `ColorRepo`, `CustomerRepo`, `EmployeeRepo`, `GuaranteeRepo`, `ManufacturerRepo`, `ModelRepo`, `PersonRepo`, `PhoneRepo`, `ProductRepo`, `SecondHandRepo`, `SellerRepo`, `TransactionRepo`, `UserRepo`.
-  - **The whole `src/MobileShop.Dal/Repos/Interfaces/` folder** (15 `I*Repo.cs` files).
-  - **14 test files** in `src/MobileShop.Tests/Dal/Repos/`. `RepoTestBase.cs`, `BaseRepoTests.cs`, `TestDataHelpers.cs` and `Initialization/` were all kept.
-- What was modified (5 files):
-  - **`ServiceCollectionExtensions.cs`** — removed the 15 specialized `AddScoped<I…Repo, …Repo>()` lines from `AddMobileShopRepository()`, keeping the generic registration; updated the XML summary so it no longer says remainders are removed in Stage H.
-  - **Four `GlobalUsings.cs`** (`Dal`, `Web`, `Tests`, `Services`) — removed the single `global using MobileShop.Dal.Repos.Interfaces;` line from each. These were the **expected forced break** (the namespace no longer exists, so the build would fail with CS0234). **Only those four lines were removed**; `global using MobileShop.Dal.Repos;` was deliberately **kept** in `Dal` and `Tests`, because `Repos.Base` still exists.
-- Test-count reconciliation (this is where the count was not obvious):
-  - I counted **54** `[Fact]` and **0** `[Theory]` in the 14 deleted test files before deleting, but the drop was far larger: **522 -> 214 = 308**.
-  - The extra tests come from **inheritance**: 10 of the 14 deleted classes derive from `BaseRepoTests<TEntity, TRepo>`, which contributes **26** `[Fact]`s each; the other 4 (`Category`, `Color`, `Manufacturer`, `Model`) derive only from `RepoTestBase`. So 10 x 26 = 260 inherited + 54 declared = 314, which over-predicted by 6.
-  - Rather than leave that discrepancy unexplained, I **measured it**: I stashed my work, ran the suite at `HEAD` with normal verbosity, and counted the actually-executing `Dal.Repos.*` tests: **308** passed (AppleId 30, Customer 28, Product 29, Transaction 31, User 36, and 26 each for Guarantee/Person/Phone/SecondHand/Seller, 6 each for Category/Color/Manufacturer/Model). That matches 522 - 308 = 214 **exactly**. The 6-test gap in my static model came from `[Fact]`s that are declared but shadowed/overridden, which only an actual run reveals. All work was then restored via `git stash pop` and re-staged.
-- Limitations: None. `IBaseRepo<T>`/`BaseRepo<T>` survive untouched, so no surviving code changed behavior; this was pure removal plus the required using fix.
-- Friction noted: build (~21 s) and the full suite (~44 s) exceed the ~30 s command window, so the chain used the detached-launch + poll pattern. The stash/baseline-count detour cost an extra full build+test cycle; it was worth it because a 308-test drop explained only by "inherited tests" would otherwise have been an unverified story.
-- Problems: none. The predicted namespace break occurred exactly where the prompt anticipated (the four `Repos.Interfaces` using lines) and nowhere else — no ARCHITECTURAL BLOCKER conditions were met.
-- Status: COMPLETE
+> This file is an instruction. After you finish, replace its entire content with your Act Report, using the same format as your previous reports.
+
+You are the ACTOR. Read `.clinerules/actor.md`, `.clinerules/chat/audit.md` (Job B on Step 3: one HIGH finding) and `.clinerules/chat/plan.md`. Run `git pull` first. Do **one correction pass for that HIGH finding only**, then STOP. Do not start Step 4. Do not touch `.clinerules/to-do.md`, `.clinerules/chat/plan.md`, or `audit.md`.
+
+## Problem
+`src/MobileShop.Tests/Dal/BaseClass/BaseRepoTests.cs` is an `abstract` generic class (`BaseRepoTests<TEntity, TRepo>`) with 26 `[Fact]`s. All its concrete subclasses were deleted in `e3a6622`, so none of its tests run any more, and `BaseRepo<T>`, the only surviving repository abstraction, has no direct tests.
+
+## Task (tests only; no production code changes)
+1. Recover the old Person subclass for reference: `git show e3a6622^:src/MobileShop.Tests/Dal/Repos/PersonRepoTests.cs`.
+2. Add one concrete class in `src/MobileShop.Tests/Dal/BaseClass/`, for example `BaseRepoPersonTests.cs`:
+   `public class BaseRepoPersonTests : BaseRepoTests<Person, BaseRepo<Person>>`
+   - `CreateRepo()` returns `new BaseRepo<Person>(Context)`.
+   - `CreateValidEntity()` is adapted from the recovered `PersonRepoTests` (a valid `Person` with unique values, following the base class's expectations).
+   - Use the repo's minimal modern C# style (file-scoped namespace, expression-bodied members, existing global usings). Do not add `using` lines that a global using already covers.
+3. Do not modify `BaseRepoTests.cs`, `RepoTestBase.cs`, any production file, or any other test.
+
+## Verify
+- `dotnet build src/MobileShop.slnx --nologo && dotnet test src/MobileShop.slnx --nologo --no-build`. Expected: **0 errors, 240 passed / 2 skipped** (214 + 26). Report the actual numbers. If one or more of the 26 inherited tests fails against `BaseRepo<Person>`, do not change `BaseRepo` or weaken the test: STOP and report the failing test names and messages as a finding.
+- Run the suite filtered to the new class, for example `--filter "FullyQualifiedName~BaseRepoPersonTests"`, and confirm it runs exactly 26 tests.
+- `git diff --stat -- src/MobileShop.Services src/MobileShop.Web src/MobileShop.Dal src/MobileShop.Api` is empty.
+- Report the warning count honestly. CS9124 at `ProductsDataService.cs:26` is expected on a full recompile. Do not fix it; it stays in the cleanup backlog.
+
+## Commit and report
+- Commit: `git commit -m "test(dal): restore BaseRepo<T> direct tests with a concrete Person subclass"` (Conventional Commits, no Co-authored-by, never amend, never push).
+- Then replace this file's content with your Act Report (commit hash, verification numbers, what was added, limitations, problems), and record the hash in a separate commit: `git commit -m "docs(act): record Stage H Step 3 correction commit hash"`.
+- STOP.
