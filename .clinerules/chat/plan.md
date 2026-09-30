@@ -1,121 +1,93 @@
-# Plan — Stage E: Transactions — TransactionsDataService + transaction/invoice/PDF
+# Plan — Stage F: Reports — ReportsDataService + profit/loss
 
-Stage D is signed off. Incorporates Job A audit **H1** (empty list-factor error message) and optional notes (Index still loads list on factor failure; single-id factor returns `byte[]?`).
+Stage E is signed off. This file plans **Stage F only** (next unchecked stage in `to-do.md`).
 
 ## Process (binding)
-- **One step → commit → Job B review → next step.** Do not run the whole stage in one continuous actor session without reviewer sign-off between steps.
-- Only the **reviewer** ticks Stage E in `to-do.md` after the final step PASSes.
+- **One step → commit → Job B review → next step.**
+- Only the **reviewer** ticks Stage F in `to-do.md` after the final step PASSes.
 
-## Locked decisions (carried + Stage E)
-L1 Boundaries — pages inject area interfaces only. No EF entity crosses the page boundary.
-L2 One area service per page, local name `dataService`. **No** second data service and **no** page-level `IPdfGenerator` after migration — PDF generation lives **inside** `TransactionsDataService` (it may inject `IPdfGenerator`).
-L3 DI — **this stage removes nothing.** Keep entity `ITransactionDataService`, `IInvoiceDataService`, phone/apple/customer/seller services (Home cards, Reports P/L, any remaining callers).
-L4 Invoice/PDF ownership is this area.
-L5 Reports owns profit/loss — **do not** move `GetProfitLoss*` here; leave on entity `TransactionDataService` until Stage F.
-L6 Logging — `ILogger<TransactionsDataService>`; log record success/failure only.
-L7 Api — any **signature change** updates `ApiTransactionsDataService` in the **same step**. Never touch `src/MobileShop.Api`. `UseApi` stays false.
-L8 No auth, no schema/migrations, no DatabaseInitializer policy change, no bin/obj.
-L9 Tests — `RepoTestBase` + real `TransactionsDataService` over `BaseRepo<T>` (+ real `IPdfGenerator` or thin test double only if required).
-L10 **Full interface in Step 1** — implement every `ITransactionsDataService` member on the Dal class (no NIE).
-L11 **List-factor errors (locked, audit H1)** — `GenerateListFactorPdfAsync` must never return `Succeeded: true` with empty/null bytes. Exact failure messages:
-   - empty selection **and** empty snapshot → `"No transactions match the current filters."`
-   - any selected id ≤ 0 → `"Selected transaction identifiers must be positive numbers."`
-   - selected ids missing from snapshot → `$"These selected transactions no longer exist: {string.Join(", ", missing)}."`
-L12 **Single-id factor** — `GetTransactionFactorPdfAsync` returns `Task<byte[]?>`; **null** when the transaction is missing (page maps null → NotFound).
+## Locked decisions
+L1 Pages inject area interfaces only. No EF entities on the page path.
+L2 One area service per page, local name `dataService`. After migration, ProfitLoss injects **only** `IReportsDataService` — not `ITransactionDataService`, not `IEmployeeDataService`, not `IOptions<DistributionSettings>`.
+L3 DI — **this stage removes nothing.** Keep entity `ITransactionDataService`, `IEmployeeDataService`, and all other entity services (Home cards still use transaction service; Stage H deletes leftovers).
+L4 Profit/loss **ownership moves here** (Stage E L5 is fulfilled by this stage). Port the projections from entity `TransactionDataService`; leave those methods on the entity interface until Stage H (callers may still compile against them).
+L5 Date-range **UI** (`DateRangeMode`, `AutomaticPreset`, `ResolveBoundsAsync`, `From`/`To` bind props) **stays on the page**. The service only answers data questions for already-resolved bounds.
+L6 Logging — `ILogger<ReportsDataService>`; optional info on empty range only if useful; no noise.
+L7 Api — `ApiReportsDataService` already implements the interface with NIE. No signature change expected; if any is required, update Api in the same step. Never touch `src/MobileShop.Api`.
+L8 No auth, schema, migrations, DatabaseInitializer policy, bin/obj.
+L9 Tests — `RepoTestBase` + real `ReportsDataService`; port/extend coverage for P/L rows, total, earliest date, distribution (seed must include active Mikaeeil/Anis employees as today).
+L10 **Full interface in Step 1** — implement every `IReportsDataService` member on Dal (no NIE).
+
+## Gap (must fix in Step 1)
+`IReportsDataService` is registered under the **Api** branch only. The **Dal** branch currently has **no** `IReportsDataService` → `ReportsDataService` line. Add it in Step 1 or Production DI will fail once the page depends on it.
 
 ## Scope
-Four pages: `Transactions/Index`, `Details`, `Buy`, `Sell`.
-Implement `GetInvoiceAsync` / `GenerateInvoicePdfAsync` on the area service (port `InvoiceDataService`) even though there is no Invoice Razor page yet.
+Single page: `Pages/Reports/ProfitLoss`.
 
-## Current page inventory (verified)
-| Page | Injects today | Behavior to preserve |
-|------|---------------|----------------------|
-| Index | `ITransactionDataService`, `IPdfGenerator` | List + factor download (selection or filtered list; single-snapshot rules; `transactions-factor.pdf`) |
-| Details | `ITransactionDataService`, `IPdfGenerator` | Details + single-row factor PDF |
-| Buy | transaction + seller + phone + appleId services | Sellers + selectable (Buy); `RecordBuyAsync` |
-| Sell | transaction + customer + phone + appleId services | Customers + selectable (Sell); `RecordSellAsync` |
+## Current page behavior (verified)
+Ctor today: `(ITransactionDataService, IEmployeeDataService, IOptions<DistributionSettings>)`.
 
-Shop sentinels: `ShopSellerId = 1`, `ShopCustomerId = 1` — port as private constants with the same TODO comment.
+`OnGetAsync`:
+1. `ResolveBoundsAsync` — Automatic presets (Today/Week/Month/Year/All using earliest) or Manual (`From`/`To` with defaults); may set `EmptyDatabaseNote`.
+2. `Rows = GetProfitLossRowsAsync(EffectiveFrom, EffectiveTo)`.
+3. `TotalProfit = GetProfitLossTotalAsync(EffectiveFrom, EffectiveTo)`.
+4. Active employees + `DistributionCalculator.Calculate(TotalProfit, employees, settings)` → `DistributionRows`.
 
-## Contract changes (Step 1)
-Add (update Api stub same step):
+Preserve all of the above semantics after migration; only the data sources change.
 
+## Interface (already present — implement as-is)
 ```csharp
-Task<FactorPdfResult> GenerateListFactorPdfAsync(
-    string? direction, int take, bool ascending, IReadOnlyList<int> selectedIds);
+Task<IReadOnlyList<ProfitLossRowViewModel>> GetProfitLossRowsAsync(DateTime? from, DateTime? to);
+Task<decimal> GetProfitLossTotalAsync(DateTime? from, DateTime? to);
+Task<DateTime?> GetEarliestTransactionDateAsync();
+Task<IReadOnlyList<DistributionRow>> GetDistributionRowsAsync(decimal totalProfit);
 ```
 
-New record `MobileShop.Models.ViewModels.Web.FactorPdfResult`:
-`public sealed record FactorPdfResult(bool Succeeded, byte[]? Bytes, string? Error);`
-
-Change `GetTransactionFactorPdfAsync` to `Task<byte[]?>` (L12).
-
-### `GenerateListFactorPdfAsync` semantics (complete)
-1. Load the same list snapshot as `GetListAsync(direction, take, ascending)` (clamp take 1–500 as today).
-2. If `selectedIds` is null or empty:
-   - if snapshot is empty → **fail** L11 empty-filter message;
-   - else rows = snapshot mapped with `ToFactorRow()`.
-3. Else (selection present):
-   - if any id ≤ 0 → **fail** positive-numbers message;
-   - distinct ids; resolve **only** against the snapshot dictionary; any missing → **fail** missing-ids message (never partial factor, never per-id extra fetch);
-   - else rows = resolved factor rows in request order.
-4. On success: `Bytes = pdfGenerator.GenerateTransactionFactor(new TransactionFactorViewModel(rows, DateTime.UtcNow))`, `Succeeded = true`, `Error = null`.
+### Implementation notes
+- **P/L rows/total** — port `TransactionDataService.GetProfitLossRowsAsync` / `GetProfitLossTotalAsync` (group by product, buy/sell sums, date filter inclusive on `.Date`). Prefer `IBaseRepo<Transaction>` + `SelectAllAsync` projections (same shape as entity service).
+- **Earliest date** — port `TransactionRepo.GetEarliestTransactionDateAsync` semantics (non-deleted, order by date ascending, date-only). Use `IBaseRepo<Transaction>` ordered select **or** `ITransactionRepo` if the specialized method is the cleanest path; document choice in act.md. Soft-delete filters must still apply.
+- **Distribution** — load active employees with `PersonNavigation` (required by `DistributionCalculator`), then `DistributionCalculator.Calculate(totalProfit, employees, settings.Value)`. Inject `IOptions<DistributionSettings>` **into the service**, not the page. For employees: prefer `IBaseRepo<Employee>` if Include/person names work via Select; otherwise `IEmployeeRepo.FindAllActiveAsync()` is acceptable until Stage H (same Include graph as today). **Do not** inject `IEmployeeDataService` into the area service if a repo path works.
 
 ## Reviewer Briefing
-- **H1 applied:** empty snapshot + no selection fails with the Index filter message; never succeed with empty PDF.
-- **HIGH residual:** RecordBuy/Sell rejection rules + shop sentinels; invoice Include graph (prefer repos; `AppDbContext` only if unavoidable — note in act.md).
-- **MEDIUM:** selectable phone∪AppleId; Step 3 Index still `LoadAsync` on factor failure.
+- **HIGH:** Dal DI registration missing today — must add in Step 1 before page migration.
+- **HIGH:** Distribution still requires named active employees; do not change calculator rules.
+- **MEDIUM:** Date-range resolution stays on the page (L5).
+- **Do not** delete entity transaction/employee DI (L3).
 
-## ~~[x] Step 1 — Contract + `TransactionsDataService` + Dal registration~~
-- Files: create `src/MobileShop.Services/DataServices/Dal/TransactionsDataService.cs`, `src/MobileShop.Models/ViewModels/Web/FactorPdfResult.cs`, `src/MobileShop.Tests/Services/DataServices/Dal/TransactionsDataServiceTests.cs`; modify `ITransactionsDataService`, `ApiTransactionsDataService`, `ServiceCollectionExtensions` (one Dal line); optionally shorten BindModels FQNs.
-- Ctor: `(IBaseRepo<Transaction> transactions, IBaseRepo<Seller> sellers, IBaseRepo<Customer> customers, IBaseRepo<Phone> phones, IBaseRepo<AppleId> appleIds, IPdfGenerator pdfGenerator, ILogger<TransactionsDataService> logger)` — add repos only if invoice needs them; **no** entity data services.
-- Implement all members:
-  1. `GetListAsync` — port entity list (direction, take clamp, date order).
-  2. `GetDetailsAsync` — port details projection.
-  3. `GetSellersAsync` / `GetCustomersAsync` — port party-option projections.
-  4. `GetSelectableProductsAsync` — phone + AppleId selectable ports, then `OrderBy(Name)`.
-  5. `RecordBuyAsync` / `RecordSellAsync` — port rejection rules (negative price; existing Buy/Sell on product); shop sentinels; `ServiceResult` with page-matching failure messages.
-  6. `GetInvoiceAsync` / `GenerateInvoicePdfAsync` — port invoice assembly + `pdfGenerator.Generate` (prefer Select/repos; document if `AppDbContext` is required).
-  7. `GetTransactionFactorPdfAsync` → `byte[]?` (null if missing).
-  8. `GenerateListFactorPdfAsync` — full semantics under Contract changes (including L11).
-- Register `ITransactionsDataService` → `TransactionsDataService` in the Dal branch only.
-- Tests: list filter/order/take; details; record success + duplicate reject; selectable shape; list factor — empty snapshot message, non-positive id, missing id, success non-empty bytes; party options.
+## [ ] Step 1 — `ReportsDataService` + Dal registration
+- Files: create `src/MobileShop.Services/DataServices/Dal/ReportsDataService.cs`, `src/MobileShop.Tests/Services/DataServices/Dal/ReportsDataServiceTests.cs`; modify `ServiceCollectionExtensions` (Dal branch only: `services.AddScoped<IReportsDataService, ReportsDataService>();`).
+- Ctor: `(IBaseRepo<Transaction> transactions, …employees…, IOptions<DistributionSettings> distributionSettings, ILogger<ReportsDataService> logger)`.
+- Implement all four interface members (L10).
+- Tests: rows/total for a known range; empty range; earliest null vs seeded; distribution three rows 40/50/10 when profit > 0 (use seeded names).
 - Verify: `dotnet build src/MobileShop.slnx --nologo && dotnet test src/MobileShop.slnx --nologo --no-build`
-- Done when: interface + Api + Dal green; **no page changes**.
-- Risk: HIGH. Confidence: MEDIUM.
-
-## ~~[x] Step 2 — Invoice follow-up (optional)~~ — SKIPPED: invoice Includes complete in Step 1; no work invented
-Only if Step 1 deferred invoice Includes. If invoice + list factor already done, **skip** and record reason in `act.md` — invent no extra work.
-- Risk: LOW. Confidence: HIGH.
-
-## ~~[x] Step 3 — Migrate four Transactions pages + tests~~
-- Files: all four `Pages/Transactions/*.cshtml.cs`; `Tests/Web/Pages/Transactions/*`.
-- Change:
-  - Each ctor: `(ITransactionsDataService dataService)` only.
-  - **Index:** always `LoadAsync` first (so the list is populated even when factor fails); download handler calls `GenerateListFactorPdfAsync` with normalized direction/take/order + `SelectedIds`; on `!Succeeded` add `ModelState` error from `Error` and `return Page()`; on success `File(Bytes!, "application/pdf", "transactions-factor.pdf")`.
-  - **Details:** details + `GetTransactionFactorPdfAsync`; null → NotFound.
-  - **Buy/Sell:** parties + selectable from service; post → `Record*Async(Input)`; failure model error; success Message strings unchanged.
-- Do not edit `.cshtml` unless forced (stop and report).
-- Verify: build + full suite.
+- Done when: Dal registers area service; **no page changes**.
 - Risk: MEDIUM. Confidence: HIGH.
 
-## ~~[x] Step 4 — Stage E validation~~
+## [ ] Step 2 — Migrate `ProfitLoss` page + tests
+- Files: `Pages/Reports/ProfitLoss.cshtml.cs`; any `Tests/Web/Pages/Reports/*`.
+- Change:
+  - Ctor: `(IReportsDataService dataService)` only.
+  - Keep `ResolveBoundsAsync` / enums / bind properties on the page.
+  - Replace transaction/employee/settings calls with `dataService.GetEarliestTransactionDateAsync`, `GetProfitLossRowsAsync`, `GetProfitLossTotalAsync`, `GetDistributionRowsAsync(TotalProfit)`.
+- Do not edit `.cshtml` unless forced (stop and report).
+- Verify: build + full suite.
+- Risk: LOW. Confidence: HIGH.
+
+## [ ] Step 3 — Stage F validation
 - Chain 1: build + full suite.
-- Chain 2: Production host; **200** on `/Transactions`, `/Transactions/Buy`, `/Transactions/Sell`, `/Transactions/Details?id=1` (if seeded), regression Home/Products/People/Reports/Account.
-- Optional: factor download returns `application/pdf` for a non-empty filter.
-- Non-destructiveness: no `InitializeForDevelopment` in Production log; optional row-count fingerprint stable.
-- Done when: four pages use only `dataService`; no page `IPdfGenerator` or entity transaction/phone/apple/customer/seller injects; entity DI still registered; suite + smoke green.
+- Chain 2: Production host; **200** `/Reports/ProfitLoss` (and with query presets if easy); regression Home/Products/People/Transactions/Account.
+- Non-destructiveness: no init wipe; optional row-count fingerprint stable.
+- Done when: page uses only `dataService`; entity DI still present; suite + smoke green.
 - Risk: LOW. Confidence: HIGH.
 
 ## Global Definition of Done
-- Full `ITransactionsDataService` (including list factor + L11 messages) on Dal; registered.
-- Index/Details/Buy/Sell depend on a single `dataService`.
-- Factor/invoice PDFs only via area service + existing `IPdfGenerator`.
-- No entity service/repo registration removed; profit/loss stays on entity transaction service until Stage F.
+- `ReportsDataService` implements full `IReportsDataService` and is Dal-registered.
+- ProfitLoss depends on a single `dataService`.
+- Date-range UI remains on the page; P/L + distribution data come from the area service.
+- No entity service/repo registration removed.
 - Build + suite + Production smoke green.
 
 ## Execution notes
 - One step per commit; Conventional Commits; no Co-authored-by.
 - Stop after each step for Job B.
-- Audit H1 is applied — actor may start **Step 1 only** after this plan.
-- OUT OF SCOPE: Reports/ProfitLoss migration, Home cards migration, deleting entity Transaction/Invoice services.
+- OUT OF SCOPE: Account pages, deleting entity services, Home dashboard migration, changing DistributionCalculator fixed shares.
