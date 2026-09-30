@@ -351,7 +351,7 @@ as they are — see Step 1 for why the JSON contract must not move.
   changed, and `git status` shows no `.cshtml` diff.
 - Risk: LOW. Confidence: HIGH.
 
-## [ ] Step 5 — Coverage consolidation and Stage C validation
+## ~~[x] Step 5 — Coverage consolidation and Stage C validation~~
 - Files: modify: src/MobileShop.Tests/Services/DataServices/Dal/PhoneDataServiceTests.cs and
   AppleIdDataServiceTests.cs (only to remove assertions that are now duplicated and strictly weaker);
   create: none; delete: none.
