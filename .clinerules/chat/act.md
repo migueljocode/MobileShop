@@ -1,6 +1,6 @@
 # Act Report — Stage H Step 2
 
-- Commit: (filled in after commit)
+- Commit: `a31cb6e` — refactor(services): delete obsolete DAL entity services and their tests
 - Verification:
   - Dead-reference search: the nine deleted service types have **no** surviving code reference; `\bDataServiceBase<` has **no** surviving reference; `IEmployeeDataService` has **no** surviving reference.
   - Required chain: `dotnet build src/MobileShop.slnx --nologo && dotnet test src/MobileShop.slnx --nologo --no-build` -> **0 errors, 1 warning**; **Failed: 0, Passed: 519, Skipped: 2, Total: 521** (EXIT=0).
