@@ -1,6 +1,6 @@
 # Act Report — Stage G Step 3 (Stage G validation)
 
-- Commit: (filled in after commit)
+- Commit: `15b7e24` — docs(account): complete Stage G validation
 - Verification — Chain 1 (build + full suite, one chained call):
   - `dotnet build src/MobileShop.slnx --nologo && dotnet test src/MobileShop.slnx --nologo --no-build` -> **Build succeeded, 0 errors, 1 warning**; **Failed: 0, Passed: 547, Skipped: 2, Total: 549** (EXIT=0, 56 s).
   - The warning is the **pre-existing** `CS9124` in `src/MobileShop.Services/DataServices/Dal/ProductsDataService.cs(26,62)`; it reappeared on this full rebuild (Step 2's incremental build did not show it). Untouched by this stage.
