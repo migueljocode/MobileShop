@@ -1,19 +1,20 @@
-# Act Report — Stage F Step 3 (Stage F validation)
+# Act Report — Stage G Step 1
 
-- Commit: `4ee6c2d` — docs(reports): complete Stage F validation
-- Verification — Chain 1 (build + full suite, one chained call):
-  - `dotnet build src/MobileShop.slnx --nologo && dotnet test src/MobileShop.slnx --nologo --no-build` -> **Build succeeded, 0 errors, 1 warning**; **Failed: 0, Passed: 538, Skipped: 2, Total: 540** (EXIT=0).
-  - The single warning is the **pre-existing** `CS9124` at `src/MobileShop.Services/DataServices/Dal/ProductsDataService.cs(26,62)` — untouched by this stage, identical to the Stage E and Stage F Step 1/2 baselines; deliberately not fixed.
-- Verification — Chain 2 (Production host + smoke):
-  - Host started with `ASPNETCORE_ENVIRONMENT=Production dotnet run --project src/MobileShop.Web --no-launch-profile --urls http://localhost:5199`; log confirms `Hosting environment: Production` and `Now listening on: http://localhost:5199`. Shut down afterwards (port 5199 released; post-shutdown probe refused, curl exit 7).
-  - **Target route 200**: `/Reports/ProfitLoss` -> **200**.
-  - **All five automatic presets 200** (the plan's "with query presets if easy"): `Mode=Automatic&Preset=Today|Week|Month|Year|All` -> **200** each.
-  - **Data-path proof**: the `Preset=All` response body renders the distribution section with both required employees (`Mikaeeil Jorjany`, `Anis Sahabi`) and the fixed shares `>40%`, `>50%`, `>10%`, plus the `Total profit:` line. This exercises the whole migrated chain — `GetEarliestTransactionDateAsync` -> `GetProfitLossRowsAsync`/`GetProfitLossTotalAsync` -> `GetDistributionRowsAsync` — through `IReportsDataService`, and confirms the seeded employee lookup still satisfies the fixed 40/50/10 rules (plan HIGH).
-  - **Regression routes 200**: `/`, `/Products`, `/People/Customers`, `/People/Sellers`, `/Transactions`, `/Transactions/Buy`, `/Transactions/Sell`, `/Account/Login` — **8/8**.
-  - **Non-destructiveness**: Production log has **0** matches for `InitializeForDevelopment|EnsureDeleted|EnsureCreated`, **0** for `seed`, **0** for `ERR |FTL |Exception`. Row-count fingerprint `Products|Phones|Transactions|Employees` = `17|7|26|6` before **and** after the pass (read-only `mode=ro`); Employees added to the fingerprint this stage because distribution now depends on that table.
-  - **DoD spot-checks**: `ProfitLossModel` ctor is `(IReportsDataService dataService)` only; a word-boundary grep for `ITransactionDataService|IEmployeeDataService|IOptions<|DistributionCalculator|Repo<` on `ProfitLoss.cshtml.cs` returns **no match** (the earlier loose grep matched only the substring "Reports" in the namespace/`IReportsDataService`); entity `ITransactionDataService`, `IInvoiceDataService`, and `IEmployeeDataService` registrations **all still present** in the Dal branch (L3), and the profit/loss methods remain on the entity `TransactionDataService` for Stage H as planned.
-- Files changed: **none in `src/`** — this step only ticks plan.md and writes act.md.
-- Limitations: None. Stage F Global Definition of Done is satisfied. Stage F was **not** ticked in `to-do.md` — per the rules only the reviewer ticks stages, after this sign-off.
-- Friction noted: build (~21 s) and the full suite (~35 s) exceed the ~30 s command window, so Chain 1 was launched detached via `setsid` and the log polled until the summary plus `EXIT=` line appeared. One self-inflicted false positive: a loose grep pattern reported "matches" on `ProfitLoss.cshtml.cs` that were really the substring `Reports` inside the namespace and `IReportsDataService`; re-ran with word boundaries (`\b...\b`) to get a trustworthy answer rather than accepting the misleading output.
-- Problems: None.
+- Commit: (filled in after commit)
+- Verification:
+  - `dotnet build src/MobileShop.slnx --nologo` -> **Build succeeded, 0 errors, 1 warning**. The warning is the **pre-existing** `CS9124` in `src/MobileShop.Services/DataServices/Dal/ProductsDataService.cs(26,62)` — untouched by this stage, identical to every baseline since Stage E.
+  - `dotnet test src/MobileShop.slnx --nologo --no-build` -> **Failed: 0, Passed: 546, Skipped: 2, Total: 548** (EXIT=0).
+  - Targeted first: `--filter FullyQualifiedName~AccountDataServiceTests` -> **8 passed, 0 failed** (~15 s, because the real Argon2 hasher runs).
+  - Done-when check: Dal registers the area service; **no page/startup changes** (`git diff --stat` on `src/MobileShop.Web/` is empty).
+- What was implemented (plan Step 1 scope only):
+  - **`AccountDataService`** (new, `src/MobileShop.Services/DataServices/Dal/`) — implements **all four** `IAccountDataService` members (L10, no NIE). Ctor `(IUserRepo users, IPasswordHasher passwordHasher, ILogger<AccountDataService> logger)`. It injects **no** `IUserDataService` (plan's explicit prohibition), and **no** entity service at all.
+  - **Ported from `UserDataService`**, semantics preserved: `DefaultAdminUsername = "admin"` / `DefaultAdminPassword = "Admin@123"` kept as public consts (plan allowed public for tests); `EnsureAdminUser` finds the admin by default username, **throws `InvalidOperationException` with the same message** when missing, sets a fresh hash, and updates; `ValidateCredentialsAsync` / `ChangePasswordAsync(username, ...)` keep the same verify/hash flow and the same `LogWarning`/`LogInformation` messages as the entity service (L6).
+  - **`GetAdminUsernameAsync`** — new area-only member returning just the username string (`admin?.Username`); **no `User` entity is exposed**, which is what L1 requires the Profile page to consume in Step 2.
+  - **Password hashing stays behind `IPasswordHasher` inside the service (L5)** — pages will pass plain passwords only.
+  - **Dal DI gap fixed (plan HIGH)** — added `services.AddScoped<IAccountDataService, AccountDataService>();` in the Dal branch only. The `if (useApi)` branch and its `ApiAccountDataService` line are untouched (L7); no interface signature changed, so no Api stub update was required.
+  - **L3 respected** — `IUserDataService` -> `UserDataService` (Dal) and `ApiUserDataService` (Api) registrations **both still present**; nothing removed.
+  - **Tests** — `AccountDataServiceTests` (8) over `RepoTestBase` + the real service with `UserRepo` and the **real `PasswordHasher`** (no double): `GetAdminUsernameAsync` null when missing and `"admin"` when seeded; `EnsureAdminUser` stores a hash that differs from the stale value and verifies against the default password; `EnsureAdminUser` throws (message asserted) when the admin was not seeded; validate accepts the correct password; validate rejects wrong password and unknown user; `ChangePasswordAsync` stores a verifiable hash such that the new password validates and the old one no longer does; change-password returns false for an unknown user.
+- Limitations: None. **No authentication was added** (L4) — this service only validates credentials and changes passwords, exactly as the entity service did.
+- Friction noted: the full suite duration grew from ~35 s to **~53 s** because these tests exercise real Argon2 hashing rather than a stub; still inside a detached-launch + poll loop, so no truncation. No build friction beyond the standing `setsid` pattern.
+- Problems: one self-inflicted compile slip while writing the tests — `EnsureAdminUser_sets_a_hash_that_verifies_against_the_default_password` was declared `void` while containing `await`; corrected to `async Task` **before** the first build, so it never reached verification as a failure.
 - Status: COMPLETE

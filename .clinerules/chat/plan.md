@@ -58,7 +58,7 @@ Task<bool> ChangePasswordAsync(string username, string plainNewPassword);
 - **MEDIUM:** Startup EnsureAdmin switches to area service; keep entity `IUserDataService` registered (L3).
 - **Do not** enable authentication middleware (L4).
 
-## [ ] Step 1 — `AccountDataService` + Dal registration
+## ~~[x] Step 1 — `AccountDataService` + Dal registration~~
 - Files: create `src/MobileShop.Services/DataServices/Dal/AccountDataService.cs`, `src/MobileShop.Tests/Services/DataServices/Dal/AccountDataServiceTests.cs`; modify `ServiceCollectionExtensions` (Dal: `services.AddScoped<IAccountDataService, AccountDataService>();`).
 - Ctor: `(IUserRepo users, IPasswordHasher passwordHasher, ILogger<AccountDataService> logger)` (or equivalent `IBaseRepo<User>` if username helpers exist).
 - Implement all four interface members (L10).
