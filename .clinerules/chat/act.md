@@ -1,17 +1,32 @@
-# Act Report — Stage H Step 3 correction (Job B HIGH: BaseRepo<T> lost all direct tests)
+# Act Report — Stage H Step 4 (GlobalUsings cleanup + final Stage H validation)
 
-- Context: Job B reviewed Step 3 (`e3a6622`, `4b39100`, `f5570ea`) and returned **NEEDS ONE CORRECTION PASS** with one HIGH finding, confirming the deletions themselves were clean. This is that correction. **No Step 4 work performed.**
-- Commit: `3b04b29` — test(dal): restore BaseRepo coverage via concrete generic-repo suite
-- HIGH finding independently confirmed before fixing: `BaseRepoTests.cs:12` is `public abstract class BaseRepoTests<TEntity, TRepo> : RepoTestBase` with **26** `[Fact]`s, and after the Step 3 deletions a repo-wide `grep 'BaseRepoTests<'` found **only the abstract declaration itself** — no concrete subclass remained. Because the class is abstract, all 26 tests were dead code: they compiled but never executed. `IBaseRepo<T>`/`BaseRepo<T>`, the only surviving repository abstraction that every area service and page depends on, therefore had **zero direct coverage**, against the Stage H Global Definition of Done requirement that it "remain registered and functional".
-- What was added (**tests only**): `src/MobileShop.Tests/Dal/BaseClass/BaseRepoPersonTests.cs` — `public class BaseRepoPersonTests : BaseRepoTests<Person, BaseRepo<Person>>` with `CreateRepo() => new(Context)` and a `CreateValidEntity()` recovered verbatim from the deleted `PersonRepoTests.cs` (`git show e3a6622^:src/MobileShop.Tests/Dal/Repos/PersonRepoTests.cs`). The generic type argument is now the concrete `BaseRepo<Person>` instead of the deleted `IPersonRepo`. `BaseRepoTests.cs` itself was **not** modified, and no production code was touched.
-- Verification:
-  - Required chain: `dotnet build src/MobileShop.slnx --nologo && dotnet test src/MobileShop.slnx --nologo --no-build` -> **Build succeeded, 0 errors, 1 warning; Failed: 0, Passed: 240, Skipped: 2, Total: 242** (EXIT=0, 37 s).
-  - **Matches the reviewer's predicted 240 exactly** (214 + 26).
-  - Confirmed the tests genuinely execute by running them with normal verbosity: **26 passed** under `BaseRepoPersonTests`, covering `Add`/`AddAsync` persist-true and persist-false, `Update`/`UpdateAsync` marking the entity unchanged, `Delete`/`DeleteAsync` soft-deleting and hiding the row, `SaveChanges`/`SaveChangesAsync`, both `Find` predicate overloads (sync and async), and all three `SelectFirstAsync` cases (ascending, descending, no-match). These are precisely the 26 behaviours the reviewer listed as lost.
-  - Scope: the only change is the new test file. `git diff --stat` over `src/MobileShop.Services`, `src/MobileShop.Web`, `src/MobileShop.Dal`, and `src/MobileShop.Api` is **empty** — **tests-only**, no production change.
-- Warning (reported honestly): still exactly **1** warning, `ProductsDataService.cs(26,62): CS9124` — the pre-existing one from Stage E onward, untouched by this correction and deliberately **not** fixed, since it remains Step 4's backlog item #1.
-- The reviewer's 6 cleanup backlog items were **not** actioned here; they belong to Step 4: the unused `Transactions` property causing CS9124, the three stale comments naming deleted types (`SampleDataSeedTests.cs:127`, `ProfileModelTests.cs:12`, `PeopleDataService.cs:114`), `ProductDetailsViewModel.Transactions = null!`, the missing `GetInventoryRowsAsync` ordering test, the minor empty-inventory test, and the open `Phone`-category filter decision in `CreatePhoneAsync`.
+- Commit: (filled in after commit)
+- GlobalUsings cleanup (evidence-based, per L8):
+  - Inspected all four in-scope files: `Services`, `Dal`, `Web`, `Tests`.
+  - **Removed exactly one import from each of two files**: `global using MobileShop.Dal.Repos;` from `Services/GlobalUsings.cs` and `Tests/GlobalUsings.cs`. Proof of obsolescence: after Step 3 the `MobileShop.Dal.Repos` namespace contains **0** type files (`find src/MobileShop.Dal/Repos -maxdepth 1 -name '*.cs'` -> 0); only its child `Repos.Base` survives.
+  - **Kept `global using MobileShop.Dal.Repos.Base;`** in all three files that have it (`Dal`, `Services`, `Tests`), because `BaseRepo<T>`/`IBaseRepo<T>` still live there and are still registered.
+  - Correction to the reviewer's guidance: it suggested the bare `Repos` using was present in the **Dal** project too. It is not — `Dal/GlobalUsings.cs` only ever imported `Repos.Base`, so Dal needed no change. Verified by exact-match grep rather than assumed.
+  - `Dal/GlobalUsings.cs` and `Web/GlobalUsings.cs` were inspected and left **unmodified** — nothing in them was provably obsolete.
+- Final validation (clean build, as the reviewer required):
+  - `dotnet clean src/MobileShop.slnx --nologo` then `dotnet build src/MobileShop.slnx --nologo --no-incremental` -> **Build succeeded, 0 errors, 1 warning**.
+  - `dotnet test src/MobileShop.slnx --nologo --no-build` -> **Failed: 0, Passed: 240, Skipped: 2, Total: 242** (EXIT=0, 40 s) — identical to the post-correction baseline, confirming the using removals broke nothing.
+  - **Warning reported honestly:** the `--no-incremental` build reports **1** warning: **`ProductsDataService.cs(26,62): warning CS9124`** (parameter captured into enclosing type state). An *incremental* build had been reporting 0 warnings and masking it — the reviewer's warning about this was well founded. I did **not** fix it: it is backlog item #1, which the reviewer explicitly placed outside Step 4's scope.
+- Production smoke (`ASPNETCORE_ENVIRONMENT=Production`, `--no-launch-profile --no-build`, port 5199):
+  - **7/7 required routes 200**: `/`, `/Products`, `/People/Customers`, `/Transactions`, `/Reports/ProfitLoss`, `/Account/Login`, `/Account/Profile`.
+  - Log confirms `Hosting environment: Production`.
+  - **No dev init/wipe/seed**: 0 matches for `InitializeForDevelopment|EnsureDeleted|EnsureCreated`, 0 for `seed`, 0 for `ERR |FTL |Exception`.
+  - **Non-destructive**: fingerprint `Products|Phones|Transactions|Employees|Users` = `17|7|26|6|1` before **and** after the Production pass (read-only `mode=ro`).
+- Optional Development smoke (performed, then reverted):
+  - `InitializeForDevelopment` intentionally wipes and recreates the dev DB, and `SolutionPaths.DatabaseFile` resolves to the repo-root `MobileShop.db` with no override, so I took a verified backup first.
+  - Ran Development on port 5201: seed completed, then **`AccountDataService | Ensured the default admin account 'admin'`**, then `Application started` — **no throw**, confirming the migrated startup path still works after the repository deletions. 0 matches for `ERR |FTL |Unhandled`. `/Account/Login`, `/Account/Profile`, `/Transactions`, `/Reports/ProfitLoss` all **200**.
+  - **Database restored from backup and verified byte-identical** (`cmp` identical, fingerprint `17|7|26|6|1`). Both hosts stopped; ports 5199 and 5201 released and confirmed free.
+- Repository-wide dead-reference search:
+  - Deleted DAL entity-service types (`UserDataService` … `EmployeeDataService`) as **code**: **NONE**.
+  - `DataServiceBase<` (non-Api): **NONE**.
+  - Specialized repo types/interfaces + `IEmployeeDataService`: **NONE**.
+  - Obsolete `AddScoped<I…DataService, …DataService>` registrations: **NONE**.
+  - Three residual **comment-only** hits name deleted types — `ProfileModelTests.cs:12`, `SampleDataSeedTests.cs:127`, `PeopleDataService.cs:114`. These are backlog item #2 and were deliberately left alone (not Step 4 scope, and fixing them would touch files this step does not list).
 - Limitations: None.
-- Friction noted: build (~21 s) and the full suite (~37 s) exceed the ~30 s command window, so both used the detached-launch + poll pattern.
-- Problems — a disclosure the reviewer correctly called out: my Step 3 report said **"Problems: none"** and never mentioned that keeping the abstract base left its 26 tests running nothing. My test-count reconciliation was accurate about *how many* tests disappeared but I never asked the more important question — *whether what remained still executes anything*. The deletions were correct and the count was correct, yet a full behavioural suite was silently dead in the repository. That is a reporting omission on my part, and it is recorded here rather than quietly fixed. Root cause per the reviewer is a `plan.md` L7/Step 3 premise gap (the plan assumed `BaseRepoTests` stays useful because "area/page tests still use them", which is true of `RepoTestBase` but not the abstract generic), not a wrong deletion.
+- Friction noted: clean build (~25 s) and full suite (~40 s) exceed the ~30 s window, so all long commands used the detached-launch + poll pattern.
+- Problems: none. Two scope decisions worth stating: (a) I fixed **no** backlog item, including the CS9124 warning, because the reviewer scoped those out of Step 4; (b) the **LOW** finding from the last review — `BaseRepoPersonTests.cs` has no trailing newline (verified: last byte is `}`, not `\n`) — is left unfixed, because Step 4's in-scope files are the four `GlobalUsings.cs` only and I do not modify files a step does not list. Both are noted for the post-Stage-H pass.
 - Status: COMPLETE

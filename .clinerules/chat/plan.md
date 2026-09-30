@@ -99,7 +99,7 @@ L8 **GlobalUsings are cleaned by evidence, not preference.** Remove only imports
 - **Risk:** HIGH
 - **Confidence:** MEDIUM
 
-## [ ] Step 4 — Clean GlobalUsings and perform final Stage H validation
+## ~~[x] Step 4 — Clean GlobalUsings and perform final Stage H validation~~
 
 - **Files:** inspect/modify `src/MobileShop.Services/GlobalUsings.cs`, `src/MobileShop.Dal/GlobalUsings.cs`, `src/MobileShop.Web/GlobalUsings.cs`, and `src/MobileShop.Tests/GlobalUsings.cs`; do not change API files or unrelated feature files.
 - **Change:** after Steps 1–3, remove only imports proven unused, especially obsolete specialized-repository namespaces or obsolete DAL service-base namespaces. Keep imports still required by area services, API stubs, models, and `IBaseRepo<T>`.
