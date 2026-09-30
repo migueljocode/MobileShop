@@ -1,6 +1,6 @@
 # Act Report — Stage G Step 1
 
-- Commit: (filled in after commit)
+- Commit: `fcae247` — feat(account): add AccountDataService with credential operations
 - Verification:
   - `dotnet build src/MobileShop.slnx --nologo` -> **Build succeeded, 0 errors, 1 warning**. The warning is the **pre-existing** `CS9124` in `src/MobileShop.Services/DataServices/Dal/ProductsDataService.cs(26,62)` — untouched by this stage, identical to every baseline since Stage E.
   - `dotnet test src/MobileShop.slnx --nologo --no-build` -> **Failed: 0, Passed: 546, Skipped: 2, Total: 548** (EXIT=0).
