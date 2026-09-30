@@ -318,7 +318,7 @@ as they are — see Step 1 for why the JSON contract must not move.
   page tests still cover the handlers they covered before.
 - Risk: HIGH. Confidence: HIGH.
 
-## [ ] Step 4 — Migrate `Products/Index`, `Products/Details`, `Products/SecondHand`
+## ~~[x] Step 4 — Migrate `Products/Index`, `Products/Details`, `Products/SecondHand`~~
 - Files: modify: src/MobileShop.Web/Pages/Products/Index.cshtml.cs, Details.cshtml.cs, SecondHand.cshtml.cs;
   do not touch: any `.cshtml`, any service, any repo, any test.
 - Symbols: `IndexModel` (ctor, `OnGetAsync(string? type)`), `DetailsModel` (ctor, `OnGetAsync(int id, string? type)`),
