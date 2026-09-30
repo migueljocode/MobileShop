@@ -73,7 +73,7 @@ Task<IReadOnlyList<DistributionRow>> GetDistributionRowsAsync(decimal totalProfi
 - Verify: build + full suite.
 - Risk: LOW. Confidence: HIGH.
 
-## [ ] Step 3 — Stage F validation
+## ~~[x] Step 3 — Stage F validation~~
 - Chain 1: build + full suite.
 - Chain 2: Production host; **200** `/Reports/ProfitLoss` (and with query presets if easy); regression Home/Products/People/Transactions/Account.
 - Non-destructiveness: no init wipe; optional row-count fingerprint stable.
