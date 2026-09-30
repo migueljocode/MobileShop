@@ -1,43 +1,36 @@
-# Audit — Job B (Execution Check): Stage H Step 2
+# Audit — Job B (Execution Check): Stage H Step 2 correction pass (`7f2672e`)
 
-**Reviewed**: `386e0e7` → `be467fc` (`a31cb6e` refactor + `be467fc` act.md) against `plan.md` Step 2 and `actor.md`.
-**Method**: static review only (the sandbox can't restore NuGet packages). The reported "0 errors, 1 warning, 519 passed / 0 failed / 2 skipped" is unverified; re-run `dotnet build` and `dotnet test` locally.
+**Reviewed**: `be467fc` → `d3a7a46` (`7f2672e` tests, `6af867c` act.md, `d3a7a46` my previous audit committed) against the Step 2 Job B findings and `actor.md`.
+**Method**: static review only (the sandbox can't restore NuGet packages). The reported "522 passed / 0 failed / 2 skipped, 1 warning" is unverified; re-run `dotnet build` and `dotnet test` locally.
 
-**Verdict: PASS — no CRITICAL or HIGH findings.** Three MEDIUM/LOW items are non-blocking, but I'd close the coverage gap before Step 3.
+**Verdict: PASS — no CRITICAL or HIGH findings.** Step 2 is closed. One MEDIUM test defect is non-blocking; it goes into the cleanup backlog below.
 
 ## Verified correct
-- **Scope:** deleted exactly the plan's set: nine DAL entity services, `Dal/Base/DataServiceBase.cs`, `IEmployeeDataService.cs` and eight test files (`EmployeeDataServiceTests` never existed). Only `ServiceCollectionExtensions.cs`, `Services/GlobalUsings.cs`, one doc comment in `TestDataHelpers.cs` and the `plan.md` header were modified.
-- **API untouched:** the `if (useApi)` branch keeps all 8 entity-service registrations and the Api stubs; `IDataService<T>`, `ApiDataServiceBase<T>` and the eight entity-service interfaces survive (L1/L2).
-- **No dangling references:** a word-boundary search of `*.cs`, `*.cshtml`, `*.md` and `*.json` for all nine deleted names, `IEmployeeDataService` and `DataServiceBase<` finds no code references. The remaining consumers of the eight kept interfaces are the Api DI lines only.
-- **Forced GlobalUsings change is justified:** removing `global using …Dal.Base;` is the minimum needed for the deletion to compile (CS0234). No other GlobalUsings touched; Step 4 still owns the rest.
-- **Count reconciliation:** 550 → 519 is 31, matching the deleted tests (27 `[Fact]` + 2 `[Theory]` × 2 `[InlineData]`); I counted the same method names.
-- **DI:** the six area-service registrations are kept and only the nine DAL entity registrations were removed.
+- **Scope:** tests-only. The commit touches `PeopleDataServiceTests.cs`, `TransactionsDataServiceTests.cs` and `act.md`; no service, Web, Dal or Api file changed. `audit.md` (reviewer's file) was left alone.
+- **Count:** 519 → 522 is exactly the 3 added tests.
+- **`RecordBuyAsync_rejects_negative_price`:** correct. The expected message matches `TransactionsDataService.cs:151` verbatim and it asserts no transaction row is written. It closes the earlier gap.
+- **Customer soft-delete test:** meaningful, since the live and soft-deleted Sells are both seeded on the tested customer and the count is asserted as 1.
+- **Warning identified:** CS9124 at `ProductsDataService.cs(26,62)`. Reporting it rather than fixing it is within scope.
+- **Mutation testing:** the actor mutation-tested the customer predicate and honestly reported that the tests still pass. `ModelBuilderExtensions` applies a global `HasQueryFilter(!IsDeleted)` to every `BaseEntity`, and I confirmed the filter and that `IgnoreQueryFilters` is used only in the sample-data wipe. So the explicit `!t.IsDeleted` in `PeopleDataService` is currently redundant, and these tests verify behaviour, not the predicate. That's acceptable.
 
-## Findings (non-blocking)
+## Findings
 
-### MEDIUM — Two behaviours lost their only test
-I compared the deleted test names with the surviving area-service tests. Most behaviours are re-covered (Account, Reports, Transactions record/PDF paths, Products, People details). Two that the surviving services still implement are not:
-1. **Soft-deleted exclusion in the People list counts.** `PeopleDataService.cs:22` and `:43` filter `!t.IsDeleted` on purchased/sold counts. The deleted `Customer…` and `Seller…GetListRows_counts_…_excludes_soft_deleted_async` tests were the only coverage, and `PeopleDataServiceTests` has no `IsDeleted` assertion. (The zero-count case is still covered.)
-2. **`RecordBuyAsync` negative-price rejection** (`TransactionsDataService.cs:148`). The deleted `RecordBuyAsync_rejects_negative_price` was the only test; survivors cover `RecordSellAsync_rejects_negative_price` only.
-
-**Fix (tests only, no source change):** add three tests to the existing survivor files: customer and seller count ignores a soft-deleted transaction, and `RecordBuyAsync` rejects a negative price. Do this as a small correction commit before Step 3, or record it in `act.md` if you deliberately accept the loss.
-
-### MEDIUM — Build reports 1 warning, and it isn't identified
-Stage H Step 1 ended at 0 warnings and this step's report says "0 errors, 1 warning" without naming it. I found no dangling `cref` to a deleted type, so I can't pin it down statically. The actor should run `dotnet build --nologo -v n | grep -i warning` and either fix it or state that it's pre-existing and why, since Step 4's final validation expects a clean build.
+### MEDIUM — `GetSellerRowsAsync_sold_count_ignores_soft_deleted_transactions` is vacuous
+Both the live and the soft-deleted Buy are seeded on `shopSeller.Id`, never on the tested `seller` (Sara Karimi), who has no transactions at all. The assertion `SoldCount == 0` is therefore true regardless of soft-delete handling. The actor's mutation test only removed the customer predicate (line 22), so this slipped through.
+**Fix (tests only):** seed the live Buy and the soft-deleted Buy with `seller.Id`, and assert `SoldCount == 1`.
 
 ### LOW
-- **Stale prose comments** naming deleted types (no compile impact):
-  - `SampleDataSeedTests.cs:127` mentions `TransactionDataService`;
-  - `ProfileModelTests.cs:12` says "calls `UserDataService.ChangePasswordAsync`" (it's `AccountDataService` now);
-  - `PeopleDataService.cs:114` mentions `ProductDataService`.
-  Fix them in Step 4's cleanup.
-- **Minor lost coverage:** the deleted `GetInventoryRows_returns_empty_list_when_no_products` has no `ProductsDataService` counterpart.
+- **Clutter:** the customer test has an unneeded `shopCustomer` setup with `Assert.NotNull(shopCustomer)` as a "sanity" check, and the seller test creates a customer only to satisfy a foreign key. Drop the pointless assertion.
+- **`act.md` accuracy:** it says the CS9124 warning was already recorded at Stage H Step 1, but Step 1's own report said 0 warnings. Cause and fix are the same either way (below).
 
-## Carried from earlier audits (not actioned, none blocking)
-- `ProductDetailsViewModel.Transactions = null!`
-- the unused `protected IBaseRepo<Transaction> Transactions` property in `ProductsDataService`
-- no ordering test for `GetInventoryRowsAsync`
-- the `Phone`-category filter in `CreatePhoneAsync`'s model lookup (still an owner decision)
+## Cleanup backlog (for the later Act prompt; nothing here blocks Step 3)
+1. **Delete `protected IBaseRepo<Transaction> Transactions { get; } = transactions;`** at `ProductsDataService.cs:26`. The unused duplicate is exactly what triggers CS9124 (the parameter is captured and also initializes a property), and deleting it should restore a 0-warning build. I asked for this removal in earlier audits.
+2. **Fix the vacuous seller test** (MEDIUM above) and drop the pointless `shopCustomer` assertion.
+3. **Stale comments naming deleted types:** `SampleDataSeedTests.cs:127`, `ProfileModelTests.cs:12` (should be `AccountDataService`) and `PeopleDataService.cs:114`.
+4. **`ProductDetailsViewModel.Transactions = null!`:** replace with a body property `{ get; init; } = []`.
+5. **Missing ordering test** for `GetInventoryRowsAsync` (phones first, then Apple IDs, each by `ProductId`).
+6. **Minor lost test:** empty-inventory case for `ProductsDataService`.
+7. **Owner decision, still open:** the `Phone`-category filter in `CreatePhoneAsync`'s model lookup (`ProductsDataService.cs:266`) versus the original page behaviour.
 
 ## Reviewer checklist
 - [x] Job B; one verdict; only `audit.md` written.
