@@ -1,12 +1,15 @@
-# Audit — Job B (Execution Check): Stage E Step 1
+# Audit — Job B (Execution Check): Stage E Step 3
 
 **Verdict**: **PASS**
 
-Verified commit `7c1d4f7` against plan Step 1 and `act.md`.
+Also acknowledges **Step 2 SKIPPED** (invoice + list factor already complete in Step 1 — correct per plan).
 
-- Full `ITransactionsDataService` on Dal: list/details/parties/selectable/record/invoice/single factor/`GenerateListFactorPdfAsync` with L11 messages; `GetTransactionFactorPdfAsync` → `byte[]?` (L12).
-- Api stub updated same step; Dal DI one line; no page changes; entity DI kept (L3).
-- `AppDbContext` only for invoice Includes (documented; plan-allowed).
-- Verification recorded: build 0/0; suite **525 passed**, 2 skipped; 15 new service tests.
+Verified commit `84a3ced` against plan Step 3 and `act.md`.
 
-Step 2 may be **skipped** (invoice complete). Next: Step 3 (pages) after this sign-off — do not continue without Job B between steps.
+- All four pages inject only `ITransactionsDataService dataService` (no `IPdfGenerator` / entity services).
+- Index: `LoadAsync` before factor; `GenerateListFactorPdfAsync` on download; ModelState on failure.
+- Details: null factor PDF → NotFound.
+- Buy/Sell: parties + selectable + `Record*Async(Input)`.
+- No `.cshtml` edits; page tests rewired; suite **529 passed**, 2 skipped.
+
+Not stage sign-off — **Step 4** (validation) remains.
