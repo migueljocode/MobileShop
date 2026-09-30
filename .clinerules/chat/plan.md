@@ -1,105 +1,115 @@
-# Plan — Stage D: People — PeopleDataService + customer/seller pages
+# Plan — Stage E: Transactions — TransactionsDataService + transaction/invoice/PDF
 
-Stage C is signed off. Incorporates Job A audit **H1** (details members required in Step 1) and locks details ViewModels with a defaulted `Products` list.
+Stage D is signed off. This file plans **Stage E only** (next unchecked stage in `to-do.md`).
 
-## Locked decisions (carried + Stage D)
+## Process (binding)
+- **One step → commit → Job B review → next step.** Do not run Steps 1–4 in a single continuous actor session without reviewer sign-off between steps (Stage D process note).
+- Only the **reviewer** ticks Stage E in `to-do.md` after the final step PASSes.
+
+## Locked decisions (carried + Stage E)
 L1 Boundaries — pages inject area interfaces only. No EF entity crosses the page boundary.
-L2 One area service per page, local name `dataService`. No page injects a repo or a second data service.
-L3 DI — **this stage removes nothing.** Keep per-entity repo registrations and entity data services. Buy/Sell still use party options / selectable products on entity services until Stage E.
-L4–L5 PDF / Reports — unchanged.
-L6 Logging — `ILogger<PeopleDataService>`; `LogInformation` / `LogWarning` on create success/failure only.
-L7 Api — `ApiPeopleDataService` already exists (NIE). Signature changes must update the Api stub in the same step. Never touch `src/MobileShop.Api`. `UseApi` stays false.
+L2 One area service per page, local name `dataService`. **No** second data service and **no** page-level `IPdfGenerator` after migration — PDF generation lives **inside** `TransactionsDataService` (it may inject `IPdfGenerator`).
+L3 DI — **this stage removes nothing.** Keep entity `ITransactionDataService`, `IInvoiceDataService`, phone/apple/customer/seller services (Home cards, Reports P/L, any remaining callers).
+L4 Invoice/PDF ownership is this area (already on `ITransactionsDataService`).
+L5 Reports owns profit/loss — **do not** move `GetProfitLoss*` here; leave on entity `TransactionDataService` until Stage F.
+L6 Logging — `ILogger<TransactionsDataService>`; log create/record success and failure only.
+L7 Api — `ApiTransactionsDataService` already exists. Any **signature change** updates the Api stub in the **same step**. Never touch `src/MobileShop.Api`. `UseApi` stays false.
 L8 No auth, no schema/migrations, no DatabaseInitializer policy change, no bin/obj.
-L9 Tests — `RepoTestBase` + real `PeopleDataService` over `new BaseRepo<T>(Context)`. Port coverage; do not delete tests for types that still exist.
-L10 **Details shape (locked)** — extend both records with a last defaulted member:
-   `IReadOnlyList<ProductListItemViewModel> Products = []`.
-   `GetCustomerDetailsAsync` / `GetSellerDetailsAsync` always return header fields; Step 1 ships `Products = []`; Step 2 fills product rows. No alternate “separate list method” API.
+L9 Tests — `RepoTestBase` + real `TransactionsDataService` over `BaseRepo<T>` (+ `IPdfGenerator` real or thin test double only if required). Port coverage; do not delete tests for types that still exist.
+L10 **Full interface in Step 1** — `TransactionsDataService` must implement **every** `ITransactionsDataService` member (no NIE on Dal). Members not yet fully wired for multi-select factor get a complete implementation as specified below in the same step they are introduced.
 
 ## Scope
-Six pages → one `PeopleDataService` (Dal):
-`Customers`, `Sellers`, `CustomerDetails`, `SellerDetails`, `CreateCustomer`, `CreateSeller`.
-No `.cshtml` edits if page models keep `Customer`/`Seller`/`Products` property names.
+Four pages: `Transactions/Index`, `Details`, `Buy`, `Sell`.
+No dedicated Invoice Razor page today — still implement `GetInvoiceAsync` / `GenerateInvoicePdfAsync` on the area service (port `InvoiceDataService`) so PDF can be used later and the interface is honest.
 
 ## Current page inventory (verified)
 | Page | Injects today | Behavior to preserve |
 |------|---------------|----------------------|
-| Customers | `ICustomerDataService` | `GetListRowsAsync(sortBy, ascending)` — Name/Phone/Count; invalid sort → Name |
-| Sellers | `ISellerDataService` | same; Count = Buy-direction txn count |
-| CustomerDetails | `ICustomerDataService` + `IProductDataService` | details + purchased rows (Sell → product ids ∩ inventory) |
-| SellerDetails | `ISellerDataService` + `IProductDataService` | details + supplied-to-shop (Buy only) |
-| CreateCustomer | `ICustomerDataService` | Customer+Person; `AddAsync`; redirect `/People/Customers` |
-| CreateSeller | `ISellerDataService` | Seller+Person; `AddAsync`; redirect `/People/Sellers` |
+| Index | `ITransactionDataService`, `IPdfGenerator` | List via `GetListAsync(direction, take, ascending)`; normalize direction/order/take; **factor PDF** via selection or full filtered list (`ResolveFactorRows` single-snapshot rules, error messages, `transactions-factor.pdf`) |
+| Details | `ITransactionDataService`, `IPdfGenerator` | `GetDetailsAsync`; NotFound; single-row factor PDF via `ToFactorRow` |
+| Buy | `ITransactionDataService`, `ISellerDataService`, `IPhoneDataService`, `IAppleIdDataService` | Party sellers + selectable products (phone∪appleId, Buy direction, OrderBy Name); `RecordBuyAsync(productId, sellerId, price, date)` → model error or success Message |
+| Sell | same pattern with customers + Sell direction | `RecordSellAsync` |
 
-Entity leak today: `PurchasedProductsAsync` / `SoldToShopAsync` return `IEnumerable<Product>`. Area path returns **`ProductListItemViewModel`** only (`Name` for the list views).
+Shop sentinels in entity service: `ShopSellerId = 1`, `ShopCustomerId = 1` (sample-data person/seller/customer id 1). Port as private constants on the area service with the same TODO comment.
+
+## Contract gap (must fix in plan)
+`ITransactionsDataService` already has list/details/parties/selectable/record/invoice/single-id factor PDF, but **Index multi-select factor** is not expressible as `GetTransactionFactorPdfAsync(int)`. **Add one member** (update Api stub same step):
+
+```csharp
+/// <summary>Builds a transaction-factor PDF from filters and optional selected ids (Index download).</summary>
+Task<FactorPdfResult> GenerateListFactorPdfAsync(
+    string? direction, int take, bool ascending, IReadOnlyList<int> selectedIds);
+```
+
+New record in Models (e.g. `MobileShop.Models.ViewModels.Web/FactorPdfResult.cs`):
+`public sealed record FactorPdfResult(bool Succeeded, byte[]? Bytes, string? Error);`
+
+Semantics — port `IndexModel.ResolveFactorRows` + `OnGetDownloadFactorAsync`:
+1. Load the same list snapshot as `GetListAsync(direction, take, ascending)`.
+2. If `selectedIds` empty → factor rows from entire snapshot (`ToFactorRow`).
+3. If any id ≤ 0 → failure Error = `"Selected transaction identifiers must be positive numbers."`
+4. Distinct selected ids; missing from snapshot → failure listing missing ids (never partial factor, never per-id extra fetch).
+5. On success `Bytes = pdfGenerator.GenerateTransactionFactor(new TransactionFactorViewModel(rows, DateTime.UtcNow))`.
+
+Single-id `GetTransactionFactorPdfAsync(id)`: load details; null → empty array or throw is wrong — return empty bytes only if callers expect File always; **prefer** same pattern as Details today: page returns NotFound when details null; service returns `byte[]?` **or** keep `byte[]` and page checks details first. **Locked:** service `GetTransactionFactorPdfAsync` returns `byte[]?` null when transaction missing; page maps null → NotFound. **Update interface + Api stub** if changing from non-nullable `byte[]`.
 
 ## Reviewer Briefing
-- **H1 resolved:** Step 1 implements **all six** `IPeopleDataService` members; details are header-only with empty `Products`.
-- **MEDIUM — Step 2 product rows:** Sell vs Buy id sets + `ProductDataService` inventory projection filtered by ids.
-- **MEDIUM — sort switches:** port verbatim from entity services.
-- **Do not** remove entity Customer/Seller DI (L3).
+- **HIGH — multi-select factor.** Exact Index snapshot rules; one contract addition + Api update.
+- **HIGH — RecordBuy/Sell.** Port rejection rules (negative price; existing Buy/Sell on product); ShopCustomerId/ShopSellerId; map to `ServiceResult` for pages.
+- **MEDIUM — selectable products.** Merge phone + AppleId `GetSelectableProductsAsync` ports; OrderBy Name for the page.
+- **MEDIUM — invoice.** Port `InvoiceDataService.GetInvoice` / `GeneratePdf` without `AppDbContext` on the area service if possible — prefer `IBaseRepo<Transaction>` + same projections, or inject `AppDbContext` only if Include graph is too heavy for Select (acceptable exception if documented; prefer repos).
+- **Do not** remove entity transaction/invoice DI (L3). Do not move profit/loss (L5).
 
-## [x] Step 1 — ViewModel defaults + full `PeopleDataService` skeleton (lists, creates, header-only details) + Dal registration
-- Files:
-  - modify: `src/MobileShop.Models/ViewModels/Web/CustomerDetailsViewModel.cs`, `SellerDetailsViewModel.cs`
-  - create: `src/MobileShop.Services/DataServices/Dal/PeopleDataService.cs`, `src/MobileShop.Tests/Services/DataServices/Dal/PeopleDataServiceTests.cs`
-  - modify: `src/MobileShop.Services/ServiceCollectionExtensions.cs` (one Dal line only)
-  - modify if needed: entity `CustomerDataService` / `SellerDataService` `GetDetails` constructions (default `Products` keeps them compiling)
-  - optionally: shorten BindModels FQNs on `IPeopleDataService` / `ApiPeopleDataService`
-  - do not touch: pages, `.cshtml`, repo registrations, `if (useApi)` branch
-- Symbols: `CustomerDetailsViewModel` / `SellerDetailsViewModel` gain `Products`; `PeopleDataService` implements **every** `IPeopleDataService` member.
-- Ctor Step 1: `(IBaseRepo<Customer> customers, IBaseRepo<Seller> sellers, ILogger<PeopleDataService> logger)` — **no** `IBaseRepo<Product>` yet (added in Step 2).
-- Change:
-  1. Append `IReadOnlyList<ProductListItemViewModel> Products = []` as the last positional parameter on both details records.
-  2. `GetCustomerRowsAsync` / `GetSellerRowsAsync` — port projections + sort switches from `CustomerDataService` / `SellerDataService` `GetListRowsAsync` (Sell count / Buy count; `!t.IsDeleted`).
-  3. `CreateCustomerAsync` / `CreateSellerAsync` — port Create page construction; success iff `AddAsync > 0`; failure messages as today; log on success/failure.
-  4. `GetCustomerDetailsAsync` / `GetSellerDetailsAsync` — port entity header projections only; **do not** load product rows; rely on default empty `Products` (or pass `[]` explicitly). **No** `NotImplementedException`.
-  5. Register `services.AddScoped<IPeopleDataService, PeopleDataService>();` in the Dal (`else`) branch only.
-- Tests: sort Name/Phone/Count both directions; create success/failure; details returns non-null header and empty `Products` for a seeded customer/seller; null for missing id.
+## [ ] Step 1 — Contract + `TransactionsDataService` core + Dal registration
+- Files: create `TransactionsDataService.cs`, `FactorPdfResult.cs` (if new), `TransactionsDataServiceTests.cs`; modify `ITransactionsDataService`, `ApiTransactionsDataService`, `ServiceCollectionExtensions` (Dal line only); optionally BindModels global usings.
+- Ctor: `(IBaseRepo<Transaction> transactions, IBaseRepo<Seller> sellers, IBaseRepo<Customer> customers, IBaseRepo<Phone> phones, IBaseRepo<AppleId> appleIds, IPdfGenerator pdfGenerator, ILogger<TransactionsDataService> logger)` — add further repos only if invoice projection needs them; **do not** inject entity data services.
+- Implement **all** interface members:
+  1. `GetListAsync` — port `TransactionDataService.GetListAsync` (direction filter, clamp take 1–500, date order).
+  2. `GetDetailsAsync` — port details projection.
+  3. `GetSellersAsync` / `GetCustomersAsync` — port `SellerDataService` / `CustomerDataService` `GetPartyOptionsAsync`.
+  4. `GetSelectableProductsAsync` — phone + AppleId selectable ports concatenated, `OrderBy(Name)`.
+  5. `RecordBuyAsync` / `RecordSellAsync` — map input → entity `RecordBuyAsync`/`RecordSellAsync` rules; return `ServiceResult` (Succeeded false + Message matching page strings on failure).
+  6. `GetInvoiceAsync` / `GenerateInvoicePdfAsync` — port invoice assembly + `pdfGenerator.Generate`.
+  7. `GetTransactionFactorPdfAsync` — single transaction factor; null bytes if missing.
+  8. `GenerateListFactorPdfAsync` — full Index factor semantics above.
+- Register `ITransactionsDataService` → `TransactionsDataService` in Dal branch only.
+- Tests: list filter/order/take; details null/known; record buy/sell success + duplicate rejection; selectable non-empty shape; list factor empty selection / missing id error / success bytes non-empty when data exists; party options ordered.
 - Verify: `dotnet build src/MobileShop.slnx --nologo && dotnet test src/MobileShop.slnx --nologo --no-build`
-- Done when: interface fully implemented; Dal registered; no page changed; suite green.
-- Risk: MEDIUM. Confidence: HIGH.
+- Done when: interface + Api + Dal compile; **no page changes yet**.
+- Risk: HIGH. Confidence: MEDIUM.
 
-## [x] Step 2 — Fill details `Products` (inventory-shaped rows, no entities)
-- Files: modify: `PeopleDataService.cs` (add `IBaseRepo<Product> products` to ctor), `PeopleDataServiceTests.cs`; do not touch interface signatures (already return details VMs); do not touch pages yet.
-- Change:
-  1. Inject `IBaseRepo<Product> products`.
-  2. After resolving the header (or in the same method), resolve product ids:
-     - Customer: Sell-direction transaction product ids (purchased from shop).
-     - Seller: Buy-direction only (`SoldToShop` semantics).
-  3. Build inventory-shaped rows with the **same projection** as `ProductDataService.GetInventoryRowsAsync` (Id, ProductId, Type from category name, Name, Barcode, Color, IsSold, IsSecondHand). Filter to those ids (in-memory filter after `SelectAllAsync` is fine if `Contains` is awkward on the provider).
-  4. Return `details with { Products = rows }` (or construct with the list). Distinct product ids as today’s `.Distinct()` behavior.
-- Tests: product rows only for the correct direction; empty when none; still null details for unknown id.
-- Verify: build + full suite.
-- Risk: MEDIUM. Confidence: MEDIUM.
-
-## [x] Step 3 — Migrate all six People pages + rewire page tests
-- Files: modify: all six `Pages/People/*.cshtml.cs`; `src/MobileShop.Tests/Web/Pages/People/CustomersModelTests.cs`, `SellersModelTests.cs`; add minimal tests for creates/details if missing; do not touch `.cshtml` unless forced (stop and report).
-- Change:
-  - Each ctor: `(IPeopleDataService dataService)` only.
-  - Customers/Sellers: `GetCustomerRowsAsync` / `GetSellerRowsAsync` with existing query args.
-  - CustomerDetails/SellerDetails: `var details = await dataService.Get*DetailsAsync(id)`; `NotFound` if null; assign header property from details; `Products = details.Products`.
-  - Creates: validate → `Create*Async` → `Message` on failure → redirect list on success.
-  - Page tests: construct `PeopleDataService` with `BaseRepo<T>` (include `Product` repo after Step 2).
-- Verify: build + full suite.
+## [ ] Step 2 — (reserved only if Step 1 splits invoice)
+If Step 1 lands without invoice Includes working cleanly, use this step solely to finish invoice projection/tests. **If Step 1 already completes invoice + list factor, mark this step skipped in act.md with reason and do not invent work.**
 - Risk: LOW. Confidence: HIGH.
 
-## [x] Step 4 — Stage D validation
-- Files: none (or tick plan.md only).
-- Verify chain 1: `dotnet build src/MobileShop.slnx --nologo && dotnet test src/MobileShop.slnx --nologo --no-build`
-- Verify chain 2: `ASPNETCORE_ENVIRONMENT=Production dotnet run --project src/MobileShop.Web --no-launch-profile --urls http://localhost:5199` then curl **200** for `/People/Customers`, `/People/Sellers`, `/People/CreateCustomer`, `/People/CreateSeller`, and if seed ids exist `/People/CustomerDetails?id=1`, `/People/SellerDetails?id=1`, plus regression `/`, `/Products`, `/Transactions`, `/Reports/ProfitLoss`, `/Account/Login`.
-- Non-destructiveness: Production log has no `InitializeForDevelopment`; optional read-only row counts stable before/after.
-- Done when: all six pages use only `IPeopleDataService dataService`; no People page injects entity people/product services or repos; entity DI still registered (L3); suite green; smoke 200.
+## [ ] Step 3 — Migrate four Transactions pages + tests
+- Files: `Index.cshtml.cs`, `Details.cshtml.cs`, `Buy.cshtml.cs`, `Sell.cshtml.cs`; tests under `Tests/Web/Pages/Transactions/`.
+- Change:
+  - Each ctor: `(ITransactionsDataService dataService)` only.
+  - Index: load via `GetListAsync`; download handler calls `GenerateListFactorPdfAsync` with normalized direction/take/order + `SelectedIds`; on failure add ModelState error and return Page; on success `File(bytes, "application/pdf", "transactions-factor.pdf")`.
+  - Details: details + factor via service; NotFound when null.
+  - Buy/Sell: load parties + selectable from service; post → `Record*Async(Input)` → Message / model error; preserve success strings.
+- Do not edit `.cshtml` unless binding forces it (stop and report).
+- Verify: build + full suite.
+- Risk: MEDIUM. Confidence: HIGH.
+
+## [ ] Step 4 — Stage E validation
+- Verify chain 1: build + full test suite.
+- Verify chain 2: Production host; curl **200** `/Transactions`, `/Transactions/Buy`, `/Transactions/Sell`, `/Transactions/Details?id=1` (if exists), regression Home/Products/People/Reports/Account.
+- Optional: download factor endpoint returns `application/pdf` for a known filter.
+- Non-destructiveness: no `InitializeForDevelopment` in Production log; optional row-count fingerprint stable.
+- Done when: four pages use only `dataService`; no page injects `IPdfGenerator` or entity transaction/phone/apple/customer/seller services; entity DI still present; suite + smoke green.
 - Risk: LOW. Confidence: HIGH.
 
 ## Global Definition of Done
-- `PeopleDataService` implements full `IPeopleDataService` and is registered in the Dal branch.
-- Details VMs carry `Products`; details methods never return Product entities.
-- All six People pages depend on a single `dataService`.
-- No entity service or repo registration removed.
+- `TransactionsDataService` implements full `ITransactionsDataService` (including list factor) and is Dal-registered.
+- Index/Details/Buy/Sell depend on a single `dataService`.
+- Factor and invoice PDFs generated only via the area service + existing `IPdfGenerator`.
+- No entity service/repo registration removed; profit/loss remains on entity transaction service until Stage F.
 - Build + full suite green; Production smoke green.
 
 ## Execution notes
 - One step per commit; Conventional Commits; no Co-authored-by.
-- Port sort switches byte-for-byte; do not “improve” invalid sort keys.
-- Party options stay on entity Customer/Seller services for Stage E.
-- Audit H1 is already applied in this plan — actor may start Step 1 without another review round.
+- Port RecordBuy/Sell and list projections; do not “simplify” shop sentinel ids.
+- Stop after each step for reviewer Job B.
+- OUT OF SCOPE: Reports/ProfitLoss page migration, Home dashboard cards migration, deleting entity Transaction/Invoice services.
