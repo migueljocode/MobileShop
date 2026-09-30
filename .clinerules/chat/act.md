@@ -1,6 +1,6 @@
 # Act Report — Stage H Step 1
 
-- Commit: (filled in after commit)
+- Commit: `062f644` — refactor(services): move Account and Reports area services onto IBaseRepo
 - Verification:
   - Targeted: `dotnet build src/MobileShop.slnx --nologo` then `dotnet test ... --filter "FullyQualifiedName~AccountDataServiceTests|FullyQualifiedName~ReportsDataServiceTests"` -> **Build succeeded; Failed: 0, Passed: 20, Skipped: 0, Total: 20** (17 pre-existing + 3 added regressions).
   - Required chain: `dotnet build src/MobileShop.slnx --nologo && dotnet test src/MobileShop.slnx --nologo --no-build` -> **0 errors, 0 warnings; Failed: 0, Passed: 550, Skipped: 2, Total: 552** (EXIT=0). Baseline was 547 passed; the delta is exactly the 3 new regression tests.
