@@ -1,4 +1,3 @@
-using Microsoft.Extensions.Options;
 using MobileShop.Services.Logging.Settings;
 using MobileShop.Services.DataServices.Interfaces;
 using MobileShop.Web.Pages.Reports;
@@ -18,39 +17,22 @@ namespace MobileShop.Tests.Web.Pages.Reports;
 /// </summary>
 public class ProfitLossTests
 {
-    private static ProfitLossModel CreateModel(
-        Mock<ITransactionDataService> serviceMock,
-        Mock<IEmployeeDataService>? employeeMock = null)
+    private static ProfitLossModel CreateModel(Mock<IReportsDataService> serviceMock)
     {
-        employeeMock ??= new Mock<IEmployeeDataService>();
-        employeeMock.Setup(e => e.GetActiveEmployeesAsync())
+        // The page now receives distribution rows from the area service rather than computing them
+        // from employee entities, so the double returns a representative fixed three-row result.
+        serviceMock.Setup(s => s.GetDistributionRowsAsync(It.IsAny<decimal>()))
             .ReturnsAsync(new[]
             {
-                new Employee
-                {
-                    Id = 1,
-                    PersonNavigation = new Person { Id = 101, FirstName = "Mikaeeil", LastName = "Jorjany" },
-                    SharePercent = 50,
-                    IsActive = true
-                },
-                new Employee
-                {
-                    Id = 2,
-                    PersonNavigation = new Person { Id = 102, FirstName = "Anis", LastName = "Sahabi" },
-                    SharePercent = 50,
-                    IsActive = true
-                }
+                new DistributionRow { EmployeeName = "Anis Sahabi", SharePercent = 50, CalculatedAmount = 500m },
+                new DistributionRow { EmployeeName = "Mikaeeil Jorjany", SharePercent = 40, CalculatedAmount = 400m },
+                new DistributionRow { EmployeeName = "Shop", SharePercent = 10, CalculatedAmount = 100m },
             });
 
-        var options = Options.Create(new DistributionSettings());
-
-        return new ProfitLossModel(
-            serviceMock.Object,
-            employeeMock.Object,
-            options);
+        return new ProfitLossModel(serviceMock.Object);
     }
 
-    private static void SetupProfitLossMocks(Mock<ITransactionDataService> serviceMock)
+    private static void SetupProfitLossMocks(Mock<IReportsDataService> serviceMock)
     {
         serviceMock.Setup(s => s.GetEarliestTransactionDateAsync())
             .ReturnsAsync(new DateTime(2024, 1, 1));
@@ -69,7 +51,7 @@ public class ProfitLossTests
     [Fact]
     public async Task Automatic_Today_preset_resolves_to_today_through_today()
     {
-        var mock = new Mock<ITransactionDataService>();
+        var mock = new Mock<IReportsDataService>();
         SetupProfitLossMocks(mock);
         var model = CreateModel(mock);
 
@@ -87,7 +69,7 @@ public class ProfitLossTests
     [Fact]
     public async Task Automatic_Week_preset_resolves_to_monday_through_today()
     {
-        var mock = new Mock<ITransactionDataService>();
+        var mock = new Mock<IReportsDataService>();
         SetupProfitLossMocks(mock);
         var model = CreateModel(mock);
 
@@ -108,7 +90,7 @@ public class ProfitLossTests
     [Fact]
     public async Task Automatic_Month_preset_resolves_to_first_of_month_through_today()
     {
-        var mock = new Mock<ITransactionDataService>();
+        var mock = new Mock<IReportsDataService>();
         SetupProfitLossMocks(mock);
         var model = CreateModel(mock);
 
@@ -128,7 +110,7 @@ public class ProfitLossTests
     [Fact]
     public async Task Automatic_Year_preset_resolves_to_jan1_through_today()
     {
-        var mock = new Mock<ITransactionDataService>();
+        var mock = new Mock<IReportsDataService>();
         SetupProfitLossMocks(mock);
         var model = CreateModel(mock);
 
@@ -148,7 +130,7 @@ public class ProfitLossTests
     [Fact]
     public async Task Automatic_All_preset_resolves_from_earliest_transaction_through_today()
     {
-        var mock = new Mock<ITransactionDataService>();
+        var mock = new Mock<IReportsDataService>();
         SetupProfitLossMocks(mock);
         var earliest = new DateTime(2018, 4, 12);
         mock.Setup(s => s.GetEarliestTransactionDateAsync())
@@ -166,7 +148,7 @@ public class ProfitLossTests
     [Fact]
     public async Task Automatic_All_preset_uses_today_when_no_transactions_exist()
     {
-        var mock = new Mock<ITransactionDataService>();
+        var mock = new Mock<IReportsDataService>();
         SetupProfitLossMocks(mock);
         mock.Setup(s => s.GetEarliestTransactionDateAsync())
             .ReturnsAsync((DateTime?)null);
@@ -183,7 +165,7 @@ public class ProfitLossTests
     [Fact]
     public async Task Default_mode_is_Automatic_and_preset_is_Month()
     {
-        var mock = new Mock<ITransactionDataService>();
+        var mock = new Mock<IReportsDataService>();
         SetupProfitLossMocks(mock);
         var model = CreateModel(mock);
 
@@ -202,7 +184,7 @@ public class ProfitLossTests
     [Fact]
     public async Task Manual_missing_From_defaults_to_earliest_transaction_date()
     {
-        var mock = new Mock<ITransactionDataService>();
+        var mock = new Mock<IReportsDataService>();
         SetupProfitLossMocks(mock);
         var earliestTx = new DateTime(2025, 3, 10);
         mock.Setup(s => s.GetEarliestTransactionDateAsync())
@@ -224,7 +206,7 @@ public class ProfitLossTests
     [Fact]
     public async Task Manual_missing_To_defaults_to_today()
     {
-        var mock = new Mock<ITransactionDataService>();
+        var mock = new Mock<IReportsDataService>();
         SetupProfitLossMocks(mock);
         var earliestTx = new DateTime(2024, 7, 1);
         mock.Setup(s => s.GetEarliestTransactionDateAsync())
@@ -248,7 +230,7 @@ public class ProfitLossTests
         // Simulates the reviewed Step-2 flow: user clicks the Manual radio on a page that
         // loaded in Automatic mode, so both From/To arrive as null; the server's Manual
         // branch must write back both defaults so the pickers render populated.
-        var mock = new Mock<ITransactionDataService>();
+        var mock = new Mock<IReportsDataService>();
         SetupProfitLossMocks(mock);
         var earliestTx = new DateTime(2022, 11, 5);
         mock.Setup(s => s.GetEarliestTransactionDateAsync())
@@ -278,7 +260,7 @@ public class ProfitLossTests
     [Fact]
     public async Task Automatic_Month_populates_from_and_to_without_touching_effective_bounds()
     {
-        var mock = new Mock<ITransactionDataService>();
+        var mock = new Mock<IReportsDataService>();
         SetupProfitLossMocks(mock);
         var earliestTx = new DateTime(2024, 1, 1);
         mock.Setup(s => s.GetEarliestTransactionDateAsync())
@@ -303,7 +285,7 @@ public class ProfitLossTests
     [Fact]
     public async Task Manual_both_missing_default_to_earliest_and_today()
     {
-        var mock = new Mock<ITransactionDataService>();
+        var mock = new Mock<IReportsDataService>();
         SetupProfitLossMocks(mock);
         var earliestTx = new DateTime(2023, 5, 20);
         mock.Setup(s => s.GetEarliestTransactionDateAsync())
@@ -325,7 +307,7 @@ public class ProfitLossTests
     [Fact]
     public async Task Manual_supplied_From_preserved_when_To_missing()
     {
-        var mock = new Mock<ITransactionDataService>();
+        var mock = new Mock<IReportsDataService>();
         SetupProfitLossMocks(mock);
         mock.Setup(s => s.GetEarliestTransactionDateAsync())
             .ReturnsAsync(new DateTime(2020, 1, 1));
@@ -346,7 +328,7 @@ public class ProfitLossTests
     [Fact]
     public async Task Manual_supplied_To_preserved_when_From_missing()
     {
-        var mock = new Mock<ITransactionDataService>();
+        var mock = new Mock<IReportsDataService>();
         SetupProfitLossMocks(mock);
         mock.Setup(s => s.GetEarliestTransactionDateAsync())
             .ReturnsAsync(new DateTime(2020, 1, 1));
@@ -367,7 +349,7 @@ public class ProfitLossTests
     [Fact]
     public async Task Manual_both_supplied_preserved_independently()
     {
-        var mock = new Mock<ITransactionDataService>();
+        var mock = new Mock<IReportsDataService>();
         SetupProfitLossMocks(mock);
         mock.Setup(s => s.GetEarliestTransactionDateAsync())
             .ReturnsAsync(new DateTime(2019, 1, 1));
@@ -391,7 +373,7 @@ public class ProfitLossTests
     [Fact]
     public async Task Empty_database_defaults_From_to_today_shows_note()
     {
-        var mock = new Mock<ITransactionDataService>();
+        var mock = new Mock<IReportsDataService>();
         SetupProfitLossMocks(mock);
         mock.Setup(s => s.GetEarliestTransactionDateAsync())
             .ReturnsAsync((DateTime?)null); // empty
@@ -419,7 +401,7 @@ public class ProfitLossTests
         DateTime? capturedRowsFrom = null, capturedRowsTo = null;
         DateTime? capturedTotalFrom = null, capturedTotalTo = null;
 
-        var mock = new Mock<ITransactionDataService>();
+        var mock = new Mock<IReportsDataService>();
         mock.Setup(s => s.GetProfitLossRowsAsync(
             It.IsAny<DateTime?>(), It.IsAny<DateTime?>()))
             .Callback<DateTime?, DateTime?>((f, t) =>
@@ -455,7 +437,7 @@ public class ProfitLossTests
     [Fact]
     public async Task Inclusive_bounds_include_transactions_on_both_From_and_To()
     {
-        var mock = new Mock<ITransactionDataService>();
+        var mock = new Mock<IReportsDataService>();
         var capturedRowsFrom = (DateTime?)null;
         var capturedRowsTo = (DateTime?)null;
         var capturedTotalFrom = (DateTime?)null;

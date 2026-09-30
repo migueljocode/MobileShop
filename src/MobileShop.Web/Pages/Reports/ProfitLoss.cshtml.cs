@@ -4,9 +4,7 @@ public enum DateRangeMode { Automatic, Manual }
 public enum AutomaticPreset { Today, Week, Month, Year, All }
 
 public class ProfitLossModel(
-    ITransactionDataService transactionDataService,
-    IEmployeeDataService employeeDataService,
-    IOptions<DistributionSettings> distributionSettings) : PageModel
+    IReportsDataService dataService) : PageModel
 {
     [BindProperty(SupportsGet = true)] public DateRangeMode Mode { get; set; } = DateRangeMode.Automatic;
     [BindProperty(SupportsGet = true)] public AutomaticPreset Preset { get; set; } = AutomaticPreset.Month;
@@ -27,7 +25,7 @@ public class ProfitLossModel(
     private async Task ResolveBoundsAsync()
     {
         var today = DateTime.Today;
-        var earliest = await transactionDataService.GetEarliestTransactionDateAsync();
+        var earliest = await dataService.GetEarliestTransactionDateAsync();
 
         if (Mode == DateRangeMode.Automatic)
         {
@@ -65,11 +63,10 @@ public class ProfitLossModel(
     {
         await ResolveBoundsAsync();
 
-        Rows = await transactionDataService.GetProfitLossRowsAsync(EffectiveFrom, EffectiveTo);
-        TotalProfit = await transactionDataService.GetProfitLossTotalAsync(EffectiveFrom, EffectiveTo);
+        Rows = await dataService.GetProfitLossRowsAsync(EffectiveFrom, EffectiveTo);
+        TotalProfit = await dataService.GetProfitLossTotalAsync(EffectiveFrom, EffectiveTo);
 
-        // Calculate distribution
-        var employees = await employeeDataService.GetActiveEmployeesAsync();
-        DistributionRows = DistributionCalculator.Calculate(TotalProfit, employees, distributionSettings.Value);
+        // Distribution
+        DistributionRows = await dataService.GetDistributionRowsAsync(TotalProfit);
     }
 }

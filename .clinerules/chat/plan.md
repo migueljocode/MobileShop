@@ -63,7 +63,7 @@ Task<IReadOnlyList<DistributionRow>> GetDistributionRowsAsync(decimal totalProfi
 - Done when: Dal registers area service; **no page changes**.
 - Risk: MEDIUM. Confidence: HIGH.
 
-## [ ] Step 2 — Migrate `ProfitLoss` page + tests
+## ~~[x] Step 2 — Migrate `ProfitLoss` page + tests~~
 - Files: `Pages/Reports/ProfitLoss.cshtml.cs`; any `Tests/Web/Pages/Reports/*`.
 - Change:
   - Ctor: `(IReportsDataService dataService)` only.
