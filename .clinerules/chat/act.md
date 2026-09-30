@@ -1,6 +1,6 @@
 # Act Report — Stage E Step 1
 
-- Commit: (filled in after commit)
+- Commit: `7c1d4f7` — feat(transactions): add TransactionsDataService with full interface and list factor
 - Verification:
   - Chain: `dotnet build src/MobileShop.slnx --nologo` -> exit 0; **0 errors, 0 warnings**.
   - Chain: `dotnet test src/MobileShop.slnx --nologo --no-build` -> **Failed: 0, Passed: 525, Skipped: 2, Total: 527** (EXIT=0). Stage D baseline was 510 passed; the 15 new `TransactionsDataServiceTests` account for the delta.
