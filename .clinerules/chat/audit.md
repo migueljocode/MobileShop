@@ -1,30 +1,44 @@
-# Act Report — Stage H Step 3 (delete specialized repositories, interfaces, and their tests)
+# Audit — Job B (Execution Check): Stage H Step 3
 
-- Commit: `e3a6622` — refactor(dal): delete specialized repositories, interfaces, and their tests
-- Verification:
-  - Required chain: `dotnet build src/MobileShop.slnx --nologo && dotnet test src/MobileShop.slnx --nologo --no-build` -> **Build succeeded, 0 errors, 1 warning; Failed: 0, Passed: 214, Skipped: 2, Total: 216** (EXIT=0, 44 s).
-  - **Warning (reported honestly, as instructed):** exactly **1** warning, identified as **`ProductsDataService.cs(26,62): warning CS9124`** — the pre-existing one that first appeared at Stage E. It is **not** caused by this step and that file was not modified. I did **not** fix it, per the explicit instruction not to touch the CS9124 backlog item (it remains Step 4's item #1).
-  - Dead-reference search after deletion: word-boundary grep for all 15 specialized repo types across `src` (`.cs`/`.cshtml`) -> **NONE**; grep for `Repos.Interfaces` -> **NONE**.
-  - `src/MobileShop.Dal/Repos/` now contains **only** `Base/BaseRepo.cs` and `Base/IBaseRepo.cs`.
-  - `git diff --cached --stat -- src/MobileShop.Api` is **empty** (API untouched).
-  - `services.AddScoped(typeof(IBaseRepo<>), typeof(BaseRepo<>));` is still registered at line 67.
-  - `git diff --diff-filter=D --name-only` lists **only** the 44 planned deletions (15 impls + 15 interfaces + 14 test files).
-- Consumer proof (re-run myself, exactly as instructed):
-  - Searched `\b(I)?(User|Customer|Seller|Product|Transaction|AppleId|Phone|SecondHand|Guarantee|Manufacturer|Model|Category|Color|Employee|Person)Repo\b` over `src` excluding `bin/obj` and `Dal/Repos/`.
-  - Result: **15 hits in `ServiceCollectionExtensions.cs`** (the DI registrations) and **14 repo test files** under `src/MobileShop.Tests/Dal/Repos/` (2 hits each). `EmployeeRepo` had no test file, as the reviewer stated.
-  - **No surviving production consumer** — no Web page, area service, initialization code, or test helper referenced any of them. Every repo therefore qualified for deletion.
-- What was deleted (44 files):
-  - **15 implementations** in `src/MobileShop.Dal/Repos/`: `AppleIdRepo`, `CategoryRepo`, `ColorRepo`, `CustomerRepo`, `EmployeeRepo`, `GuaranteeRepo`, `ManufacturerRepo`, `ModelRepo`, `PersonRepo`, `PhoneRepo`, `ProductRepo`, `SecondHandRepo`, `SellerRepo`, `TransactionRepo`, `UserRepo`.
-  - **The whole `src/MobileShop.Dal/Repos/Interfaces/` folder** (15 `I*Repo.cs` files).
-  - **14 test files** in `src/MobileShop.Tests/Dal/Repos/`. `RepoTestBase.cs`, `BaseRepoTests.cs`, `TestDataHelpers.cs` and `Initialization/` were all kept.
-- What was modified (5 files):
-  - **`ServiceCollectionExtensions.cs`** — removed the 15 specialized `AddScoped<I…Repo, …Repo>()` lines from `AddMobileShopRepository()`, keeping the generic registration; updated the XML summary so it no longer says remainders are removed in Stage H.
-  - **Four `GlobalUsings.cs`** (`Dal`, `Web`, `Tests`, `Services`) — removed the single `global using MobileShop.Dal.Repos.Interfaces;` line from each. These were the **expected forced break** (the namespace no longer exists, so the build would fail with CS0234). **Only those four lines were removed**; `global using MobileShop.Dal.Repos;` was deliberately **kept** in `Dal` and `Tests`, because `Repos.Base` still exists.
-- Test-count reconciliation (this is where the count was not obvious):
-  - I counted **54** `[Fact]` and **0** `[Theory]` in the 14 deleted test files before deleting, but the drop was far larger: **522 -> 214 = 308**.
-  - The extra tests come from **inheritance**: 10 of the 14 deleted classes derive from `BaseRepoTests<TEntity, TRepo>`, which contributes **26** `[Fact]`s each; the other 4 (`Category`, `Color`, `Manufacturer`, `Model`) derive only from `RepoTestBase`. So 10 x 26 = 260 inherited + 54 declared = 314, which over-predicted by 6.
-  - Rather than leave that discrepancy unexplained, I **measured it**: I stashed my work, ran the suite at `HEAD` with normal verbosity, and counted the actually-executing `Dal.Repos.*` tests: **308** passed (AppleId 30, Customer 28, Product 29, Transaction 31, User 36, and 26 each for Guarantee/Person/Phone/SecondHand/Seller, 6 each for Category/Color/Manufacturer/Model). That matches 522 - 308 = 214 **exactly**. The 6-test gap in my static model came from `[Fact]`s that are declared but shadowed/overridden, which only an actual run reveals. All work was then restored via `git stash pop` and re-staged.
-- Limitations: None. `IBaseRepo<T>`/`BaseRepo<T>` survive untouched, so no surviving code changed behavior; this was pure removal plus the required using fix.
-- Friction noted: build (~21 s) and the full suite (~44 s) exceed the ~30 s command window, so the chain used the detached-launch + poll pattern. The stash/baseline-count detour cost an extra full build+test cycle; it was worth it because a 308-test drop explained only by "inherited tests" would otherwise have been an unverified story.
-- Problems: none. The predicted namespace break occurred exactly where the prompt anticipated (the four `Repos.Interfaces` using lines) and nowhere else — no ARCHITECTURAL BLOCKER conditions were met.
-- Status: COMPLETE
+**Reviewed**: `90d07ad` → `f5570ea` (`e3a6622` deletions, `4b39100` act.md, `f5570ea` plan tick) against `plan.md` Step 3, `actor.md` and the Step 3 prompt.
+**Method**: static review only (the sandbox can't restore NuGet packages). The reported "0 errors, 1 warning, 214 passed / 0 failed / 2 skipped" is unverified; re-run `dotnet build` and `dotnet test` locally.
+
+**Verdict: NEEDS ONE CORRECTION PASS — one HIGH finding (the surviving `BaseRepo<T>` lost all of its direct tests). The deletions themselves are clean.**
+
+## Finding
+
+### HIGH — `BaseRepo<T>` now has no direct tests; 26 tests were silently lost
+- **What happened:** `BaseRepoTests<TEntity, TRepo>` is an **abstract** generic base (`BaseRepoTests.cs:12`) with 26 `[Fact]`s. They only ever ran through concrete subclasses, and all ten of those (Guarantee, Person, Phone, SecondHand, Seller, AppleId, Customer, Product, Transaction, User) were in the 14 deleted `*RepoTests.cs` files. `grep "BaseRepoTests<"` now finds only the abstract declaration itself. So the file was "kept" (as L7 asked), but **zero of its tests execute**.
+- **Why it matters:** `IBaseRepo<T>`/`BaseRepo<T>` is the only surviving repository abstraction, and every area service and page depends on it. Stage H's Global Definition of Done requires it to "remain registered and functional". The 26 tests were its only direct coverage:
+  - `Add`/`AddAsync` with persist true and false;
+  - `Update` marking the entity unchanged;
+  - `Delete` soft-deleting and hiding the row;
+  - `SaveChanges`;
+  - the predicate `Find` overloads;
+  - `SelectFirstAsync` ascending, descending and no-match.
+  Area-service tests only exercise some of these paths indirectly.
+- **Disclosure:** `act.md` explains the 308-test drop well (54 declared + 26 inherited × 10, reconciled by an actual run) but reports "Problems: none" and doesn't mention that keeping the abstract base leaves it running nothing.
+- **Root cause:** `plan.md` L7/Step 3 assumed `BaseRepoTests` stays useful "because area/page tests still use them". That's true for `RepoTestBase`, not for the abstract generic. This was a plan premise gap, not an actor error.
+- **Fix (tests only, no production change):** add a concrete derived class in `src/MobileShop.Tests/Dal/BaseClass/`, for example `BaseRepoPersonTests : BaseRepoTests<Person, BaseRepo<Person>>`, with `CreateRepo() => new BaseRepo<Person>(Context)` and a `CreateValidEntity()` copied from the deleted `PersonRepoTests.cs` (recoverable with `git show e3a6622^:src/MobileShop.Tests/Dal/Repos/PersonRepoTests.cs`). One entity restores all 26 generic tests; the old per-entity subclasses added no behaviour beyond that. Expected suite result: **240 passed / 2 skipped**.
+
+## Verified correct
+- **Deletions:** exactly 44 files (15 `*Repo.cs`, the whole `Interfaces/` folder of 15, and 14 test files). `Dal/Repos/` now contains only `Base/BaseRepo.cs` and `Base/IBaseRepo.cs`. `RepoTestBase`, `BaseRepoTests`, `TestDataHelpers` and `Initialization/` survive.
+- **Consumer proof:** the actor re-ran the word-boundary search and found only DI lines and the repo tests; I found the same independently. There were no surviving consumers.
+- **Forced change was minimal:** exactly four `global using MobileShop.Dal.Repos.Interfaces;` lines removed (Dal, Web, Tests, Services), as predicted. `global using MobileShop.Dal.Repos;` was correctly kept because `Repos.Base` still exists.
+- **DI:** the 15 specialized registrations are gone, `AddScoped(typeof(IBaseRepo<>), typeof(BaseRepo<>))` stays, and the method's XML summary was updated.
+- **Scope:** `src/MobileShop.Api` is untouched, no area service or production logic changed, and `to-do.md` was not touched. The actor ticked only the Step 3 header in `plan.md`.
+- **Test-count reconciliation:** 522 → 214 = 308. The actor measured it by stashing and running the baseline: 10 classes × 26 inherited + declared tests (AppleId 30, Customer 28, Product 29, Transaction 31, User 36, 26 each for the five bare subclasses, 6 each for Category/Color/Manufacturer/Model). That is solid evidence.
+- **CS9124** reappeared on the full recompile, as predicted. Still backlog item 1.
+
+## Cleanup backlog (for the later Act prompt)
+1. **Delete `protected IBaseRepo<Transaction> Transactions { get; } = transactions;`** at `ProductsDataService.cs:26` (the cause of CS9124).
+2. **Stale comments naming deleted types:** `SampleDataSeedTests.cs:127`, `ProfileModelTests.cs:12` (should be `AccountDataService`) and `PeopleDataService.cs:114`.
+3. **`ProductDetailsViewModel.Transactions = null!`:** replace with a body property `{ get; init; } = []`.
+4. **Missing ordering test** for `GetInventoryRowsAsync`.
+5. **Minor lost test:** the empty-inventory case for `ProductsDataService`.
+6. **Owner decision, still open:** the `Phone`-category filter in `CreatePhoneAsync` (`ProductsDataService.cs:266`).
+
+## Reviewer checklist
+- [x] Job B; one verdict; only `audit.md` written.
+- [x] `to-do.md` untouched (Stage H isn't finished).
+- [x] No Act-mode suggestion in this file; the correction prompt is delivered separately as `act.md`.
