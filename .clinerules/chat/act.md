@@ -1,13 +1,15 @@
-# Act Report — Stage C Step 4
-- Commit: 1bc6d74 — refactor(products): migrate Index Details SecondHand pages to ProductsDataService
+# Act Report — Stage C Step 5
+- Commit: cff36bf — docs(products): complete Stage C coverage consolidation and validation
 - Verification:
-  - `dotnet build src/MobileShop.slnx --nologo` -> exit 0; **0 errors, 0 warnings**.
-  - `dotnet test src/MobileShop.slnx --nologo --no-build` (full suite) -> **Failed: 0, Passed: 490, Skipped: 2, Total: 492** (EXIT=0).
-- What was implemented (plan Step 4 scope only):
-  - `IndexModel`: ctor `(IProductsDataService dataService)`; `Type` normalisation kept byte-identical; one call `Products = await dataService.GetInventoryRowsAsync(Type)`.
-  - `DetailsModel`: ctor `(IProductsDataService dataService)`; `Product = await dataService.GetDetailsAsync(id, type ?? string.Empty)`; `NotFound()` kept; `Transactions = Product.Transactions`; both property types unchanged, so `Details.cshtml` untouched.
-  - `SecondHandModel`: ctor `(IProductsDataService dataService)`; `(await dataService.GetSecondHandRowsAsync()).OrderBy(product => product.Name).ToList()`.
-  - No `.cshtml`, service, repo, or test touched. No page in the solution injects a repo.
+  - Chain 1: `dotnet build src/MobileShop.slnx --nologo` -> exit 0; **0 errors, 0 warnings** (one transient `1 Warning(s)` line on an earlier incremental build did not reproduce — final clean build is 0/0).
+  - Chain 1: `dotnet test src/MobileShop.slnx --nologo --no-build` -> **Failed: 0, Passed: 490, Skipped: 2, Total: 492** (EXIT=0).
+  - Chain 2 (guard): log shows `Hosting environment: Production` + `Now listening on: http://localhost:5199` (`--no-launch-profile`, `ASPNETCORE_ENVIRONMENT=Production`); log has **0** matches for `EnsureDeleted|EnsureCreated|seed`.
+  - Chain 2 (routes): all ten routes **200**: `/`, `/Products`, `/Products/SecondHand`, `/Products/CreatePhone`, `/Products/CreateAppleId`, `/People/Customers`, `/People/Sellers`, `/Transactions`, `/Reports/ProfitLoss`, `/Account/Login`.
+  - Chain 2 (dropdowns): `/Products/CreatePhone` body contains all four ids: `manufacturerSelect`, `modelSelect`, `colorSelect`, `corporationSelect`.
+  - Non-destructiveness: row-count fingerprint `Products|Phones|Transactions` = `17|7|26` before AND after the pass (read-only `mode=ro`).
+- What was implemented (plan Step 5 scope only):
+  - No assertion removed: the `Quantity() >= 0`-shaped example does not exist in `PhoneDataServiceTests`/`AppleIdDataServiceTests` (grep found nothing), and every remaining member (`IsSold`, `IsSecondHand`, `GetOwner`, `GetGuarantee`, `GetSecondHandInfo`, `GetAvailableSecondHandRows*`, `Quantity*`, `GetSelectableProductsAsync`) still has a live consumer per plan L3/carried notes — `Buy`/`Sell` pages still resolve `GetSelectableProductsAsync`. Per plan edge-case rule ("if you cannot show that a dropped assertion is reproduced, keep it"), all `[Fact]`s and assertions stay. No file created, none deleted.
+  - DoD spot-checks: all five product pages inject only `IProductsDataService dataService`; no page references a repo (`grep Repo` on Products pages = no match); no `.cshtml` diff in the last 4 commits.
 - Limitations: None.
 - Friction noted: None.
 - Problems: None.
