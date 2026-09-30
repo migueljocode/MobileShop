@@ -1,3 +1,16 @@
+# Act Report — Stage D Step 4
+- Verification chain 1: `dotnet build src/MobileShop.slnx --nologo` -> exit 0; **0 errors**; only the pre-existing `CS9124` in `ProductsDataService` (reproduced on a stashed HEAD baseline, not introduced by Stage D).
+- Verification chain 1: `dotnet test src/MobileShop.slnx --nologo --no-build` -> **Failed: 0, Passed: 510, Skipped: 2, Total: 512** (EXIT=0).
+- Verification chain 2 (Production smoke, `ASPNETCORE_ENVIRONMENT=Production`, `--no-launch-profile`, `--urls http://localhost:5199`):
+  - Log confirms `Hosting environment: Production` + `Now listening on: http://localhost:5199`.
+  - **11/11 routes 200**: `/People/Customers`, `/People/Sellers`, `/People/CreateCustomer`, `/People/CreateSeller`, `/People/CustomerDetails?id=1`, `/People/SellerDetails?id=1`, `/`, `/Products`, `/Transactions`, `/Reports/ProfitLoss`, `/Account/Login`.
+  - Extra data-path proof: `/People/CustomerDetails?id=3` renders exactly its 5 purchased products (Anker 20W USB-C Charger, Samsung Galaxy A55, Spigen Galaxy S24 Glass, Apple iPhone, Baseus USB-C Braided Cable); `/People/SellerDetails?id=2` renders exactly its 10 supplied products. Counts match a read-only SQL check of distinct ProductId per direction, so the Step 2 projection reaches the view correctly.
+  - Sentinel id=1 pages correctly show "No purchased products." / "No products supplied." (id 1 has zero transactions in the relevant direction).
+  - Log has **0** matches for `InitializeForDevelopment|EnsureDeleted|EnsureCreated|seed` and **0** for `ERR |FTL |Exception`.
+- Non-destructiveness: row-count fingerprint `Products|Phones|Transactions` = `17|7|26` before AND after the pass (read-only `mode=ro`).
+- Done-when review: all six pages inject only `IPeopleDataService dataService`; no People page injects entity people/product services or repos; no `.cshtml` changed; entity DI still registered (L3); suite green; smoke green.
+- Status: COMPLETE — Stage D Global Definition of Done satisfied.
+
 # Act Report — Stage D Step 3
 - Verification:
   - Chain 1: `dotnet build src/MobileShop.slnx --nologo` -> exit 0; **0 errors, 0 warnings**.

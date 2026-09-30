@@ -83,7 +83,7 @@ Entity leak today: `PurchasedProductsAsync` / `SoldToShopAsync` return `IEnumera
 - Verify: build + full suite.
 - Risk: LOW. Confidence: HIGH.
 
-## [ ] Step 4 — Stage D validation
+## [x] Step 4 — Stage D validation
 - Files: none (or tick plan.md only).
 - Verify chain 1: `dotnet build src/MobileShop.slnx --nologo && dotnet test src/MobileShop.slnx --nologo --no-build`
 - Verify chain 2: `ASPNETCORE_ENVIRONMENT=Production dotnet run --project src/MobileShop.Web --no-launch-profile --urls http://localhost:5199` then curl **200** for `/People/Customers`, `/People/Sellers`, `/People/CreateCustomer`, `/People/CreateSeller`, and if seed ids exist `/People/CustomerDetails?id=1`, `/People/SellerDetails?id=1`, plus regression `/`, `/Products`, `/Transactions`, `/Reports/ProfitLoss`, `/Account/Login`.
