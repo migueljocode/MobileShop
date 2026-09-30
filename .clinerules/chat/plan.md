@@ -66,7 +66,7 @@ Change `GetTransactionFactorPdfAsync` to `Task<byte[]?>` (L12).
 - **HIGH residual:** RecordBuy/Sell rejection rules + shop sentinels; invoice Include graph (prefer repos; `AppDbContext` only if unavoidable — note in act.md).
 - **MEDIUM:** selectable phone∪AppleId; Step 3 Index still `LoadAsync` on factor failure.
 
-## [ ] Step 1 — Contract + `TransactionsDataService` + Dal registration
+## ~~[x] Step 1 — Contract + `TransactionsDataService` + Dal registration~~
 - Files: create `src/MobileShop.Services/DataServices/Dal/TransactionsDataService.cs`, `src/MobileShop.Models/ViewModels/Web/FactorPdfResult.cs`, `src/MobileShop.Tests/Services/DataServices/Dal/TransactionsDataServiceTests.cs`; modify `ITransactionsDataService`, `ApiTransactionsDataService`, `ServiceCollectionExtensions` (one Dal line); optionally shorten BindModels FQNs.
 - Ctor: `(IBaseRepo<Transaction> transactions, IBaseRepo<Seller> sellers, IBaseRepo<Customer> customers, IBaseRepo<Phone> phones, IBaseRepo<AppleId> appleIds, IPdfGenerator pdfGenerator, ILogger<TransactionsDataService> logger)` — add repos only if invoice needs them; **no** entity data services.
 - Implement all members:

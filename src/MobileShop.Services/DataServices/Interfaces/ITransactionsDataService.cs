@@ -15,7 +15,16 @@ public interface ITransactionsDataService
 
     /// <summary>Gets the transaction factor PDF bytes.</summary>
     /// <param name="transactionId">The transaction identifier.</param>
-    Task<byte[]> GetTransactionFactorPdfAsync(int transactionId);
+    /// <returns>The factor PDF bytes, or <c>null</c> when the transaction does not exist.</returns>
+    Task<byte[]?> GetTransactionFactorPdfAsync(int transactionId);
+
+    /// <summary>Generates a factor PDF for the selected or filtered transactions.</summary>
+    /// <param name="direction">The optional transaction direction filter.</param>
+    /// <param name="take">The maximum number of list rows considered.</param>
+    /// <param name="ascending">Whether the list is ordered ascending by date.</param>
+    /// <param name="selectedIds">The explicitly selected transaction identifiers; when empty the filtered list is used.</param>
+    Task<FactorPdfResult> GenerateListFactorPdfAsync(
+        string? direction, int take, bool ascending, IReadOnlyList<int> selectedIds);
 
     /// <summary>Gets seller party options.</summary>
     Task<IReadOnlyList<PartyOptionViewModel>> GetSellersAsync();

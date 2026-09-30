@@ -11,7 +11,12 @@ public class ApiTransactionsDataService : ITransactionsDataService
         => throw new NotImplementedException("ApiTransactionsDataService is not implemented yet.");
 
     /// <inheritdoc />
-    public Task<byte[]> GetTransactionFactorPdfAsync(int transactionId)
+    public Task<byte[]?> GetTransactionFactorPdfAsync(int transactionId)
+        => throw new NotImplementedException("ApiTransactionsDataService is not implemented yet.");
+
+    /// <inheritdoc />
+    public Task<FactorPdfResult> GenerateListFactorPdfAsync(
+        string? direction, int take, bool ascending, IReadOnlyList<int> selectedIds)
         => throw new NotImplementedException("ApiTransactionsDataService is not implemented yet.");
 
     /// <inheritdoc />

@@ -1,69 +1,20 @@
-# Act Report — Stage D Step 4
-- Verification chain 1: `dotnet build src/MobileShop.slnx --nologo` -> exit 0; **0 errors**; only the pre-existing `CS9124` in `ProductsDataService` (reproduced on a stashed HEAD baseline, not introduced by Stage D).
-- Verification chain 1: `dotnet test src/MobileShop.slnx --nologo --no-build` -> **Failed: 0, Passed: 510, Skipped: 2, Total: 512** (EXIT=0).
-- Verification chain 2 (Production smoke, `ASPNETCORE_ENVIRONMENT=Production`, `--no-launch-profile`, `--urls http://localhost:5199`):
-  - Log confirms `Hosting environment: Production` + `Now listening on: http://localhost:5199`.
-  - **11/11 routes 200**: `/People/Customers`, `/People/Sellers`, `/People/CreateCustomer`, `/People/CreateSeller`, `/People/CustomerDetails?id=1`, `/People/SellerDetails?id=1`, `/`, `/Products`, `/Transactions`, `/Reports/ProfitLoss`, `/Account/Login`.
-  - Extra data-path proof: `/People/CustomerDetails?id=3` renders exactly its 5 purchased products (Anker 20W USB-C Charger, Samsung Galaxy A55, Spigen Galaxy S24 Glass, Apple iPhone, Baseus USB-C Braided Cable); `/People/SellerDetails?id=2` renders exactly its 10 supplied products. Counts match a read-only SQL check of distinct ProductId per direction, so the Step 2 projection reaches the view correctly.
-  - Sentinel id=1 pages correctly show "No purchased products." / "No products supplied." (id 1 has zero transactions in the relevant direction).
-  - Log has **0** matches for `InitializeForDevelopment|EnsureDeleted|EnsureCreated|seed` and **0** for `ERR |FTL |Exception`.
-- Non-destructiveness: row-count fingerprint `Products|Phones|Transactions` = `17|7|26` before AND after the pass (read-only `mode=ro`).
-- Done-when review: all six pages inject only `IPeopleDataService dataService`; no People page injects entity people/product services or repos; no `.cshtml` changed; entity DI still registered (L3); suite green; smoke green.
-- Status: COMPLETE — Stage D Global Definition of Done satisfied.
+# Act Report — Stage E Step 1
 
-# Act Report — Stage D Step 3
+- Commit: (filled in after commit)
 - Verification:
-  - Chain 1: `dotnet build src/MobileShop.slnx --nologo` -> exit 0; **0 errors, 0 warnings**.
-  - Chain 1: `dotnet test src/MobileShop.slnx --nologo --no-build` -> **Failed: 0, Passed: 510, Skipped: 2, Total: 512** (EXIT=0).
-  - DoD spot-checks: all six People page models inject `(IPeopleDataService dataService)` only (grep shows no entity service/repo references); `git diff --stat` on `Pages/People/*.cshtml` is empty (no view edits); entity `ICustomerDataService`/`ISellerDataService`/`IProductDataService` DI still registered in both branches (L3).
-- What was implemented (plan Step 3 scope only):
-  - `CustomersModel` / `SellersModel`: ctor → `(IPeopleDataService dataService)`; call `GetCustomerRowsAsync` / `GetSellerRowsAsync` with existing query args; `SortBy`/`Ascending` assignments unchanged.
-  - `CustomerDetailsModel` / `SellerDetailsModel`: dropped the second service (`IProductDataService`); `var details = await dataService.Get*DetailsAsync(id)`; `NotFound` if null; `Customer`/`Seller = details`; `Products = details.Products`.
-  - `CreateCustomerModel` / `CreateSellerModel`: dropped entity construction from the page; validate → `Create*Async` → `Message` on failure (service message, fallback text preserved) → redirect list on success.
-  - Page tests: `CustomersModelTests` / `SellersModelTests` rewritten to construct real `PeopleDataService` over `BaseRepo<Customer>/Seller/Product` + `NullLogger` (no Moq); added `DetailsAndCreateModelTests.cs` with minimal known-id/unknown-id tests for both details pages and valid/invalid-ModelState tests for both create pages.
-  - No `.cshtml` edits (property names `Customer`/`Seller`/`Products`/`Message` preserved).
-- Problems: `PageResult` needed `using Microsoft.AspNetCore.Mvc.RazorPages;` in the new test file (fixed before final green).
-- Status: COMPLETE
-
-# Act Report — Stage D Step 2
-- Verification:
-  - Chain 1: `dotnet build src/MobileShop.slnx --nologo` -> exit 0; **0 errors**; only pre-existing `CS9124` in `ProductsDataService` (reproduced at baseline).
-  - Chain 1: `dotnet test src/MobileShop.slnx --nologo --no-build` -> **Failed: 0, Passed: 502, Skipped: 2, Total: 504** (EXIT=0). Filtered `PeopleDataServiceTests`: 12/12 pass.
-- What was implemented (plan Step 2 scope only):
-  - `PeopleDataService` ctor gained `IBaseRepo<Product> products`; interface signatures untouched; pages untouched.
-  - `GetCustomerDetailsAsync`: resolves Sell-direction transaction product ids for that customer (distinct), then projects inventory rows via a shared `GetInventoryRowsForAsync` helper using the byte-for-byte `ProductDataService.GetInventoryRowsAsync` projection (EntityId/ProductId both `product.Id`, Type from category name, Identifier=`Barcode`, IsSold via Sell-direction `Any`, IsSecondHand via `SecondHandProfile != null`), in-memory filter after `SelectAllAsync`, ordered by `ProductId`. Returns `details with { Products = rows }`; null header → null.
-  - `GetSellerDetailsAsync`: same, but Buy-direction only (`SoldToShop` semantics).
-  - Tests: customer details returns only the purchased Sell-direction product (excludes Buy rows and other customers' purchases) with full row shape assertions; seller details returns only Buy-direction supply (excludes other sellers and Sell-only rows); empty list when no matching transactions; still null for unknown id (already covered).
-- Problems: None.
-- Status: COMPLETE
-
-# Act Report — Stage D Step 1
-- Verification:
-  - Chain 1: `dotnet build src/MobileShop.slnx --nologo` -> exit 0; **0 errors, 0 warnings**.
-  - Chain 1: `dotnet test src/MobileShop.slnx --nologo --no-build` -> **Failed: 0, Passed: 498, Skipped: 2, Total: 500** (EXIT=0). Filtered `PeopleDataServiceTests`: 8/8 pass.
-  - Pre-existing note: an incremental build can surface `CS9124` (ProductsDataService `transactions` captured twice) — reproduced on a stashed baseline build at HEAD, unrelated to this step; a clean incremental build after this step is 0/0.
+  - Chain: `dotnet build src/MobileShop.slnx --nologo` -> exit 0; **0 errors, 0 warnings**.
+  - Chain: `dotnet test src/MobileShop.slnx --nologo --no-build` -> **Failed: 0, Passed: 525, Skipped: 2, Total: 527** (EXIT=0). Stage D baseline was 510 passed; the 15 new `TransactionsDataServiceTests` account for the delta.
+  - Targeted first: `--filter FullyQualifiedName~TransactionsDataServiceTests` -> **15 passed, 0 failed**.
+  - Done-when check: interface + Api + Dal green; **no page changes** (`Pages/Transactions/*` untouched).
 - What was implemented (plan Step 1 scope only):
-  - `CustomerDetailsViewModel` / `SellerDetailsViewModel` gained a last defaulted member `IReadOnlyList<ProductListItemViewModel> Products = null!`. EF expression trees cannot contain collection expressions, so the record default stays `null!` and `PeopleDataService` returns `details with { Products = [] }` post-projection — the observable contract (L10: details always carry a non-null empty `Products` in Step 1) holds.
-  - Created `PeopleDataService` with ctor `(IBaseRepo<Customer> customers, IBaseRepo<Seller> sellers, ILogger<PeopleDataService> logger)` implementing all six `IPeopleDataService` members: list rows with sort switches ported byte-for-byte from entity services (Sell count for customers, Buy count for sellers, invalid sort → Name); create paths ported from the Create pages (`AddAsync > 0` success, failure messages preserved, `LogInformation`/`LogWarning` only on create); header-only details.
-  - Registered `services.AddScoped<IPeopleDataService, PeopleDataService>();` in the Dal branch only; `if (useApi)` untouched; no entity DI removed (L3).
-  - Created `PeopleDataServiceTests` (8 tests): sort Name/Phone/Count both directions + invalid-sort fallback for both lists, details header + empty `Products` for known id, null for unknown id, create persistence for customer/seller. Seeding uses explicit `Person`-first + FK pattern per repo-test conventions.
-  - No page, `.cshtml`, repo registration, or Api stub changes (interface signatures unchanged → Api stub untouched, L7).
-- Problems: two details tests initially failed because seeding via `PersonNavigation` and `Products = null!` default both violated test/provider expectations; fixed by FK-pattern seeding and `with { Products = [] }`.
-- Status: COMPLETE
-
-# Act Report — Stage C Step 5
-- Commit: cff36bf — docs(products): complete Stage C coverage consolidation and validation
-- Verification:
-  - Chain 1: `dotnet build src/MobileShop.slnx --nologo` -> exit 0; **0 errors, 0 warnings** (one transient `1 Warning(s)` line on an earlier incremental build did not reproduce — final clean build is 0/0).
-  - Chain 1: `dotnet test src/MobileShop.slnx --nologo --no-build` -> **Failed: 0, Passed: 490, Skipped: 2, Total: 492** (EXIT=0).
-  - Chain 2 (guard): log shows `Hosting environment: Production` + `Now listening on: http://localhost:5199` (`--no-launch-profile`, `ASPNETCORE_ENVIRONMENT=Production`); log has **0** matches for `EnsureDeleted|EnsureCreated|seed`.
-  - Chain 2 (routes): all ten routes **200**: `/`, `/Products`, `/Products/SecondHand`, `/Products/CreatePhone`, `/Products/CreateAppleId`, `/People/Customers`, `/People/Sellers`, `/Transactions`, `/Reports/ProfitLoss`, `/Account/Login`.
-  - Chain 2 (dropdowns): `/Products/CreatePhone` body contains all four ids: `manufacturerSelect`, `modelSelect`, `colorSelect`, `corporationSelect`.
-  - Non-destructiveness: row-count fingerprint `Products|Phones|Transactions` = `17|7|26` before AND after the pass (read-only `mode=ro`).
-- What was implemented (plan Step 5 scope only):
-  - No assertion removed: the `Quantity() >= 0`-shaped example does not exist in `PhoneDataServiceTests`/`AppleIdDataServiceTests` (grep found nothing), and every remaining member (`IsSold`, `IsSecondHand`, `GetOwner`, `GetGuarantee`, `GetSecondHandInfo`, `GetAvailableSecondHandRows*`, `Quantity*`, `GetSelectableProductsAsync`) still has a live consumer per plan L3/carried notes — `Buy`/`Sell` pages still resolve `GetSelectableProductsAsync`. Per plan edge-case rule ("if you cannot show that a dropped assertion is reproduced, keep it"), all `[Fact]`s and assertions stay. No file created, none deleted.
-  - DoD spot-checks: all five product pages inject only `IProductsDataService dataService`; no page references a repo (`grep Repo` on Products pages = no match); no `.cshtml` diff in the last 4 commits.
-- Limitations: None.
-- Friction noted: None.
-- Problems: None.
+  - **Contract** — `ITransactionsDataService.GetTransactionFactorPdfAsync` widened to `Task<byte[]?>` (L12, null when missing); new `GenerateListFactorPdfAsync(string? direction, int take, bool ascending, IReadOnlyList<int> selectedIds)` returning `FactorPdfResult`. `ApiTransactionsDataService` updated in the same step with matching signatures (NIE stubs preserved; `src/MobileShop.Api` untouched, L7).
+  - **New record** — `MobileShop.Models.ViewModels.Web.FactorPdfResult(bool Succeeded, byte[]? Bytes, string? Error)`.
+  - **`TransactionsDataService`** — ctor `(IBaseRepo<Transaction>, IBaseRepo<Seller>, IBaseRepo<Customer>, IBaseRepo<Phone>, IBaseRepo<AppleId>, AppDbContext, IPdfGenerator, ILogger<TransactionsDataService>)`. All 11 interface members implemented, no NIE: list (direction filter pushed to the repo predicate overload, `Take` clamped 1-500, date order); details projection; `GetSellersAsync`/`GetCustomersAsync` party options ordered by label; `GetSelectableProductsAsync` phone+AppleId with the `Transactions.All(t => t.Direction != direction)` filter then `OrderBy(Name)`; `RecordBuyAsync`/`RecordSellAsync` with negative-price and existing-direction rejection, shop sentinels `ShopSellerId`/`ShopCustomerId` = 1 (same TODO comment), page-matching failure messages, `LogInformation`/`LogWarning`; invoice assembly + `pdfGenerator.Generate`; single-id factor -> `byte[]?`; list factor with full L11 semantics.
+  - **L11 behaviour** — empty selection + empty snapshot -> `"No transactions match the current filters."`; any id <= 0 -> `"Selected transaction identifiers must be positive numbers."`; ids missing from the snapshot -> `"These selected transactions no longer exist: {ids}."`. Distinct ids, single-snapshot resolution, **never** `Succeeded: true` with null/empty bytes.
+  - **Dal registration** — one line, Dal branch only: `services.AddScoped<ITransactionsDataService, TransactionsDataService>();`. `if (useApi)` branch and every entity registration untouched (L3).
+  - **Tests** — `TransactionsDataServiceTests` (15) over `RepoTestBase` + real service with `BaseRepo<T>` and a thin `FakePdfGenerator` double (deterministic byte markers): list direction/order/take-clamp; details + null for unknown id; party options; selectable shape and post-Buy exclusion; record success/duplicate/negative; single factor null + bytes; list factor — empty-snapshot message, non-positive id, missing id (no partial bytes), success with selection and without; invoice + `KeyNotFoundException` for unknown id.
+- **Architectural note (required by plan step 6):** the invoice shape needs eager `Include` chains that `IBaseRepo<T>` does not expose, so the service injects `AppDbContext` and uses it **only** in `LoadInvoiceGraph`. This mirrors the existing `InvoiceDataService`. `AppDbContext` is not used by any other member. The plan authorised this ("`AppDbContext` only if unavoidable — note in act.md").
+- Limitations: `GetInvoiceAsync` / `GenerateInvoicePdfAsync` complete synchronously via `Task.FromResult` (the `AppDbContext` query is sync, same as the ported `InvoiceDataService`). Stage E Step 2 is explicitly optional and was not needed — invoice Includes are already complete, so Step 2 should be skipped with that reason recorded.
+- Friction noted: the full test suite (~35 s) and the build (~21 s) both exceed the ~30 s command window; the first full-suite attempt was truncated with no summary. Resolved by launching the run detached via `setsid` and polling the log until the `Passed!/Failed!` summary and `EXIT=` line appeared — never judging before completion. Also `IBaseRepo<T>` has no include-capable async read, which forces the `AppDbContext` carve-out above.
+- Problems: `InvoiceViewModel` lives in namespace `MobileShop.Models.ViewModels` (not `...ViewModels.Web`), so the test file needed an explicit `using MobileShop.Models.ViewModels;` — caught by the first build and fixed before the final green.
 - Status: COMPLETE
