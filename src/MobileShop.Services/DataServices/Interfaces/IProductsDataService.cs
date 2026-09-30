@@ -27,7 +27,7 @@ public interface IProductsDataService
     /// <summary>Gets all distinct guarantee corporation names.</summary>
     Task<IReadOnlyList<string>> GetGuaranteeCorporationsAsync();
 
-        /// <summary>Creates a manufacturer and returns its dropdown option.</summary>
+    /// <summary>Creates a manufacturer and returns its dropdown option.</summary>
     /// <param name="name">The manufacturer name.</param>
     Task<DropdownCreateResult> CreateManufacturerAsync(string name);
 
@@ -40,7 +40,7 @@ public interface IProductsDataService
     /// <param name="name">The color name.</param>
     Task<DropdownCreateResult> CreateColorAsync(string name);
 
-        /// <summary>Creates a phone from the submitted input.</summary>
+    /// <summary>Creates a phone from the submitted input.</summary>
     /// <param name="input">The phone input.</param>
     Task<ServiceResult> CreatePhoneAsync(CreatePhoneInputModel input);
 

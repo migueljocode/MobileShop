@@ -2,12 +2,14 @@ namespace MobileShop.Services.DataServices.Dal;
 
 /// <summary>Provides the catalog and creation operations for the Products area.</summary>
 /// <remarks>
-/// The eight repositories cover every product type plus the shared catalog entities; there is no
-/// <see cref="SecondHand"/> repo (the second-hand profile is a <see cref="Product"/> navigation, not a
-/// separate write) and no <see cref="Transaction"/> repo yet (that arrives in Stage E).
+/// The seven repositories cover both product types plus the shared catalog entities. There is no
+/// <see cref="Product"/> repo because each create path builds the product row inline and it is persisted by
+/// cascade through the phone or Apple-ID insert, no <see cref="SecondHand"/> repo (the second-hand profile is
+/// a <see cref="Product"/> navigation, not a separate write), and no <see cref="Transaction"/> repo yet
+/// (that arrives in Step 2, which needs the details page's transaction rows).
 /// </remarks>
 public class ProductsDataService(
-        IBaseRepo<Phone> phones,
+    IBaseRepo<Phone> phones,
     IBaseRepo<AppleId> appleIds,
     IBaseRepo<Manufacturer> manufacturers,
     IBaseRepo<Model> models,
@@ -244,7 +246,7 @@ public class ProductsDataService(
         if (model is null)
             return new ServiceResult(false, "Selected model not found for this manufacturer.", nameof(CreatePhoneInputModel.ModelId), null);
 
-                        MobileShop.Models.Entities.Color? color = null;
+        MobileShop.Models.Entities.Color? color = null;
         if (input.ColorId.HasValue)
         {
             color = await colors.FindAsync(input.ColorId.Value);
