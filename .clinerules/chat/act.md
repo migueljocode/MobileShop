@@ -1,17 +1,16 @@
-# Act Report — Stage C Step 2
-- Commit: 8dcdc6a — feat(products): extend ProductsDataService reads with type filter and transactions
+# Act Report — Stage C Step 3
+- Commit: 615e392 — refactor(products): migrate CreatePhone and CreateAppleId pages to ProductsDataService
 - Verification:
   - `dotnet build src/MobileShop.slnx --nologo` -> exit 0; **0 errors, 0 warnings**.
-  - `dotnet test src/MobileShop.Tests/MobileShop.Tests.csproj --nologo --filter "FullyQualifiedName~ProductsDataServiceTests"` -> **Failed: 0, Passed: 33, Skipped: 0, Total: 33**.
-  - `dotnet test src/MobileShop.slnx --nologo --no-build` (full suite) -> **Failed: 0, Passed: 489, Skipped: 2, Total: 491** (EXIT=0).
-- What was implemented (plan Step 2 scope only):
-  - `ProductDetailsViewModel` gained defaulted `IReadOnlyList<ProductTransactionViewModel> Transactions = null!` (Step 1 contract).
-  - `IProductsDataService`/`ApiProductsDataService.GetInventoryRowsAsync` gained `string? type = null` (still NotImplemented in Api per L7).
-  - New `DataServices/Shared/ProductTransactionProjection.cs` with `Selector` copied verbatim from `TransactionDataService.cs:271-280` (Shop fallbacks).
-  - `ProductsDataService.GetInventoryRowsAsync(type)`: null/all/unrecognised → both blocks; `"phone"` phones only; `"appleid"` Apple IDs only; per-block `OrderBy(ProductId)`, concat without merged sort; projections untouched.
-  - `ProductsDataService.GetDetailsAsync`: projections untouched (Apple-ID no `ToString("d")`, phone with it); three-phase wrap — projection, null check, `details with { Transactions = rows }` via private `GetProductTransactionsAsync` (predicate + shared Selector + `OrderByDescending(Date)`).
-  - `ProductsDataServiceTests`: 4 new tests — phone-only, appleid-only, all+unrecognised both-blocks, details transactions descending-date with named labels.
-- Limitations: None — no pages, DI, entity services, or views touched.
-- Friction noted: Shop-fallback branch (`PersonNavigation == null`) cannot be covered under InMemory — it inner-joins and drops the row (verified: projection-only query returned 0 rows with a deleted/null person). Test covers named-label branches; Shop branch is byte-identical to the production `TransactionDataService` projection.
+  - `dotnet test ... --filter "FullyQualifiedName~Web.Pages.Products"` -> **Failed: 0, Passed: 27, Skipped: 0, Total: 27**.
+  - `dotnet test src/MobileShop.slnx --nologo --no-build` (full suite) -> **Failed: 0, Passed: 490, Skipped: 2, Total: 492** (EXIT=0).
+- What was implemented (plan Step 3 scope only):
+  - `CreatePhone.cshtml.cs`: ctor is now `(IProductsDataService dataService)` only; properties are `IReadOnlyList<DropdownOptionViewModel>` (+ unchanged `IReadOnlyList<string> Corporations`); `PopulateDropdownsAsync` delegates to the four service members; `OnGetModelsAsync` keeps `{o.Id, o.Name}` payload; three modal handlers delegate and return `{id,name}` / `{error}+400/404`; `OnPostCreateCorporationAsync` untouched; `OnPostAsync` follows validate -> `CreatePhoneAsync` -> field error/`Message` -> redirect `type="phone"`.
+  - `CreateAppleId.cshtml.cs`: ctor is now `(IProductsDataService dataService)` only; constants + `AddModelAsync` removed; `OnPostAsync` follows validate -> `CreateAppleIdAsync` -> field error/`Message` -> redirect `type="appleid"`.
+  - Null-forgiving `!` added where the service contract guarantees non-null (`Option` on success, `Message` on failure) to keep the build at 0 warnings.
+  - Page tests rewired to real `ProductsDataService` over `BaseRepo<T>`; all existing assertions kept; added duplicate-IMEI `ModelState` test (unknown-manufacturer case already existed) and redirect route-value assertions (new id + type).
+  - No `.cshtml`, service, or repo touched.
+- Limitations: None.
+- Friction noted: None.
 - Problems: None.
 - Status: COMPLETE
