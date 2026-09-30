@@ -1,13 +1,12 @@
-# Audit — Job B (Execution Check): Stage F Step 1
+# Audit — Job B (Execution Check): Stage F Step 2
 
 **Verdict**: **PASS**
 
-Verified commit `13b18d3` against plan Step 1 and `act.md`.
+Verified commit `5a06ffe` against plan Step 2 and `act.md`.
 
-- Full `IReportsDataService` on Dal (P/L rows/total, earliest date, distribution).
-- Dal DI gap fixed: `IReportsDataService` → `ReportsDataService`.
-- No page changes; entity DI kept; calculator 40/50/10 unchanged.
-- Documented `ITransactionRepo` / `IEmployeeRepo` usage (allowed).
-- Suite **538 passed**, 2 skipped; 9 new service tests.
+- ProfitLoss injects only `IReportsDataService dataService`.
+- Date-range UI (`ResolveBoundsAsync`, enums, bind props) preserved on the page.
+- Rows/total/distribution come from the area service; no page `DistributionCalculator` / entity services / `IOptions`.
+- Suite **538 passed**; no `.cshtml` edits.
 
-Next: **Step 2** (ProfitLoss page migration) only, then Job B.
+Next: **Step 3** (validation) only, then Job B for stage sign-off.
