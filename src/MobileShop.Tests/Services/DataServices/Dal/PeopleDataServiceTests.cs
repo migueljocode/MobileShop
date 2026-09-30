@@ -325,15 +325,11 @@ public class PeopleDataServiceTests : RepoTestBase
         var customer = AddCustomer("Sara", "Ahmadi", "09120000001", "1000000001");
 
         var shopSeller = AddSeller("Shop", "Owner", "09120000009");
-        var shopCustomer = AddCustomer("Shop", "Buyer", "09120000010", "1000000002");
         var live = TestDataHelpers.CreateProduct(Context);
         var removed = TestDataHelpers.CreateProduct(Context);
 
         SeedTransaction(live.Id, shopSeller.Id, customer.Id, TransactionDirection.Sell);
         SeedSoftDeletedTransaction(removed.Id, shopSeller.Id, customer.Id, TransactionDirection.Sell);
-
-        // Sanity: the shop sentinel rows exist so nothing else is silently required.
-        Assert.NotNull(shopCustomer);
 
         var rows = await _service.GetCustomerRowsAsync("Name", true);
         var row = rows.Single(r => r.Id == customer.Id);
@@ -345,17 +341,18 @@ public class PeopleDataServiceTests : RepoTestBase
     public async Task GetSellerRowsAsync_sold_count_ignores_soft_deleted_transactions()
     {
         var seller = AddSeller("Sara", "Karimi", "09120000002");
-        var shopSeller = AddSeller("Shop", "Owner", "09120000009");
         var customer = AddCustomer("Shop", "Buyer", "09120000010", "1000000003");
         var live = TestDataHelpers.CreateProduct(Context);
         var removed = TestDataHelpers.CreateProduct(Context);
 
-        SeedTransaction(live.Id, shopSeller.Id, customer.Id, TransactionDirection.Buy);
-        SeedSoftDeletedTransaction(removed.Id, shopSeller.Id, customer.Id, TransactionDirection.Buy);
+        // Both buys belong to the seller under test, so the count is 1 only if the
+        // soft-deleted transaction is excluded.
+        SeedTransaction(live.Id, seller.Id, customer.Id, TransactionDirection.Buy);
+        SeedSoftDeletedTransaction(removed.Id, seller.Id, customer.Id, TransactionDirection.Buy);
 
         var rows = await _service.GetSellerRowsAsync("Name", true);
         var row = rows.Single(r => r.Id == seller.Id);
 
-        Assert.Equal(0, row.SoldCount);
+        Assert.Equal(1, row.SoldCount);
     }
 }
