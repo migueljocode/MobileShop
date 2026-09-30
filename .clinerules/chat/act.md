@@ -1,7 +1,7 @@
 # Act Report — Stage H Step 3 correction (Job B HIGH: BaseRepo<T> lost all direct tests)
 
 - Context: Job B reviewed Step 3 (`e3a6622`, `4b39100`, `f5570ea`) and returned **NEEDS ONE CORRECTION PASS** with one HIGH finding, confirming the deletions themselves were clean. This is that correction. **No Step 4 work performed.**
-- Commit: (filled in after commit)
+- Commit: `3b04b29` — test(dal): restore BaseRepo coverage via concrete generic-repo suite
 - HIGH finding independently confirmed before fixing: `BaseRepoTests.cs:12` is `public abstract class BaseRepoTests<TEntity, TRepo> : RepoTestBase` with **26** `[Fact]`s, and after the Step 3 deletions a repo-wide `grep 'BaseRepoTests<'` found **only the abstract declaration itself** — no concrete subclass remained. Because the class is abstract, all 26 tests were dead code: they compiled but never executed. `IBaseRepo<T>`/`BaseRepo<T>`, the only surviving repository abstraction that every area service and page depends on, therefore had **zero direct coverage**, against the Stage H Global Definition of Done requirement that it "remain registered and functional".
 - What was added (**tests only**): `src/MobileShop.Tests/Dal/BaseClass/BaseRepoPersonTests.cs` — `public class BaseRepoPersonTests : BaseRepoTests<Person, BaseRepo<Person>>` with `CreateRepo() => new(Context)` and a `CreateValidEntity()` recovered verbatim from the deleted `PersonRepoTests.cs` (`git show e3a6622^:src/MobileShop.Tests/Dal/Repos/PersonRepoTests.cs`). The generic type argument is now the concrete `BaseRepo<Person>` instead of the deleted `IPersonRepo`. `BaseRepoTests.cs` itself was **not** modified, and no production code was touched.
 - Verification:
