@@ -1,67 +1,45 @@
-# Audit — Job A: Stage H Plan Review
+# Audit — Job B (Execution Check): Stage H Step 2
 
-**Verdict**: **APPROVED**
+**Reviewed**: `386e0e7` → `be467fc` (`a31cb6e` refactor + `be467fc` act.md) against `plan.md` Step 2 and `actor.md`.
+**Method**: static review only (the sandbox can't restore NuGet packages). The reported "0 errors, 1 warning, 519 passed / 0 failed / 2 skipped" is unverified; re-run `dotnet build` and `dotnet test` locally.
 
-Reviewed Stage H `plan.md` against the repository state and the Stage G sign-off. The plan is authorized for execution, beginning with **Stage H Step 1 only**.
+**Verdict: PASS — no CRITICAL or HIGH findings.** Three MEDIUM/LOW items are non-blocking, but I'd close the coverage gap before Step 3.
 
-## Approval basis
+## Verified correct
+- **Scope:** deleted exactly the plan's set: nine DAL entity services, `Dal/Base/DataServiceBase.cs`, `IEmployeeDataService.cs` and eight test files (`EmployeeDataServiceTests` never existed). Only `ServiceCollectionExtensions.cs`, `Services/GlobalUsings.cs`, one doc comment in `TestDataHelpers.cs` and the `plan.md` header were modified.
+- **API untouched:** the `if (useApi)` branch keeps all 8 entity-service registrations and the Api stubs; `IDataService<T>`, `ApiDataServiceBase<T>` and the eight entity-service interfaces survive (L1/L2).
+- **No dangling references:** a word-boundary search of `*.cs`, `*.cshtml`, `*.md` and `*.json` for all nine deleted names, `IEmployeeDataService` and `DataServiceBase<` finds no code references. The remaining consumers of the eight kept interfaces are the Api DI lines only.
+- **Forced GlobalUsings change is justified:** removing `global using …Dal.Base;` is the minimum needed for the deletion to compile (CS0234). No other GlobalUsings touched; Step 4 still owns the rest.
+- **Count reconciliation:** 550 → 519 is 31, matching the deleted tests (27 `[Fact]` + 2 `[Theory]` × 2 `[InlineData]`); I counted the same method names.
+- **DI:** the six area-service registrations are kept and only the nine DAL entity registrations were removed.
 
-- Stage G is complete and signed off; Stage H is the next unchecked stage.
-- The plan preserves the established workflow: **one step → commit → Job B review → next step**.
-- Step 1 correctly identifies the remaining specialized-repository consumers in the surviving area services:
-  - `AccountDataService` → `IUserRepo`
-  - `ReportsDataService` → `ITransactionRepo`, `IEmployeeRepo`
-- Step 1 explicitly migrates those consumers to `IBaseRepo<T>` **before** any specialized repository deletion.
-- The plan preserves the API branch and does not authorize changes to `src/MobileShop.Api`.
-- The plan explicitly preserves `IDataService<T>`, `ApiDataServiceBase<T>`, and API-facing entity-service contracts still required by API stubs.
-- The plan preserves `BaseRepo<T>` / `IBaseRepo<T>` as the surviving repository abstraction.
-- Database/schema/migration policy, authentication state, Apple ID password handling, and development initialization policy remain unchanged.
-- The plan requires behavior-preserving tests for Account and Reports before proceeding to destructive cleanup.
-- Later deletion steps are gated by production-consumer searches, avoiding speculative deletion.
-- Final validation includes full build/test, production smoke, production non-destructiveness, and development EnsureAdmin smoke.
+## Findings (non-blocking)
 
-## Step 1 authorization
+### MEDIUM — Two behaviours lost their only test
+I compared the deleted test names with the surviving area-service tests. Most behaviours are re-covered (Account, Reports, Transactions record/PDF paths, Products, People details). Two that the surviving services still implement are not:
+1. **Soft-deleted exclusion in the People list counts.** `PeopleDataService.cs:22` and `:43` filter `!t.IsDeleted` on purchased/sold counts. The deleted `Customer…` and `Seller…GetListRows_counts_…_excludes_soft_deleted_async` tests were the only coverage, and `PeopleDataServiceTests` has no `IsDeleted` assertion. (The zero-count case is still covered.)
+2. **`RecordBuyAsync` negative-price rejection** (`TransactionsDataService.cs:148`). The deleted `RecordBuyAsync_rejects_negative_price` was the only test; survivors cover `RecordSellAsync_rejects_negative_price` only.
 
-The Actor was authorized to implement **only Step 1**:
+**Fix (tests only, no source change):** add three tests to the existing survivor files: customer and seller count ignores a soft-deleted transaction, and `RecordBuyAsync` rejects a negative price. Do this as a small correction commit before Step 3, or record it in `act.md` if you deliberately accept the loss.
 
-- migrate `AccountDataService` from `IUserRepo` to `IBaseRepo<User>`;
-- migrate `ReportsDataService` from `ITransactionRepo` / `IEmployeeRepo` to `IBaseRepo<Transaction>` / `IBaseRepo<Employee>`;
-- retarget the corresponding Account/Reports tests;
-- preserve all documented behavior and error semantics;
-- do not delete specialized repositories, obsolete entity services, or tests yet;
-- do not modify `src/MobileShop.Api`;
-- run the Step 1 verification;
-- create the Step 1 implementation commit;
-- stop for **Job B execution review**.
+### MEDIUM — Build reports 1 warning, and it isn't identified
+Stage H Step 1 ended at 0 warnings and this step's report says "0 errors, 1 warning" without naming it. I found no dangling `cref` to a deleted type, so I can't pin it down statically. The actor should run `dotnet build --nologo -v n | grep -i warning` and either fix it or state that it's pre-existing and why, since Step 4's final validation expects a clean build.
 
-## Job B — Stage H Step 1 Execution Review
+### LOW
+- **Stale prose comments** naming deleted types (no compile impact):
+  - `SampleDataSeedTests.cs:127` mentions `TransactionDataService`;
+  - `ProfileModelTests.cs:12` says "calls `UserDataService.ChangePasswordAsync`" (it's `AccountDataService` now);
+  - `PeopleDataService.cs:114` mentions `ProductDataService`.
+  Fix them in Step 4's cleanup.
+- **Minor lost coverage:** the deleted `GetInventoryRows_returns_empty_list_when_no_products` has no `ProductsDataService` counterpart.
 
-**Verdict**: **PASS**
+## Carried from earlier audits (not actioned, none blocking)
+- `ProductDetailsViewModel.Transactions = null!`
+- the unused `protected IBaseRepo<Transaction> Transactions` property in `ProductsDataService`
+- no ordering test for `GetInventoryRowsAsync`
+- the `Phone`-category filter in `CreatePhoneAsync`'s model lookup (still an owner decision)
 
-Reviewed the Step 1 implementation commit `062f644e1c330999da17b0f6855cae2a99ad7bbd`.
-
-### Verification
-
-- The implementation changes exactly the intended Step 1 area services and their Account/Reports tests, plus the actor report.
-- `AccountDataService` no longer depends on `IUserRepo`; it uses `IBaseRepo<User>`.
-- `ReportsDataService` no longer depends on `ITransactionRepo` or `IEmployeeRepo`; it uses generic repository operations.
-- Account credential lookup preserves the previous case-insensitive username behavior.
-- Earliest transaction selection preserves the previous non-deleted filtering and date-only result semantics.
-- Distribution employee selection preserves active filtering, ordering, and person-name data required by the existing calculation.
-- No production files were deleted.
-- `src/MobileShop.Api` was untouched.
-- No specialized repositories, obsolete entity services, or their tests were deleted.
-- The actor's required full verification reports **0 build errors, 0 warnings, 550 passed, 2 skipped, 0 failed**.
-- The targeted Account/Reports verification reports **20 passed, 0 failed**.
-- A production-source search confirms the three specialized repository interfaces remain only in their own repository code/registrations/tests and obsolete entity-service implementations; no surviving area service references them.
-- The actor caught and corrected a date-only regression and preserved the existing missing-employee test before the final verification.
-
-### Reviewer conclusion
-
-Step 1 satisfies its plan-defined done condition and stays within the authorized scope. No blocking defect was found.
-
-**Stage H Step 1 Job B — PASS.**
-
-**Authorized next action: Stage H Step 2 only.**
-
-Do not begin Step 3 or Step 4 until their respective execution/review gates are satisfied.
+## Reviewer checklist
+- [x] Job B; one verdict; only `audit.md` written.
+- [x] `to-do.md` untouched (Stage H isn't finished).
+- [x] No Act-mode suggestion.
