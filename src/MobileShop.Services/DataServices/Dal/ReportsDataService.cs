@@ -3,8 +3,7 @@ namespace MobileShop.Services.DataServices.Dal;
 /// <summary>Provides the reporting operations for the Reports area.</summary>
 public class ReportsDataService(
     IBaseRepo<Transaction> transactions,
-    ITransactionRepo transactionRepo,
-    IEmployeeRepo employeeRepo,
+    IBaseRepo<Employee> employees,
     IOptions<DistributionSettings> distributionSettings,
     ILogger<ReportsDataService> logger)
     : IReportsDataService
@@ -54,18 +53,42 @@ public class ReportsDataService(
     /// <inheritdoc />
     public async Task<DateTime?> GetEarliestTransactionDateAsync()
     {
-        // IBaseRepo<T> has no ordered "first" projection, so the specialized repo query is used here;
-        // it applies the same non-deleted filter and returns a date-only value.
-        var earliest = await transactionRepo.GetEarliestTransactionDateAsync();
+        // Uses the generic ordered "first" projection. The explicit non-deleted filter is required
+        // here: IBaseRepo<T> applies no soft-delete filter of its own, and the specialized
+        // repository query this replaces did filter !IsDeleted.
+        var earliest = await transactions.SelectFirstAsync(
+            transaction => !transaction.IsDeleted,
+            transaction => transaction.Date,
+            transaction => (DateTime?)transaction.Date);
+
+        // Truncate to the date, matching the previous implementation's contract.
         return earliest?.Date;
     }
 
     /// <inheritdoc />
     public async Task<IReadOnlyList<DistributionRow>> GetDistributionRowsAsync(decimal totalProfit)
     {
-        // The calculator requires Employee entities with PersonNavigation loaded (it matches the
-        // required employees by full name), so the repo query that includes the person is used.
-        var employees = await employeeRepo.FindAllActiveAsync();
-        return DistributionCalculator.Calculate(totalProfit, employees, distributionSettings.Value);
+        // The calculator matches the required employees by exact full name, so the projection must
+        // supply the employee id plus the person's first and last name. Ordering by name mirrors
+        // the previous active-employee query.
+        var active = await employees.SelectAllAsync(
+            employee => employee.IsActive,
+            employee => new { employee.Id, employee.PersonNavigation.FirstName, employee.PersonNavigation.LastName });
+
+        var employeeList = active
+            .Select(employee => new Employee
+            {
+                Id = employee.Id,
+                PersonNavigation = new Person
+                {
+                    FirstName = employee.FirstName,
+                    LastName = employee.LastName,
+                },
+            })
+            .OrderBy(employee => employee.PersonNavigation.FirstName)
+            .ThenBy(employee => employee.PersonNavigation.LastName)
+            .ToList();
+
+        return DistributionCalculator.Calculate(totalProfit, employeeList, distributionSettings.Value);
     }
 }

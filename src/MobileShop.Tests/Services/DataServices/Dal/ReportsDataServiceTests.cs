@@ -11,8 +11,7 @@ public class ReportsDataServiceTests : RepoTestBase
     {
         _service = new ReportsDataService(
             new BaseRepo<Transaction>(Context),
-            new TransactionRepo(Context),
-            new EmployeeRepo(Context),
+            new BaseRepo<Employee>(Context),
             Options.Create(new DistributionSettings()),
             NullLogger<ReportsDataService>.Instance);
     }
@@ -207,6 +206,36 @@ public class ReportsDataServiceTests : RepoTestBase
     [Fact]
     public async Task GetDistributionRowsAsync_throws_when_required_employee_missing()
     {
+        AddEmployee("Anis", "Sahabi");
+
+        await Assert.ThrowsAsync<InvalidOperationException>(
+            () => _service.GetDistributionRowsAsync(100m));
+    }
+
+    [Fact]
+    public async Task GetEarliestTransactionDateAsync_ignores_soft_deleted_transactions()
+    {
+        var seller = AddSeller();
+        var customer = AddCustomer();
+        var product = TestDataHelpers.CreateProduct(Context);
+
+        // Soft-deleted row is earlier than every live row; it must not be selected.
+        var deleted = AddTransaction(product, seller.Id, customer.Id, TransactionDirection.Sell, new DateTime(2024, 1, 1), 50m);
+        deleted.IsDeleted = true;
+        Context.SaveChanges();
+
+        AddTransaction(product, seller.Id, customer.Id, TransactionDirection.Sell, new DateTime(2024, 5, 20), 50m);
+
+        var earliest = await _service.GetEarliestTransactionDateAsync();
+
+        Assert.NotNull(earliest);
+        Assert.Equal(new DateTime(2024, 5, 20), earliest!.Value);
+    }
+
+    [Fact]
+    public async Task GetDistributionRowsAsync_ignores_inactive_required_employees()
+    {
+        AddEmployee("Mikaeeil", "Jorjany", isActive: false);
         AddEmployee("Anis", "Sahabi");
 
         await Assert.ThrowsAsync<InvalidOperationException>(

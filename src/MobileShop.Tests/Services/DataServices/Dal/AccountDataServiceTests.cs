@@ -8,7 +8,7 @@ public class AccountDataServiceTests : RepoTestBase
     public AccountDataServiceTests()
     {
         _service = new AccountDataService(
-            new UserRepo(Context),
+            new BaseRepo<User>(Context),
             _hasher,
             NullLogger<AccountDataService>.Instance);
     }
@@ -99,5 +99,17 @@ public class AccountDataServiceTests : RepoTestBase
     public async Task ChangePasswordAsync_returns_false_for_unknown_user()
     {
         Assert.False(await _service.ChangePasswordAsync("nobody", "New@456"));
+    }
+
+    [Fact]
+    public async Task Credential_lookups_are_case_insensitive_in_both_directions()
+    {
+        AddUser("Admin", "Admin@123");
+
+        // Stored as "Admin" but reached with different casing, as the previous repository lookup allowed.
+        Assert.Equal("Admin", await _service.GetAdminUsernameAsync());
+        Assert.True(await _service.ValidateCredentialsAsync("admin", "Admin@123"));
+        Assert.True(await _service.ChangePasswordAsync("ADMIN", "New@456"));
+        Assert.True(await _service.ValidateCredentialsAsync("aDmIn", "New@456"));
     }
 }

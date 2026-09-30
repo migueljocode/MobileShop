@@ -55,7 +55,7 @@ L8 **GlobalUsings are cleaned by evidence, not preference.** Remove only imports
 - **MEDIUM risk:** GlobalUsings cleanup can create compile-only failures if an import is removed prematurely; perform it after the code deletions and use the build as the final proof.
 - **HIGH confidence:** the existing area services already demonstrate the intended `IBaseRepo<T>` pattern, and current searches show the remaining specialized production consumers are concentrated in Account, Reports, and the obsolete entity services.
 
-## [ ] Step 1 — Remove specialized-repo dependencies from surviving area services
+## ~~[x] Step 1 — Remove specialized-repo dependencies from surviving area services~~
 
 - **Files:** inspect/modify `src/MobileShop.Services/DataServices/Dal/AccountDataService.cs`, `src/MobileShop.Services/DataServices/Dal/ReportsDataService.cs`, `src/MobileShop.Tests/Services/DataServices/Dal/AccountDataServiceTests.cs`, `src/MobileShop.Tests/Services/DataServices/Dal/ReportsDataServiceTests.cs`; do not touch `src/MobileShop.Api`.
 - **Symbols:** `AccountDataService`, `EnsureAdminUser()`, `GetAdminUsernameAsync()`, `ValidateCredentialsAsync()`, `ChangePasswordAsync()`, `ReportsDataService.GetEarliestTransactionDateAsync()`, `GetDistributionRowsAsync()`.
