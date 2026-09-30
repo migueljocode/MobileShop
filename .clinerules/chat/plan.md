@@ -79,7 +79,7 @@ Task<bool> ChangePasswordAsync(string username, string plainNewPassword);
 - Verify: build + full suite.
 - Risk: LOW. Confidence: HIGH.
 
-## [ ] Step 3 — Stage G validation
+## ~~[x] Step 3 — Stage G validation~~
 - Chain 1: build + full suite.
 - Chain 2: Production host; **200** `/Account/Login`, `/Account/Profile` if reachable; regression Home/Products/People/Transactions/Reports.
 - Optional Development smoke: EnsureAdmin still runs without throw after seed.

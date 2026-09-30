@@ -1,21 +1,22 @@
-# Act Report — Stage G Step 2
+# Act Report — Stage G Step 3 (Stage G validation)
 
-- Commit: `c8367c0` — refactor(account): migrate Login, Profile, and dev EnsureAdmin to IAccountDataService
-- Verification:
-  - `dotnet build src/MobileShop.slnx --nologo` -> **Build succeeded, 0 errors, 0 warnings**. The `CS9124` warning in `ProductsDataService` did **not** appear on this incremental build (it is a pre-existing baseline warning that surfaces on full rebuilds; untouched by this stage either way).
-  - `dotnet test src/MobileShop.slnx --nologo --no-build` -> **Failed: 0, Passed: 547, Skipped: 2, Total: 549** (EXIT=0). Delta vs Step 1 is **+1** — the single new page test added below; no existing test was removed.
-  - Targeted first: `--filter FullyQualifiedName~Account` -> **15 passed, 0 failed**.
-  - Done-when check: Login and Profile inject only `IAccountDataService dataService`; a word-boundary grep for `IUserDataService|FindByUsernameAsync|User` over both page models returns **no match** — no `User` entity reaches a page (L1). `git diff --stat` on `Pages/Account/*.cshtml` **empty** (no view edits).
-- What was implemented (plan Step 2 scope only):
-  - **Login** — ctor now `(IAccountDataService dataService)`; the private `_userDataService` field was removed. `OnPostAsync` calls `dataService.ValidateCredentialsAsync(Username, Password)`. All user-visible behaviour preserved exactly: `"Invalid username or password."` on failure, `"Credentials validated. Authentication is not enabled in this stage."` on success, `ModelState.Clear()` after, `ReturnUrl` handling untouched. **No auth middleware/cookie/JWT was added (L4).**
-  - **Profile** — ctor now `(IAccountDataService dataService)`. `OnGetAsync` no longer calls `FindByUsernameAsync("admin")` and no longer receives a `User`; it sets `Username = await dataService.GetAdminUsernameAsync()`. `OnPostAsync` resolves `var adminUsername = await dataService.GetAdminUsernameAsync() ?? "admin"` and uses it for both `ValidateCredentialsAsync` and `ChangePasswordAsync`, so the previously hard-coded `"admin"` literal is now sourced from the service (plan instruction). Data annotations, the three ModelState messages (`"Invalid current password."`, `"New passwords do not match."`, `"Failed to change password."`), the success message `"Password changed successfully."`, and the post-success field clearing are all unchanged.
-  - **Dev startup** — `ConfigureApp` now resolves `GetRequiredService<IAccountDataService>().EnsureAdminUser()` instead of `IUserDataService`. The `IsDevelopment()` guard and the `InitializeForDevelopment` policy are untouched (L8).
-  - **Logout** — not touched, as the plan required.
-  - **L3 respected** — `IUserDataService` -> `UserDataService` (Dal) and `ApiUserDataService` (Api) registrations **both still present**.
-  - **Page tests** — `ProfileModelTests` retargeted from `Mock<IUserDataService>` to `Mock<IAccountDataService>`; the `FindByUsernameAsync` setups (which returned a `User` entity) were replaced with a `GetAdminUsernameAsync` setup. All five original tests and their assertions are preserved. **Added one test** — `OnGetAsync_leaves_username_null_when_no_admin_exists` — covering the new null-username path that the previous `FindByUsernameAsync` null-guard handled.
-- Limitations: None.
-- Friction noted: the full suite duration is now **~62 s** (real Argon2 hashing from Step 1's tests plus these page tests), comfortably handled by the detached-launch + poll pattern.
-- Problems: two self-inflicted issues, both caught and fixed before verification passed:
-  1. The Profile success message was briefly written as `"Password changed successfully"` **without the trailing period**, which would have changed a user-visible string. Caught on review of my own edit and restored to the exact original before the first build.
-  2. The first build failed with `CS0103: 'AccountDataService' does not exist in the current context` at the Profile fallback. Root cause: `MobileShop.Web`'s `GlobalUsings.cs` intentionally imports `Services.DataServices.Interfaces` but **not** `Services.DataServices.Dal` — pages are meant to depend on interfaces only. Rather than add a concrete-type using to a page (which would weaken the layering the project enforces), the fallback now uses the `"admin"` literal with an explanatory comment. Rebuilt clean.
+- Commit: (filled in after commit)
+- Verification — Chain 1 (build + full suite, one chained call):
+  - `dotnet build src/MobileShop.slnx --nologo && dotnet test src/MobileShop.slnx --nologo --no-build` -> **Build succeeded, 0 errors, 1 warning**; **Failed: 0, Passed: 547, Skipped: 2, Total: 549** (EXIT=0, 56 s).
+  - The warning is the **pre-existing** `CS9124` in `src/MobileShop.Services/DataServices/Dal/ProductsDataService.cs(26,62)`; it reappeared on this full rebuild (Step 2's incremental build did not show it). Untouched by this stage.
+- Verification — Chain 2 (Production host + smoke):
+  - Host started with `ASPNETCORE_ENVIRONMENT=Production ... --urls http://localhost:5199`; log confirms `Hosting environment: Production`. Shut down afterwards (port released, probe refused, curl exit 7).
+  - **Target routes 200**: `/Account/Login`, `/Account/Profile`.
+  - **Regression routes 200 (5/5)**: `/`, `/Products`, `/People/Customers`, `/Transactions`, `/Reports/ProfitLoss`.
+  - **Data-path proof**: `/Account/Profile` renders the string `admin` in the response (sourced from `GetAdminUsernameAsync`, i.e. no `User` entity on the page) and still exposes all three bind fields `CurrentPassword`, `NewPassword`, `ConfirmPassword`. `/Account/Login` still exposes `Username` and `Password`. Both views therefore still bind to the unchanged `.cshtml` inputs.
+  - **Non-destructiveness (Production)**: log has **0** matches for `InitializeForDevelopment|EnsureDeleted|EnsureCreated`, **0** for `seed`, **0** for `ERR |FTL |Exception`. Fingerprint `Products|Phones|Transactions|Employees|Users` = `17|7|26|6|1` before **and** after. `Users` was added to the fingerprint this stage because the Account area now depends on that table.
+  - **DoD spot-checks**: both Account page models declare `(IAccountDataService dataService)` only; entity `IUserDataService` registrations still present in **both** branches (L3); no authentication middleware, cookie, or JWT anywhere (L4); `Pages/Account/*.cshtml` untouched.
+- Verification — optional Development smoke (plan Step 3, "EnsureAdmin still runs without throw after seed"):
+  - `DatabaseInitializer.InitializeForDevelopment` intentionally **deletes and recreates** the dev database, and `SolutionPaths.DatabaseFile` resolves to the repo-root `MobileShop.db` with no override. To avoid destroying the seeded dev data, I copied `MobileShop.db` to `/tmp/MobileShop.db.backup` first and verified the backup fingerprint.
+  - Ran `ASPNETCORE_ENVIRONMENT=Development ... --urls http://localhost:5201`: log shows the seed completing, then `AccountDataService | Ensured the default admin account 'admin'`, then `Application started` with **no throw** — the Step 2 startup migration works end-to-end through the new area service. `/Account/Login` and `/Account/Profile` both **200**; `0` matches for `ERR |FTL |Unhandled`.
+  - **Database restored afterwards from the backup and verified byte-identical** (`cmp` = identical, fingerprint `17|7|26|6|1`). Development host shut down; port 5201 released.
+- Files changed: **none in `src/`** — this step only ticks plan.md and writes act.md. `git status` is clean; the SQLite file is not a tracked source change.
+- Limitations: None. Stage G Global Definition of Done is satisfied. Stage G was **not** ticked in `to-do.md` — per the rules only the reviewer ticks stages, after this sign-off.
+- Friction noted: build (~21 s) and the full suite (~56 s, inflated by real Argon2 hashing from Stage G Step 1) both exceed the ~30 s command window, so Chain 1 used the detached-launch + poll pattern. A raw `curl -X POST /Account/Login` returned **400 with an empty body**; on inspection this is ASP.NET Core's antiforgery rejection for a POST without a valid token, **not** an application failure — the form fields are present and the POST logic is covered by the page tests. No antiforgery middleware was added or removed.
+- Problems: None.
 - Status: COMPLETE
