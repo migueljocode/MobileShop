@@ -1,10 +1,7 @@
 namespace MobileShop.Web.Pages.Transactions;
 
 public class BuyModel(
-    ITransactionDataService transactionDataService,
-    ISellerDataService sellerDataService,
-    IPhoneDataService phoneDataService,
-    IAppleIdDataService appleIdDataService) : PageModel
+    ITransactionsDataService dataService) : PageModel
 {
     [BindProperty] public BuyInputModel Input { get; set; } = new();
     public IReadOnlyList<PartyOptionViewModel> Sellers { get; private set; } = [];
@@ -18,9 +15,10 @@ public class BuyModel(
     {
         await LoadSelectionsAsync();
         if (!ModelState.IsValid) return Page();
-        if (!await transactionDataService.RecordBuyAsync(Input.ProductId, Input.SellerId, Input.Price, Input.Date))
+        var result = await dataService.RecordBuyAsync(Input);
+        if (!result.Succeeded)
         {
-            ModelState.AddModelError(string.Empty, "The buy could not be recorded. Check the product and price.");
+            ModelState.AddModelError(string.Empty, result.Message!);
             return Page();
         }
         Message = "Buy recorded successfully.";
@@ -31,11 +29,8 @@ public class BuyModel(
 
     private async Task<IActionResult> LoadSelectionsAsync()
     {
-        Sellers = await sellerDataService.GetPartyOptionsAsync();
-        Products = (await phoneDataService.GetSelectableProductsAsync(TransactionDirection.Buy))
-            .Concat(await appleIdDataService.GetSelectableProductsAsync(TransactionDirection.Buy))
-            .OrderBy(product => product.Name)
-            .ToList();
+        Sellers = await dataService.GetSellersAsync();
+        Products = await dataService.GetSelectableProductsAsync(TransactionDirection.Buy);
         return Page();
     }
 

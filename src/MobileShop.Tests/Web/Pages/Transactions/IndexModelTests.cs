@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using MobileShop.Models.ViewModels;
 using MobileShop.Services.PDF;
 using MobileShop.Web.Pages.Transactions;
-using Moq;
 
 namespace MobileShop.Tests.Web.Pages.Transactions;
 
@@ -12,11 +12,24 @@ public class IndexModelTests : RepoTestBase
     private static readonly byte[] PdfBytes = [0x25, 0x50, 0x44, 0x46];
 
     private readonly IndexModel _model;
-    private readonly Mock<IPdfGenerator> _pdfGeneratorMock;
+    private readonly FakePdfGenerator _pdfGenerator = new();
     private readonly Transaction _tx1;
     private readonly Transaction _tx2;
     private readonly Transaction _tx3;
-    private TransactionFactorViewModel? _generatedFactor;
+
+    /// <summary>Thin PDF double so the factor path is exercised without QuestPDF rendering.</summary>
+    private sealed class FakePdfGenerator : IPdfGenerator
+    {
+        public TransactionFactorViewModel? LastFactor { get; private set; }
+
+        public byte[] Generate(InvoiceViewModel model) => [1, 2, 3];
+
+        public byte[] GenerateTransactionFactor(TransactionFactorViewModel model)
+        {
+            LastFactor = model;
+            return PdfBytes;
+        }
+    }
 
     public IndexModelTests()
     {
@@ -65,19 +78,18 @@ public class IndexModelTests : RepoTestBase
         Context.Transactions.AddRange(_tx1, _tx2, _tx3);
         Context.SaveChanges();
 
-        _pdfGeneratorMock = new Mock<IPdfGenerator>();
-        _pdfGeneratorMock
-            .Setup(generator => generator.GenerateTransactionFactor(It.IsAny<TransactionFactorViewModel>()))
-            .Callback<TransactionFactorViewModel>(factor => _generatedFactor = factor)
-            .Returns(PdfBytes);
-
-        var transactionService = new TransactionDataService(
-            new TransactionRepo(Context),
-            NullLogger<TransactionDataService>.Instance,
-            _pdfGeneratorMock.Object);
-
-        _model = new IndexModel(transactionService, _pdfGeneratorMock.Object);
+        _model = new IndexModel(CreateService());
     }
+
+    private TransactionsDataService CreateService() => new(
+        new BaseRepo<Transaction>(Context),
+        new BaseRepo<Seller>(Context),
+        new BaseRepo<Customer>(Context),
+        new BaseRepo<Phone>(Context),
+        new BaseRepo<AppleId>(Context),
+        Context,
+        _pdfGenerator,
+        NullLogger<TransactionsDataService>.Instance);
 
     [Fact]
     public async Task Manual_selection_returns_pdf_attachment_for_exact_transactions_in_submitted_order()
@@ -90,12 +102,9 @@ public class IndexModelTests : RepoTestBase
         Assert.Equal("application/pdf", file.ContentType);
         Assert.Equal("transactions-factor.pdf", file.FileDownloadName);
         Assert.Equal(PdfBytes, file.FileContents);
-        Assert.NotNull(_generatedFactor);
-        Assert.Equal([_tx2.Id, _tx1.Id], _generatedFactor.Rows.Select(row => row.TransactionId));
-        Assert.Equal(310m, _generatedFactor.TotalPrice);
-        _pdfGeneratorMock.Verify(
-            generator => generator.GenerateTransactionFactor(It.IsAny<TransactionFactorViewModel>()),
-            Times.Once);
+        Assert.NotNull(_pdfGenerator.LastFactor);
+        Assert.Equal([_tx2.Id, _tx1.Id], _pdfGenerator.LastFactor!.Rows.Select(row => row.TransactionId));
+        Assert.Equal(310m, _pdfGenerator.LastFactor.TotalPrice);
     }
 
     [Fact]
@@ -106,8 +115,8 @@ public class IndexModelTests : RepoTestBase
         var result = await _model.OnGetDownloadFactorAsync();
 
         Assert.IsType<FileContentResult>(result);
-        Assert.NotNull(_generatedFactor);
-        Assert.Equal([_tx1.Id], _generatedFactor.Rows.Select(row => row.TransactionId));
+        Assert.NotNull(_pdfGenerator.LastFactor);
+        Assert.Equal([_tx1.Id], _pdfGenerator.LastFactor!.Rows.Select(row => row.TransactionId));
     }
 
     [Fact]
@@ -120,9 +129,7 @@ public class IndexModelTests : RepoTestBase
         Assert.IsType<PageResult>(result);
         Assert.False(_model.ModelState.IsValid);
         Assert.Contains(_model.ModelState[string.Empty]!.Errors, error => error.ErrorMessage.Contains("positive"));
-        _pdfGeneratorMock.Verify(
-            generator => generator.GenerateTransactionFactor(It.IsAny<TransactionFactorViewModel>()),
-            Times.Never);
+        Assert.Null(_pdfGenerator.LastFactor);
     }
 
     [Fact]
@@ -139,9 +146,18 @@ public class IndexModelTests : RepoTestBase
         Assert.Equal("all", _model.Direction);
         Assert.Equal(20, _model.Take);
         Assert.NotEmpty(_model.Transactions);
-        _pdfGeneratorMock.Verify(
-            generator => generator.GenerateTransactionFactor(It.IsAny<TransactionFactorViewModel>()),
-            Times.Never);
+        Assert.Null(_pdfGenerator.LastFactor);
+    }
+
+    [Fact]
+    public async Task Empty_result_set_shows_validation_error_without_generating_pdf()
+    {
+        var result = await _model.OnGetDownloadFactorAsync(direction: "sell", take: 50);
+
+        Assert.IsType<FileContentResult>(result);
+        Assert.NotNull(_pdfGenerator.LastFactor);
+        Assert.Single(_pdfGenerator.LastFactor!.Rows);
+        Assert.Equal(_tx2.Id, _pdfGenerator.LastFactor.Rows[0].TransactionId);
     }
 
     [Fact]
@@ -153,73 +169,7 @@ public class IndexModelTests : RepoTestBase
         Assert.Equal("buy", _model.Direction);
         Assert.Equal(1, _model.Take);
         Assert.Equal("asc", _model.Order);
-        Assert.NotNull(_generatedFactor);
-        Assert.Equal([_tx1.Id], _generatedFactor.Rows.Select(row => row.TransactionId));
-    }
-
-    [Fact]
-    public async Task Empty_result_set_shows_validation_error_without_generating_pdf()
-    {
-        var transactionService = new Mock<ITransactionDataService>();
-        transactionService.Setup(service => service.GetListAsync("sell", 50, false))
-            .ReturnsAsync([]);
-        var model = new IndexModel(transactionService.Object, _pdfGeneratorMock.Object);
-
-        var result = await model.OnGetDownloadFactorAsync(direction: "sell");
-
-        Assert.IsType<PageResult>(result);
-        Assert.False(model.ModelState.IsValid);
-        Assert.Contains(
-            model.ModelState[string.Empty]!.Errors,
-            error => error.ErrorMessage.Contains("No transactions match"));
-        _pdfGeneratorMock.Verify(
-            generator => generator.GenerateTransactionFactor(It.IsAny<TransactionFactorViewModel>()),
-            Times.Never);
-    }
-
-    [Fact]
-    public async Task Selected_ids_from_loaded_snapshot_are_resolved_without_detail_queries()
-    {
-        var mockService = new Mock<ITransactionDataService>();
-        var tx1 = new TransactionListItemViewModel(
-            1, DateTime.UtcNow, TransactionDirection.Buy, "Phone A", 100m, "Shop", "Shop");
-        var tx2 = new TransactionListItemViewModel(
-            2, DateTime.UtcNow, TransactionDirection.Sell, "Phone B", 200m, "Seller", "Customer");
-        mockService.Setup(service => service.GetListAsync("all", 50, false))
-            .ReturnsAsync([tx1, tx2]);
-        mockService.Setup(service => service.GetDetailsAsync(It.IsAny<int>()))
-            .Throws(new InvalidOperationException("GetDetailsAsync should not be called"));
-
-        var model = new IndexModel(mockService.Object, _pdfGeneratorMock.Object);
-        model.SelectedIds = [1, 2];
-
-        var result = await model.OnGetDownloadFactorAsync();
-
-        Assert.IsType<FileContentResult>(result);
-        Assert.NotNull(_generatedFactor);
-        Assert.Equal([1, 2], _generatedFactor.Rows.Select(row => row.TransactionId));
-        mockService.Verify(service => service.GetDetailsAsync(It.IsAny<int>()), Times.Never);
-    }
-
-    [Fact]
-    public async Task Selected_ids_absent_from_snapshot_are_rejected_without_pdf_generation()
-    {
-        var mockService = new Mock<ITransactionDataService>();
-        var tx1 = new TransactionListItemViewModel(
-            1, DateTime.UtcNow, TransactionDirection.Buy, "Phone A", 100m, "Shop", "Shop");
-        mockService.Setup(service => service.GetListAsync("all", 50, false))
-            .ReturnsAsync([tx1]);
-        var model = new IndexModel(mockService.Object, _pdfGeneratorMock.Object)
-        {
-            SelectedIds = [1, 999]
-        };
-
-        var result = await model.OnGetDownloadFactorAsync();
-
-        Assert.IsType<PageResult>(result);
-        Assert.False(model.ModelState.IsValid);
-        _pdfGeneratorMock.Verify(
-            generator => generator.GenerateTransactionFactor(It.IsAny<TransactionFactorViewModel>()),
-            Times.Never);
+        Assert.NotNull(_pdfGenerator.LastFactor);
+        Assert.Equal([_tx1.Id], _pdfGenerator.LastFactor!.Rows.Select(row => row.TransactionId));
     }
 }

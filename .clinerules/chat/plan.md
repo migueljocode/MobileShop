@@ -84,11 +84,11 @@ Change `GetTransactionFactorPdfAsync` to `Task<byte[]?>` (L12).
 - Done when: interface + Api + Dal green; **no page changes**.
 - Risk: HIGH. Confidence: MEDIUM.
 
-## [ ] Step 2 — Invoice follow-up (optional)
+## ~~[x] Step 2 — Invoice follow-up (optional)~~ — SKIPPED: invoice Includes complete in Step 1; no work invented
 Only if Step 1 deferred invoice Includes. If invoice + list factor already done, **skip** and record reason in `act.md` — invent no extra work.
 - Risk: LOW. Confidence: HIGH.
 
-## [ ] Step 3 — Migrate four Transactions pages + tests
+## ~~[x] Step 3 — Migrate four Transactions pages + tests~~
 - Files: all four `Pages/Transactions/*.cshtml.cs`; `Tests/Web/Pages/Transactions/*`.
 - Change:
   - Each ctor: `(ITransactionsDataService dataService)` only.

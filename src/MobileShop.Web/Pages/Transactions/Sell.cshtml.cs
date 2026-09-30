@@ -1,10 +1,7 @@
 namespace MobileShop.Web.Pages.Transactions;
 
 public class SellModel(
-    ITransactionDataService transactionDataService,
-    ICustomerDataService customerDataService,
-    IPhoneDataService phoneDataService,
-    IAppleIdDataService appleIdDataService) : PageModel
+    ITransactionsDataService dataService) : PageModel
 {
     [BindProperty] public SellInputModel Input { get; set; } = new();
     public IReadOnlyList<PartyOptionViewModel> Customers { get; private set; } = [];
@@ -18,9 +15,10 @@ public class SellModel(
     {
         await LoadSelectionsAsync();
         if (!ModelState.IsValid) return Page();
-        if (!await transactionDataService.RecordSellAsync(Input.ProductId, Input.CustomerId, Input.Price, Input.Date))
+        var result = await dataService.RecordSellAsync(Input);
+        if (!result.Succeeded)
         {
-            ModelState.AddModelError(string.Empty, "The sale could not be recorded. Check the product and price.");
+            ModelState.AddModelError(string.Empty, result.Message!);
             return Page();
         }
         Message = "Sale recorded successfully.";
@@ -31,11 +29,8 @@ public class SellModel(
 
     private async Task<IActionResult> LoadSelectionsAsync()
     {
-        Customers = await customerDataService.GetPartyOptionsAsync();
-        Products = (await phoneDataService.GetSelectableProductsAsync(TransactionDirection.Sell))
-            .Concat(await appleIdDataService.GetSelectableProductsAsync(TransactionDirection.Sell))
-            .OrderBy(product => product.Name)
-            .ToList();
+        Customers = await dataService.GetCustomersAsync();
+        Products = await dataService.GetSelectableProductsAsync(TransactionDirection.Sell);
         return Page();
     }
 
