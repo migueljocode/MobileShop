@@ -1,18 +1,30 @@
-# Act Report — Stage H Step 2 correction, second pass (Job B MEDIUM: vacuous seller test)
+# Act Report — Stage H Step 3 (delete specialized repositories, interfaces, and their tests)
 
-- Context: Job B reviewed the first correction (`7f2672e`) and returned **PASS — Step 2 is closed**, with one MEDIUM test defect it asked to be fixed. This is that fix. **No Step 3 work was performed.**
-- Commit: `5601a87` — test(people): make seller soft-delete count test non-vacuous
+- Commit: `e3a6622` — refactor(dal): delete specialized repositories, interfaces, and their tests
 - Verification:
-  - `dotnet build src/MobileShop.slnx --nologo && dotnet test src/MobileShop.slnx --nologo --no-build` -> **Build succeeded, 0 errors, 0 warnings; Failed: 0, Passed: 522, Skipped: 2, Total: 524** (EXIT=0). Count is unchanged from the previous pass, as expected for a fix rather than new tests.
-  - Scope: single file, `PeopleDataServiceTests.cs`. `git diff --stat` over `src/MobileShop.Services`, `src/MobileShop.Web`, `src/MobileShop.Dal`, `src/MobileShop.Api` is **empty** — **tests-only**.
-- MEDIUM defect confirmed and fixed: the reviewer was right. In my previous version both Buys were seeded on `shopSeller.Id`, but `SoldCount` is read from `seller.Transactions` for the seller under test, so Sara Karimi had **no** transactions and `Assert.Equal(0, row.SoldCount)` passed no matter how soft-deletes were handled. Fixed by seeding the live Buy and the soft-deleted Buy with `seller.Id` and asserting **`SoldCount == 1`** — a value that is only reachable when the soft-deleted row is genuinely excluded.
-- LOW clutter fixed: removed the unneeded `shopCustomer` seed and its `Assert.NotNull(shopCustomer)` "sanity" assertion from the customer test.
-- I also mutation-tested **both** soft-delete tests this time — my earlier check only removed the customer predicate (line 22), which is exactly why the seller defect slipped through:
-  - Removing `&& !t.IsDeleted` from the **seller** predicate (line 43): suite still passed. Expected, because `ModelBuilderExtensions` applies a global `HasQueryFilter(!IsDeleted)` to every `BaseEntity`, so EF already excludes soft-deleted rows and the explicit predicate is currently redundant.
-  - Decisive mutation: flipped the test helper's `transaction.IsDeleted = true` to `false`, simulating a row that is actually live. **Both** soft-delete tests then **failed** (`Failed: 2, Passed: 12`). This proves the tests are genuinely discriminating for the user-visible behaviour rather than vacuously true.
-  - All mutations reverted and verified: `MUTATION` string absent, `transaction.IsDeleted = true` restored, and `git diff --stat` on `PeopleDataService.cs` is **empty** (byte-identical to HEAD).
-- Reviewer backlog items **deliberately not actioned here**: they belong to Step 4 (GlobalUsings cleanup and final validation), specifically the unused `protected IBaseRepo<Transaction> Transactions` property in `ProductsDataService.cs:26` that causes CS9124, the three stale comments naming deleted types, `ProductDetailsViewModel.Transactions = null!`, the missing `GetInventoryRowsAsync` ordering test, the minor empty-inventory test, and the `CreatePhoneAsync` category-filter owner decision. I did not touch `ProductsDataService`, since doing so would exceed this fix's scope.
-- Limitations: None.
-- Friction noted: build (~21 s) and the full suite (~47 s) exceed the ~30 s command window, so the chain used the detached-launch + poll pattern. Also worth noting: this incremental build reported **0 warnings**, while the previous full build reported the pre-existing CS9124. The warning is emitted only when the affected project is actually recompiled; it is unchanged on disk and remains Step 4's item #1.
-- Problems: none outstanding. The single defect (vacuous seller test) was introduced by me in the previous correction and is now genuinely fixed and proven by mutation.
+  - Required chain: `dotnet build src/MobileShop.slnx --nologo && dotnet test src/MobileShop.slnx --nologo --no-build` -> **Build succeeded, 0 errors, 1 warning; Failed: 0, Passed: 214, Skipped: 2, Total: 216** (EXIT=0, 44 s).
+  - **Warning (reported honestly, as instructed):** exactly **1** warning, identified as **`ProductsDataService.cs(26,62): warning CS9124`** — the pre-existing one that first appeared at Stage E. It is **not** caused by this step and that file was not modified. I did **not** fix it, per the explicit instruction not to touch the CS9124 backlog item (it remains Step 4's item #1).
+  - Dead-reference search after deletion: word-boundary grep for all 15 specialized repo types across `src` (`.cs`/`.cshtml`) -> **NONE**; grep for `Repos.Interfaces` -> **NONE**.
+  - `src/MobileShop.Dal/Repos/` now contains **only** `Base/BaseRepo.cs` and `Base/IBaseRepo.cs`.
+  - `git diff --cached --stat -- src/MobileShop.Api` is **empty** (API untouched).
+  - `services.AddScoped(typeof(IBaseRepo<>), typeof(BaseRepo<>));` is still registered at line 67.
+  - `git diff --diff-filter=D --name-only` lists **only** the 44 planned deletions (15 impls + 15 interfaces + 14 test files).
+- Consumer proof (re-run myself, exactly as instructed):
+  - Searched `\b(I)?(User|Customer|Seller|Product|Transaction|AppleId|Phone|SecondHand|Guarantee|Manufacturer|Model|Category|Color|Employee|Person)Repo\b` over `src` excluding `bin/obj` and `Dal/Repos/`.
+  - Result: **15 hits in `ServiceCollectionExtensions.cs`** (the DI registrations) and **14 repo test files** under `src/MobileShop.Tests/Dal/Repos/` (2 hits each). `EmployeeRepo` had no test file, as the reviewer stated.
+  - **No surviving production consumer** — no Web page, area service, initialization code, or test helper referenced any of them. Every repo therefore qualified for deletion.
+- What was deleted (44 files):
+  - **15 implementations** in `src/MobileShop.Dal/Repos/`: `AppleIdRepo`, `CategoryRepo`, `ColorRepo`, `CustomerRepo`, `EmployeeRepo`, `GuaranteeRepo`, `ManufacturerRepo`, `ModelRepo`, `PersonRepo`, `PhoneRepo`, `ProductRepo`, `SecondHandRepo`, `SellerRepo`, `TransactionRepo`, `UserRepo`.
+  - **The whole `src/MobileShop.Dal/Repos/Interfaces/` folder** (15 `I*Repo.cs` files).
+  - **14 test files** in `src/MobileShop.Tests/Dal/Repos/`. `RepoTestBase.cs`, `BaseRepoTests.cs`, `TestDataHelpers.cs` and `Initialization/` were all kept.
+- What was modified (5 files):
+  - **`ServiceCollectionExtensions.cs`** — removed the 15 specialized `AddScoped<I…Repo, …Repo>()` lines from `AddMobileShopRepository()`, keeping the generic registration; updated the XML summary so it no longer says remainders are removed in Stage H.
+  - **Four `GlobalUsings.cs`** (`Dal`, `Web`, `Tests`, `Services`) — removed the single `global using MobileShop.Dal.Repos.Interfaces;` line from each. These were the **expected forced break** (the namespace no longer exists, so the build would fail with CS0234). **Only those four lines were removed**; `global using MobileShop.Dal.Repos;` was deliberately **kept** in `Dal` and `Tests`, because `Repos.Base` still exists.
+- Test-count reconciliation (this is where the count was not obvious):
+  - I counted **54** `[Fact]` and **0** `[Theory]` in the 14 deleted test files before deleting, but the drop was far larger: **522 -> 214 = 308**.
+  - The extra tests come from **inheritance**: 10 of the 14 deleted classes derive from `BaseRepoTests<TEntity, TRepo>`, which contributes **26** `[Fact]`s each; the other 4 (`Category`, `Color`, `Manufacturer`, `Model`) derive only from `RepoTestBase`. So 10 x 26 = 260 inherited + 54 declared = 314, which over-predicted by 6.
+  - Rather than leave that discrepancy unexplained, I **measured it**: I stashed my work, ran the suite at `HEAD` with normal verbosity, and counted the actually-executing `Dal.Repos.*` tests: **308** passed (AppleId 30, Customer 28, Product 29, Transaction 31, User 36, and 26 each for Guarantee/Person/Phone/SecondHand/Seller, 6 each for Category/Color/Manufacturer/Model). That matches 522 - 308 = 214 **exactly**. The 6-test gap in my static model came from `[Fact]`s that are declared but shadowed/overridden, which only an actual run reveals. All work was then restored via `git stash pop` and re-staged.
+- Limitations: None. `IBaseRepo<T>`/`BaseRepo<T>` survive untouched, so no surviving code changed behavior; this was pure removal plus the required using fix.
+- Friction noted: build (~21 s) and the full suite (~44 s) exceed the ~30 s command window, so the chain used the detached-launch + poll pattern. The stash/baseline-count detour cost an extra full build+test cycle; it was worth it because a 308-test drop explained only by "inherited tests" would otherwise have been an unverified story.
+- Problems: none. The predicted namespace break occurred exactly where the prompt anticipated (the four `Repos.Interfaces` using lines) and nowhere else — no ARCHITECTURAL BLOCKER conditions were met.
 - Status: COMPLETE
