@@ -1,6 +1,6 @@
 # Act Report — Stage G Step 2
 
-- Commit: (filled in after commit)
+- Commit: `c8367c0` — refactor(account): migrate Login, Profile, and dev EnsureAdmin to IAccountDataService
 - Verification:
   - `dotnet build src/MobileShop.slnx --nologo` -> **Build succeeded, 0 errors, 0 warnings**. The `CS9124` warning in `ProductsDataService` did **not** appear on this incremental build (it is a pre-existing baseline warning that surfaces on full rebuilds; untouched by this stage either way).
   - `dotnet test src/MobileShop.slnx --nologo --no-build` -> **Failed: 0, Passed: 547, Skipped: 2, Total: 549** (EXIT=0). Delta vs Step 1 is **+1** — the single new page test added below; no existing test was removed.
