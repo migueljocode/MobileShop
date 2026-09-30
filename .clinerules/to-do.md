@@ -3,6 +3,6 @@
 - [x] ~~Stage C — Products: ProductsDataService + product pages~~
 - [x] ~~Stage D — People: PeopleDataService + customer/seller pages~~
 - [x] ~~Stage E — Transactions: TransactionsDataService + transaction/invoice/PDF~~
-- [ ] Stage F — Reports: ReportsDataService + profit/loss
+- [x] ~~Stage F — Reports: ReportsDataService + profit/loss~~
 - [ ] Stage G — Account: AccountDataService + login/profile
 - [ ] Stage H — Cleanup: delete entity services/repos/tests, GlobalUsings, final validation
