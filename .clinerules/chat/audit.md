@@ -1,7 +1,13 @@
-# Audit — Job A (Plan Review): Stage F — Reports
+# Audit — Job B (Execution Check): Stage F Step 1
 
-**Verdict**: **APPROVED**
+**Verdict**: **PASS**
 
-Plan matches the area-service pattern. Dal DI gap for `IReportsDataService` is real and correctly required in Step 1. L2 (single `dataService`, no page `IOptions`/entity services), L5 (date UI on page), L3 (keep entity DI), and fixed distribution rules are sound. Interface is implemented as-is; step split is proportional.
+Verified commit `13b18d3` against plan Step 1 and `act.md`.
 
-No CRITICAL/HIGH findings. Actor may start **Step 1 only**, then stop for Job B.
+- Full `IReportsDataService` on Dal (P/L rows/total, earliest date, distribution).
+- Dal DI gap fixed: `IReportsDataService` → `ReportsDataService`.
+- No page changes; entity DI kept; calculator 40/50/10 unchanged.
+- Documented `ITransactionRepo` / `IEmployeeRepo` usage (allowed).
+- Suite **538 passed**, 2 skipped; 9 new service tests.
+
+Next: **Step 2** (ProfitLoss page migration) only, then Job B.
