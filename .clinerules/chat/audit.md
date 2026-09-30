@@ -1,18 +1,7 @@
-# Audit — Job B (Execution Check + Stage Sign-off): Stage F Step 3
+# Audit — Job A (Plan Review): Stage G — Account
 
-**Verdict**: **PASS** — Stage F Definition of Done met. Stage F signed off in `to-do.md`.
+**Verdict**: **APPROVED**
 
-## Step 3
-Verified commit `4ee6c2d` against `act.md`.
+Dal DI gap for `IAccountDataService` is real. L1 (no `User` on pages via `GetAdminUsernameAsync`), L2 single `dataService`, L3 keep `IUserDataService`, L4 no auth middleware, and EnsureAdmin startup switch are correct. Interface is implement-as-is; step split is proportional.
 
-- Suite **538 passed**; Production `/Reports/ProfitLoss` + all Automatic presets **200**.
-- Body shows Mikaeeil/Anis and 40/50/10 distribution.
-- Regression routes 200; fingerprint `17|7|26|6` stable; no destructive init.
-
-## Stage F DoD
-- Full `IReportsDataService` on Dal; registered.
-- ProfitLoss uses only `dataService`; date UI on page.
-- Entity DI retained (L3).
-- Build + suite + Production smoke green.
-
-**Next:** Stage G (Account) — planner owns the next `plan.md`.
+No CRITICAL/HIGH findings. Actor may start **Step 1 only**, then stop for Job B.
