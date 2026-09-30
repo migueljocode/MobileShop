@@ -1,7 +1,11 @@
-# Audit — Job A (Plan Review): Stage G — Account
+# Audit — Job B (Execution Check): Stage G Step 1
 
-**Verdict**: **APPROVED**
+**Verdict**: **PASS**
 
-Dal DI gap for `IAccountDataService` is real. L1 (no `User` on pages via `GetAdminUsernameAsync`), L2 single `dataService`, L3 keep `IUserDataService`, L4 no auth middleware, and EnsureAdmin startup switch are correct. Interface is implement-as-is; step split is proportional.
+Verified commit `fcae247` against plan Step 1 and `act.md`.
 
-No CRITICAL/HIGH findings. Actor may start **Step 1 only**, then stop for Job B.
+- Full `IAccountDataService` on Dal (EnsureAdmin, GetAdminUsername, Validate, ChangePassword).
+- Dal DI gap fixed; `IUserDataService` still registered (L3).
+- No page/startup changes; real Argon2 tests; suite **546 passed**, 2 skipped.
+
+Next: **Step 2** (Login, Profile, Dev EnsureAdmin) only, then Job B.
