@@ -1,15 +1,13 @@
-# Act Report — Stage C Step 3
-- Commit: 615e392 — refactor(products): migrate CreatePhone and CreateAppleId pages to ProductsDataService
+# Act Report — Stage C Step 4
+- Commit: 1bc6d74 — refactor(products): migrate Index Details SecondHand pages to ProductsDataService
 - Verification:
   - `dotnet build src/MobileShop.slnx --nologo` -> exit 0; **0 errors, 0 warnings**.
-  - `dotnet test ... --filter "FullyQualifiedName~Web.Pages.Products"` -> **Failed: 0, Passed: 27, Skipped: 0, Total: 27**.
   - `dotnet test src/MobileShop.slnx --nologo --no-build` (full suite) -> **Failed: 0, Passed: 490, Skipped: 2, Total: 492** (EXIT=0).
-- What was implemented (plan Step 3 scope only):
-  - `CreatePhone.cshtml.cs`: ctor is now `(IProductsDataService dataService)` only; properties are `IReadOnlyList<DropdownOptionViewModel>` (+ unchanged `IReadOnlyList<string> Corporations`); `PopulateDropdownsAsync` delegates to the four service members; `OnGetModelsAsync` keeps `{o.Id, o.Name}` payload; three modal handlers delegate and return `{id,name}` / `{error}+400/404`; `OnPostCreateCorporationAsync` untouched; `OnPostAsync` follows validate -> `CreatePhoneAsync` -> field error/`Message` -> redirect `type="phone"`.
-  - `CreateAppleId.cshtml.cs`: ctor is now `(IProductsDataService dataService)` only; constants + `AddModelAsync` removed; `OnPostAsync` follows validate -> `CreateAppleIdAsync` -> field error/`Message` -> redirect `type="appleid"`.
-  - Null-forgiving `!` added where the service contract guarantees non-null (`Option` on success, `Message` on failure) to keep the build at 0 warnings.
-  - Page tests rewired to real `ProductsDataService` over `BaseRepo<T>`; all existing assertions kept; added duplicate-IMEI `ModelState` test (unknown-manufacturer case already existed) and redirect route-value assertions (new id + type).
-  - No `.cshtml`, service, or repo touched.
+- What was implemented (plan Step 4 scope only):
+  - `IndexModel`: ctor `(IProductsDataService dataService)`; `Type` normalisation kept byte-identical; one call `Products = await dataService.GetInventoryRowsAsync(Type)`.
+  - `DetailsModel`: ctor `(IProductsDataService dataService)`; `Product = await dataService.GetDetailsAsync(id, type ?? string.Empty)`; `NotFound()` kept; `Transactions = Product.Transactions`; both property types unchanged, so `Details.cshtml` untouched.
+  - `SecondHandModel`: ctor `(IProductsDataService dataService)`; `(await dataService.GetSecondHandRowsAsync()).OrderBy(product => product.Name).ToList()`.
+  - No `.cshtml`, service, repo, or test touched. No page in the solution injects a repo.
 - Limitations: None.
 - Friction noted: None.
 - Problems: None.
