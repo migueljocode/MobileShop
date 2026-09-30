@@ -1,6 +1,6 @@
 # Act Report — Stage E Step 4 (Stage E validation)
 
-- Commit: (filled in after commit)
+- Commit: `2ff8ca3` — docs(transactions): complete Stage E validation
 - Verification — Chain 1 (build + full suite, one chained call):
   - `dotnet build src/MobileShop.slnx --nologo && dotnet test src/MobileShop.slnx --nologo --no-build` -> **Build succeeded, 0 errors, 1 warning**; **Failed: 0, Passed: 529, Skipped: 2, Total: 531** (EXIT=0).
   - The single warning is the **pre-existing** `CS9124` in `src/MobileShop.Services/DataServices/Dal/ProductsDataService.cs(26,62)` ("Parameter 'IBaseRepo<Transaction> transactions' is captured..."). It is in a file this stage never touched and is the same baseline warning the Stage D report already recorded; not introduced here and deliberately not fixed (out of scope, no unrelated refactors).
