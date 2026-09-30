@@ -67,7 +67,7 @@ Task<bool> ChangePasswordAsync(string username, string plainNewPassword);
 - Done when: Dal registers area service; **no page/startup changes yet**.
 - Risk: MEDIUM. Confidence: HIGH.
 
-## [ ] Step 2 — Migrate Login, Profile, and Dev EnsureAdmin
+## ~~[x] Step 2 — Migrate Login, Profile, and Dev EnsureAdmin~~
 - Files: `Pages/Account/Login.cshtml.cs`, `Pages/Account/ProfileModel.cs`; `Web/Extensions/WebApplicationBuilderExtensions.cs`; any Account page tests.
 - Change:
   - Login: `(IAccountDataService dataService)` only; call `ValidateCredentialsAsync`.

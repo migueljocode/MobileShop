@@ -15,28 +15,26 @@ namespace MobileShop.Tests.Web.Pages.Account;
 public class ProfileModelTests : RepoTestBase
 {
     private readonly ProfileModel _model;
-    private readonly Mock<IUserDataService> _userDataServiceMock;
+    private readonly Mock<IAccountDataService> _accountDataServiceMock;
 
     public ProfileModelTests()
     {
-        _userDataServiceMock = new Mock<IUserDataService>();
-        _userDataServiceMock.Setup(u => u.FindByUsernameAsync(It.IsAny<string>()))
-            .ReturnsAsync((User?)null);
-        _userDataServiceMock.Setup(u => u.ValidateCredentialsAsync(It.IsAny<string>(), It.IsAny<string>()))
+        _accountDataServiceMock = new Mock<IAccountDataService>();
+        _accountDataServiceMock.Setup(u => u.GetAdminUsernameAsync())
+            .ReturnsAsync("admin");
+        _accountDataServiceMock.Setup(u => u.ValidateCredentialsAsync(It.IsAny<string>(), It.IsAny<string>()))
             .ReturnsAsync(false);
-        _userDataServiceMock.Setup(u => u.ChangePasswordAsync(It.IsAny<string>(), It.IsAny<string>()))
+        _accountDataServiceMock.Setup(u => u.ChangePasswordAsync(It.IsAny<string>(), It.IsAny<string>()))
             .ReturnsAsync(false);
 
-        _userDataServiceMock.Setup(u => u.FindByUsernameAsync("admin"))
-            .ReturnsAsync(new User { Id = 1, Username = "admin" });
-        _userDataServiceMock.Setup(u => u.ValidateCredentialsAsync("admin", "Admin@123"))
+        _accountDataServiceMock.Setup(u => u.ValidateCredentialsAsync("admin", "Admin@123"))
             .ReturnsAsync(true);
-        _userDataServiceMock.Setup(u => u.ValidateCredentialsAsync("admin", "wrong"))
+        _accountDataServiceMock.Setup(u => u.ValidateCredentialsAsync("admin", "wrong"))
             .ReturnsAsync(false);
-        _userDataServiceMock.Setup(u => u.ChangePasswordAsync("admin", "NewPass123"))
+        _accountDataServiceMock.Setup(u => u.ChangePasswordAsync("admin", "NewPass123"))
             .ReturnsAsync(true);
 
-        _model = new ProfileModel(_userDataServiceMock.Object);
+        _model = new ProfileModel(_accountDataServiceMock.Object);
     }
 
     [Fact]
@@ -45,6 +43,17 @@ public class ProfileModelTests : RepoTestBase
         await _model.OnGetAsync();
 
         Assert.Equal("admin", _model.Username);
+    }
+
+    [Fact]
+    public async Task OnGetAsync_leaves_username_null_when_no_admin_exists()
+    {
+        _accountDataServiceMock.Setup(u => u.GetAdminUsernameAsync())
+            .ReturnsAsync((string?)null);
+
+        await _model.OnGetAsync();
+
+        Assert.Null(_model.Username);
     }
 
     [Fact]
@@ -61,7 +70,7 @@ public class ProfileModelTests : RepoTestBase
         Assert.Null(_model.CurrentPassword);
         Assert.Null(_model.NewPassword);
         Assert.Null(_model.ConfirmPassword);
-        _userDataServiceMock.Verify(u => u.ChangePasswordAsync("admin", "NewPass123"), Times.Once);
+        _accountDataServiceMock.Verify(u => u.ChangePasswordAsync("admin", "NewPass123"), Times.Once);
     }
 
     [Fact]

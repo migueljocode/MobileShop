@@ -1,9 +1,7 @@
 namespace MobileShop.Web.Pages.Account;
 
-public class LoginModel(IUserDataService userDataService) : PageModel
+public class LoginModel(IAccountDataService dataService) : PageModel
 {
-    private readonly IUserDataService _userDataService = userDataService;
-
     [BindProperty]
     public string Username { get; set; } = string.Empty;
 
@@ -24,7 +22,7 @@ public class LoginModel(IUserDataService userDataService) : PageModel
             return Page();
         }
 
-        if (!await _userDataService.ValidateCredentialsAsync(Username, Password))
+        if (!await dataService.ValidateCredentialsAsync(Username, Password))
         {
             ModelState.AddModelError(string.Empty, "Invalid username or password.");
             return Page();

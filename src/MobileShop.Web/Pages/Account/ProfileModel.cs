@@ -1,9 +1,7 @@
 namespace MobileShop.Web.Pages.Account;
 
-public class ProfileModel(IUserDataService userDataService) : PageModel
+public class ProfileModel(IAccountDataService dataService) : PageModel
 {
-    private readonly IUserDataService _userDataService = userDataService;
-
     [BindProperty]
     [Required]
     public string? CurrentPassword { get; set; }
@@ -24,13 +22,7 @@ public class ProfileModel(IUserDataService userDataService) : PageModel
     public string? Username { get; set; }
 
     public async Task OnGetAsync()
-    {
-        var user = await _userDataService.FindByUsernameAsync("admin");
-        if (user != null)
-        {
-            Username = user.Username;
-        }
-    }
+        => Username = await dataService.GetAdminUsernameAsync();
 
     public async Task<IActionResult> OnPostAsync()
     {
@@ -39,7 +31,11 @@ public class ProfileModel(IUserDataService userDataService) : PageModel
             return Page();
         }
 
-        var credsOk = await _userDataService.ValidateCredentialsAsync("admin", CurrentPassword ?? string.Empty);
+        // The service owns the admin username; "admin" is only a last-resort fallback so a
+// missing seed surfaces as a normal failed validation rather than a null dereference.
+        var adminUsername = await dataService.GetAdminUsernameAsync() ?? "admin";
+
+        var credsOk = await dataService.ValidateCredentialsAsync(adminUsername, CurrentPassword ?? string.Empty);
         if (!credsOk)
         {
             ModelState.AddModelError(string.Empty, "Invalid current password.");
@@ -52,13 +48,14 @@ public class ProfileModel(IUserDataService userDataService) : PageModel
             return Page();
         }
 
-        var ok = await _userDataService.ChangePasswordAsync("admin", NewPassword!);
+        var ok = await dataService.ChangePasswordAsync(adminUsername, NewPassword!);
         if (!ok)
         {
             ModelState.AddModelError(string.Empty, "Failed to change password.");
             return Page();
         }
 
+        Username = adminUsername;
         Message = "Password changed successfully.";
         ModelState.Clear();
         CurrentPassword = null;

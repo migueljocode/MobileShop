@@ -28,7 +28,7 @@ public static class WebApplicationBuilderExtensions
 
             // Dev-only: the freshly seeded sample data ships a placeholder hash, so the admin account gets a real one.
             using var scope = app.Services.CreateScope();
-            scope.ServiceProvider.GetRequiredService<IUserDataService>().EnsureAdminUser();
+            scope.ServiceProvider.GetRequiredService<IAccountDataService>().EnsureAdminUser();
         }
 
         app.UseRouting();
