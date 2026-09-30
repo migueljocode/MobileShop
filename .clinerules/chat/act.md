@@ -1,28 +1,17 @@
-# ACTOR PROMPT — Stage H Step 3 correction (restore BaseRepo<T> direct tests)
+# Act Report — Stage H Step 3 correction (Job B HIGH: BaseRepo<T> lost all direct tests)
 
-> This file is an instruction. After you finish, replace its entire content with your Act Report, using the same format as your previous reports.
-
-You are the ACTOR. Read `.clinerules/actor.md`, `.clinerules/chat/audit.md` (Job B on Step 3: one HIGH finding) and `.clinerules/chat/plan.md`. Run `git pull` first. Do **one correction pass for that HIGH finding only**, then STOP. Do not start Step 4. Do not touch `.clinerules/to-do.md`, `.clinerules/chat/plan.md`, or `audit.md`.
-
-## Problem
-`src/MobileShop.Tests/Dal/BaseClass/BaseRepoTests.cs` is an `abstract` generic class (`BaseRepoTests<TEntity, TRepo>`) with 26 `[Fact]`s. All its concrete subclasses were deleted in `e3a6622`, so none of its tests run any more, and `BaseRepo<T>`, the only surviving repository abstraction, has no direct tests.
-
-## Task (tests only; no production code changes)
-1. Recover the old Person subclass for reference: `git show e3a6622^:src/MobileShop.Tests/Dal/Repos/PersonRepoTests.cs`.
-2. Add one concrete class in `src/MobileShop.Tests/Dal/BaseClass/`, for example `BaseRepoPersonTests.cs`:
-   `public class BaseRepoPersonTests : BaseRepoTests<Person, BaseRepo<Person>>`
-   - `CreateRepo()` returns `new BaseRepo<Person>(Context)`.
-   - `CreateValidEntity()` is adapted from the recovered `PersonRepoTests` (a valid `Person` with unique values, following the base class's expectations).
-   - Use the repo's minimal modern C# style (file-scoped namespace, expression-bodied members, existing global usings). Do not add `using` lines that a global using already covers.
-3. Do not modify `BaseRepoTests.cs`, `RepoTestBase.cs`, any production file, or any other test.
-
-## Verify
-- `dotnet build src/MobileShop.slnx --nologo && dotnet test src/MobileShop.slnx --nologo --no-build`. Expected: **0 errors, 240 passed / 2 skipped** (214 + 26). Report the actual numbers. If one or more of the 26 inherited tests fails against `BaseRepo<Person>`, do not change `BaseRepo` or weaken the test: STOP and report the failing test names and messages as a finding.
-- Run the suite filtered to the new class, for example `--filter "FullyQualifiedName~BaseRepoPersonTests"`, and confirm it runs exactly 26 tests.
-- `git diff --stat -- src/MobileShop.Services src/MobileShop.Web src/MobileShop.Dal src/MobileShop.Api` is empty.
-- Report the warning count honestly. CS9124 at `ProductsDataService.cs:26` is expected on a full recompile. Do not fix it; it stays in the cleanup backlog.
-
-## Commit and report
-- Commit: `git commit -m "test(dal): restore BaseRepo<T> direct tests with a concrete Person subclass"` (Conventional Commits, no Co-authored-by, never amend, never push).
-- Then replace this file's content with your Act Report (commit hash, verification numbers, what was added, limitations, problems), and record the hash in a separate commit: `git commit -m "docs(act): record Stage H Step 3 correction commit hash"`.
-- STOP.
+- Context: Job B reviewed Step 3 (`e3a6622`, `4b39100`, `f5570ea`) and returned **NEEDS ONE CORRECTION PASS** with one HIGH finding, confirming the deletions themselves were clean. This is that correction. **No Step 4 work performed.**
+- Commit: (filled in after commit)
+- HIGH finding independently confirmed before fixing: `BaseRepoTests.cs:12` is `public abstract class BaseRepoTests<TEntity, TRepo> : RepoTestBase` with **26** `[Fact]`s, and after the Step 3 deletions a repo-wide `grep 'BaseRepoTests<'` found **only the abstract declaration itself** — no concrete subclass remained. Because the class is abstract, all 26 tests were dead code: they compiled but never executed. `IBaseRepo<T>`/`BaseRepo<T>`, the only surviving repository abstraction that every area service and page depends on, therefore had **zero direct coverage**, against the Stage H Global Definition of Done requirement that it "remain registered and functional".
+- What was added (**tests only**): `src/MobileShop.Tests/Dal/BaseClass/BaseRepoPersonTests.cs` — `public class BaseRepoPersonTests : BaseRepoTests<Person, BaseRepo<Person>>` with `CreateRepo() => new(Context)` and a `CreateValidEntity()` recovered verbatim from the deleted `PersonRepoTests.cs` (`git show e3a6622^:src/MobileShop.Tests/Dal/Repos/PersonRepoTests.cs`). The generic type argument is now the concrete `BaseRepo<Person>` instead of the deleted `IPersonRepo`. `BaseRepoTests.cs` itself was **not** modified, and no production code was touched.
+- Verification:
+  - Required chain: `dotnet build src/MobileShop.slnx --nologo && dotnet test src/MobileShop.slnx --nologo --no-build` -> **Build succeeded, 0 errors, 1 warning; Failed: 0, Passed: 240, Skipped: 2, Total: 242** (EXIT=0, 37 s).
+  - **Matches the reviewer's predicted 240 exactly** (214 + 26).
+  - Confirmed the tests genuinely execute by running them with normal verbosity: **26 passed** under `BaseRepoPersonTests`, covering `Add`/`AddAsync` persist-true and persist-false, `Update`/`UpdateAsync` marking the entity unchanged, `Delete`/`DeleteAsync` soft-deleting and hiding the row, `SaveChanges`/`SaveChangesAsync`, both `Find` predicate overloads (sync and async), and all three `SelectFirstAsync` cases (ascending, descending, no-match). These are precisely the 26 behaviours the reviewer listed as lost.
+  - Scope: the only change is the new test file. `git diff --stat` over `src/MobileShop.Services`, `src/MobileShop.Web`, `src/MobileShop.Dal`, and `src/MobileShop.Api` is **empty** — **tests-only**, no production change.
+- Warning (reported honestly): still exactly **1** warning, `ProductsDataService.cs(26,62): CS9124` — the pre-existing one from Stage E onward, untouched by this correction and deliberately **not** fixed, since it remains Step 4's backlog item #1.
+- The reviewer's 6 cleanup backlog items were **not** actioned here; they belong to Step 4: the unused `Transactions` property causing CS9124, the three stale comments naming deleted types (`SampleDataSeedTests.cs:127`, `ProfileModelTests.cs:12`, `PeopleDataService.cs:114`), `ProductDetailsViewModel.Transactions = null!`, the missing `GetInventoryRowsAsync` ordering test, the minor empty-inventory test, and the open `Phone`-category filter decision in `CreatePhoneAsync`.
+- Limitations: None.
+- Friction noted: build (~21 s) and the full suite (~37 s) exceed the ~30 s command window, so both used the detached-launch + poll pattern.
+- Problems — a disclosure the reviewer correctly called out: my Step 3 report said **"Problems: none"** and never mentioned that keeping the abstract base left its 26 tests running nothing. My test-count reconciliation was accurate about *how many* tests disappeared but I never asked the more important question — *whether what remained still executes anything*. The deletions were correct and the count was correct, yet a full behavioural suite was silently dead in the repository. That is a reporting omission on my part, and it is recorded here rather than quietly fixed. Root cause per the reviewer is a `plan.md` L7/Step 3 premise gap (the plan assumed `BaseRepoTests` stays useful because "area/page tests still use them", which is true of `RepoTestBase` but not the abstract generic), not a wrong deletion.
+- Status: COMPLETE
