@@ -1,33 +1,47 @@
-# Audit — Job B (Execution Check): Stage G Step 3
+# Audit — Job A: Stage H Plan Review
 
-**Verdict**: **PASS**
+**Verdict**: **APPROVED**
 
-Verified Stage G Step 3 against `plan.md`, `act.md`, and the actual repository state. The validation commit is `15b7e24`; the follow-up documentation commit is `858738e2`.
+Reviewed Stage H `plan.md` against the repository state and the Stage G sign-off. The plan is authorized for execution, beginning with **Stage H Step 1 only**.
 
-## Verification
+## Approval basis
 
-- **Chain 1 passed**: full build + full test suite completed with **0 test failures, 547 passed, 2 skipped**. Build returned **0 errors and 1 pre-existing warning** (`CS9124` in `ProductsDataService.cs`); the warning is explicitly outside this stage and the build/test command exited successfully.
-- **Chain 2 passed**: Production host started successfully and returned **200** for both `/Account/Login` and `/Account/Profile`.
-- Production regression smoke returned **200 for all 5 routes**: Home, Products, Customers, Transactions, and Reports.
-- Production non-destructiveness check passed: no development initialization/wipe calls or seed activity appeared in the logs; the recorded database fingerprint was unchanged before/after.
-- **Development smoke passed**: development initialization seeded successfully, `AccountDataService.EnsureAdminUser()` completed without throwing, and both Account routes returned **200**.
-- Development database state was restored and verified byte-identical after the smoke test.
-- Step 2 architectural conditions remain satisfied:
-  - Login/Profile use only `IAccountDataService dataService`.
-  - No page-level `IUserDataService` or `User` entity dependency.
-  - Existing `IUserDataService` registrations remain.
-  - Authentication remains disabled.
-  - Account `.cshtml` files remain untouched.
-- The implementation and validation commits contain no unrelated `src/` changes.
+- Stage G is complete and signed off; Stage H is the next unchecked stage.
+- The plan preserves the established workflow: **one step → commit → Job B review → next step**.
+- Step 1 correctly identifies the remaining specialized-repository consumers in the surviving area services:
+  - `AccountDataService` → `IUserRepo`
+  - `ReportsDataService` → `ITransactionRepo`, `IEmployeeRepo`
+- Step 1 explicitly migrates those consumers to `IBaseRepo<T>` **before** any specialized repository deletion.
+- The plan preserves the API branch and does not authorize changes to `src/MobileShop.Api`.
+- The plan explicitly preserves `IDataService<T>`, `ApiDataServiceBase<T>`, and API-facing entity-service contracts still required by API stubs.
+- The plan preserves `BaseRepo<T>` / `IBaseRepo<T>` as the surviving repository abstraction.
+- Database/schema/migration policy, authentication state, Apple ID password handling, and development initialization policy remain unchanged.
+- The plan requires behavior-preserving tests for Account and Reports before proceeding to destructive cleanup.
+- Later deletion steps are gated by production-consumer searches, avoiding speculative deletion.
+- Final validation includes full build/test, production smoke, production non-destructiveness, and development EnsureAdmin smoke.
 
-## Reviewer Notes
+## Step 1 authorization
 
-The single build warning is **not a blocker**: it is a documented pre-existing `ProductsDataService` warning, unrelated to Stage G, and the complete command exited successfully.
+The Actor is authorized to implement **only Step 1** now:
 
-No HIGH-risk, LOW-confidence, architectural, regression, or validation finding was found.
+- migrate `AccountDataService` from `IUserRepo` to `IBaseRepo<User>`;
+- migrate `ReportsDataService` from `ITransactionRepo` / `IEmployeeRepo` to `IBaseRepo<Transaction>` / `IBaseRepo<Employee>`;
+- retarget the corresponding Account/Reports tests;
+- preserve all documented behavior and error semantics;
+- do not delete specialized repositories, obsolete entity services, or tests yet;
+- do not modify `src/MobileShop.Api`;
+- run the Step 1 verification;
+- create the Step 1 implementation commit;
+- stop for **Job B execution review**.
+
+## Reviewer findings
+
+No HIGH-risk architectural ambiguity blocks Step 1.
+
+The destructive cleanup in Steps 2–4 remains appropriately gated behind Step 1 and subsequent Job B reviews. The plan's MEDIUM confidence on Step 1 is acceptable because the actor is required to prove behavior through the existing tests and full solution validation before the next cleanup step.
 
 ## Result
 
-**Stage G Step 3 — PASS.**
+**Stage H Job A — APPROVED.**
 
-The Stage G Global Definition of Done is satisfied. Stage G can now be marked complete in `.clinerules/to-do.md` by the reviewer.
+**Authorized next action: Stage H Step 1 only.**
