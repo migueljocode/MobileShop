@@ -22,7 +22,7 @@ Reviewed Stage H `plan.md` against the repository state and the Stage G sign-off
 
 ## Step 1 authorization
 
-The Actor is authorized to implement **only Step 1** now:
+The Actor was authorized to implement **only Step 1**:
 
 - migrate `AccountDataService` from `IUserRepo` to `IBaseRepo<User>`;
 - migrate `ReportsDataService` from `ITransactionRepo` / `IEmployeeRepo` to `IBaseRepo<Transaction>` / `IBaseRepo<Employee>`;
@@ -34,14 +34,34 @@ The Actor is authorized to implement **only Step 1** now:
 - create the Step 1 implementation commit;
 - stop for **Job B execution review**.
 
-## Reviewer findings
+## Job B — Stage H Step 1 Execution Review
 
-No HIGH-risk architectural ambiguity blocks Step 1.
+**Verdict**: **PASS**
 
-The destructive cleanup in Steps 2–4 remains appropriately gated behind Step 1 and subsequent Job B reviews. The plan's MEDIUM confidence on Step 1 is acceptable because the actor is required to prove behavior through the existing tests and full solution validation before the next cleanup step.
+Reviewed the Step 1 implementation commit `062f644e1c330999da17b0f6855cae2a99ad7bbd`.
 
-## Result
+### Verification
 
-**Stage H Job A — APPROVED.**
+- The implementation changes exactly the intended Step 1 area services and their Account/Reports tests, plus the actor report.
+- `AccountDataService` no longer depends on `IUserRepo`; it uses `IBaseRepo<User>`.
+- `ReportsDataService` no longer depends on `ITransactionRepo` or `IEmployeeRepo`; it uses generic repository operations.
+- Account credential lookup preserves the previous case-insensitive username behavior.
+- Earliest transaction selection preserves the previous non-deleted filtering and date-only result semantics.
+- Distribution employee selection preserves active filtering, ordering, and person-name data required by the existing calculation.
+- No production files were deleted.
+- `src/MobileShop.Api` was untouched.
+- No specialized repositories, obsolete entity services, or their tests were deleted.
+- The actor's required full verification reports **0 build errors, 0 warnings, 550 passed, 2 skipped, 0 failed**.
+- The targeted Account/Reports verification reports **20 passed, 0 failed**.
+- A production-source search confirms the three specialized repository interfaces remain only in their own repository code/registrations/tests and obsolete entity-service implementations; no surviving area service references them.
+- The actor caught and corrected a date-only regression and preserved the existing missing-employee test before the final verification.
 
-**Authorized next action: Stage H Step 1 only.**
+### Reviewer conclusion
+
+Step 1 satisfies its plan-defined done condition and stays within the authorized scope. No blocking defect was found.
+
+**Stage H Step 1 Job B — PASS.**
+
+**Authorized next action: Stage H Step 2 only.**
+
+Do not begin Step 3 or Step 4 until their respective execution/review gates are satisfied.
