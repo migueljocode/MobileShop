@@ -4,6 +4,7 @@ namespace MobileShop.Services.DataServices.Dal;
 public class PeopleDataService(
     IBaseRepo<Customer> customers,
     IBaseRepo<Seller> sellers,
+    IBaseRepo<Product> products,
     ILogger<PeopleDataService> logger)
     : IPeopleDataService
 {
@@ -61,7 +62,21 @@ public class PeopleDataService(
                 customer.PersonNavigation.FirstName + " " + customer.PersonNavigation.LastName,
                 customer.PersonNavigation.PhoneNumber,
                 customer.NationalId));
-        return details is null ? null : details with { Products = [] };
+        if (details is null)
+            return null;
+
+        // Products purchased from the shop: Sell-direction transactions for this customer.
+        var purchasedIds = (await customers.SelectAllAsync(
+                customer => customer.Id == id,
+                customer => customer.Transactions
+                    .Where(transaction => transaction.Direction == TransactionDirection.Sell)
+                    .Select(transaction => transaction.ProductId)
+                    .ToList()))
+            .SelectMany(ids => ids)
+            .Distinct()
+            .ToHashSet();
+
+        return details with { Products = await GetInventoryRowsForAsync(purchasedIds) };
     }
 
     /// <inheritdoc />
@@ -73,7 +88,44 @@ public class PeopleDataService(
                 seller.PersonNavigation.FirstName + " " + seller.PersonNavigation.LastName,
                 seller.PersonNavigation.PhoneNumber,
                 seller.EntityType.ToString()));
-        return details is null ? null : details with { Products = [] };
+        if (details is null)
+            return null;
+
+        // Products supplied to the shop: Buy-direction transactions for this seller only.
+        var suppliedIds = (await sellers.SelectAllAsync(
+                seller => seller.Id == id,
+                seller => seller.Transactions
+                    .Where(transaction => transaction.Direction == TransactionDirection.Buy)
+                    .Select(transaction => transaction.ProductId)
+                    .ToList()))
+            .SelectMany(ids => ids)
+            .Distinct()
+            .ToHashSet();
+
+        return details with { Products = await GetInventoryRowsForAsync(suppliedIds) };
+    }
+
+    /// <summary>Projects inventory-shaped rows for the given product ids, ordered by product id.</summary>
+    private async Task<IReadOnlyList<ProductListItemViewModel>> GetInventoryRowsForAsync(HashSet<int> productIds)
+    {
+        if (productIds.Count == 0)
+            return [];
+
+        // Same projection as ProductDataService.GetInventoryRowsAsync; in-memory filter after SelectAllAsync.
+        var rows = await products.SelectAllAsync(product => new ProductListItemViewModel(
+            product.Id,
+            product.Id,
+            product.ModelNavigation.CategoryNavigation.Name,
+            product.ModelNavigation.ManufacturerNavigation.Name + " " + product.ModelNavigation.Name,
+            product.Barcode,
+            product.ColorNavigation == null ? null : product.ColorNavigation.Name,
+            product.Transactions.Any(transaction => transaction.Direction == TransactionDirection.Sell),
+            product.SecondHandProfile != null));
+
+        return rows
+            .Where(row => productIds.Contains(row.ProductId))
+            .OrderBy(row => row.ProductId)
+            .ToList();
     }
 
     /// <inheritdoc />

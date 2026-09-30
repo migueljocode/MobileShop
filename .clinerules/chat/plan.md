@@ -59,7 +59,7 @@ Entity leak today: `PurchasedProductsAsync` / `SoldToShopAsync` return `IEnumera
 - Done when: interface fully implemented; Dal registered; no page changed; suite green.
 - Risk: MEDIUM. Confidence: HIGH.
 
-## [ ] Step 2 — Fill details `Products` (inventory-shaped rows, no entities)
+## [x] Step 2 — Fill details `Products` (inventory-shaped rows, no entities)
 - Files: modify: `PeopleDataService.cs` (add `IBaseRepo<Product> products` to ctor), `PeopleDataServiceTests.cs`; do not touch interface signatures (already return details VMs); do not touch pages yet.
 - Change:
   1. Inject `IBaseRepo<Product> products`.

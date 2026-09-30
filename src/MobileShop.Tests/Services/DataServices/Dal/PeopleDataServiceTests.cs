@@ -11,6 +11,7 @@ public class PeopleDataServiceTests : RepoTestBase
         _service = new PeopleDataService(
             new BaseRepo<Customer>(Context),
             new BaseRepo<Seller>(Context),
+            new BaseRepo<Product>(Context),
             NullLogger<PeopleDataService>.Instance);
     }
 
@@ -145,6 +146,51 @@ public class PeopleDataServiceTests : RepoTestBase
     }
 
     [Fact]
+    public async Task GetCustomerDetailsAsync_returns_purchased_sell_direction_products_only()
+    {
+        var customer = AddCustomer("Ali", "Rezaei", "09120000001", "1000000001");
+        var other = AddCustomer("Sara", "Ahmadi", "09120000002", "1000000002");
+        var sellerPerson = new Person { FirstName = "Shop", LastName = "Seller", PhoneNumber = "09120000009" };
+        Context.People.Add(sellerPerson);
+        Context.SaveChanges();
+        var seller = new Seller { PersonId = sellerPerson.Id, EntityType = SellerEntityType.Real };
+        Context.Sellers.Add(seller);
+        Context.SaveChanges();
+
+        var purchased = TestDataHelpers.CreateProduct(Context);
+        var notPurchased = TestDataHelpers.CreateProduct(Context);
+
+        // purchased: Sell transaction for this customer
+        SeedTransaction(purchased.Id, seller.Id, customer.Id, TransactionDirection.Sell);
+        // same product, but a Buy transaction (shop bought from seller) — must not count for the customer
+        SeedTransaction(purchased.Id, seller.Id, 1, TransactionDirection.Buy);
+        // another customer's purchase — must not leak into this customer's rows
+        SeedTransaction(notPurchased.Id, seller.Id, other.Id, TransactionDirection.Sell);
+
+        var details = await _service.GetCustomerDetailsAsync(customer.Id);
+
+        Assert.NotNull(details);
+        Assert.Single(details!.Products);
+        var row = details.Products[0];
+        Assert.Equal(purchased.Id, row.ProductId);
+        Assert.Equal(purchased.Id, row.EntityId);
+        Assert.Equal(purchased.Barcode, row.Identifier);
+        Assert.True(row.IsSold);
+        Assert.False(row.IsSecondHand);
+    }
+
+    [Fact]
+    public async Task GetCustomerDetailsAsync_returns_empty_products_when_no_sell_transactions()
+    {
+        var customer = AddCustomer("Ali", "Rezaei", "09120000001", "1000000001");
+
+        var details = await _service.GetCustomerDetailsAsync(customer.Id);
+
+        Assert.NotNull(details);
+        Assert.Empty(details!.Products);
+    }
+
+    [Fact]
     public async Task GetSellerDetailsAsync_returns_header_with_empty_products_for_known_id()
     {
         var seller = AddSeller("Sara", "Karimi", "09120000002", SellerEntityType.Legal);
@@ -165,6 +211,48 @@ public class PeopleDataServiceTests : RepoTestBase
         var details = await _service.GetSellerDetailsAsync(999);
 
         Assert.Null(details);
+    }
+
+    [Fact]
+    public async Task GetSellerDetailsAsync_returns_supplied_buy_direction_products_only()
+    {
+        var seller = AddSeller("Sara", "Karimi", "09120000002");
+        var otherSeller = AddSeller("Ali", "Zed", "09120000003");
+        var customerPerson = new Person { FirstName = "Shop", LastName = "Customer", PhoneNumber = "09120000010" };
+        Context.People.Add(customerPerson);
+        Context.SaveChanges();
+        var customer = new Customer { PersonId = customerPerson.Id, NationalId = "1000000003" };
+        Context.Customers.Add(customer);
+        Context.SaveChanges();
+
+        var supplied = TestDataHelpers.CreateProduct(Context);
+        var soldAway = TestDataHelpers.CreateProduct(Context);
+
+        // supplied: Buy transaction (shop bought from this seller)
+        SeedTransaction(supplied.Id, seller.Id, customer.Id, TransactionDirection.Buy);
+        // same product sold by another seller — must not leak in
+        SeedTransaction(supplied.Id, otherSeller.Id, customer.Id, TransactionDirection.Buy);
+        // this seller's product only ever sold away (Sell direction) — must not count as supplied
+        SeedTransaction(soldAway.Id, seller.Id, customer.Id, TransactionDirection.Sell);
+
+        var details = await _service.GetSellerDetailsAsync(seller.Id);
+
+        Assert.NotNull(details);
+        Assert.Single(details!.Products);
+        var row = details.Products[0];
+        Assert.Equal(supplied.Id, row.ProductId);
+        Assert.Equal(supplied.Barcode, row.Identifier);
+    }
+
+    [Fact]
+    public async Task GetSellerDetailsAsync_returns_empty_products_when_no_buy_transactions()
+    {
+        var seller = AddSeller("Sara", "Karimi", "09120000002");
+
+        var details = await _service.GetSellerDetailsAsync(seller.Id);
+
+        Assert.NotNull(details);
+        Assert.Empty(details!.Products);
     }
 
     [Fact]

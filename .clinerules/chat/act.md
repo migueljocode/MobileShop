@@ -1,3 +1,15 @@
+# Act Report — Stage D Step 2
+- Verification:
+  - Chain 1: `dotnet build src/MobileShop.slnx --nologo` -> exit 0; **0 errors**; only pre-existing `CS9124` in `ProductsDataService` (reproduced at baseline).
+  - Chain 1: `dotnet test src/MobileShop.slnx --nologo --no-build` -> **Failed: 0, Passed: 502, Skipped: 2, Total: 504** (EXIT=0). Filtered `PeopleDataServiceTests`: 12/12 pass.
+- What was implemented (plan Step 2 scope only):
+  - `PeopleDataService` ctor gained `IBaseRepo<Product> products`; interface signatures untouched; pages untouched.
+  - `GetCustomerDetailsAsync`: resolves Sell-direction transaction product ids for that customer (distinct), then projects inventory rows via a shared `GetInventoryRowsForAsync` helper using the byte-for-byte `ProductDataService.GetInventoryRowsAsync` projection (EntityId/ProductId both `product.Id`, Type from category name, Identifier=`Barcode`, IsSold via Sell-direction `Any`, IsSecondHand via `SecondHandProfile != null`), in-memory filter after `SelectAllAsync`, ordered by `ProductId`. Returns `details with { Products = rows }`; null header → null.
+  - `GetSellerDetailsAsync`: same, but Buy-direction only (`SoldToShop` semantics).
+  - Tests: customer details returns only the purchased Sell-direction product (excludes Buy rows and other customers' purchases) with full row shape assertions; seller details returns only Buy-direction supply (excludes other sellers and Sell-only rows); empty list when no matching transactions; still null for unknown id (already covered).
+- Problems: None.
+- Status: COMPLETE
+
 # Act Report — Stage D Step 1
 - Verification:
   - Chain 1: `dotnet build src/MobileShop.slnx --nologo` -> exit 0; **0 errors, 0 warnings**.
