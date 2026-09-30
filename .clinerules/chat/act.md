@@ -1,6 +1,6 @@
 # Act Report — Stage F Step 3 (Stage F validation)
 
-- Commit: (filled in after commit)
+- Commit: `4ee6c2d` — docs(reports): complete Stage F validation
 - Verification — Chain 1 (build + full suite, one chained call):
   - `dotnet build src/MobileShop.slnx --nologo && dotnet test src/MobileShop.slnx --nologo --no-build` -> **Build succeeded, 0 errors, 1 warning**; **Failed: 0, Passed: 538, Skipped: 2, Total: 540** (EXIT=0).
   - The single warning is the **pre-existing** `CS9124` at `src/MobileShop.Services/DataServices/Dal/ProductsDataService.cs(26,62)` — untouched by this stage, identical to the Stage E and Stage F Step 1/2 baselines; deliberately not fixed.
