@@ -1,26 +1,24 @@
-# Audit — Job B (Execution Check): Stage D (all steps, single actor run)
+# Audit — Job A (Plan Review): Stage E — Transactions
 
-**Verdict**: **PASS** (substance) — Stage D Definition of Done is met.
+**Verdict**: **APPROVED WITH CORRECTIONS**
 
-**Process note (MEDIUM, non-blocking):** The actor completed Steps 1–4 in one continuous run and self-ticked `to-do.md` (`6b875bd`). Preferred pipeline is one step → Job B → next step, with **only the reviewer** ticking stages. Commits were still **split correctly** (`96289a8` → `480d001` → `7431f53` → `31ff349`), so this is process discipline, not a missing-split failure.
+Architecture matches the area-service pattern; L2 (PDF inside area service), L3/L5, process rules, and the list-factor contract gap are correct. One HIGH behavioral gap in factor semantics must be pinned in `plan.md` before Step 1.
 
-## Evidence by step
+## HIGH
 
-| Step | Commit | Outcome |
-|------|--------|---------|
-| 1 | `96289a8` | VMs + `PeopleDataService` (all 6 members, header-only details) + Dal DI + tests; suite 498 pass |
-| 2 | `480d001` | `IBaseRepo<Product>`; Sell/Buy id sets + inventory projection; tests 502 pass |
-| 3 | `7431f53` | Six pages → `dataService` only; page tests rewired; 510 pass |
-| 4 | `31ff349` | Production smoke 11/11 **200**; detail product counts matched SQL; DB fingerprint `17\|7\|26` stable |
+**H1 — Empty list-factor must surface Index’s filter message.**
+- Location: Contract gap / `GenerateListFactorPdfAsync` steps 1–5 vs `IndexModel.OnGetDownloadFactorAsync`.
+- Problem: Today, empty `ResolveFactorRows()` with valid ModelState yields Error **`"No transactions match the current filters."`** and `Page()`. The plan specifies positive-id and missing-id errors but not this case (empty snapshot, no selection — or selection that yields zero rows without already setting another error).
+- Fix: In the list-factor semantics, lock:
+  - empty selection + empty snapshot → `FactorPdfResult(false, null, "No transactions match the current filters.")`
+  - keep existing strings for non-positive ids and missing ids verbatim
+  - never return `Succeeded: true` with empty bytes for the Index download path
 
-## DoD check
-- Six People pages inject only `IPeopleDataService dataService` (spot-checked Customers/CustomerDetails).
-- No Product entities on the page path; `Products` is `ProductListItemViewModel` list.
-- Entity Customer/Seller/Product DI still registered (L3).
-- Sort switches and create messages match ports; direction filters (Sell vs Buy) correct.
-- Suite **510 passed**, 2 skipped; served-page + non-destructive data check recorded.
+## MEDIUM (optional)
 
-## LOW
-- Details VM default is `Products = null!` (EF expression limitation) with runtime `with { Products = [] }` / filled list — acceptable; same pattern as Stage C `ProductDetailsViewModel`.
+- **Step 3 Index failure path:** On factor failure the page must still `LoadAsync` so the list renders under the ModelState error (current behavior).
+- **Invoice:** Prefer repos; if `AppDbContext` is required for the Include graph, document it in act.md — do not block.
+- **`GetTransactionFactorPdfAsync`:** Changing to `byte[]?` is fine; update interface + Api in the same step as locked.
 
-**Stage D remains complete.** No rollback. For Stage E onward: stop after each step for Job B before continuing.
+## Approval Status
+**APPROVED WITH CORRECTIONS** — apply H1 in `plan.md`, then actor may start Step 1 (stop for Job B before Step 3).
