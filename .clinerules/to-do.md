@@ -1,6 +1,6 @@
 - [x] ~~Stage A — Foundation: generic repo registration, area interfaces, Api stubs, DI seams~~
 - [x] ~~Stage B — Home: HomeDataService + dashboard~~
-- [ ] Stage C — Products: ProductsDataService + product pages
+- [x] ~~Stage C — Products: ProductsDataService + product pages~~
 - [ ] Stage D — People: PeopleDataService + customer/seller pages
 - [ ] Stage E — Transactions: TransactionsDataService + transaction/invoice/PDF
 - [ ] Stage F — Reports: ReportsDataService + profit/loss
