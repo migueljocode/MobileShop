@@ -1,19 +1,14 @@
 namespace MobileShop.Web.Pages.Products;
 
 public class CreatePhoneModel(
-    IPhoneDataService phoneDataService,
-    IManufacturerRepo manufacturerRepo,
-    IModelRepo modelRepo,
-    ICategoryRepo categoryRepo,
-    IColorRepo colorRepo,
-    IGuaranteeRepo guaranteeRepo) : PageModel
+    IProductsDataService dataService) : PageModel
 {
     [BindProperty] public CreatePhoneInputModel Input { get; set; } = new();
     public string? Message { get; private set; }
-    public IEnumerable<Manufacturer> Manufacturers { get; private set; } = [];
-    public IEnumerable<Model> Models { get; private set; } = [];
-    public IEnumerable<Color> Colors { get; private set; } = [];
-    public IEnumerable<string> Corporations { get; private set; } = [];
+    public IReadOnlyList<DropdownOptionViewModel> Manufacturers { get; private set; } = [];
+    public IReadOnlyList<DropdownOptionViewModel> Models { get; private set; } = [];
+    public IReadOnlyList<DropdownOptionViewModel> Colors { get; private set; } = [];
+    public IReadOnlyList<string> Corporations { get; private set; } = [];
 
     public async Task OnGetAsync()
     {
@@ -22,46 +17,26 @@ public class CreatePhoneModel(
 
     public async Task<IActionResult> OnGetModelsAsync(int manufacturerId)
     {
-        var models = await modelRepo.GetByManufacturerAsync(manufacturerId);
-        return new JsonResult(models.Select(m => new { m.Id, m.Name }));
+        var options = await dataService.GetModelsAsync(manufacturerId);
+        return new JsonResult(options.Select(o => new { o.Id, o.Name }));
     }
 
     public async Task<IActionResult> OnPostCreateManufacturerAsync(string name)
     {
-        if (string.IsNullOrWhiteSpace(name))
-            return new JsonResult(new { error = "Name is required." }) { StatusCode = 400 };
+        var result = await dataService.CreateManufacturerAsync(name);
+        if (!result.Succeeded)
+            return new JsonResult(new { error = result.Error! }) { StatusCode = result.StatusCode };
 
-        var trimmed = name.Trim();
-        var existing = await manufacturerRepo.FindAsync(m => m.Name == trimmed);
-        if (existing is not null)
-            return new JsonResult(new { id = existing.Id, name = existing.Name });
-
-        var manufacturer = new Manufacturer { Name = trimmed };
-        await manufacturerRepo.AddAsync(manufacturer);
-        return new JsonResult(new { id = manufacturer.Id, name = manufacturer.Name });
+        return new JsonResult(new { id = result.Option!.Id, name = result.Option.Name });
     }
 
     public async Task<IActionResult> OnPostCreateModelAsync(int manufacturerId, string name)
     {
-        if (string.IsNullOrWhiteSpace(name))
-            return new JsonResult(new { error = "Name is required." }) { StatusCode = 400 };
+        var result = await dataService.CreateModelAsync(manufacturerId, name);
+        if (!result.Succeeded)
+            return new JsonResult(new { error = result.Error! }) { StatusCode = result.StatusCode };
 
-        var manufacturer = await manufacturerRepo.FindAsync(manufacturerId);
-        if (manufacturer is null)
-            return new JsonResult(new { error = "Manufacturer not found." }) { StatusCode = 404 };
-
-        var category = await categoryRepo.FindAsync(c => c.Name == "Phone")
-            ?? throw new InvalidOperationException("The 'Phone' category is missing from the catalog seed data.");
-
-        var trimmed = name.Trim();
-        var existing = await modelRepo.FindAsync(m =>
-            m.ManufacturerId == manufacturerId && m.Name == trimmed && m.CategoryId == category.Id);
-        if (existing is not null)
-            return new JsonResult(new { id = existing.Id, name = existing.Name });
-
-        var model = new Model { ManufacturerId = manufacturerId, CategoryId = category.Id, Name = trimmed };
-        await modelRepo.AddAsync(model);
-        return new JsonResult(new { id = model.Id, name = model.Name });
+        return new JsonResult(new { id = result.Option!.Id, name = result.Option.Name });
     }
 
     public async Task<IActionResult> OnPostAsync()
@@ -72,91 +47,27 @@ public class CreatePhoneModel(
             return Page();
         }
 
-        var imei1 = Input.IMEI1.Trim();
-        if (await phoneDataService.ImeiExistsAsync(imei1))
+        var result = await dataService.CreatePhoneAsync(Input);
+        if (!result.Succeeded)
         {
-            ModelState.AddModelError(nameof(Input.IMEI1), "A phone with this IMEI already exists.");
+            if (result.ErrorField is not null)
+                ModelState.AddModelError(result.ErrorField, result.Message!);
+            else
+                Message = result.Message;
             await PopulateDropdownsAsync();
             return Page();
         }
 
-        var manufacturer = await manufacturerRepo.FindAsync(Input.ManufacturerId);
-        if (manufacturer is null)
-        {
-            ModelState.AddModelError(nameof(Input.ManufacturerId), "Selected manufacturer not found.");
-            await PopulateDropdownsAsync();
-            return Page();
-        }
-
-        var model = await modelRepo.FindAsync(Input.ModelId);
-        if (model is null || model.ManufacturerId != manufacturer.Id)
-        {
-            ModelState.AddModelError(nameof(Input.ModelId), "Selected model not found for this manufacturer.");
-            await PopulateDropdownsAsync();
-            return Page();
-        }
-
-        var color = Input.ColorId is null
-            ? null
-            : await colorRepo.FindAsync(Input.ColorId.Value) ?? null;
-        if (Input.ColorId.HasValue && color is null)
-        {
-            ModelState.AddModelError(nameof(Input.ColorId), "Selected color not found.");
-            await PopulateDropdownsAsync();
-            return Page();
-        }
-
-        var product = new Product
-        {
-            ModelId = model.Id,
-            ColorId = color?.Id,
-            Barcode = Guid.NewGuid().ToString("N")[..12],
-            Price = Input.Price,
-            SecondHandProfile = Input.IsSecondHand ? new SecondHand
-            {
-                TestPeriodDays = Input.TestPeriodDays ?? 30,
-                UsedDurationDays = 0,
-            } : null,
-            GuaranteeProfile = Input.HasGuarantee ? new Guarantee
-            {
-                StartDate = DateTime.Today,
-                ExpirationDate = Input.GuaranteeExpiry ?? DateTime.Today.AddYears(1),
-                Corporation = string.IsNullOrWhiteSpace(Input.GuaranteeCorporation) ? "Shop Warranty" : Input.GuaranteeCorporation.Trim(),
-            } : null,
-        };
-
-        var phone = new Phone
-        {
-            IMEI1 = imei1,
-            IMEI2 = string.IsNullOrWhiteSpace(Input.IMEI2) ? null : Input.IMEI2.Trim(),
-            OwnershipTransferred = false,
-            ProductNavigation = product,
-        };
-
-        var ok = await phoneDataService.AddAsync(phone);
-        if (!ok)
-        {
-            Message = "The phone could not be saved. Check the details and try again.";
-            await PopulateDropdownsAsync();
-            return Page();
-        }
-
-        return RedirectToPage("/Products/Details", new { id = phone.Id, type = "phone" });
+        return RedirectToPage("/Products/Details", new { id = result.EntityId, type = "phone" });
     }
 
     public async Task<IActionResult> OnPostCreateColorAsync(string name)
     {
-        if (string.IsNullOrWhiteSpace(name))
-            return new JsonResult(new { error = "Name is required." }) { StatusCode = 400 };
+        var result = await dataService.CreateColorAsync(name);
+        if (!result.Succeeded)
+            return new JsonResult(new { error = result.Error! }) { StatusCode = result.StatusCode };
 
-        var trimmed = name.Trim();
-        var existing = await colorRepo.FindAsync(c => c.Name == trimmed);
-        if (existing is not null)
-            return new JsonResult(new { id = existing.Id, name = existing.Name });
-
-        var color = new Color { Name = trimmed };
-        await colorRepo.AddAsync(color);
-        return new JsonResult(new { id = color.Id, name = color.Name });
+        return new JsonResult(new { id = result.Option!.Id, name = result.Option.Name });
     }
 
     public async Task<IActionResult> OnPostCreateCorporationAsync(string name)
@@ -178,14 +89,11 @@ public class CreatePhoneModel(
 
     private async Task PopulateDropdownsAsync()
     {
-        Manufacturers = await manufacturerRepo.FindAllAsync();
+        Manufacturers = await dataService.GetManufacturersAsync();
         Models = Input.ManufacturerId > 0
-            ? await modelRepo.GetByManufacturerAsync(Input.ManufacturerId)
+            ? await dataService.GetModelsAsync(Input.ManufacturerId)
             : [];
-        Colors = await colorRepo.FindAllAsync();
-        Corporations = (await guaranteeRepo.FindAllAsync())
-            .Select(g => g.Corporation)
-            .Distinct(StringComparer.OrdinalIgnoreCase)
-            .OrderBy(c => c, StringComparer.Ordinal);
+        Colors = await dataService.GetColorsAsync();
+        Corporations = await dataService.GetGuaranteeCorporationsAsync();
     }
 }

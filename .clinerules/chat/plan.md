@@ -261,7 +261,7 @@ as they are — see Step 1 for why the JSON contract must not move.
   projection exists, and the only files touched are the ones this step lists.
 - Risk: MEDIUM. Confidence: HIGH.
 
-## [ ] Step 3 — Migrate `CreatePhone` and `CreateAppleId`
+## ~~[x] Step 3 — Migrate `CreatePhone` and `CreateAppleId`~~
 - Files: modify: src/MobileShop.Web/Pages/Products/CreatePhone.cshtml.cs,
   src/MobileShop.Web/Pages/Products/CreateAppleId.cshtml.cs, and their test files
   src/MobileShop.Tests/Web/Pages/Products/CreatePhoneModelTests.cs (359 lines) and

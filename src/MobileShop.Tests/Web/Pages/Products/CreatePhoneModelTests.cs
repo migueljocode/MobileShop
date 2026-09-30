@@ -16,9 +16,16 @@ public class CreatePhoneModelTests : RepoTestBase
 
     public CreatePhoneModelTests()
     {
-        var phoneDataService = new PhoneDataService(
-            new PhoneRepo(Context),
-            NullLogger<PhoneDataService>.Instance);
+        var dataService = new ProductsDataService(
+            new BaseRepo<Phone>(Context),
+            new BaseRepo<AppleId>(Context),
+            new BaseRepo<Manufacturer>(Context),
+            new BaseRepo<Model>(Context),
+            new BaseRepo<Category>(Context),
+            new BaseRepo<Color>(Context),
+            new BaseRepo<Guarantee>(Context),
+            new BaseRepo<Transaction>(Context),
+            NullLogger<ProductsDataService>.Instance);
 
         // seed catalog data that would exist in production seed
         Context.Categories.Add(new Category { Name = "Phone" });
@@ -27,13 +34,7 @@ public class CreatePhoneModelTests : RepoTestBase
             new Manufacturer { Name = "Samsung" });
         Context.SaveChanges();
 
-        _model = new CreatePhoneModel(
-            phoneDataService,
-            new ManufacturerRepo(Context),
-            new ModelRepo(Context),
-            new CategoryRepo(Context),
-            new ColorRepo(Context),
-            new GuaranteeRepo(Context));
+        _model = new CreatePhoneModel(dataService);
     }
 
     private static CreatePhoneInputModel ValidInput(int manufacturerId, int modelId) => new()
@@ -133,7 +134,30 @@ public class CreatePhoneModelTests : RepoTestBase
 
         var redirect = Assert.IsType<RedirectToPageResult>(result);
         Assert.Equal("/Products/Details", redirect.PageName);
+        Assert.Equal("phone", redirect.RouteValues!["type"]);
+        Assert.NotNull(redirect.RouteValues!["id"]);
         Assert.NotNull(Context.Phones.FirstOrDefault(p => p.IMEI1 == "123456789012345"));
+    }
+
+    [Fact]
+    public async Task OnPostAsync_DuplicateImei_ReturnsModelStateError()
+    {
+        var apple = Context.Manufacturers.First(m => m.Name == "Apple");
+        var phoneCategory = Context.Categories.First(c => c.Name == "Phone");
+        var model = new Model { ManufacturerId = apple.Id, CategoryId = phoneCategory.Id, Name = "iPhone 15" };
+        Context.Models.Add(model);
+        Context.SaveChanges();
+
+        _model.Input = ValidInput(apple.Id, model.Id);
+        var first = await _model.OnPostAsync();
+        Assert.IsType<RedirectToPageResult>(first);
+
+        _model.Input = ValidInput(apple.Id, model.Id);
+        var result = await _model.OnPostAsync();
+
+        Assert.IsType<PageResult>(result);
+        Assert.False(_model.ModelState.IsValid);
+        Assert.True(_model.ModelState.ContainsKey(nameof(CreatePhoneInputModel.IMEI1)));
     }
 
     [Fact]

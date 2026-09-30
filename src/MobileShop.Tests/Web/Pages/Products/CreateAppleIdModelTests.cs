@@ -19,19 +19,22 @@ public class CreateAppleIdModelTests : RepoTestBase
 
     public CreateAppleIdModelTests()
     {
-        var appleIdDataService = new AppleIdDataService(
-            new AppleIdRepo(Context),
-            NullLogger<AppleIdDataService>.Instance);
+        var dataService = new ProductsDataService(
+            new BaseRepo<Phone>(Context),
+            new BaseRepo<AppleId>(Context),
+            new BaseRepo<Manufacturer>(Context),
+            new BaseRepo<Model>(Context),
+            new BaseRepo<Category>(Context),
+            new BaseRepo<MobileShop.Models.Entities.Color>(Context),
+            new BaseRepo<Guarantee>(Context),
+            new BaseRepo<Transaction>(Context),
+            NullLogger<ProductsDataService>.Instance);
 
         // the AppleId category and the Apple manufacturer come from the catalog seed data in production
         Context.Categories.Add(new Category { Name = AppleIdCategoryName });
         Context.SaveChanges();
 
-        _model = new CreateAppleIdModel(
-            appleIdDataService,
-            new ManufacturerRepo(Context),
-            new ModelRepo(Context),
-            new CategoryRepo(Context));
+        _model = new CreateAppleIdModel(dataService);
     }
 
     private static CreateAppleIdInputModel ValidInput(string email) => new()
