@@ -11,19 +11,20 @@
 
 ## Step 1 — Bundle the QuestPDF-compatible Vazirmatn font
 
-- Add the required Vazirmatn TTF/OTF asset to the existing project font location, preferably alongside the existing `wwwroot/fonts` assets.
-- Preserve the existing font family name `Vazirmatn`.
-- Do not remove the existing WOFF2 web-font assets; they serve a different purpose.
-- Record the font source/version and licence information in the repository documentation appropriate to the existing project conventions.
+- Add a QuestPDF font asset such as `Vazirmatn-Regular.ttf` under the Services PDF area (for example `src/MobileShop.Services/PDF/Fonts/`), not under Web `wwwroot`: the PDF generator lives in Services and must not depend on Web static assets.
+- Mark the font as content copied to the Services build output (or otherwise make it reliably available to the registration path); verify the actual test/runtime output contains the file.
+- Preserve the existing font family name `Vazirmatn` and do not remove the existing WOFF2 web-font assets; they serve a different purpose.
+- Pin the exact Vazirmatn source/version and retain the applicable font licence text/notice with the bundled asset or repository documentation.
 - Do not change invoice layout or Persian content in this step.
-- Verify the font file is included in the relevant build/test output path and is accessible to the code that registers it.
+- Verify the font file is present in the Services and test output path that the registration code will use.
 - Risk: MEDIUM
 - Confidence: HIGH
 
 ## Step 2 — Register Vazirmatn for QuestPDF
 
-- Update only the PDF configuration/setup needed to register the bundled TTF/OTF with QuestPDF before Persian document generation.
-- Use the project's existing PDF initialization/configuration path rather than introducing a separate runtime service.
+- Update `src/MobileShop.Services/PDF/Configuration/QuestPdfSetup.cs` (the existing startup hook) to register the bundled TTF/OTF with QuestPDF's `FontManager` exactly once before the first render.
+- Use the bundled file/resource rather than Web `wwwroot` and do not rely on machine-installed fonts.
+- Make the registration path usable by the existing direct `QuestPdfGenerator` unit tests as well as normal application startup; do not assume the Web host runs during unit tests.
 - Preserve the existing `Vazirmatn` family name used by `FontFamily("Vazirmatn")`.
 - Keep English PDF generation unchanged.
 - Do not alter invoice layout, models, DI architecture, or database behavior.
@@ -33,7 +34,7 @@
 
 ## Step 3 — Unskip and validate the two Persian tests
 
-- Modify only `src/MobileShop.Tests/Services/PDF/QuestPdfGeneratorTests.cs` for the test assertions/skip state.
+- Modify only `src/MobileShop.Tests/Services/PDF/QuestPdfGeneratorTests.cs` for the test setup/skip state/assertions needed to exercise the real PDF setup in direct unit tests.
 - Remove the two `Skip` attributes and their obsolete commercial-license wording.
 - Preserve both test purposes:
   - Persian invoice generation returns a non-empty PDF payload with a PDF signature.
@@ -47,8 +48,8 @@
 
 ## Global Definition of Done
 
-- A Vazirmatn TTF/OTF is bundled in the repository and its licence/source is documented.
-- QuestPDF can resolve the `Vazirmatn` family from the bundled font.
+- A pinned Vazirmatn TTF/OTF is bundled in the Services PDF area, copied into the relevant outputs, and its licence/source is documented.
+- QuestPDF registers and resolves the `Vazirmatn` family from that bundled font in both application startup and direct PDF unit tests.
 - Both Persian PDF tests are unskipped and pass.
 - Existing English PDF tests remain passing.
 - Full solution build/test passes with no new warnings or failures.
