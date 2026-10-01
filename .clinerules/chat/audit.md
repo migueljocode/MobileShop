@@ -1,34 +1,32 @@
 # Audit — Stage M — PartNumber
 
-## Reviewer Job B — Step 1
+## Reviewer Job B — Step 2
 
-**Status: PASS — Step 1 approved.**
+**Status: PASS — Step 2 approved.**
 
 ### Verified
 
-- `PartNumber` belongs to one `Model`; `Model` has many PartNumbers.
-- `Phone.PartNumberId` is nullable.
-- Multiple phones can share one PartNumber.
-- Uniqueness is scoped to **Model + Code** with the soft-delete filter.
-- Phone → PartNumber uses `DeleteBehavior.NoAction`.
-- `AppDbContext` registers `PartNumbers`.
-- `AddPartNumber.Up()` is additive: nullable Phone column, new PartNumbers table, indexes, and foreign keys. No destructive operation appears in `Up()`.
-- The corrected migration test creates the database at the schema immediately preceding `AddPartNumber`, inserts an existing Phone before the migration, applies `AddPartNumber`, and verifies the same Phone/IMEI survives with `PartNumberId == null`.
-- Focused PartNumber tests: **5 passed / 0 failed / 0 skipped**.
-- Full suite: **256 passed / 0 failed / 0 skipped**.
+- Four development PartNumbers are seeded with stable IDs 1–4.
+- The seeded PartNumbers belong to phone models 1, 3, 6, and 16.
+- Existing phone rows 1, 3, 4, and 7 reference PartNumbers 1–4 respectively; phones 2, 5, and 6 remain `NULL`.
+- Existing Product and Phone IDs are unchanged.
+- `SampleDataLoader` deserializes PartNumbers and `SampleDataInitializer` inserts them after Models/Products are available.
+- `ClearData` clears Phones before PartNumbers, so the new Phone → PartNumber FK is respected during destructive development reseeding.
+- `IProductsDataService` exposes PartNumber list/create operations.
+- `ProductsDataService` uses the existing generic repository abstraction and scopes listing to the requested Model.
+- Create trims the code, rejects blank codes with 400, rejects unknown models with 404, and returns the existing option for an existing Model + Code.
+- The API implementation remains a stub and is only synchronized with the changed interface, consistent with the established contract.
+- Five focused PartNumber service tests cover model scoping, empty results, creation, duplicate reuse, unknown model, and blank-code validation.
 - Build: **0 warnings / 0 errors**.
-- Scope remains within Models/DAL/tests; no API, authentication, PDF, or development-initialization-policy changes were introduced.
-
-### Previous blocker resolved
-
-The earlier migration test incorrectly created the Phone after the migration. Commit `62a7b75f361f906d96d69221052976c8b9012cae` corrected that test to use the pre-migration schema.
+- Full suite: **262 passed / 0 failed / 0 skipped**.
+- No production API behavior, authentication, PDF, or database-initialization-policy changes were introduced.
 
 ### Workflow
 
-The Actor's earlier plan-editing violation remains recorded historically. The follow-up implementation commit only changes the migration-safety test; no additional workflow violation is recorded here.
+The Actor edited `.clinerules/chat/plan.md` in commit `aa42599a7a98f2c62b5590cf12a1be04b8226928` to mark Step 2 complete before Reviewer Job B. This violates the established rule that the Actor must not edit `plan.md`, `audit.md`, or `.clinerules/to-do.md` to mark progress. The violation is recorded; no rework is required because the implementation itself passes review.
 
 ### Gate
 
-**Step 1 PASS. Step 2 may begin.**
+**Step 2 PASS. Step 3 may begin.**
 
 No `.clinerules/to-do.md` change is made because Stage M is not complete.
