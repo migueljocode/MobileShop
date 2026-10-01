@@ -1,3 +1,52 @@
+# Act — Stage M Step 4 — PartNumber and SIM options on phone details
+
+## Commit
+- This commit — feat(products): show part number and SIM options on phone details
+  - Implements Step 4 of plan.md.
+
+## What changed
+- `ProductDetailsViewModel.cs` — three init-only string properties with `"N/A"` defaults: `PartNumberLabel`, `DualSimLabel`, `EsimLabel`. Defaults keep the phone-only fields neutral for Apple IDs and for phones without a part number.
+- `ProductsDataService.GetDetailsAsync` — the **phone** projection now sets the three labels from the existing `Phone.PartNumberNavigation`: `N/A` when the navigation is null, otherwise the `Code` and `Yes`/`No` for `SupportsDualSim`/`SupportsEsim`. The **Apple ID** branch is unchanged (it keeps the defaults).
+- `Products/Details.cshtml` — the Part number / Dual SIM / eSIM rows render only when `Type == "Phone"`, so Apple ID details are byte-for-byte unchanged.
+- `ProductsDataServiceTests.cs` — 5 new `GetDetailsAsync` tests (plus two small local seeding helpers) covering the required cases.
+
+## Verification
+- `dotnet build src/MobileShop.slnx --nologo` → **0 warnings, 0 errors**
+- Focused `dotnet test ... --filter "FullyQualifiedName~GetDetailsAsync"` → **10 passed, 0 failed, 0 skipped**
+- Full suite `dotnet test src/MobileShop.slnx --nologo --no-build` → **272 passed, 0 failed, 0 skipped**
+- Null-part-number case explicitly asserted: phone loads with `PartNumberId == null` and shows `N/A` for all three.
+- Apple ID details explicitly asserted unchanged (Type/Identifier unchanged; the phone-only fields keep `N/A`).
+- No API, authentication, PDF, or database-initialization-policy changes: `git status` shows only the four files above.
+
+## Required test coverage (map)
+1. PartNumber code displayed → `GetDetailsAsync_phone_with_part_number_shows_code_and_capabilities`
+2. `SupportsDualSim` displayed → same test (`"Yes"`) and the both-true test
+3. `SupportsEsim` displayed → same test (`"No"`) and the both-true test
+4. `PartNumberId == null` loads → `GetDetailsAsync_phone_without_part_number_loads_and_shows_na`
+5. Null shows `N/A` → same test (all three labels)
+6. Existing PartNumber with false capabilities ≠ missing → `GetDetailsAsync_phone_with_false_capabilities_is_not_treated_as_missing_part_number`
+7. Apple ID details unchanged → `GetDetailsAsync_apple_id_details_remain_unchanged_without_part_number_fields`
+
+## Files changed
+- `src/MobileShop.Models/ViewModels/Web/ProductDetailsViewModel.cs`
+- `src/MobileShop.Services/DataServices/Dal/ProductsDataService.cs`
+- `src/MobileShop.Tests/Services/DataServices/Dal/ProductsDataServiceTests.cs`
+- `src/MobileShop.Web/Pages/Products/Details.cshtml`
+
+## Limitations
+None. Step 4 is display-only; assigning a part number during phone creation was deliberately not touched (that is Stage N, as plan.md states). I did **not** edit plan.md/audit.md/to-do.md, per plan.md §92 — the Reviewer owns those.
+
+## Friction noted
+- Build is now ~31s and the full suite ~35s, both beyond the 30s tool window; run in the background and polled.
+
+## Problems
+None — verification green. Reviewer Job B determines PASS/FAIL.
+
+## Status
+COMPLETE — awaiting Reviewer Job B for Step 4.
+
+---
+
 # Act — Stage M Step 3 — PartNumber filter on the Products list
 
 ## Commit

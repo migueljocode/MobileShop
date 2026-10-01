@@ -157,7 +157,14 @@ public class ProductsDataService(
                     phone.ProductNavigation.GuaranteeProfile == null
                         ? "None"
                         : phone.ProductNavigation.GuaranteeProfile.Corporation + " until " + phone.ProductNavigation.GuaranteeProfile.ExpirationDate.ToString("d"),
-                    phone.ProductNavigation.SecondHandProfile != null));
+                    phone.ProductNavigation.SecondHandProfile != null)
+                {
+                    // A phone without a part number keeps the "N/A" defaults, so a missing part number
+                    // is never rendered as a false capability.
+                    PartNumberLabel = phone.PartNumberNavigation == null ? "N/A" : phone.PartNumberNavigation.Code,
+                    DualSimLabel = phone.PartNumberNavigation == null ? "N/A" : phone.PartNumberNavigation.SupportsDualSim ? "Yes" : "No",
+                    EsimLabel = phone.PartNumberNavigation == null ? "N/A" : phone.PartNumberNavigation.SupportsEsim ? "Yes" : "No",
+                });
         }
 
         if (details is null) return null;

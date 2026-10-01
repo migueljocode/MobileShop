@@ -459,6 +459,135 @@ public class ProductsDataServiceTests : RepoTestBase
         Assert.Equal("Sara Customer", details.Transactions[1].CustomerLabel);
     }
 
+    // ── Phone details PartNumber / SIM ────────────────────────
+
+    private Phone SeedPhoneWithPartNumber(out PartNumber partNumber, bool supportsDualSim, bool supportsEsim)
+    {
+        SeedCatalog(out var phoneModel, out _);
+        var product = TestDataHelpers.CreateProduct(Context);
+        var tracked = Context.Products.First(p => p.Id == product.Id);
+        tracked.ModelId = phoneModel.Id;
+        Context.Products.Update(tracked);
+
+        partNumber = new PartNumber
+        {
+            ModelId = phoneModel.Id,
+            Code = "CH/ZAA",
+            SupportsDualSim = supportsDualSim,
+            SupportsEsim = supportsEsim
+        };
+        Context.PartNumbers.Add(partNumber);
+        Context.SaveChanges();
+
+        var phone = new Phone
+        {
+            ProductId = product.Id,
+            IMEI1 = TestDataHelpers.GenerateImei(),
+            OwnershipTransferred = false,
+            PartNumberId = partNumber.Id
+        };
+        Context.Phones.Add(phone);
+        Context.SaveChanges();
+        return phone;
+    }
+
+    private Phone SeedPhoneWithoutPartNumber()
+    {
+        SeedCatalog(out var phoneModel, out _);
+        var product = TestDataHelpers.CreateProduct(Context);
+        var tracked = Context.Products.First(p => p.Id == product.Id);
+        tracked.ModelId = phoneModel.Id;
+        Context.Products.Update(tracked);
+
+        var phone = new Phone
+        {
+            ProductId = product.Id,
+            IMEI1 = TestDataHelpers.GenerateImei(),
+            OwnershipTransferred = false
+        };
+        Context.Phones.Add(phone);
+        Context.SaveChanges();
+        return phone;
+    }
+
+    [Fact]
+    public async Task GetDetailsAsync_phone_with_part_number_shows_code_and_capabilities()
+    {
+        var phone = SeedPhoneWithPartNumber(out var partNumber, supportsDualSim: true, supportsEsim: false);
+
+        var details = await _service.GetDetailsAsync(phone.Id, "phone");
+
+        Assert.NotNull(details);
+        Assert.Equal("CH/ZAA", details!.PartNumberLabel);
+        Assert.Equal("Yes", details.DualSimLabel);
+        Assert.Equal("No", details.EsimLabel);
+        Assert.Equal(partNumber.Code, details.PartNumberLabel);
+    }
+
+    [Fact]
+    public async Task GetDetailsAsync_phone_with_part_number_that_supports_both_shows_yes_for_both()
+    {
+        var phone = SeedPhoneWithPartNumber(out _, supportsDualSim: true, supportsEsim: true);
+
+        var details = await _service.GetDetailsAsync(phone.Id, "phone");
+
+        Assert.NotNull(details);
+        Assert.Equal("Yes", details!.DualSimLabel);
+        Assert.Equal("Yes", details.EsimLabel);
+    }
+
+    [Fact]
+    public async Task GetDetailsAsync_phone_without_part_number_loads_and_shows_na()
+    {
+        var phone = SeedPhoneWithoutPartNumber();
+
+        var details = await _service.GetDetailsAsync(phone.Id, "phone");
+
+        Assert.NotNull(details);
+        Assert.Null(Context.Phones.Single(p => p.Id == phone.Id).PartNumberId);
+        Assert.Equal("N/A", details!.PartNumberLabel);
+        Assert.Equal("N/A", details.DualSimLabel);
+        Assert.Equal("N/A", details.EsimLabel);
+    }
+
+    [Fact]
+    public async Task GetDetailsAsync_phone_with_false_capabilities_is_not_treated_as_missing_part_number()
+    {
+        // A real part number with both capabilities false must render "No", never the "N/A"
+        // used for a phone that has no part number at all.
+        var phone = SeedPhoneWithPartNumber(out _, supportsDualSim: false, supportsEsim: false);
+
+        var details = await _service.GetDetailsAsync(phone.Id, "phone");
+
+        Assert.NotNull(details);
+        Assert.Equal("CH/ZAA", details!.PartNumberLabel);
+        Assert.Equal("No", details.DualSimLabel);
+        Assert.Equal("No", details.EsimLabel);
+    }
+
+    [Fact]
+    public async Task GetDetailsAsync_apple_id_details_remain_unchanged_without_part_number_fields()
+    {
+        SeedCatalog(out _, out var appleIdModel);
+        var product = TestDataHelpers.CreateProduct(Context);
+        var tracked = Context.Products.First(p => p.Id == product.Id);
+        tracked.ModelId = appleIdModel.Id;
+        Context.Products.Update(tracked);
+        var appleId = new AppleId { ProductId = product.Id, Email = "unchanged@example.com", Password = "secret" };
+        Context.AppleIds.Add(appleId);
+        Context.SaveChanges();
+
+        var details = await _service.GetDetailsAsync(appleId.Id, "appleid");
+
+        Assert.NotNull(details);
+        Assert.Equal("Apple ID", details!.Type);
+        Assert.Equal("Email: unchanged@example.com", details.Identifier);
+        // The phone-only part-number fields keep their defaults for Apple IDs.
+        Assert.Equal("N/A", details.PartNumberLabel);
+        Assert.Equal("N/A", details.DualSimLabel);
+        Assert.Equal("N/A", details.EsimLabel);
+    }
+
     // ── CreateManufacturer / CreateModel / CreateColor ───────
 
     [Fact]

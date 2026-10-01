@@ -15,6 +15,12 @@
         <dt class="col-sm-3">Owner</dt><dd class="col-sm-9">@Model.Product.OwnerLabel</dd>
         <dt class="col-sm-3">Second-hand</dt><dd class="col-sm-9">@(Model.Product.IsSecondHand ? "Yes" : "No")</dd>
         <dt class="col-sm-3">Guarantee</dt><dd class="col-sm-9">@Model.Product.GuaranteeLabel</dd>
+        @if (Model.Product.Type == "Phone")
+        {
+            <dt class="col-sm-3">Part number</dt><dd class="col-sm-9">@Model.Product.PartNumberLabel</dd>
+            <dt class="col-sm-3">Dual SIM</dt><dd class="col-sm-9">@Model.Product.DualSimLabel</dd>
+            <dt class="col-sm-3">eSIM</dt><dd class="col-sm-9">@Model.Product.EsimLabel</dd>
+        }
     </dl>
     <h2>Transactions</h2>
     @if (Model.Transactions.Count == 0) { <p class="text-muted">No transactions.</p> }
