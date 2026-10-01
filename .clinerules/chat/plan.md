@@ -20,7 +20,7 @@
 - **Done** — Job B PASS after one correction (`bee5ba9`, `546440f`, `b5df8fe`). Delivered: `Pages/Shared/_ProductPickerOptions.cshtml`, `wwwroot/js/product-picker.js`, Buy on tag-helper controls, `[Display(Name = "Finished price")]` on `BuyInputModel.Price`, date default today.
 - Carried into Step 3: selected-product re-selection after a failed post.
 
-## [ ] Step 3 — Sell page on the shared picker (+ selected-product fix on both pages)
+## ~~[x] Step 3 — Sell page on the shared picker (+ selected-product fix on both pages)~~
 - Files
   - inspect: `src/MobileShop.Web/Pages/Transactions/Sell.cshtml`, `Sell.cshtml.cs`, `Buy.cshtml`, `Pages/Shared/_ProductPickerOptions.cshtml`, `wwwroot/js/product-picker.js`, `ProductPickerViewModel.cs`, `SellInputModel.cs`, `RecordModelTests.cs`
   - modify: `ProductPickerViewModel.cs`, `_ProductPickerOptions.cshtml`, `Buy.cshtml`, `Sell.cshtml`, `Sell.cshtml.cs`, `SellInputModel.cs`, `RecordModelTests.cs`
