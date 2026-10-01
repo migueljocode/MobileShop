@@ -1,6 +1,6 @@
 # Act Report — Post–Stage H cleanup (polish pass)
 
-- Commit: (filled in after commit)
+- Commit: `ed29b3e` — refactor(products): remove dead repo property, null-default view model, stale comments
 - Verification (clean build, as the prompt preferred):
   - `dotnet clean src/MobileShop.slnx --nologo` then `dotnet build src/MobileShop.slnx --nologo --no-incremental` -> **Build succeeded, 0 errors, 0 warnings**.
   - `dotnet test src/MobileShop.slnx --nologo --no-build` -> **Failed: 0, Passed: 243, Skipped: 2, Total: 245** (EXIT=0, 41 s). Baseline was 240; the delta is exactly the 3 added tests.
