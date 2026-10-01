@@ -1,19 +1,19 @@
-# Act — Stage I — Step 1 — Rename PasswordHasher to ArgonPasswordHasher
+# Act — Stage I — Steps 1 & 2 Report
 
-## Commit
-88c8ff3b10249d460ecaa3309b3ac8836371c1ad — refactor(security): rename PasswordHasher to ArgonPasswordHasher — Implements Step 1 of plan.md.
+## Step 1 — Rename PasswordHasher to ArgonPasswordHasher
+- Commit: 88c8ff3b10249d460ecaa3309b3ac8836371c1ad — refactor(security): rename PasswordHasher to ArgonPasswordHasher
+- Verification: dotnet build (0 errors, 0 warnings); ArgonPasswordHasherTests 9/9 passed; AccountDataServiceTests 9/9 passed.
 
-## Verification
-- `dotnet build src/MobileShop.slnx --nologo` → Build succeeded. 0 Warning(s), 0 Error(s).
-- `dotnet test src/MobileShop.Tests/MobileShop.Tests.csproj --nologo --no-build --no-restore --filter "FullyQualifiedName~ArgonPasswordHasherTests"` → Passed! Failed: 0, Passed: 9, Skipped: 0, Total: 9.
-- `dotnet test src/MobileShop.Tests/MobileShop.Tests.csproj --nologo --no-build --no-restore --filter "FullyQualifiedName~Services.DataServices.Dal.AccountDataServiceTests"` → Passed! Failed: 0, Passed: 9, Skipped: 0, Total: 9.
-- Codebase search for `\bPasswordHasher\b` confirms no concrete class references remain (only `IPasswordHasher` interface and the `AccountDataService` substring).
+## Step 2 — Move PDF tests under Services.PDF
+- Commit: 9d95cb46508b87c709d7e735ad133b01c630942b — refactor(tests): move PDF tests to Services.PDF namespace
+- Verification: dotnet build (0 errors, 0 warnings); QuestPdfGeneratorTests discovered under MobileShop.Tests.Services.PDF: 4 passed, 2 skipped, 0 failed, 6 total. The two skipped Persian tests remain skipped as expected.
+- Codebase search for `MobileShop.Tests.PDF` confirms no source-code references remain (only documentation files in .clinerules/).
 
 ## Limitations
 None.
 
 ## Friction noted
-The default tool timeout of 30s was insufficient for test execution (tests take ~13–17s each plus runner overhead). Used `--no-build --no-restore` flags to skip rebuild on subsequent runs after the initial build, which brought tests within the timeout window. The build itself took ~20s.
+The default tool timeout of 30s is insufficient for builds/tests. Used `--no-build --no-restore` on test runs after the initial build to stay within the timeout.
 
 ## Problems
 None.
