@@ -2,40 +2,43 @@
 
 ## Planner / Reviewer Job A
 
-Stage M is the next unchecked stage in `.clinerules/to-do.md`. It is a schema change, so implementation must be staged one step at a time: **one step → commit → Reviewer Job B → next step**.
+**Status: APPROVED with clarifications below.**
+
+Stage M is the next unchecked stage in `.clinerules/to-do.md`. It is a schema change, so implementation must be staged: **one step → commit → Reviewer Job B → next step**.
 
 ### Design decisions
 
 - Add a new `PartNumber` entity under `MobileShop.Models.Entities`.
 - A PartNumber belongs to exactly one `Model`; a Model can have many PartNumbers.
-  - Rationale: a part number such as `CH/ZAA` identifies a regional/SIM variant of a concrete device model, while multiple physical `Phone` rows can share that variant.
-  - Do **not** put `PartNumberId` on `Product` or `Model`; the FK belongs on `Phone`.
+- Many physical `Phone` rows can share the same PartNumber.
 - `Phone.PartNumberId` is nullable so all existing phones remain valid.
 - PartNumber carries:
-  - a required unique code/value;
+  - required code/value;
   - `SupportsDualSim` boolean;
   - `SupportsEsim` boolean.
+- **Uniqueness is scoped to Model + code, not globally.** This matches the Model-owned relationship and allows the same textual part-number code to exist under different models if the catalog requires it.
 - Use the existing `BaseEntity` / soft-delete conventions.
 - Put EF mapping in `PartNumberConfiguration` and extend `PhoneConfiguration`; register the DbSet in `AppDbContext`.
 - The migration must be additive/non-destructive for production:
   - create `PartNumbers`;
   - add nullable `Phone.PartNumberId`;
   - add the FK/indexes;
-  - never drop or rewrite existing phone/product rows.
-- Development initialization remains destructive and continues using `sample-data.json`; preserve existing IDs and relationships while adding representative PartNumber records and assigning them to existing phone rows.
+  - never drop, rewrite, or require a PartNumber for existing phone/product rows.
 
 ## Step 1 — Add the PartNumber schema and production-safe migration
 
 - [ ] Step 1 — Add `PartNumber`, nullable `Phone.PartNumberId`, EF configuration/DbSet, and one additive EF migration.
-- Keep the change limited to Models/DAL/migration files.
-- Migration must be safe against an existing production database containing phones with no PartNumber.
-- Do not change development database initialization policy.
-- Add focused EF/mapping tests proving:
-  - PartNumber → Model is many-to-one.
-  - Phone → PartNumber is optional.
-  - duplicate PartNumber codes are rejected by the configured unique constraint/index.
+- Keep the implementation limited to Models/DAL/migration files plus focused DAL tests.
+- Configure the unique index as **(ModelId, Code)**, respecting soft-delete conventions.
+- Configure Phone → PartNumber as optional with no destructive cascade behavior.
+- Add focused EF tests proving:
+  - PartNumber → Model is many-to-one;
+  - Phone → PartNumber is optional;
+  - duplicate **Model + Code** is rejected;
+  - the same Code under different Models is allowed, if the implementation exposes that case naturally.
+- **Migration safety test:** exercise the generated migration against a SQLite database containing an existing phone row before the migration; apply the migration; verify the phone still exists and has `NULL PartNumberId`.
+- Inspect migration `Up`/`Down` for destructive operations before approval.
 - Verification:
-  - inspect migration Up/Down for destructive operations;
   - `dotnet build src/MobileShop.slnx --nologo`;
   - relevant DAL tests;
   - full test suite with `--no-build`;
@@ -49,7 +52,7 @@ Stage M is the next unchecked stage in `.clinerules/to-do.md`. It is a schema ch
 - Add service methods for:
   - list PartNumbers for a Model;
   - create a PartNumber for a Model;
-  - return the existing PartNumber instead of creating a duplicate when the same code already exists for that Model.
+  - return the existing PartNumber instead of creating a duplicate when the same **Model + Code** already exists.
 - Validate Model existence and require a non-empty code.
 - Keep the API data-service path untouched; Stage J left those stubs intentionally inert.
 - Add focused service tests for:
@@ -61,7 +64,7 @@ Stage M is the next unchecked stage in `.clinerules/to-do.md`. It is a schema ch
 - Verification:
   - relevant service tests;
   - full build/test;
-  - confirm sample-data JSON keeps existing IDs stable.
+  - confirm sample-data JSON keeps existing IDs stable and only adds the intended PartNumber rows/assignments.
 - **Reviewer Job B required before Step 3.**
 
 ## Step 3 — Add PartNumber filtering to Products
@@ -101,7 +104,7 @@ Stage M is the next unchecked stage in `.clinerules/to-do.md`. It is a schema ch
 ## Stage M Definition of Done
 
 - [ ] All four implementation steps have passed Reviewer Job B.
-- [ ] Production migration is additive/non-destructive and reviewed.
+- [ ] Production migration is additive/non-destructive and verified against an existing-phone database.
 - [ ] Existing phone/product IDs and relationships remain stable in development seed data.
 - [ ] PartNumber list/create operations are covered by focused tests.
 - [ ] Products PartNumber filtering is covered by regression tests.
