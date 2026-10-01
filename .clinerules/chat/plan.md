@@ -19,6 +19,7 @@
 - Verify the font file is present in the Services and test output path that the registration code will use.
 - Risk: MEDIUM
 - Confidence: HIGH
+- Reviewer Job B: PASS — verified in commit `ad162453c0ebbf832c300ec6619445bd0b54d00c`.
 
 - [ ] Step 2 — Register Vazirmatn for QuestPDF
 
