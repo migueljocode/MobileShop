@@ -134,3 +134,21 @@ Repository inspection confirms the Stage L scope matches the current implementat
 # Stage L — Plan Correction
 
 The previous `plan.md` incorrectly accumulated prior-stage material. Reviewer rewrote it to contain **only the active Stage L plan**, with Step 1 authorized and Steps 2–3 explicitly pending Job B authorization.
+
+
+# Stage L — Plan Re-review and Rewrite
+
+**Verdict: APPROVED — Stage L Step 1 only.**
+
+The previous plan was re-reviewed against the repository and rewritten because it did not meet the project's planning format and actor-guidance requirements.
+
+The corrected plan now:
+- contains only the active Stage L;
+- uses checkbox syntax for every step and the Stage L DoD;
+- records concrete repository facts;
+- gives explicit actor execution rules and stop/authorization gates;
+- defines exact files, preserved contracts, required behavior, verification, and scope locks;
+- keeps Steps 2 and 3 blocked until their preceding Job B PASS;
+- keeps Reviewer ownership of `.clinerules/chat/plan.md`, `.clinerules/chat/audit.md`, and `.clinerules/to-do.md`.
+
+**Authorization: Step 1 only.**
