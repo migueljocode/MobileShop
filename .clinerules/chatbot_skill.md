@@ -22,7 +22,7 @@ Repository writes are allowed when the user explicitly authorizes them. Planning
 ### "plan"
 1. Read `to-do.md`, `plan.md`, `audit.md`, relevant rules, and the actual repository.
 2. Determine the exact active stage.
-3. Rewrite `plan.md) for the active stage only.
+3. Rewrite `plan.md` for the active stage only.
 4. Keep it actor-ready: exact scope, symbols, behavior, tests, verification, risks, and completion criteria.
 5. Never implement production code or tick `to-do.md`.
 
