@@ -87,7 +87,7 @@
 - Risk: HIGH
 - Confidence: MEDIUM
 
-## [ ] Step 3 — Final Stage M validation (Reviewer sign-off)
+## ~~[x] Step 3 — Final Stage M validation (Reviewer sign-off)~~
 
 - Actor: no production changes expected; report SHAs + validation only if asked. Reviewer runs/records full build+test and UX checklist, writes final PASS, then ticks `to-do.md`.
 - Checklist: phone-only selector; no Filter button; auto-apply; inventory options; column; Create Phone combobox+Add New; details still OK; no API/auth/PDF/migration scope creep.

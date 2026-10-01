@@ -1,17 +1,29 @@
-# Audit — Job B: Stage M (reopened) Step 2
+# Audit — Job B: Stage M (reopened) Step 3 — final sign-off
 
 **Verdict: PASS**
 
-**Commit:** `2543d5a82930bef876916526a645d979bfb09bb5`
+## Commits
+- Step 1 — `f80ae397a8a684d5bae5ea773c8bfae0da8d3911`
+- Step 2 — `2543d5a82930bef876916526a645d979bfb09bb5`
+- Prior Job B — `77f5b82ca82e4fee6bde187ee29fc4ccb02bd213`
 
-Diff implements the step. Conventional commit. No API/auth/PDF/migration. Recorded verification in act.md: 284 passed.
+## UX checklist
 
-Persist, omit→null, and foreign-model reject are covered in `CreatePhoneAsync` tests. Model-scoped GET, Add New create, missing-model 400, and duplicate reuse are covered on the page model.
+| Item | Result |
+|------|--------|
+| Phone-only PartNumber selector | **OK** — `ShowPartNumberFilter` / `Type == "phone"` |
+| No Filter button | **OK** |
+| Auto-apply on change | **OK** — `onchange="this.form.submit()"` |
+| Inventory-derived options | **OK** — `GetInventoryPartNumbersAsync()` |
+| Part number list column | **OK** — `PartNumberLabel` |
+| Create Phone combobox + Add New | **OK** — Model-scoped; persist or null |
+| Phone details Part number / Dual SIM / eSIM | **OK** — Phone-only rows unchanged |
+| No API / auth / PDF / migration in these steps | **OK** |
 
-## Notes (optional, not blocking)
-- Manufacturer `change` resets models but does not clear the PartNumber select; picking a model does. Submit is still safe (empty model fails validation; foreign PN is rejected in the service).
-- Add New is not disabled in the UI; JS bails and the handler returns 400 without a model.
-- Actor also ticked plan.md Step 1/2 headers in this commit (plan briefing said not to edit plan.md; actor.md says to tick the current step).
+## Verification
+Actor recorded on Step 2 (covers the tree): `dotnet build` 0/0; full suite **284 passed**, 0 failed, 0 skipped. This sandbox has no `dotnet`; suite was not re-run here.
 
-## Gate
-Step 3 (reviewer sign-off) is next. Stage M stays unchecked until that final PASS.
+## Notes (not blocking)
+Manufacturer change does not clear the PartNumber select until a model is picked. Server still rejects a foreign PartNumberId.
+
+Stage M is complete.
