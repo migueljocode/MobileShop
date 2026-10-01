@@ -1,34 +1,87 @@
-# Audit — Reviewer: Stage O Step 4
+# Audit — Stage O Step 4 validation task for Actor
 
-**Reviewed:** final Stage O validation gate against the approved plan and current repository state.
-**Verdict: FAIL — CI passes, but the full Step 4 gate is not fully evidenced.**
+**Purpose:** collect the remaining validation evidence required for the Reviewer to complete Stage O Step 4.  
+**Scope:** validation/evidence only. Do not change production implementation files.
 
-## Findings
-- Step 4 is **Reviewer-only**.
-- GitHub Actions CI is now configured in `.github/workflows/dotnet.yml`.
-- GitHub-hosted CI run `36942766748` for commit `2a2cfb8e9e94fcac612ce15f850f7062b3867535` completed with conclusion `success`.
-- The CI workflow successfully performed restore, build, and test on `ubuntu-latest` with .NET `10.0.x`.
-- Current source inspection confirms the planned final UI structure and picker behavior:
-  - Buy and Sell use the shared product-picker partial and `product-picker.js`.
-  - Both pages preserve `Input.ProductId` through the shared options.
-  - Both expose Product, Finished price, Date and Back; Buy exposes Seller and Sell does not.
-  - The shared partial emits invariant-culture suggested prices and the script uses that value to prefill Finished price.
-  - Sell defaults Date to `DateTime.Today`.
-- The remaining Step 4 requirements are not independently evidenced by the GitHub CI run:
-  - configured-culture/browser verification of Finished-price rendering and binding;
-  - final rendered Buy/Sell UI checklist.
-- Therefore CI is a successful build/test gate, but it does not by itself prove the complete manual Step 4 checklist.
+## Actor task
 
-## Required next action
-Complete the remaining Reviewer checks in a browser-capable environment, then re-run the final gate. Do not tick Step 4 or Stage O until those checks pass.
+Run the final Stage O validation and record concise evidence in `act.md`.
 
-## Reviewer checklist
-- [x] Correctly treated Step 4 as Reviewer-only.
-- [x] Reviewed the approved Step 4 requirements.
-- [x] Inspected current source relevant to final UI/culture behavior.
-- [x] GitHub Actions restore/build/test PASS.
-- [ ] Configured-culture Finished-price rendered/binding check PASS.
-- [ ] Final rendered Buy/Sell UI checklist PASS.
-- [ ] Step 4 PASS.
-- [ ] Stage O sign-off.
-- [ ] Tick Stage O in `to-do.md`.
+### 1. Clean build and full test suite
+
+Run:
+
+```bash
+dotnet clean src/MobileShop.slnx --nologo
+dotnet build src/MobileShop.slnx --nologo --no-incremental
+dotnet test src/MobileShop.slnx --nologo --no-build
+```
+
+Record:
+- build result;
+- warning/error counts;
+- test passed/failed/skipped counts.
+
+The required result is **0 warnings, 0 errors, all tests passing**.
+
+### 2. Finished-price culture check
+
+Using the running application/browser, verify that changing a product with a suggested price prefills **Finished price** correctly.
+
+Check:
+- the application's configured culture;
+- a comma-decimal culture if one is configured/available;
+- the displayed Finished price;
+- the value posted/bound when the form is submitted;
+- that the decimal value is not corrupted by culture formatting.
+
+Record the observed culture, input/display value, and result.
+
+### 3. Final Buy UI check
+
+Open the Buy page and confirm:
+- Product selector is present;
+- Suggested price is shown for products that have one;
+- Finished price is present and labeled **Finished price**;
+- Date is present and defaults to today on GET;
+- Seller is present;
+- Back button is present;
+- product-picker.js is loaded once.
+
+Also verify a failed post preserves the posted Product and Finished price and renders the relevant validation message.
+
+### 4. Final Sell UI check
+
+Open the Sell page and confirm:
+- Product selector is present;
+- Suggested price is shown for products that have one;
+- Finished price is present and labeled **Finished price**;
+- Date is present and defaults to today on GET;
+- Seller is **not** present;
+- Back button is present;
+- product-picker.js is loaded once.
+
+Also verify a failed post preserves the posted Product and Finished price and renders the relevant validation message.
+
+### 5. Regression/scope check
+
+Confirm:
+- `src/MobileShop.Api` has no changes from the Stage O implementation;
+- no services/entities/schema/PDF/auth changes were introduced;
+- no unrelated implementation files were changed during validation.
+
+## Evidence format
+
+Append a concise section to `act.md` containing:
+- commands and results;
+- culture/browser result;
+- Buy UI result;
+- Sell UI result;
+- scope/regression result;
+- any failure or limitation.
+
+Do **not** mark Step 4 complete in `plan.md`, `audit.md`, or `to-do.md`. The Reviewer performs the final sign-off after reviewing the evidence.
+
+## Pass criteria
+
+Step 4 is ready for Reviewer sign-off only when every check above passes and the evidence is recorded in `act.md`.
