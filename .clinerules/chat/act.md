@@ -21,13 +21,15 @@ Step 3 replaces the raw numeric range validation messages on Buy/Sell required d
 
 ### src/MobileShop.Tests/Web/Pages/Transactions/RecordModelTests.cs
 - Added `ValidateInput` helper to run data-annotation validation against the Input property
-- Added `Zero_selection_rejected_with_friendly_message` theory: tests ProductId=0/SellerId=0 in Buy and CustomerId=0 in Sell, asserts exact friendly messages
+- Added `Zero_selection_rejected_with_friendly_message` theory: tests ProductId=0 in Buy and CustomerId=0 in Sell, asserts exact friendly messages
+- Added `Buy_zero_seller_id_rejected_with_friendly_message`: tests SellerId=0 in Buy, asserts "The seller should be selected."
+- Added `Sell_zero_product_id_rejected_with_friendly_message`: tests ProductId=0 in Sell, asserts "The product should be selected."
 - Added `Valid_positive_ids_pass_validation` theory: tests valid positive IDs, asserts ModelState.IsValid
 
 ## Verification
 - Build: `dotnet build src/MobileShop.slnx --nologo --no-restore` → Build succeeded. 0 Warning(s), 0 Error(s).
-- Targeted tests: `--filter "FullyQualifiedName~RecordModelTests"` → Passed! Failed: 0, Passed: 9, Skipped: 0, Total: 9.
-- Full suite: Passed! Failed: 0, Passed: 249, Skipped: 0, Total: 249.
+- Targeted tests: `--filter "FullyQualifiedName~RecordModelTests"` → Passed! Failed: 0, Passed: 11, Skipped: 0, Total: 11.
+- Full suite: Passed! Failed: 0, Passed: 251, Skipped: 0, Total: 251.
 - `[Range(1, int.MaxValue)]` pattern only exists on BuyInputModel and SellInputModel.
 
 ## Changed files
@@ -50,4 +52,4 @@ Full test suite (35s) exceeds 30s tool timeout; ran in background and polled out
 None.
 
 ## Status
-COMPLETE — Step 3 (friendly validation messages) is implemented and verified. All 249 tests pass. Stage L Definition of Done is met. Stopping for final Job B review.
+COMPLETE — Step 3 (friendly validation messages) is implemented and verified. All four required messages have explicit regression assertions. All 251 tests pass. Stage L Definition of Done is met. Stopping for final Job B review.

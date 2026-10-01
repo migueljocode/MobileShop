@@ -193,6 +193,40 @@ public class RecordModelTests : RepoTestBase
         }
     }
 
+    [Fact]
+    public async Task Buy_zero_seller_id_rejected_with_friendly_message()
+    {
+        TestDataHelpers.SeedShopSentinels(Context);
+        var product = TestDataHelpers.CreateProduct(Context);
+
+        var buyModel = new BuyModel(CreateService())
+        {
+            Input = new BuyInputModel { ProductId = product.Id, SellerId = 0, Price = 150m }
+        };
+        ValidateInput(buyModel);
+        await buyModel.OnPostAsync();
+        Assert.False(buyModel.ModelState.IsValid);
+        var error = Assert.Single(buyModel.ModelState["Input.SellerId"]!.Errors);
+        Assert.Equal("The seller should be selected.", error.ErrorMessage);
+    }
+
+    [Fact]
+    public async Task Sell_zero_product_id_rejected_with_friendly_message()
+    {
+        TestDataHelpers.SeedShopSentinels(Context);
+        var customer = AddCustomer("Sara", "Ahmadi");
+
+        var sellModel = new SellModel(CreateService())
+        {
+            Input = new SellInputModel { ProductId = 0, CustomerId = customer.Id, Price = 250m }
+        };
+        ValidateInput(sellModel);
+        await sellModel.OnPostAsync();
+        Assert.False(sellModel.ModelState.IsValid);
+        var error = Assert.Single(sellModel.ModelState["Input.ProductId"]!.Errors);
+        Assert.Equal("The product should be selected.", error.ErrorMessage);
+    }
+
     [Theory]
     [InlineData("Buy")]
     [InlineData("Sell")]
