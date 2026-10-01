@@ -6,4 +6,4 @@
 - [x] ~~Stage F — Reports: ReportsDataService + profit/loss~~
 - [x] ~~Stage G — Account: AccountDataService + login/profile~~
 - [x] ~~Stage H — Cleanup: delete entity services/repos/tests, GlobalUsings, final validation~~
-- [ ] Post-H polish — CS9124, stale comments, ViewModel default, inventory tests (see audit.md Act prompt)
+- [x] ~~Post-H polish — CS9124, stale comments, ViewModel default, inventory tests~~
