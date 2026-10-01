@@ -30,7 +30,7 @@
 - `Migration_preserves_existing_phone_with_null_part_number` — Migration additive; phone survives with NULL PartNumberId
 
 ## Commit
-<pending>
+`2121f17` — feat(models,dal): add PartNumber entity, nullable Phone.PartNumberId, additive AddPartNumber migration, and EF tests
 
 ## Limitations
 None.
