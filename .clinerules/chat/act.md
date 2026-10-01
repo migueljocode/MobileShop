@@ -1,3 +1,42 @@
+# Act — Stage N Step 3 — Create Apple ID reuses shared pricing script
+
+## Commit
+- This commit — feat(web): reuse shared pricing script on Create Apple ID
+  - Implements Step 3 of Stage N plan.md.
+
+## What changed
+- `CreateAppleId.cshtml` only:
+  - Label `Paid price` on `Input.Price` (same as Create Phone).
+  - New read-only **Finished price** display (`data-finished-price`, `readonly`, `tabindex="-1"`, same muted note), wired to the same `create-product-pricing.js` hooks (`[data-price]` / `[data-percent]` / `[data-amount]` / `[data-finished-price]`).
+  - Duplicate inline percent ↔ $ sync block **deleted**; replaced with `<script src="~/js/create-product-pricing.js">` — one shared source, no fork.
+  - Column widths `col-md-4` → `col-md-3` to fit the new display (same as Create Phone).
+  - Email/Password/Notes/service logic unchanged (Step 1 server behavior + plaintext-password policy untouched).
+
+## Verification
+- `dotnet build src/MobileShop.slnx --nologo` → **0 warnings, 0 errors**
+- Focused `CreateAppleIdModelTests|CreatePhoneModelTests|ProductsDataServiceTests` → **98 passed, 0 failed, 0 skipped**
+- Full suite `dotnet test src/MobileShop.slnx --nologo --no-build` → **291 passed, 0 failed, 0 skipped**
+- `git status` shows only `CreateAppleId.cshtml` — Create Phone still has its 28 PartNumber/toggle/script markers; no Api/PDF/migration/schema/auth changes; no plan/audit/todo edits.
+
+## Requirement map
+1. Same read-only finished price via `data-finished-price` on Apple ID → done.
+2. Delete Apple ID's duplicate inline sync, reference the shared script → done.
+3. The script remains shared between the two create pages → both pages reference the identical `~/js/create-product-pricing.js`.
+
+## Limitations
+None. Nothing else on the Apple ID page was changed (no toggle/notes UX there — that is phone-only per Stage N).
+
+## Friction noted
+- Build ~32s / full suite ~40s exceed the 30s tool window; run in the background and polled.
+
+## Problems
+None — verification green. Reviewer Job B determines PASS/FAIL.
+
+## Status
+COMPLETE — awaiting Reviewer Job B for Stage N Step 3.
+
+---
+
 # Act — Stage N Step 2 — Create Phone UI: toggles, notes, shared pricing script
 
 ## Commit

@@ -9,13 +9,13 @@
 <form method="post" class="row g-3 col-lg-7">
     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
-    <div class="col-md-4">
-        <label asp-for="Input.Price" class="form-label"></label>
+    <div class="col-md-3">
+        <label asp-for="Input.Price" class="form-label">Paid price</label>
         <input asp-for="Input.Price" class="form-control" data-price />
         <span asp-validation-for="Input.Price" class="text-danger"></span>
     </div>
 
-    <div class="col-md-4">
+    <div class="col-md-3">
         <label asp-for="Input.ProfitPercent" class="form-label">Profit %</label>
         <div class="input-group">
             <input asp-for="Input.ProfitPercent" class="form-control" data-percent />
@@ -24,13 +24,20 @@
         <span asp-validation-for="Input.ProfitPercent" class="text-danger"></span>
     </div>
 
-    <div class="col-md-4">
+    <div class="col-md-3">
         <label asp-for="Input.ProfitAmount" class="form-label">Profit $</label>
         <div class="input-group">
             <span class="input-group-text">$</span>
             <input asp-for="Input.ProfitAmount" class="form-control" data-amount />
         </div>
         <span asp-validation-for="Input.ProfitAmount" class="text-danger"></span>
+    </div>
+
+    <div class="col-md-3">
+        <label class="form-label">Finished price</label>
+        <input type="text" class="form-control" data-finished-price readonly aria-readonly="true"
+               tabindex="-1" style="background:#e9ecef;" />
+        <span class="form-text text-muted">Server-stored price (paid + profit).</span>
     </div>
 
     <div class="col-md-8">
@@ -64,34 +71,5 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const priceEl = document.querySelector('[data-price]');
-            const percentEl = document.querySelector('[data-percent]');
-            const amountEl = document.querySelector('[data-amount]');
-
-            function updateFromPercent() {
-                const price = parseFloat(priceEl.value);
-                const percent = parseFloat(percentEl.value);
-                if (isNaN(price) || price === 0 || isNaN(percent)) {
-                    amountEl.value = '';
-                    return;
-                }
-                amountEl.value = (price * percent / 100).toFixed(2);
-            }
-
-            function updateFromAmount() {
-                const price = parseFloat(priceEl.value);
-                const amount = parseFloat(amountEl.value);
-                if (isNaN(price) || price === 0 || isNaN(amount)) {
-                    percentEl.value = '';
-                    return;
-                }
-                percentEl.value = (amount / price * 100).toFixed(2);
-            }
-
-            percentEl.addEventListener('input', updateFromPercent);
-            amountEl.addEventListener('input', updateFromAmount);
-        });
-    </script>
+    <script src="~/js/create-product-pricing.js"></script>
 }
