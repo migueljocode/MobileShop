@@ -21,7 +21,8 @@
 - Confidence: HIGH
 - Reviewer Job B: PASS — verified in commit `ad162453c0ebbf832c300ec6619445bd0b54d00c`.
 
-- ~~[x] Step 2 — Register Vazirmatn for QuestPDF~~ (commit `107cc07`)
+- ~~[x] Step 2 — Register Vazirmatn for QuestPDF~~ (commit `f8b8e69b2ce0c16486d83204e1c9df5b665be186`)
+- Reviewer Job B: PASS — verified in commit `f8b8e69b2ce0c16486d83204e1c9df5b665be186`.
 
 - Update `src/MobileShop.Services/PDF/Configuration/QuestPdfSetup.cs` (the existing startup hook) to register the bundled TTF/OTF with QuestPDF's `FontManager` exactly once before the first render.
 - Use the bundled file/resource rather than Web `wwwroot` and do not rely on machine-installed fonts.
