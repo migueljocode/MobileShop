@@ -60,12 +60,32 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         if (finished < 0) finished = 0;
-        finishedEl.textContent = finished.toFixed(2);
+
+        // Must set .value on <input>; textContent does not update the input display.
+        const text = finished.toFixed(2);
+        if ('value' in finishedEl) {
+            finishedEl.value = text;
+        } else {
+            finishedEl.textContent = text;
+        }
+    }
+
+    // When paid price changes, re-link %/$ then refresh finished (same live feel as profit fields).
+    function onPaidPriceInput() {
+        const percent = parseFloat(percentEl.value);
+        const amount = parseFloat(amountEl.value);
+        if (!isNaN(percent)) {
+            updateFromPercent();
+        } else if (!isNaN(amount)) {
+            updateFromAmount();
+        } else {
+            updateFinished();
+        }
     }
 
     percentEl.addEventListener('input', updateFromPercent);
     amountEl.addEventListener('input', updateFromAmount);
-    priceEl.addEventListener('input', updateFinished);
+    priceEl.addEventListener('input', onPaidPriceInput);
 
     // Populate the read-only figure for any value restored on a validation round-trip.
     updateFinished();
