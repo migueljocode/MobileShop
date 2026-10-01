@@ -8,7 +8,7 @@
 - The current repository search shows the generic repository implementation is concentrated in src/MobileShop.Dal/Repos/Base/, with consumers using the MobileShop.Dal.Repos.Base global using. Do not infer or redesign repository behavior during the move.
 - Stage I is cleanup only: no API changes, no database/schema changes, no behavior changes, no dependency changes, and no changes to authentication or database initialization policy.
 
-## [ ] Step 1 — Rename PasswordHasher to ArgonPasswordHasher
+## ~~[x] Step 1 — Rename PasswordHasher to ArgonPasswordHasher~~
 
 - Files: inspect src/MobileShop.Services/Security/PasswordHasher.cs, src/MobileShop.Services/Security/IPasswordHasher.cs, src/MobileShop.Services/ServiceCollectionExtensions.cs, src/MobileShop.Tests/Services/Security/PasswordHasherTests.cs, and src/MobileShop.Tests/Services/DataServices/Dal/AccountDataServiceTests.cs; modify/rename only the concrete hasher and its direct tests/consumers; do not touch IPasswordHasher.
 - Symbols: PasswordHasher, IPasswordHasher, ServiceCollectionExtensions.AddMobileShopSecurity(), PasswordHasherTests, and the AccountDataServiceTests _hasher field.

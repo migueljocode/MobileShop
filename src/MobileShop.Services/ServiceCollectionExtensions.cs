@@ -71,7 +71,7 @@ public static class ServiceCollectionExtensions
     /// <summary>Registers the security primitives (Argon2 password hashing).</summary>
     private static IServiceCollection AddMobileShopSecurity(this IServiceCollection services)
     {
-        services.AddSingleton<IPasswordHasher, PasswordHasher>();
+        services.AddSingleton<IPasswordHasher, ArgonPasswordHasher>();
         return services;
     }
 

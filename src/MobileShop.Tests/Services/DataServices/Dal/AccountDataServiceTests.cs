@@ -3,7 +3,7 @@ namespace MobileShop.Tests.Services.DataServices.Dal;
 public class AccountDataServiceTests : RepoTestBase
 {
     private readonly AccountDataService _service;
-    private readonly PasswordHasher _hasher = new();
+        private readonly IPasswordHasher _hasher = new ArgonPasswordHasher();
 
     public AccountDataServiceTests()
     {

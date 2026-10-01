@@ -1,8 +1,8 @@
 namespace MobileShop.Tests.Services.Security;
 
-public class PasswordHasherTests
+public class ArgonPasswordHasherTests
 {
-    private readonly IPasswordHasher _hasher = new PasswordHasher();
+    private readonly IPasswordHasher _hasher = new ArgonPasswordHasher();
 
     [Fact]
     public void Hash_ReturnsNonEmptyString()
