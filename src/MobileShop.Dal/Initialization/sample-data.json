@@ -696,6 +696,7 @@
     {
       "id": 1,
       "imei1": "123456789012345",
+      "partNumberId": 1,
       "productId": 1
     },
     {
@@ -708,11 +709,13 @@
       "id": 3,
       "imei1": "345678901234567",
       "ownershipTransferred": true,
+      "partNumberId": 2,
       "productId": 3
     },
     {
       "id": 4,
       "imei1": "456789012345678",
+      "partNumberId": 3,
       "productId": 6
     },
     {
@@ -730,7 +733,38 @@
     {
       "id": 7,
       "imei1": "789012345678901",
+      "partNumberId": 4,
       "productId": 17
+    }
+  ],
+  "partNumbers": [
+    {
+      "id": 1,
+      "modelId": 1,
+      "code": "MQ0K3LL/A",
+      "supportsDualSim": true,
+      "supportsEsim": false
+    },
+    {
+      "id": 2,
+      "modelId": 3,
+      "code": "MLPA2LL/A",
+      "supportsDualSim": true,
+      "supportsEsim": false
+    },
+    {
+      "id": 3,
+      "modelId": 6,
+      "code": "MQ0J3LL/A",
+      "supportsDualSim": true,
+      "supportsEsim": false
+    },
+    {
+      "id": 4,
+      "modelId": 16,
+      "code": "MU1J3LL/A",
+      "supportsDualSim": false,
+      "supportsEsim": true
     }
   ],
   "secondHands": [

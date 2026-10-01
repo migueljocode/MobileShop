@@ -60,6 +60,7 @@ public class SampleDataSeedTests : IDisposable
         Assert.Equal(4, context.StorageCapacities.Count());
         Assert.Equal(16, context.Models.Count());
         Assert.Equal(17, context.Products.Count());
+        Assert.Equal(4, context.PartNumbers.Count());
         Assert.Equal(26, context.Transactions.Count());
         Assert.Equal(3, context.AppleIds.Count());
         Assert.Equal(7, context.Phones.Count());

@@ -25,6 +25,7 @@ public class CreatePhoneModelTests : RepoTestBase
             new BaseRepo<Color>(Context),
             new BaseRepo<Guarantee>(Context),
             new BaseRepo<Transaction>(Context),
+            new BaseRepo<PartNumber>(Context),
             NullLogger<ProductsDataService>.Instance);
 
         // seed catalog data that would exist in production seed

@@ -41,6 +41,17 @@ public interface IProductsDataService
     /// <param name="name">The color name.</param>
     Task<DropdownCreateResult> CreateColorAsync(string name);
 
+    /// <summary>Gets the part-number dropdown options for a model.</summary>
+    /// <param name="modelId">The model identifier.</param>
+    Task<IReadOnlyList<DropdownOptionViewModel>> GetPartNumbersAsync(int modelId);
+
+    /// <summary>Creates a part number for a model and returns its dropdown option.</summary>
+    /// <param name="modelId">The owning model identifier.</param>
+    /// <param name="code">The part-number code.</param>
+    /// <param name="supportsDualSim">Whether the part number supports dual SIM.</param>
+    /// <param name="supportsEsim">Whether the part number supports eSIM.</param>
+    Task<DropdownCreateResult> CreatePartNumberAsync(int modelId, string code, bool supportsDualSim, bool supportsEsim);
+
     /// <summary>Creates a phone from the submitted input.</summary>
     /// <param name="input">The phone input.</param>
     Task<ServiceResult> CreatePhoneAsync(CreatePhoneInputModel input);

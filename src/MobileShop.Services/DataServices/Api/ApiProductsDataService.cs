@@ -43,6 +43,14 @@ public class ApiProductsDataService : IProductsDataService
         => throw new NotImplementedException("ApiProductsDataService is not implemented yet.");
 
     /// <inheritdoc />
+    public Task<IReadOnlyList<DropdownOptionViewModel>> GetPartNumbersAsync(int modelId)
+        => throw new NotImplementedException("ApiProductsDataService is not implemented yet.");
+
+    /// <inheritdoc />
+    public Task<DropdownCreateResult> CreatePartNumberAsync(int modelId, string code, bool supportsDualSim, bool supportsEsim)
+        => throw new NotImplementedException("ApiProductsDataService is not implemented yet.");
+
+    /// <inheritdoc />
     public Task<ServiceResult> CreatePhoneAsync(CreatePhoneInputModel input)
         => throw new NotImplementedException("ApiProductsDataService is not implemented yet.");
 

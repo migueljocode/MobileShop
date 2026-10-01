@@ -26,6 +26,7 @@ public class ProductsDataServiceTests : RepoTestBase
             new BaseRepo<MobileShop.Models.Entities.Color>(Context),
             new BaseRepo<Guarantee>(Context),
             new BaseRepo<Transaction>(Context),
+            new BaseRepo<PartNumber>(Context),
             NullLogger<ProductsDataService>.Instance);
     }
 
@@ -742,4 +743,103 @@ public class ProductsDataServiceTests : RepoTestBase
         var product = Context.Products.First(p => p.Id == result.EntityId);
         Assert.Equal(12, product.Barcode.Length);
     }
+
+    // ── PartNumber list/create ──────────────────────────
+
+    [Fact]
+    public async Task GetPartNumbersAsync_returns_only_part_numbers_for_the_given_model()
+    {
+        SeedCatalog(out var phoneModel13, out _);
+        var phoneCategory = Context.Categories.First(c => c.Name == "Phone");
+        var samsung = new Manufacturer { Name = "Samsung" };
+        Context.Manufacturers.Add(samsung);
+        Context.SaveChanges();
+        var phoneModelGalaxy = new Model { ManufacturerId = samsung.Id, CategoryId = phoneCategory.Id, Name = "Galaxy S24" };
+        Context.Models.Add(phoneModelGalaxy);
+        Context.SaveChanges();
+
+        Context.PartNumbers.AddRange(
+            new PartNumber { ModelId = phoneModel13.Id, Code = "MQ0K3LL/A", SupportsDualSim = true, SupportsEsim = false },
+            new PartNumber { ModelId = phoneModelGalaxy.Id, Code = "SM-S921B", SupportsDualSim = false, SupportsEsim = false });
+        Context.SaveChanges();
+
+        var options = await _service.GetPartNumbersAsync(phoneModel13.Id);
+
+        Assert.Single(options);
+        Assert.Contains(options, o => o.Name == "MQ0K3LL/A");
+        Assert.DoesNotContain(options, o => o.Name == "SM-S921B");
+    }
+
+    [Fact]
+    public async Task GetPartNumbersAsync_returns_empty_for_model_with_no_part_numbers()
+    {
+        SeedCatalog(out var phoneModel, out _);
+
+        var options = await _service.GetPartNumbersAsync(phoneModel.Id);
+
+        Assert.Empty(options);
+    }
+
+    [Fact]
+    public async Task CreatePartNumberAsync_creates_and_returns_new_option()
+    {
+        SeedCatalog(out var phoneModel, out _);
+        Assert.False(Context.PartNumbers.Any(pn => pn.ModelId == phoneModel.Id));
+
+        var result = await _service.CreatePartNumberAsync(phoneModel.Id, "  MQ0K3LL/A  ", supportsDualSim: true, supportsEsim: false);
+
+        Assert.True(result.Succeeded);
+        Assert.Equal(200, result.StatusCode);
+        Assert.NotNull(result.Option);
+        Assert.Equal("MQ0K3LL/A", result.Option!.Name);
+
+        var partNumber = Context.PartNumbers.First(pn => pn.Id == result.Option.Id);
+        Assert.Equal(phoneModel.Id, partNumber.ModelId);
+        Assert.True(partNumber.SupportsDualSim);
+        Assert.False(partNumber.SupportsEsim);
+    }
+
+    [Fact]
+    public async Task CreatePartNumberAsync_returns_existing_option_on_duplicate()
+    {
+        SeedCatalog(out var phoneModel, out _);
+        Context.PartNumbers.Add(new PartNumber
+        {
+            ModelId = phoneModel.Id,
+            Code = "MQ0K3LL/A",
+            SupportsDualSim = true,
+            SupportsEsim = false
+        });
+        Context.SaveChanges();
+
+        var result = await _service.CreatePartNumberAsync(phoneModel.Id, "MQ0K3LL/A", supportsDualSim: true, supportsEsim: false);
+
+        Assert.True(result.Succeeded);
+        Assert.Equal(200, result.StatusCode);
+        Assert.NotNull(result.Option);
+        Assert.Equal(1, Context.PartNumbers.Count());
+    }
+
+    [Fact]
+    public async Task CreatePartNumberAsync_returns_404_for_unknown_model()
+    {
+        var result = await _service.CreatePartNumberAsync(999, "CH/ZAA", supportsDualSim: true, supportsEsim: true);
+
+        Assert.False(result.Succeeded);
+        Assert.Equal(404, result.StatusCode);
+        Assert.Equal("Model not found.", result.Error);
+    }
+
+    [Fact]
+    public async Task CreatePartNumberAsync_rejects_blank_code()
+    {
+        SeedCatalog(out var phoneModel, out _);
+
+        var result = await _service.CreatePartNumberAsync(phoneModel.Id, "   ", supportsDualSim: true, supportsEsim: true);
+
+        Assert.False(result.Succeeded);
+        Assert.Equal(400, result.StatusCode);
+        Assert.Equal("Code is required.", result.Error);
+    }
+
 }

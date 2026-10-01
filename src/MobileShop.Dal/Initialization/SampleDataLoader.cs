@@ -12,6 +12,7 @@ internal sealed class SampleDataSet
     public List<StorageCapacity> StorageCapacities { get; init; } = [];
     public List<Model> Models { get; init; } = [];
     public List<Product> Products { get; init; } = [];
+    public List<PartNumber> PartNumbers { get; init; } = [];
     public List<Transaction> Transactions { get; init; } = [];
     public List<AppleId> AppleIds { get; init; } = [];
     public List<Phone> Phones { get; init; } = [];
@@ -59,6 +60,7 @@ internal static class SampleDataLoader
             StorageCapacities = Deserialize<StorageCapacity>(root, "storageCapacities"),
             Models = Deserialize<Model>(root, "models"),
             Products = Deserialize<Product>(root, "products"),
+            PartNumbers = Deserialize<PartNumber>(root, "partNumbers"),
             Transactions = Deserialize<Transaction>(root, "transactions"),
             AppleIds = Deserialize<AppleId>(root, "appleIds"),
             Phones = Deserialize<Phone>(root, "phones"),

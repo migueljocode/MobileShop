@@ -27,6 +27,7 @@ public static class SampleDataInitializer
         ClearSet<GlassModelFit>(context);
         ClearSet<Glass>(context);
         ClearSet<Phone>(context);
+        ClearSet<PartNumber>(context);
         ClearSet<Transaction>(context);
         ClearSet<Product>(context);
         ClearSet<Model>(context);
@@ -61,6 +62,7 @@ public static class SampleDataInitializer
         ProcessInsert(context, context.StorageCapacities, data.StorageCapacities);
         ProcessInsert(context, context.Models, data.Models);
         ProcessInsert(context, context.Products, data.Products);
+        ProcessInsert(context, context.PartNumbers, data.PartNumbers);
         ProcessInsert(context, context.Transactions, data.Transactions);
         ProcessInsert(context, context.AppleIds, data.AppleIds);
         ProcessInsert(context, context.Phones, data.Phones);

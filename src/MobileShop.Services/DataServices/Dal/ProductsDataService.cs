@@ -4,7 +4,7 @@ namespace MobileShop.Services.DataServices.Dal;
 
 /// <summary>Provides the catalog and creation operations for the Products area.</summary>
 /// <remarks>
-/// The eight repositories cover both product types plus the shared catalog entities and transactions. There is no
+/// The nine repositories cover both product types plus the shared catalog entities and transactions. There is no
 /// <see cref="Product"/> repo because each create path builds the product row inline and it is persisted by
 /// cascade through the phone or Apple-ID insert, and no <see cref="SecondHand"/> repo (the second-hand profile is
 /// a <see cref="Product"/> navigation, not a separate write).
@@ -18,6 +18,7 @@ public class ProductsDataService(
     IBaseRepo<MobileShop.Models.Entities.Color> colors,
     IBaseRepo<Guarantee> guarantees,
     IBaseRepo<Transaction> transactions,
+    IBaseRepo<PartNumber> partNumbers,
     ILogger<ProductsDataService> logger)
     : IProductsDataService
 {
@@ -172,6 +173,13 @@ public class ProductsDataService(
         => (await colors.FindAllAsync()).Select(c => new DropdownOptionViewModel(c.Id, c.Name)).ToList().AsReadOnly();
 
     /// <inheritdoc />
+    public async Task<IReadOnlyList<DropdownOptionViewModel>> GetPartNumbersAsync(int modelId)
+        => (await partNumbers.FindAllAsync(pn => pn.ModelId == modelId))
+            .Select(pn => new DropdownOptionViewModel(pn.Id, pn.Code))
+            .ToList()
+            .AsReadOnly();
+
+    /// <inheritdoc />
     public async Task<IReadOnlyList<string>> GetGuaranteeCorporationsAsync()
         => (await guarantees.FindAllAsync())
             .Select(g => g.Corporation)
@@ -246,6 +254,36 @@ public class ProductsDataService(
 
         Logger.LogInformation("Added Color Id={Id}", color.Id);
         return new DropdownCreateResult(true, new DropdownOptionViewModel(color.Id, color.Name), null, 200);
+    }
+
+    /// <inheritdoc />
+    public async Task<DropdownCreateResult> CreatePartNumberAsync(int modelId, string code, bool supportsDualSim, bool supportsEsim)
+    {
+        if (string.IsNullOrWhiteSpace(code))
+            return new DropdownCreateResult(false, null, "Code is required.", 400);
+
+        var model = await models.FindAsync(modelId);
+        if (model is null)
+            return new DropdownCreateResult(false, null, "Model not found.", 404);
+
+        var trimmed = code.Trim();
+        var existing = await partNumbers.FindAsync(pn => pn.ModelId == modelId && pn.Code == trimmed);
+        if (existing is not null)
+            return new DropdownCreateResult(true, new DropdownOptionViewModel(existing.Id, existing.Code), null, 200);
+
+        var partNumber = new PartNumber
+        {
+            ModelId = modelId,
+            Code = trimmed,
+            SupportsDualSim = supportsDualSim,
+            SupportsEsim = supportsEsim
+        };
+        var added = await partNumbers.AddAsync(partNumber) > 0;
+        if (!added)
+            return new DropdownCreateResult(false, null, "The part number could not be saved.", 400);
+
+        Logger.LogInformation("Added PartNumber Id={Id} for ModelId={ModelId}", partNumber.Id, modelId);
+        return new DropdownCreateResult(true, new DropdownOptionViewModel(partNumber.Id, partNumber.Code), null, 200);
     }
 
     /// <inheritdoc />

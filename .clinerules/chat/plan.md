@@ -6,7 +6,7 @@
 
 The migration-safety correction now exercises the required production-like path: a Phone is created under the schema immediately before `AddPartNumber`, then the new migration is applied and the same Phone is reloaded with `NULL PartNumberId`.
 
-### Step 1 — Add the PartNumber schema and production-safe migration
+### ~~Step 1 — Add the PartNumber schema and production-safe migration~~
 
 - [x] Step 1 — Add `PartNumber`, nullable `Phone.PartNumberId`, EF configuration/DbSet, and one additive EF migration.
 - Keep the implementation limited to Models/DAL/migration files plus focused DAL tests.
@@ -25,9 +25,9 @@ The migration-safety correction now exercises the required production-like path:
 - No API/auth/PDF/database-initialization-policy changes found.
 - Step 1 is approved; proceed to Step 2.
 
-## Step 2
+## ~~Step 2~~
 
-- [ ] Step 2 — Add representative development PartNumbers, assign them to existing phone seed rows, and expose list/create operations through the existing Products data-service abstraction.
+- ~~Step 2 — Add representative development PartNumbers, assign them to existing phone seed rows, and expose list/create operations through the existing Products data-service abstraction.~~
 - One step → commit → Reviewer Job B before Step 3.
 
 ## Stage M Definition of Done
