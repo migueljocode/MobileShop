@@ -18,51 +18,31 @@ Stage L is the active unchecked stage in `.clinerules/to-do.md`.
 
 ## Step 3 — Friendly required-selection validation
 
-- [ ] Step 3 — Replace raw zero-selection validation messages
+- ~~[x] Step 3 — Replace raw zero-selection validation messages~~ (implementation `a8079108d5ebfe878d522fd74e7d82289161c4ae`; coverage fix `23aa1c17aad4ded6175a15ef676eaf4ede395ded`)
 
-### Implementation reviewed
+### Final Job B Review
 
-Commit:
-`a8079108d5ebfe878d522fd74e7d82289161c4ae`
+**PASS.**
 
-Implemented:
-- Friendly `Range` messages on Buy ProductId/SellerId.
-- Friendly `Range` messages on Sell ProductId/CustomerId.
-- Missing Seller/Customer validation spans added.
-- Regression tests added.
-- Actor reports targeted tests 9/9 and full suite 249/249.
-
-### Job B finding
-
-**NOT PASS — regression coverage is incomplete.**
-
-The implementation has the requested four validation messages, but the new regression test only asserts exact friendly messages for:
-- Buy ProductId
-- Sell CustomerId
-
-It does **not** assert the exact requested messages for:
+Verified:
+- Buy ProductId → `The product should be selected.`
 - Buy SellerId → `The seller should be selected.`
 - Sell ProductId → `The product should be selected.`
-
-Because Step 3 explicitly requires regression tests for the affected models/messages, the final Job B cannot PASS yet.
-
-### Required rework
-
-Add focused regression assertions covering all four affected fields and exact messages. Keep the existing implementation otherwise unchanged unless the additional inspection finds another required-dropdown field using the same pattern.
-
-Then rerun:
-- `RecordModelTests`
-- full solution build
-- full solution test
-
-Commit the test correction and stop for final Job B review.
-
-**Stage L remains incomplete. Do not change `.clinerules/to-do.md`.**
+- Sell CustomerId → `The customer should be selected.`
+- Missing Seller/Customer validation spans are present.
+- `Range(1, int.MaxValue)` rejection remains intact.
+- All four exact messages now have direct regression assertions.
+- Targeted `RecordModelTests`: **11 passed, 0 skipped, 0 failed**.
+- Full suite: **251 passed, 0 skipped, 0 failed**.
+- Build: **0 warnings, 0 errors**.
+- No API, DB/schema/migration, authentication, data-service contract, or PDF changes in the Step 3 implementation/coverage fix.
 
 ## Stage L Definition of Done
 
-- [ ] Step 3 final Job B PASS.
-- [ ] All Stage L implementation changes verified.
-- [ ] Targeted tests and full build/test pass.
-- [ ] No API, DB/schema/migration, authentication, data-service contract/behavior, or PDF changes.
-- [ ] Reviewer gives final Job B PASS before Stage L is marked complete in `.clinerules/to-do.md`.
+- ~~[x] Step 3 final Job B PASS.~~
+- ~~[x] All Stage L implementation changes verified.~~
+- ~~[x] Targeted tests and full build/test pass.~~
+- ~~[x] No API, DB/schema/migration, authentication, data-service contract/behavior, or PDF changes.~~
+- [ ] Reviewer gives final Stage L sign-off before `.clinerules/to-do.md` is updated.
+
+**Next action:** Reviewer may now perform Stage L final sign-off and update `.clinerules/to-do.md`; no further implementation rework is required.
