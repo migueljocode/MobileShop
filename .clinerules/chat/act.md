@@ -38,7 +38,7 @@ Step 3 replaces the raw numeric range validation messages on Buy/Sell required d
 - src/MobileShop.Tests/Web/Pages/Transactions/RecordModelTests.cs
 
 ## Commit
-`pending` — to be committed
+`a807910` — feat(web): friendly validation messages for required dropdown selections
 
 ## Limitations
 None.
