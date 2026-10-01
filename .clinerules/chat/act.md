@@ -1,3 +1,51 @@
+# Act — Stage M (reopened) Step 1 — Correct Products PartNumber filtering and inventory display
+
+## Commit
+- This commit — feat(products): phone-only inventory-derived part-number filter with list column
+  - Implements Step 1 of the reopened Stage M plan.md.
+
+## What changed
+- `ProductListItemViewModel.cs` — added `PartNumberLabel` as an **init-only** property (default `"N/A"`), deliberately **not** a positional parameter, so every existing construction stays source-compatible (audit HIGH #1 satisfied without breaking callers).
+- `ProductsDataService.GetInventoryRowsAsync` + `GetSecondHandRowsAsync` — phone projections set `PartNumberLabel` from `phone.PartNumberNavigation` (code or `"N/A"`). Apple ID projections keep the `"N/A"` default.
+- `TransactionsDataService.GetSelectableProductsAsync` — the phone projection sets the same label; Apple IDs unchanged.
+- `PeopleDataService` — untouched: that projection is over `Product` (no phone part number), so it correctly keeps the `"N/A"` default.
+- `IProductsDataService` / `ProductsDataService` — new `GetInventoryPartNumbersAsync()` returning distinct part numbers **attached to live phone inventory** (unused catalog part numbers excluded, soft-delete filters inherited from the repos). Model-scoped `GetPartNumbersAsync(modelId)` is untouched and no longer used by the Index (audit MEDIUM).
+- `ApiProductsDataService` — new member stubbed as `NotImplementedException`, matching the file's contract.
+- `Products/Index.cshtml.cs` — builds options only when `Type == "phone"`; a stale positive id not in the option set is normalised to null; null/0/negative remain no selection.
+- `Products/Index.cshtml` — filter form renders **only** for phones (audit HIGH #4); **Filter button removed**, GET form auto-submits via `onchange="this.form.submit()"` (audit HIGH #3); **All** and **Apple IDs** links no longer carry `partNumberId` (audit HIGH #2), Phones preserves a valid selection; new **Part number** column bound to `PartNumberLabel`.
+- `ProductsDataServiceTests.cs` — 4 new tests.
+
+## Verification
+- `dotnet build src/MobileShop.slnx --nologo` → **0 warnings, 0 errors**
+- Focused `dotnet test ... --filter "FullyQualifiedName~ProductsDataServiceTests"` → **56 passed, 0 failed, 0 skipped**
+- Full suite `dotnet test src/MobileShop.slnx --nologo --no-build` → **276 passed, 0 failed, 0 skipped**
+- `git status` shows only the eight files above — no API project/auth/PDF/migration edits; the Api *services* member is a stub consistent with its existing contract, not an API-project change.
+
+## Plan requirement map
+- #1 phone-only control → `Index.cshtml` `@if (Model.ShowPartNumberFilter)`
+- #2 no Filter button → removed; auto-submit on change
+- #3/#4 auto-apply, empty option clears → `onchange` submit; leading "All part numbers" value `""`
+- #5 type links → All/Apple IDs drop `partNumberId`; Phones keeps it
+- #6 inventory-derived options, filter omitted → `GetInventoryPartNumbersAsync()` (not filter-scoped)
+- #7 stale id → normalised to null in `IndexModel`
+- #8 null/0/negative → no selection
+- #9 ViewModel field + all projections → `PartNumberLabel` set on every phone site; Apple IDs `"N/A"`
+- #10 Part number column → added to the table
+
+## Limitations
+None. Create Phone PartNumber + Add New is Step 2 and was deliberately not touched. `PeopleDataService`'s generic `Product` projection was correctly left at the default because it has no phone part number to show (not a missed call site).
+
+## Friction noted
+- Build ~31s and full suite ~36s exceed the 30s tool window; both run in the background and polled.
+
+## Problems
+None — verification green. Reviewer Job B determines PASS/FAIL.
+
+## Status
+COMPLETE — awaiting Reviewer Job B for reopened Stage M Step 1.
+
+---
+
 # Act — Stage M Step 4 — PartNumber and SIM options on phone details
 
 ## Commit

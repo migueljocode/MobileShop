@@ -366,6 +366,85 @@ public class ProductsDataServiceTests : RepoTestBase
         Assert.Contains(options, o => o.Name == "LL/A");
     }
 
+    // ── Inventory-derived PartNumber options ──────────────────
+
+    [Fact]
+    public async Task GetInventoryPartNumbersAsync_only_returns_part_numbers_attached_to_inventory()
+    {
+        SeedCatalog(out var phoneModel, out _);
+        var usedProduct = TestDataHelpers.CreateProduct(Context);
+        Context.PartNumbers.AddRange(
+            new PartNumber { ModelId = phoneModel.Id, Code = "CH/ZAA", SupportsDualSim = true },
+            new PartNumber { ModelId = phoneModel.Id, Code = "UNUSED", SupportsEsim = true });
+        Context.SaveChanges();
+        var usedId = Context.PartNumbers.First(pn => pn.Code == "CH/ZAA").Id;
+
+        Context.Phones.Add(new Phone { ProductId = usedProduct.Id, IMEI1 = TestDataHelpers.GenerateImei(), PartNumberId = usedId });
+        Context.SaveChanges();
+
+        var options = await _service.GetInventoryPartNumbersAsync();
+
+        var option = Assert.Single(options);
+        Assert.Equal("CH/ZAA", option.Name);
+        Assert.Equal(usedId, option.Id);
+    }
+
+    [Fact]
+    public async Task GetInventoryPartNumbersAsync_is_empty_when_no_phone_carries_a_part_number()
+    {
+        SeedCatalog(out var phoneModel, out _);
+        var product = TestDataHelpers.CreateProduct(Context);
+        Context.PartNumbers.Add(new PartNumber { ModelId = phoneModel.Id, Code = "CH/ZAA" });
+        Context.SaveChanges();
+        Context.Phones.Add(new Phone { ProductId = product.Id, IMEI1 = TestDataHelpers.GenerateImei() });
+        Context.SaveChanges();
+
+        var options = await _service.GetInventoryPartNumbersAsync();
+
+        Assert.Empty(options);
+    }
+
+    // ── List projection PartNumberLabel ───────────────────────
+
+    [Fact]
+    public async Task GetInventoryRowsAsync_phone_row_exposes_part_number_code_and_missing_shows_na()
+    {
+        SeedCatalog(out var phoneModel, out _);
+        var withPart = TestDataHelpers.CreateProduct(Context);
+        var withoutPart = TestDataHelpers.CreateProduct(Context);
+        Context.PartNumbers.Add(new PartNumber { ModelId = phoneModel.Id, Code = "CH/ZAA", SupportsDualSim = true });
+        Context.SaveChanges();
+        var pnId = Context.PartNumbers.First(pn => pn.Code == "CH/ZAA").Id;
+
+        Context.Phones.Add(new Phone { ProductId = withPart.Id, IMEI1 = TestDataHelpers.GenerateImei(), PartNumberId = pnId });
+        Context.Phones.Add(new Phone { ProductId = withoutPart.Id, IMEI1 = TestDataHelpers.GenerateImei() });
+        Context.SaveChanges();
+
+        var rows = await _service.GetInventoryRowsAsync("phone");
+
+        var withPartRow = Assert.Single(rows, r => r.ProductId == withPart.Id);
+        Assert.Equal("CH/ZAA", withPartRow.PartNumberLabel);
+        var withoutPartRow = Assert.Single(rows, r => r.ProductId == withoutPart.Id);
+        Assert.Equal("N/A", withoutPartRow.PartNumberLabel);
+    }
+
+    [Fact]
+    public async Task GetInventoryRowsAsync_apple_id_row_shows_na_part_number()
+    {
+        SeedCatalog(out var phoneModel, out _);
+        var appleProduct = TestDataHelpers.CreateProduct(Context);
+        Context.PartNumbers.Add(new PartNumber { ModelId = phoneModel.Id, Code = "CH/ZAA" });
+        Context.SaveChanges();
+        Context.AppleIds.Add(new AppleId { ProductId = appleProduct.Id, Email = "stock@example.com", Password = "secret" });
+        Context.SaveChanges();
+
+        var rows = await _service.GetInventoryRowsAsync("appleid");
+
+        var row = Assert.Single(rows);
+        Assert.Equal("Apple ID", row.Type);
+        Assert.Equal("N/A", row.PartNumberLabel);
+    }
+
     // ── Details ───────────────────────────────────────────────
 
     [Fact]

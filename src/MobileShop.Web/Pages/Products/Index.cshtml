@@ -7,25 +7,27 @@
 <h1>Products</h1>
 <div class="d-flex flex-wrap gap-2 align-items-center mb-3">
     <div class="btn-group" role="group">
-        <a class="btn @(Model.Type == "all" ? "btn-primary" : "btn-outline-primary")" asp-route-type="all" asp-route-partNumberId="@Model.PartNumberId">All</a>
+        @* Only the phones view can be narrowed by a part number, so All/Apple IDs links must drop it. *@
+        <a class="btn @(Model.Type == "all" ? "btn-primary" : "btn-outline-primary")" asp-route-type="all">All</a>
         <a class="btn @(Model.Type == "phone" ? "btn-primary" : "btn-outline-primary")" asp-route-type="phone" asp-route-partNumberId="@Model.PartNumberId">Phones</a>
-        <a class="btn @(Model.Type == "appleid" ? "btn-primary" : "btn-outline-primary")" asp-route-type="appleid" asp-route-partNumberId="@Model.PartNumberId">Apple IDs</a>
+        <a class="btn @(Model.Type == "appleid" ? "btn-primary" : "btn-outline-primary")" asp-route-type="appleid">Apple IDs</a>
     </div>
     <a asp-page="/Products/SecondHand" class="btn btn-outline-warning">Second-hand</a>
     <a asp-page="/Products/CreatePhone" class="btn btn-success">Create phone</a>
     <a asp-page="/Products/CreateAppleId" class="btn btn-success">Create Apple ID</a>
 </div>
 
-<form method="get" class="row g-2 align-items-end mb-3">
-    <input type="hidden" name="type" value="@Model.Type" />
-    <div class="col-auto">
-        <label class="form-label" asp-for="PartNumberId">Part number</label>
-        <select class="form-select" asp-for="PartNumberId" asp-items="Model.PartNumberOptions"></select>
-    </div>
-    <div class="col-auto">
-        <button type="submit" class="btn btn-outline-primary">Filter</button>
-    </div>
-</form>
+@if (Model.ShowPartNumberFilter)
+{
+    <form method="get" class="row g-2 align-items-end mb-3">
+        <input type="hidden" name="type" value="@Model.Type" />
+        <div class="col-auto">
+            <label class="form-label" asp-for="PartNumberId">Part number</label>
+            <select class="form-select" asp-for="PartNumberId" asp-items="Model.PartNumberOptions"
+                    onchange="this.form.submit()"></select>
+        </div>
+    </form>
+}
 
 @if (Model.Products.Count == 0)
 {
@@ -34,7 +36,7 @@
 else
 {
     <table class="table table-striped">
-        <thead><tr><th>Type</th><th>Product</th><th>Identifier</th><th>Color</th><th>Status</th><th></th></tr></thead>
+        <thead><tr><th>Type</th><th>Product</th><th>Identifier</th><th>Part number</th><th>Color</th><th>Status</th><th></th></tr></thead>
         <tbody>
         @foreach (var product in Model.Products)
         {
@@ -42,6 +44,7 @@ else
                 <td>@product.Type</td>
                 <td>@product.Name</td>
                 <td>@product.Identifier</td>
+                <td>@product.PartNumberLabel</td>
                 <td>@(string.IsNullOrWhiteSpace(product.Color) ? "N/A" : product.Color)</td>
                 <td>
                     <span class="badge @(product.IsSold ? "text-bg-secondary" : "text-bg-success")">@(product.IsSold ? "Sold" : "Available")</span>

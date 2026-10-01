@@ -47,9 +47,16 @@ public interface IProductsDataService
 
     /// <summary>Gets the part-number dropdown options for a model.</summary>
     /// <param name="modelId">
-    /// The model identifier, or null to return every part number (used by the Products list filter).
+    /// The model identifier, or null to return every part number (used by the Create Phone form).
     /// </param>
     Task<IReadOnlyList<DropdownOptionViewModel>> GetPartNumbersAsync(int? modelId = null);
+
+    /// <summary>
+    /// Gets the distinct part numbers attached to the current phone inventory, for the Products
+    /// list filter. Options come only from phones that exist in inventory (soft-deleted rows are
+    /// excluded by the repository filters), so unused catalog part numbers do not appear.
+    /// </summary>
+    Task<IReadOnlyList<DropdownOptionViewModel>> GetInventoryPartNumbersAsync();
 
     /// <summary>Creates a part number for a model and returns its dropdown option.</summary>
     /// <param name="modelId">The owning model identifier.</param>

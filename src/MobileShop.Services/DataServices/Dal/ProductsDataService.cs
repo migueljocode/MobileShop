@@ -46,7 +46,10 @@ public class ProductsDataService(
                 "IMEI: " + phone.IMEI1,
                 phone.ProductNavigation.ColorNavigation == null ? null : phone.ProductNavigation.ColorNavigation.Name,
                 phone.ProductNavigation.Transactions.Any(t => t.Direction == TransactionDirection.Sell),
-                phone.ProductNavigation.SecondHandProfile != null);
+                phone.ProductNavigation.SecondHandProfile != null)
+            {
+                PartNumberLabel = phone.PartNumberNavigation == null ? "N/A" : phone.PartNumberNavigation.Code,
+            };
 
             // The predicate is only applied when a part number is actually selected, so a
             // zero/negative id can never silently drop every phone.
@@ -87,7 +90,10 @@ public class ProductsDataService(
                 "IMEI: " + phone.IMEI1,
                 phone.ProductNavigation.ColorNavigation == null ? null : phone.ProductNavigation.ColorNavigation.Name,
                 phone.ProductNavigation.Transactions.Any(t => t.Direction == TransactionDirection.Sell),
-                phone.ProductNavigation.SecondHandProfile != null)))
+                phone.ProductNavigation.SecondHandProfile != null)
+            {
+                PartNumberLabel = phone.PartNumberNavigation == null ? "N/A" : phone.PartNumberNavigation.Code,
+            }))
             .OrderBy(row => row.ProductId)
             .ToList();
 
@@ -200,6 +206,26 @@ public class ProductsDataService(
             .Select(pn => new DropdownOptionViewModel(pn.Id, pn.Code))
             .ToList()
             .AsReadOnly();
+
+    /// <inheritdoc />
+    public async Task<IReadOnlyList<DropdownOptionViewModel>> GetInventoryPartNumbersAsync()
+    {
+        // Only part numbers actually attached to a live phone row are offered, so a catalog part
+        // number with no inventory behind it never appears in the Products list filter.
+        var usedIds = (await phones.SelectAllAsync(phone => phone.PartNumberId))
+            .Where(id => id is > 0)
+            .Select(id => id!.Value)
+            .ToHashSet();
+
+        if (usedIds.Count == 0)
+            return [];
+
+        return (await partNumbers.FindAllAsync(pn => usedIds.Contains(pn.Id)))
+            .Select(pn => new DropdownOptionViewModel(pn.Id, pn.Code))
+            .OrderBy(option => option.Name, StringComparer.OrdinalIgnoreCase)
+            .ToList()
+            .AsReadOnly();
+    }
 
     /// <inheritdoc />
     public async Task<IReadOnlyList<string>> GetGuaranteeCorporationsAsync()

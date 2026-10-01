@@ -122,7 +122,10 @@ public class TransactionsDataService(
                 "IMEI: " + phone.IMEI1,
                 (phone.ProductNavigation.ColorNavigation == null ? null : phone.ProductNavigation.ColorNavigation.Name),
                 phone.ProductNavigation.Transactions.Any(t => t.Direction == TransactionDirection.Sell),
-                phone.ProductNavigation.SecondHandProfile != null));
+                phone.ProductNavigation.SecondHandProfile != null)
+            {
+                PartNumberLabel = phone.PartNumberNavigation == null ? "N/A" : phone.PartNumberNavigation.Code,
+            });
 
         var appleIdRows = await appleIds.SelectAllAsync(
             appleId => appleId.ProductNavigation.Transactions.All(transaction => transaction.Direction != direction),
