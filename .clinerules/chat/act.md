@@ -40,7 +40,7 @@ Step 3 replaces the raw numeric range validation messages on Buy/Sell required d
 - src/MobileShop.Tests/Web/Pages/Transactions/RecordModelTests.cs
 
 ## Commit
-`a807910` — feat(web): friendly validation messages for required dropdown selections
+`23aa1c1` — test(web): add validation coverage for Buy SellerId and Sell ProductId friendly messages
 
 ## Limitations
 None.
