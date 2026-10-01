@@ -20,40 +20,9 @@
 - **A3:** Conditional second-hand / guarantee UX = **Create Phone only**. Create Apple ID = shared pricing only.
 - **A4:** PartNumber + Add New on Create Phone is **done** (Stage M) — out of scope.
 
-## [ ] Step 1 — Bind models + server finished-price + notes persistence
+## ~~[x] Step 1 — Bind models + server finished-price + notes persistence~~
 
-- Files
-  - Modify:
-    - `src/MobileShop.Models/ViewModels/Web/BindModels/CreatePhoneInputModel.cs`
-    - `src/MobileShop.Services/DataServices/Dal/ProductsDataService.cs` — `CreatePhoneAsync`, `CreateAppleIdAsync`
-    - `CreateAppleIdInputModel` only if XML/docs need “paid” clarification (no new fields required)
-  - Tests: `ProductsDataServiceTests`
-  - Do not touch: schema, migrations, sample-data, Api **project**, auth, PDF, PartNumber handlers, UI scripts (Step 2+)
-
-- Symbols
-  - `CreatePhoneInputModel`: add `SecondHandNotes`, `GuaranteeNotes` (`string?`, `[StringLength(500)]`)
-  - Private helper e.g. `ComputeFinishedPrice(decimal paid, decimal? percent, decimal? amount)` used by both creates
-  - `CreatePhoneAsync` / `CreateAppleIdAsync`
-
-- Current → Desired
-  1. `Product.Price = ComputeFinishedPrice(input.Price, input.ProfitPercent, input.ProfitAmount)` per **A2**.
-  2. Keep existing range validation on paid/percent/amount; do not allow a negative finished result (guard if needed).
-  3. When `IsSecondHand`: set `SecondHand.Notes` (trim empty → null); keep `TestPeriodDays` / `UsedDurationDays` as today.
-  4. When `HasGuarantee`: set `Guarantee.Notes` (trim empty → null); **preserve** `StartDate = DateTime.Today`, expiry, corporation defaults.
-  5. Flags false → profiles stay null.
-  6. Apple ID create uses the same finished-price helper; Email/Password/Notes unchanged (plaintext password policy untouched).
-
-- Tests
-  - Phone: percent-only; amount-only; both present → amount path (safety net).
-  - Phone: second-hand notes / guarantee notes persisted; flags false → no profiles.
-  - Apple ID: finished price with percent and with amount.
-
-- Verify: focused `ProductsDataServiceTests` create cases.
-
-- Done when: server is source of truth for finished price + notes; Job B PASS.
-
-- Risk: HIGH
-- Confidence: HIGH (after A2 correction)
+- **Done** — Job B PASS (`ab7c8ff`). Server `ComputeFinishedPrice` + notes on profiles.
 
 ## [ ] Step 2 — Create Phone UI: toggles, notes, shared pricing script
 
@@ -119,4 +88,4 @@
 
 One step → one commit → `act.md` → **STOP** for Job B. Do not edit plan/audit/todo. Do not re-open PartNumber. Do not touch `src/MobileShop.Api`.
 
-**Step 1 is authorized.**
+**Step 2 is authorized.**
