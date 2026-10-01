@@ -67,3 +67,14 @@
 - Report the exact commit SHA, verification, limitations, friction, and problems in `.clinerules/chat/act.md`.
 - Actor must not edit `.clinerules/to-do.md`, `.clinerules/chat/plan.md`, or `.clinerules/chat/audit.md` to mark progress.
 - Reviewer owns `.clinerules/chat/audit.md` and final stage completion.
+
+
+### Reviewer Final Sign-off — Stage K
+
+- Step 3 Job B: PASS — verified Actor commit `6a4d63b16df140af7b7f4204679d32c401b7f788`.
+- Both Persian tests are unskipped with assertions unchanged.
+- Actor reported targeted PDF tests: 6 passed, 0 skipped; full suite: 245 passed, 0 skipped.
+- Independent source inspection confirms the two `Skip` attributes were removed and the existing font-registration path remains wired for direct tests and Web startup.
+- `src/MobileShop.Api` and unrelated API/DB/auth areas remain untouched by Step 3.
+- Process violation recorded: Actor again edited `.clinerules/chat/plan.md` in the implementation commit. Reviewer owns progress documentation.
+- Stage K: **SIGNED OFF**.
