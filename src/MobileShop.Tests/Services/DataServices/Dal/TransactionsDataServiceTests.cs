@@ -293,6 +293,25 @@ public class TransactionsDataServiceTests : RepoTestBase
     }
 
     [Fact]
+    public async Task GetSelectableProductsAsync_carries_catalog_price_as_suggested_price()
+    {
+        var product = TestDataHelpers.CreateProduct(Context, price: 1234.50m);
+        var appleIdProduct = TestDataHelpers.CreateProduct(Context, price: 99.99m);
+
+        Context.Phones.Add(new Phone { ProductId = product.Id, IMEI1 = TestDataHelpers.GenerateImei() });
+        Context.AppleIds.Add(new AppleId { ProductId = appleIdProduct.Id, Email = "a@b.c" });
+        Context.SaveChanges();
+
+        var selectable = await _service.GetSelectableProductsAsync(TransactionDirection.Buy);
+
+        Assert.Equal(2, selectable.Count);
+        var phoneRow = Assert.Single(selectable, row => row.Type == "Phone");
+        Assert.Equal(1234.50m, phoneRow.SuggestedPrice);
+        var appleIdRow = Assert.Single(selectable, row => row.Type == "Apple ID");
+        Assert.Equal(99.99m, appleIdRow.SuggestedPrice);
+    }
+
+    [Fact]
     public async Task GenerateListFactorPdfAsync_fails_with_filter_message_when_snapshot_is_empty()
     {
         var result = await _service.GenerateListFactorPdfAsync("all", 50, false, []);

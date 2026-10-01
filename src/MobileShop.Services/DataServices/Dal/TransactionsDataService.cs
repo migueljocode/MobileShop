@@ -125,6 +125,7 @@ public class TransactionsDataService(
                 phone.ProductNavigation.SecondHandProfile != null)
             {
                 PartNumberLabel = phone.PartNumberNavigation == null ? "N/A" : phone.PartNumberNavigation.Code,
+                SuggestedPrice = phone.ProductNavigation.Price,
             });
 
         var appleIdRows = await appleIds.SelectAllAsync(
@@ -137,7 +138,10 @@ public class TransactionsDataService(
                 appleId.Email,
                 null,
                 appleId.ProductNavigation.Transactions.Any(t => t.Direction == TransactionDirection.Sell),
-                appleId.ProductNavigation.SecondHandProfile != null));
+                appleId.ProductNavigation.SecondHandProfile != null)
+            {
+                SuggestedPrice = appleId.ProductNavigation.Price,
+            });
 
         return phoneRows
             .Concat(appleIdRows)

@@ -1,3 +1,40 @@
+# Act — Stage O Step 1 — Suggested price on selectable products
+
+## Commit
+- This commit — feat(transactions): expose catalog price as suggested price on selectable products
+  - Implements Step 1 of Stage O plan.md.
+
+## What changed
+- `ProductListItemViewModel.cs` — added init-only `decimal? SuggestedPrice` (default null), same pattern as `PartNumberLabel`, so all existing constructions stay source-compatible.
+- `TransactionsDataService.GetSelectableProductsAsync` — phone and Apple ID projections set `SuggestedPrice = <profile>.ProductNavigation.Price`. RecordBuy/RecordSell logic untouched.
+- `TransactionsDataServiceTests.cs` — new test `GetSelectableProductsAsync_carries_catalog_price_as_suggested_price` asserting phone (1234.50) and Apple ID (99.99) rows carry their catalog prices.
+
+## Verification
+- `dotnet build src/MobileShop.slnx --nologo` → **0 warnings, 0 errors**
+- Focused `TransactionsDataServiceTests` → **17 passed, 0 failed, 0 skipped**
+- Full suite `dotnet test src/MobileShop.slnx --nologo --no-build` → **292 passed, 0 failed, 0 skipped**
+- `git status` shows only the three files above — no Buy/Sell UI yet (Steps 2–3), no `src/MobileShop.Api`, no auth/PDF/schema changes, no plan/audit/todo edits.
+
+## Requirement map
+- Extend VM with init-only suggested price, default-safe → done (`SuggestedPrice`, null default).
+- Fill in `GetSelectableProductsAsync` projections for phone + Apple ID → done.
+- Assert selectable products carry price → new test.
+- No RecordBuy/RecordSell logic change → untouched.
+
+## Limitations
+None. Buy/Sell UI (shared partial, labels, date default) is Steps 2–3 and deliberately untouched.
+
+## Friction noted
+- Full suite takes ~36s; log shows nothing until completion, so I polled the file rather than trusting the tool timeout (one earlier `dotnet test` run appeared stalled but was simply buffering output).
+
+## Problems
+None — verification green. Reviewer Job B determines PASS/FAIL.
+
+## Status
+COMPLETE — awaiting Reviewer Job B for Stage O Step 1.
+
+---
+
 # Act — Stage N Step 3 — Create Apple ID reuses shared pricing script
 
 ## Commit
