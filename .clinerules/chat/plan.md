@@ -34,7 +34,7 @@
 - Risk: MEDIUM
 - Confidence: MEDIUM
 
-- [ ] Step 3 — Unskip and validate the two Persian tests
+- ~~[x] Step 3 — Unskip and validate the two Persian tests~~
 
 - Modify only `src/MobileShop.Tests/Services/PDF/QuestPdfGeneratorTests.cs` for the test setup/skip state/assertions needed to exercise the real PDF setup in direct unit tests.
 - Remove the two `Skip` attributes and their obsolete commercial-license wording.

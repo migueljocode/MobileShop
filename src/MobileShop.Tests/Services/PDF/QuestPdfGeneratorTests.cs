@@ -62,7 +62,7 @@ public class QuestPdfGeneratorTests
         Assert.Throws<ArgumentNullException>(() => _generator.Generate(null!));
     }
 
-    [Fact(Skip = "Persian generation requires Vazirmatn font which may need commercial license")]
+    [Fact]
     public void GeneratePersian_returns_pdf_bytes_for_valid_invoice()
     {
         var model = new InvoiceViewModel(
@@ -91,7 +91,7 @@ public class QuestPdfGeneratorTests
         Assert.Equal(0x46, pdfBytes[3]);
     }
 
-    [Fact(Skip = "Persian generation requires Vazirmatn font which may need commercial license")]
+    [Fact]
     public void GeneratePersian_throws_for_null_model()
     {
         Assert.Throws<ArgumentNullException>(() => _generator.GeneratePersian(null!));
