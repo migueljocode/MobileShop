@@ -1,82 +1,66 @@
-# Plan — Stage J — Api layer cleanup
+# Plan — Stage K — Persian PDF font support
 
 ## Reviewer Briefing
 
-- Stage J intentionally lifts the Stage H restriction on the unused API-backed entity-service stubs.
-- Repository inspection shows the eight entity-service interfaces are referenced only by their matching API stubs and `ServiceCollectionExtensions.cs`; no Web, Tests, or other production consumers were found.
-- `IDataService<T>` is used only by those eight interfaces and `ApiDataServiceBase<T>`; after those are removed, neither has a remaining source consumer.
-- The six surviving API registrations are `IHomeDataService`, `IProductsDataService`, `IPeopleDataService`, `ITransactionsDataService`, `IReportsDataService`, and `IAccountDataService`.
-- `src/MobileShop.Api` remains strictly out of scope.
-- Step 2 is the highest-risk step because it removes a shared-looking abstraction and eight concrete types; repository-wide reference verification is mandatory.
+- Stage K is the next unchecked stage after Stage J.
+- Stage I already moved the PDF tests to `MobileShop.Tests.Services.PDF`; Stage K now resolves the two intentionally skipped Persian tests.
+- The repository currently contains Vazirmatn WOFF2 assets under `src/MobileShop.Web/wwwroot/fonts`, while the Stage K requirement calls for a TTF/OTF asset because QuestPDF needs a loadable font file for this test path.
+- The existing PDF generator already uses the `Vazirmatn` family for Persian output; Stage K should provide/register the required font rather than redesign the PDF.
+- The owner has explicitly accepted the Vazirmatn licence for this stage.
+- `src/MobileShop.Api`, database/schema/migrations, authentication, data services, and unrelated UX remain out of scope.
 
-## ~~[x] Step 1 — Remove unused entity-service API registrations~~
+## Step 1 — Bundle the QuestPDF-compatible Vazirmatn font
 
-- Files: inspect/modify `src/MobileShop.Services/ServiceCollectionExtensions.cs` only.
-- Symbols: `AddMobileShopDataServices(bool useApi)`; the eight entity registrations for User, Customer, Seller, Transaction, Product, Invoice, Phone, and AppleId.
-- Current -> Desired: the `useApi` branch contains exactly:
-  - `IHomeDataService -> ApiHomeDataService`
-  - `IProductsDataService -> ApiProductsDataService`
-  - `IPeopleDataService -> ApiPeopleDataService`
-  - `ITransactionsDataService -> ApiTransactionsDataService`
-  - `IReportsDataService -> ApiReportsDataService`
-  - `IAccountDataService -> ApiAccountDataService`
-- Change: registration cleanup only. Keep the unused types until Step 2.
-- Depends on: Stage I PASS.
-- Preserve: `UseApi` configuration, default DAL path, all non-API registrations, and all project-specific constraints.
-- Do not touch: `src/MobileShop.Api`, database initialization, authentication, PDF configuration, or unrelated code.
-- Verify: `dotnet build src/MobileShop.slnx --nologo && dotnet test src/MobileShop.slnx --nologo --no-build`.
-- Done when: build/tests pass, exactly six API area registrations remain, and only this file changed.
+- Add the required Vazirmatn TTF/OTF asset to the existing project font location, preferably alongside the existing `wwwroot/fonts` assets.
+- Preserve the existing font family name `Vazirmatn`.
+- Do not remove the existing WOFF2 web-font assets; they serve a different purpose.
+- Record the font source/version and licence information in the repository documentation appropriate to the existing project conventions.
+- Do not change invoice layout or Persian content in this step.
+- Verify the font file is included in the relevant build/test output path and is accessible to the code that registers it.
 - Risk: MEDIUM
 - Confidence: HIGH
 
-## ~~[x] Step 2 — Remove unused entity API surface~~
+## Step 2 — Register Vazirmatn for QuestPDF
 
-- Files to remove:
-  - `src/MobileShop.Services/DataServices/Api/ApiUserDataService.cs`
-  - `src/MobileShop.Services/DataServices/Api/ApiCustomerDataService.cs`
-  - `src/MobileShop.Services/DataServices/Api/ApiSellerDataService.cs`
-  - `src/MobileShop.Services/DataServices/Api/ApiTransactionDataService.cs`
-  - `src/MobileShop.Services/DataServices/Api/ApiProductDataService.cs`
-  - `src/MobileShop.Services/DataServices/Api/ApiInvoiceDataService.cs`
-  - `src/MobileShop.Services/DataServices/Api/ApiPhoneDataService.cs`
-  - `src/MobileShop.Services/DataServices/Api/ApiAppleIdDataService.cs`
-  - `src/MobileShop.Services/DataServices/Interfaces/IUserDataService.cs`
-  - `src/MobileShop.Services/DataServices/Interfaces/ICustomerDataService.cs`
-  - `src/MobileShop.Services/DataServices/Interfaces/ISellerDataService.cs`
-  - `src/MobileShop.Services/DataServices/Interfaces/ITransactionDataService.cs`
-  - `src/MobileShop.Services/DataServices/Interfaces/IProductDataService.cs`
-  - `src/MobileShop.Services/DataServices/Interfaces/IInvoiceDataService.cs`
-  - `src/MobileShop.Services/DataServices/Interfaces/IPhoneDataService.cs`
-  - `src/MobileShop.Services/DataServices/Interfaces/IAppleIdDataService.cs`
-  - `src/MobileShop.Services/DataServices/Interfaces/Base/IDataService.cs`
-  - `src/MobileShop.Services/DataServices/Api/Base/ApiDataServiceBase.cs`
-- Symbols: the eight entity API contracts/stubs, `IDataService<T>`, and `ApiDataServiceBase<T>`.
-- Current -> Desired: those unused types/files are gone; the six surviving area API services remain.
-- Change: remove only the now-unreferenced API entity-service layer.
-- Depends on: Step 1 Job B PASS.
-- Before removal: search all `src` source/test files for every deleted type and `IDataService<`; no source/test reference may remain.
-- Do not create compatibility types or replacement abstractions.
-- Do not touch `src/MobileShop.Api` or the six surviving area API services.
-- Verify: repository-wide stale-reference search, then `dotnet build src/MobileShop.slnx --nologo && dotnet test src/MobileShop.slnx --nologo --no-build`.
-- Done when: all listed files are gone, no stale source/test references remain, the six area API registrations remain, and full validation passes.
-- Risk: HIGH
+- Update only the PDF configuration/setup needed to register the bundled TTF/OTF with QuestPDF before Persian document generation.
+- Use the project's existing PDF initialization/configuration path rather than introducing a separate runtime service.
+- Preserve the existing `Vazirmatn` family name used by `FontFamily("Vazirmatn")`.
+- Keep English PDF generation unchanged.
+- Do not alter invoice layout, models, DI architecture, or database behavior.
+- Verify both normal and Persian PDF generation paths.
+- Risk: MEDIUM
+- Confidence: MEDIUM
+
+## Step 3 — Unskip and validate the two Persian tests
+
+- Modify only `src/MobileShop.Tests/Services/PDF/QuestPdfGeneratorTests.cs` for the test assertions/skip state.
+- Remove the two `Skip` attributes and their obsolete commercial-license wording.
+- Preserve both test purposes:
+  - Persian invoice generation returns a non-empty PDF payload with a PDF signature.
+  - Persian generation still throws `ArgumentNullException` for a null model.
+- Do not weaken assertions merely to make the tests pass.
+- Run the targeted PDF tests first.
+- Then run the full solution build and test suite.
+- Expected result: the two previously skipped tests become passing; no existing test regressions.
+- Risk: LOW
 - Confidence: HIGH
 
 ## Global Definition of Done
 
-- `useApi` registers exactly the six surviving area services.
-- Eight unused entity API interfaces and eight matching API stub classes are gone.
-- `IDataService<T>` and `ApiDataServiceBase<T>` are gone because repository inspection confirms no remaining source/test consumers.
-- Six surviving area API services remain intact.
-- `src/MobileShop.Api` is untouched.
-- No database/schema/migration, initialization, authentication, PDF, package, or unrelated behavior changes.
-- Final validation passes: `dotnet build src/MobileShop.slnx --nologo && dotnet test src/MobileShop.slnx --nologo --no-build`.
-- No stale source/test references to the removed API entity-service types remain.
-- Stage J is signed off only after Step 2 Job B PASS.
+- A Vazirmatn TTF/OTF is bundled in the repository and its licence/source is documented.
+- QuestPDF can resolve the `Vazirmatn` family from the bundled font.
+- Both Persian PDF tests are unskipped and pass.
+- Existing English PDF tests remain passing.
+- Full solution build/test passes with no new warnings or failures.
+- No PDF layout redesign is performed; that belongs to Stage P.
+- No database/schema/migration/auth/API-host changes.
+- `src/MobileShop.Api` remains untouched.
+- Stage K is signed off only after the final Job B PASS.
 
 ## Execution notes
 
-- Implement exactly one step, verify it, commit it, and **STOP for Job B** before the next step.
-- Report the exact commit SHA, verification, limitations, friction, problems, and status in `.clinerules/chat/act.md`.
-- Actor must not edit `.clinerules/to-do.md`; reviewer ticks the stage only after final Job B PASS.
-- Reviewer owns `.clinerules/chat/audit.md`.
+- Implement exactly one step, verify it, commit it, and **STOP for Job B**.
+- Do not start the next step until Job B explicitly returns PASS and authorizes it.
+- Report the exact commit SHA, verification, limitations, friction, and problems in `.clinerules/chat/act.md`.
+- Actor must not edit `.clinerules/to-do.md`, `.clinerules/chat/plan.md`, or `.clinerules/chat/audit.md` to mark progress.
+- Reviewer owns `.clinerules/chat/audit.md` and final stage completion.
