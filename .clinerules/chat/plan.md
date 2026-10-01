@@ -36,7 +36,7 @@ This plan has been rechecked against the current repository before authorization
 
 ## Step 1 — Transactions filters auto-apply
 
-- [ ] Step 1 — Make the Transactions list filters apply automatically
+- ~~[x] Step 1 — Make the Transactions list filters apply automatically~~ (commit `d3f2f82fdc5a3b7fba14d0dedc9ebf9b7a7626ea`)
 
 ### Required implementation
 
@@ -68,7 +68,7 @@ This plan has been rechecked against the current repository before authorization
 - Run full solution build/test.
 - Inspect `git diff` and confirm no API/DB/auth/data-service/PDF changes.
 
-**Step 1 is the only authorized step. Stop for Job B after committing.**
+**Reviewer Job B: PASS — verified commit `d3f2f82fdc5a3b7fba14d0dedc9ebf9b7a7626ea`. Step 2 is now authorized.**
 
 ## Step 2 — Return/Back navigation
 
