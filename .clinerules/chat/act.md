@@ -1,3 +1,44 @@
+# Act — Stage O Step 2 — Shared product-picker partial + Buy page
+
+## Commit
+- This commit — feat(transactions): shared product picker with suggested price prefill on Buy
+  - Implements Step 2 of Stage O plan.md.
+
+## What changed
+- **Created** `ProductPickerViewModel(Products, FieldPrefix)` — carries selectable rows + the `Input` field prefix so generated names (`Input.ProductId`, `Input.Price`) bind on post.
+- **Created** `Pages/Shared/_ProductPicker.cshtml` — shared product `<select>` (friendly option text: type/name/identifier/color/part number), each option with `data-suggested-price` (invariant culture), read-only **Suggested price** display, **Finished price** input, and a small change script that shows the suggested price and always sets finished = suggested (documented A2 rule).
+- `Buy.cshtml` — uses the partial (`FieldPrefix = "Input"`); **Seller** dropdown kept; date `type="date"`; removed the old inline product/price markup.
+- `Buy.cshtml.cs` — `OnGetAsync` sets `Input.Date ??= DateTime.Today`.
+- `BuyInputModel.Price` — `[Display(Name = "Finished price")]` (bind name `Price` per A1 unchanged).
+- `RecordModelTests.cs` — new `Buy_OnGet_defaults_date_to_today` asserting `Input.Date == DateTime.Today`.
+
+## Verification
+- `dotnet build src/MobileShop.slnx --nologo` → **0 warnings, 0 errors**
+- Focused `RecordModelTests|TransactionsDataServiceTests` → **29 passed, 0 failed, 0 skipped**
+- Full suite `dotnet test src/MobileShop.slnx --nologo --no-build` → **293 passed, 0 failed, 0 skipped**
+- `git status` shows only the six files above — Sell page untouched (Step 3), no `src/MobileShop.Api`, no auth/PDF/schema changes, no plan/audit/todo edits.
+
+## Requirement map
+- Shared partial once → `_ProductPicker.cshtml` with `ProductPickerViewModel`.
+- Options `data-suggested-price` invariant → done.
+- Suggested price display + finished prefill on change → done.
+- Buy label **Finished price**; date default today; keep **Seller** → done.
+- Optional `[Display]` → done on `BuyInputModel.Price`.
+
+## Limitations
+None. Sell page is Step 3 and deliberately untouched.
+
+## Friction noted
+- `dotnet build`/`dotnet test` through the tool hang even after completion — run detached via `setsid nohup ... &` and poll the log file. Full suite took ~53s this run.
+
+## Problems
+None — verification green. Reviewer Job B determines PASS/FAIL.
+
+## Status
+COMPLETE — awaiting Reviewer Job B for Stage O Step 2.
+
+---
+
 # Act — Stage O Step 1 — Suggested price on selectable products
 
 ## Commit

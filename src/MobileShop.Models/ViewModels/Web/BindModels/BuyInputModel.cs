@@ -10,6 +10,7 @@ public sealed class BuyInputModel
     public int SellerId { get; set; }
 
     [Range(0, double.MaxValue)]
+    [Display(Name = "Finished price")]
     public decimal Price { get; set; }
 
     [DataType(DataType.DateTime)]

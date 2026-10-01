@@ -70,6 +70,16 @@ public class RecordModelTests : RepoTestBase
     }
 
     [Fact]
+    public async Task Buy_OnGet_defaults_date_to_today()
+    {
+        var model = new BuyModel(CreateService());
+        var result = await model.OnGetAsync();
+
+        Assert.IsType<PageResult>(result);
+        Assert.Equal(DateTime.Today, model.Input.Date);
+    }
+
+    [Fact]
     public async Task Buy_OnPost_records_transaction_and_reports_success_message()
     {
         TestDataHelpers.SeedShopSentinels(Context);

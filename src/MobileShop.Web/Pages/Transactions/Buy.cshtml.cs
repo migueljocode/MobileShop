@@ -9,7 +9,10 @@ public class BuyModel(
     public string? Message { get; private set; }
 
     public async Task<IActionResult> OnGetAsync()
-        => await LoadSelectionsAsync();
+    {
+        Input.Date ??= DateTime.Today;
+        return await LoadSelectionsAsync();
+    }
 
     public async Task<IActionResult> OnPostAsync()
     {
