@@ -9,7 +9,7 @@
 - The owner has explicitly accepted the Vazirmatn licence for this stage.
 - `src/MobileShop.Api`, database/schema/migrations, authentication, data services, and unrelated UX remain out of scope.
 
-- [ ] Step 1 — Bundle the QuestPDF-compatible Vazirmatn font
+- ~~[x] Step 1 — Bundle the QuestPDF-compatible Vazirmatn font~~
 
 - Add a QuestPDF font asset such as `Vazirmatn-Regular.ttf` under the Services PDF area (for example `src/MobileShop.Services/PDF/Fonts/`), not under Web `wwwroot`: the PDF generator lives in Services and must not depend on Web static assets.
 - Mark the font as content copied to the Services build output (or otherwise make it reliably available to the registration path); verify the actual test/runtime output contains the file.
