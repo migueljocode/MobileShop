@@ -98,3 +98,34 @@ Actor again edited `.clinerules/chat/plan.md` in the Step 3 implementation commi
 ### Authorization / completion
 
 **Stage K is signed off. Stage L is now the next unchecked stage.**
+
+
+# Stage L — Job A — Plan Review
+
+**Verdict: APPROVED — Stage L Step 1 only.**
+
+Repository inspection confirms the Stage L scope matches the current implementation:
+
+- Transactions `Index.cshtml` uses one GET form with direction/count/order filters and a separate Download Factor submit button.
+- `IndexModel` already clamps Count to 1–500 and preserves `direction`, `take`, and `order` query parameters.
+- Buy/Sell currently use positive-ID `Range` validation with zero-valued placeholder options, explaining the raw default validation text.
+- CustomerDetails and SellerDetails are GET-only detail pages without return navigation.
+- Existing transaction page-model tests provide an appropriate place for focused regression coverage.
+
+### Scope locks
+
+- **API untouched.**
+- **No DB/schema/migration changes.**
+- **No authentication changes.**
+- **No data-service contract/behavior changes.**
+- **No PDF changes.**
+- Do not remove Download Factor.
+- Do not weaken positive-ID validation.
+- Do not use browser-history navigation when deterministic Razor page links are available.
+- Preserve existing query parameter names and server-side Count clamping.
+
+### Authorization
+
+**Stage L Step 1 is authorized. Steps 2–3 are not authorized yet.**
+
+**Conclusion: APPROVED — implement Step 1 only, then stop for Job B.**
