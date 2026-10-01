@@ -1,28 +1,22 @@
-# Act — Stage I — All Steps Report
+# Act — Stage J — Step 1 — Remove unused entity-service API registrations
 
-## Step 1 — Rename PasswordHasher to ArgonPasswordHasher
-- Commit: 88c8ff3b10249d460ecaa3309b3ac8836371c1ad — refactor(security): rename PasswordHasher to ArgonPasswordHasher
-- Verification: dotnet build src/MobileShop.slnx (0 errors, 0 warnings); ArgonPasswordHasherTests 9/9 passed; AccountDataServiceTests 9/9 passed.
-- Codebase search for `\bPasswordHasher\b` confirms no concrete class references remain (only `IPasswordHasher` interface and the `AccountDataService` substring).
+## Commit
+3bde83ccb88b3a1deb357eb4cb2fe568e3763cb1 — refactor(api): remove unused entity-service API registrations from useApi branch
 
-## Step 2 — Move PDF tests under Services.PDF
-- Commit: 9d95cb46508b87c709d7e735ad133b01c630942b — refactor(tests): move PDF tests to Services.PDF namespace
-- Verification: dotnet build (0 errors, 0 warnings); QuestPdfGeneratorTests discovered under MobileShop.Tests.Services.PDF: 4 passed, 2 skipped, 0 failed, 6 total. Two skipped Persian tests remain skipped as expected.
-- Codebase search for `MobileShop.Tests.PDF` confirms no source-code references remain (only documentation files in .clinerules/).
-
-## Step 3 — Flatten and singularize the generic repository namespace
-- Commit: 35c6854f1447f7e07a9dec014edefb5053ed75ba — refactor(repo): move BaseRepo/IBaseRepo to MobileShop.Dal.Repo namespace
-- Verification: dotnet build src/MobileShop.slnx (0 errors, 0 warnings); full test suite: Passed! Failed: 0, Passed: 243, Skipped: 2, Total: 245.
-- Repository-wide search for `Dal.Repos` confirms no source-code references remain (only documentation files). The old `src/MobileShop.Dal/Repos/` directory is gone; BaseRepo<T> and IBaseRepo<T> exist only under MobileShop.Dal.Repo.
+## Verification
+- `dotnet build src/MobileShop.slnx --nologo --no-restore` → Build succeeded. 0 Warning(s), 0 Error(s).
+- `dotnet test src/MobileShop.slnx --nologo --no-build --no-restore` → Passed! Failed: 0, Passed: 243, Skipped: 2, Total: 245.
+- Confirmed: exactly six API area registrations remain in the `useApi` branch (IHomeDataService, IProductsDataService, IPeopleDataService, ITransactionsDataService, IReportsDataService, IAccountDataService).
+- Confirmed: the eight entity-service API types (interfaces + stubs) still exist in source but are no longer registered in DI; they will be deleted in Step 2.
 
 ## Limitations
 None.
 
 ## Friction noted
-The default tool timeout of 30s is insufficient for builds/tests. Used `--no-build --no-restore` on test runs after the initial build to stay within the timeout. Full test suite (243 tests) took ~37s; used a background process with output redirected to a log file to capture results beyond the tool timeout.
+The tool's 30s timeout is insufficient for the full test suite (243 tests take ~36s). Used `--no-build --no-restore` after the initial build to reduce test runner startup time. Full suite run via a background process with redirected output to poll results.
 
 ## Problems
 None.
 
 ## Status
-COMPLETE
+COMPLETE — Step 1 done. Stopping for Job B review before Step 2.
