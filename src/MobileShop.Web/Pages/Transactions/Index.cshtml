@@ -35,7 +35,6 @@
         <p class="d-flex flex-wrap gap-2">
             <a class="btn btn-primary" asp-page="/Transactions/Buy">Record Buy</a>
             <a class="btn btn-dark" asp-page="/Transactions/Sell">Record Sell</a>
-            <button type="submit" class="btn btn-outline-primary">Apply filters</button>
             <button type="submit" name="handler" value="DownloadFactor" class="btn btn-primary">Download Factor (PDF)</button>
         </p>
 
@@ -88,3 +87,26 @@
         }
     </form>
 </div>
+
+@section Scripts {
+    <script>
+        // Auto-submit the filter form when direction or order changes.
+        document.getElementById('direction').addEventListener('change', function () {
+            this.form.requestSubmit();
+        });
+        document.getElementById('order').addEventListener('change', function () {
+            this.form.requestSubmit();
+        });
+
+        // Debounced auto-submit when the Count (take) field changes.
+        let countDebounceTimer = null;
+        const COUNT_DEBOUNCE_MS = 300;
+
+        document.getElementById('take').addEventListener('input', function () {
+            clearTimeout(countDebounceTimer);
+            countDebounceTimer = setTimeout(function () {
+                document.getElementById('take').form.requestSubmit();
+            }, COUNT_DEBOUNCE_MS);
+        });
+    </script>
+}
