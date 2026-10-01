@@ -11,6 +11,7 @@ public static class WebApplicationBuilderExtensions
     public static WebApplicationBuilder ConfigureBuilder(this WebApplicationBuilder builder)
     {
         QuestPdfSetup.UseCommunityLicense();
+        QuestPdfSetup.RegisterFonts();
         builder.ConfigureSerilog();
         builder.Services.AddRazorPages();
         builder.Services.AddMobileShop(builder.Configuration);

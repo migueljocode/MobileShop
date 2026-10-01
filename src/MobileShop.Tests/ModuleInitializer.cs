@@ -9,5 +9,6 @@ internal static class ModuleInitializer
     internal static void Initialize()
     {
         QuestPdfSetup.UseCommunityLicense();
+        QuestPdfSetup.RegisterFonts();
     }
 }
