@@ -31,13 +31,13 @@
         <span asp-validation-for="Input.ModelId" class="text-danger"></span>
     </div>
 
-    <div class="col-md-4">
-        <label asp-for="Input.Price" class="form-label"></label>
+    <div class="col-md-3">
+        <label asp-for="Input.Price" class="form-label">Paid price</label>
         <input asp-for="Input.Price" class="form-control" data-price />
         <span asp-validation-for="Input.Price" class="text-danger"></span>
     </div>
 
-    <div class="col-md-4">
+    <div class="col-md-3">
         <label asp-for="Input.ProfitPercent" class="form-label">Profit %</label>
         <div class="input-group">
             <input asp-for="Input.ProfitPercent" class="form-control" data-percent />
@@ -46,13 +46,20 @@
         <span asp-validation-for="Input.ProfitPercent" class="text-danger"></span>
     </div>
 
-    <div class="col-md-4">
+    <div class="col-md-3">
         <label asp-for="Input.ProfitAmount" class="form-label">Profit $</label>
         <div class="input-group">
             <span class="input-group-text">$</span>
             <input asp-for="Input.ProfitAmount" class="form-control" data-amount />
         </div>
         <span asp-validation-for="Input.ProfitAmount" class="text-danger"></span>
+    </div>
+
+    <div class="col-md-3">
+        <label class="form-label">Finished price</label>
+        <input type="text" class="form-control" data-finished-price readonly aria-readonly="true"
+               tabindex="-1" style="background:#e9ecef;" />
+        <span class="form-text text-muted">Server-stored price (paid + profit).</span>
     </div>
 
     <div class="col-md-6">
@@ -78,12 +85,6 @@
     </div>
 
     <div class="col-md-6">
-        <label asp-for="Input.TestPeriodDays" class="form-label">Second-hand test days</label>
-        <input asp-for="Input.TestPeriodDays" class="form-control" />
-        <span asp-validation-for="Input.TestPeriodDays" class="text-danger"></span>
-    </div>
-
-    <div class="col-md-6">
         <label asp-for="Input.IMEI1" class="form-label"></label>
         <input asp-for="Input.IMEI1" class="form-control" />
         <span asp-validation-for="Input.IMEI1" class="text-danger"></span>
@@ -97,33 +98,56 @@
 
     <div class="col-12">
         <div class="form-check">
-            <input asp-for="Input.IsSecondHand" class="form-check-input" />
+            <input asp-for="Input.IsSecondHand" class="form-check-input" data-second-hand-toggle />
             <label asp-for="Input.IsSecondHand" class="form-check-label">Second-hand item</label>
+        </div>
+    </div>
+
+    <div class="col-12" data-second-hand-block style="display:none;">
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label asp-for="Input.TestPeriodDays" class="form-label">Second-hand test days</label>
+                <input asp-for="Input.TestPeriodDays" class="form-control" />
+                <span asp-validation-for="Input.TestPeriodDays" class="text-danger"></span>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="Input.SecondHandNotes" class="form-label">Second-hand notes</label>
+                <input asp-for="Input.SecondHandNotes" class="form-control" />
+                <span asp-validation-for="Input.SecondHandNotes" class="text-danger"></span>
+            </div>
         </div>
     </div>
 
     <div class="col-12">
         <div class="form-check">
-            <input asp-for="Input.HasGuarantee" class="form-check-input" />
+            <input asp-for="Input.HasGuarantee" class="form-check-input" data-guarantee-toggle />
             <label asp-for="Input.HasGuarantee" class="form-check-label">Has guarantee</label>
         </div>
     </div>
 
-    <div class="col-md-6">
-        <label asp-for="Input.GuaranteeCorporation" class="form-label">Guarantee corporation</label>
-        <div class="input-group">
-            <select asp-for="Input.GuaranteeCorporation" asp-items="@(new SelectList(Model.Corporations))" class="form-select" id="corporationSelect">
-                <option value="">-- Select corporation --</option>
-            </select>
-            <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#addCorporationModal">Add New</button>
+    <div class="col-12" data-guarantee-block style="display:none;">
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label asp-for="Input.GuaranteeCorporation" class="form-label">Guarantee corporation</label>
+                <div class="input-group">
+                    <select asp-for="Input.GuaranteeCorporation" asp-items="@(new SelectList(Model.Corporations))" class="form-select" id="corporationSelect">
+                        <option value="">-- Select corporation --</option>
+                    </select>
+                    <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#addCorporationModal">Add New</button>
+                </div>
+                <span asp-validation-for="Input.GuaranteeCorporation" class="text-danger"></span>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="Input.GuaranteeExpiry" class="form-label">Guarantee expiry</label>
+                <input asp-for="Input.GuaranteeExpiry" class="form-control" />
+                <span asp-validation-for="Input.GuaranteeExpiry" class="text-danger"></span>
+            </div>
+            <div class="col-12">
+                <label asp-for="Input.GuaranteeNotes" class="form-label">Guarantee notes</label>
+                <input asp-for="Input.GuaranteeNotes" class="form-control" />
+                <span asp-validation-for="Input.GuaranteeNotes" class="text-danger"></span>
+            </div>
         </div>
-        <span asp-validation-for="Input.GuaranteeCorporation" class="text-danger"></span>
-    </div>
-
-    <div class="col-md-6">
-        <label asp-for="Input.GuaranteeExpiry" class="form-label">Guarantee expiry</label>
-        <input asp-for="Input.GuaranteeExpiry" class="form-control" />
-        <span asp-validation-for="Input.GuaranteeExpiry" class="text-danger"></span>
     </div>
 
     <div class="col-12">
@@ -252,34 +276,30 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script src="~/js/create-product-pricing.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            const priceEl = document.querySelector('[data-price]');
-            const percentEl = document.querySelector('[data-percent]');
-            const amountEl = document.querySelector('[data-amount]');
+            // Conditional second-hand / guarantee blocks: visible only while their toggle is ticked.
+            const secondHandToggle = document.querySelector('[data-second-hand-toggle]');
+            const secondHandBlock = document.querySelector('[data-second-hand-block]');
+            const guaranteeToggle = document.querySelector('[data-guarantee-toggle]');
+            const guaranteeBlock = document.querySelector('[data-guarantee-block]');
 
-            function updateFromPercent() {
-                const price = parseFloat(priceEl.value);
-                const percent = parseFloat(percentEl.value);
-                if (isNaN(price) || price === 0 || isNaN(percent)) {
-                    amountEl.value = '';
-                    return;
-                }
-                amountEl.value = (price * percent / 100).toFixed(2);
+            function syncSecondHand() {
+                if (secondHandBlock) secondHandBlock.style.display = secondHandToggle.checked ? '' : 'none';
+            }
+            function syncGuarantee() {
+                if (guaranteeBlock) guaranteeBlock.style.display = guaranteeToggle.checked ? '' : 'none';
             }
 
-            function updateFromAmount() {
-                const price = parseFloat(priceEl.value);
-                const amount = parseFloat(amountEl.value);
-                if (isNaN(price) || price === 0 || isNaN(amount)) {
-                    percentEl.value = '';
-                    return;
-                }
-                percentEl.value = (amount / price * 100).toFixed(2);
+            if (secondHandToggle) {
+                secondHandToggle.addEventListener('change', syncSecondHand);
+                syncSecondHand();
             }
-
-            percentEl.addEventListener('input', updateFromPercent);
-            amountEl.addEventListener('input', updateFromAmount);
+            if (guaranteeToggle) {
+                guaranteeToggle.addEventListener('change', syncGuarantee);
+                syncGuarantee();
+            }
 
             const manufacturerSelect = document.getElementById('manufacturerSelect');
             const modelSelect = document.getElementById('modelSelect');

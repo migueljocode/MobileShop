@@ -1,3 +1,48 @@
+# Act — Stage N Step 2 — Create Phone UI: toggles, notes, shared pricing script
+
+## Commit
+- This commit — feat(web): create shared pricing script and phone toggle/notes UI
+  - Implements Step 2 of Stage N plan.md.
+
+## What changed
+- **Created** `src/MobileShop.Web/wwwroot/js/create-product-pricing.js` (this step owns creation):
+  - Keeps the **percent ↔ amount** two-way sync, extracted verbatim from the page's inline script (not a fork — the inline copy was removed).
+  - Recomputes a **read-only finished price** via `data-finished-price` using the same **A2** amount-first rule as the server; display only (never posts a competing value).
+  - Hooks: `[data-price]`, `[data-percent]`, `[data-amount]`, `[data-finished-price]`.
+- `CreatePhone.cshtml`:
+  - Label `Paid price` on `Input.Price`; new read-only **Finished price** display (`data-finished-price`, `readonly`, `tabindex="-1"`, muted note "Server-stored price (paid + profit)").
+  - Second-hand block (`data-second-hand-block`, hidden by default): `TestPeriodDays` + **Second-hand notes**, visible only while `IsSecondHand` is ticked (`data-second-hand-toggle`).
+  - Guarantee block (`data-guarantee-block`, hidden by default): corporation + expiry + **Guarantee notes**, visible only while `HasGuarantee` is ticked (`data-guarantee-toggle`).
+  - Inline price-sync functions removed (moved to the shared script); added the two toggle `change` handlers; reference `<script src="~/js/create-product-pricing.js">`.
+  - **PartNumber** modal/handlers untouched (verified: 8 markers intact, no removals).
+
+## Verification
+- `dotnet build src/MobileShop.slnx --nologo` → **0 warnings, 0 errors**
+- Focused `CreatePhoneModelTests|ProductsDataServiceTests` → **93 passed, 0 failed, 0 skipped**
+- Full suite `dotnet test src/MobileShop.slnx --nologo --no-build` → **291 passed, 0 failed, 0 skipped**
+- `git status` shows only `CreatePhone.cshtml` + the new `create-product-pricing.js` — no PartNumber/Api/PDF/migration/schema changes, no plan/audit/todo edits.
+
+## Requirement map
+1. Second-hand block visible only when checked → `data-second-hand-block` + toggle sync.
+2. Guarantee block visible only when checked → `data-guarantee-block` + toggle sync.
+3. Labels paid / profit % / $ / read-only Finished → done; finished is display-only.
+4. Post paid + profits; server recomputes finished price → unchanged (server side from Step 1).
+5. Do not break manufacturer/model/color/PartNumber Add New → only pricing functions were extracted; Add New handlers left intact (verified).
+
+## Limitations
+None. Step 3 (Apple ID reuses the shared script) is deliberately not touched — this step only owns Create Phone + the script's creation.
+
+## Friction noted
+- Build ~33s / full suite ~40s exceed the 30s tool window; run in the background and polled.
+
+## Problems
+None — verification green. Reviewer Job B determines PASS/FAIL.
+
+## Status
+COMPLETE — awaiting Reviewer Job B for Stage N Step 2.
+
+---
+
 # Act — Stage N Step 1 — Bind models + server finished-price + notes persistence
 
 ## Commit
