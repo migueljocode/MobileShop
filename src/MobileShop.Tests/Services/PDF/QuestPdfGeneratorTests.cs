@@ -5,7 +5,7 @@ using MobileShop.Services.PDF.Settings;
 using MobileShop.Models.ViewModels;
 using Moq;
 
-namespace MobileShop.Tests.PDF;
+namespace MobileShop.Tests.Services.PDF;
 
 public class QuestPdfGeneratorTests
 {

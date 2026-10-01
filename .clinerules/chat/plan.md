@@ -27,7 +27,7 @@
 - Risk: LOW
 - Confidence: HIGH
 
-## [ ] Step 2 — Move PDF tests under Services.PDF
+## ~~[x] Step 2 — Move PDF tests under Services.PDF~~
 
 - Files: rename src/MobileShop.Tests/PDF/QuestPdfGeneratorTests.cs to src/MobileShop.Tests/Services/PDF/QuestPdfGeneratorTests.cs; modify its namespace only as needed; do not modify QuestPdfGenerator, PDF production code, PDF configuration, or the skipped-test behavior.
 - Symbols: MobileShop.Tests.PDF.QuestPdfGeneratorTests -> MobileShop.Tests.Services.PDF.QuestPdfGeneratorTests.
