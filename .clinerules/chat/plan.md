@@ -1,106 +1,131 @@
-# Plan — Stage M — PartNumber
+# Plan — Stage N — Create Phone & Create Apple ID UX
 
 ## Reviewer Briefing
 
-- Prior Stage M sign-off is void for UX; stage stays open until this plan’s final Job B PASS.
-- Step 1 is HIGH for list projection: `ProductListItemViewModel` must gain a PartNumber display field and **every** constructor site must be updated.
-- Step 1 UI: phone-only selector, no Filter button, auto-apply on change, inventory-derived options (not full catalog).
-- Step 2 is Create Phone Model-scoped PartNumber + Add New (owner “add new if missing”); not on Products Index. Stage N must not re-implement the same control later.
-- One step → one commit → Job B. Actor never edits plan.md / audit.md / to-do.md.
+- Stage M is complete (including Create Phone **PartNumber** combobox + Add New). **Do not re-implement PartNumber UI** in this stage; Stage N inherits that work.
+- Highest risk is the **finished-price** contract: today `Input.Price` is written straight to `Product.Price`. Stage N needs a clear paid-price + profit → read-only finished price, with the same rule on the server as in the browser.
+- Second-hand / guarantee **Notes** exist on entities but are not on `CreatePhoneInputModel` or the form; only Phone needs those conditional sections (Apple ID already has product-level Notes and has no second-hand/guarantee create UI).
+- Prefer one shared client asset for pricing (and toggles if reused) rather than copy-pasting divergent scripts on both pages.
+- No schema/migration; no `MobileShop.Api` project edits; no production auth; no DB init policy changes.
 
-## ~~[x] Step 1 — Correct Products PartNumber filtering and inventory display~~
+## Assumptions (labeled)
+
+- **A1:** “Paid price” is the cost the shop paid; UI field may stay bound as `Price` or be renamed for labels only. **Finished price** = paid + profit and is what is stored in `Product.Price`.
+- **A2:** Profit is either **percent** or **amount**, not both. If both are provided, prefer **amount** (document in service). If neither, finished = paid.
+- **A3:** Conditional second-hand / guarantee UX applies to **Create Phone** only. Create Apple ID gets the **shared pricing** UX only.
+- **A4:** PartNumber + Add New on Create Phone is **done** (Stage M Step 2) and is out of scope here.
+
+## [ ] Step 1 — Bind models + server finished-price + notes persistence
 
 - Files
   - Inspect/modify:
-    - `src/MobileShop.Web/Pages/Products/Index.cshtml`
-    - `src/MobileShop.Web/Pages/Products/Index.cshtml.cs`
-    - `src/MobileShop.Services/DataServices/Dal/ProductsDataService.cs`
-    - `src/MobileShop.Models/ViewModels/Web/ProductListItemViewModel.cs`
-    - Existing `IProductsDataService` (locate; do not invent a second contract)
-    - Every other `new ProductListItemViewModel(...)` call site if the record shape changes (grep required)
-  - Tests: `ProductsDataServiceTests`; page tests only if the repo already has them
-  - Do not touch: API project, auth, PDF, migrations/schema, Create Phone (Step 2)
+    - `src/MobileShop.Models/ViewModels/Web/BindModels/CreatePhoneInputModel.cs`
+    - `src/MobileShop.Models/ViewModels/Web/BindModels/CreateAppleIdInputModel.cs` (only if price field naming/docs need alignment; no second-hand fields)
+    - `src/MobileShop.Services/DataServices/Dal/ProductsDataService.cs` — `CreatePhoneAsync`, `CreateAppleIdAsync`
+    - `src/MobileShop.Services/DataServices/Interfaces/IProductsDataService.cs` — only if signatures/docs change (prefer no signature break)
+    - `ApiProductsDataService` stubs only if interface members change
+  - Tests: `ProductsDataServiceTests` for create price/notes cases
+  - Do not touch: schema, migrations, sample-data.json, Api **project**, auth, PDF, CreatePhone PartNumber handlers
 
 - Symbols
-  - `IndexModel.OnGetAsync`
-  - `GetInventoryRowsAsync`
-  - Inventory-derived PartNumber options (new method if needed; do **not** misuse Model-scoped `GetPartNumbersAsync(modelId)` for Index)
-  - `ProductListItemViewModel`
-  - `Index.cshtml` type links + filter form + table
+  - `CreatePhoneInputModel` — add `SecondHandNotes`, `GuaranteeNotes` (`string?`, length ≤ 500 to match entities)
+  - `CreatePhoneAsync` / `CreateAppleIdAsync`
+  - Optional private helper e.g. `ComputeFinishedPrice(paid, percent, amount)` used by both creates
 
 - Current → Desired
-  - Current: selector always visible; Filter button; options from global `GetPartNumbersAsync()`; no list column; type links all pass `partNumberId`.
+  - Current: `Product.Price = input.Price` with no server-side profit fold-in; second-hand/guarantee profiles omit `Notes`.
   - Desired:
-    1. Render the PartNumber control **only** when `Type == "phone"`. For `all` / `appleid`, do **not** render the form.
-    2. Remove the Filter button entirely.
-    3. Auto-apply: GET form; on select change submit the form (e.g. `onchange` → `this.form.submit()`). No second click.
-    4. Empty / “All part numbers” clears the PartNumber restriction.
-    5. Type links: **All** and **Apple IDs** must **not** pass `partNumberId`. **Phones** may preserve a valid selection.
-    6. Options = distinct PartNumbers attached to **current phone inventory**, built with the PartNumber filter **omitted** so the dropdown does not collapse to the selected id only. Leading “All part numbers”. Exclude unused catalog PartNumbers and soft-deleted phones/part numbers per existing query filters.
-    7. Stale positive `partNumberId` not in that option set → treat as no selection.
-    8. null / 0 / negative query → no selection.
-    9. Add `PartNumberLabel` (or equivalent `string`) to `ProductListItemViewModel`. Update **all** constructions: phones project code or `"N/A"`; Apple IDs always `"N/A"`.
-    10. Table: new **Part number** column bound to that field.
-    11. Existing Details, ordering, sold/second-hand badges, and other columns unchanged.
+    1. Compute finished price on the server from paid + profit (A1–A2) and assign **that** to `Product.Price`.
+    2. Reject negative finished price / invalid paid (keep existing range attributes).
+    3. When `IsSecondHand`, set `SecondHand.Notes` from input (trim empty → null); still set `TestPeriodDays` as today.
+    4. When `HasGuarantee`, set `Guarantee.Notes` from input; keep corporation/expiry behavior.
+    5. When flags are false, profiles remain null (no empty profiles).
+    6. Apple ID create uses the **same** finished-price formula; existing `Notes` field behavior unchanged.
 
-- Change (concrete)
-  - Extend list ViewModel + inventory projections.
-  - Service method for inventory-available PartNumber dropdown options (or extend contract cleanly).
-  - Index page: conditional form, auto-submit, type-link query cleanup, column.
+- Edge cases
+  - Both profit fields set → amount wins (A2).
+  - Percent only → `paid + paid * percent/100` (decimal-safe).
+  - Whitespace notes → null.
 
 - Tests
-  - Options only from phones in inventory; unused PartNumber excluded.
-  - Valid PartNumber filters phones; Apple IDs not returned under phone+PartNumber filter path as designed.
-  - null/0/negative = no filter.
-  - Projection exposes code vs N/A.
-  - Compile-safe after ViewModel shape change (all call sites).
+  - Phone: percent-only and amount-only finished price.
+  - Phone: both profits → amount wins.
+  - Phone: second-hand notes persisted; guarantee notes persisted.
+  - Phone: flags false → no SecondHand/Guarantee rows.
+  - Apple ID: finished price with profit amount/percent.
 
-- Verify: focused ProductsDataService (+ page if any) tests; full suite deferred to Step 3 unless compile fails.
+- Verify: focused `ProductsDataServiceTests` create cases; full suite deferred to final step unless compile fails.
 
-- Done when: phone-only auto filter; no Filter button; inventory options; Part number column; Job B PASS.
+- Done when: server is source of truth for finished price and notes; Job B PASS.
 
-- Risk: MEDIUM
-- Confidence: HIGH
-
-## ~~[x] Step 2 — Create Phone PartNumber selector + Add New~~
-
-- Files: `CreatePhone.cshtml`, `CreatePhone.cshtml.cs`, `CreatePhoneInputModel.cs`, `ProductsDataService` / `IProductsDataService`, existing Create Phone / service tests.
-- Do not: new migration, Create Apple ID PartNumber, parallel PartNumber admin page, new frontend framework.
-
-- Current → Desired
-  1. Nullable `PartNumberId` on input model.
-  2. Combobox + Add New (existing modal/AJAX pattern).
-  3. Options **Model-scoped** via existing `GetPartNumbersAsync(modelId)`.
-  4. Manufacturer/Model change resets/reloads PartNumber options.
-  5. Add New disabled/rejects without Model; collects code, Dual SIM, eSIM; calls `CreatePartNumberAsync`; selects returned option without full reload.
-  6. Duplicate Model+Code reuses existing service behavior.
-  7. CreatePhone persists selected PartNumberId; omit → null (valid).
-  8. Reject PartNumber belonging to another Model.
-  9. No unrelated field behavior changes.
-
-- Tests: omit/persist/reject foreign Model; Model-scoped list; Add New create/select; existing create/reuse intact.
-
-- Verify: focused Create Phone / ProductsDataService tests.
-
-- Done when: select or Add New works; persist/null OK; Job B PASS.
-
-- Risk: HIGH
+- Risk: HIGH (price contract)
 - Confidence: MEDIUM
 
-## ~~[x] Step 3 — Final Stage M validation (Reviewer sign-off)~~
+## [ ] Step 2 — Create Phone UI: toggles, notes, read-only finished price
 
-- Actor: no production changes expected; report SHAs + validation only if asked. Reviewer runs/records full build+test and UX checklist, writes final PASS, then ticks `to-do.md`.
-- Checklist: phone-only selector; no Filter button; auto-apply; inventory options; column; Create Phone combobox+Add New; details still OK; no API/auth/PDF/migration scope creep.
+- Files
+  - `src/MobileShop.Web/Pages/Products/CreatePhone.cshtml`
+  - `src/MobileShop.Web/Pages/Products/CreatePhone.cshtml.cs` only if needed for display helpers
+  - Prefer new shared script under `src/MobileShop.Web/wwwroot/js/` (e.g. `create-product-pricing.js`) introduced here or in Step 3 — if introduced here, Create Phone must reference it
+  - Do not touch: PartNumber modal/handlers (already correct)
+
+- Current → Desired
+  1. **Second-hand block:** `TestPeriodDays` and new **Second-hand notes** textarea visible only when `IsSecondHand` is checked (show/hide via JS; keep fields in DOM or disable when hidden so postback is clean).
+  2. **Guarantee block:** corporation, expiry, and new **Guarantee notes** visible only when `HasGuarantee` is checked.
+  3. **Pricing:** clear labels — paid/cost input (existing `Price` or display name “Paid price”); profit % and profit amount as today; **Finished price** is a **read-only** display (not a second writable bound field that fights the server). On input change, recompute finished with the same rule as Step 1.
+  4. On submit, either post paid + profits only (server computes) **or** post finished as `Price` only if it matches the formula — **prefer post paid + profits; server always recomputes** so the client cannot lie.
+  5. Do not break manufacturer/model/color/PartNumber Add New flows.
+
+- Tests: page-model tests only if the repo already covers CreatePhone toggles; otherwise service tests remain authoritative and Job B checks markup.
+
+- Verify: focused create/page tests as applicable.
+
+- Done when: conditional sections and finished-price UX work on Create Phone; Job B PASS.
+
+- Risk: MEDIUM
+- Confidence: MEDIUM
+
+## [ ] Step 3 — Shared pricing script + Create Apple ID UX
+
+- Files
+  - Shared: `wwwroot/js/create-product-pricing.js` (or partial `_CreateProductPricing.cshtml` if the repo prefers Razor-owned script — pick one pattern and stick to it)
+  - `CreateAppleId.cshtml` / `.cs` — wire the same pricing labels + read-only finished display
+  - Ensure Create Phone uses the **same** shared asset (no duplicated formula)
+  - Do not add second-hand/guarantee UI to Apple ID
+
+- Current → Desired
+  1. One shared client formula matching Step 1 (A2).
+  2. Create Apple ID: paid + profit % / amount + read-only finished price; existing Email/Password/Notes unchanged.
+  3. Create Phone references the same script for pricing (toggles may stay page-local if not needed on Apple ID).
+
+- Tests: Apple ID create finished-price service coverage if not done in Step 1; no API tests.
+
+- Verify: focused tests + smoke both create pages if feasible.
+
+- Done when: both pages share one pricing implementation; Job B PASS.
+
+- Risk: MEDIUM
+- Confidence: MEDIUM
+
+## [ ] Step 4 — Final Stage N validation (Reviewer sign-off)
+
+- No production changes expected from the actor except fixing FAIL items.
+- Run: `dotnet build src/MobileShop.slnx --nologo && dotnet test src/MobileShop.slnx --nologo --no-build`
+- Record exact pass/fail/skip and warning/error counts.
+- Checklist: conditional second-hand/guarantee on Phone; notes persisted; finished price server+client aligned; Apple ID pricing only; PartNumber untouched; no Api/auth/PDF/migration scope creep.
+- Reviewer ticks Stage N in `to-do.md` only after PASS.
+
 - Risk: HIGH | Confidence: HIGH
 
 ## Global Definition of Done
 
-- Phone-only, auto-applied PartNumber filter; no Filter button.
-- Options from current phone inventory; list column present.
-- Create Phone: Model-scoped combobox + Add New; persist or null.
-- Details/SIM display unchanged; no destructive schema work in these corrective steps.
-- Focused + full build/test green; every step Job B PASS; only then Stage M checked in `to-do.md`.
+- Create Phone: Test days + second-hand notes only when second-hand is checked.
+- Create Phone: Guarantee corporation, expiry, guarantee notes only when guarantee is checked.
+- Notes persisted on `SecondHand` / `Guarantee` when applicable.
+- Finished price = paid + profit (shared client + server); stored as `Product.Price`.
+- Create Apple ID uses the same pricing UX; no PartNumber work in this stage.
+- Full build/test green; each step Job B PASS; then Stage N checked.
 
 ## Execution notes
 
-Implement **only** the authorized step. One implementation commit, then **STOP** for Job B. Do not edit plan/audit/todo. No silent scope expansion.
+Implement **one** step, commit once, write `act.md`, **STOP** for Job B. Do not edit `plan.md` / `audit.md` / `to-do.md`. Do not re-open PartNumber. Do not touch `src/MobileShop.Api` project.
