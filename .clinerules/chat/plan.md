@@ -27,7 +27,7 @@ Stage M is the next unchecked stage in `.clinerules/to-do.md`. It is a schema ch
 
 ## Step 1 — Add the PartNumber schema and production-safe migration
 
-- [ ] Step 1 — Add `PartNumber`, nullable `Phone.PartNumberId`, EF configuration/DbSet, and one additive EF migration.
+- [~~x~~] Step 1 — Add `PartNumber`, nullable `Phone.PartNumberId`, EF configuration/DbSet, and one additive EF migration.
 - Keep the implementation limited to Models/DAL/migration files plus focused DAL tests.
 - Configure the unique index as **(ModelId, Code)**, respecting soft-delete conventions.
 - Configure Phone → PartNumber as optional with no destructive cascade behavior.

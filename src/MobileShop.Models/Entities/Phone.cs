@@ -19,4 +19,7 @@ public class Phone : BaseEntity
 
     public int ProductId { get; set; }
     public virtual Product ProductNavigation { get; set; } = null!;
+
+    public int? PartNumberId { get; set; }
+    public virtual PartNumber? PartNumberNavigation { get; set; }
 }

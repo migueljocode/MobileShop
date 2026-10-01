@@ -13,5 +13,11 @@ public class PhoneConfiguration : IEntityTypeConfiguration<Phone>
             .WithOne(product => product.PhoneProfile)
             .HasForeignKey<Phone>(p => p.ProductId)
             .OnDelete(DeleteBehavior.NoAction);
+
+        // Phone -> PartNumber is optional; no cascade delete
+        builder.HasOne(p => p.PartNumberNavigation)
+            .WithMany(pn => pn.Phones)
+            .HasForeignKey(p => p.PartNumberId)
+            .OnDelete(DeleteBehavior.NoAction);
     }
 }

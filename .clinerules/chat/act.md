@@ -1,55 +1,46 @@
-# Act — Stage L — Step 3 — Friendly required-selection validation
-
-## Summary
-Step 3 replaces the raw numeric range validation messages on Buy/Sell required dropdown fields with friendly selection messages, adds the missing validation spans for SellerId and CustomerId, and adds regression tests.
-
-## Changes
-
-### src/MobileShop.Models/ViewModels/Web/BindModels/BuyInputModel.cs
-- `ProductId` Range: added `ErrorMessage = "The product should be selected."`
-- `SellerId` Range: added `ErrorMessage = "The seller should be selected."`
-
-### src/MobileShop.Models/ViewModels/Web/BindModels/SellInputModel.cs
-- `ProductId` Range: added `ErrorMessage = "The product should be selected."`
-- `CustomerId` Range: added `ErrorMessage = "The customer should be selected."`
-
-### src/MobileShop.Web/Pages/Transactions/Buy.cshtml
-- Added validation span for `Input.SellerId`
-
-### src/MobileShop.Web/Pages/Transactions/Sell.cshtml
-- Added validation span for `Input.CustomerId`
-
-### src/MobileShop.Tests/Web/Pages/Transactions/RecordModelTests.cs
-- Added `ValidateInput` helper to run data-annotation validation against the Input property
-- Added `Zero_selection_rejected_with_friendly_message` theory: tests ProductId=0 in Buy and CustomerId=0 in Sell, asserts exact friendly messages
-- Added `Buy_zero_seller_id_rejected_with_friendly_message`: tests SellerId=0 in Buy, asserts "The seller should be selected."
-- Added `Sell_zero_product_id_rejected_with_friendly_message`: tests ProductId=0 in Sell, asserts "The product should be selected."
-- Added `Valid_positive_ids_pass_validation` theory: tests valid positive IDs, asserts ModelState.IsValid
+# Act — Stage M Step 1 — PartNumber schema and migration
 
 ## Verification
-- Build: `dotnet build src/MobileShop.slnx --nologo --no-restore` → Build succeeded. 0 Warning(s), 0 Error(s).
-- Targeted tests: `--filter "FullyQualifiedName~RecordModelTests"` → Passed! Failed: 0, Passed: 11, Skipped: 0, Total: 11.
-- Full suite: Passed! Failed: 0, Passed: 251, Skipped: 0, Total: 251.
-- `[Range(1, int.MaxValue)]` pattern only exists on BuyInputModel and SellInputModel.
 
-## Changed files
-- src/MobileShop.Models/ViewModels/Web/BindModels/BuyInputModel.cs
-- src/MobileShop.Models/ViewModels/Web/BindModels/SellInputModel.cs
-- src/MobileShop.Web/Pages/Transactions/Buy.cshtml
-- src/MobileShop.Web/Pages/Transactions/Sell.cshtml
-- src/MobileShop.Tests/Web/Pages/Transactions/RecordModelTests.cs
+- `dotnet build src/MobileShop.slnx --nologo` → Build succeeded. 0 warnings, 0 errors
+- `dotnet test ... --filter "FullyQualifiedName~PartNumberEfTests"` → 5 passed, 0 failed, 0 skipped
+- Full test suite (`--no-build`) → 256 passed, 0 failed, 0 skipped
+
+## What changed
+
+### New files
+- `src/MobileShop.Models/Entities/PartNumber.cs` — PartNumber entity (ModelId FK, Code, SupportsDualSim, SupportsEsim; inherits BaseEntity)
+- `src/MobileShop.Models/Entities/Configuration/PartNumberConfiguration.cs` — unique index on (ModelId, Code) with soft-delete filter; Model→PartNumber one-to-many; Phone→PartNumber optional with NoAction delete
+- `src/MobileShop.Dal/Migrations/20261001161450_AddPartNumber.Designer.cs` + `AddPartNumber.cs` — additive migration (add column, create table, indexes, FK); no Drop/Delete/Alter in `Up`
+- `src/MobileShop.Tests/Dal/BaseClass/SqliteRepoTestBase.cs` — SQLite-backed test base
+- `src/MobileShop.Tests/Dal/EfStructures/PartNumberEfTests.cs` — 5 focused tests
+
+### Modified files
+- `src/MobileShop.Models/Entities/Phone.cs` — added nullable `PartNumberId` + `PartNumberNavigation`
+- `src/MobileShop.Models/Entities/Model.cs` — added `PartNumbers` collection
+- `src/MobileShop.Models/Entities/Configuration/PhoneConfiguration.cs` — added optional Phone → PartNumber relationship
+- `src/MobileShop.Dal/EfStructures/AppDbContext.cs` — added `PartNumbers` DbSet
+- `src/MobileShop.Dal/Migrations/AppDbContextModelSnapshot.cs` — auto-updated
+
+## Tests added (5)
+- `PartNumber_requires_model` — PartNumber → Model many-to-one
+- `Phone_can_exist_without_part_number` — Phone → PartNumber optional (NULL FK)
+- `Multiple_phones_can_share_same_part_number` — One-to-many from PartNumber to Phones
+- `Duplicate_model_plus_code_rejected_but_same_code_different_model_allowed` — Unique constraint scoped to Model+Code
+- `Migration_preserves_existing_phone_with_null_part_number` — Migration additive; phone survives with NULL PartNumberId
 
 ## Commit
-`23aa1c1` — test(web): add validation coverage for Buy SellerId and Sell ProductId friendly messages
+<pending>
 
 ## Limitations
 None.
 
 ## Friction noted
-Full test suite (35s) exceeds 30s tool timeout; ran in background and polled output file.
+- `editor` tool mangled tab/space indentation in some edits, requiring sed-based fixes.
+- Full test suite (38s) exceeds 30s tool timeout; ran in background and polled.
 
 ## Problems
-None.
+None
 
 ## Status
-COMPLETE — Step 3 (friendly validation messages) is implemented and verified. All four required messages have explicit regression assertions. All 251 tests pass. Stage L Definition of Done is met. Stopping for final Job B review.
+COMPLETE — awaiting Reviewer Job B.

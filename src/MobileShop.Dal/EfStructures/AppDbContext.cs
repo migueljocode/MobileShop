@@ -33,6 +33,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public virtual DbSet<PortableStorage> PortableStorages => Set<PortableStorage>();
     public virtual DbSet<Case> Cases => Set<Case>();
     public virtual DbSet<Glass> Glasses => Set<Glass>();
+    public virtual DbSet<PartNumber> PartNumbers => Set<PartNumber>();
 
     // explicit many-to-many joins
     public virtual DbSet<CaseModelFit> CaseModelFits => Set<CaseModelFit>();

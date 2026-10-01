@@ -24,4 +24,6 @@ public class Model : BaseEntity
     public virtual ICollection<Product> Products { get; set; } = [];
     public virtual ICollection<CaseModelFit> CaseFits { get; set; } = [];
     public virtual ICollection<GlassModelFit> GlassFits { get; set; } = [];
+
+    public virtual ICollection<PartNumber> PartNumbers { get; set; } = [];
 }
