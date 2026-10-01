@@ -1,59 +1,53 @@
-# Audit — Stage M — PartNumber
+# Audit — Stage M replan (Job A verification before Act)
 
-## Reviewer Reopening
+**Verdict: APPROVED WITH CORRECTIONS**
 
-**Status: REQUIRES REPLANNING — previous Stage M sign-off is revoked for the requested UX correction.**
+Independent review of `to-do.md`, `plan.md`, `audit.md` (reopening note), and current Products/Create Phone code on `main`.
 
-The previous Step 1–4 implementation work is not being discarded. The stage is reopened because the delivered Products UX does not satisfy the owner's requested behavior, and the missing Create Phone PartNumber UX is now explicitly required for Stage M completion.
+## Repo facts (confirmed)
 
-### Confirmed current gaps
+| Claim | Evidence |
+|-------|----------|
+| PartNumber selector shown for All/Phones/Apple IDs | `Products/Index.cshtml` always renders the GET form |
+| Visible **Filter** button | submit button in that form |
+| Options from global catalog | `IndexModel` calls `GetPartNumbersAsync()` with no inventory scope |
+| No Part number column | `ProductListItemViewModel` has no PartNumber field; table headers omit it |
+| Create Phone has no PartNumber UI | no PartNumber in `CreatePhone.cshtml` / `CreatePhoneInputModel` |
+| Schema/service already exist | `PartNumber` entity + `GetPartNumbersAsync` / `CreatePartNumberAsync` / filter on `GetInventoryRowsAsync` |
+| Stage M unchecked | `to-do.md` line is `[ ]` — correct |
 
-1. **Products PartNumber selector**
-   - Current Products/Index.cshtml renders the PartNumber selector for All, Phones, and Apple IDs.
-   - It includes a visible Filter button.
-   - The selector is populated from GetPartNumbersAsync() globally rather than from PartNumbers actually available in current phone inventory.
-2. **Automatic filtering**
-   - PartNumber selection currently requires form submission through the Filter button.
-   - Required behavior is immediate application when the selected PartNumber changes.
-3. **Products list**
-   - ProductListItemViewModel currently has no PartNumber field.
-   - Products table therefore has no Part number column.
-4. **Create Phone**
-   - CreatePhone.cshtml has Manufacturer/Model/Color/etc. selectors with Add New controls, but no PartNumber selector.
-   - CreatePhoneInputModel has no PartNumberId.
-   - CreatePhoneModel does not load/create PartNumbers for the selected Model.
-   - CreatePhoneAsync does not persist a selected PartNumber.
-5. **Previous sign-off**
-   - Previous audit incorrectly marked Stage M complete because it validated the earlier implementation against an incomplete interpretation of the requested UX.
-   - to-do.md must therefore be reopened and must not remain checked.
+Previous “Stage M done” was invalid for the owner’s UX bar. Reopening is correct.
 
-### Corrective scope
+## Plan vs owner requirements
 
-The rewritten plan.md is now the sole Actor handoff for the reopened Stage M and contains:
-- exact files/symbols;
-- current → desired behavior;
-- Products phone-only automatic filtering;
-- inventory-derived PartNumber options;
-- PartNumber table column;
-- Model-scoped Create Phone PartNumber combobox;
-- Add New PartNumber modal flow;
-- persistence and null behavior;
-- focused tests;
-- one-step/one-commit/Job-B gates;
-- full final validation;
-- honest Risk and Confidence ratings.
+| Owner requirement | Plan coverage |
+|-------------------|---------------|
+| Filter only when **Phones** selected | Step 1 desired #1 |
+| No Filter button; apply on select | Step 1 #2–#4 |
+| Combobox = part numbers on **current phone inventory** | Step 1 #6–#8 (omit active PartNumber filter when building options) |
+| Part number **column** | Step 1 #9–#12 |
+| Combobox + **Add New** if missing | Step 2 on **Create Phone** (Model-scoped) |
 
-### Workflow
+**Assumption (acceptable):** “Add New” is on Create Phone, not on the Products list filter. Matches Stage N language and existing Add New patterns. Products Index remains filter-only.
 
-- Stage M is currently **open**.
-- Step 1 is the active Actor assignment.
-- Actor must implement Step 1 only, commit once, then stop for Job B.
-- Actor must not modify plan.md, audit.md, or to-do.md.
-- Reviewer owns those files.
-- Stage M remains unchecked until final validation passes.
+## HIGH corrections (must be in plan before Act)
 
-## Reviewer Gate
+1. **ViewModel + all projections:** Add an explicit list field (e.g. `PartNumberLabel` / `string? PartNumberCode`) on `ProductListItemViewModel` and update **every** `new ProductListItemViewModel(...)` site (phones, Apple IDs, any other callers) so the record still compiles. Apple IDs / null phones → display value that the view shows as `N/A`.
+2. **Type toggles:** All / Apple IDs links must **not** keep a selected `partNumberId` (clear query). Phones-only may preserve it. Today all three links pass `asp-route-partNumberId`.
+3. **Auto-apply mechanism:** Prefer GET form + `onchange` submit on the select (or equivalent). No Filter button. No new SPA/API page.
+4. **Selector visibility:** When `Type != "phone"`, do not render the PartNumber form at all (not merely empty options).
 
-**Current gate: Step 1 pending implementation and Job B.**
+## MEDIUM (optional; plan already mostly covers)
 
-No Stage M completion claim is valid until the reopened requirements in plan.md are implemented and reviewed.
+- Inventory-derived options may need a dedicated service method; do not overload Model-scoped `GetPartNumbersAsync(modelId)` for the Index filter.
+- Stale `partNumberId` not in available set → treat as no selection (plan already says this).
+
+## Process
+
+- One step → one commit → Job B → next step.
+- Actor does not edit `plan.md` / `audit.md` / `to-do.md`.
+- Stage M stays unchecked until final Step 3 Job B PASS.
+
+## Gate
+
+**Step 1 is authorized only after plan.md incorporates the HIGH corrections above** (planner or reviewer may fold them). Then Actor implements **Step 1 only** and stops.
