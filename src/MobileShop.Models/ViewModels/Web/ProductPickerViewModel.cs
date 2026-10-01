@@ -7,4 +7,5 @@ namespace MobileShop.Models.ViewModels.Web;
 /// renders only the product <c>option</c> elements plus the suggested-price display.
 /// </summary>
 public sealed record ProductPickerViewModel(
-    IReadOnlyList<ProductListItemViewModel> Products);
+    IReadOnlyList<ProductListItemViewModel> Products,
+    int SelectedProductId = 0);

@@ -9,6 +9,7 @@ public sealed class SellInputModel
     [Range(1, int.MaxValue, ErrorMessage = "The customer should be selected.")]
     public int CustomerId { get; set; }
 
+    [Display(Name = "Finished price")]
     [Range(0, double.MaxValue)]
     public decimal Price { get; set; }
 

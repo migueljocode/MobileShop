@@ -9,6 +9,14 @@
     var label = $"{product.Type}: {product.Name} — {product.Identifier}" +
         (string.IsNullOrWhiteSpace(product.Color) ? string.Empty : $" — {product.Color}") +
         (product.PartNumberLabel == "N/A" ? string.Empty : $" — {product.PartNumberLabel}");
-    <option value="@product.ProductId" data-suggested-price="@(product.SuggestedPrice?.ToString(CultureInfo.InvariantCulture) ?? string.Empty)">@label</option>
+    var price = product.SuggestedPrice?.ToString(CultureInfo.InvariantCulture) ?? string.Empty;
+    if (product.ProductId == Model.SelectedProductId)
+    {
+        <option value="@product.ProductId" data-suggested-price="@price" selected>@label</option>
+    }
+    else
+    {
+        <option value="@product.ProductId" data-suggested-price="@price">@label</option>
+    }
 }
 <div class="form-text mt-1">Suggested price: <span data-suggested-price-display>—</span></div>
