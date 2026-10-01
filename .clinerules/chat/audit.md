@@ -70,3 +70,39 @@ The Step 1 done conditions are satisfied and no blocking defect was found.
 **Authorized next action: Stage I Step 2 only.**
 
 Do not begin Step 3 until Step 2 receives a separate Job B review and PASS.
+
+
+## Process Control Finding — Stage I Execution Sequence
+
+**Verdict**: **WORKFLOW VIOLATION**
+
+The approved execution rule was not followed.
+
+### Evidence
+
+After the reviewer issued **Stage I Step 1 Job B — PASS** in commit `e5b294d0c0d7c307a527a8d509dcb5405017ed4a`, the actor proceeded with both later implementation steps without an intervening reviewer Job B review:
+
+1. `9d95cb46508b87c709d7e735ad133b01c630942b` — Step 2 implementation.
+2. `22d0207b983b812076ba112016de0cd2c597f2a0` — Step 1/2 act report.
+3. `35c6854f1447f7e07a9dec014edefb5053ed75ba` — Step 3 implementation.
+4. `82860f622f5d23c1cf3ec319f1461ea2301c3a76` — combined Stage I act report.
+
+The repository timestamps show these occurred after the Step 1 Job B PASS but **before any Step 2 Job B review or authorization**. Step 3 was likewise performed before any Step 2 Job B PASS.
+
+This directly conflicts with the Stage I execution rule: implement exactly one step, verify it, commit it, and stop for Job B review before the next step.
+
+It also conflicts with the Step 1 Job B authorization: **Authorized next action: Stage I Step 2 only. Do not begin Step 3 until Step 2 receives a separate Job B execution review and PASS.**
+
+### Consequence
+
+- Step 2 and Step 3 are **not reviewer-approved**.
+- Their implementation commits are not retroactively authorized by the later act report.
+- The reviewer must review Step 2 and Step 3 separately before considering either step accepted.
+- Stage I remains unchecked.
+- No Stage I final sign-off is permitted yet.
+
+The implementation changes may still be technically correct, but technical correctness does not erase the required workflow gate.
+
+### Required next reviewer action
+
+Review **Step 2** first against the approved plan and actual diff. If Step 2 passes, record its Job B PASS and explicitly authorize Step 3. Then review Step 3 separately. Do not treat the combined actor report as equivalent to the required per-step reviews.
