@@ -4,27 +4,39 @@
 
 **Status: PASS — Step 3 approved.**
 
-### Verified
+Steps 1–3 are complete. Step 4 is now the active Actor assignment.
 
-- A positive PartNumber ID filters Products phone inventory to matching Phone.PartNumberId.
-- An active PartNumber filter excludes Apple ID rows entirely.
-- Null, zero, and negative PartNumber IDs behave as no PartNumber selection.
-- Existing type routing remains preserved: phone excludes Apple IDs; appleid excludes phones; all includes both when no PartNumber filter is active.
-- The Products page provides a PartNumber GET filter and an “All part numbers” option.
-- Type-navigation links preserve the selected PartNumber filter.
-- GetPartNumbersAsync can return all PartNumbers for the filter while retaining model-scoped lookup for existing callers.
-- The DAL keeps a single Product-list projection for phone rows.
-- Focused ProductsDataService tests: 47 passed / 0 failed / 0 skipped.
-- Full suite: 267 passed / 0 failed / 0 skipped.
-- Build: 0 warnings / 0 errors.
-- No production API behavior, authentication, PDF, or database-initialization-policy changes were introduced.
+### Step 4 handoff
 
-### Workflow
+The active plan has been expanded into an executable specification so the Actor should not need to infer the intended behavior.
 
-The Actor again edited .clinerules/chat/plan.md in implementation commit 2c58380bf710c9361cc76138aa5fe4e6b5e47a59 to mark Step 3 complete before Reviewer Job B. This violates the established rule that the Actor must not edit plan.md, audit.md, or .clinerules/to-do.md to mark progress. The violation is recorded; no implementation rework is required because the Step 3 implementation passes review.
+The required result is limited to the existing phone-details flow:
+
+- Display PartNumber code plus Dual SIM and eSIM capabilities when a PartNumber exists.
+- Safely handle a null PartNumber and show N/A rather than false/empty capability values.
+- Preserve the distinction between a real PartNumber with false capabilities and no PartNumber.
+- Leave Apple ID details unchanged.
+- Do not add PartNumber selection to Create Phone; that belongs to Stage N.
+- Reuse existing architecture and EF navigation rather than introducing duplicate lookup mechanisms.
+- Add focused regression coverage for populated PartNumber, null PartNumber, false capabilities, and unchanged Apple ID details.
+- Run focused tests, the full suite, and the full build before handoff.
+- Make one implementation commit, then stop for Reviewer Job B.
+- The Actor must not edit plan.md, audit.md, or to-do.md to mark progress.
+
+### Previously verified Stage M state
+
+- Step 1 PASS: additive PartNumber schema/migration and existing-phone migration safety verified.
+- Step 2 PASS: seed data and PartNumber list/create operations verified.
+- Step 3 PASS: Products PartNumber filtering and existing type routing verified.
+- Latest Step 3 validation: 47 focused ProductsDataService tests passed; full suite 267 passed; build 0 warnings / 0 errors.
+- No API behavior, authentication, PDF, or database-initialization-policy changes were introduced by Step 3.
+
+### Workflow history
+
+The Actor edited .clinerules/chat/plan.md in implementation commit 2c58380bf710c9361cc76138aa5fe4e6b5e47a59 to mark Step 3 complete before Reviewer Job B. This remains recorded as a workflow violation; no implementation rework was required because Step 3 passed review.
 
 ### Gate
 
 **Step 3 PASS. Step 4 may begin.**
 
-No .clinerules/to-do.md change is made because Stage M is not complete.
+No .clinerules/to-do.md change is made until the entire Stage M Definition of Done has passed final Reviewer validation.
