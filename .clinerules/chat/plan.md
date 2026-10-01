@@ -1,96 +1,117 @@
 # Plan — Stage M — PartNumber
 
-## Reviewer Job B — Step 3
+## Current Step
 
-**Status: PASS — Step 3 approved.**
+- [ ] Step 4 — Show PartNumber and SIM options on phone details.
 
-Step 3 adds the optional PartNumber filter to the Products list while preserving existing type filtering.
+### Objective
 
-### ~~Step 1 — Add the PartNumber schema and production-safe migration~~
+Update the existing phone-details flow so that phones with a PartNumber display the PartNumber code and its SIM capabilities, while phones without a PartNumber remain fully valid and display `N/A` for the PartNumber/SIM information.
 
-- [x] Step 1 — Add PartNumber, nullable Phone.PartNumberId, EF configuration/DbSet, and one additive EF migration.
-- Step 1 passed Reviewer Job B and remains approved.
+This step is limited to phone details. PartNumber assignment during phone creation is **not** part of this step and belongs to Stage N.
 
-### ~~Step 2 — Seed PartNumbers + list/create operations~~
+### Required implementation
 
-- [x] Step 2 — Add representative development PartNumbers, assign them to existing phone seed rows, and expose list/create operations through the existing Products data-service abstraction.
-- Step 2 passed Reviewer Job B and remains approved.
+- Use the existing phone-details page, page model/view model, and existing data-service/repository flow.
+- Do not create a new page, endpoint, service abstraction, or parallel details flow.
+- Extend the existing phone-details data model/projection only as necessary to expose:
+  - PartNumber code.
+  - `SupportsDualSim`.
+  - `SupportsEsim`.
+- Reuse the PartNumber EF relationship/navigation introduced in Stage M.
+- Do not introduce a second PartNumber lookup or duplicate relationship.
+- The phone-details query must work when `Phone.PartNumberId` is null.
+- A phone with no PartNumber must load successfully and must not throw a null-navigation exception.
 
-## ~~Step 3 — Add the PartNumber filter to Products~~
+### UI behavior
 
-- [x] Step 3 — Add the optional PartNumber filter to the Products list; selected PartNumber shows only matching phone inventory, Apple IDs are excluded, invalid/non-positive IDs behave as no selection, and existing type routes remain unchanged.
-- Positive PartNumber IDs filter phone inventory by Phone.PartNumberId.
-- An active PartNumber filter excludes Apple IDs.
-- Null, zero, and negative PartNumber IDs are treated as no filter.
-- Existing all, phone, and appleid type semantics remain intact.
-- The Products page exposes a GET dropdown with an “All part numbers” option and preserves the selected PartNumber when switching type routes.
-- GetPartNumbersAsync now supports an optional model ID; existing model-scoped behavior remains available.
-- Focused ProductsDataService tests: 47 passed, 0 failed, 0 skipped.
-- Build: 0 warnings, 0 errors.
-- Full suite: 267 passed, 0 failed, 0 skipped.
-- No API behavior, authentication, PDF, or database-initialization-policy change was introduced.
-- Step 3 is approved; proceed to Step 4.
+For a phone **with** a PartNumber:
 
-## Step 4 — Show PartNumber and SIM options on phone details
+- Display the PartNumber code.
+- Display the Dual SIM capability from `SupportsDualSim`.
+- Display the eSIM capability from `SupportsEsim`.
+- Use the existing application's established boolean presentation convention.
 
-- [ ] Step 4 — Update the existing phone-details flow so a phone's PartNumber information is displayed when a PartNumber exists, while phones without one render safely as N/A.
+For a phone **without** a PartNumber:
 
-### Actor instructions
+- Display `N/A` for the PartNumber.
+- Display `N/A` for the SIM capability information.
+- Do not convert a missing PartNumber into `false`.
+- Keep every existing phone-detail field and behavior working as before.
 
-- Work only in the existing phone-details page/model/data-service flow. Do not create a new page, endpoint, or parallel details mechanism.
-- Extend the existing phone-details data projection only as needed to expose PartNumber code, SupportsDualSim, and SupportsEsim.
-- Reuse the Stage M EF PartNumber navigation. Do not add a duplicate relationship or separate lookup abstraction.
-- A null Phone.PartNumberId must be fully supported. Loading a phone with no PartNumber must never throw.
-- When PartNumber exists, show its code, Dual SIM capability, and eSIM capability.
-- When PartNumber is null, show N/A for the PartNumber and SIM-option information. Do not display null as false.
-- Preserve the distinction between an existing PartNumber with a false capability and no PartNumber: real false values remain false/no according to the existing UI convention; null remains N/A.
-- Keep all existing phone-detail fields, labels, navigation, authorization, and behavior unchanged unless a minimal internal model change is required.
-- Apple ID details must remain unchanged. Do not add PartNumber/SIM fields to Apple ID details.
-- Do not add PartNumber selection to Create Phone. Assignment for newly created phones belongs to Stage N.
-- Do not change Product/Phone creation or editing, Transactions, People, API behavior, authentication, PDF behavior, or development database initialization.
-- Follow the existing UI convention for boolean values instead of inventing a new global convention.
+A PartNumber that exists but has `SupportsDualSim == false` or `SupportsEsim == false` is different from a missing PartNumber. Preserve the actual false values for an existing PartNumber.
+
+### Apple ID constraint
+
+- Apple ID details must remain unchanged.
+- Do not add PartNumber or SIM fields to Apple ID details.
+- Do not introduce an Apple ID PartNumber concept.
+- Do not change Apple ID-specific fields, labels, routing, navigation, or behavior.
+
+### Explicitly out of scope
+
+Do not make changes to:
+
+- Create Phone PartNumber selection or assignment.
+- Product/Phone creation or editing behavior unrelated to this details display.
+- Transactions.
+- People.
+- API behavior or API contracts.
+- Authentication.
+- PDF functionality.
+- Development database initialization/seeding policy.
+- Unrelated architecture cleanup or refactoring.
+- Any other Stage M step.
+
+Preserve existing routes, authorization, contracts, and behavior unless a minimal internal change is required to display the new information.
 
 ### Required tests
 
-- Add/update focused phone-details tests covering:
-  1. Phone with PartNumber shows the PartNumber code.
-  2. The same phone shows the correct SupportsDualSim value.
-  3. The same phone shows the correct SupportsEsim value.
-  4. Phone with PartNumberId null loads successfully and shows N/A for PartNumber/SIM information.
-  5. Existing PartNumber with false capabilities is not treated as null; actual false values are preserved.
-  6. Apple ID details remain unchanged and do not gain PartNumber/SIM fields.
-- Explicitly test the null relationship. A populated PartNumber test alone is insufficient.
-- Reuse existing fixtures/helpers/test style; do not introduce broad new test infrastructure.
+Add or update focused tests for the existing phone-details flow.
 
-### Workflow and scope rules
+The tests must explicitly cover:
 
-- Do not edit .clinerules/chat/plan.md, .clinerules/chat/audit.md, or .clinerules/to-do.md to mark progress. The Reviewer owns those files.
-- Do not combine another roadmap step with Step 4.
-- Make exactly one implementation commit for Step 4, then stop and wait for Reviewer Job B.
+1. A phone with a PartNumber exposes/displays the correct PartNumber code.
+2. The same phone exposes/displays the correct `SupportsDualSim` value.
+3. The same phone exposes/displays the correct `SupportsEsim` value.
+4. A phone with `PartNumberId == null` loads successfully.
+5. A phone with `PartNumberId == null` displays `N/A` for PartNumber/SIM information.
+6. An existing PartNumber with false capability values is not treated as a missing PartNumber.
+7. Apple ID details remain unchanged and do not receive PartNumber/SIM fields.
+
+Use the existing test framework, fixtures, helpers, naming conventions, and assertion style. Do not introduce broad test infrastructure for this step.
+
+### Workflow — mandatory
+
+- Implement **Step 4 only**.
+- Do not implement another roadmap step in the same change.
+- Make **one implementation commit** for Step 4.
+- After that commit, **stop** and wait for Reviewer Job B.
+- Do not make a second implementation commit before Reviewer Job B.
 - Do not mark Step 4 complete yourself.
-- Preserve existing contracts and architecture; if an ambiguity appears, report it rather than making unrelated design changes.
+- Do not edit `.clinerules/chat/plan.md`, `.clinerules/chat/audit.md`, or `.clinerules/to-do.md` to record progress or completion.
+- The Reviewer owns those planning/audit/checklist files.
+- Do not silently change the architecture when an ambiguity is encountered; preserve the existing contract and report the ambiguity in the handoff.
 
-### Handoff validation
+### Required validation before handoff
 
-Before handing the commit to Reviewer Job B:
-- Run focused phone-details tests and report exact passed/failed/skipped counts.
-- Run the full test suite and report exact passed/failed/skipped counts.
-- Run the full build and report exact warning/error counts.
-- Confirm Apple ID details remain unchanged.
-- Confirm no API/authentication/PDF/database-initialization-policy changes were made.
-- Report the single implementation commit SHA and changed files.
-- Do not call the step approved; Reviewer Job B decides PASS/FAIL.
+Before handing the single implementation commit to Reviewer Job B:
 
-## Stage M Definition of Done
+- Run the focused phone-details tests.
+- Run the full test suite.
+- Run the full build.
+- Report exact test counts: passed, failed, skipped.
+- Report exact build warning/error counts.
+- Verify the null-PartNumber case explicitly.
+- Verify Apple ID details remain unchanged.
+- Verify no API, authentication, PDF, or database-initialization-policy changes were introduced.
+- Report the implementation commit SHA.
+- Report the changed files.
+- Do not state that Step 4 passed or is approved. Reviewer Job B determines PASS/FAIL.
 
-## Stage M Definition of Done
+### Completion gate
 
-- [ ] All four implementation steps have passed Reviewer Job B.
-- [ ] Production migration is additive/non-destructive and verified against an existing-phone database.
-- [ ] Existing phone/product IDs and relationships remain stable in development seed data.
-- [ ] PartNumber list/create operations are covered by focused tests.
-- [ ] Products PartNumber filtering is covered by regression tests.
-- [ ] Phone details show PartNumber/SIM options and handle null safely.
-- [ ] Full build/test passes.
-- [ ] No API, authentication, PDF, or database-initialization-policy changes.
-- [ ] Reviewer gives final Stage M sign-off before .clinerules/to-do.md is updated.
+Step 4 is complete only after Reviewer Job B verifies the implementation and gives PASS.
+
+Stage M is complete only after all four steps have passed Reviewer Job B and the Reviewer has performed final Stage M validation. Only then may the Reviewer update `.clinerules/to-do.md` to mark Stage M complete.
+
