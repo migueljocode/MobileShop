@@ -1,19 +1,21 @@
-# Audit — Job A: Stage N plan (revised)
+# Audit — Job B: Stage N Step 1
 
-**Verdict: APPROVED**
+**Verdict: PASS**
 
-Prior HIGH findings are incorporated in `plan.md` (`71be5c8`):
+**Commit:** `ab7c8ffd7e5382d185acbf37aa82220068a552cf`
 
-| Prior HIGH | Status |
-|------------|--------|
-| A2 linked % ↔ $ + server amount-first safety net | **OK** — A2 corrected; client must preserve sync |
-| Shared script owned by Step 2 only | **OK** — Step 2 creates; Step 3 reuses |
-| `Guarantee.StartDate` preserved | **OK** (optional MEDIUM folded) |
-
-No remaining CRITICAL/HIGH issues. Scope, project rules, PartNumber exclusion, and step gates are sound.
+| Requirement | Result |
+|-------------|--------|
+| `SecondHandNotes` / `GuaranteeNotes` on input | **OK** |
+| `ComputeFinishedPrice` A2 (amount → percent → paid; floor 0) | **OK** |
+| Phone + Apple ID use helper for `Product.Price` | **OK** |
+| Notes on profiles; `StartDate = Today` | **OK** |
+| Flags false → null profiles | **OK** (tests claimed) |
+| UI / PartNumber / Api project untouched | **OK** (diff: model, service, tests, act) |
+| Build/tests per act | 0/0 build; **291** passed |
 
 ## Gate
 
-**Step 1 is authorized.**
+**Step 2 authorized** — Create Phone toggles, notes fields, create `wwwroot/js/create-product-pricing.js`.
 
-Actor: implement Step 1 only → one commit → report in `act.md` → **STOP** for Job B. Do not edit plan/audit/todo.
+Actor: one commit → `act.md` → STOP. Do not edit plan/audit/todo.
