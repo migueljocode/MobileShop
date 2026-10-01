@@ -2,53 +2,21 @@
 
 ## Reviewer Briefing
 
-- Stage M is complete (including Create Phone **PartNumber** combobox + Add New). **Do not re-implement PartNumber UI**.
-- Highest risk: **finished-price** contract — `Input.Price` (paid) + profit → stored `Product.Price` (finished), same rule client and server.
-- Existing pages **link** profit % ↔ profit $ (edit one updates the other). Shared script must **preserve** that; do not switch to exclusive modes.
-- Second-hand / guarantee **Notes** on Phone only; Apple ID keeps product-level Notes and shared pricing only.
-- Shared pricing JS is **created in Step 2** and only **reused** in Step 3.
-- No schema/migration; no `src/MobileShop.Api` project; no production auth; no DB init policy changes.
+- Stage M PartNumber work is out of scope.
+- Shared pricing JS created in Step 2; Step 3 only reuses it.
+- No schema/Api/auth/PDF changes.
 
-## Assumptions (labeled)
+## Assumptions
 
-- **A1:** Bind property stays `Price` = **paid** cost. Display label may say “Paid price”. **Finished price** is computed and stored in `Product.Price`.
-- **A2 (corrected):** Client keeps **linked** percent ↔ amount (current behavior). Server finished price:
-  1. if `ProfitAmount` has a value → `paid + amount`
-  2. else if `ProfitPercent` has a value → `paid + paid * percent / 100`
-  3. else → `paid`
-  Amount-first on the server is only a **safety net** for partial/stale posts; when the client stays in sync both branches match.
-- **A3:** Conditional second-hand / guarantee UX = **Create Phone only**. Create Apple ID = shared pricing only.
-- **A4:** PartNumber + Add New on Create Phone is **done** (Stage M) — out of scope.
+- **A1–A4** as previously approved (paid bind, linked %↔$, Phone toggles only, PartNumber done).
 
 ## ~~[x] Step 1 — Bind models + server finished-price + notes persistence~~
 
-- **Done** — Job B PASS (`ab7c8ff`). Server `ComputeFinishedPrice` + notes on profiles.
+- **Done** — `ab7c8ff`
 
-## [ ] Step 2 — Create Phone UI: toggles, notes, shared pricing script
+## ~~[x] Step 2 — Create Phone UI: toggles, notes, shared pricing script~~
 
-- Files
-  - **Create** `src/MobileShop.Web/wwwroot/js/create-product-pricing.js` (this step owns creation)
-  - Modify `CreatePhone.cshtml` (and `.cs` only if required)
-  - Do not touch PartNumber modal/handlers
-
-- Shared script must
-  - Keep **percent ↔ amount** two-way sync (extract from current inline script)
-  - Recompute **read-only finished price** display with the same rule as **A2**
-  - Target elements via existing `data-price` / `data-percent` / `data-amount` plus a finished-price display hook (e.g. `data-finished-price`)
-
-- Create Phone UI
-  1. Second-hand block: `TestPeriodDays` + **Second-hand notes** visible only when `IsSecondHand` is checked.
-  2. Guarantee block: corporation, expiry, **Guarantee notes** visible only when `HasGuarantee` is checked.
-  3. Labels: paid price; profit % / $; **Finished price** read-only (not a competing bind that overrides server).
-  4. Post **paid + profits**; server always recomputes finished price.
-  5. Do not break manufacturer/model/color/PartNumber Add New.
-
-- Verify: focused tests if any; Job B checks markup + script reference.
-
-- Done when: toggles + notes + shared script live on Create Phone; Job B PASS.
-
-- Risk: MEDIUM
-- Confidence: HIGH
+- **Done** — Job B PASS (`152f234`). `create-product-pricing.js` + Create Phone toggles/notes/finished display.
 
 ## [ ] Step 3 — Create Apple ID reuses shared pricing script
 
@@ -68,24 +36,12 @@
 
 ## [ ] Step 4 — Final Stage N validation (Reviewer sign-off)
 
-- `dotnet build src/MobileShop.slnx --nologo && dotnet test src/MobileShop.slnx --nologo --no-build`
-- Record exact counts.
-- Checklist: Phone toggles + notes; finished price client+server; Apple ID pricing only; PartNumber untouched; no Api/auth/PDF/migration scope creep.
-- Reviewer ticks Stage N only after PASS.
-
-- Risk: HIGH | Confidence: HIGH
+- Full build + test; checklist; tick Stage N in `to-do.md` only after PASS.
 
 ## Global Definition of Done
 
-- Phone: test days + second-hand notes only when second-hand checked.
-- Phone: guarantee fields + guarantee notes only when guarantee checked.
-- Notes persisted on profiles when applicable; `Guarantee.StartDate` still today.
-- Finished price = A2 rule (linked client + server); stored as `Product.Price`.
-- One shared `create-product-pricing.js`; Apple ID pricing only; no PartNumber work this stage.
-- Full build/test green; every step Job B PASS; then Stage N checked in `to-do.md`.
+- Phone toggles + notes; finished price client+server; one shared pricing JS; Apple ID pricing only; PartNumber untouched; suite green.
 
 ## Execution notes
 
-One step → one commit → `act.md` → **STOP** for Job B. Do not edit plan/audit/todo. Do not re-open PartNumber. Do not touch `src/MobileShop.Api`.
-
-**Step 2 is authorized.**
+**Step 3 is authorized.** One commit → act.md → STOP.
