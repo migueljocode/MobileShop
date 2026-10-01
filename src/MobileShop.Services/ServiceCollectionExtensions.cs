@@ -86,14 +86,6 @@ public static class ServiceCollectionExtensions
     {
         if (useApi)
         {
-            services.AddScoped<IUserDataService, ApiUserDataService>();
-            services.AddScoped<ICustomerDataService, ApiCustomerDataService>();
-            services.AddScoped<ISellerDataService, ApiSellerDataService>();
-            services.AddScoped<ITransactionDataService, ApiTransactionDataService>();
-            services.AddScoped<IProductDataService, ApiProductDataService>();
-            services.AddScoped<IInvoiceDataService, ApiInvoiceDataService>();
-            services.AddScoped<IPhoneDataService, ApiPhoneDataService>();
-            services.AddScoped<IAppleIdDataService, ApiAppleIdDataService>();
             services.AddScoped<IHomeDataService, ApiHomeDataService>();
             services.AddScoped<IProductsDataService, ApiProductsDataService>();
             services.AddScoped<IPeopleDataService, ApiPeopleDataService>();

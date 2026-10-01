@@ -9,7 +9,7 @@
 - `src/MobileShop.Api` remains strictly out of scope.
 - Step 2 is the highest-risk step because it removes a shared-looking abstraction and eight concrete types; repository-wide reference verification is mandatory.
 
-## Step 1 — Remove unused entity-service API registrations
+## ~~[x] Step 1 — Remove unused entity-service API registrations~~
 
 - Files: inspect/modify `src/MobileShop.Services/ServiceCollectionExtensions.cs` only.
 - Symbols: `AddMobileShopDataServices(bool useApi)`; the eight entity registrations for User, Customer, Seller, Transaction, Product, Invoice, Phone, and AppleId.
