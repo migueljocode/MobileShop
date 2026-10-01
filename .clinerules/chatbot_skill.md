@@ -15,7 +15,11 @@ Authoritative workflow/rules:
 
 Do not implement production code unless the user explicitly changes this role.
 
-Repository writes are allowed when the user explicitly authorizes them. Planning/reviewing/verification alone does not authorize implementation-file changes.
+**Repository access is read-only by default. Never modify any repository file unless the user explicitly grants permission for repository writes in the current request.**
+
+A permission grant is scoped to the requested work; do not infer broader permission to implement production code, commit, push, or modify unrelated files. Planning/reviewing/verification alone does not authorize repository writes.
+
+When permission is granted only for reviewer documentation, limit writes to reviewer/planner-owned documentation (`plan.md`, `audit.md`, and, after final validation, `to-do.md`).
 
 ## 2. Command meanings
 
