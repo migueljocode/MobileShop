@@ -1,9 +1,10 @@
 namespace MobileShop.Models.ViewModels.Web;
 
 /// <summary>
-/// Carries the data a shared transaction product picker needs: the selectable product rows and
-/// the HTML field prefix (<c>Input</c>) the hosting page binds under.
+/// Carries the selectable product rows a shared transaction product-picker options partial
+/// renders. The hosting page keeps its own tag-helper select and price controls (so client and
+/// server validation, the selected value and the posted price survive round-trips); the partial
+/// renders only the product <c>option</c> elements plus the suggested-price display.
 /// </summary>
 public sealed record ProductPickerViewModel(
-    IReadOnlyList<ProductListItemViewModel> Products,
-    string FieldPrefix);
+    IReadOnlyList<ProductListItemViewModel> Products);

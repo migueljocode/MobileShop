@@ -1,0 +1,14 @@
+@using System.Globalization
+@model MobileShop.Models.ViewModels.Web.ProductPickerViewModel
+@* Shared product-picker options for the transaction forms: renders only the product <option> *@
+@* elements (with invariant-culture suggested prices) plus the read-only suggested-price display. *@
+@* The hosting page keeps its own tag-helper select/price controls and validation spans, and *@
+@* references wwwroot/js/product-picker.js next to _ValidationScriptsPartial. *@
+@foreach (var product in Model.Products)
+{
+    var label = $"{product.Type}: {product.Name} — {product.Identifier}" +
+        (string.IsNullOrWhiteSpace(product.Color) ? string.Empty : $" — {product.Color}") +
+        (product.PartNumberLabel == "N/A" ? string.Empty : $" — {product.PartNumberLabel}");
+    <option value="@product.ProductId" data-suggested-price="@(product.SuggestedPrice?.ToString(CultureInfo.InvariantCulture) ?? string.Empty)">@label</option>
+}
+<div class="form-text mt-1">Suggested price: <span data-suggested-price-display>—</span></div>
