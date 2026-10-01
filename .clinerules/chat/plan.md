@@ -9,7 +9,7 @@
 - The owner has explicitly accepted the Vazirmatn licence for this stage.
 - `src/MobileShop.Api`, database/schema/migrations, authentication, data services, and unrelated UX remain out of scope.
 
-## Step 1 — Bundle the QuestPDF-compatible Vazirmatn font
+- [ ] Step 1 — Bundle the QuestPDF-compatible Vazirmatn font
 
 - Add a QuestPDF font asset such as `Vazirmatn-Regular.ttf` under the Services PDF area (for example `src/MobileShop.Services/PDF/Fonts/`), not under Web `wwwroot`: the PDF generator lives in Services and must not depend on Web static assets.
 - Mark the font as content copied to the Services build output (or otherwise make it reliably available to the registration path); verify the actual test/runtime output contains the file.
@@ -20,7 +20,7 @@
 - Risk: MEDIUM
 - Confidence: HIGH
 
-## Step 2 — Register Vazirmatn for QuestPDF
+- [ ] Step 2 — Register Vazirmatn for QuestPDF
 
 - Update `src/MobileShop.Services/PDF/Configuration/QuestPdfSetup.cs` (the existing startup hook) to register the bundled TTF/OTF with QuestPDF's `FontManager` exactly once before the first render.
 - Use the bundled file/resource rather than Web `wwwroot` and do not rely on machine-installed fonts.
@@ -32,7 +32,7 @@
 - Risk: MEDIUM
 - Confidence: MEDIUM
 
-## Step 3 — Unskip and validate the two Persian tests
+- [ ] Step 3 — Unskip and validate the two Persian tests
 
 - Modify only `src/MobileShop.Tests/Services/PDF/QuestPdfGeneratorTests.cs` for the test setup/skip state/assertions needed to exercise the real PDF setup in direct unit tests.
 - Remove the two `Skip` attributes and their obsolete commercial-license wording.
