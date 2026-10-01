@@ -2,47 +2,40 @@
 
 ## Current Status
 
-**Stage L — Step 1: PASS**
+**Stage L — Step 2: PASS**
 
 Verified implementation commit:
+`17302ccc914e0afdad635e2f78492338b90af344`
 
-`d3f2f82fdc5a3b7fba14d0dedc9ebf9b7a7626ea`
-
-### Step 1 Review
-
-- **Apply filters** button was removed from Transactions.
-- Direction changes submit the existing GET form immediately.
-- Order changes submit the existing GET form immediately.
-- Count submits after a 300 ms debounce.
-- Repeated Count input resets the debounce timer.
-- Existing query parameters `direction`, `take`, and `order` remain unchanged.
-- Download Factor remains a separate submit action.
-- `selectedIds` behavior remains unchanged.
-- No transaction PageModel or data-service contract changes were introduced.
-- Actor reported full build: **0 warnings, 0 errors**.
+### Step 2 Review
+- Buy has a Back link to `/Transactions/Index`.
+- Sell has a Back link to `/Transactions/Index`.
+- CustomerDetails has a Back to customers link to `/People/Customers`.
+- SellerDetails has a Back to sellers link to `/People/Sellers`.
+- All four links use Razor `asp-page` navigation.
+- The change is limited to the four requested Razor pages.
+- No PageModel GET/POST, model binding, or data-service behavior changed.
+- Actor reported build: **0 warnings, 0 errors**.
 - Actor reported full test suite: **245 passed, 0 skipped, 0 failed**.
 
-### Process Finding
-
-The Actor modified `.clinerules/chat/audit.md` during implementation. This violates the Stage L rule that Reviewer owns `plan.md`, `audit.md`, and `to-do.md).
-
-Recorded as a **process violation only**. No technical rework is required.
+### Process Review
+- Step 2 implementation did not modify `.clinerules/chat/plan.md`, `.clinerules/chat/audit.md`, or `.clinerules/to-do.md`.
+- Step 1's earlier process violation remains historical and is not repeated here.
 
 ### Authorization
 
-**Step 1: PASS.**
+**Step 2: PASS.**
 
-**Step 2: AUTHORIZED.**
+**Step 3: AUTHORIZED.**
 
-Step 3 remains unauthorized until Step 2 receives Job B PASS.
+The Actor may now implement only Step 3 and must stop after its commit for final Job B.
 
 ---
 
 ## Active Review Rules
-
 - One step at a time.
-- Actor commits the implementation and stops.
+- Actor commits implementation and stops.
 - Reviewer performs Job B before authorizing the next step.
-- Actor must not modify `.clinerules/chat/plan.md`, `.clinerules/chat/audit.md`, or `.clinerules/to-do.md`.
+- Actor must not modify `plan.md`, `audit.md`, or `to-do.md`.
 - Reviewer owns progress documentation.
-- Stage L is not complete until the final Job B PASS.
+- Do not mark Stage L complete until final Job B PASS.
