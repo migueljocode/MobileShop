@@ -1,33 +1,59 @@
 # Audit — Stage M — PartNumber
 
-## Final Reviewer Status
+## Reviewer Reopening
 
-**PASS — Stage M complete.**
+**Status: REQUIRES REPLANNING — previous Stage M sign-off is revoked for the requested UX correction.**
 
-### Step 4 — Job B
+The previous Step 1–4 implementation work is not being discarded. The stage is reopened because the delivered Products UX does not satisfy the owner's requested behavior, and the missing Create Phone PartNumber UX is now explicitly required for Stage M completion.
 
-Implementation commit: `ed4d3123c8ff2211bc4c5e85ef293199bf6a46c4`
+### Confirmed current gaps
 
-Verified:
-- Existing Product details flow is reused.
-- Phones with a PartNumber display its code, Dual SIM, and eSIM capabilities.
-- Null PartNumber loads safely and displays `N/A`.
-- Existing PartNumbers with false capabilities display `No`, preserving the distinction from missing data.
-- Apple ID details do not receive PartNumber/SIM UI.
-- Create Phone PartNumber assignment remains out of scope for Stage M and belongs to Stage N.
-- No API, authentication, PDF, or development database-initialization-policy changes were introduced.
-- Step 4 used one implementation commit; the Actor did not edit reviewer-owned `plan.md`, `audit.md`, or `to-do.md`.
+1. **Products PartNumber selector**
+   - Current Products/Index.cshtml renders the PartNumber selector for All, Phones, and Apple IDs.
+   - It includes a visible Filter button.
+   - The selector is populated from GetPartNumbersAsync() globally rather than from PartNumbers actually available in current phone inventory.
+2. **Automatic filtering**
+   - PartNumber selection currently requires form submission through the Filter button.
+   - Required behavior is immediate application when the selected PartNumber changes.
+3. **Products list**
+   - ProductListItemViewModel currently has no PartNumber field.
+   - Products table therefore has no Part number column.
+4. **Create Phone**
+   - CreatePhone.cshtml has Manufacturer/Model/Color/etc. selectors with Add New controls, but no PartNumber selector.
+   - CreatePhoneInputModel has no PartNumberId.
+   - CreatePhoneModel does not load/create PartNumbers for the selected Model.
+   - CreatePhoneAsync does not persist a selected PartNumber.
+5. **Previous sign-off**
+   - Previous audit incorrectly marked Stage M complete because it validated the earlier implementation against an incomplete interpretation of the requested UX.
+   - to-do.md must therefore be reopened and must not remain checked.
 
-### Step 4 Validation
+### Corrective scope
 
-- Focused details tests: **10 passed, 0 failed, 0 skipped**.
-- Full suite: **272 passed, 0 failed, 0 skipped**.
-- Build: **0 warnings, 0 errors**.
+The rewritten plan.md is now the sole Actor handoff for the reopened Stage M and contains:
+- exact files/symbols;
+- current → desired behavior;
+- Products phone-only automatic filtering;
+- inventory-derived PartNumber options;
+- PartNumber table column;
+- Model-scoped Create Phone PartNumber combobox;
+- Add New PartNumber modal flow;
+- persistence and null behavior;
+- focused tests;
+- one-step/one-commit/Job-B gates;
+- full final validation;
+- honest Risk and Confidence ratings.
 
-### Stage M Final Gate
+### Workflow
 
-Steps 1–4 all passed Reviewer Job B.
+- Stage M is currently **open**.
+- Step 1 is the active Actor assignment.
+- Actor must implement Step 1 only, commit once, then stop for Job B.
+- Actor must not modify plan.md, audit.md, or to-do.md.
+- Reviewer owns those files.
+- Stage M remains unchecked until final validation passes.
 
-Stage M is marked complete in `.clinerules/to-do.md` with the required strikethrough checkbox form.
+## Reviewer Gate
 
-The previously recorded workflow violation remains: the Actor edited `.clinerules/chat/plan.md` in Step 3 commit `2c58380bf710c9361cc76138aa5fe4e6b5e47a59`. No implementation rework was required because Step 3 subsequently passed review.
+**Current gate: Step 1 pending implementation and Job B.**
+
+No Stage M completion claim is valid until the reopened requirements in plan.md are implemented and reviewed.
