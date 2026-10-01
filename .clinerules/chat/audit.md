@@ -2,25 +2,29 @@
 
 ## Reviewer Job A
 
-**Status: APPROVED — plan only.**
+**Status: APPROVED — plan clarified.**
 
-Repository review confirms the current design supports this stage cleanly:
+Repository review confirms the stage fits the current architecture:
 
 - `Phone` currently has no PartNumber relation.
-- `Model` already owns the device model identity and is the appropriate parent for reusable PartNumbers.
-- `PhoneConfiguration` and `ModelConfiguration` are the existing EF relationship-mapping points.
-- `AppDbContext` centralizes DbSets and applies configurations from the Models assembly.
+- `Model` is the appropriate parent for reusable PartNumbers.
+- `PhoneConfiguration` and a new `PartNumberConfiguration` are the EF mapping points.
+- `AppDbContext` uses `ApplyConfigurationsFromAssembly(...)`, so the new configuration will be discovered automatically.
 - `ProductsDataService` is the existing DAL-backed Products orchestration point.
 - Products list/details already flow through `IProductsDataService`.
-- `CreatePhoneInputModel` currently has no PartNumber field; Stage M therefore does not add the phone-form dropdown. That belongs to Stage N as specified by the roadmap.
-- Development seeding is intentionally destructive, while the new production migration must remain additive/non-destructive.
+- `CreatePhoneInputModel` currently has no PartNumber field; the create-form dropdown remains Stage N.
+- Development initialization is intentionally destructive, while the Stage M production migration must be additive/non-destructive.
 - API implementations/stubs remain out of scope.
 
-### Important design choice
+### Important design clarification
 
-**PartNumber → Model is many-to-one; Phone → PartNumber is optional.**
+**PartNumber → Model is many-to-one; Phone → PartNumber is optional; uniqueness is Model + Code.**
 
-This keeps one regional/SIM variant reusable across many physical phones while allowing existing phones to remain without a PartNumber.
+The original plan wording could be read as globally unique PartNumber codes while Step 2 only described duplicate handling within a Model. The plan now makes the intended constraint explicit: duplicate **Model + Code** is rejected, while the same code under another Model is permitted.
+
+### Migration safety
+
+Because this is the first production schema change in the stage, Job B for Step 1 must verify the actual migration path against a database that already contains a Phone. A successful build or `EnsureCreated` test alone is not sufficient evidence that the migration is production-safe.
 
 ### Step sequence
 
@@ -29,7 +33,7 @@ This keeps one regional/SIM variant reusable across many physical phones while a
 3. Products list filter.
 4. Phone details display.
 
-No implementation should begin until the Actor follows this Step 1 plan and waits for Reviewer Job B before continuing.
+No implementation should proceed beyond Step 1 until Reviewer Job B passes Step 1.
 
 ## Constraints
 
