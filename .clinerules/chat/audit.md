@@ -129,3 +129,8 @@ Repository inspection confirms the Stage L scope matches the current implementat
 **Stage L Step 1 is authorized. Steps 2–3 are not authorized yet.**
 
 **Conclusion: APPROVED — implement Step 1 only, then stop for Job B.**
+
+
+# Stage L — Plan Correction
+
+The previous `plan.md` incorrectly accumulated prior-stage material. Reviewer rewrote it to contain **only the active Stage L plan**, with Step 1 authorized and Steps 2–3 explicitly pending Job B authorization.
