@@ -75,3 +75,26 @@ Verified Actor implementation commit `f8b8e69b2ce0c16486d83204e1c9df5b665be186` 
 **Stage K Step 3 is now authorized.**
 
 **Conclusion: PASS — Step 2 complete; proceed to Step 3 only.**
+
+# Stage K — Job B — Step 3 Review / Final Sign-off
+
+**Verdict: PASS — Stage K complete.**
+
+Verified Actor implementation commit `6a4d63b16df140af7b7f4204679d32c401b7f788`.
+
+- Exactly the two Persian tests were changed from skipped `[Fact(Skip = ...)]` to `[Fact]`.
+- Assertions were preserved: non-empty PDF + `%PDF` signature for valid Persian invoice, and `ArgumentNullException` for null input.
+- No production PDF implementation was changed in Step 3.
+- Actor reported targeted PDF suite: **6 passed, 0 skipped, 0 failed**.
+- Actor reported full suite: **245 passed, 0 skipped, 0 failed**.
+- Independent inspection confirms `ModuleInitializer` still registers the bundled fonts for direct tests and Web startup still registers them before service setup.
+- No GitHub Actions run was attached to this commit, so the test results are accepted as Actor-reported verification rather than CI-verified.
+- `src/MobileShop.Api` remains untouched; no DB/schema/auth/layout changes were introduced.
+
+### Process finding
+
+Actor again edited `.clinerules/chat/plan.md` in the Step 3 implementation commit. This violates the standing workflow rule. No technical rework is required; Reviewer corrected/owns the final plan state.
+
+### Authorization / completion
+
+**Stage K is signed off. Stage L is now the next unchecked stage.**
