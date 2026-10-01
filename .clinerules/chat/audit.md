@@ -153,3 +153,91 @@ The reviewer gate is part of the workflow, not an optional documentation step.
 **Steps 1–3: technically accepted; no rework requested.**
 
 Stage I remains subject to the normal final-stage checklist/sign-off process.
+
+---
+
+# Stage J — Reviewer Audit
+
+## Job A — Plan Review
+
+**Verdict: APPROVED**
+
+The Stage J plan was reviewed against the current repository state, the Stage J entry in `.clinerules/to-do.md`, and the established Planner → Reviewer → Actor workflow.
+
+### Scope verification
+
+The plan correctly targets the unused API entity-service surface:
+
+- `IUserDataService` / `ApiUserDataService`
+- `ICustomerDataService` / `ApiCustomerDataService`
+- `ISellerDataService` / `ApiSellerDataService`
+- `ITransactionDataService` / `ApiTransactionDataService`
+- `IProductDataService` / `ApiProductDataService`
+- `IInvoiceDataService` / `ApiInvoiceDataService`
+- `IPhoneDataService` / `ApiPhoneDataService`
+- `IAppleIdDataService` / `ApiAppleIdDataService`
+- `IDataService<T>`
+- `ApiDataServiceBase<T>`
+
+Repository search confirms the eight entity interfaces are only referenced by their corresponding API stubs and the API registration block in `ServiceCollectionExtensions.cs`. The generic `IDataService<T>` abstraction is only consumed by those eight interfaces and `ApiDataServiceBase<T>`.
+
+The plan correctly preserves the six area API services:
+
+- `IHomeDataService -> ApiHomeDataService`
+- `IProductsDataService -> ApiProductsDataService`
+- `IPeopleDataService -> ApiPeopleDataService`
+- `ITransactionsDataService -> ApiTransactionsDataService`
+- `IReportsDataService -> ApiReportsDataService`
+- `IAccountDataService -> ApiAccountDataService`
+
+### Step boundaries
+
+The two-step decomposition is sound:
+
+1. Remove only the eight obsolete registrations.
+2. After Step 1 Job B PASS, delete the now-unused entity interfaces/stubs and their shared generic API abstraction.
+
+This gives the reviewer a clean compilation checkpoint before deletion.
+
+### Protected scope
+
+The plan explicitly protects:
+
+- `src/MobileShop.Api`
+- DAL registrations and the normal non-API path
+- database/schema/migrations
+- database initialization
+- authentication
+- PDF configuration
+- unrelated application behavior
+
+No API implementation work is being smuggled into the cleanup stage.
+
+### Verification requirements
+
+The plan requires:
+
+- repository-wide stale-reference searches before deletion;
+- full solution build;
+- full solution test suite;
+- confirmation that exactly six API area registrations remain;
+- confirmation that no stale source/test references remain;
+- Job B PASS before advancing from Step 1 to Step 2.
+
+These are sufficient for the stated cleanup scope.
+
+### Workflow control
+
+The plan correctly restores the rule that was violated during Stage I:
+
+**Implement one step → verify → commit → report → STOP → wait for Job B PASS → continue only when authorized.**
+
+The actor is explicitly forbidden from ticking `.clinerules/to-do.md`; the reviewer owns final stage completion.
+
+## Job A Decision
+
+**APPROVED — Stage J Step 1 is authorized.**
+
+The actor must implement **Step 1 only**, commit it, report it, and stop for Job B review.
+
+**Step 2 is not authorized until Job B explicitly returns PASS for Step 1.**
