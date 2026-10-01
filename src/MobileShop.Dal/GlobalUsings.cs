@@ -4,7 +4,7 @@ global using Microsoft.EntityFrameworkCore.Design;
 global using MobileShop.Dal.EfStructures;
 global using MobileShop.Models.Extensions;
 global using MobileShop.Dal.Initialization;
-global using MobileShop.Dal.Repos.Base;
+global using MobileShop.Dal.Repo;
 global using MobileShop.Models.Entities;
 global using MobileShop.Models.Entities.Base;
 global using MobileShop.Models.Entities.Configuration;

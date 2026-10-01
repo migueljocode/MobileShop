@@ -41,7 +41,7 @@
 - Risk: LOW
 - Confidence: HIGH
 
-## [ ] Step 3 — Flatten and singularize the generic repository namespace
+## ~~[x] Step 3 — Flatten and singularize the generic repository namespace~~
 
 - Files: rename/move src/MobileShop.Dal/Repos/Base/BaseRepo.cs -> src/MobileShop.Dal/Repo/BaseRepo.cs and src/MobileShop.Dal/Repos/Base/IBaseRepo.cs -> src/MobileShop.Dal/Repo/IBaseRepo.cs; modify src/MobileShop.Dal/GlobalUsings.cs, src/MobileShop.Services/GlobalUsings.cs, src/MobileShop.Tests/GlobalUsings.cs, src/MobileShop.Services/ServiceCollectionExtensions.cs, and any other actual source/test reference found by the final repository-wide search; update repository tests that directly name the old namespace/path if any are found.
 - Symbols: MobileShop.Dal.Repos.Base.BaseRepo<T>, MobileShop.Dal.Repos.Base.IBaseRepo<T>, BaseRepo<T>, IBaseRepo<T>, ServiceCollectionExtensions.AddMobileShopRepository(), BaseRepoTests<TEntity,TRepo>, and BaseRepoPersonTests.

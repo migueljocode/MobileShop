@@ -1,4 +1,4 @@
-namespace MobileShop.Dal.Repos.Base;
+namespace MobileShop.Dal.Repo;
 
 /// <summary>
 /// Generic CRUD repository contract shared by every entity repository.

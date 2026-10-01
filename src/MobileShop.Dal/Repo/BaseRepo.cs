@@ -1,4 +1,4 @@
-namespace MobileShop.Dal.Repos.Base;
+namespace MobileShop.Dal.Repo;
 
 /// <inheritdoc cref="IBaseRepo{T}" />
 public class BaseRepo<T>(AppDbContext context) : IBaseRepo<T> where T : BaseEntity
