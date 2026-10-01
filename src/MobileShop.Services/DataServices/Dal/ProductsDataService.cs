@@ -360,6 +360,19 @@ public class ProductsDataService(
                 return new ServiceResult(false, "Selected color not found.", nameof(CreatePhoneInputModel.ColorId), null);
         }
 
+        // The part number is optional, but when supplied it must belong to the selected model —
+        // otherwise a phone could be created carrying another model's part number.
+        PartNumber? partNumber = null;
+        if (input.PartNumberId.HasValue)
+        {
+            partNumber = await partNumbers.FindAsync(input.PartNumberId.Value);
+            if (partNumber is null)
+                return new ServiceResult(false, "Selected part number not found.", nameof(CreatePhoneInputModel.PartNumberId), null);
+
+            if (partNumber.ModelId != model.Id)
+                return new ServiceResult(false, "The selected part number does not belong to the selected model.", nameof(CreatePhoneInputModel.PartNumberId), null);
+        }
+
         var product = new Product
         {
             ModelId = model.Id,
@@ -384,6 +397,7 @@ public class ProductsDataService(
             IMEI1 = imei1,
             IMEI2 = string.IsNullOrWhiteSpace(input.IMEI2) ? null : input.IMEI2.Trim(),
             OwnershipTransferred = false,
+            PartNumberNavigation = partNumber,
             ProductNavigation = product,
         };
 

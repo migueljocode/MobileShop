@@ -27,6 +27,12 @@ public sealed class CreatePhoneInputModel
 
     public int? ColorId { get; set; }
 
+    /// <summary>
+    /// The optional part number for this phone. Omitted stays null, which keeps existing phones
+    /// and callers valid; a value must belong to the selected model.
+    /// </summary>
+    public int? PartNumberId { get; set; }
+
     public bool IsSecondHand { get; set; }
 
     [Range(0, int.MaxValue)]

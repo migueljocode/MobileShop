@@ -73,6 +73,87 @@ public class CreatePhoneModelTests : RepoTestBase
         Assert.Equal(2, models.Count());
     }
 
+    private (Model model, Model otherModel) SeedModelsWithPartNumbers()
+    {
+        var apple = Context.Manufacturers.First(m => m.Name == "Apple");
+        var phoneCategory = Context.Categories.First(c => c.Name == "Phone");
+        var model = new Model { ManufacturerId = apple.Id, CategoryId = phoneCategory.Id, Name = "iPhone 15" };
+        var otherModel = new Model { ManufacturerId = apple.Id, CategoryId = phoneCategory.Id, Name = "iPhone 14" };
+        Context.Models.AddRange(model, otherModel);
+        Context.SaveChanges();
+
+        Context.PartNumbers.AddRange(
+            new PartNumber { ModelId = model.Id, Code = "CH/ZAA", SupportsDualSim = true },
+            new PartNumber { ModelId = otherModel.Id, Code = "OTHER" });
+        Context.SaveChanges();
+        return (model, otherModel);
+    }
+
+    [Fact]
+    public async Task OnGetPartNumbersAsync_ReturnsOnlyOptionsForGivenModel()
+    {
+        var (model, _) = SeedModelsWithPartNumbers();
+
+        var result = await _model.OnGetPartNumbersAsync(model.Id);
+
+        var jsonResult = Assert.IsType<JsonResult>(result);
+        var json = System.Text.Json.JsonSerializer.Serialize(jsonResult.Value);
+        using var doc = System.Text.Json.JsonDocument.Parse(json);
+        Assert.Equal(1, doc.RootElement.GetArrayLength());
+        Assert.Equal("CH/ZAA", doc.RootElement[0].GetProperty("Name").GetString());
+    }
+
+    [Fact]
+    public async Task OnGetPartNumbersAsync_ReturnsEmptyForInvalidModelId()
+    {
+        var result = await _model.OnGetPartNumbersAsync(0);
+
+        var jsonResult = Assert.IsType<JsonResult>(result);
+        var json = System.Text.Json.JsonSerializer.Serialize(jsonResult.Value);
+        using var doc = System.Text.Json.JsonDocument.Parse(json);
+        Assert.Equal(0, doc.RootElement.GetArrayLength());
+    }
+
+    [Fact]
+    public async Task OnPostCreatePartNumberAsync_CreatesAndReturnsOption()
+    {
+        var (model, _) = SeedModelsWithPartNumbers();
+
+        var result = await _model.OnPostCreatePartNumberAsync(model.Id, "NEWCODE", supportsDualSim: true, supportsEsim: false);
+
+        var jsonResult = Assert.IsType<JsonResult>(result);
+        Assert.NotNull(Context.PartNumbers.FirstOrDefault(pn => pn.Code == "NEWCODE" && pn.ModelId == model.Id));
+        var json = System.Text.Json.JsonSerializer.Serialize(jsonResult.Value);
+        using var doc = System.Text.Json.JsonDocument.Parse(json);
+        Assert.Equal("NEWCODE", doc.RootElement.GetProperty("name").GetString());
+    }
+
+
+    [Fact]
+    public async Task OnPostCreatePartNumberAsync_RejectsMissingModel()
+    {
+        var result = await _model.OnPostCreatePartNumberAsync(0, "CODE", supportsDualSim: false, supportsEsim: false);
+
+        var jsonResult = Assert.IsType<JsonResult>(result);
+        Assert.Equal(400, jsonResult.StatusCode);
+        Assert.False(Context.PartNumbers.Any(pn => pn.Code == "CODE"));
+    }
+
+    [Fact]
+    public async Task OnPostCreatePartNumberAsync_DuplicateModelAndCode_ReusesExisting()
+    {
+        var (model, _) = SeedModelsWithPartNumbers();
+        var before = Context.PartNumbers.Count();
+
+        var result = await _model.OnPostCreatePartNumberAsync(model.Id, "CH/ZAA", supportsDualSim: true, supportsEsim: false);
+
+        var jsonResult = Assert.IsType<JsonResult>(result);
+        var json = System.Text.Json.JsonSerializer.Serialize(jsonResult.Value);
+        using var doc = System.Text.Json.JsonDocument.Parse(json);
+        Assert.Equal("CH/ZAA", doc.RootElement.GetProperty("name").GetString());
+        Assert.Equal(before, Context.PartNumbers.Count());
+    }
+
     [Fact]
     public async Task OnPostCreateManufacturerAsync_CreatesNewManufacturer()
     {

@@ -8,7 +8,7 @@
 - Step 2 is Create Phone Model-scoped PartNumber + Add New (owner “add new if missing”); not on Products Index. Stage N must not re-implement the same control later.
 - One step → one commit → Job B. Actor never edits plan.md / audit.md / to-do.md.
 
-## [ ] Step 1 — Correct Products PartNumber filtering and inventory display
+## ~~[x] Step 1 — Correct Products PartNumber filtering and inventory display~~
 
 - Files
   - Inspect/modify:
@@ -62,7 +62,7 @@
 - Risk: MEDIUM
 - Confidence: HIGH
 
-## [ ] Step 2 — Create Phone PartNumber selector + Add New
+## ~~[x] Step 2 — Create Phone PartNumber selector + Add New~~
 
 - Files: `CreatePhone.cshtml`, `CreatePhone.cshtml.cs`, `CreatePhoneInputModel.cs`, `ProductsDataService` / `IProductsDataService`, existing Create Phone / service tests.
 - Do not: new migration, Create Apple ID PartNumber, parallel PartNumber admin page, new frontend framework.

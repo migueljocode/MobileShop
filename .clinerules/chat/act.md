@@ -1,3 +1,48 @@
+# Act — Stage M (reopened) Step 2 — Create Phone PartNumber selector + Add New
+
+## Commit
+- This commit — feat(products): add Model-scoped PartNumber selector and Add New to Create Phone
+  - Implements Step 2 of the reopened Stage M plan.md.
+
+## What changed
+- `CreatePhoneInputModel.cs` — added nullable `PartNumberId` (omitted → null; additive, no schema change).
+- `ProductsDataService.CreatePhoneAsync` — when `PartNumberId` is supplied it must exist and belong to the selected model, else `ServiceResult` fails on the `PartNumberId` field; the selected part number is persisted on the `Phone` (null when omitted).
+- `CreatePhone.cshtml.cs` — new `PartNumbers` list, `OnGetPartNumbersAsync(modelId)` (model-scoped, empty for `modelId <= 0`), `OnPostCreatePartNumberAsync(modelId, code, supportsDualSim, supportsEsim)` (400 without a model; delegates to `CreatePartNumberAsync` so duplicate Model+Code reuses the existing row). `PopulateDropdownsAsync` loads model-scoped options for the posted model.
+- `CreatePhone.cshtml` — Part number combobox next to Color with an **Add New** button; new `#addPartNumberModal` (code + Dual SIM + eSIM checkboxes); JS reloads part numbers on model change, and on Add New posts `handler=CreatePartNumber` then selects the returned option without a full reload.
+- Tests — 3 service tests (`ProductsDataServiceTests`) + 5 page tests (`CreatePhoneModelTests`).
+
+## Verification
+- `dotnet build src/MobileShop.slnx --nologo` → **0 warnings, 0 errors**
+- Focused `CreatePhoneModelTests|ProductsDataServiceTests` → **86 passed, 0 failed, 0 skipped**
+- Full suite `dotnet test src/MobileShop.slnx --nologo --no-build` → **284 passed, 0 failed, 0 skipped**
+- `git status` shows only the six files above — no API project/auth/PDF/migration edits; no schema change.
+
+## Requirement map
+1. Nullable `PartNumberId` on input → done.
+2. Combobox + Add New (existing modal/AJAX pattern) → done.
+3. Options Model-scoped via `GetPartNumbersAsync(modelId)` → done (`PopulateDropdownsAsync` + `OnGetPartNumbersAsync`).
+4. Model change resets/reloads PartNumber options → `modelSelect` `change` listener.
+5. Add New disabled without Model (client) / rejected server-side → JS bails when no model; handler returns 400 for `modelId <= 0`.
+6. Duplicate Model+Code reuses existing → via existing `CreatePartNumberAsync`.
+7. Persist selected PartNumberId; omit → null → done in service.
+8. Reject PartNumber belonging to another model → `partNumber.ModelId != model.Id` fails.
+9. No unrelated field behavior changes → only `PartNumberId` added.
+
+## Limitations
+None. The Stage N "shared client script for both pages" was not introduced — this step follows the existing per-page modal/AJAX pattern, as plan.md specifies the existing pattern.
+
+## Friction noted
+- Build ~31s / full suite ~37s exceed the 30s tool window; run in the background and polled.
+- A first run of the new page test assumed camelCase JSON for the `PartNumbers` GET; the handler returns PascalCase (`o.Id`/`o.Name`) so I corrected the assertion to `Name`. POST handlers intentionally return lowercase (`id`/`name`) and their assertions were already correct.
+
+## Problems
+None — verification green. Reviewer Job B determines PASS/FAIL.
+
+## Status
+COMPLETE — awaiting Reviewer Job B for Step 2.
+
+---
+
 # Act — Stage M (reopened) Step 1 — Correct Products PartNumber filtering and inventory display
 
 ## Commit

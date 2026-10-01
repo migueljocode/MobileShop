@@ -759,6 +759,81 @@ public class ProductsDataServiceTests : RepoTestBase
         Assert.Equal("Name is required.", result.Error);
     }
 
+    // ── CreatePhoneAsync: PartNumber ─────────────────────────
+
+    [Fact]
+    public async Task CreatePhoneAsync_persists_selected_part_number()
+    {
+        SeedCatalog(out var phoneModel, out _);
+        Context.PartNumbers.Add(new PartNumber { ModelId = phoneModel.Id, Code = "CH/ZAA", SupportsDualSim = true });
+        Context.SaveChanges();
+        var pnId = Context.PartNumbers.First(pn => pn.Code == "CH/ZAA").Id;
+
+        var input = new MobileShop.Models.ViewModels.Web.BindModels.CreatePhoneInputModel
+        {
+            ManufacturerId = 1,
+            ModelId = phoneModel.Id,
+            Price = 999m,
+            IMEI1 = TestDataHelpers.GenerateImei(),
+            PartNumberId = pnId,
+        };
+
+        var result = await _service.CreatePhoneAsync(input);
+
+        Assert.True(result.Succeeded);
+        var phone = await Context.Phones.FirstAsync(p => p.IMEI1 == input.IMEI1);
+        Assert.Equal(pnId, phone.PartNumberId);
+    }
+
+    [Fact]
+    public async Task CreatePhoneAsync_omitted_part_number_stays_null()
+    {
+        SeedCatalog(out var phoneModel, out _);
+
+        var input = new MobileShop.Models.ViewModels.Web.BindModels.CreatePhoneInputModel
+        {
+            ManufacturerId = 1,
+            ModelId = phoneModel.Id,
+            Price = 999m,
+            IMEI1 = TestDataHelpers.GenerateImei(),
+            PartNumberId = null,
+        };
+
+        var result = await _service.CreatePhoneAsync(input);
+
+        Assert.True(result.Succeeded);
+        var phone = await Context.Phones.FirstAsync(p => p.IMEI1 == input.IMEI1);
+        Assert.Null(phone.PartNumberId);
+    }
+
+    [Fact]
+    public async Task CreatePhoneAsync_rejects_part_number_belonging_to_another_model()
+    {
+        SeedCatalog(out var phoneModel, out _);
+        // A part number owned by a different model must not be attachable.
+        var otherModel = new Model { ManufacturerId = 1, CategoryId = Context.Categories.First(c => c.Name == "Phone").Id, Name = "Other" };
+        Context.Models.Add(otherModel);
+        Context.SaveChanges();
+        Context.PartNumbers.Add(new PartNumber { ModelId = otherModel.Id, Code = "FOREIGN" });
+        Context.SaveChanges();
+        var foreignPnId = Context.PartNumbers.First(pn => pn.Code == "FOREIGN").Id;
+
+        var input = new MobileShop.Models.ViewModels.Web.BindModels.CreatePhoneInputModel
+        {
+            ManufacturerId = 1,
+            ModelId = phoneModel.Id,
+            Price = 999m,
+            IMEI1 = TestDataHelpers.GenerateImei(),
+            PartNumberId = foreignPnId,
+        };
+
+        var result = await _service.CreatePhoneAsync(input);
+
+        Assert.False(result.Succeeded);
+        Assert.Equal(nameof(MobileShop.Models.ViewModels.Web.BindModels.CreatePhoneInputModel.PartNumberId), result.ErrorField);
+        Assert.False(await Context.Phones.AnyAsync(p => p.IMEI1 == input.IMEI1));
+    }
+
     // ── CreatePhoneAsync ─────────────────────────────────────
 
     [Fact]

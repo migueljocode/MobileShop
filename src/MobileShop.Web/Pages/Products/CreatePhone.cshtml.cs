@@ -9,6 +9,7 @@ public class CreatePhoneModel(
     public IReadOnlyList<DropdownOptionViewModel> Models { get; private set; } = [];
     public IReadOnlyList<DropdownOptionViewModel> Colors { get; private set; } = [];
     public IReadOnlyList<string> Corporations { get; private set; } = [];
+    public IReadOnlyList<DropdownOptionViewModel> PartNumbers { get; private set; } = [];
 
     public async Task OnGetAsync()
     {
@@ -19,6 +20,29 @@ public class CreatePhoneModel(
     {
         var options = await dataService.GetModelsAsync(manufacturerId);
         return new JsonResult(options.Select(o => new { o.Id, o.Name }));
+    }
+
+    /// <summary>Returns the model-scoped part numbers so the combobox can reload when the model changes.</summary>
+    public async Task<IActionResult> OnGetPartNumbersAsync(int modelId)
+    {
+        if (modelId <= 0)
+            return new JsonResult(Array.Empty<object>());
+
+        var options = await dataService.GetPartNumbersAsync(modelId);
+        return new JsonResult(options.Select(o => new { o.Id, o.Name }));
+    }
+
+    /// <summary>Creates a part number for the selected model and returns it for immediate selection.</summary>
+    public async Task<IActionResult> OnPostCreatePartNumberAsync(int modelId, string code, bool supportsDualSim, bool supportsEsim)
+    {
+        if (modelId <= 0)
+            return new JsonResult(new { error = "Select a model first." }) { StatusCode = 400 };
+
+        var result = await dataService.CreatePartNumberAsync(modelId, code, supportsDualSim, supportsEsim);
+        if (!result.Succeeded)
+            return new JsonResult(new { error = result.Error! }) { StatusCode = result.StatusCode };
+
+        return new JsonResult(new { id = result.Option!.Id, name = result.Option.Name });
     }
 
     public async Task<IActionResult> OnPostCreateManufacturerAsync(string name)
@@ -95,5 +119,8 @@ public class CreatePhoneModel(
             : [];
         Colors = await dataService.GetColorsAsync();
         Corporations = await dataService.GetGuaranteeCorporationsAsync();
+        PartNumbers = Input.ModelId > 0
+            ? await dataService.GetPartNumbersAsync(Input.ModelId)
+            : [];
     }
 }
