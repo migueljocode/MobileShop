@@ -4,6 +4,7 @@
     ViewData["Title"] = "Record buy";
 }
 <h1>Record buy</h1>
+<a asp-page="/Transactions/Index" class="btn btn-secondary mb-3">Back</a>
 <form method="post" class="col-md-6">
     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
     <label asp-for="Input.ProductId" class="form-label">Product</label><select asp-for="Input.ProductId" class="form-select"><option value="0">Select product</option>@foreach (var product in Model.Products) { <option value="@product.ProductId">@product.Type: @product.Name — @product.Identifier@(product.Color is null ? string.Empty : $" — {product.Color}")</option> }</select><span asp-validation-for="Input.ProductId" class="text-danger"></span>
