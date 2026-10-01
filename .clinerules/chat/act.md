@@ -22,7 +22,7 @@ Step 2 adds a Back navigation link to all four detail/entry pages, using Razor `
 - `src/MobileShop.Web/Pages/People/SellerDetails.cshtml`
 
 ## Commit
-`pending`
+`17302cc` — feat(web): add Back buttons to Buy, Sell, CustomerDetails, SellerDetails
 
 ## Limitations
 None.
