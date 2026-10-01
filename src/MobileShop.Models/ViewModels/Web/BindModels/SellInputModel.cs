@@ -3,10 +3,10 @@ namespace MobileShop.Models.ViewModels.Web.BindModels;
 /// <summary>Input submitted when recording a sale.</summary>
 public sealed class SellInputModel
 {
-    [Range(1, int.MaxValue)]
+    [Range(1, int.MaxValue, ErrorMessage = "The product should be selected.")]
     public int ProductId { get; set; }
 
-    [Range(1, int.MaxValue)]
+    [Range(1, int.MaxValue, ErrorMessage = "The customer should be selected.")]
     public int CustomerId { get; set; }
 
     [Range(0, double.MaxValue)]

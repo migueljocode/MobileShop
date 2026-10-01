@@ -156,4 +156,89 @@ public class RecordModelTests : RepoTestBase
         Assert.Equal(TransactionDirection.Sell, transaction.Direction);
         Assert.Equal(customer.Id, transaction.CustomerId);
     }
+
+    [Theory]
+    [InlineData("Buy")]
+    [InlineData("Sell")]
+    public async Task Zero_selection_rejected_with_friendly_message(string direction)
+    {
+        TestDataHelpers.SeedShopSentinels(Context);
+        var seller = AddSeller("Ali", "Zed");
+        var customer = AddCustomer("Sara", "Ahmadi");
+        var product = TestDataHelpers.CreateProduct(Context);
+
+        if (direction == "Buy")
+        {
+            var buyModel = new BuyModel(CreateService())
+            {
+                Input = new BuyInputModel { ProductId = 0, SellerId = seller.Id, Price = 150m }
+            };
+            ValidateInput(buyModel);
+            await buyModel.OnPostAsync();
+            Assert.False(buyModel.ModelState.IsValid);
+            var error = Assert.Single(buyModel.ModelState["Input.ProductId"]!.Errors);
+            Assert.Equal("The product should be selected.", error.ErrorMessage);
+        }
+        else
+        {
+            var sellModel = new SellModel(CreateService())
+            {
+                Input = new SellInputModel { ProductId = product.Id, CustomerId = 0, Price = 250m }
+            };
+            ValidateInput(sellModel);
+            await sellModel.OnPostAsync();
+            Assert.False(sellModel.ModelState.IsValid);
+            var error = Assert.Single(sellModel.ModelState["Input.CustomerId"]!.Errors);
+            Assert.Equal("The customer should be selected.", error.ErrorMessage);
+        }
+    }
+
+    [Theory]
+    [InlineData("Buy")]
+    [InlineData("Sell")]
+    public async Task Valid_positive_ids_pass_validation(string direction)
+    {
+        TestDataHelpers.SeedShopSentinels(Context);
+        var seller = AddSeller("Ali", "Zed");
+        var customer = AddCustomer("Sara", "Ahmadi");
+        var product = TestDataHelpers.CreateProduct(Context);
+
+        if (direction == "Buy")
+        {
+            var buyModel = new BuyModel(CreateService())
+            {
+                Input = new BuyInputModel { ProductId = product.Id, SellerId = seller.Id, Price = 150m }
+            };
+            await buyModel.OnPostAsync();
+            Assert.True(buyModel.ModelState.IsValid);
+            Assert.NotNull(buyModel.Message);
+        }
+        else
+        {
+            var sellModel = new SellModel(CreateService())
+            {
+                Input = new SellInputModel { ProductId = product.Id, CustomerId = customer.Id, Price = 250m }
+            };
+            await sellModel.OnPostAsync();
+            Assert.True(sellModel.ModelState.IsValid);
+            Assert.NotNull(sellModel.Message);
+        }
+    }
+
+    /// <summary>
+    /// Runs data-annotation validation against the Input property the way MVC's model binder
+    /// would, populating ModelState so attribute-driven errors can be asserted.
+    /// </summary>
+    private static void ValidateInput(PageModel pageModel)
+    {
+        var inputProp = pageModel.GetType().GetProperty("Input")!;
+        var input = inputProp.GetValue(pageModel)!;
+        var results = new List<ValidationResult>();
+        var ctx = new ValidationContext(input!);
+        Validator.TryValidateObject(input!, ctx, results, true);
+        foreach (var r in results)
+        {
+            pageModel.ModelState.AddModelError(inputProp.Name + "." + r.MemberNames.FirstOrDefault(), r.ErrorMessage ?? string.Empty);
+        }
+    }
 }

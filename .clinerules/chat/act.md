@@ -1,37 +1,53 @@
-# Act — Stage L — Step 2 — Return/Back buttons on Buy, Sell, CustomerDetails, SellerDetails
+# Act — Stage L — Step 3 — Friendly required-selection validation
 
 ## Summary
-Step 2 adds a Back navigation link to all four detail/entry pages, using Razor `asp-page` navigation (deterministic links, no browser-history JS). Each link targets the exact owning list page.
+Step 3 replaces the raw numeric range validation messages on Buy/Sell required dropdown fields with friendly selection messages, adds the missing validation spans for SellerId and CustomerId, and adds regression tests.
 
 ## Changes
-- `src/MobileShop.Web/Pages/Transactions/Buy.cshtml`: Added `<a asp-page="/Transactions/Index" class="btn btn-secondary mb-3">Back</a>` before the form.
-- `src/MobileShop.Web/Pages/Transactions/Sell.cshtml`: Added `<a asp-page="/Transactions/Index" class="btn btn-secondary mb-3">Back</a>` before the form.
-- `src/MobileShop.Web/Pages/People/CustomerDetails.cshtml`: Added `<a asp-page="/People/Customers" class="btn btn-secondary mt-3">Back to customers</a>` after the product list.
-- `src/MobileShop.Web/Pages/People/SellerDetails.cshtml`: Added `<a asp-page="/People/Sellers" class="btn btn-secondary mt-3">Back to sellers</a>` after the product list.
+
+### src/MobileShop.Models/ViewModels/Web/BindModels/BuyInputModel.cs
+- `ProductId` Range: added `ErrorMessage = "The product should be selected."`
+- `SellerId` Range: added `ErrorMessage = "The seller should be selected."`
+
+### src/MobileShop.Models/ViewModels/Web/BindModels/SellInputModel.cs
+- `ProductId` Range: added `ErrorMessage = "The product should be selected."`
+- `CustomerId` Range: added `ErrorMessage = "The customer should be selected."`
+
+### src/MobileShop.Web/Pages/Transactions/Buy.cshtml
+- Added validation span for `Input.SellerId`
+
+### src/MobileShop.Web/Pages/Transactions/Sell.cshtml
+- Added validation span for `Input.CustomerId`
+
+### src/MobileShop.Tests/Web/Pages/Transactions/RecordModelTests.cs
+- Added `ValidateInput` helper to run data-annotation validation against the Input property
+- Added `Zero_selection_rejected_with_friendly_message` theory: tests ProductId=0/SellerId=0 in Buy and CustomerId=0 in Sell, asserts exact friendly messages
+- Added `Valid_positive_ids_pass_validation` theory: tests valid positive IDs, asserts ModelState.IsValid
 
 ## Verification
 - Build: `dotnet build src/MobileShop.slnx --nologo --no-restore` → Build succeeded. 0 Warning(s), 0 Error(s).
-- Full suite: `dotnet test src/MobileShop.slnx --no-build --no-restore --nologo` → Passed! Failed: 0, Passed: 245, Skipped: 0, Total: 245.
-- Confirmed `/People/Customers` and `/People/Sellers` Razor pages exist.
-- No PageModel POST/GET behavior changed — links are pure GET navigation.
+- Targeted tests: `--filter "FullyQualifiedName~RecordModelTests"` → Passed! Failed: 0, Passed: 9, Skipped: 0, Total: 9.
+- Full suite: Passed! Failed: 0, Passed: 249, Skipped: 0, Total: 249.
+- `[Range(1, int.MaxValue)]` pattern only exists on BuyInputModel and SellInputModel.
 
 ## Changed files
-- `src/MobileShop.Web/Pages/Transactions/Buy.cshtml`
-- `src/MobileShop.Web/Pages/Transactions/Sell.cshtml`
-- `src/MobileShop.Web/Pages/People/CustomerDetails.cshtml`
-- `src/MobileShop.Web/Pages/People/SellerDetails.cshtml`
+- src/MobileShop.Models/ViewModels/Web/BindModels/BuyInputModel.cs
+- src/MobileShop.Models/ViewModels/Web/BindModels/SellInputModel.cs
+- src/MobileShop.Web/Pages/Transactions/Buy.cshtml
+- src/MobileShop.Web/Pages/Transactions/Sell.cshtml
+- src/MobileShop.Tests/Web/Pages/Transactions/RecordModelTests.cs
 
 ## Commit
-`17302cc` — feat(web): add Back buttons to Buy, Sell, CustomerDetails, SellerDetails
+`pending` — to be committed
 
 ## Limitations
 None.
 
 ## Friction noted
-Full test suite (~35s) exceeds the 30s tool timeout; ran in background and polled output file.
+Full test suite (35s) exceeds 30s tool timeout; ran in background and polled output file.
 
 ## Problems
 None.
 
 ## Status
-COMPLETE — Step 2 (Back buttons) is implemented and verified. All 245 tests pass. Stopping for Job B review.
+COMPLETE — Step 3 (friendly validation messages) is implemented and verified. All 249 tests pass. Stage L Definition of Done is met. Stopping for final Job B review.
