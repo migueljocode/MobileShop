@@ -4,105 +4,152 @@
 
 **Verdict**: **APPROVED**
 
-Reviewed the Stage I plan in `.clinerules/chat/plan.md` against the current repository state and `.clinerules/to-do.md`.
+Reviewed the Stage I plan in `.clinerules/chat/plan.md` against the repository state and `.clinerules/to-do.md`.
 
-### Verification
+The plan correctly limits Stage I to naming, namespace, and test-structure cleanup with no intended runtime behavior change. It protects `src/MobileShop.Api`, database/schema/migrations, initialization, authentication, and unrelated application behavior.
 
-- Stage I is the first unchecked stage in `.clinerules/to-do.md`.
-- The plan is limited to the stated naming/structure cleanup and explicitly preserves runtime behavior.
-- `PasswordHasher` is currently the concrete implementation registered behind the unchanged `IPasswordHasher`; the plan correctly limits Step 1 to renaming the concrete type/file, its tests, direct construction sites, and DI registration.
-- The PDF test currently lives at `src/MobileShop.Tests/PDF/QuestPdfGeneratorTests.cs` with namespace `MobileShop.Tests.PDF`; the plan correctly makes Step 2 a path/namespace-only move and leaves the two skipped Persian tests for Stage K.
-- `BaseRepo<T>` and `IBaseRepo<T>` currently live under `src/MobileShop.Dal/Repos/Base` and namespace `MobileShop.Dal.Repos.Base`; the plan correctly moves them to `MobileShop.Dal/Repo` and namespace `MobileShop.Dal.Repo`, with no contract or behavior changes.
-- The current DI registration is already only the generic `IBaseRepo<> -> BaseRepo<>` mapping, so Step 3 correctly preserves that registration rather than redesigning the repository layer.
-- The plan explicitly protects `src/MobileShop.Api`, database/schema/migrations, initialization policy, authentication, and application behavior.
-- The plan requires one-step-at-a-time execution, a commit, then Job B review before the next step.
-- The verification commands are appropriate for the affected scope, with full solution build/test required at the final step.
-- The repository search confirms the old repository namespace is currently concentrated in the expected GlobalUsings and generic repository files; the plan correctly requires a repository-wide stale-reference search before Step 3 completion.
-- No unrelated Stage J, K, L, or later work has been pulled into Stage I.
+The approved steps were:
 
-### Risk assessment
+1. Rename concrete `PasswordHasher` to `ArgonPasswordHasher` while keeping `IPasswordHasher` unchanged.
+2. Move the PDF tests from `MobileShop.Tests.PDF` to `MobileShop.Tests.Services.PDF` without changing production PDF code or skipped-test behavior.
+3. Move `BaseRepo<T>` and `IBaseRepo<T>` from `MobileShop.Dal.Repos.Base` to `MobileShop.Dal.Repo`, preserving the repository contract and generic DI registration.
 
-- Step 1 — **LOW risk / HIGH confidence**.
-- Step 2 — **LOW risk / HIGH confidence**.
-- Step 3 — **HIGH risk / MEDIUM confidence**, appropriately gated because it changes the physical and namespace location of the generic repository abstraction used by multiple projects.
+The execution rule was explicit: **implement exactly one step, verify it, commit it, and stop for Job B review before starting the next step.**
 
-### Reviewer conclusion
+---
 
-The Stage I plan is sufficiently concrete, behavior-preserving, and consistent with the repository's rules.
+## Job B — Combined Stage I Technical Review
 
-**Stage I Job A — APPROVED.**
+**Verdict**: **PASS — Steps 1, 2, and 3 are technically accepted**
 
-**Authorized next action: Stage I Step 1 only.**
+Because the actor has already completed all three implementation steps and the owner does not want rework, the reviewer performed one consolidated technical review of the complete Stage I implementation rather than requiring implementation changes.
 
-Do not begin Step 2 or Step 3 until Step 1 receives a separate Job B execution review and PASS.
+### Step 1 — Rename PasswordHasher to ArgonPasswordHasher
 
+**Implementation commit:** `88c8ff3b10249d460ecaa3309b3ac8836371c1ad`
 
-## Job B — Stage I Step 1 Execution Review
+Verified from the actor report and repository state:
 
-**Verdict**: **PASS**
+- `PasswordHasher` was renamed to `ArgonPasswordHasher`.
+- Security tests were renamed accordingly.
+- `IPasswordHasher` remains the public abstraction.
+- DI maps `IPasswordHasher -> ArgonPasswordHasher`.
+- No production AccountDataService behavior change was introduced.
+- Actor verification reports:
+  - solution build: 0 errors, 0 warnings;
+  - `ArgonPasswordHasherTests`: 9/9 passed;
+  - `AccountDataServiceTests`: 9/9 passed.
 
-Reviewed commit `88c8ff3b10249d460ecaa3309b3ac8836371c1ad` against the approved Stage I plan and the actor report in `.clinerules/chat/act.md`.
+**Step 1 technical result: PASS.**
 
-### Verification
+### Step 2 — Move PDF tests under Services.PDF
 
-- Step 1 changes are limited to the concrete hasher rename, its security test rename, the direct `AccountDataServiceTests` construction site, DI registration, and the execution-plan checkbox.
-- `PasswordHasher.cs` was renamed to `ArgonPasswordHasher.cs`; the implementation remains the same Argon2 calls.
-- `PasswordHasherTests` was renamed to `ArgonPasswordHasherTests`; the existing test bodies and cases remain intact.
-- `IPasswordHasher` remains unchanged, including its `Hash` and `Verify` contract.
-- DI now maps `IPasswordHasher -> ArgonPasswordHasher`.
-- `AccountDataServiceTests` now constructs `ArgonPasswordHasher`; no production AccountDataService change was introduced.
-- The commit contains no API files, database/schema/migration files, authentication changes, initialization changes, or unrelated production changes.
-- Actor verification reports a successful solution build with 0 warnings and 0 errors.
-- Actor verification reports 9/9 passing `ArgonPasswordHasherTests` and 9/9 passing `AccountDataServiceTests`.
-- The actor reports no remaining concrete `PasswordHasher` references; remaining textual matches are the interface name and planning/documentation text.
-- Step 2 and Step 3 implementation work has not started.
+**Implementation commit:** `9d95cb46508b87c709d7e735ad133b01c630942b`
 
-### Minor process note
+Verified:
 
-The actor marked Step 1 complete in `.clinerules/chat/plan.md` within the implementation commit. This does not alter production behavior or the Stage I gate; the reviewer still controls Job B authorization and the Stage I checklist.
+- `src/MobileShop.Tests/PDF/QuestPdfGeneratorTests.cs` was moved to `src/MobileShop.Tests/Services/PDF/QuestPdfGeneratorTests.cs`.
+- Namespace changed from `MobileShop.Tests.PDF` to `MobileShop.Tests.Services.PDF`.
+- The test file still contains all six tests.
+- The two Persian tests remain intentionally skipped; they are not prematurely fixed or unskipped.
+- No `QuestPdfGenerator` production implementation or PDF configuration change was included.
+- Actor verification reports:
+  - solution build: 0 errors, 0 warnings;
+  - `QuestPdfGeneratorTests`: 4 passed, 2 skipped, 0 failed, 6 total.
+- Current repository state contains the new path/namespace and no source-code reference to the old test namespace.
 
-### Conclusion
+**Step 2 technical result: PASS.**
 
-The Step 1 done conditions are satisfied and no blocking defect was found.
+### Step 3 — Flatten and singularize generic repository namespace
 
-**Stage I Step 1 Job B — PASS.**
+**Implementation commit:** `35c6854f1447f7e07a9dec014edefb5053ed75ba`
 
-**Authorized next action: Stage I Step 2 only.**
+Verified:
 
-Do not begin Step 3 until Step 2 receives a separate Job B review and PASS.
+- `BaseRepo.cs` moved from `src/MobileShop.Dal/Repos/Base/` to `src/MobileShop.Dal/Repo/`.
+- `IBaseRepo.cs` moved the same way.
+- Namespace changed from `MobileShop.Dal.Repos.Base` to `MobileShop.Dal.Repo`.
+- DAL, Services, and Tests GlobalUsings now reference `MobileShop.Dal.Repo`.
+- `BaseRepo<T>` implementation contents are unchanged apart from its namespace.
+- `IBaseRepo<T>` contract is unchanged apart from its namespace.
+- `AddMobileShopRepository()` still registers exactly:
+  `IBaseRepo<> -> BaseRepo<>`.
+- No compatibility/forwarding namespace was introduced.
+- The old `src/MobileShop.Dal/Repos/` tree is gone.
+- Current repository state has the generic repository only under `MobileShop.Dal.Repo`.
+- Actor verification reports:
+  - solution build: 0 errors, 0 warnings;
+  - full test run: 243 passed, 2 skipped, 0 failed, 245 total.
+- No API, database/schema, initialization, authentication, or unrelated production changes were identified in the implementation commits.
 
+**Step 3 technical result: PASS.**
+
+### Combined Stage I technical conclusion
+
+The implementation satisfies the technical requirements of the approved Stage I plan. No code rework is required for Steps 2 or 3.
+
+The actor's combined report is accepted as verification evidence for the already-completed work, with the workflow exception recorded separately below.
+
+---
 
 ## Process Control Finding — Stage I Execution Sequence
 
-**Verdict**: **WORKFLOW VIOLATION**
+**Verdict**: **WORKFLOW VIOLATION — recorded, not a reason to rework technically passing code**
 
-The approved execution rule was not followed.
+The actor did not follow the required reviewer gate.
 
-### Evidence
-
-After the reviewer issued **Stage I Step 1 Job B — PASS** in commit `e5b294d0c0d7c307a527a8d509dcb5405017ed4a`, the actor proceeded with both later implementation steps without an intervening reviewer Job B review:
+After Step 1 received Job B PASS in commit `e5b294d0c0d7c307a527a8d509dcb5405017ed4a`, the actor continued through Step 2 and Step 3 without stopping for the required reviewer approval between steps:
 
 1. `9d95cb46508b87c709d7e735ad133b01c630942b` — Step 2 implementation.
-2. `22d0207b983b812076ba112016de0cd2c597f2a0` — Step 1/2 act report.
+2. `22d0207b983b812076ba112016de0cd2c597f2a0` — Step 1/2 actor report.
 3. `35c6854f1447f7e07a9dec014edefb5053ed75ba` — Step 3 implementation.
-4. `82860f622f5d23c1cf3ec319f1461ea2301c3a76` — combined Stage I act report.
+4. `82860f622f5d23c1cf3ec319f1461ea2301c3a76` — combined Stage I actor report.
 
-The repository timestamps show these occurred after the Step 1 Job B PASS but **before any Step 2 Job B review or authorization**. Step 3 was likewise performed before any Step 2 Job B PASS.
+There was no Step 2 Job B review before Step 3 started.
 
-This directly conflicts with the Stage I execution rule: implement exactly one step, verify it, commit it, and stop for Job B review before the next step.
+This violated the approved rule:
 
-It also conflicts with the Step 1 Job B authorization: **Authorized next action: Stage I Step 2 only. Do not begin Step 3 until Step 2 receives a separate Job B execution review and PASS.**
+> Implement one step → verify → commit → stop for Job B review → only then continue.
 
-### Consequence
+### Important distinction
 
-- Step 2 and Step 3 are **not reviewer-approved**.
-- Their implementation commits are not retroactively authorized by the later act report.
-- The reviewer must review Step 2 and Step 3 separately before considering either step accepted.
-- Stage I remains unchecked.
-- No Stage I final sign-off is permitted yet.
+The workflow violation does **not** mean the technically correct Step 2 or Step 3 changes need to be reverted or reworked.
 
-The implementation changes may still be technically correct, but technical correctness does not erase the required workflow gate.
+The reviewer has now inspected the completed changes and records:
 
-### Required next reviewer action
+- **Step 1: technical PASS**
+- **Step 2: technical PASS**
+- **Step 3: technical PASS**
+- **Process compliance: VIOLATION**
 
-Review **Step 2** first against the approved plan and actual diff. If Step 2 passes, record its Job B PASS and explicitly authorize Step 3. Then review Step 3 separately. Do not treat the combined actor report as equivalent to the required per-step reviews.
+This audit intentionally accepts the completed technical work while preserving an accurate record that the required review gates were skipped.
+
+### Rule reminder for the actor
+
+For every future stage, the actor must stop after **each individual implementation commit**.
+
+Required sequence:
+
+1. Implement **one** step.
+2. Verify that step.
+3. Commit that step.
+4. Report the exact commit and verification.
+5. **STOP.**
+6. Wait for reviewer Job B.
+7. Continue only after the reviewer explicitly says **PASS** and authorizes the next step.
+
+**Never implement Step N+1 merely because Step N appears correct or because multiple steps are independent.**
+
+The reviewer gate is part of the workflow, not an optional documentation step.
+
+---
+
+## Stage I Review Status
+
+**Technical implementation: PASS**
+
+**Process compliance: VIOLATION RECORDED**
+
+**Steps 1–3: technically accepted; no rework requested.**
+
+Stage I remains subject to the normal final-stage checklist/sign-off process.
