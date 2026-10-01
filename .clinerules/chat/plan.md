@@ -29,7 +29,7 @@
 - Risk: MEDIUM
 - Confidence: HIGH
 
-## [ ] Step 2 — Remove unused entity API surface
+## ~~[x] Step 2 — Remove unused entity API surface~~
 
 - Files to remove:
   - `src/MobileShop.Services/DataServices/Api/ApiUserDataService.cs`
