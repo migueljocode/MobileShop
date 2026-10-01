@@ -26,26 +26,39 @@ public class ProductsDataService(
     protected ILogger<ProductsDataService> Logger { get; } = logger;
 
     /// <inheritdoc />
-    public async Task<IReadOnlyList<ProductListItemViewModel>> GetInventoryRowsAsync(string? type = null)
+    public async Task<IReadOnlyList<ProductListItemViewModel>> GetInventoryRowsAsync(string? type = null, int? partNumberId = null)
     {
         var rows = new List<ProductListItemViewModel>();
+
+        // A positive part number narrows the list to the phones carrying it; zero/negative/null
+        // is treated as no selection so the filter never hides everything by accident.
+        var hasPartNumberFilter = partNumberId is > 0;
 
         // Only "appleid" excludes phones; only "phone" excludes Apple IDs — null, "all"
         // and any unrecognised value return both blocks. Pages lowercase before calling.
         if (type is not "appleid")
-            rows.AddRange((await phones.SelectAllAsync(
-                phone => new ProductListItemViewModel(
-                    phone.Id,
-                    phone.ProductId,
-                    "Phone",
-                    phone.ProductNavigation.ModelNavigation.ManufacturerNavigation.Name + " " + phone.ProductNavigation.ModelNavigation.Name,
-                    "IMEI: " + phone.IMEI1,
-                    phone.ProductNavigation.ColorNavigation == null ? null : phone.ProductNavigation.ColorNavigation.Name,
-                    phone.ProductNavigation.Transactions.Any(t => t.Direction == TransactionDirection.Sell),
-                    phone.ProductNavigation.SecondHandProfile != null)))
-                .OrderBy(row => row.ProductId));
+        {
+            Expression<Func<Phone, ProductListItemViewModel>> project = phone => new ProductListItemViewModel(
+                phone.Id,
+                phone.ProductId,
+                "Phone",
+                phone.ProductNavigation.ModelNavigation.ManufacturerNavigation.Name + " " + phone.ProductNavigation.ModelNavigation.Name,
+                "IMEI: " + phone.IMEI1,
+                phone.ProductNavigation.ColorNavigation == null ? null : phone.ProductNavigation.ColorNavigation.Name,
+                phone.ProductNavigation.Transactions.Any(t => t.Direction == TransactionDirection.Sell),
+                phone.ProductNavigation.SecondHandProfile != null);
 
-        if (type is not "phone")
+            // The predicate is only applied when a part number is actually selected, so a
+            // zero/negative id can never silently drop every phone.
+            var phoneRows = hasPartNumberFilter
+                ? await phones.SelectAllAsync(phone => phone.PartNumberId == partNumberId, project)
+                : await phones.SelectAllAsync(project);
+
+            rows.AddRange(phoneRows.OrderBy(row => row.ProductId));
+        }
+
+        // Apple IDs never carry a part number, so an active part-number filter excludes them entirely.
+        if (type is not "phone" && !hasPartNumberFilter)
             rows.AddRange((await appleIds.SelectAllAsync(
                 appleId => new ProductListItemViewModel(
                     appleId.Id,
@@ -173,8 +186,10 @@ public class ProductsDataService(
         => (await colors.FindAllAsync()).Select(c => new DropdownOptionViewModel(c.Id, c.Name)).ToList().AsReadOnly();
 
     /// <inheritdoc />
-    public async Task<IReadOnlyList<DropdownOptionViewModel>> GetPartNumbersAsync(int modelId)
-        => (await partNumbers.FindAllAsync(pn => pn.ModelId == modelId))
+    public async Task<IReadOnlyList<DropdownOptionViewModel>> GetPartNumbersAsync(int? modelId = null)
+        => (modelId is null
+                ? await partNumbers.FindAllAsync()
+                : await partNumbers.FindAllAsync(pn => pn.ModelId == modelId))
             .Select(pn => new DropdownOptionViewModel(pn.Id, pn.Code))
             .ToList()
             .AsReadOnly();

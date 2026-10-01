@@ -5,16 +5,27 @@
 }
 
 <h1>Products</h1>
-<div class="d-flex flex-wrap gap-2 mb-3">
+<div class="d-flex flex-wrap gap-2 align-items-center mb-3">
     <div class="btn-group" role="group">
-        <a class="btn @(Model.Type == "all" ? "btn-primary" : "btn-outline-primary")" asp-route-type="all">All</a>
-        <a class="btn @(Model.Type == "phone" ? "btn-primary" : "btn-outline-primary")" asp-route-type="phone">Phones</a>
-        <a class="btn @(Model.Type == "appleid" ? "btn-primary" : "btn-outline-primary")" asp-route-type="appleid">Apple IDs</a>
+        <a class="btn @(Model.Type == "all" ? "btn-primary" : "btn-outline-primary")" asp-route-type="all" asp-route-partNumberId="@Model.PartNumberId">All</a>
+        <a class="btn @(Model.Type == "phone" ? "btn-primary" : "btn-outline-primary")" asp-route-type="phone" asp-route-partNumberId="@Model.PartNumberId">Phones</a>
+        <a class="btn @(Model.Type == "appleid" ? "btn-primary" : "btn-outline-primary")" asp-route-type="appleid" asp-route-partNumberId="@Model.PartNumberId">Apple IDs</a>
     </div>
     <a asp-page="/Products/SecondHand" class="btn btn-outline-warning">Second-hand</a>
     <a asp-page="/Products/CreatePhone" class="btn btn-success">Create phone</a>
     <a asp-page="/Products/CreateAppleId" class="btn btn-success">Create Apple ID</a>
 </div>
+
+<form method="get" class="row g-2 align-items-end mb-3">
+    <input type="hidden" name="type" value="@Model.Type" />
+    <div class="col-auto">
+        <label class="form-label" asp-for="PartNumberId">Part number</label>
+        <select class="form-select" asp-for="PartNumberId" asp-items="Model.PartNumberOptions"></select>
+    </div>
+    <div class="col-auto">
+        <button type="submit" class="btn btn-outline-primary">Filter</button>
+    </div>
+</form>
 
 @if (Model.Products.Count == 0)
 {

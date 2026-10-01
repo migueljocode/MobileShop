@@ -5,7 +5,11 @@ public interface IProductsDataService
 {
     /// <summary>Gets all new-product inventory rows.</summary>
     /// <param name="type">The product type filter.</param>
-    Task<IReadOnlyList<ProductListItemViewModel>> GetInventoryRowsAsync(string? type = null);
+    /// <param name="partNumberId">
+    /// The optional part-number filter. A positive value limits the result to phones carrying that part
+    /// number (Apple IDs are excluded); null, zero or a negative value applies no part-number filter.
+    /// </param>
+    Task<IReadOnlyList<ProductListItemViewModel>> GetInventoryRowsAsync(string? type = null, int? partNumberId = null);
 
     /// <summary>Gets all second-hand product rows.</summary>
     Task<IReadOnlyList<ProductListItemViewModel>> GetSecondHandRowsAsync();
@@ -42,8 +46,10 @@ public interface IProductsDataService
     Task<DropdownCreateResult> CreateColorAsync(string name);
 
     /// <summary>Gets the part-number dropdown options for a model.</summary>
-    /// <param name="modelId">The model identifier.</param>
-    Task<IReadOnlyList<DropdownOptionViewModel>> GetPartNumbersAsync(int modelId);
+    /// <param name="modelId">
+    /// The model identifier, or null to return every part number (used by the Products list filter).
+    /// </param>
+    Task<IReadOnlyList<DropdownOptionViewModel>> GetPartNumbersAsync(int? modelId = null);
 
     /// <summary>Creates a part number for a model and returns its dropdown option.</summary>
     /// <param name="modelId">The owning model identifier.</param>

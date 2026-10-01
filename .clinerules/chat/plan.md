@@ -27,9 +27,9 @@ Step 2 is complete: representative PartNumbers are seeded and linked to existing
 - No API behavior, authentication, PDF, or database-initialization-policy change was introduced.
 - Step 2 is approved; proceed to Step 3.
 
-## Step 3
+## ~~Step 3~~
 
-- [ ] Step 3 — Add the optional PartNumber filter to the Products list; selected PartNumber shows only matching phone inventory, Apple IDs are excluded, invalid/non-positive IDs behave as no selection, and existing type routes remain unchanged.
+- ~~Step 3 — Add the optional PartNumber filter to the Products list; selected PartNumber shows only matching phone inventory, Apple IDs are excluded, invalid/non-positive IDs behave as no selection, and existing type routes remain unchanged.~~
 - One step → commit → Reviewer Job B before Step 4.
 
 ## Step 4
