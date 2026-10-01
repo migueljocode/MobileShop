@@ -23,7 +23,6 @@ public class ProductsDataService(
 {
         /// <summary>Gets the structured logger for this products service.</summary>
     protected ILogger<ProductsDataService> Logger { get; } = logger;
-    protected IBaseRepo<Transaction> Transactions { get; } = transactions;
 
     /// <inheritdoc />
     public async Task<IReadOnlyList<ProductListItemViewModel>> GetInventoryRowsAsync(string? type = null)

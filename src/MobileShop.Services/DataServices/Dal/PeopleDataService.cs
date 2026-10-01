@@ -111,7 +111,7 @@ public class PeopleDataService(
         if (productIds.Count == 0)
             return [];
 
-        // Same projection as ProductDataService.GetInventoryRowsAsync; in-memory filter after SelectAllAsync.
+        // Same inventory projection shape as ProductsDataService.GetInventoryRowsAsync; in-memory filter after SelectAllAsync.
         var rows = await products.SelectAllAsync(product => new ProductListItemViewModel(
             product.Id,
             product.Id,

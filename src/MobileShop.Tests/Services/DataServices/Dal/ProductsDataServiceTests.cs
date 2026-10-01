@@ -129,6 +129,73 @@ public class ProductsDataServiceTests : RepoTestBase
     }
 
     [Fact]
+    public async Task GetInventoryRowsAsync_returns_phones_first_then_apple_ids_each_ascending_by_product_id()
+    {
+        SeedCatalog(out _, out _);
+
+        // Insert in a deliberately shuffled order (and with non-monotonic ids) so the test only
+        // passes if the service applies its documented ordering rule.
+        var products = new List<Product>();
+        for (var i = 0; i < 3; i++)
+            products.Add(TestDataHelpers.CreateProduct(Context));
+
+        // Phones in reverse creation order, Apple IDs in reverse creation order.
+        Context.Phones.Add(new Phone { ProductId = products[2].Id, IMEI1 = TestDataHelpers.GenerateImei() });
+        Context.Phones.Add(new Phone { ProductId = products[0].Id, IMEI1 = TestDataHelpers.GenerateImei() });
+        Context.Phones.Add(new Phone { ProductId = products[1].Id, IMEI1 = TestDataHelpers.GenerateImei() });
+        Context.AppleIds.Add(new AppleId { ProductId = products[2].Id, Email = "c@example.com", Password = "p" });
+        Context.AppleIds.Add(new AppleId { ProductId = products[0].Id, Email = "a@example.com", Password = "p" });
+        Context.AppleIds.Add(new AppleId { ProductId = products[1].Id, Email = "b@example.com", Password = "p" });
+        Context.SaveChanges();
+
+        var rows = await _service.GetInventoryRowsAsync();
+
+        // Documented rule: the Phone block first, then the Apple ID block, each ascending by ProductId.
+        Assert.Equal(
+            new[] { "Phone", "Phone", "Phone", "Apple ID", "Apple ID", "Apple ID" },
+            rows.Select(row => row.Type));
+
+        Assert.Equal(
+            new[] { products[0].Id, products[1].Id, products[2].Id,
+                    products[0].Id, products[1].Id, products[2].Id },
+            rows.Select(row => row.ProductId));
+    }
+
+    [Fact]
+    public async Task GetInventoryRowsAsync_returns_empty_list_when_no_phones_or_apple_ids_exist()
+    {
+        SeedCatalog(out _, out _);
+
+        var defaultRows = await _service.GetInventoryRowsAsync();
+        Assert.NotNull(defaultRows);
+        Assert.Empty(defaultRows);
+
+        Assert.Empty(await _service.GetInventoryRowsAsync("phone"));
+        Assert.Empty(await _service.GetInventoryRowsAsync("appleid"));
+        Assert.Empty(await _service.GetInventoryRowsAsync("all"));
+    }
+
+    [Fact]
+    public async Task GetInventoryRowsAsync_returns_empty_list_after_inventory_is_removed()
+    {
+        SeedCatalog(out _, out _);
+        var product = TestDataHelpers.CreateProduct(Context);
+        Context.Phones.Add(new Phone { ProductId = product.Id, IMEI1 = TestDataHelpers.GenerateImei() });
+        Context.SaveChanges();
+
+        Assert.Single(await _service.GetInventoryRowsAsync());
+
+        Context.Entry(Context.Phones.Single()).State = EntityState.Deleted;
+        Context.SaveChanges();
+
+        // Soft-deleted inventory must drop out, and the result must be empty rather than null.
+        var rows = await _service.GetInventoryRowsAsync();
+
+        Assert.NotNull(rows);
+        Assert.Empty(rows);
+    }
+
+    [Fact]
     public async Task GetSecondHandRowsAsync_only_returns_second_hand_products()
     {
         SeedCatalog(out _, out _);

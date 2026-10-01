@@ -1,32 +1,20 @@
-# Act Report — Stage H Step 4 (GlobalUsings cleanup + final Stage H validation)
+# Act Report — Post–Stage H cleanup (polish pass)
 
-- Commit: `5cd80f2` — refactor: remove obsolete Dal.Repos global usings and validate Stage H
-- GlobalUsings cleanup (evidence-based, per L8):
-  - Inspected all four in-scope files: `Services`, `Dal`, `Web`, `Tests`.
-  - **Removed exactly one import from each of two files**: `global using MobileShop.Dal.Repos;` from `Services/GlobalUsings.cs` and `Tests/GlobalUsings.cs`. Proof of obsolescence: after Step 3 the `MobileShop.Dal.Repos` namespace contains **0** type files (`find src/MobileShop.Dal/Repos -maxdepth 1 -name '*.cs'` -> 0); only its child `Repos.Base` survives.
-  - **Kept `global using MobileShop.Dal.Repos.Base;`** in all three files that have it (`Dal`, `Services`, `Tests`), because `BaseRepo<T>`/`IBaseRepo<T>` still live there and are still registered.
-  - Correction to the reviewer's guidance: it suggested the bare `Repos` using was present in the **Dal** project too. It is not — `Dal/GlobalUsings.cs` only ever imported `Repos.Base`, so Dal needed no change. Verified by exact-match grep rather than assumed.
-  - `Dal/GlobalUsings.cs` and `Web/GlobalUsings.cs` were inspected and left **unmodified** — nothing in them was provably obsolete.
-- Final validation (clean build, as the reviewer required):
-  - `dotnet clean src/MobileShop.slnx --nologo` then `dotnet build src/MobileShop.slnx --nologo --no-incremental` -> **Build succeeded, 0 errors, 1 warning**.
-  - `dotnet test src/MobileShop.slnx --nologo --no-build` -> **Failed: 0, Passed: 240, Skipped: 2, Total: 242** (EXIT=0, 40 s) — identical to the post-correction baseline, confirming the using removals broke nothing.
-  - **Warning reported honestly:** the `--no-incremental` build reports **1** warning: **`ProductsDataService.cs(26,62): warning CS9124`** (parameter captured into enclosing type state). An *incremental* build had been reporting 0 warnings and masking it — the reviewer's warning about this was well founded. I did **not** fix it: it is backlog item #1, which the reviewer explicitly placed outside Step 4's scope.
-- Production smoke (`ASPNETCORE_ENVIRONMENT=Production`, `--no-launch-profile --no-build`, port 5199):
-  - **7/7 required routes 200**: `/`, `/Products`, `/People/Customers`, `/Transactions`, `/Reports/ProfitLoss`, `/Account/Login`, `/Account/Profile`.
-  - Log confirms `Hosting environment: Production`.
-  - **No dev init/wipe/seed**: 0 matches for `InitializeForDevelopment|EnsureDeleted|EnsureCreated`, 0 for `seed`, 0 for `ERR |FTL |Exception`.
-  - **Non-destructive**: fingerprint `Products|Phones|Transactions|Employees|Users` = `17|7|26|6|1` before **and** after the Production pass (read-only `mode=ro`).
-- Optional Development smoke (performed, then reverted):
-  - `InitializeForDevelopment` intentionally wipes and recreates the dev DB, and `SolutionPaths.DatabaseFile` resolves to the repo-root `MobileShop.db` with no override, so I took a verified backup first.
-  - Ran Development on port 5201: seed completed, then **`AccountDataService | Ensured the default admin account 'admin'`**, then `Application started` — **no throw**, confirming the migrated startup path still works after the repository deletions. 0 matches for `ERR |FTL |Unhandled`. `/Account/Login`, `/Account/Profile`, `/Transactions`, `/Reports/ProfitLoss` all **200**.
-  - **Database restored from backup and verified byte-identical** (`cmp` identical, fingerprint `17|7|26|6|1`). Both hosts stopped; ports 5199 and 5201 released and confirmed free.
-- Repository-wide dead-reference search:
-  - Deleted DAL entity-service types (`UserDataService` … `EmployeeDataService`) as **code**: **NONE**.
-  - `DataServiceBase<` (non-Api): **NONE**.
-  - Specialized repo types/interfaces + `IEmployeeDataService`: **NONE**.
-  - Obsolete `AddScoped<I…DataService, …DataService>` registrations: **NONE**.
-  - Three residual **comment-only** hits name deleted types — `ProfileModelTests.cs:12`, `SampleDataSeedTests.cs:127`, `PeopleDataService.cs:114`. These are backlog item #2 and were deliberately left alone (not Step 4 scope, and fixing them would touch files this step does not list).
-- Limitations: None.
-- Friction noted: clean build (~25 s) and full suite (~40 s) exceed the ~30 s window, so all long commands used the detached-launch + poll pattern.
-- Problems: none. Two scope decisions worth stating: (a) I fixed **no** backlog item, including the CS9124 warning, because the reviewer scoped those out of Step 4; (b) the **LOW** finding from the last review — `BaseRepoPersonTests.cs` has no trailing newline (verified: last byte is `}`, not `\n`) — is left unfixed, because Step 4's in-scope files are the four `GlobalUsings.cs` only and I do not modify files a step does not list. Both are noted for the post-Stage-H pass.
+- Commit: (filled in after commit)
+- Verification (clean build, as the prompt preferred):
+  - `dotnet clean src/MobileShop.slnx --nologo` then `dotnet build src/MobileShop.slnx --nologo --no-incremental` -> **Build succeeded, 0 errors, 0 warnings**.
+  - `dotnet test src/MobileShop.slnx --nologo --no-build` -> **Failed: 0, Passed: 243, Skipped: 2, Total: 245** (EXIT=0, 41 s). Baseline was 240; the delta is exactly the 3 added tests.
+  - **CS9124 is gone.** The clean build now reports zero warnings, where the same build reported 1 immediately before this change.
+- Items completed:
+  1. **CS9124 — removed the dead property only.** Deleted `protected IBaseRepo<Transaction> Transactions { get; } = transactions;` from `ProductsDataService.cs`. I verified before touching it that the property was genuinely never read (the other `Transactions` hits in the file are the *record* property in `details with { Transactions = rows }` and the `Product.Transactions` navigation), and that the ctor parameter `transactions` **is** still used by `GetProductTransactionsAsync` at line 157. The parameter and its use are untouched, matching the prompt's correction.
+  2. **Three stale comments** updated: `ProfileModelTests.cs` (`UserDataService` -> `AccountDataService`), `PeopleDataService.cs` (`ProductDataService` -> `ProductsDataService`, and "Same projection" -> "Same inventory projection shape"), `SampleDataSeedTests.cs` (`TransactionDataService` -> "the Transactions area"). A repo-wide grep for all nine deleted service names now returns **NONE**, so nothing still advertises a type that no longer exists.
+  3. **`ProductDetailsViewModel.Transactions = null!` removed.** Converted the positional parameter into an init property defaulting to `[]`. Both `new ProductDetailsViewModel(...)` call sites pass only 9 arguments, so they were unaffected, and `details with { Transactions = rows }` still works through the init accessor. `Products/Details.cshtml.cs` copies `Product.Transactions` into its own non-null list, so it no longer risks dereferencing null.
+  4. **Ordering test added.** `GetInventoryRowsAsync_returns_phones_first_then_apple_ids_each_ascending_by_product_id` seeds 3 phones and 3 Apple IDs **in deliberately shuffled order** and asserts both the type sequence (`Phone, Phone, Phone, Apple ID, Apple ID, Apple ID`) and the exact ascending `ProductId` sequence per block — documenting the rule the implementation actually follows.
+  5. **Empty-inventory tests added** (2): one for a catalog with no phones/Apple IDs at all, asserting empty (not null) for the default, `"phone"`, `"appleid"` and `"all"` arguments; one that seeds a phone, asserts it is returned, soft-deletes it, and asserts the list becomes empty rather than null.
+- Mutation-tested the new ordering test (the prompt required it to fail if the order is shuffled): reversing the phone block's `OrderBy` to `OrderByDescending` made **only** that test fail (`Failed: 1, Passed: 35`), and nothing else detected the change. The mutation was then reverted and the resulting diff verified to contain only the intended CS9124 property removal.
+- Out of scope, deliberately untouched, per the prompt: the owner decision on the `Phone`-category filter in `CreatePhoneAsync`; API implementations; UI redesign; Stage H deletions.
+- Reviewer correction verified rather than assumed: the vacuous seller soft-delete test was **already fixed** — it seeds both the live and soft-deleted Buy against `seller.Id` and asserts `SoldCount == 1`. I confirmed this by reading the current test and did **not** rework it, exactly as instructed.
+- Limitations: None. No behavior change: the removed property was unreachable, the record default only removes a possible null, and the comments were documentation only.
+- Friction noted: my first mutation attempt used `sed` on `ProductsDataService.cs:45` and injected an extra closing parenthesis, producing `CS1002`/`CS1513` — a **syntax** error rather than a valid ordering mutation, so that run proved nothing. I restored from backup and redid the mutation with the editor's exact-string replacement, which is the only mutation result I trust and reported. Build (~25 s) and suite (~41 s) exceed the ~30 s window, so all long commands used the detached-launch + poll pattern.
+- Problems: none.
 - Status: COMPLETE

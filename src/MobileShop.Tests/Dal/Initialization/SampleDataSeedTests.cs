@@ -124,7 +124,7 @@ public class SampleDataSeedTests : IDisposable
             Assert.False(string.IsNullOrWhiteSpace(transaction.ProductNavigation.ModelNavigation.ManufacturerNavigation.Name));
         });
 
-        // Shop sentinel rule relied on by TransactionDataService (Buy => shop is customer,
+        // Shop sentinel rule relied on by the Transactions area (Buy => shop is customer,
         // Sell => shop is seller; both sentinel ids point at person 1).
         Assert.All(transactions.Where(transaction => transaction.Direction == TransactionDirection.Buy),
             transaction => Assert.Equal(1, transaction.CustomerId));

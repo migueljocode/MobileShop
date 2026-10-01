@@ -9,7 +9,7 @@ namespace MobileShop.Tests.Web.Pages.Account;
 /// Verifies the development profile page password change flow:
 /// - GET resolves the seeded dev admin explicitly (no User.Identity dependency)
 /// - POST validates current password, new password confirmation, and required inputs
-/// - Successful change calls UserDataService.ChangePasswordAsync and displays success message
+/// - Successful change calls AccountDataService.ChangePasswordAsync and displays success message
 /// - Validation errors are preserved and displayed on redisplay
 /// </summary>
 public class ProfileModelTests : RepoTestBase
