@@ -1,36 +1,26 @@
-# Audit — Job B (Execution Check): Stage O Step 2 — Shared product picker + Buy page
+# ACTOR PROMPT — Stage O Step 2 correction (restore validation, selected value and posted price on Buy)
 
-**Reviewed**: `bee5ba9` against Stage O `plan.md` Step 2, the Step 1 PASS gate and `actor.md`.
-**Method**: static review only (the sandbox can't restore NuGet packages or run the app). The reported "0 warnings, 293 passed / 0 failed / 0 skipped" is unverified; re-run build and tests locally.
+> This file is an instruction. After you finish, replace its entire content with your Act Report, using the same format as your previous reports.
 
-**Verdict: FAIL — one HIGH finding. Step 3 (Sell) must not start until it is fixed, because Sell reuses the same partial.**
+You are the ACTOR. Read `.clinerules/actor.md`, `.clinerules/project-specific-rules.md`, `.clinerules/chat/plan.md` (Stage O) and `.clinerules/chat/audit.md` (Job B on Step 2: one HIGH finding). Run `git pull` first. Do **one correction pass for that HIGH finding only**, then STOP. Do not start Step 3. Do not touch the Sell page, `to-do.md`, `plan.md` or `audit.md`.
 
-## Finding
+## Problem
+`src/MobileShop.Web/Pages/Shared/_ProductPicker.cshtml` replaced the Buy page's tag-helper controls with hand-built HTML. Result on Buy: no client validation, the Stage L messages ("The product should be selected." etc.) never render (a manual `data-valmsg-for` span is not filled server-side, and the page uses `asp-validation-summary="ModelOnly"`), and after a failed post the selected product and the typed price are lost.
 
-### HIGH — `_ProductPicker.cshtml` drops server-rendered validation, selected value and posted price on the Buy page
-The old Buy markup used tag helpers (`<select asp-for="Input.ProductId">`, `<input asp-for="Input.Price">`, `<span asp-validation-for=…>`). The partial replaces them with hand-built HTML (`name="@productIdName"`, `<input … data-finished-price-input />`, `<span … data-valmsg-for="@productIdName">`). Static consequences:
-1. **No client validation.** Hand-written controls carry no `data-val-*` attributes, so jQuery unobtrusive validation has nothing to validate for Product or Price.
-2. **Validation messages never appear.** On a failed post, only `asp-validation-for` fills the span with the ModelState error text. A manual `data-valmsg-for` span stays empty server-side. `Buy.cshtml` uses `asp-validation-summary="ModelOnly"`, which excludes property errors. So the Stage L friendly messages ("The product should be selected.") are invisible on Buy, and the page just reloads. The Stage L tests don't catch it because they validate the data annotations, not the rendered page.
-3. **The posted values are lost.** The `<option>` elements have no `selected`, and the Price input has no `value`. After any failed post (for example a missing seller) the user must re-pick the product and retype the price. The old `asp-for` markup retained both.
-4. **Minor:** the Price field now renders blank instead of the bound default. `DateTime.Today` equality in the new test can flake at midnight (LOW).
+## Task (Web layer only; no service, entity, Api, auth, PDF or schema changes)
+1. Restructure so the **page keeps tag helpers** and only genuinely shared parts live in shared files:
+   - In `Buy.cshtml` restore: `<select asp-for="Input.ProductId" class="form-select" data-product-picker>` with the "Select product" `<option value="0">`, the product `<option>` list, `<span asp-validation-for="Input.ProductId" class="text-danger">`, and `<input asp-for="Input.Price" class="form-control" data-finished-price-input />` with `<span asp-validation-for="Input.Price" class="text-danger">`. Labels use `asp-for` (so the label reads "Finished price").
+   - Shared partial: change `_ProductPicker.cshtml` (or rename it, for example `_ProductPickerOptions.cshtml`) so it renders **only the product `<option>` elements** (friendly text: type / name / identifier / color / part number, each with `data-suggested-price` in invariant culture) plus the read-only **Suggested price** display. It no longer renders the `<select>`, the price `<input>` or any validation span. Adjust `ProductPickerViewModel` only if needed (the `FieldPrefix` property can go if unused).
+   - Shared script: move the inline `<script>` into `src/MobileShop.Web/wwwroot/js/product-picker.js` (same pattern as `create-product-pricing.js`). Keep the documented A2 rule (on product change, show the suggested price and set the finished price to it). Use `[data-product-picker]`, `[data-finished-price-input]` and `[data-suggested-price-display]` hooks, and reference it from Buy.cshtml's `Scripts` section next to `_ValidationScriptsPartial`.
+2. Keep unchanged: the Seller dropdown, the `type="date"` Date input and `Input.Date ??= DateTime.Today`, the `[Display(Name = "Finished price")]` on `BuyInputModel.Price`.
+3. The partial and script must be written so Step 3 can reuse them on the Sell page without changes (do not touch Sell now).
 
-**Fix (no new design):** keep the pages' own tag-helper controls and share only what is genuinely shared. For example, a partial that renders just the `<option>` list with the `data-suggested-price` attributes and friendly option text, plus the suggested-price display, and one external script (`wwwroot/js/product-picker.js`, like `create-product-pricing.js`) instead of an inline `<script>`. Buy.cshtml keeps `<select asp-for="Input.ProductId">`, `<input asp-for="Input.Price">` and `<span asp-validation-for=…>`. That restores client validation, server messages, the selected product and the posted price, and Step 3 can reuse the same partial and script on Sell.
+## Verify
+- Build and tests as a chain, detached + polled if over the time window: `dotnet build src/MobileShop.slnx --nologo && dotnet test src/MobileShop.slnx --nologo --no-build`. Expected 0 warnings and the same pass count as before (293), plus any test you add.
+- **Rendered-page check (required, because unit tests don't cover Razor output):** run the Web app in Development, GET `/Transactions/Buy`, then POST it with a valid antiforgery token and `Input.ProductId=0` (and a valid seller and price). Confirm the response HTML contains "The product should be selected." Then POST with a valid product but `Input.SellerId=0` and confirm the response keeps the posted product `selected` and the posted price in the Price input. Record the commands and the grep evidence (short) in the report. Stop the app afterwards and make sure `MobileShop.db` is not left modified (restore it if it is).
+- `git diff --stat -- src/MobileShop.Api src/MobileShop.Web/Pages/Transactions/Sell.cshtml src/MobileShop.Web/Pages/Transactions/Sell.cshtml.cs` is empty.
 
-## Verified correct
-- **Scope:** only the picker view model, the partial, Buy.cshtml/.cs, `BuyInputModel` and one test changed. The Sell page, Api, auth, PDF and schema are untouched, and `plan.md`, `audit.md` and `to-do.md` were not edited.
-- `[Display(Name = "Finished price")]` on `BuyInputModel.Price` keeps the bound name `Price` (A1).
-- **Date default:** `Input.Date ??= DateTime.Today` with `type="date"` renders as `yyyy-MM-dd` and works.
-- **`data-suggested-price`:** uses `CultureInfo.InvariantCulture`, so there's no locale breakage in the attribute itself.
-- **Seller:** the dropdown is still present on Buy, as planned.
-- **Test:** `Buy_OnGet_defaults_date_to_today` asserts the new default.
-
-## Findings (LOW)
-- The inline script uses document-wide `querySelector`, so it only supports one picker per page; moving it into a shared script (as above) fixes that.
-- If the app culture ever uses a comma decimal separator, a prefilled `1234.5` could fail to bind as a price. Worth one manual check in Step 3's validation.
-
-## Gate
-**Step 3 is NOT authorized.** One correction pass on Step 2 is authorized (prompt delivered as `act.md`), followed by Job B.
-
-## Reviewer checklist
-- [x] Job B; one verdict; only `audit.md` written; `to-do.md` untouched.
-- [x] Only the HIGH item blocks.
+## Commit and report
+- Commit: `git commit -m "fix(transactions): keep tag-helper controls on Buy and share only picker options and script"` (Conventional Commits, no Co-authored-by, never amend, never push).
+- Then replace this file's content with your Act Report (commit hash, verification numbers, the rendered-page evidence, limitations, problems) and record the hash in a separate commit: `git commit -m "docs(act): record Stage O Step 2 correction commit hash"`.
+- STOP for Job B.
