@@ -241,3 +241,60 @@ The actor is explicitly forbidden from ticking `.clinerules/to-do.md`; the revie
 The actor must implement **Step 1 only**, commit it, report it, and stop for Job B review.
 
 **Step 2 is not authorized until Job B explicitly returns PASS for Step 1.**
+
+
+---
+
+# Stage J — Job B — Step 1 Review
+
+**Implementation commit:** `3bde83ccb88b3a1deb357eb4cb2fe568e3763cb1`
+
+## Technical verdict: **PASS**
+
+Step 1 satisfies the approved plan:
+
+- The eight obsolete API entity-service registrations were removed from `AddMobileShopDataServices(bool useApi)`.
+- The `useApi` branch now contains exactly the six planned area registrations:
+  `IHomeDataService`, `IProductsDataService`, `IPeopleDataService`, `ITransactionsDataService`, `IReportsDataService`, and `IAccountDataService`.
+- The eight obsolete interfaces/stubs remain present, as required; their deletion is correctly deferred to Step 2.
+- The non-API registrations remain unchanged.
+- `src/MobileShop.Api` is untouched.
+- No database, authentication, PDF, or unrelated changes are present in the implementation diff.
+- Actor verification reports:
+  - build: 0 warnings, 0 errors;
+  - tests: 243 passed, 2 skipped, 0 failed, 245 total.
+- The implementation change itself is limited to the intended DI registration cleanup.
+
+## Process finding: **VIOLATION RECORDED**
+
+The actor also modified `.clinerules/chat/plan.md` in the same implementation commit by changing Step 1 to a completed checkbox:
+
+`## ~~[x] Step 1 — Remove unused entity-service API registrations~~`
+
+The approved plan explicitly states:
+
+- actor must not edit `.clinerules/to-do.md`;
+- reviewer owns stage completion;
+- actor reports the step and stops for Job B.
+
+More importantly, the plan itself was intended to remain the reviewer's planning artifact. The checkbox was not part of the authorized implementation scope.
+
+This does **not** invalidate the technically correct Step 1 implementation, and no rework is requested. However, the actor must not modify plan/audit/checklist state to signal completion in future steps. The reviewer controls those state transitions.
+
+## Job B decision
+
+**PASS — Stage J Step 1 technically accepted.**
+
+**Step 2 is now authorized.**
+
+Actor requirements for Step 2:
+
+1. Perform the repository-wide stale-reference search required by the plan.
+2. Delete only the 18 explicitly listed obsolete API entity-service files/types.
+3. Do not touch `src/MobileShop.Api` or the six surviving area API services.
+4. Run stale-reference verification and the full build/test validation.
+5. Commit Step 2.
+6. Report the exact SHA and evidence.
+7. **STOP for final Job B review.**
+
+Do not edit `.clinerules/chat/audit.md`, `.clinerules/to-do.md`, or the Stage J plan to mark Step 2 complete.
