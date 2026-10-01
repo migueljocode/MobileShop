@@ -1,43 +1,61 @@
 # Audit — Stage M — PartNumber
 
-## Reviewer Job A
+## Reviewer Job B — Step 1
 
-**Status: APPROVED — plan clarified.**
+**Status: BLOCKED**
 
-Repository review confirms the stage fits the current architecture:
+### What passed
 
-- `Phone` currently has no PartNumber relation.
-- `Model` is the appropriate parent for reusable PartNumbers.
-- `PhoneConfiguration` and a new `PartNumberConfiguration` are the EF mapping points.
-- `AppDbContext` uses `ApplyConfigurationsFromAssembly(...)`, so the new configuration will be discovered automatically.
-- `ProductsDataService` is the existing DAL-backed Products orchestration point.
-- Products list/details already flow through `IProductsDataService`.
-- `CreatePhoneInputModel` currently has no PartNumber field; the create-form dropdown remains Stage N.
-- Development initialization is intentionally destructive, while the Stage M production migration must be additive/non-destructive.
-- API implementations/stubs remain out of scope.
+The submitted Step 1 implementation matches the approved data model in the important areas:
 
-### Important design clarification
+- `PartNumber` belongs to one `Model`; `Model` has many PartNumbers.
+- `Phone.PartNumberId` is nullable.
+- Multiple phones can share one PartNumber.
+- Uniqueness is scoped to **Model + Code** and respects the soft-delete filter.
+- Phone → PartNumber uses `NoAction`; no destructive cascade was introduced.
+- `AppDbContext` exposes `PartNumbers`.
+- The generated `AddPartNumber` migration is additive in `Up`: nullable Phone column, new table, indexes, and FKs; no drop/delete/alter operation appears in `Up`.
+- Build reported 0 warnings / 0 errors.
+- Focused PartNumber tests reported 5 passed / 0 failed / 0 skipped.
+- Full suite reported 256 passed / 0 failed / 0 skipped.
 
-**PartNumber → Model is many-to-one; Phone → PartNumber is optional; uniqueness is Model + Code.**
+### Blocking finding
 
-The original plan wording could be read as globally unique PartNumber codes while Step 2 only described duplicate handling within a Model. The plan now makes the intended constraint explicit: duplicate **Model + Code** is rejected, while the same code under another Model is permitted.
+The required migration-safety test is not testing the required scenario.
 
-### Migration safety
+The test named `Migration_preserves_existing_phone_with_null_part_number` first executes:
 
-Because this is the first production schema change in the stage, Job B for Step 1 must verify the actual migration path against a database that already contains a Phone. A successful build or `EnsureCreated` test alone is not sufficient evidence that the migration is production-safe.
+```
+Context.Database.EnsureDeleted();
+Context.Database.Migrate();
+```
 
-### Step sequence
+and only **after the migration** creates the Phone.
 
-1. Schema/entity + additive migration.
-2. Seed data + ProductsDataService list/create.
-3. Products list filter.
-4. Phone details display.
+Therefore it does not establish that a Phone created under the previous schema survives the `AddPartNumber` migration. It only establishes that the post-migration schema permits a Phone with a null PartNumberId.
 
-No implementation should proceed beyond Step 1 until Reviewer Job B passes Step 1.
+This fails the explicit Stage M Job B requirement to verify the generated migration against a database containing an existing Phone.
 
-## Constraints
+### Required actor change
 
-- Preserve existing IDs and seed relationships.
-- Do not modify API, authentication, PDF, or development initialization policy.
-- Do not add the PartNumber create/dropdown UI to CreatePhone in Stage M; that is Stage N.
-- Reviewer only updates `.clinerules/to-do.md` after final Stage M validation passes.
+Replace the migration test with a genuine pre-migration scenario:
+
+- bring SQLite to the previous migration/schema;
+- create and save an existing Phone;
+- apply `AddPartNumber`;
+- reload the same Phone;
+- assert its ID and IMEI are unchanged and `PartNumberId` is null.
+
+Then rerun the focused DAL tests and full suite.
+
+### Workflow violation
+
+The Step 1 actor commit also edited `.clinerules/chat/plan.md` and changed the checkbox to `[~~x~~]`. This violates the standing workflow rule that the Actor must not edit `plan.md`, `audit.md`, or `.clinerules/to-do.md` to mark progress.
+
+The Reviewer has restored the plan. No implementation rework is requested for this violation.
+
+### Gate
+
+**Step 2 is not approved. Step 1 remains open until the migration-safety test is corrected and Job B passes.**
+
+No `.clinerules/to-do.md` change is made.
