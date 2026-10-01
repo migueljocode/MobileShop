@@ -1,3 +1,46 @@
+# Act — Stage N Step 1 — Bind models + server finished-price + notes persistence
+
+## Commit
+- This commit — feat(products): compute finished price server-side and persist second-hand/guarantee notes
+  - Implements Step 1 of Stage N plan.md.
+
+## What changed
+- `CreatePhoneInputModel.cs` — added `SecondHandNotes` and `GuaranteeNotes` (`string?`, `[StringLength(500)]`).
+- `ProductsDataService.ComputeFinishedPrice(paid, percent, amount)` — private helper implementing assumption **A2** (amount-first): `amount` wins if present, else `percent` is applied, else `paid`; result never negative. Used by **both** creates.
+- `ProductsDataService.NormalizeNote(note)` — trims and maps whitespace-only → null.
+- `CreatePhoneAsync` — `Product.Price = ComputeFinishedPrice(...)`; `SecondHand.Notes = NormalizeNote(SecondHandNotes)` when `IsSecondHand` (TestPeriodDays/UsedDurationDays unchanged); `Guarantee.Notes = NormalizeNote(GuaranteeNotes)` when `HasGuarantee`, **preserving** `StartDate = DateTime.Today`, expiry, corporation defaults. Flags false → profiles stay null.
+- `CreateAppleIdAsync` — `Product.Price = ComputeFinishedPrice(...)` (same helper); Email/Password/Notes unchanged (plaintext-password policy untouched).
+- `CreateAppleIdInputModel` — not modified (no docs change needed).
+
+## Verification
+- `dotnet build src/MobileShop.slnx --nologo` → **0 warnings, 0 errors**
+- Focused `ProductsDataServiceTests` → **66 passed, 0 failed, 0 skipped**
+- Full suite `dotnet test src/MobileShop.slnx --nologo --no-build` → **291 passed, 0 failed, 0 skipped**
+- `git status` shows only the three files above — no schema/migration, no sample-data, no `src/MobileShop.Api` project, no auth/PDF, no UI scripts.
+
+## Test coverage (per plan)
+- Phone percent-only → `CreatePhoneAsync_finished_price_with_percent_only` (1000+10% = 1100)
+- Phone amount-only → `CreatePhoneAsync_finished_price_with_amount_only` (1000+250 = 1250)
+- Phone both present → amount path → `CreatePhoneAsync_finished_price_prefers_amount_when_both_present` (1000+50 = 1050, not 1100)
+- Second-hand + guarantee notes persisted → `CreatePhoneAsync_persists_second_hand_and_guarantee_notes` (asserts trimmed notes + StartDate = Today)
+- Flags false → no profiles → `CreatePhoneAsync_flags_false_leave_profiles_null_and_blank_notes_trim_to_null`
+- Apple ID percent → `CreateAppleIdAsync_finished_price_with_percent` (200+50% = 300)
+- Apple ID amount → `CreateAppleIdAsync_finished_price_with_amount` (200+40 = 240)
+
+## Limitations
+None. UI toggles/notes/shared pricing script are Step 2+ and were deliberately not touched (this step is server-side only). PartNumber handlers untouched (out of scope).
+
+## Friction noted
+- Build ~31s / full suite ~40s exceed the 30s tool window; run in the background and polled.
+
+## Problems
+None — verification green. Reviewer Job B determines PASS/FAIL.
+
+## Status
+COMPLETE — awaiting Reviewer Job B for Stage N Step 1.
+
+---
+
 # Act — Stage M (reopened) Step 2 — Create Phone PartNumber selector + Add New
 
 ## Commit

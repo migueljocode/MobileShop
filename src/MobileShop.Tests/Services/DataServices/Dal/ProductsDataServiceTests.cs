@@ -759,6 +759,147 @@ public class ProductsDataServiceTests : RepoTestBase
         Assert.Equal("Name is required.", result.Error);
     }
 
+    // ── Stage N Step 1: finished price + notes ────────────────
+
+    private static MobileShop.Models.ViewModels.Web.BindModels.CreatePhoneInputModel PhonePricing(decimal paid, decimal? percent, decimal? amount) => new()
+    {
+        ManufacturerId = 1,
+        ModelId = 0, // set by caller after catalog seeding
+        Price = paid,
+        ProfitPercent = percent,
+        ProfitAmount = amount,
+        IMEI1 = TestDataHelpers.GenerateImei(),
+    };
+
+    [Fact]
+    public async Task CreatePhoneAsync_finished_price_with_percent_only()
+    {
+        SeedCatalog(out var phoneModel, out _);
+        var input = PhonePricing(1000m, percent: 10m, amount: null);
+        input.ModelId = phoneModel.Id;
+
+        var result = await _service.CreatePhoneAsync(input);
+
+        Assert.True(result.Succeeded);
+        var phone = await Context.Phones.FirstAsync(p => p.IMEI1 == input.IMEI1);
+        var product = await Context.Products.FirstAsync(p => p.Id == phone.ProductId);
+        Assert.Equal(1100m, product.Price);
+    }
+
+    [Fact]
+    public async Task CreatePhoneAsync_finished_price_with_amount_only()
+    {
+        SeedCatalog(out var phoneModel, out _);
+        var input = PhonePricing(1000m, percent: null, amount: 250m);
+        input.ModelId = phoneModel.Id;
+
+        var result = await _service.CreatePhoneAsync(input);
+
+        Assert.True(result.Succeeded);
+        var phone = await Context.Phones.FirstAsync(p => p.IMEI1 == input.IMEI1);
+        var product = await Context.Products.FirstAsync(p => p.Id == phone.ProductId);
+        Assert.Equal(1250m, product.Price);
+    }
+
+    [Fact]
+    public async Task CreatePhoneAsync_finished_price_prefers_amount_when_both_present()
+    {
+        SeedCatalog(out var phoneModel, out _);
+        // Amount-first safety net: 1000 + 50 (amount) wins over 1000 + 10% (1100).
+        var input = PhonePricing(1000m, percent: 10m, amount: 50m);
+        input.ModelId = phoneModel.Id;
+
+        var result = await _service.CreatePhoneAsync(input);
+
+        Assert.True(result.Succeeded);
+        var phone = await Context.Phones.FirstAsync(p => p.IMEI1 == input.IMEI1);
+        var product = await Context.Products.FirstAsync(p => p.Id == phone.ProductId);
+        Assert.Equal(1050m, product.Price);
+    }
+
+    [Fact]
+    public async Task CreatePhoneAsync_persists_second_hand_and_guarantee_notes()
+    {
+        SeedCatalog(out var phoneModel, out _);
+        var input = PhonePricing(1000m, null, null);
+        input.ModelId = phoneModel.Id;
+        input.IsSecondHand = true;
+        input.SecondHandNotes = "  scuffed corner  ";
+        input.HasGuarantee = true;
+        input.GuaranteeNotes = " box included ";
+
+        var result = await _service.CreatePhoneAsync(input);
+
+        Assert.True(result.Succeeded);
+        var phone = await Context.Phones.FirstAsync(p => p.IMEI1 == input.IMEI1);
+        var product = await Context.Products.Include(p => p.SecondHandProfile).Include(p => p.GuaranteeProfile)
+            .FirstAsync(p => p.Id == phone.ProductId);
+        Assert.Equal("scuffed corner", product.SecondHandProfile!.Notes);
+        Assert.Equal("box included", product.GuaranteeProfile!.Notes);
+        Assert.Equal(DateTime.Today, product.GuaranteeProfile.StartDate);
+    }
+
+    [Fact]
+    public async Task CreatePhoneAsync_flags_false_leave_profiles_null_and_blank_notes_trim_to_null()
+    {
+        SeedCatalog(out var phoneModel, out _);
+        var input = PhonePricing(1000m, null, null);
+        input.ModelId = phoneModel.Id;
+        input.IsSecondHand = false;
+        input.SecondHandNotes = "   ";
+        input.HasGuarantee = false;
+        input.GuaranteeNotes = "   ";
+
+        var result = await _service.CreatePhoneAsync(input);
+
+        Assert.True(result.Succeeded);
+        var phone = await Context.Phones.FirstAsync(p => p.IMEI1 == input.IMEI1);
+        var product = await Context.Products.Include(p => p.SecondHandProfile).Include(p => p.GuaranteeProfile)
+            .FirstAsync(p => p.Id == phone.ProductId);
+        Assert.Null(product.SecondHandProfile);
+        Assert.Null(product.GuaranteeProfile);
+    }
+
+    [Fact]
+    public async Task CreateAppleIdAsync_finished_price_with_percent()
+    {
+        SeedCatalog(out _, out _);
+        var input = new MobileShop.Models.ViewModels.Web.BindModels.CreateAppleIdInputModel
+        {
+            Price = 200m,
+            ProfitPercent = 50m,
+            Email = "pricing-percent@example.com",
+            Password = "secret123",
+        };
+
+        var result = await _service.CreateAppleIdAsync(input);
+
+        Assert.True(result.Succeeded);
+        var appleId = await Context.AppleIds.FirstAsync(a => a.Email == input.Email);
+        var product = await Context.Products.FirstAsync(p => p.Id == appleId.ProductId);
+        Assert.Equal(300m, product.Price);
+    }
+
+    [Fact]
+    public async Task CreateAppleIdAsync_finished_price_with_amount()
+    {
+        SeedCatalog(out _, out _);
+        var input = new MobileShop.Models.ViewModels.Web.BindModels.CreateAppleIdInputModel
+        {
+            Price = 200m,
+            ProfitAmount = 40m,
+            Email = "pricing-amount@example.com",
+            Password = "secret123",
+        };
+
+        var result = await _service.CreateAppleIdAsync(input);
+
+        Assert.True(result.Succeeded);
+        var appleId = await Context.AppleIds.FirstAsync(a => a.Email == input.Email);
+        var product = await Context.Products.FirstAsync(p => p.Id == appleId.ProductId);
+        Assert.Equal(240m, product.Price);
+    }
+
     // ── CreatePhoneAsync: PartNumber ─────────────────────────
 
     [Fact]

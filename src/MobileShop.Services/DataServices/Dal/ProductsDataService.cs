@@ -378,17 +378,19 @@ public class ProductsDataService(
             ModelId = model.Id,
             ColorId = color?.Id,
             Barcode = Guid.NewGuid().ToString("N")[..12],
-            Price = input.Price,
+            Price = ComputeFinishedPrice(input.Price, input.ProfitPercent, input.ProfitAmount),
             SecondHandProfile = input.IsSecondHand ? new SecondHand
             {
                 TestPeriodDays = input.TestPeriodDays ?? 30,
                 UsedDurationDays = 0,
+                Notes = NormalizeNote(input.SecondHandNotes),
             } : null,
             GuaranteeProfile = input.HasGuarantee ? new Guarantee
             {
                 StartDate = DateTime.Today,
                 ExpirationDate = input.GuaranteeExpiry ?? DateTime.Today.AddYears(1),
                 Corporation = string.IsNullOrWhiteSpace(input.GuaranteeCorporation) ? "Shop Warranty" : input.GuaranteeCorporation.Trim(),
+                Notes = NormalizeNote(input.GuaranteeNotes),
             } : null,
         };
 
@@ -438,7 +440,7 @@ public class ProductsDataService(
         {
             ModelId = model.Id,
             Barcode = Guid.NewGuid().ToString("N")[..12],
-            Price = input.Price,
+            Price = ComputeFinishedPrice(input.Price, input.ProfitPercent, input.ProfitAmount),
         };
 
         var appleId = new AppleId
@@ -466,4 +468,26 @@ public class ProductsDataService(
         await models.AddAsync(model);
         return model;
     }
+
+    /// <summary>
+    /// Computes the finished price stored on <see cref="Product.Price"/> from the paid cost and the
+    /// profit inputs, using the agreed amount-first rule: a supplied amount wins, otherwise a
+    /// supplied percent is applied, otherwise the paid price is the finished price. Amount-first is
+    /// a safety net for partial/stale posts — when the client keeps percent and amount in sync both
+    /// branches agree. The result is never negative.
+    /// </summary>
+    private static decimal ComputeFinishedPrice(decimal paid, decimal? percent, decimal? amount)
+    {
+        var finished = amount.HasValue
+            ? paid + amount.Value
+            : percent.HasValue
+                ? paid + paid * percent.Value / 100m
+                : paid;
+
+        return finished < 0 ? 0 : finished;
+    }
+
+    /// <summary>Trims a free-text note and maps whitespace-only input to null.</summary>
+    private static string? NormalizeNote(string? note)
+        => string.IsNullOrWhiteSpace(note) ? null : note.Trim();
 }

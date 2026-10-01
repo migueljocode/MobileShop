@@ -38,6 +38,10 @@ public sealed class CreatePhoneInputModel
     [Range(0, int.MaxValue)]
     public int? TestPeriodDays { get; set; }
 
+    /// <summary>Optional free-text notes for a second-hand phone. Empty trims to null.</summary>
+    [StringLength(500, ErrorMessage = "{0} cannot exceed {1} characters.")]
+    public string? SecondHandNotes { get; set; }
+
     public bool HasGuarantee { get; set; }
 
     [StringLength(100)]
@@ -45,4 +49,8 @@ public sealed class CreatePhoneInputModel
 
     [DataType(DataType.Date)]
     public DateTime? GuaranteeExpiry { get; set; }
+
+    /// <summary>Optional free-text notes for the guarantee. Empty trims to null.</summary>
+    [StringLength(500, ErrorMessage = "{0} cannot exceed {1} characters.")]
+    public string? GuaranteeNotes { get; set; }
 }
