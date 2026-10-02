@@ -1,22 +1,21 @@
-# Act Report — Stage P Step 4 (PDF regression coverage)
+# Act Report — Stage P Step 5 (rendered PDF inspection)
 
 ## Commit
 
-This commit — `test(pdf): expand factor regression coverage`
+Pending verification — Step 5 implementation prepared.
 
 ## Verification
 
-- Expanded `QuestPdfGeneratorTests` for one-row factors, mixed Buy/Sell totals, Persian/RTL and long text, decimal/large prices, empty factor data, valid PDF payloads, and configured header/footer/signature paths.
-- Existing invoice and Persian invoice tests remain covered.
-- GitHub Actions **#53 — Success**.
+- Added CI-rendered factor PDF artifacts for a single Persian factor and a selected/mixed multi-row factor.
+- GitHub Actions verification is pending for the implementation commit.
 
 ## Limitations
 
-Rendered-PDF visual inspection remains planned for Step 5.
+The final visual inspection evidence is recorded after the CI-rendered PDFs are inspected.
 
 ## Friction noted
 
-The original Step 4 implementation was split by the GitHub file-update workflow; this remediation consolidates the step back to a single Actor commit.
+None.
 
 ## Problems
 
@@ -24,4 +23,4 @@ None.
 
 ## Status
 
-COMPLETE
+IN PROGRESS

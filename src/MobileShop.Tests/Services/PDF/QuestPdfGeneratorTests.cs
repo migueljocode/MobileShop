@@ -139,6 +139,50 @@ public class QuestPdfGeneratorTests
     }
 
     [Fact]
+    public void GenerateTransactionFactor_writes_rendered_inspection_artifacts()
+    {
+        var outputDirectory = Environment.GetEnvironmentVariable("FACTOR_PDF_INSPECTION_DIR");
+        if (string.IsNullOrWhiteSpace(outputDirectory))
+            return;
+
+        Directory.CreateDirectory(outputDirectory);
+
+        var single = Factor(
+            new TransactionFactorRowViewModel(
+                1,
+                new(2026, 1, 1, 10, 30, 0, DateTimeKind.Utc),
+                TransactionDirection.Sell,
+                "اپل آیفون ۱۷ پرو مکس ۵۱۲ گیگابایت Titanium Desert",
+                987_654_321.99m,
+                "Customer",
+                "سارا احمدی رضایی با نام خانوادگی طولانی و اطلاعات تکمیلی"));
+
+        var selected = Factor(
+            Enumerable.Range(1, 12)
+                .Select(id => new TransactionFactorRowViewModel(
+                    id,
+                    new(2026, 1, id, 10, 30, 0, DateTimeKind.Utc),
+                    id % 2 == 0 ? TransactionDirection.Sell : TransactionDirection.Buy,
+                    id % 2 == 0
+                        ? "Apple iPhone 17 Pro Max 512GB Titanium Desert"
+                        : "سامسونگ گلکسی S26 اولترا با حافظه ۱ ترابایت",
+                    120_000_000m + id * 1_234_567.89m,
+                    id % 2 == 0 ? "Customer" : "Seller",
+                    id % 2 == 0
+                        ? "سارا احمدی رضایی"
+                        : "علی محمدی فروشنده با نام طولانی"))
+                .ToArray());
+
+        File.WriteAllBytes(
+            Path.Combine(outputDirectory, "single-persian-factor.pdf"),
+            _generator.GenerateTransactionFactor(single));
+
+        File.WriteAllBytes(
+            Path.Combine(outputDirectory, "selected-mixed-factor.pdf"),
+            _generator.GenerateTransactionFactor(selected));
+    }
+
+    [Fact]
     public void GenerateTransactionFactor_throws_for_null_model()
         => Assert.Throws<ArgumentNullException>(() => _generator.GenerateTransactionFactor(null!));
 
