@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
-root="$(cd "$(dirname "$0")/../.." && pwd)"
+root="$(cd "$(dirname "$0")/.." && pwd)"
 script="$root/Bash/log.sh"
 ps_source="$root/PowerShell/log.ps1"
 fixture="$root/tests/fixtures/sample.log"
