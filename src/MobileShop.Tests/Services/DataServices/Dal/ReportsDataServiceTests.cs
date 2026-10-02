@@ -153,7 +153,7 @@ public class ReportsDataServiceTests : RepoTestBase
             new DateTime(2025, 12, 31));
 
         Assert.Empty(rows);
-        Assert.Equal(0m, await _service.GetProfitLossTotalAsync(
+        Assert.Equal(0, await _service.GetProfitLossTotalAsync(
             new DateTime(2025, 1, 1),
             new DateTime(2025, 12, 31)));
     }
@@ -202,7 +202,7 @@ public class ReportsDataServiceTests : RepoTestBase
         var mikaeeil = AddEmployee("Mikaeeil", "Jorjany");
         var anis = AddEmployee("Anis", "Sahabi");
 
-        var rows = await _service.GetDistributionRowsAsync(1000m);
+        var rows = await _service.GetDistributionRowsAsync(1000);
 
         Assert.Equal(3, rows.Count);
         Assert.Equal(400, rows.Single(row => row.EmployeeId == mikaeeil.Id).CalculatedAmount);
@@ -220,7 +220,7 @@ public class ReportsDataServiceTests : RepoTestBase
         AddEmployee("Mikaeeil", "Jorjany");
         AddEmployee("Anis", "Sahabi");
 
-        var rows = await _service.GetDistributionRowsAsync(-250m);
+        var rows = await _service.GetDistributionRowsAsync(-250);
 
         Assert.Equal(3, rows.Count);
         Assert.All(rows, row => Assert.True(row.IsLossPeriod));
@@ -234,7 +234,7 @@ public class ReportsDataServiceTests : RepoTestBase
         AddEmployee("Anis", "Sahabi");
 
         await Assert.ThrowsAsync<InvalidOperationException>(
-            () => _service.GetDistributionRowsAsync(100m));
+            () => _service.GetDistributionRowsAsync(100));
     }
 
     [Fact]
@@ -263,6 +263,6 @@ public class ReportsDataServiceTests : RepoTestBase
         AddEmployee("Anis", "Sahabi");
 
         await Assert.ThrowsAsync<InvalidOperationException>(
-            () => _service.GetDistributionRowsAsync(100m));
+            () => _service.GetDistributionRowsAsync(100));
     }
 }
