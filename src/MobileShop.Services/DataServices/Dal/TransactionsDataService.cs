@@ -192,7 +192,7 @@ public class TransactionsDataService(
             SellerId = input.SellerId,
             CustomerId = ShopCustomerId,
             FinishedPrice = input.Price,
-            Date = input.Date ?? DateTime.UtcNow,
+            Date = input.Date ?? DateTime.Today,
             Direction = TransactionDirection.Buy
         };
 
@@ -234,7 +234,7 @@ public class TransactionsDataService(
             SellerId = ShopSellerId,
             CustomerId = input.CustomerId,
             FinishedPrice = input.Price,
-            Date = input.Date ?? DateTime.UtcNow,
+            Date = input.Date ?? DateTime.Today,
             Direction = TransactionDirection.Sell
         };
 
