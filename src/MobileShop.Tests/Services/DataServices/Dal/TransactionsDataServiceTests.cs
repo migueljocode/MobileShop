@@ -61,7 +61,7 @@ public class TransactionsDataServiceTests : RepoTestBase
             ProductId = product.Id,
             SellerId = sellerId,
             CustomerId = customerId,
-            FinishedPrice = 100m,
+            FinishedPrice = 100,
             Date = date,
             Direction = direction,
         };
@@ -175,7 +175,7 @@ public class TransactionsDataServiceTests : RepoTestBase
         {
             ProductId = product.Id,
             SellerId = seller.Id,
-            Price = 250m,
+            Price = 250,
         });
 
         Assert.True(result.Succeeded);
@@ -190,7 +190,7 @@ public class TransactionsDataServiceTests : RepoTestBase
         {
             ProductId = product.Id,
             SellerId = seller.Id,
-            Price = 300m,
+            Price = 300,
         });
 
         Assert.False(duplicate.Succeeded);
@@ -208,7 +208,7 @@ public class TransactionsDataServiceTests : RepoTestBase
         {
             ProductId = product.Id,
             CustomerId = customer.Id,
-            Price = 400m,
+            Price = 400,
         });
 
         Assert.True(result.Succeeded);
@@ -221,7 +221,7 @@ public class TransactionsDataServiceTests : RepoTestBase
         {
             ProductId = product.Id,
             CustomerId = customer.Id,
-            Price = 500m,
+            Price = 500,
         });
 
         Assert.False(duplicate.Succeeded);
@@ -304,7 +304,7 @@ public class TransactionsDataServiceTests : RepoTestBase
         var model = new Model { ManufacturerId = manufacturer.Id, CategoryId = glassCategory.Id, Name = "iPhone 16 Glass" };
         Context.Models.Add(model);
         Context.SaveChanges();
-        var product = new Product { ModelId = model.Id, Barcode = "GLASS123456", Price = 123m, GlassProfile = new Glass() };
+        var product = new Product { ModelId = model.Id, Barcode = "GLASS123456", Price = 123, GlassProfile = new Glass() };
         Context.Products.Add(product);
         Context.SaveChanges();
 
