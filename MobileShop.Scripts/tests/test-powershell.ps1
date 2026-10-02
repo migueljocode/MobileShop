@@ -8,7 +8,7 @@ Assert ((Run @('-Level','warning','-Path',$f)|Select-String '\tWRN\t').Count -eq
 Assert ((Run @('-Level','error','-Path',$f)|Select-String '\tERR\t').Count -eq 2) 'exact-error'
 Assert ((Run @('-Level','fatal','-Path',$f)|Select-String '\tFTL\t').Count -eq 1) 'exact-fatal'
 Assert ((Run @('-Level','debug','-Above','-Path',$f)|Select-String '\t(DBG|INF|WRN|ERR|FTL)\t').Count -eq 7) 'above'
-Assert ((Run @('-Level','warning','-Below','-Path',$f)|Select-String '\t(DBG|INF|WRN)\t').Count -eq 3) 'below'
+Assert ((Run @('-Level','warning','-Below','-Path',$f)|Select-String '\t(DBG|INF|WRN)\t' ).Count -eq 4) 'below'
 Assert ((Run @('-Level','error','-Number','1','-Path',$f)|Select-String '\tERR\t').Count -eq 1) 'number'
 Assert ((Run @('-Level','error','-DateFrom','2026-01-02','-DateTo','2026-01-02','-Path',$f)|Select-String '\tERR\t').Count -eq 1) 'date'
 Assert ((Run @('-Level','error','-DateTimeFrom','2026-01-01 08:03:00','-DateTimeTo','2026-01-01 08:03:00','-Path',$f)|Select-String '\tERR\t').Count -eq 1) 'datetime'
