@@ -89,7 +89,7 @@ public class RecordModelTests : RepoTestBase
 
         var model = new BuyModel(CreateService())
         {
-            Input = new BuyInputModel { ProductId = product.Id, SellerId = seller.Id, Price = 150m }
+            Input = new BuyInputModel { ProductId = product.Id, SellerId = seller.Id, Price = 150 }
         };
 
         var result = await model.OnPostAsync();
@@ -98,7 +98,7 @@ public class RecordModelTests : RepoTestBase
         Assert.Equal("Buy recorded successfully.", model.Message);
         var transaction = Context.Transactions.Single();
         Assert.Equal(TransactionDirection.Buy, transaction.Direction);
-        Assert.Equal(150m, transaction.FinishedPrice);
+        Assert.Equal(150, transaction.FinishedPrice);
     }
 
     [Fact]
@@ -113,7 +113,7 @@ public class RecordModelTests : RepoTestBase
             ProductId = product.Id,
             SellerId = seller.Id,
             CustomerId = 1,
-            FinishedPrice = 100m,
+            FinishedPrice = 100,
             Date = DateTime.UtcNow,
             Direction = TransactionDirection.Buy
         });
@@ -121,7 +121,7 @@ public class RecordModelTests : RepoTestBase
 
         var model = new BuyModel(CreateService())
         {
-            Input = new BuyInputModel { ProductId = product.Id, SellerId = seller.Id, Price = 150m }
+            Input = new BuyInputModel { ProductId = product.Id, SellerId = seller.Id, Price = 150 }
         };
 
         var result = await model.OnPostAsync();
@@ -166,7 +166,7 @@ public class RecordModelTests : RepoTestBase
 
         var model = new SellModel(CreateService())
         {
-            Input = new SellInputModel { ProductId = product.Id, CustomerId = customer.Id, Price = 250m }
+            Input = new SellInputModel { ProductId = product.Id, CustomerId = customer.Id, Price = 250 }
         };
 
         var result = await model.OnPostAsync();
@@ -192,7 +192,7 @@ public class RecordModelTests : RepoTestBase
         {
             var buyModel = new BuyModel(CreateService())
             {
-                Input = new BuyInputModel { ProductId = 0, SellerId = seller.Id, Price = 150m }
+                Input = new BuyInputModel { ProductId = 0, SellerId = seller.Id, Price = 150 }
             };
             ValidateInput(buyModel);
             await buyModel.OnPostAsync();
@@ -204,7 +204,7 @@ public class RecordModelTests : RepoTestBase
         {
             var sellModel = new SellModel(CreateService())
             {
-                Input = new SellInputModel { ProductId = product.Id, CustomerId = 0, Price = 250m }
+                Input = new SellInputModel { ProductId = product.Id, CustomerId = 0, Price = 250 }
             };
             ValidateInput(sellModel);
             await sellModel.OnPostAsync();
@@ -222,7 +222,7 @@ public class RecordModelTests : RepoTestBase
 
         var buyModel = new BuyModel(CreateService())
         {
-            Input = new BuyInputModel { ProductId = product.Id, SellerId = 0, Price = 150m }
+            Input = new BuyInputModel { ProductId = product.Id, SellerId = 0, Price = 150 }
         };
         ValidateInput(buyModel);
         await buyModel.OnPostAsync();
@@ -239,7 +239,7 @@ public class RecordModelTests : RepoTestBase
 
         var sellModel = new SellModel(CreateService())
         {
-            Input = new SellInputModel { ProductId = 0, CustomerId = customer.Id, Price = 250m }
+            Input = new SellInputModel { ProductId = 0, CustomerId = customer.Id, Price = 250 }
         };
         ValidateInput(sellModel);
         await sellModel.OnPostAsync();
@@ -262,7 +262,7 @@ public class RecordModelTests : RepoTestBase
         {
             var buyModel = new BuyModel(CreateService())
             {
-                Input = new BuyInputModel { ProductId = product.Id, SellerId = seller.Id, Price = 150m }
+                Input = new BuyInputModel { ProductId = product.Id, SellerId = seller.Id, Price = 150 }
             };
             await buyModel.OnPostAsync();
             Assert.True(buyModel.ModelState.IsValid);
@@ -272,7 +272,7 @@ public class RecordModelTests : RepoTestBase
         {
             var sellModel = new SellModel(CreateService())
             {
-                Input = new SellInputModel { ProductId = product.Id, CustomerId = customer.Id, Price = 250m }
+                Input = new SellInputModel { ProductId = product.Id, CustomerId = customer.Id, Price = 250 }
             };
             await sellModel.OnPostAsync();
             Assert.True(sellModel.ModelState.IsValid);
