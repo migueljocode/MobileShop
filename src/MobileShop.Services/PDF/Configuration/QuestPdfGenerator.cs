@@ -262,9 +262,8 @@ public sealed class QuestPdfGenerator(IOptions<PdfSettings> options) : IPdfGener
                         text.Span("  |  ");
                     text.Span(_settings.ShopInstagram);
                 }
-            })
-            .FontSize(7.5f)
-            .FontColor("#829AB1");
+                text.FontSize(7.5f).FontColor("#829AB1");
+            });
 
 
     private void ComposePage(PageDescriptor page, InvoicePresentation p)
