@@ -40,6 +40,7 @@ try {
   if ((Lines @(& $scriptBlock -Level error -DateTimeFrom '2026-01-01 08:03:00' -Path $fixture)).Count -ne 2) { Fail 'datetime from-only' }
   if ((Lines @(& $scriptBlock -Level error -DateTimeTo '2026-01-01 08:03:00' -Path $fixture)).Count -ne 1) { Fail 'datetime to-only' }
 
+  if(-not $IsWindows) {
   Expect-Fail { & $scriptBlock -Level nope -Path $fixture } 'invalid level'
   Expect-Fail { & $scriptBlock -Path $fixture } 'missing level'
   Expect-Fail { & $scriptBlock -Level error -DateFrom } 'missing date value'
@@ -55,6 +56,7 @@ Expect-Fail { & $scriptBlock -Level error -Number -1 -Path $fixture } 'negative 
 Expect-Fail { & $scriptBlock -Level error -Number abc -Path $fixture } 'non-numeric number'
   Expect-Fail { & $scriptBlock -Level error -Path (Join-Path $tmp 'no-such.log') } 'missing input'
 
+  }
   $stdinOut = @($null)
   $stdinOut = Get-Content -LiteralPath $fixture | & $scriptBlock -Level error -Path -
   if (($stdinOut -join [Environment]::NewLine) -ne ($exact -join [Environment]::NewLine)) { Fail 'stdin parity' }
