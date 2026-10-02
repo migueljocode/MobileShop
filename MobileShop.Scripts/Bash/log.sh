@@ -7,7 +7,10 @@ LEVEL: debug info warning error fatal. Exact is default.
 -n/--number N prints first N matching events; N must be positive.
 --date-from/--date-to: YYYY-MM-DD. --date-time-from/--date-time-to: "YYYY-MM-DD HH:mm:ss".
 Date/datetime modes cannot mix. From-only uses current local date/time as to; to-only uses first event as from.
-Default input: logs/app-*.log. PATH selects one file; - reads stdin. Events stdout, diagnostics stderr.
+Default input: logs/app-*.log. PATH selects one file literally; - reads stdin and pipelines. Events/help stdout; diagnostics stderr; invalid usage is non-zero.
+Bounds are inclusive. From-only uses current local date/time; to-only infers the lower bound from the first event; no bounds means no time restriction. Date and datetime modes cannot mix.
+Examples: ./log.sh --level error; ./log.sh --level error --above -n 20; ./log.sh --level warning --date-from 2026-01-01 --date-to 2026-01-31; ./log.sh --level error --date-time-from '2026-01-01 08:00:00' --date-time-to '2026-01-01 18:00:00'; cat logs/app-*.log | ./log.sh --level error.
+Invalid examples: --date-from 2026-02-30, reversed ranges, --above --below, and -n 0 are rejected with stderr diagnostics.
 EOF
 }
 die(){ printf 'log.sh: %s\n' "$*" >&2; exit 2; }
