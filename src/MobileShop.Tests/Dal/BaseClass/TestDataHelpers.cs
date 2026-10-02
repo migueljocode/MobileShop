@@ -11,7 +11,7 @@ internal static class TestDataHelpers
     /// requires, so product projections can resolve their navigation paths. Randomised names keep
     /// the unique indexes happy across repeated calls in one test run.
     /// </summary>
-    internal static Product CreateProduct(AppDbContext context, decimal price = 100m, bool persist = true)
+    internal static Product CreateProduct(AppDbContext context, int price = 100, bool persist = true)
     {
         var category = new Category { Name = $"Category-{Guid.NewGuid():N}" };
         var manufacturer = new Manufacturer { Name = $"Manufacturer-{Guid.NewGuid():N}" };
