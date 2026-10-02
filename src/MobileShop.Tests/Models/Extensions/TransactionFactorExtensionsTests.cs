@@ -18,7 +18,7 @@ public class TransactionFactorExtensionsTests
         Assert.Equal(SampleDate, row.Date);
         Assert.Equal(TransactionDirection.Sell, row.Direction);
         Assert.Equal("Apple iPhone 13", row.ProductLabel);
-        Assert.Equal(45_000_000m, row.FinishedPrice);
+        Assert.Equal(45000000, row.FinishedPrice);
         Assert.Equal("Customer", row.PersonRole);
         Assert.Equal("Sara Ahmadi", row.PersonLabel);
     }
@@ -88,6 +88,6 @@ public class TransactionFactorExtensionsTests
             ],
             SampleDate);
 
-        Assert.Equal(350m, model.TotalPrice);
+        Assert.Equal(350, model.TotalPrice);
     }
 }
