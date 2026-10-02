@@ -1,85 +1,98 @@
-# Plan — Stage R — Cross-platform log query scripts
+# Plan — Stage R — Cross-platform log level query scripts
 
 ## Reviewer Briefing
 - Build a small, dependency-light command family under `MobileShop.Scripts/Bash` and `MobileShop.Scripts/PowerShell`.
 - Bash scripts must run on macOS and Linux using standard shell utilities only; PowerShell counterparts must provide the same user-facing capabilities on Windows.
-- Keep each command single-purpose and representative so a non-pro user can discover and invoke it directly, for example `log-errors`, `log-last-errors`, `log-warnings`, and `log-warnings-and-above`.
-- Every command must support useful `-h/--help`, stdin/stdout/stderr correctly, a file argument, and simple filtering options where applicable.
-- Preserve Unix pipeline conventions: input may come from a file or stdin, normal results go to stdout, diagnostics/errors go to stderr, and exit status is non-zero for invalid usage or unreadable input.
-- Do not add a third-party runtime dependency, application schema change, application authentication change, or changes to the production logging implementation.
-- Keep the implementation intentionally boring: shared helper logic is acceptable, but avoid a framework or a single opaque "do everything" command.
-- Claude verification is an external review step after the Actor implementation and GitHub Actions verification; it is not a substitute for the repository CI gate.
+- Keep commands simple and directly callable by a non-pro user, with representative names such as `log-errors`, `log-errors-and-above`, and `log-errors-and-below`.
+- Every command supports useful `-h/--help`, stdin/stdout/stderr correctly, a file input, and `-n/--number N` to select the number of matching log entities printed.
+- Preserve Unix pipeline conventions: normal results go to stdout, diagnostics/errors go to stderr, and invalid usage or unreadable input returns a non-zero exit status.
+- Do not add a third-party runtime dependency, application schema change, authentication change, or production logging implementation change.
+- Keep implementation intentionally boring: shared helper logic is encouraged; avoid a framework or opaque all-in-one command.
+- Claude verification remains an external review step after Actor implementation and GitHub Actions verification; it does not replace CI.
 
 ## Step 1 — Script layout and shared conventions
 - Create `MobileShop.Scripts/Bash` and `MobileShop.Scripts/PowerShell`.
 - Define one consistent command contract for both platforms:
-  - default log source: `logs/app-*.log` when a file is not supplied, with clear behavior when no matching file exists;
+  - default log source: `logs/app-*.log` when no file is supplied, with clear behavior when no matching log exists;
   - optional explicit file/path argument;
-  - `-` means stdin where practical;
-  - `-h` and `--help` show concise usage/examples and exit successfully;
-  - `--file FILE` / positional FILE compatibility where it improves discoverability;
-  - `--since DATE` and `--until DATE` for date filtering;
-  - `--match TEXT` for simple message/text filtering;
-  - `--tail N` for limiting the final result set.
-- Document that commands operate on the existing Serilog file format and preserve the original log lines rather than reformatting them.
+  - `-` means stdin;
+  - `-h` and `--help` show concise usage, command meaning, options, examples, and exit behavior;
+  - `-n N` and `--number N` select the number of matching log entities to print;
+  - reject missing, non-integer, zero, and negative values for `N`;
+  - preserve original log lines without reformatting.
+- Treat a log entity as a complete log event; exception continuation lines belonging to a selected event must remain attached to that event where practical.
 
-## Step 2 — Bash command family
-Create representative, directly callable commands:
-- `log-errors` — show Error and Fatal entries.
-- `log-last-errors` — show the most recent Error/Fatal entries; default to a small useful tail count and allow `--tail N`.
-- `log-warnings` — show Warning entries.
-- `log-warnings-and-above` — show Warning, Error, and Fatal entries.
-- `log-info` — show Information entries.
-- `log-debug` — show Debug entries.
-- `log-level LEVEL` — show one named level for users who need something outside the common shortcuts.
-- `log-search TEXT` — search log messages without requiring knowledge of grep syntax.
-- `log-tail` — show the last N log lines, with an easy `--tail N` option.
-- Keep command names short and literal; scripts should be thin wrappers over a shared internal Bash helper rather than duplicate parsing/filtering code.
+## Step 2 — Bash log-level command family
+For each supported level, provide the same three relationship forms:
+- exact level: `log-<level>`
+- that level and above: `log-<level>-and-above`
+- that level and below: `log-<level>-and-below`
+
+Supported levels:
+- `debug`
+- `info`
+- `warning`
+- `error`
+- `fatal`
+
+Examples:
+- `log-errors` — Error only.
+- `log-errors-and-above` — Error and Fatal.
+- `log-errors-and-below` — Error, Warning, Information, and Debug.
+- `log-warnings` — Warning only.
+- `log-warnings-and-above` — Warning, Error, and Fatal.
+- `log-warnings-and-below` — Warning, Information, and Debug.
+- Apply the same pattern to Debug, Information, and Fatal.
+- `-n/--number N` limits the selected matching log entities, with the output order clearly documented.
+- Keep command names literal and avoid requiring users to know grep/awk syntax.
+- Use a small shared Bash helper for parsing, input handling, level selection, and number limiting instead of duplicating the implementation in every script.
 
 ## Step 3 — PowerShell parity
-Implement the same command names and user-visible behavior under `MobileShop.Scripts/PowerShell`.
-- Use native PowerShell pipeline behavior and standard commands only.
-- Accept file input and pipeline/stdin input.
-- Send normal log output through the success/output stream and diagnostics to the error stream.
-- Keep option names and examples aligned with Bash wherever PowerShell syntax permits.
-- Do not require execution-policy changes or installation of modules just to use the scripts.
+- Implement the same level commands and relationship commands under `MobileShop.Scripts/PowerShell`.
+- Match Bash user-visible behavior, including `-n/--number`, file/stdin input, filtering semantics, output, diagnostics, and exit status.
+- Use native PowerShell pipeline/input behavior and built-in capabilities only.
+- Do not require execution-policy changes or module installation just to use the scripts.
+- Keep command names representative and easy to discover from the directory.
 
-## Step 4 — Help, stdin/stdout/stderr, and edge-case coverage
-- Give every command a concise help page with synopsis, syntax, arguments/options, examples, input/output behavior, and exit codes.
+## Step 4 — Help, streams, and edge cases
+- Give every command a concise help page covering synopsis, syntax, level relationship, `-n/--number`, file/stdin input, examples, and exit codes.
 - Verify:
   - direct file invocation;
   - stdin/pipeline invocation;
   - missing file;
   - empty input;
-  - invalid level;
-  - invalid date;
-  - invalid/non-positive tail count;
-  - text containing spaces/special characters;
+  - invalid `-n/--number`;
+  - text containing spaces/special characters in file paths;
   - multiple rolling log files;
-  - no matches.
-- Ensure no command accidentally consumes or prints help/errors into the normal result stream.
-- Ensure filenames and user search text are handled safely without accidental shell evaluation.
+  - no matches;
+  - exception continuation lines;
+  - all supported levels and above/below relationships.
+- Ensure normal log results never contain diagnostics/help text.
+- Ensure filenames and arguments are handled safely without accidental shell evaluation.
 
 ## Step 5 — Focused automated/script verification
-- Add repository tests or deterministic script fixtures where appropriate without introducing a new test framework.
-- Exercise representative existing log lines, including Debug/Information/Warning/Error/Fatal and exception continuation lines.
-- Verify Bash syntax and execution on the CI-supported Unix environment and PowerShell syntax/execution on the CI-supported Windows environment, using GitHub Actions rather than local build/test as the final gate.
-- Verify both platforms return equivalent result sets for the same fixture and options.
+- Add deterministic fixtures/tests where appropriate without introducing a new test framework.
+- Exercise representative Debug, Information, Warning, Error, and Fatal events plus exception continuation lines.
+- Verify Bash syntax and execution on the CI-supported Unix environment and PowerShell syntax/execution on the CI-supported Windows environment.
+- Use GitHub Actions as the final repository verification gate, not local build/test.
+- Verify Bash and PowerShell return equivalent result sets for equivalent commands and `-n` values.
 - Keep generated logs, temporary files, and unrelated artifacts out of the commit.
 
 ## Step 6 — Documentation and usability pass
-- Add a concise `MobileShop.Scripts/README.md` showing the most common commands first, with copy/paste examples for macOS/Linux and Windows PowerShell.
-- Explain the default log location, stdin usage, date/text filters, tailing, exit codes, and how to discover commands through `--help`.
-- Prefer examples such as `./log-errors`, `./log-last-errors --tail 20`, and PowerShell equivalents rather than requiring users to understand grep/awk/Select-String.
+- Add `MobileShop.Scripts/README.md` with the common commands first and copy/paste examples for macOS/Linux and Windows PowerShell.
+- Explain the exact/above/below command pattern, default log location, stdin usage, `-n/--number`, exit codes, and `--help`.
+- Prefer examples such as `./log-errors`, `./log-errors-and-above -n 20`, and their PowerShell equivalents.
+- Make the command family understandable without prior shell expertise.
 
 ## Global Definition of Done
-- `MobileShop.Scripts/Bash` contains a coherent, executable command family for common log diagnosis.
-- `MobileShop.Scripts/PowerShell` provides equivalent commands and behavior.
-- Common tasks require no knowledge of grep/awk/findstr/Select-String.
-- Every command has useful `-h/--help`, sensible exit codes, and correct stdin/stdout/stderr behavior.
-- File, date-range, text-search, and tail-count filtering work consistently.
-- Bash uses only standard macOS/Linux tooling; PowerShell uses built-in PowerShell capabilities.
-- Existing application logging behavior is unchanged.
-- CI passes the script verification on the supported platforms.
+- `MobileShop.Scripts/Bash` contains the complete level-based command family.
+- `MobileShop.Scripts/PowerShell` provides equivalent level-based commands.
+- Every supported level has exact, above, and below commands.
+- Every command supports `-h/--help` and `-n/--number N`.
+- File input and stdin/pipeline input work consistently.
+- Normal output uses stdout; diagnostics use stderr; invalid usage/input returns non-zero.
+- Bash uses only standard macOS/Linux tooling; PowerShell uses built-in capabilities.
+- Existing application logging behavior remains unchanged.
+- CI verifies the scripts on supported platforms.
 - `MobileShop.Scripts/README.md` makes the command family usable by a non-pro user.
 - After GitHub Actions verification, Actor pushes the implementation commit/PR as required by the workflow; Reviewer/Claude performs the requested final external verification.
