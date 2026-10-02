@@ -42,7 +42,7 @@ public static class DistributionCalculator
     /// <returns>Exactly three distribution rows: Mikaeeil (40%), Anis (50%), Shop (10%).</returns>
     /// <exception cref="InvalidOperationException">Thrown if required employees are missing, duplicated, or inactive.</exception>
     public static List<DistributionRow> Calculate(
-        decimal totalProfit,
+        int totalProfit,
         IEnumerable<Employee> employees,
         DistributionSettings settings)
     {
@@ -101,8 +101,8 @@ public static class DistributionCalculator
         if (totalProfit > 0)
         {
         // Profit case - fixed shares 40/50/10 with floor rounding for employees
-        var mikaeeilAmount = Math.Floor(totalProfit * 0.40m);
-        var anisAmount = Math.Floor(totalProfit * 0.50m);
+        var mikaeeilAmount = totalProfit * 40 / 100;
+        var anisAmount = totalProfit * 50 / 100;
         var shopAmount = totalProfit - mikaeeilAmount - anisAmount; // Remainder including rounding
 
         rows.Add(new DistributionRow
@@ -146,6 +146,6 @@ public sealed record DistributionRow
     public int EmployeeId { get; init; }
     public string EmployeeName { get; init; } = string.Empty;
     public int SharePercent { get; init; }
-    public decimal CalculatedAmount { get; init; }
+    public int CalculatedAmount { get; init; }
     public bool IsLossPeriod { get; init; }
 }
