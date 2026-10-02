@@ -153,6 +153,16 @@ If CI fails, inspect the failed Action/job logs, identify the concrete issue, fi
 
 Do not claim success from interrupted or pending commands.
 
+### GitHub Actions identifier reporting
+
+Whenever an Actor task triggers a GitHub Actions workflow, include the corresponding **Action Identifier** in the final chat response so the user can track the verification run.
+
+- Report the identifier after the main result/status.
+- If the Action is still running, report its identifier and state that verification is pending.
+- If multiple Actions were triggered for the same Actor task, report each relevant identifier.
+- Never invent an identifier. If the GitHub tooling does not expose it and the user has not supplied it, explicitly say the identifier is unavailable.
+- When the user supplies an Action result/identifier, use that identifier in subsequent status reporting for the task.
+
 ## 9. Documentation ownership
 
 **Planner:** `plan.md`
