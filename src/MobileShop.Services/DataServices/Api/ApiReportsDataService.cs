@@ -7,7 +7,7 @@ public class ApiReportsDataService : IReportsDataService
         => throw new NotImplementedException("ApiReportsDataService is not implemented yet.");
 
     /// <inheritdoc />
-    public Task<decimal> GetProfitLossTotalAsync(DateTime? from, DateTime? to)
+    public Task<int> GetProfitLossTotalAsync(DateTime? from, DateTime? to)
         => throw new NotImplementedException("ApiReportsDataService is not implemented yet.");
 
     /// <inheritdoc />
@@ -15,6 +15,6 @@ public class ApiReportsDataService : IReportsDataService
         => throw new NotImplementedException("ApiReportsDataService is not implemented yet.");
 
     /// <inheritdoc />
-    public Task<IReadOnlyList<DistributionRow>> GetDistributionRowsAsync(decimal totalProfit)
+    public Task<IReadOnlyList<DistributionRow>> GetDistributionRowsAsync(int totalProfit)
         => throw new NotImplementedException("ApiReportsDataService is not implemented yet.");
 }
