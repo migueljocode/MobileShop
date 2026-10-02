@@ -59,6 +59,10 @@ public class ApiProductsDataService : IProductsDataService
         => throw new NotImplementedException("ApiProductsDataService is not implemented yet.");
 
     /// <inheritdoc />
+    public Task<ServiceResult> CreateGlassesAsync(CreateGlassInputModel input)
+        => throw new NotImplementedException("ApiProductsDataService is not implemented yet.");
+
+    /// <inheritdoc />
     public Task<ServiceResult> CreateAppleIdAsync(CreateAppleIdInputModel input)
         => throw new NotImplementedException("ApiProductsDataService is not implemented yet.");
 }
