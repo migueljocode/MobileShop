@@ -1,8 +1,9 @@
-# Actor Report — Stage Q Step 2
+# Actor Report — Stage Q Count Cap Correction
 
-- Commit: 4f41f410a7476aab3f22a82707ccad621724fdc7 — feat(stage-q): create glass page
-- Verification: GitHub Actions #78 -> success; build and full test suite passed.
-- Limitations: None.
-- Friction noted: Two focused test assertion/import fixes were required after CI exposed test-only issues; the final main commit passed the complete CI workflow.
+- Commit: 5f055d5c61a06f92af1e6681dc64b62f3d5b1d80 — fix(stage-q): remove glass count cap
+- Verification: GitHub Actions #82 -> success; build and full test suite passed.
+- Changes: Count now requires only a positive value; the 500 upper bound was removed from the model validation, service validation, UI, and focused tests. Count 501 is explicitly covered as accepted.
+- Limitations: Count remains an Int32 value because the existing contract uses `int`; no artificial application-level upper cap remains.
+- Friction noted: None.
 - Problems: None.
 - Status: COMPLETE
