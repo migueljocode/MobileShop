@@ -40,3 +40,12 @@ jobs:
           name: factor-pdf-inspection
           path: TestResults/FactorPdfInspection/
           if-no-files-found: error
+
+  powershell-windows:
+    name: PowerShell log utility (Windows)
+    runs-on: windows-2025
+    steps:
+      - uses: actions/checkout@v5
+      - name: Test PowerShell log utility
+        shell: pwsh
+        run: ./MobileShop.Scripts/tests/test-powershell.ps1
