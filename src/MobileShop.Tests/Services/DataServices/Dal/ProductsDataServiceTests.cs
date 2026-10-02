@@ -1065,11 +1065,12 @@ public class ProductsDataServiceTests : RepoTestBase
         var result = await _service.CreateGlassesAsync(input);
 
         Assert.True(result.Succeeded);
-        var products = await Context.Products.Include(p => p.GlassProfile).ThenInclude(g => g!.ModelFits)
-            .Where(p => p.ModelId == phoneModel.Id).ToListAsync();
+        var products = await Context.Products.Include(p => p.GlassProfile).ThenInclude(g => g!.ModelFits).ToListAsync();
+        var glassModel = Assert.Single(Context.Models.Where(m => m.CategoryId == Context.Categories.First(c => c.Name == "Glass").Id && m.ManufacturerId == 1 && m.Name == "iPhone 16 Glass"));
 
         Assert.Equal(3, products.Count);
         Assert.All(products, p => Assert.Equal(125m, p.Price));
+        Assert.All(products, p => Assert.Equal(glassModel.Id, p.ModelId));
         Assert.Equal(3, products.Select(p => p.Barcode).Distinct().Count());
         Assert.All(products, p => Assert.Equal(12, p.Barcode.Length));
         Assert.All(products, p => Assert.NotNull(p.GlassProfile));
@@ -1083,7 +1084,7 @@ public class ProductsDataServiceTests : RepoTestBase
         SeedCatalog(out var phoneModel, out _);
         var result = await _service.CreateGlassesAsync(new MobileShop.Models.ViewModels.Web.BindModels.CreateGlassInputModel
         {
-            ManufacturerId = 1, ModelId = phoneModel.Id, Price = 100m, ProfitPercent = 50m, ProfitAmount = 20m, Count = 2
+            CompatibleManufacturerId = 1, CompatibleModelId = phoneModel.Id, GlassManufacturerId = 1, Price = 100m, ProfitPercent = 50m, ProfitAmount = 20m, Count = 2
         });
 
         Assert.True(result.Succeeded);
@@ -1098,14 +1099,14 @@ public class ProductsDataServiceTests : RepoTestBase
 
         var one = await _service.CreateGlassesAsync(new MobileShop.Models.ViewModels.Web.BindModels.CreateGlassInputModel
         {
-            ManufacturerId = 1, ModelId = phoneModel.Id, Price = 10m, Count = 1
+            CompatibleManufacturerId = 1, CompatibleModelId = phoneModel.Id, GlassManufacturerId = 1, Price = 10m, Count = 1
         });
         Assert.True(one.Succeeded);
         Assert.Single(await Context.Products.ToListAsync());
 
         var fiveHundredAndOne = await _service.CreateGlassesAsync(new MobileShop.Models.ViewModels.Web.BindModels.CreateGlassInputModel
         {
-            ManufacturerId = 1, ModelId = phoneModel.Id, Price = 10m, Count = 501
+            CompatibleManufacturerId = 1, CompatibleModelId = phoneModel.Id, GlassManufacturerId = 1, Price = 10m, Count = 501
         });
         Assert.True(fiveHundredAndOne.Succeeded);
         Assert.Equal(502, await Context.Products.CountAsync());
@@ -1118,7 +1119,7 @@ public class ProductsDataServiceTests : RepoTestBase
 
         var result = await _service.CreateGlassesAsync(new MobileShop.Models.ViewModels.Web.BindModels.CreateGlassInputModel
         {
-            ManufacturerId = 1, ModelId = phoneModel.Id, Price = 10m, Count = 0
+            CompatibleManufacturerId = 1, CompatibleModelId = phoneModel.Id, GlassManufacturerId = 1, Price = 10m, Count = 0
         });
 
         Assert.False(result.Succeeded);
@@ -1148,7 +1149,7 @@ public class ProductsDataServiceTests : RepoTestBase
         });
 
         Assert.False(result.Succeeded);
-        Assert.Equal(nameof(MobileShop.Models.ViewModels.Web.BindModels.CreateGlassInputModel.ModelId), result.ErrorField);
+        Assert.Equal(nameof(MobileShop.Models.ViewModels.Web.BindModels.CreateGlassInputModel.CompatibleModelId), result.ErrorField);
         Assert.Empty(await Context.Products.ToListAsync());
     }
 
@@ -1178,7 +1179,7 @@ public class ProductsDataServiceTests : RepoTestBase
         });
 
         Assert.False(result.Succeeded);
-        Assert.Equal(nameof(MobileShop.Models.ViewModels.Web.BindModels.CreateGlassInputModel.ManufacturerId), result.ErrorField);
+        Assert.Equal(nameof(MobileShop.Models.ViewModels.Web.BindModels.CreateGlassInputModel.CompatibleManufacturerId), result.ErrorField);
         Assert.Empty(await Context.Products.ToListAsync());
     }
 

@@ -24,7 +24,7 @@ public class CreateGlassModelTests : RepoTestBase
             new BaseRepo<Product>(Context),
             NullLogger<ProductsDataService>.Instance);
 
-        Context.Categories.Add(new Category { Name = "Phone" });
+        Context.Categories.AddRange(new Category { Name = "Phone" }, new Category { Name = "Glass" });
         Context.Manufacturers.AddRange(new Manufacturer { Name = "Apple" }, new Manufacturer { Name = "Samsung" });
         Context.SaveChanges();
         _model = new CreateGlassModel(dataService);
@@ -84,24 +84,25 @@ public class CreateGlassModelTests : RepoTestBase
     public async Task OnPostAsync_ValidInput_CreatesRequestedCountAndShowsMessage()
     {
         var (manufacturer, model) = SeedModel();
-        _model.Input = ValidInput(manufacturer.Id, model.Id);
+        _model.Input = ValidInput(manufacturer.Id, model.Id, Context.Manufacturers.First(m => m.Name == "Samsung").Id);
         var result = await _model.OnPostAsync();
         Assert.IsType<PageResult>(result);
         Assert.Equal("Created 3 glass product(s) successfully.", _model.Message);
         Assert.Equal(3, Context.Products.Count());
         Assert.All(Context.Glasses, glass => Assert.Equal(model.Id, glass.ModelFits.Single().ModelId));
+        Assert.All(Context.Products, product => Assert.Equal("Glass", product.ModelNavigation.CategoryNavigation.Name));
     }
 
     [Fact]
     public async Task OnPostAsync_ServiceValidationError_IsAddedToFieldAndRedisplays()
     {
         var (manufacturer, model) = SeedModel();
-        _model.Input = ValidInput(manufacturer.Id, model.Id);
-        _model.Input.ManufacturerId = 9999;
+        _model.Input = ValidInput(manufacturer.Id, model.Id, Context.Manufacturers.First(m => m.Name == "Samsung").Id);
+        _model.Input.CompatibleManufacturerId = 9999;
         var result = await _model.OnPostAsync();
         Assert.IsType<PageResult>(result);
         Assert.False(_model.ModelState.IsValid);
-        Assert.True(_model.ModelState.ContainsKey(nameof(CreateGlassInputModel.ManufacturerId)));
+        Assert.True(_model.ModelState.ContainsKey(nameof(CreateGlassInputModel.CompatibleManufacturerId)));
         Assert.Empty(Context.Products);
         Assert.Equal(2, _model.Manufacturers.Count);
     }
