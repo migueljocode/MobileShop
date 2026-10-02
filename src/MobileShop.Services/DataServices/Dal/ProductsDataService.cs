@@ -21,6 +21,12 @@ public class ProductsDataService(
     IBaseRepo<PartNumber> partNumbers,
     IBaseRepo<Product> products,
     ILogger<ProductsDataService> logger)
+{
+    // Glass creation represents stock intake, so its paid cost is recorded as a Buy leg.
+    // The seeded shop sentinel is used because the Create Glass form intentionally has no seller field.
+    private const int ShopSellerId = 1;
+    private const int ShopCustomerId = 1;
+
     : IProductsDataService
 {
         /// <summary>Gets the structured logger for this products service.</summary>
@@ -527,6 +533,20 @@ public class ProductsDataService(
             product.GlassProfile = glass;
             batch.Add(product);
         }
+
+        var purchaseTransactions = batch.Select(product => new Transaction
+        {
+            ProductNavigation = product,
+            SellerId = ShopSellerId,
+            CustomerId = ShopCustomerId,
+            FinishedPrice = input.Price,
+            Date = DateTime.Today,
+            Direction = TransactionDirection.Buy,
+        }).ToList();
+
+        // Track the purchase legs without persisting separately; the product batch save commits the
+        // Product + Glass + GlassModelFit + Buy graph together.
+        await transactions.AddRangeAsync(purchaseTransactions, persist: false);
 
         var saved = await products.AddRangeAsync(batch) > 0;
         if (!saved)
