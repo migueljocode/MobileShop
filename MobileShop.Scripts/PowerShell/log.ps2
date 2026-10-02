@@ -8,7 +8,12 @@ Date/datetime modes cannot mix. From-only uses current local date/time as to; to
 Default: logs/app-*.log. PATH selects one file; - reads pipeline. Results stdout, errors stderr.
 '@}
 function Fail($m){[Console]::Error.WriteLine("log.ps2: $m");exit 2}
-if($args -contains '-h' -or $args -contains '--help'){Help;exit 0};if(!$Level){Fail '--Level is required (use --Help)'};if($Above -and $Below){Fail '--Above and --Below are mutually exclusive'};if($PSBoundParameters.ContainsKey('Number') -and $Number -le 0){Fail '--Number must be positive'}
+if($args -contains '-h' -or $args -contains '--help'){Help;exit 0}
+if(!$Level){Fail '--Level is required (use --Help)'}
+$levels=@{debug=0;info=1;warning=2;error=3;fatal=4}
+if(!$levels.ContainsKey($Level)){Fail "invalid level '$Level'"}
+if($Above -and $Below){Fail '--Above and --Below are mutually exclusive'}
+if($PSBoundParameters.ContainsKey('Number') -and $Number -le 0){Fail '--Number must be positive'}
 $dm=$PSBoundParameters.ContainsKey('DateFrom') -or $PSBoundParameters.ContainsKey('DateTo');$tm=$PSBoundParameters.ContainsKey('DateTimeFrom') -or $PSBoundParameters.ContainsKey('DateTimeTo');if($dm -and $tm){Fail 'date and datetime filters cannot be mixed'}
 function PD($v,$o){$x=[datetime]::MinValue;if(![datetime]::TryParseExact($v,'yyyy-MM-dd',[Globalization.CultureInfo]::InvariantCulture,[Globalization.DateTimeStyles]::None,[ref]$x)){Fail "invalid $o '$v'; expected YYYY-MM-DD"};$x.Date}
 function PT($v,$o){$x=[datetime]::MinValue;if(![datetime]::TryParseExact($v,'yyyy-MM-dd HH:mm:ss',[Globalization.CultureInfo]::InvariantCulture,[Globalization.DateTimeStyles]::None,[ref]$x)){Fail "invalid $o '$v'; expected YYYY-MM-DD HH:mm:ss"};$x}
@@ -18,4 +23,4 @@ if($Path -eq '-'){$lines=@($input)}elseif($Path){if(!(Test-Path -LiteralPath $Pa
 $ev=ReadE $lines;if(($dm -or $tm)-and !$ev.Count -and !$DateFrom -and !$DateTimeFrom){Fail 'cannot infer lower bound from empty input'}
 if($dm){if(!$df){$df=[datetime]::ParseExact($ev[0].Timestamp.Substring(0,10),'yyyy-MM-dd',$null)};if(!$dt){$dt=(Get-Date).Date};if($df -gt $dt){Fail 'date range is reversed'}}
 if($tm){if(!$tf){$tf=[datetime]::ParseExact($ev[0].Timestamp.Substring(0,19),'yyyy-MM-dd HH:mm:ss',$null)};if(!$tt){$tt=(Get-Date)};if($tf -gt $tt){Fail 'datetime range is reversed'}}
-$want=@{debug=0;info=1;warning=2;error=3;fatal=4}[$Level];$c=0;foreach($e in $ev){$ok=if($Above){$e.Rank-ge$want}elseif($Below){$e.Rank-le$want}else{$e.Rank-eq$want};if(!$ok){continue};$s=[datetime]::ParseExact($e.Timestamp,'yyyy-MM-dd HH:mm:ss.fff',$null);if($dm -and ($s.Date-lt$df -or $s.Date-gt$dt)){continue};if($tm -and ($s-lt$tf -or $s-gt$tt)){continue};Write-Output $e.Text;$c++;if($Number-and$c-ge$Number){break}}
+$want=$levels[$Level];$c=0;foreach($e in $ev){$ok=if($Above){$e.Rank-ge$want}elseif($Below){$e.Rank-le$want}else{$e.Rank-eq$want};if(!$ok){continue};$s=[datetime]::ParseExact($e.Timestamp,'yyyy-MM-dd HH:mm:ss.fff',$null);if($dm -and ($s.Date-lt$df -or $s.Date-gt$dt)){continue};if($tm -and ($s-lt$tf -or $s-gt$tt)){continue};Write-Output $e.Text;$c++;if($Number-and$c-ge$Number){break}}
