@@ -801,7 +801,7 @@ public class ProductsDataServiceTests : RepoTestBase
     public async Task CreatePhoneAsync_finished_price_with_percent_only()
     {
         SeedCatalog(out var phoneModel, out _);
-        var input = PhonePricing(1000, percent: 10m, amount: null);
+        var input = PhonePricing(1000, percent: 10, amount: null);
         input.ModelId = phoneModel.Id;
 
         var result = await _service.CreatePhoneAsync(input);
@@ -832,7 +832,7 @@ public class ProductsDataServiceTests : RepoTestBase
     {
         SeedCatalog(out var phoneModel, out _);
         // Amount-first safety net: 1000 + 50 (amount) wins over 1000 + 10% (1100).
-        var input = PhonePricing(1000, percent: 10m, amount: 50);
+        var input = PhonePricing(1000, percent: 10, amount: 50);
         input.ModelId = phoneModel.Id;
 
         var result = await _service.CreatePhoneAsync(input);
@@ -893,7 +893,7 @@ public class ProductsDataServiceTests : RepoTestBase
         var input = new MobileShop.Models.ViewModels.Web.BindModels.CreateAppleIdInputModel
         {
             Price = 200,
-            ProfitPercent = 50m,
+            ProfitPercent = 50,
             Email = "pricing-percent@example.com",
             Password = "secret123",
         };
@@ -1084,7 +1084,7 @@ public class ProductsDataServiceTests : RepoTestBase
         SeedCatalog(out var phoneModel, out _);
         var input = new MobileShop.Models.ViewModels.Web.BindModels.CreateGlassInputModel
         {
-            CompatibleManufacturerId = 1, CompatibleModelId = phoneModel.Id, GlassManufacturerId = 1, Price = 100, ProfitPercent = 25m, Count = 3
+            CompatibleManufacturerId = 1, CompatibleModelId = phoneModel.Id, GlassManufacturerId = 1, Price = 100, ProfitPercent = 25, Count = 3
         };
 
         var result = await _service.CreateGlassesAsync(input);
@@ -1118,7 +1118,7 @@ public class ProductsDataServiceTests : RepoTestBase
             CompatibleModelId = phoneModel.Id,
             GlassManufacturerId = 1,
             Price = 10,
-            ProfitPercent = 200m,
+            ProfitPercent = 200,
             Count = 1,
         });
 
@@ -1136,7 +1136,7 @@ public class ProductsDataServiceTests : RepoTestBase
         SeedCatalog(out var phoneModel, out _);
         var result = await _service.CreateGlassesAsync(new MobileShop.Models.ViewModels.Web.BindModels.CreateGlassInputModel
         {
-            CompatibleManufacturerId = 1, CompatibleModelId = phoneModel.Id, GlassManufacturerId = 1, Price = 100, ProfitPercent = 50m, ProfitAmount = 20m, Count = 2
+            CompatibleManufacturerId = 1, CompatibleModelId = phoneModel.Id, GlassManufacturerId = 1, Price = 100, ProfitPercent = 50, ProfitAmount = 20, Count = 2
         });
 
         Assert.True(result.Succeeded);
