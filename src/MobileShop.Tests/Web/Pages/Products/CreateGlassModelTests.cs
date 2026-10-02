@@ -90,7 +90,8 @@ public class CreateGlassModelTests : RepoTestBase
         Assert.Equal("Created 3 glass product(s) successfully.", _model.Message);
         Assert.Equal(3, Context.Products.Count());
         Assert.All(Context.Glasses, glass => Assert.Equal(model.Id, glass.ModelFits.Single().ModelId));
-        Assert.All(Context.Products, product => Assert.Equal("Glass", product.ModelNavigation.CategoryNavigation.Name));
+        var glassCategoryId = Context.Categories.Single(c => c.Name == "Glass").Id;
+        Assert.All(Context.Products, product => Assert.Equal(glassCategoryId, Context.Models.Single(m => m.Id == product.ModelId).CategoryId));
     }
 
     [Fact]

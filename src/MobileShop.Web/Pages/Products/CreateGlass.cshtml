@@ -11,18 +11,18 @@
 
     <div class="col-md-6">
         <label asp-for="Input.CompatibleManufacturerId" class="form-label">Compatible phone manufacturer</label>
-        <select asp-for="Input.ManufacturerId" asp-items="@(new SelectList(Model.Manufacturers, "Id", "Name"))" class="form-select" id="compatibleManufacturerSelect">
+        <select asp-for="Input.CompatibleManufacturerId" asp-items="@(new SelectList(Model.Manufacturers, "Id", "Name"))" class="form-select" id="compatibleManufacturerSelect">
             <option value="">-- Select manufacturer --</option>
         </select>
-        <span asp-validation-for="Input.ManufacturerId" class="text-danger"></span>
+        <span asp-validation-for="Input.CompatibleManufacturerId" class="text-danger"></span>
     </div>
 
     <div class="col-md-6">
         <label asp-for="Input.CompatibleModelId" class="form-label">Compatible model</label>
-        <select asp-for="Input.ModelId" asp-items="@(new SelectList(Model.CompatibleModels, "Id", "Name"))" class="form-select" id="compatibleModelSelect">
+        <select asp-for="Input.CompatibleModelId" asp-items="@(new SelectList(Model.CompatibleModels, "Id", "Name"))" class="form-select" id="compatibleModelSelect">
             <option value="">-- Select model --</option>
         </select>
-        <span asp-validation-for="Input.ModelId" class="text-danger"></span>
+        <span asp-validation-for="Input.CompatibleModelId" class="text-danger"></span>
     </div>
 
 
