@@ -22,7 +22,7 @@ above="$(bash "$script" --level error --above "$fixture")"
 grep -q $'\tFTL\t' <<<"$above" || fail "above missed fatal"
 
 below="$(bash "$script" --level error --below "$fixture")"
-[[ "$(headers "$below")" == 4 ]] || fail "below count"
+[[ "$(headers "$below")" == 6 ]] || fail "below count"
 grep -q $'\tDBG\t' <<<"$below" || fail "below missed debug"
 grep -q $'\tINF\t' <<<"$below" || fail "below missed info"
 grep -q $'\tWRN\t' <<<"$below" || fail "below missed warning"
