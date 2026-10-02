@@ -125,7 +125,7 @@
   - all `-n` cases;
   - date from/to, from-only, to-only, no bounds;
   - datetime from/to, from-only, to-only, no bounds;
-  - current-bound behavior captured once;
+  - current-bound behavior captured once using the process-local wall-clock representation;
   - first-entry inference;
   - malformed and impossible date/datetime values with stderr diagnostics;
   - reversed ranges and mixed date modes;
