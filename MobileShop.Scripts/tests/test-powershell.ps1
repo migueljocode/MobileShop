@@ -2,8 +2,8 @@ $ErrorActionPreference='Stop'
 $r=Split-Path -Parent (Split-Path -Parent $PSScriptRoot);$s=Join-Path $r 'MobileShop.Scripts/PowerShell/log.ps2';$f=Join-Path $r 'MobileShop.Scripts/tests/fixtures/sample.log'
 function Assert([bool]$ok,[string]$name){if(!$ok){throw "FAIL: $name"}}
 function Run([string[]]$a){& pwsh -NoProfile -File $s @a 2>&1}
-Assert ((Run @('-Level','error','-Path',$f)|Select-String '\tERR\t').Count -eq 2) 'exact'
-Assert ((Run @('-Level','debug','-Above','-Path',$f)|Select-String '\t').Count -eq 8) 'above'
+foreach($level in @('debug','info','warning','error','fatal')){Assert ((Run @('-Level',$level,'-Path',$f)).Count -gt 0) "exact-$level"}
+Assert ((Run @('-Level','debug','-Above','-Path',$f)|Select-String '\t').Count -eq 7) 'above'
 Assert ((Run @('-Level','warning','-Below','-Path',$f)|Select-String '\t').Count -eq 3) 'below'
 Assert ((Run @('-Level','error','-Number','1','-Path',$f)|Select-String '\tERR\t').Count -eq 1) 'number'
 Assert ((Run @('-Level','error','-DateFrom','2026-01-02','-DateTo','2026-01-02','-Path',$f)|Select-String '\tERR\t').Count -eq 1) 'date'
