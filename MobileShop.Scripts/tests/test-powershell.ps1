@@ -22,7 +22,8 @@ try {
   if (-not ($exact -match 'System.InvalidOperationException: fixture')) { Fail 'multiline event missing' }
   if (-not ($exact -match '   at Fixture.Method\(\)')) { Fail 'multiline continuation missing' }
 
-  if ((Lines @(& pwsh -NoProfile -File $runnable -Level error -Above -Path $fixture)).Count -ne 3) { Fail 'above semantics' }
+  $above = @( & pwsh -NoProfile -File $runnable -Level error -Above -Path $fixture ) -join [Environment]::NewLine
+  if ($above -notmatch '\tERR\t' -or $above -notmatch '\tFTL\t' -or $above -match '\tWRN\t') { Fail 'above semantics' }
   if ((Lines @(& pwsh -NoProfile -File $runnable -Level error -Below -Path $fixture )).Count -ne 4) { Fail 'below semantics' }
   if ((Lines @(& pwsh -NoProfile -File $runnable -Level error -Number 1 -Path $fixture)).Count -ne 1) { Fail '-n semantics' }
 
