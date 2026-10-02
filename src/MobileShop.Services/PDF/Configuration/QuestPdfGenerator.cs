@@ -47,32 +47,227 @@ public sealed class QuestPdfGenerator(IOptions<PdfSettings> options) : IPdfGener
         page.MarginRight(_settings.MarginRight);
         page.MarginBottom(_settings.MarginBottom);
         page.MarginLeft(_settings.MarginLeft);
+        page.DefaultTextStyle(x => x.FontFamily("Vazirmatn").FontSize(9).FontColor("#25313C"));
+        page.ContentFromRightToLeft();
 
-        page.Header().Column(RenderFactorHeader);
-        page.Content().Column(column => RenderFactorContent(column, model));
-        page.Footer().AlignCenter().Text(t => RenderFooter(t));
+        page.Header().Element(c => RenderFactorHeader(c, model));
+        page.Content().Element(c => RenderFactorContent(c, model));
+        page.Footer().Element(RenderFactorFooter);
     }
 
-    private void RenderFactorHeader(ColumnDescriptor column)
-    {
-        column.Item().Text(_settings.ShopName).Bold().FontSize(18);
-        column.Item().Text("Transactions factor").FontSize(14);
-    }
+    private void RenderFactorHeader(IContainer container, TransactionFactorViewModel model)
+        => container
+            .PaddingBottom(14)
+            .BorderBottom(1.5f)
+            .BorderColor("#243B53")
+            .Row(row =>
+            {
+                row.RelativeItem().AlignStart().Column(column =>
+                {
+                    column.Item().Text(_settings.ShopName).FontSize(19).SemiBold().FontColor("#102A43");
+                    if (!string.IsNullOrWhiteSpace(_settings.ShopAddress))
+                        column.Item().PaddingTop(3).Text(_settings.ShopAddress).FontSize(8).FontColor("#627D98");
+                });
 
-    private static void RenderFactorContent(ColumnDescriptor column, TransactionFactorViewModel model)
-    {
-        column.Item().Text($"Generated: {model.GeneratedAt:yyyy-MM-dd HH:mm}");
+                row.ConstantItem(190).AlignEnd().Column(column =>
+                {
+                    column.Item().AlignEnd().Text("فاکتور تراکنش‌ها").FontSize(20).SemiBold().FontColor("#102A43");
+                    column.Item().PaddingTop(4).AlignEnd().Text(text =>
+                    {
+                        text.Span("تاریخ صدور: ").SemiBold();
+                        text.Span(model.GeneratedAt.ToString("yyyy/MM/dd HH:mm")).ContentFromLeftToRight();
+                    });
+                    column.Item().PaddingTop(2).AlignEnd().Text(text =>
+                    {
+                        text.Span("تعداد اقلام: ").SemiBold();
+                        text.Span(model.Rows.Count.ToString()).ContentFromLeftToRight();
+                    });
+                });
+            });
 
-        foreach (var row in model.Rows)
+    private static void RenderFactorContent(IContainer container, TransactionFactorViewModel model)
+        => container.Column(column =>
         {
-            column.Item().PaddingTop(8).Text($"{row.Date:yyyy-MM-dd HH:mm} | {row.Direction} | {row.ProductLabel}");
-            column.Item().Text($"Price: {row.FinishedPrice:N0} | {row.PersonRole}: {row.PersonLabel}");
-        }
+            column.Spacing(16);
+            column.Item().Element(c => RenderFactorParties(c, model));
+            column.Item().Element(c => RenderFactorTable(c, model));
+            column.Item().Element(c => RenderFactorSummary(c, model));
+            column.Item().Element(RenderFactorSignatures);
+        });
 
-        column.Item().PaddingTop(8).Text($"Records: {model.Rows.Count}");
-        column.Item().Text($"Total: {model.TotalPrice:N0}");
-        column.Item().PaddingTop(8).AlignRight().Text("Signature: ______");
+    private static void RenderFactorParties(IContainer container, TransactionFactorViewModel model)
+        => container.Row(row =>
+        {
+            row.RelativeItem().Element(c => FactorInfoCard(c, "خریدار / مشتری", FindParty(model, "Customer")));
+            row.ConstantItem(10);
+            row.RelativeItem().Element(c => FactorInfoCard(c, "فروشنده", FindParty(model, "Seller")));
+        });
+
+    private static string FindParty(TransactionFactorViewModel model, string role)
+        => model.Rows
+            .Where(x => string.Equals(x.PersonRole, role, StringComparison.OrdinalIgnoreCase))
+            .Select(x => x.PersonLabel)
+            .FirstOrDefault(x => !string.IsNullOrWhiteSpace(x))
+            ?? "در ردیف‌های فاکتور مشخص شده است";
+
+    private static void FactorInfoCard(IContainer container, string title, string value)
+        => container
+            .Border(1)
+            .BorderColor("#D9E2EC")
+            .Background("#F8FAFC")
+            .Padding(10)
+            .Column(column =>
+            {
+                column.Item().Text(title).FontSize(8).SemiBold().FontColor("#627D98");
+                column.Item().PaddingTop(3).Text(value).FontSize(10).SemiBold().FontColor("#243B53");
+            });
+
+    private static void RenderFactorTable(IContainer container, TransactionFactorViewModel model)
+        => container.Table(table =>
+        {
+            table.ColumnsDefinition(columns =>
+            {
+                columns.ConstantColumn(105);
+                columns.RelativeColumn(1.15f);
+                columns.RelativeColumn(2.25f);
+                columns.ConstantColumn(60);
+                columns.ConstantColumn(85);
+                columns.ConstantColumn(35);
+            });
+
+            table.Header(header =>
+            {
+                HeaderCell(header.Cell(), "مبلغ");
+                HeaderCell(header.Cell(), "طرف معامله");
+                HeaderCell(header.Cell(), "محصول");
+                HeaderCell(header.Cell(), "نوع");
+                HeaderCell(header.Cell(), "تاریخ");
+                HeaderCell(header.Cell(), "#");
+            });
+
+            for (var index = 0; index < model.Rows.Count; index++)
+            {
+                var row = model.Rows[index];
+                var background = index % 2 == 0 ? "#FFFFFF" : "#F8FAFC";
+
+                BodyCell(table.Cell(), row.FinishedPrice.ToString("N0"), background, true);
+                BodyCell(table.Cell(), row.PersonLabel, background);
+                BodyCell(table.Cell(), row.ProductLabel, background);
+                BodyCell(table.Cell(), DirectionLabel(row.Direction), background, false, true);
+                BodyCell(table.Cell(), row.Date.ToString("yyyy/MM/dd HH:mm"), background, false, true);
+                BodyCell(table.Cell(), (index + 1).ToString(), background, false, true);
+            }
+        });
+
+    private static void HeaderCell(IContainer cell, string text)
+        => cell
+            .Background("#243B53")
+            .PaddingVertical(8)
+            .PaddingHorizontal(7)
+            .AlignMiddle()
+            .Text(text)
+            .FontSize(8)
+            .SemiBold()
+            .FontColor("#FFFFFF")
+            .AlignCenter();
+
+    private static void BodyCell(
+        IContainer cell,
+        string text,
+        string background,
+        bool amount = false,
+        bool centered = false)
+    {
+        var content = cell
+            .Background(background)
+            .BorderBottom(1)
+            .BorderColor("#E5E7EB")
+            .PaddingVertical(8)
+            .PaddingHorizontal(7)
+            .AlignMiddle();
+
+        content = centered ? content.AlignCenter() : content.AlignStart();
+        content = amount || centered ? content.ContentFromLeftToRight() : content;
+
+        if (amount)
+            content.Text(text).FontSize(8.5f).SemiBold();
+        else
+            content.Text(text).FontSize(8);
     }
+
+    private static string DirectionLabel(TransactionDirection direction)
+        => direction == TransactionDirection.Buy ? "خرید" : "فروش";
+
+    private static void RenderFactorSummary(IContainer container, TransactionFactorViewModel model)
+        => container.Row(row =>
+        {
+            row.RelativeItem();
+            row.ConstantItem(250)
+                .Background("#F1F5F9")
+                .Border(1)
+                .BorderColor("#CBD5E1")
+                .Padding(12)
+                .Row(summary =>
+                {
+                    summary.RelativeItem().Text("جمع کل").FontSize(11).SemiBold().FontColor("#102A43");
+                    summary.ConstantItem(120).AlignEnd().Text(text =>
+                    {
+                        text.Span(model.TotalPrice.ToString("N0")).FontSize(13).SemiBold().FontColor("#102A43").ContentFromLeftToRight();
+                        text.Span("  ریال").FontSize(9).FontColor("#627D98");
+                    });
+                });
+        });
+
+    private static void RenderFactorSignatures(IContainer container)
+        => container
+            .PaddingTop(4)
+            .Row(row =>
+            {
+                row.RelativeItem().Element(c => SignatureBox(c, "امضای طرف معامله"));
+                row.ConstantItem(24);
+                row.RelativeItem().Element(c => SignatureBox(c, "مهر و امضای فروشگاه"));
+            });
+
+    private static void SignatureBox(IContainer container, string title)
+        => container
+            .Height(62)
+            .Border(1)
+            .BorderColor("#D9E2EC")
+            .Padding(9)
+            .Column(column =>
+            {
+                column.Item().Text(title).FontSize(8).SemiBold().FontColor("#627D98");
+                column.Item().PaddingTop(23).BorderBottom(1).BorderColor("#9FB3C8");
+            });
+
+    private void RenderFactorFooter(IContainer container)
+        => container
+            .PaddingTop(7)
+            .BorderTop(1)
+            .BorderColor("#D9E2EC")
+            .AlignCenter()
+            .Text(text =>
+            {
+                if (!string.IsNullOrWhiteSpace(_settings.ShopAddress))
+                    text.Span(_settings.ShopAddress);
+
+                if (!string.IsNullOrWhiteSpace(_settings.ShopPhone))
+                {
+                    if (!string.IsNullOrWhiteSpace(_settings.ShopAddress))
+                        text.Span("  |  ");
+                    text.Span(_settings.ShopPhone).ContentFromLeftToRight();
+                }
+
+                if (!string.IsNullOrWhiteSpace(_settings.ShopInstagram))
+                {
+                    if (!string.IsNullOrWhiteSpace(_settings.ShopAddress) || !string.IsNullOrWhiteSpace(_settings.ShopPhone))
+                        text.Span("  |  ");
+                    text.Span(_settings.ShopInstagram).ContentFromLeftToRight();
+                }
+            })
+            .FontSize(7.5f)
+            .FontColor("#829AB1");
+
 
     private void ComposePage(PageDescriptor page, InvoicePresentation p)
     {

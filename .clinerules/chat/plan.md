@@ -13,29 +13,27 @@
 - Stage P is focused on making the existing transaction factor a proper printable document.
 - Reviewer owns final Stage P sign-off after all implementation steps have passed Job B and final rendered-PDF validation passes.
 
-## [ ] Step 1 — Define the factor presentation contract
-- Inspect the existing `TransactionFactorViewModel`, `TransactionFactorRowViewModel`, mapping extensions, and data-service usage.
-- Extend the presentation model only where the printable layout genuinely needs additional data.
-- Ensure the model can represent shop/header information, factor/generated date, parties, transaction rows, finished prices, total, and signature/footer content without introducing EF dependencies.
-- Preserve the existing single-transaction and selected/filtered-transaction data flows.
-- Add/update focused model/mapping tests where needed.
-- Do not change transaction recording behavior.
-- Job B must verify the implementation against this step before Step 2 starts.
+## ~~[x] Step 1 — Define the factor presentation contract~~
+**Job B: PASS — Actor commit `a27c09ea79eefa3ca8ab82c2be4d7575c74c73a9`; GitHub Actions #17 succeeded.**
+- Existing factor presentation model was sufficient; no unnecessary EF/schema or transaction-flow changes were introduced.
+- `TransactionFactorViewModel` documentation now explicitly identifies the document as customer-facing and keeps static shop identity/contact data in PDF configuration.
+- Added focused coverage proving Buy/Sell rows retain their own `PersonRole` and `PersonLabel`.
+- Scope remained limited to the factor view model documentation and focused model test.
 
 ## [ ] Step 2 — Redesign the QuestPDF factor layout
 - Rework `QuestPdfGenerator.GenerateTransactionFactor` / factor composition into a professional printable A4 layout.
 - Include:
   - shop/header section;
   - factor title and generated date;
-  - buyer/customer and seller/shop context;
+  - row-level party context;
   - transaction table with date, direction, product, person, and finished price;
   - prominent total;
-  - notes/terms area where applicable;
+  - notes/terms area only where backed by legitimate data;
   - signature areas;
   - footer/shop information where configured.
 - Use reusable QuestPDF composition methods rather than one monolithic renderer.
 - Use proper tables, spacing, borders, alignment, wrapping, and pagination.
-- Preserve Persian/RTL rendering and the existing Vazirmatn setup.
+- Reuse the existing verified Persian/RTL Vazirmatn font-registration/resource path.
 - Keep invoice PDF generation unchanged.
 - Job B must verify the implementation and PDF tests before Step 3 starts.
 
@@ -81,18 +79,12 @@
 
 ## [ ] Step 6 — Final Stage P validation
 - Reviewer validates the complete stage after all Actor implementation steps have passed Job B.
-- Run:
-  `dotnet clean src/MobileShop.slnx --nologo`
-  `dotnet build src/MobileShop.slnx --nologo --no-incremental`
-  `dotnet test src/MobileShop.slnx --nologo --no-build`
-- Require 0 warnings, 0 errors, and all tests passing.
+- Require 0 warnings, 0 errors, and all tests passing through the repository's GitHub CI gate.
 - Confirm both factor entry points and rendered English/Persian PDFs.
 - Confirm no API, authentication, schema/migration, or unrelated changes.
 - Confirm GitHub Actions passes the final Actor commit.
 - Record the final evidence in `audit.md`.
 - Only after all criteria pass may Reviewer mark Step 6 and Stage P complete in `plan.md` and `.clinerules/to-do.md`.
-
-
 
 ## Actor design requirements — customer-facing factor UX
 - Treat the factor as a **real customer-facing commercial document**, not merely a technically valid PDF or a developer report.
@@ -112,7 +104,6 @@
 - Keep the existing invoice PDF behavior separate and unchanged unless a shared PDF infrastructure change is strictly required and verified.
 - Reuse the repository's **existing Persian font setup** that is already exercised by the Persian PDF tests (including the existing Vazirmatn/font-registration path) rather than introducing a second font-loading mechanism.
 - Actor must inspect the existing Persian font tests and PDF font configuration first, then use the same verified font/resource path for the factor so Persian rendering remains consistent with the already-tested PDF behavior.
-
 
 ## Definition of Done
 - Existing transaction-factor pipeline remains intact.

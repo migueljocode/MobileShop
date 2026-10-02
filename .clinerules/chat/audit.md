@@ -1,61 +1,41 @@
-# Audit — Stage O Step 4 / Stage O final sign-off
+# Audit — Stage P — Step 1 Job B
 
 ## Verdict
 
-**PASS — Step 4 complete. Stage O complete.**
+**PASS — Step 1 complete.**
 
 ## Evidence reviewed
 
-### Build and tests
-Actor evidence in `act.md` records:
-- `dotnet clean` → 0 warnings, 0 errors.
-- Clean non-incremental `dotnet build` → 0 warnings, 0 errors.
-- `dotnet test` → **294 passed, 0 failed, 0 skipped**.
+### Actor commit
+- Commit: `a27c09ea79eefa3ca8ab82c2be4d7575c74c73a9`
+- Message: `feat: define Stage P factor presentation contract`
+- Exactly two files changed:
+  - `src/MobileShop.Models/ViewModels/Web/TransactionFactorViewModel.cs`
+  - `src/MobileShop.Tests/Models/Extensions/TransactionFactorExtensionsTests.cs`
 
-### Finished-price culture/binding
-- Application has no configured RequestLocalization/UICulture middleware, so server behavior is invariant/en-US.
-- Suggested prices are emitted with invariant formatting.
-- Buy decimal POST retained `800000.5` on failed validation.
-- Sell decimal POST with `800000.5` successfully bound and persisted.
-- No decimal corruption observed.
+### Presentation contract
+- `TransactionFactorViewModel` remains the existing factor contract.
+- Static shop identity/contact information remains outside the transaction-specific model and is supplied by PDF configuration.
+- No invoice number, global buyer/seller, notes, or other unsupported business data was invented.
+- Existing `TotalPrice` behavior remains unchanged.
 
-### Buy page
-PASS:
-- Product selector.
-- Suggested price.
-- Finished price label/input.
-- Date defaults to `2026-10-02`.
-- Seller.
-- Back.
-- Product-picker script loaded once.
-- Failed post preserved posted Product and Finished price and rendered seller validation.
+### Party context
+- Added focused test coverage proving mixed Buy/Sell factor rows preserve their own `PersonRole` and `PersonLabel`.
+- This supports the planned row-level party presentation required by the redesigned factor.
 
-### Sell page
-PASS:
-- Product selector.
-- Suggested price.
-- Finished price label/input.
-- Date defaults to `2026-10-02`.
-- No Seller field.
-- Back.
-- Product-picker script loaded once.
-- Failed post preserved posted Product and Finished price and rendered customer validation.
+### Scope / regression
+- No API, authentication, schema/migration, transaction-recording, or unrelated implementation changes.
+- No PDF renderer changes were made in Step 1.
+- The Actor commit is a single clean implementation commit for this step.
 
-### Regression/scope
-PASS:
-- No `src/MobileShop.Api` changes.
-- No service/entity/schema/PDF/auth changes.
-- No unrelated implementation changes.
-- Development DB was restored after validation.
+### CI
+- GitHub Actions .NET CI run **#17** for commit `a27c09ea79eefa3ca8ab82c2be4d7575c74c73a9` completed with conclusion **success**.
+- Local build/test execution was not required for this Job B because the repository workflow uses GitHub Actions as the build/test gate.
 
-### GitHub CI
-GitHub Actions `.NET CI` run **#7** (`36944340305`) for Actor commit `bcfb190c5c3f976e3cb369e6778d69bea0dbffa0` completed with conclusion **success**.
+## Reviewer decision
 
-## Final reviewer decision
+All Step 1 Job B criteria are satisfied.
 
-All Step 4 pass criteria are satisfied.
+**Step 1: PASS**
 
-**Step 4: PASS**  
-**Stage O: PASS / COMPLETE**
-
-The Stage O item may now be marked complete in `.clinerules/to-do.md`.
+Step 2 is cleared to begin: professional QuestPDF factor layout, reusing the existing verified Persian/Vazirmatn font setup and keeping invoice rendering unchanged.
