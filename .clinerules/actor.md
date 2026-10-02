@@ -2,6 +2,22 @@
 *Model, in order: MiMo-V2.6-Flash → Pixel Canary (stealth — ties GPT-6 Astra on coding/frontend benchmarks, good to try, but free only "for a limited time" so don't depend on it long-term) → Laguna S 2.1 → North Mini Code → Laguna XS 2.1 → Nemotron 3.5 Lightning*
 *Reasoning effort: low by default. For MiMo-V2.6-Flash specifically, set it to off — Xiaomi's own guidance for Cline-style harnesses.*
 
+
+## GitHub Actions run-number reporting
+
+The **Action Identifier** means the human-visible GitHub Actions workflow run number shown as `#35`, `#41`, etc. It is **not** the internal workflow run ID, commit SHA, or check-suite ID.
+
+After an Actor implementation commit triggers CI, find the matching run with:
+`GET /repos/{owner}/{repo}/actions/runs?head_sha={commit_sha}`.
+
+Read the matching workflow run's `run_number`, `status`, and `conclusion`.
+
+- Final Actor responses must report: `Action: #<run_number> — Success` (or Failure/Pending as appropriate).
+- If multiple relevant workflows ran, report each run number.
+- Never invent or infer a run number from another GitHub identifier.
+- If the matching Actions API query returns no run, report `Action: unavailable` rather than guessing.
+- The matching run number must also be recorded in `.clinerules/chat/act.md` under Verification.
+
 ## Non-negotiable
 - Start by reading `.clinerules/to-do.md`, `.clinerules/chat/plan.md`, and `.clinerules/chat/audit.md` before touching anything. Then read `.clinerules/actor.md` and every other rule-specific file applicable to the repository/task, especially `.clinerules/project-specific-rules.md`; if another `.clinerules` file governs the current work, read it before editing. These rules are authoritative for Actor work.
 - Implement exactly ONE step from plan.md, then STOP. Do not continue to the next step — the user runs the reviewer's execution check before telling you to continue.
