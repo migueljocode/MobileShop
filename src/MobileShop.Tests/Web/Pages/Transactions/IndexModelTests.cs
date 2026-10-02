@@ -44,9 +44,9 @@ public class IndexModelTests : RepoTestBase
         Context.Customers.Add(customer);
         Context.SaveChanges();
 
-        var p1 = TestDataHelpers.CreateProduct(Context, 100m);
-        var p2 = TestDataHelpers.CreateProduct(Context, 200m);
-        var p3 = TestDataHelpers.CreateProduct(Context, 300m);
+        var p1 = TestDataHelpers.CreateProduct(Context, 100);
+        var p2 = TestDataHelpers.CreateProduct(Context, 200);
+        var p3 = TestDataHelpers.CreateProduct(Context, 300);
 
         _tx1 = new Transaction
         {
