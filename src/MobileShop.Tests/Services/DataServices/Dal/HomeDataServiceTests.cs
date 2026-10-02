@@ -87,7 +87,7 @@ public class HomeDataServiceTests : RepoTestBase
             ProductNavigation = product,
             SellerId = 1,
             CustomerId = 1,
-            FinishedPrice = 100m,
+            FinishedPrice = 100,
             Date = DateTime.UtcNow,
             Direction = TransactionDirection.Sell
         });
@@ -115,7 +115,7 @@ public class HomeDataServiceTests : RepoTestBase
             ProductNavigation = olderProduct,
             SellerId = seller.Id,
             CustomerId = customer.Id,
-            FinishedPrice = 100m,
+            FinishedPrice = 100,
             Date = new DateTime(2025, 1, 1),
             Direction = TransactionDirection.Buy
         });
@@ -125,7 +125,7 @@ public class HomeDataServiceTests : RepoTestBase
             ProductNavigation = newerProduct,
             SellerId = seller.Id,
             CustomerId = customer.Id,
-            FinishedPrice = 250m,
+            FinishedPrice = 250,
             Date = new DateTime(2025, 1, 2),
             Direction = TransactionDirection.Sell
         });
@@ -136,7 +136,7 @@ public class HomeDataServiceTests : RepoTestBase
         var card = Assert.Single(cards);
         Assert.Equal(new DateTime(2025, 1, 2), card.Date);
         Assert.Equal(TransactionDirection.Sell, card.Direction);
-        Assert.Equal(250m, card.FinishedPrice);
+        Assert.Equal(250, card.FinishedPrice);
         Assert.Equal(
             newerProduct.ModelNavigation.ManufacturerNavigation.Name + " " + newerProduct.ModelNavigation.Name,
             card.ProductLabel);
