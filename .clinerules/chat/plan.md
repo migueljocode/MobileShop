@@ -21,12 +21,9 @@ Selected-factor coverage verifies mixed Buy/Sell roles; single-factor coverage r
 **PASS — Actor 74fa05b733fbc44fb4d1e65faeb5e8e771c722ac; Actions #53 succeeded.**
 Coverage includes single/multi-row factors, totals, valid PDFs, Persian/RTL, long text, decimal/large values, empty data, null input, and existing invoice/Persian paths.
 
-## [ ] Step 5 — Rendered PDF inspection
-- Inspect actual rendered PDFs from both factor entry points.
-- Verify A4 layout, hierarchy, parties, transaction table, total, signatures, footer/shop info, Persian/RTL, wrapping/pagination, and absence of overlap/clipping/corrupt values.
-- Iterate on defects found by visual inspection.
-- Record concise evidence in act.md.
-- Do not mark Stage P complete here.
+## ~~[x] Step 5 — Rendered PDF inspection~~
+**PASS — Actor 7b1c1203ac41e473b527f6343c077ab3a906cbc4; GitHub Actions #59 succeeded.**
+Both representative PDFs were rendered and inspected: single Persian/RTL factor and selected 12-row mixed Buy/Sell factor. Both are clean one-page A4 output with readable hierarchy, parties, transaction table, totals, signatures, footer/shop info, Persian/RTL and mixed Persian/Latin wrapping, decimal/large-value formatting, and no overlap/clipping. The signature-area pagination issue found during inspection was corrected and rechecked.
 
 ## [ ] Step 6 — Final Stage P validation
 - Reviewer validates all stage evidence, CI, both entry points, rendered English/Persian PDFs, and scope compliance.
