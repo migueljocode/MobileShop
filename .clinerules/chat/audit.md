@@ -1,87 +1,61 @@
-# Audit — Stage O Step 4 validation task for Actor
+# Audit — Stage O Step 4 / Stage O final sign-off
 
-**Purpose:** collect the remaining validation evidence required for the Reviewer to complete Stage O Step 4.  
-**Scope:** validation/evidence only. Do not change production implementation files.
+## Verdict
 
-## Actor task
+**PASS — Step 4 complete. Stage O complete.**
 
-Run the final Stage O validation and record concise evidence in `act.md`.
+## Evidence reviewed
 
-### 1. Clean build and full test suite
+### Build and tests
+Actor evidence in `act.md` records:
+- `dotnet clean` → 0 warnings, 0 errors.
+- Clean non-incremental `dotnet build` → 0 warnings, 0 errors.
+- `dotnet test` → **294 passed, 0 failed, 0 skipped**.
 
-Run:
+### Finished-price culture/binding
+- Application has no configured RequestLocalization/UICulture middleware, so server behavior is invariant/en-US.
+- Suggested prices are emitted with invariant formatting.
+- Buy decimal POST retained `800000.5` on failed validation.
+- Sell decimal POST with `800000.5` successfully bound and persisted.
+- No decimal corruption observed.
 
-```bash
-dotnet clean src/MobileShop.slnx --nologo
-dotnet build src/MobileShop.slnx --nologo --no-incremental
-dotnet test src/MobileShop.slnx --nologo --no-build
-```
+### Buy page
+PASS:
+- Product selector.
+- Suggested price.
+- Finished price label/input.
+- Date defaults to `2026-10-02`.
+- Seller.
+- Back.
+- Product-picker script loaded once.
+- Failed post preserved posted Product and Finished price and rendered seller validation.
 
-Record:
-- build result;
-- warning/error counts;
-- test passed/failed/skipped counts.
+### Sell page
+PASS:
+- Product selector.
+- Suggested price.
+- Finished price label/input.
+- Date defaults to `2026-10-02`.
+- No Seller field.
+- Back.
+- Product-picker script loaded once.
+- Failed post preserved posted Product and Finished price and rendered customer validation.
 
-The required result is **0 warnings, 0 errors, all tests passing**.
+### Regression/scope
+PASS:
+- No `src/MobileShop.Api` changes.
+- No service/entity/schema/PDF/auth changes.
+- No unrelated implementation changes.
+- Development DB was restored after validation.
 
-### 2. Finished-price culture check
+### GitHub CI
+GitHub Actions `.NET CI` run **#7** (`36944340305`) for Actor commit `bcfb190c5c3f976e3cb369e6778d69bea0dbffa0` completed with conclusion **success**.
 
-Using the running application/browser, verify that changing a product with a suggested price prefills **Finished price** correctly.
+## Final reviewer decision
 
-Check:
-- the application's configured culture;
-- a comma-decimal culture if one is configured/available;
-- the displayed Finished price;
-- the value posted/bound when the form is submitted;
-- that the decimal value is not corrupted by culture formatting.
+All Step 4 pass criteria are satisfied.
 
-Record the observed culture, input/display value, and result.
+**Step 4: PASS**  
+**Stage O: PASS / COMPLETE**
 
-### 3. Final Buy UI check
-
-Open the Buy page and confirm:
-- Product selector is present;
-- Suggested price is shown for products that have one;
-- Finished price is present and labeled **Finished price**;
-- Date is present and defaults to today on GET;
-- Seller is present;
-- Back button is present;
-- product-picker.js is loaded once.
-
-Also verify a failed post preserves the posted Product and Finished price and renders the relevant validation message.
-
-### 4. Final Sell UI check
-
-Open the Sell page and confirm:
-- Product selector is present;
-- Suggested price is shown for products that have one;
-- Finished price is present and labeled **Finished price**;
-- Date is present and defaults to today on GET;
-- Seller is **not** present;
-- Back button is present;
-- product-picker.js is loaded once.
-
-Also verify a failed post preserves the posted Product and Finished price and renders the relevant validation message.
-
-### 5. Regression/scope check
-
-Confirm:
-- `src/MobileShop.Api` has no changes from the Stage O implementation;
-- no services/entities/schema/PDF/auth changes were introduced;
-- no unrelated implementation files were changed during validation.
-
-## Evidence format
-
-Append a concise section to `act.md` containing:
-- commands and results;
-- culture/browser result;
-- Buy UI result;
-- Sell UI result;
-- scope/regression result;
-- any failure or limitation.
-
-Do **not** mark Step 4 complete in `plan.md`, `audit.md`, or `to-do.md`. The Reviewer performs the final sign-off after reviewing the evidence.
-
-## Pass criteria
-
-Step 4 is ready for Reviewer sign-off only when every check above passes and the evidence is recorded in `act.md`.
+The Stage O item may now be marked complete in `.clinerules/to-do.md`.
