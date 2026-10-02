@@ -4,6 +4,8 @@ $script = Join-Path $root 'MobileShop.Scripts/PowerShell/log.ps2'
 $fixture = Join-Path $root 'MobileShop.Scripts/tests/fixtures/sample.log'
 $tmp = Join-Path ([IO.Path]::GetTempPath()) ("MobileShopLogTests-" + [guid]::NewGuid())
 New-Item -ItemType Directory -Path $tmp | Out-Null
+$runnable = Join-Path $tmp 'log.ps1'
+Copy-Item -LiteralPath $script -Destination $runnable
 try {
   function Fail($m) { throw "FAIL: $m" }
   function Lines($o) { @((@($o) -join [Environment]::NewLine) -split [Environment]::NewLine | Where-Object { $_ -match '^2026-' }) }
@@ -15,7 +17,7 @@ try {
     if ([string]::IsNullOrWhiteSpace($text)) { Fail "$Label produced no diagnostic" }
   }
 
-  $exact = @(& pwsh -NoProfile -File $script -Level error -Path $fixture)
+  $exact = @(& pwsh -NoProfile -File $runnable -Level error -Path $fixture)
   if ((Lines $exact).Count -ne 2) { Fail 'exact error count' }
   if (-not ($exact -match 'System.InvalidOperationException: fixture')) { Fail 'multiline event missing' }
   if (-not ($exact -match '   at Fixture.Method\(\)')) { Fail 'multiline continuation missing' }
