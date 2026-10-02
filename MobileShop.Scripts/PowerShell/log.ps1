@@ -1,16 +1,16 @@
 #!/usr/bin/env pwsh
 param([Alias('l')][string]$Level,[Alias('h')][switch]$Help,[switch]$Above,[switch]$Below,[Alias('n')][long]$Number,[string]$DateFrom,[string]$DateTo,[string]$DateTimeFrom,[string]$DateTimeTo,[string]$Path)
 function Help(){@'
-Usage: log.ps2 --Level LEVEL [--Above|--Below] [filters] [-n N] [PATH|-]
+Usage: log.ps1 --Level LEVEL [--Above|--Below] [filters] [-n N] [PATH|-]
 LEVEL: debug info warning error fatal. Exact is default; Above/Below include selected and more/less severe.
 -n is a positive event count. Dates: YYYY-MM-DD. Datetimes: "YYYY-MM-DD HH:mm:ss".
 Date/datetime modes cannot mix. From-only uses current local date/time as to; to-only uses first event as from.
 Default: logs/app-*.log. -Path selects one file literally; -Path - reads stdin and pipelines. Results/help stdout; diagnostics stderr; invalid usage is non-zero.
 Bounds are inclusive. From-only uses current local date/time; to-only infers the lower bound from the first event; no bounds means no time restriction. Date and datetime modes cannot mix.
-Examples: on macOS/Linux, pwsh ./log.ps2 --Level error; on Windows, pwsh -Command "& ([scriptblock]::Create((Get-Content -Raw -LiteralPath './log.ps2'))) -Level error"; pwsh ./log.ps2 --Level error --Above -Number 20 on macOS/Linux; Get-Content logs/app-*.log | pwsh ./log.ps2 --Level error on macOS/Linux. On Windows, load log.ps2 with the same scriptblock form before passing options.
+Examples: pwsh ./log.ps1 --Level error; pwsh ./log.ps1 --Level error --Above -Number 20; Get-Content logs/app-*.log | pwsh ./log.ps1 --Level error. Windows PowerShell 7 can invoke the .ps1 file directly with -File.
 Invalid examples: -DateFrom 2026-02-30, reversed ranges, -Above -Below, and -Number 0 are rejected with stderr diagnostics.
 '@}
-function Fail($m){[Console]::Error.WriteLine("log.ps2: $m");exit 2}
+function Fail($m){[Console]::Error.WriteLine("log.ps1: $m");exit 2}
 if($Help -or $args -contains '--help' -or $args -contains '-h'){Help;exit 0}
 if(!$Level){Fail '--Level is required (use --Help)'}
 $levels=@{debug=0;info=1;warning=2;error=3;fatal=4}

@@ -1,6 +1,6 @@
 $ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-$script = Join-Path $root 'MobileShop.Scripts/PowerShell/log.ps2'
+$script = Join-Path $root 'MobileShop.Scripts/PowerShell/log.ps1'
 $fixture = Join-Path $root 'MobileShop.Scripts/tests/fixtures/sample.log'
 $tmp = Join-Path ([IO.Path]::GetTempPath()) ("MobileShopLogTests-" + [guid]::NewGuid())
 New-Item -ItemType Directory -Path $tmp | Out-Null

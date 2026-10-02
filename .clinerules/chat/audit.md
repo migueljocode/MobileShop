@@ -41,13 +41,13 @@ GitHub Actions was inspected first, before this Reviewer Job B validation.
 
 - The two public entry points remain exactly:
   - MobileShop.Scripts/Bash/log.sh
-  - MobileShop.Scripts/PowerShell/log.ps2
+  - MobileShop.Scripts/PowerShell/log.ps1
 - No wrapper-script family was introduced.
 - Existing application logging configuration remains unchanged.
 - Default rolling-file ordering is deterministic on both implementations.
 - Multiline exception/continuation lines remain attached to their preceding event.
 - Normal output/help use stdout; diagnostics use stderr.
-- The intentional .ps2 Windows invocation constraint is documented; Windows CI uses a .ps1 test harness to execute the same public script contents because PowerShell 7 on Windows only accepts .ps1 for -File.
+- The PowerShell entry point uses the standard `.ps1` extension and is directly runnable on Windows.
 - Help/documentation now covers the shared CLI, filters, omitted-bound semantics, examples, streams, and the Windows .ps2 invocation form.
 
 ## Final decision
