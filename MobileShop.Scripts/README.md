@@ -18,5 +18,7 @@ cat logs/app-*.log | ./MobileShop.Scripts/Bash/log.sh --level error
 ```powershell
 pwsh ./MobileShop.Scripts/PowerShell/log.ps2 --Level error
 Get-Content logs/app-*.log | pwsh ./MobileShop.Scripts/PowerShell/log.ps2 --Level error
+# Windows PowerShell 7: .ps2 is intentionally not a native -File extension; load it as a scriptblock.
+pwsh -Command "& ([scriptblock]::Create((Get-Content -Raw -LiteralPath './MobileShop.Scripts/PowerShell/log.ps2'))) -Level error"
 ```
 No grep/awk knowledge is required.
