@@ -48,7 +48,6 @@ public sealed class QuestPdfGenerator(IOptions<PdfSettings> options) : IPdfGener
         page.MarginBottom(_settings.MarginBottom);
         page.MarginLeft(_settings.MarginLeft);
         page.DefaultTextStyle(x => x.FontFamily("Vazirmatn").FontSize(9).FontColor("#25313C"));
-        page.ContentFromRightToLeft();
 
         page.Header().Element(c => RenderFactorHeader(c, model));
         page.Content().Element(c => RenderFactorContent(c, model));
@@ -62,22 +61,22 @@ public sealed class QuestPdfGenerator(IOptions<PdfSettings> options) : IPdfGener
             .BorderColor("#243B53")
             .Row(row =>
             {
-                row.RelativeItem().AlignStart().Column(column =>
+                row.RelativeItem().AlignLeft().Column(column =>
                 {
                     column.Item().Text(_settings.ShopName).FontSize(19).SemiBold().FontColor("#102A43");
                     if (!string.IsNullOrWhiteSpace(_settings.ShopAddress))
                         column.Item().PaddingTop(3).Text(_settings.ShopAddress).FontSize(8).FontColor("#627D98");
                 });
 
-                row.ConstantItem(190).AlignEnd().Column(column =>
+                row.ConstantItem(190).AlignRight().Column(column =>
                 {
-                    column.Item().AlignEnd().Text("فاکتور تراکنش‌ها").FontSize(20).SemiBold().FontColor("#102A43");
-                    column.Item().PaddingTop(4).AlignEnd().Text(text =>
+                    column.Item().AlignRight().Text("فاکتور تراکنش‌ها").FontSize(20).SemiBold().FontColor("#102A43");
+                    column.Item().PaddingTop(4).AlignRight().Text(text =>
                     {
                         text.Span("تاریخ صدور: ").SemiBold();
                         text.Span(model.GeneratedAt.ToString("yyyy/MM/dd HH:mm")).ContentFromLeftToRight();
                     });
-                    column.Item().PaddingTop(2).AlignEnd().Text(text =>
+                    column.Item().PaddingTop(2).AlignRight().Text(text =>
                     {
                         text.Span("تعداد اقلام: ").SemiBold();
                         text.Span(model.Rows.Count.ToString()).ContentFromLeftToRight();
@@ -186,13 +185,12 @@ public sealed class QuestPdfGenerator(IOptions<PdfSettings> options) : IPdfGener
             .PaddingHorizontal(7)
             .AlignMiddle();
 
-        content = centered ? content.AlignCenter() : content.AlignStart();
-        content = amount || centered ? content.ContentFromLeftToRight() : content;
-
         if (amount)
-            content.Text(text).FontSize(8.5f).SemiBold();
+            content.Text(text).FontSize(8.5f).SemiBold().ContentFromLeftToRight();
+        else if (centered)
+            content.AlignCenter().Text(text).FontSize(8).ContentFromLeftToRight();
         else
-            content.Text(text).FontSize(8);
+            content.AlignLeft().Text(text).FontSize(8);
     }
 
     private static string DirectionLabel(TransactionDirection direction)
@@ -210,7 +208,7 @@ public sealed class QuestPdfGenerator(IOptions<PdfSettings> options) : IPdfGener
                 .Row(summary =>
                 {
                     summary.RelativeItem().Text("جمع کل").FontSize(11).SemiBold().FontColor("#102A43");
-                    summary.ConstantItem(120).AlignEnd().Text(text =>
+                    summary.ConstantItem(120).AlignRight().Text(text =>
                     {
                         text.Span(model.TotalPrice.ToString("N0")).FontSize(13).SemiBold().FontColor("#102A43").ContentFromLeftToRight();
                         text.Span("  ریال").FontSize(9).FontColor("#627D98");
