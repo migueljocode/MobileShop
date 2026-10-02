@@ -110,6 +110,9 @@
 - Actor must inspect representative rendered PDFs during implementation and iterate on the layout based on the actual visual result. Passing unit tests or merely producing a valid PDF is not sufficient evidence of acceptable UX.
 - Prefer reusable, composable PDF layout sections so the visual system remains consistent across pages and future factor changes.
 - Keep the existing invoice PDF behavior separate and unchanged unless a shared PDF infrastructure change is strictly required and verified.
+- Reuse the repository's **existing Persian font setup** that is already exercised by the Persian PDF tests (including the existing Vazirmatn/font-registration path) rather than introducing a second font-loading mechanism.
+- Actor must inspect the existing Persian font tests and PDF font configuration first, then use the same verified font/resource path for the factor so Persian rendering remains consistent with the already-tested PDF behavior.
+
 
 ## Definition of Done
 - Existing transaction-factor pipeline remains intact.
