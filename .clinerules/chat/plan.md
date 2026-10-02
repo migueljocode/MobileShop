@@ -1,43 +1,110 @@
-# Plan — Stage O — Transactions Buy/Sell form rework
+# Plan — Stage P — Printable factor redesign
 
 ## Assumptions
-- **A1** The label reads "Finished price"; the bound property stays `Price`.
-- **A2** Product change shows catalog price and prefills finished price; the user may overwrite it. The server remains the source of truth.
-- **A3** Date inputs are `type="date"` and default to today on GET.
-- **A4** Shared picker options/script; pages keep tag-helper controls for validation and round-trip binding.
-- **A5** No typeahead library.
-- **A6** Buy keeps Seller; Sell has no Seller field (the shop is the seller).
+- **A1** Keep the existing PDF pipeline: `ITransactionsDataService → TransactionFactorViewModel → IPdfGenerator.GenerateTransactionFactor → QuestPdfGenerator`.
+- **A2** Redesign presentation only; do not change transaction recording semantics or database/schema.
+- **A3** Keep QuestPDF as the PDF renderer and preserve the existing Persian/RTL font setup.
+- **A4** The factor must support both existing entry points: one transaction and selected/filtered transactions.
+- **A5** Prefer extending existing factor view models over exposing EF entities to the PDF layer.
+- **A6** No API, authentication, schema/migration, or unrelated service changes.
 
 ## Reviewer Briefing
-- Steps 1–3 are complete.
-- Step 4 was validation-only and is now complete after reviewing Actor evidence and GitHub CI.
-- Stage O is ready for final sign-off.
+- Stage O is complete and signed off.
+- Stage P is focused on making the existing transaction factor a proper printable document.
+- Reviewer owns final Stage P sign-off after all implementation steps have passed Job B and final rendered-PDF validation passes.
 
-## ~~[x] Step 1 — Suggested price on selectable products~~
-- **Done** — Job B PASS (`8660d69`). Added `SuggestedPrice` and selectable-product projections.
+## [ ] Step 1 — Define the factor presentation contract
+- Inspect the existing `TransactionFactorViewModel`, `TransactionFactorRowViewModel`, mapping extensions, and data-service usage.
+- Extend the presentation model only where the printable layout genuinely needs additional data.
+- Ensure the model can represent shop/header information, factor/generated date, parties, transaction rows, finished prices, total, and signature/footer content without introducing EF dependencies.
+- Preserve the existing single-transaction and selected/filtered-transaction data flows.
+- Add/update focused model/mapping tests where needed.
+- Do not change transaction recording behavior.
+- Job B must verify the implementation against this step before Step 2 starts.
 
-## ~~[x] Step 2 — Shared product-picker partial + Buy page~~
-- **Done** — Job B PASS after correction (`bee5ba9`, `546440f`, `b5df8fe`). Shared picker/script, Buy tag-helper controls, Finished price label, date default.
+## [ ] Step 2 — Redesign the QuestPDF factor layout
+- Rework `QuestPdfGenerator.GenerateTransactionFactor` / factor composition into a professional printable A4 layout.
+- Include:
+  - shop/header section;
+  - factor title and generated date;
+  - buyer/customer and seller/shop context;
+  - transaction table with date, direction, product, person, and finished price;
+  - prominent total;
+  - notes/terms area where applicable;
+  - signature areas;
+  - footer/shop information where configured.
+- Use reusable QuestPDF composition methods rather than one monolithic renderer.
+- Use proper tables, spacing, borders, alignment, wrapping, and pagination.
+- Preserve Persian/RTL rendering and the existing Vazirmatn setup.
+- Keep invoice PDF generation unchanged.
+- Job B must verify the implementation and PDF tests before Step 3 starts.
 
-## ~~[x] Step 3 — Sell page + selected-product round-trip fix~~
-- **Done** — Job B PASS (`a7e9419d868b7160f82c69f7cb5129ded402146b`).
-- Delivered: Sell uses the shared picker/script; both pages pass `Input.ProductId`; the partial explicitly re-selects the posted product; Sell defaults date to today and labels Price as Finished price; focused test added.
-- Evidence: 294/294 tests passed, build had 0 warnings/errors, rendered Buy/Sell POST checks preserved selected product and posted price, and API diff was empty.
+## [ ] Step 3 — Preserve and verify both factor entry points
+- Verify the Details-page single-transaction factor still uses the same generator and produces the redesigned document.
+- Verify the Transactions-page selected/filtered factor still uses the same generator and produces the redesigned document.
+- Preserve the existing snapshot/selection semantics of `GenerateListFactorPdfAsync`.
+- Add/update service/page tests only where required to prove both entry points continue to pass the correct factor model.
+- Do not duplicate PDF rendering logic.
+- Job B must verify both paths before Step 4 starts.
 
-## ~~[x] Step 4 — Final Stage O validation~~
-- **Done — Reviewer PASS.**
-- Actor evidence: clean build/test = 0 warnings, 0 errors, 294/294 tests passed; culture/decimal binding check passed; final Buy and Sell UI checks passed; failed-post product/price preservation and validation messages passed; regression/scope checks passed.
-- GitHub Actions run #7 (`36944340305`) for Actor commit `bcfb190c5c3f976e3cb369e6778d69bea0dbffa0`: **completed/success** on GitHub-hosted CI.
-- No API, service, entity/schema, PDF, auth, or unrelated implementation changes found.
-- **Stage O sign-off: PASS.**
+## [ ] Step 4 — Expand PDF regression tests
+- Update `QuestPdfGeneratorTests` and relevant factor/model tests.
+- Cover at minimum:
+  - one-row factor;
+  - multiple Buy/Sell rows;
+  - total calculation;
+  - valid generated PDF payload;
+  - Persian/RTL factor generation;
+  - long product/person text and wrapping;
+  - decimal/large prices;
+  - empty/edge-case factor data where the existing contract permits it;
+  - header/footer/signature content paths.
+- Preserve all existing invoice and Persian PDF tests.
+- Job B must require all tests to pass and no unrelated regression.
 
-## Global Definition of Done
-- Buy and Sell use the shared picker (options partial + script) with page-owned tag-helper controls.
-- Validation messages render; posted product and price survive failed posts on both pages.
-- Finished price, suggested price, date default, and Back behavior are present on both pages.
-- Clean build and full test suite pass; no API/auth/PDF/schema changes.
+## [ ] Step 5 — Rendered PDF inspection
+- Generate representative PDFs from both factor entry points.
+- Inspect the actual rendered documents, not only PDF bytes/unit-test results.
+- Verify:
+  - A4 printable layout;
+  - readable header and title;
+  - clear party information;
+  - aligned transaction table;
+  - prominent total;
+  - signature area;
+  - footer/shop information;
+  - Persian text readability and RTL direction;
+  - correct wrapping/pagination for long or multi-row content;
+  - no overlap, clipping, or corrupted decimal values.
+- Record concise evidence in `act.md`.
+- This is validation evidence; do not mark Stage P complete here.
+
+## [ ] Step 6 — Final Stage P validation
+- Reviewer validates the complete stage after all Actor implementation steps have passed Job B.
+- Run:
+  `dotnet clean src/MobileShop.slnx --nologo`
+  `dotnet build src/MobileShop.slnx --nologo --no-incremental`
+  `dotnet test src/MobileShop.slnx --nologo --no-build`
+- Require 0 warnings, 0 errors, and all tests passing.
+- Confirm both factor entry points and rendered English/Persian PDFs.
+- Confirm no API, authentication, schema/migration, or unrelated changes.
+- Confirm GitHub Actions passes the final Actor commit.
+- Record the final evidence in `audit.md`.
+- Only after all criteria pass may Reviewer mark Step 6 and Stage P complete in `plan.md` and `.clinerules/to-do.md`.
+
+## Definition of Done
+- Existing transaction-factor pipeline remains intact.
+- Factor has a professional printable layout with header, parties, line items, totals, and signature area.
+- Both single-transaction and selected/filtered factor generation work.
+- Persian/RTL rendering remains correct.
+- Existing invoice PDF behavior remains intact.
+- PDF regression tests and full solution tests pass.
+- Rendered PDFs have been visually inspected with no clipping, overlap, pagination, or formatting defects.
+- GitHub CI passes.
+- No API/auth/schema/unrelated implementation changes.
 
 ## Execution notes
 - One implementation step → one commit → Job B → next step.
-- Completed steps may be compacted to a single outcome/evidence line; do not retain their old implementation instructions once they have passed Job B.
-- Step 4 was validation-only and is now signed off by Reviewer.
+- Actor does not modify `.clinerules/chat/plan.md`, `.clinerules/chat/audit.md`, or `.clinerules/to-do.md` to mark progress.
+- Completed steps are compacted to outcome/evidence only after Job B.
+- Reviewer performs final Stage P sign-off only after rendered-PDF and CI evidence is complete.
