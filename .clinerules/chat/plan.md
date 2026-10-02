@@ -92,6 +92,25 @@
 - Record the final evidence in `audit.md`.
 - Only after all criteria pass may Reviewer mark Step 6 and Stage P complete in `plan.md` and `.clinerules/to-do.md`.
 
+
+
+## Actor design requirements — customer-facing factor UX
+- Treat the factor as a **real customer-facing commercial document**, not merely a technically valid PDF or a developer report.
+- The final document must follow a familiar **industry-standard factor/invoice information hierarchy** while using this application's actual data and terminology.
+- Design the visual hierarchy intentionally: shop identity → document title/identity → parties/context → transaction line items → totals → optional notes/terms → signatures → footer/contact information.
+- Make the document polished and beautiful but business-like: it should look credible when a customer receives, prints, or forwards it.
+- Prioritize readability and scanning: the customer should quickly understand what the document is, who the parties are, what transactions/products are included, and the final amount.
+- Use deliberate typography, spacing, alignment, borders, table proportions, section separation, and whitespace. Avoid cramped content, arbitrary decoration, excessive whitespace, or visually unbalanced pages.
+- Integrate configured shop identity/contact information into the design as intentional branding rather than simply dumping values into a header or footer.
+- Make financial information especially clear: finished prices and the final total must be easy to locate and distinguish visually.
+- Design for realistic data, not only the smallest test case. Multi-row, mixed Buy/Sell, long Persian/Latin text, and large/decimal values must remain visually coherent.
+- Treat Persian/RTL as a complete layout requirement: direction, alignment, table ordering, mixed Persian/Latin content, dates, and numeric values must remain natural and readable.
+- Preserve A4 print usability: margins, page breaks, repeated table headers where needed, footer placement, and signature areas must behave like a real printable business document.
+- Do not invent business information. If a desirable section has no legitimate data source, keep it optional or omit it rather than fabricating content.
+- Actor must inspect representative rendered PDFs during implementation and iterate on the layout based on the actual visual result. Passing unit tests or merely producing a valid PDF is not sufficient evidence of acceptable UX.
+- Prefer reusable, composable PDF layout sections so the visual system remains consistent across pages and future factor changes.
+- Keep the existing invoice PDF behavior separate and unchanged unless a shared PDF infrastructure change is strictly required and verified.
+
 ## Definition of Done
 - Existing transaction-factor pipeline remains intact.
 - Factor has a professional printable layout with header, parties, line items, totals, and signature area.
