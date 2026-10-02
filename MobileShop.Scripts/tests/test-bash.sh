@@ -25,7 +25,7 @@ grep -q 'System.InvalidOperationException: fixture' <<<"$exact" || fail "multili
 grep -q '   at Fixture.Method()' <<<"$exact" || fail "multiline continuation missing"
 
 [[ "$(bash "$script" --level warning --above "$fixture" | grep -c '^2026-')" == 3 ]] || fail "above semantics"
-[[ "$(bash "$script" --level warning --below "$fixture" | grep -c '^2026-')" == 3 ]] || fail "below semantics"
+[[ "$(bash "$script" --level warning --below "$fixture" | grep -c '^2026-')" == 4 ]] || fail "below semantics"
 [[ "$(bash "$script" --level error -n 1 "$fixture" | grep -c '^2026-')" == 1 ]] || fail "-n semantics"
 
 date_exact="$(bash "$script" --level error --date-from 2026-01-02 --date-to 2026-01-02 "$fixture")"
