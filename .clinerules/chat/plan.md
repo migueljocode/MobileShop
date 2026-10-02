@@ -34,7 +34,8 @@
 - Risk: LOW
 - Confidence: HIGH
 
-## [ ] Step 3 — Products navigation and integration coverage
+## ~~[x] Step 3 — Products navigation and integration coverage~~
+**PASS — Actor implementation; Create Glass is now reachable from Products using the existing Razor `asp-page` convention.**
 - Files: modify `src/MobileShop.Web/Pages/Products/Index.cshtml`; inspect existing navigation conventions; extend focused tests only where needed.
 - Add a clearly labeled Create glass action beside existing product creation actions using the existing Razor `asp-page` convention.
 - Keep navigation local to Products; no unrelated layout redesign.
@@ -65,6 +66,6 @@
 - Focused tests and full GitHub Actions CI pass.
 
 ## Execution notes
-- One implementation step → one Actor commit → Job B → next step.
+- One implementation step → one Actor commit → Job B → next.
 - Actor must read `.clinerules/actor.md` and must not modify `plan.md`, `audit.md`, or `to-do.md` to mark progress.
 - Do not use local `dotnet build`/`dotnet test` as the final Actor verification.
