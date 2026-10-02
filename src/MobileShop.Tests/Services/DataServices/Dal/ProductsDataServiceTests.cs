@@ -913,7 +913,7 @@ public class ProductsDataServiceTests : RepoTestBase
         var input = new MobileShop.Models.ViewModels.Web.BindModels.CreateAppleIdInputModel
         {
             Price = 200,
-            ProfitAmount = 40m,
+            ProfitAmount = 40,
             Email = "pricing-amount@example.com",
             Password = "secret123",
         };
@@ -1094,7 +1094,7 @@ public class ProductsDataServiceTests : RepoTestBase
         var glassModel = Assert.Single(Context.Models.Where(m => m.CategoryId == Context.Categories.First(c => c.Name == "Glass").Id && m.ManufacturerId == 1 && m.Name == "iPhone 16 Glass"));
 
         Assert.Equal(3, products.Count);
-        Assert.All(products, p => Assert.Equal(125m, p.Price));
+        Assert.All(products, p => Assert.Equal(125, p.Price));
         var purchases = await Context.Transactions.Where(t => t.Direction == TransactionDirection.Buy).ToListAsync();
         Assert.Equal(3, purchases.Count);
         Assert.All(purchases, t => Assert.Equal(100, t.FinishedPrice));
@@ -1141,7 +1141,7 @@ public class ProductsDataServiceTests : RepoTestBase
 
         Assert.True(result.Succeeded);
         Assert.Equal(2, await Context.Products.CountAsync());
-        Assert.All(await Context.Products.ToListAsync(), p => Assert.Equal(120m, p.Price));
+        Assert.All(await Context.Products.ToListAsync(), p => Assert.Equal(120, p.Price));
     }
 
     [Fact]
