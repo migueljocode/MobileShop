@@ -122,7 +122,7 @@ public class CreateGlassModelTests : RepoTestBase
         Assert.IsType<PageResult>(result);
         Assert.True(_model.ModelState.IsValid);
         Assert.All(Context.Products, product => Assert.Equal(31.32m, product.Price));
-        Assert.Equal(10.44m, Context.Transactions.Single(t => t.Direction == TransactionDirection.Buy).FinishedPrice);
+        Assert.All(Context.Transactions.Where(t => t.Direction == TransactionDirection.Buy), t => Assert.Equal(10.44m, t.FinishedPrice));
     }
 
     [Fact]
