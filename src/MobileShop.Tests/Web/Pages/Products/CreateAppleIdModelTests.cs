@@ -41,7 +41,7 @@ public class CreateAppleIdModelTests : RepoTestBase
 
     private static CreateAppleIdInputModel ValidInput(string email) => new()
     {
-        Price = 1_500_000m,
+        Price = 1500000,
         Email = email,
         Password = "plaintext-pass",
         Notes = "created by unit test"
@@ -73,7 +73,7 @@ public class CreateAppleIdModelTests : RepoTestBase
         Assert.Equal("created by unit test", appleId.Notes);
 
         var product = Context.Products.Single(p => p.Id == appleId.ProductId);
-        Assert.Equal(1_500_000m, product.Price);
+        Assert.Equal(1500000, product.Price);
 
         var model = Context.Models
             .Include(m => m.ManufacturerNavigation)
