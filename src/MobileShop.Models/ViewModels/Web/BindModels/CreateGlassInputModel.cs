@@ -18,6 +18,6 @@ public sealed class CreateGlassInputModel
     [Range(0, double.MaxValue)]
     public decimal? ProfitAmount { get; set; }
 
-    [Range(1, 500, ErrorMessage = "Count must be between 1 and 500.")]
+    [Range(1, int.MaxValue, ErrorMessage = "Count must be at least 1.")]
     public int Count { get; set; } = 1;
 }
