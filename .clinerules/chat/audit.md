@@ -1,22 +1,59 @@
-# Audit — Stage R — Job B
+# Audit — Stage R — Reviewer Job B
 
 ## Verdict
 
-**CHANGES REQUESTED**
+**PASS**
 
-## Verification
-- Stage R was implemented as one implementation step on the Stage R branch.
-- GitHub Actions was checked before validation as requested.
-- Latest completed Action for the verified implementation failed overall.
-- .NET build/tests passed: 316/316.
-- PowerShell log utility verification passed.
-- Bash log utility verification failed.
+## Verification basis
 
-## Findings
-1. Bash CI verification is still failing, so the implementation cannot be accepted yet.
-2. The current Bash implementation/test contract is not yet fully demonstrated for stdin/pipeline behavior, stream separation, exit codes, invalid options/date values, empty/no-match input, omitted-bound inference, multiline-event semantics, and cross-platform parity.
-3. The public help text is shorter than the plan's comprehensive help contract and does not cover all required usage/error examples.
-4. The implementation must be rechecked against the exact two-platform CLI parity and DRY/SRP/KISS requirements after the Bash failure is corrected.
+GitHub Actions was inspected first, before this Reviewer Job B validation.
 
-## Required next action
-Fix the Bash implementation and complete the missing verification coverage, push the correction, wait for the new GitHub Actions result, inspect that result first, then rerun Job B verification.
+- Workflow run #255 (37034526384) completed successfully.
+- Existing .NET gate: 316/316 tests passed.
+- Ubuntu/Bash verification: passed.
+- Ubuntu/PowerShell verification: passed.
+- Windows PowerShell verification: passed.
+- Factor PDF inspection artifact upload: passed.
+
+## Findings resolved
+
+1. **Bash explicit paths containing spaces**
+   - Explicit PATH input is now opened literally and quoted.
+   - The default logs/app-*.log discovery remains the only globbed path.
+   - Dedicated CI coverage verifies a path containing spaces.
+
+2. **Bash missing date/date-time values**
+   - Date/date-time options now validate argument presence before reading the value.
+   - Missing values produce option-specific stderr diagnostics and non-zero exit.
+   - CI covers missing date and datetime values.
+
+3. **PowerShell invalid log levels**
+   - Level validation is centralized in the level map and explicitly rejects unknown values.
+   - Invalid levels produce stderr diagnostics and non-zero exit.
+   - CI verifies the failure behavior on Ubuntu; the Windows runner verifies the PowerShell implementation itself.
+
+4. **Insufficient verification coverage**
+   - Deterministic fixtures cover all five levels, multiline events, multiple dates, offsets, and boundaries.
+   - Tests cover exact/above/below, event-count limiting including oversized N, date/date-time from/to/from-only/to-only, malformed and impossible values, reversed ranges, mixed modes, conflicting severity modes, stdin/pipeline, paths with spaces, empty-input inference, no-match output, stdout/stderr separation, help, and Bash/PowerShell parity.
+   - CI now runs Bash on the existing Ubuntu job, PowerShell on Ubuntu for parity/error coverage, and PowerShell on a Windows runner for platform verification.
+
+## Additional reviewer checks
+
+- The two public entry points remain exactly:
+  - MobileShop.Scripts/Bash/log.sh
+  - MobileShop.Scripts/PowerShell/log.ps2
+- No wrapper-script family was introduced.
+- Existing application logging configuration remains unchanged.
+- Default rolling-file ordering is deterministic on both implementations.
+- Multiline exception/continuation lines remain attached to their preceding event.
+- Normal output/help use stdout; diagnostics use stderr.
+- The intentional .ps2 Windows invocation constraint is documented; Windows CI uses a .ps1 test harness to execute the same public script contents because PowerShell 7 on Windows only accepts .ps1 for -File.
+- Help/documentation now covers the shared CLI, filters, omitted-bound semantics, examples, streams, and the Windows .ps2 invocation form.
+
+## Final decision
+
+Stage R implementation and verification requirements are demonstrated.
+
+**Reviewer Job B: PASS.**
+
+The stage may now proceed to the next workflow stage according to .clinerules/chatbot_skill.md.
