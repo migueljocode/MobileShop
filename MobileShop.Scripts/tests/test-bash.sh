@@ -53,7 +53,9 @@ expect_fail "mixed filters" bash "$script" --level error --date-from 2026-01-01 
 expect_fail "conflicting modes" bash "$script" --level error --above --below "$fixture"
 expect_fail "zero number" bash "$script" --level error -n 0 "$fixture"
 expect_fail "negative number" bash "$script" --level error -n -1 "$fixture"
+expect_fail "non-numeric number" bash "$script" --level error -n abc "$fixture"
 expect_fail "unknown option" bash "$script" --level error --wat "$fixture"
+empty="$tmp/empty.log"; : > "$empty"; expect_fail "empty inference" bash "$script" --level error --date-to 2026-01-02 "$empty"
 
 stdin_out="$(cat "$fixture" | bash "$script" --level error -)"
 [[ "$stdin_out" == "$exact" ]] || fail "stdin parity"
