@@ -73,7 +73,7 @@ public class CreateGlassModelTests : RepoTestBase
         var result = await _model.OnPostAsync();
         Assert.IsType<PageResult>(result);
         Assert.Empty(Context.Products);
-        Assert.Single(_model.Manufacturers);
+        Assert.Equal(2, _model.Manufacturers.Count);
         Assert.Single(_model.Models);
     }
 
@@ -98,7 +98,7 @@ public class CreateGlassModelTests : RepoTestBase
         var result = await _model.OnPostAsync();
         Assert.IsType<PageResult>(result);
         Assert.False(_model.ModelState.IsValid);
-        Assert.True(_model.ModelState.ContainsKey(nameof(CreateGlassInputModel.ModelId)));
+        Assert.True(_model.ModelState.ContainsKey(nameof(CreateGlassInputModel.ManufacturerId)));
         Assert.Empty(Context.Products);
         Assert.Equal(2, _model.Manufacturers.Count);
     }
