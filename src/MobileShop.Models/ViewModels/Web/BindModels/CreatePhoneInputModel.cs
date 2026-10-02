@@ -9,7 +9,7 @@ public sealed class CreatePhoneInputModel
     [Required]
     public int ModelId { get; set; }
 
-    [Range(0, double.MaxValue)]
+    [Range(0, int.MaxValue)]
     public int Price { get; set; }
 
     [Range(0, 100)]
