@@ -153,15 +153,17 @@ If CI fails, inspect the failed Action/job logs, identify the concrete issue, fi
 
 Do not claim success from interrupted or pending commands.
 
-### GitHub Actions identifier reporting
+### GitHub Actions run-number reporting
 
-Whenever an Actor task triggers a GitHub Actions workflow, include the corresponding **Action Identifier** in the final chat response so the user can track the verification run.
+Whenever an Actor task triggers a GitHub Actions workflow, include the **GitHub Actions run number** in the final chat response — the human-visible number shown as #35, #41, etc. This is the identifier the owner uses to track the verification run. Do not substitute the workflow run's internal numeric database ID or commit SHA.
 
-- Report the identifier after the main result/status.
-- If the Action is still running, report its identifier and state that verification is pending.
-- If multiple Actions were triggered for the same Actor task, report each relevant identifier.
-- Never invent an identifier. If the GitHub tooling does not expose it and the user has not supplied it, explicitly say the identifier is unavailable.
-- When the user supplies an Action result/identifier, use that identifier in subsequent status reporting for the task.
+- Report the run number after the main result/status, for example: Action: #35 — Success.
+- If the Action is still running, report its run number and state that verification is pending.
+- If multiple Actions were triggered for the same Actor task, report each relevant run number.
+- Never invent a run number. If GitHub tooling does not expose the human-visible run number and the user has not supplied it, explicitly say Action: unavailable.
+- If the user supplies the run number or result, use that exact run number in subsequent status reporting for the task.
+- When reviewing Actor work, treat a user-confirmed Action success as verification evidence when the user identifies the corresponding run; do not manufacture or infer a run number from another GitHub identifier.
+
 
 ## 9. Documentation ownership
 
