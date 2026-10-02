@@ -1,7 +1,8 @@
 namespace MobileShop.Models.ViewModels.Web;
 
 /// <summary>
-/// Data required to render a factor/report covering exactly the selected transactions.
+/// Data required to render a customer-facing factor/report covering exactly the selected transactions.
+/// Static shop identity and contact information are supplied by PDF configuration rather than duplicated here.
 /// </summary>
 public sealed record TransactionFactorViewModel(
     IReadOnlyList<TransactionFactorRowViewModel> Rows,

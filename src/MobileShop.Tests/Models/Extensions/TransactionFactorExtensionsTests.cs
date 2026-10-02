@@ -55,6 +55,30 @@ public class TransactionFactorExtensionsTests
         => Assert.Equal(expectedRole, TransactionFactorExtensions.PersonRole(direction));
 
     [Fact]
+    public void Factor_rows_preserve_their_own_party_context()
+    {
+        var model = new TransactionFactorViewModel(
+            [
+                new TransactionFactorRowViewModel(1, SampleDate, TransactionDirection.Buy, "iPhone 13", 100m, "Seller", "Ali"),
+                new TransactionFactorRowViewModel(2, SampleDate, TransactionDirection.Sell, "iPhone 13", 250m, "Customer", "Sara")
+            ],
+            SampleDate);
+
+        Assert.Collection(
+            model.Rows,
+            buy => {
+                Assert.Equal(TransactionDirection.Buy, buy.Direction);
+                Assert.Equal("Seller", buy.PersonRole);
+                Assert.Equal("Ali", buy.PersonLabel);
+            },
+            sell => {
+                Assert.Equal(TransactionDirection.Sell, sell.Direction);
+                Assert.Equal("Customer", sell.PersonRole);
+                Assert.Equal("Sara", sell.PersonLabel);
+            });
+    }
+
+    [Fact]
     public void Factor_total_sums_every_row()
     {
         var model = new TransactionFactorViewModel(
