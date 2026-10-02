@@ -1,212 +1,174 @@
-# Plan — Stage R — Cross-platform log level query scripts
+# Plan — Stage R — Cross-platform log query utilities
 
 ## Reviewer Briefing
-- Build a small, dependency-light command family under `MobileShop.Scripts/Bash` and `MobileShop.Scripts/PowerShell`.
-- All command names use lowercase kebab-case.
-- The canonical command contract is exactly:
-  - `log-<level>`
-  - `log-<level>-and-above`
-  - `log-<level>-and-below`
-- Supported `<level>` values are exactly `debug`, `info`, `warning`, `error`, and `fatal`.
-- Every command supports:
-  - `-h` / `--help`
-  - `-n N` / `--number N`
-  - `--date-from yyyy-MM-dd`
-  - `--date-to yyyy-MM-dd`
-  - `--date-time-from "yyyy-MM-dd HH:mm:ss"`
-  - `--date-time-to "yyyy-MM-dd HH:mm:ss"`
-  - explicit file/path input
-  - stdin via `-` and normal pipeline input.
-- Date/time filters are inclusive.
-- `--date-from` / `--date-to` filter by calendar date.
-- `--date-time-from` / `--date-time-to` filter by the full timestamp.
-- When a `from` option is supplied without its corresponding `to`, `to` defaults to the current local date or local date-time at command start.
-- When a `from` option is not supplied, the lower bound defaults to the first log entry in the selected input.
-- If neither side of a range is supplied, no artificial date/time restriction is added.
-- Do not silently mix date-only and date-time ranges: a date pair and a date-time pair are separate filtering modes and passing options from both modes together is invalid.
-- A `to` without its corresponding `from` is valid and uses the first log entry as the lower bound.
-- Reject malformed dates/times, impossible calendar values, reversed ranges, missing option values, and invalid `N`.
-- Bash must run on macOS and Linux using standard shell utilities only; PowerShell counterparts must provide the same user-visible behavior on Windows.
-- Commands must be directly callable by a non-pro user without requiring knowledge of grep/awk syntax.
-- Normal results go to stdout; diagnostics/errors go to stderr; invalid usage or unreadable input returns non-zero.
-- Preserve original log lines without reformatting.
-- Do not add third-party runtime dependencies, application schema changes, authentication changes, or production logging implementation changes.
-- Keep the implementation intentionally boring: shared helper logic is encouraged; avoid a framework or opaque all-in-one command.
-- Claude verification remains an external review step after Actor implementation and GitHub Actions verification; it does not replace CI.
+- Replace the previous 30-script design with exactly two user-facing entry points:
+  - `MobileShop.Scripts/Bash/log.sh`
+  - `MobileShop.Scripts/PowerShell/log.ps2`
+- The PowerShell filename `log.ps2` is intentional for this Stage R contract; do not create per-command wrapper scripts.
+- Both entry points implement the same behavior and one shared conceptual command model.
+- Selection is explicit through options:
+  - `--level <debug|info|warning|error|fatal>` (short `-l`)
+  - `--above`
+  - `--below`
+  - default with neither `--above` nor `--below` means exact level.
+- `--above` and `--below` are mutually exclusive.
+- Supported log levels map exactly: debug→Debug, info→Information, warning→Warning, error→Error, fatal→Fatal.
+- Every invocation supports `-h/--help`, `-n/--number N`, date/date-time filters, explicit input path, and stdin via `-`/pipeline.
+- Invalid dates/datetimes must be rejected before filtering, with a clear user-facing diagnostic on stderr and non-zero exit.
+- Follow DRY, SRP, and KISS strictly: one parsing/validation path, one event reader, one level selector, one range selector, one formatter/output path per implementation; do not duplicate logic across modes or platforms beyond unavoidable shell-language syntax.
+- No application schema, authentication, production logging, or third-party runtime dependency changes.
 
-## Repository Files — Exact Stage R Scope
+## Exact Repository Scope
 
-### Existing files read or directly relevant
-- `.clinerules/chat/plan.md` — this Stage R implementation plan.
-- `.clinerules/chat/audit.md` — Reviewer Job A/B audit record.
-- `.github/workflows/dotnet.yml` — existing CI; add script verification and a Windows PowerShell job while preserving the existing .NET job.
-- `src/MobileShop.Services/Logging/Configuration/LoggingsConfiguration.cs` — authoritative rolling-file path and file output format.
-- `src/MobileShop.Services/Logging/Configuration/AppLoggingSettings.cs` — existing logging-level configuration defaults.
-- `README.md` — modify only if a minimal link to script documentation is useful.
+### Existing files
+- `.clinerules/chat/plan.md` — active Stage R plan.
+- `.clinerules/chat/audit.md` — Reviewer Job A/B record.
+- `.github/workflows/dotnet.yml` — preserve existing .NET job; add Bash and Windows PowerShell verification.
+- `src/MobileShop.Services/Logging/Configuration/LoggingsConfiguration.cs` — authoritative log path/template.
+- `src/MobileShop.Services/Logging/Configuration/AppLoggingSettings.cs` — logging defaults.
+- `README.md` — optional minimal pointer to script documentation.
 
-### New files/directories
+### New Stage R files
+- `MobileShop.Scripts/Bash/log.sh`
+- `MobileShop.Scripts/PowerShell/log.ps2`
 - `MobileShop.Scripts/README.md`
-- `MobileShop.Scripts/Bash/_log-level-query.sh` — shared implementation.
-- `MobileShop.Scripts/Bash/log-debug`
-- `MobileShop.Scripts/Bash/log-debug-and-above`
-- `MobileShop.Scripts/Bash/log-debug-and-below`
-- `MobileShop.Scripts/Bash/log-info`
-- `MobileShop.Scripts/Bash/log-info-and-above`
-- `MobileShop.Scripts/Bash/log-info-and-below`
-- `MobileShop.Scripts/Bash/log-warning`
-- `MobileShop.Scripts/Bash/log-warning-and-above`
-- `MobileShop.Scripts/Bash/log-warning-and-below`
-- `MobileShop.Scripts/Bash/log-error`
-- `MobileShop.Scripts/Bash/log-error-and-above`
-- `MobileShop.Scripts/Bash/log-error-and-below`
-- `MobileShop.Scripts/Bash/log-fatal`
-- `MobileShop.Scripts/Bash/log-fatal-and-above`
-- `MobileShop.Scripts/Bash/log-fatal-and-below`
-- `MobileShop.Scripts/PowerShell/Log-LevelQuery.ps1` — shared implementation.
-- `MobileShop.Scripts/PowerShell/log-debug.ps1`
-- `MobileShop.Scripts/PowerShell/log-debug-and-above.ps1`
-- `MobileShop.Scripts/PowerShell/log-debug-and-below.ps1`
-- `MobileShop.Scripts/PowerShell/log-info.ps1`
-- `MobileShop.Scripts/PowerShell/log-info-and-above.ps1`
-- `MobileShop.Scripts/PowerShell/log-info-and-below.ps1`
-- `MobileShop.Scripts/PowerShell/log-warning.ps1`
-- `MobileShop.Scripts/PowerShell/log-warning-and-above.ps1`
-- `MobileShop.Scripts/PowerShell/log-warning-and-below.ps1`
-- `MobileShop.Scripts/PowerShell/log-error.ps1`
-- `MobileShop.Scripts/PowerShell/log-error-and-above.ps1`
-- `MobileShop.Scripts/PowerShell/log-error-and-below.ps1`
-- `MobileShop.Scripts/PowerShell/log-fatal.ps1`
-- `MobileShop.Scripts/PowerShell/log-fatal-and-above.ps1`
-- `MobileShop.Scripts/PowerShell/log-fatal-and-below.ps1`
-- `MobileShop.Scripts/tests/` — deterministic fixtures and lightweight script tests only if needed.
-- No other new repository area is in Stage R scope unless the Reviewer approves it through a plan revision.
+- `MobileShop.Scripts/tests/fixtures/` — deterministic log fixtures.
+- `MobileShop.Scripts/tests/` — lightweight cross-platform test scripts only; no new test framework unless unavoidable and approved by plan revision.
+- No other new repository area is in scope.
 
-## Step 1 — Define the exact cross-platform command and filter contract
-- Treat these as the complete command family:
-  - `log-debug`, `log-debug-and-above`, `log-debug-and-below`
-  - `log-info`, `log-info-and-above`, `log-info-and-below`
-  - `log-warning`, `log-warning-and-above`, `log-warning-and-below`
-  - `log-error`, `log-error-and-above`, `log-error-and-below`
-  - `log-fatal`, `log-fatal-and-above`, `log-fatal-and-below`
-- Map levels explicitly:
-  - `debug` → Debug
-  - `info` → Information
-  - `warning` → Warning
-  - `error` → Error
-  - `fatal` → Fatal
-- Exact commands match one level.
-- `and-above` includes the selected level and every more severe supported level.
-- `and-below` includes the selected level and every less severe supported level.
-- Default log source is `logs/app-*.log` when no explicit file is supplied.
-- A positional file/path argument selects one explicit input file.
-- `-` selects stdin.
-- For the default rolling-file source, process matching files in deterministic chronological order and document the resulting output order.
-- `-n N` counts complete matching log events, not physical lines. Define and document whether the selected N events are the first N or last N; use the same behavior on both platforms.
-- Treat a log event as the timestamped header plus its continuation lines. Exception stack-trace lines must stay attached to the selected event.
-- Date-only range semantics:
-  - `--date-from YYYY-MM-DD` is an inclusive lower calendar-date bound.
-  - `--date-to YYYY-MM-DD` is an inclusive upper calendar-date bound.
-  - If `--date-from` is present and `--date-to` is absent, the upper bound is the current local date at command start.
-  - If `--date-to` is present without `--date-from`, the lower bound is the first log entry's calendar date.
-- Date-time range semantics:
-  - `--date-time-from "YYYY-MM-DD HH:mm:ss"` is an inclusive lower timestamp bound.
-  - `--date-time-to "YYYY-MM-DD HH:mm:ss"` is an inclusive upper timestamp bound.
-  - If `--date-time-from` is present and `--date-time-to` is absent, the upper bound is the current local date-time at command start, truncated/formatted to seconds.
-  - If `--date-time-to` is present without `--date-time-from`, the lower bound is the first log entry's timestamp.
-- Date-only and date-time options are mutually exclusive modes; do not silently reinterpret one as the other.
-- Use the timestamp and timezone recorded in the log entry for comparisons; define behavior consistently for entries with offsets and ensure both platforms compare equivalent instants.
-- If the input has no log entries and a bound needs the first entry, report a clear diagnostic and return non-zero only when the requested operation cannot be meaningfully evaluated; otherwise an empty result remains successful.
-- Preserve original event text exactly.
+## Step 1 — Canonical CLI contract
+- Invocation shape:
+  - `log.sh --level LEVEL [--above|--below] [filters] [--number N] [PATH|-]`
+  - `log.ps2 --level LEVEL [--above|--below] [filters] [--number N] [PATH|-]`
+- `--level/-l` is required unless help is requested.
+- Exact mode is the default.
+- `--above` includes the selected level and every more severe level.
+- `--below` includes the selected level and every less severe level.
+- Reject missing/unknown levels and simultaneous `--above --below`.
+- Default source is `logs/app-*.log`; explicit PATH selects one file; `-` reads stdin.
+- Pipeline input is accepted without requiring users to know shell filtering commands.
+- Do not execute or interpolate input paths/content as code.
 
-## Step 2 — Implement the Bash command family
-- Implement shared behavior once in `MobileShop.Scripts/Bash/_log-level-query.sh`.
-- Keep each public wrapper tiny: select level and relationship, then delegate.
-- Use only standard macOS/Linux shell utilities.
-- Support all options from Step 1.
-- Provide robust quoting and argument handling; never evaluate filenames or log contents as shell code.
-- Ensure wrappers are executable and directly callable.
-- Keep the helper private/internal by naming convention and document that users should call the public commands.
+## Step 2 — Date and datetime filtering
+- Date-only options:
+  - `--date-from YYYY-MM-DD`
+  - `--date-to YYYY-MM-DD`
+- Date-time options:
+  - `--date-time-from "YYYY-MM-DD HH:mm:ss"`
+  - `--date-time-to "YYYY-MM-DD HH:mm:ss"`
+- Bounds are inclusive.
+- Date-only and date-time modes are mutually exclusive; mixing them is an error.
+- If a `from` is supplied without its matching `to`, `to` is the current local date/datetime captured once at command start.
+- If `from` is omitted, its lower bound is the first parsed log event in the selected input. This applies whether only `to` is supplied or no range is supplied within a chosen mode.
+- If neither bound is supplied, do not impose a synthetic time restriction.
+- `to` without `from` is valid and derives `from` from the first event.
+- Parse formats strictly; reject malformed syntax, impossible calendar/time values, reversed ranges, missing values, and unsupported combinations.
+- Date-only comparison uses the event's calendar date; datetime comparison uses the timestamp represented by the log entry, including its recorded offset. Document the local-clock interpretation of generated current bounds and make both platforms equivalent.
+- If first-entry inference is required but input contains no events, emit a clear diagnostic to stderr and return non-zero.
+- Invalid date/datetime examples must identify the option, expected format, received value, and correction example.
 
-## Step 3 — Implement PowerShell parity
-- Implement shared behavior once in `MobileShop.Scripts/PowerShell/Log-LevelQuery.ps1`.
-- Keep each public wrapper tiny: select level and relationship, then delegate.
-- Use built-in PowerShell capabilities only.
-- Match Bash semantics for level matching, event grouping, all options, date/time parsing, ordering, `-n`, input, output, diagnostics, and exit status.
-- Support pipeline/stdin naturally.
-- Keep public script names lowercase kebab-case with `.ps1`.
-- Do not require module installation or project-specific dependencies.
+## Step 3 — Log-event parsing and `-n`
+- Parse the existing Serilog header format from `LoggingsConfiguration.cs` and attach continuation/exception lines to their preceding event.
+- Never split a multiline exception into separate results.
+- Preserve event text exactly; do not reformat timestamps/messages.
+- `-n N` counts complete matching events, not physical lines.
+- Define `-n` as the first N matching events in deterministic output order; `N=0` is invalid.
+- Too-large N is valid and simply returns all matching events.
+- Reject negative, non-numeric, missing, or overflowed N with stderr diagnostic and non-zero exit.
+- Default rolling-file processing is deterministic chronological order; document whether same-day files are ordered by filename/timestamp and use the same rule on both platforms.
 
-## Step 4 — Comprehensive per-script help and streams
-- Every public Bash and PowerShell script must contain or expose its own complete, command-specific help; users must be able to run the individual script with `-h` or `--help` and understand it without opening another file.
-- Help must cover:
-  - command purpose and exact level relationship;
-  - synopsis and positional file argument;
-  - `-` stdin behavior;
-  - `-n N` / `--number N`;
-  - `--date-from` / `--date-to`;
-  - `--date-time-from` / `--date-time-to`;
-  - accepted formats with literal examples;
-  - default `from`/current `to` behavior;
-  - mutual exclusion of date and date-time modes;
-  - multiple-filter behavior and inclusive boundaries;
+## Step 4 — Bash implementation
+- `log.sh` is the only public Bash script.
+- Keep CLI parsing, validation, event parsing, selection, filtering, limiting, and output as small single-purpose functions.
+- Use standard macOS/Linux shell utilities only.
+- Avoid `eval`, unsafe word splitting, duplicated option branches, and duplicated level logic.
+- Capture current time once.
+- Send normal events to stdout; help to stdout; diagnostics/errors to stderr.
+- Return meaningful non-zero status for invalid usage/input.
+- Keep implementation directly runnable by a non-pro user.
+
+## Step 5 — PowerShell implementation
+- `log.ps2` is the only public PowerShell script.
+- Mirror the same logical functions and behavior as Bash without copying Bash-specific mechanisms.
+- Use built-in PowerShell only.
+- Accept both direct file input and pipeline input.
+- Keep level/severity mapping centralized rather than repeating conditions.
+- Capture current time once and use identical bound semantics.
+- stdout contains results/help; stderr contains diagnostics/errors; exit codes match Bash behavior.
+- No module installation or project-specific dependency.
+
+## Step 6 — Self-contained help
+- `log.sh --help` and `log.ps2 --help` must each be complete enough to use without opening another file.
+- Help must include:
+  - purpose;
+  - required `--level/-l`;
+  - exact/above/below semantics;
+  - every option and accepted value format;
   - default log path;
-  - output ordering and what `-n` counts;
-  - examples for direct invocation and pipelines;
-  - exit codes and common errors.
-- Help text should be concise enough for terminal use but comprehensive enough that a non-pro user does not need to inspect implementation files.
-- Normal output goes only to stdout; diagnostics go to stderr. Help may use stdout for successful `-h`/\`--help` and must return zero.
-- Invalid options, malformed dates/times, invalid numbers, reversed ranges, unreadable files, and incompatible filter combinations return non-zero.
+  - PATH and `-` stdin behavior;
+  - `-n` event semantics;
+  - date and datetime examples;
+  - omitted-bound defaults;
+  - inclusive ranges;
+  - mutual exclusion;
+  - malformed-input examples and errors;
+  - stdout/stderr and exit-code behavior;
+  - direct and pipeline examples;
+  - macOS/Linux and Windows PowerShell invocation examples.
+- Keep help concise but genuinely comprehensive for a non-pro user.
 
-## Step 5 — CI and focused verification
-- Add deterministic fixtures/tests under `MobileShop.Scripts/tests/` only if needed; do not introduce a new test framework merely for scripts.
-- Cover:
-  - all five levels;
-  - exact/above/below relationships;
-  - `-n` values including 1, multiple events, too-large values, zero, negative, and malformed values;
-  - date-only from/to, from-only, to-only, and no bounds;
-  - date-time from/to, from-only, to-only, and no bounds;
-  - current-time default for omitted `to`;
-  - first-entry default for omitted `from`;
-  - date/date-time mode conflicts;
-  - malformed/impossible dates and times;
-  - reversed ranges;
-  - multiple rolling files;
-  - empty input and no matches;
-  - stdin and explicit paths, including spaces;
-  - multi-line exception events;
+## Step 7 — Tests and CI
+- Use deterministic fixtures containing all five levels, multiline exceptions, multiple dates, timezone offsets, and boundary timestamps.
+- Verify:
+  - exact/above/below for every level;
+  - missing/invalid level and conflicting severity flags;
+  - all `-n` cases;
+  - date from/to, from-only, to-only, no bounds;
+  - datetime from/to, from-only, to-only, no bounds;
+  - current-bound behavior captured once;
+  - first-entry inference;
+  - malformed and impossible date/datetime values with stderr diagnostics;
+  - reversed ranges and mixed date modes;
+  - empty input/no matches;
+  - explicit paths with spaces;
+  - stdin and pipeline;
+  - multiline exceptions;
   - stdout/stderr separation and exit codes;
-  - every command's help output.
-- Extend `.github/workflows/dotnet.yml` to verify Bash on the existing Ubuntu runner and PowerShell on a Windows runner, while preserving the existing .NET build/test job.
-- Verify Bash and PowerShell return equivalent event sets for equivalent inputs/options.
-- Use GitHub Actions as the final repository verification gate, not local build/test.
-- Keep generated logs, temporary files, and unrelated artifacts out of the commit.
+  - help.
+- Compare Bash and PowerShell results for equivalent fixtures/options.
+- Update `.github/workflows/dotnet.yml` with Bash verification on the existing Ubuntu job and a Windows runner for PowerShell, while preserving the existing .NET build/test gate.
+- GitHub Actions is the final verification gate; local tests do not replace it.
+- Do not commit generated logs, temporary files, or unrelated artifacts.
 
-## Step 6 — Documentation and usability pass
-- Add `MobileShop.Scripts/README.md` with the complete command family explicitly listed.
-- Explain exact/above/below semantics, level mapping, default log location, file argument, stdin, `-n`, both date-filter modes, defaults for omitted bounds, output ordering, exit codes, and help.
-- Provide copy/paste examples for macOS/Linux and Windows PowerShell.
-- Include examples such as:
-  - `./log-error`
-  - `./log-error-and-above -n 20`
-  - `./log-warning --date-from 2026-01-01 --date-to 2026-01-31`
-  - `./log-error --date-time-from "2026-01-01 08:00:00" --date-time-to "2026-01-01 18:00:00"`
-  - `cat logs/app-*.log | ./log-error`
-- Make the command family understandable without prior shell expertise.
-- If root `README.md` is updated, keep the change limited to a concise pointer to `MobileShop.Scripts/README.md`.
+## Step 8 — Documentation
+- `MobileShop.Scripts/README.md` documents only the two entry points and their shared CLI contract.
+- Include copy/paste examples such as:
+  - `./log.sh --level error`
+  - `./log.sh --level error --above -n 20`
+  - `./log.sh --level warning --date-from 2026-01-01 --date-to 2026-01-31`
+  - `./log.sh --level error --date-time-from "2026-01-01 08:00:00" --date-time-to "2026-01-01 18:00:00"`
+  - `cat logs/app-*.log | ./log.sh --level error`
+  - `./log.ps2 --level error --above -n 20`
+- Explain that no grep/awk knowledge is required.
+- Root README, if touched, gets only a concise pointer.
+
+## Clean Code / Architecture Rules
+- DRY: one source of truth for level ordering, option semantics, date parsing, event parsing, and error wording within each implementation.
+- SRP: parsing arguments, parsing timestamps/events, selecting levels, applying ranges, limiting output, and rendering diagnostics are separate responsibilities.
+- KISS: prefer straightforward functions and data flow over abstractions, frameworks, generated code, or clever shell tricks.
+- Keep public surface minimal: exactly two executable entry points.
+- Cross-platform parity is behavioral, not forced through unnatural shared code.
+- Any duplicated logic introduced must be justified in the implementation commit/PR.
 
 ## Global Definition of Done
-- All 15 Bash commands and all 15 PowerShell counterparts exist at the exact paths listed above.
-- Every command name is lowercase kebab-case and follows exactly `log-<level>` or `log-<level>-and-above/below`.
-- Every command supports `-h`/\`--help`, `-n N`/\`--number N`, both date-only options, both date-time options, explicit file input, and stdin/pipeline input.
-- Date/date-time parsing and default-bound behavior are identical across platforms.
-- Every public script has comprehensive self-contained help.
-- File input and stdin/pipeline input work consistently.
-- Normal output uses stdout; diagnostics/errors use stderr; invalid usage/input returns non-zero.
-- Multi-line exception events remain intact.
-- Bash uses only standard macOS/Linux tooling; PowerShell uses built-in capabilities.
-- Existing application logging behavior remains unchanged.
-- `.github/workflows/dotnet.yml` verifies both script platforms.
-- `MobileShop.Scripts/README.md` makes the command family usable by a non-pro user.
-- The implementation is limited to the exact Stage R paths listed here plus explicitly recorded deterministic fixtures/tests.
-- After GitHub Actions verification, Actor pushes the implementation commit/PR as required by the workflow; Reviewer/Claude performs the requested external verification.
-- Planner does not mark `.clinerules/to-do.md` complete; only Reviewer may do so after final verification.
+- Exactly `MobileShop.Scripts/Bash/log.sh` and `MobileShop.Scripts/PowerShell/log.ps2` are the public scripts.
+- No 15-command wrapper family remains.
+- CLI level/severity selection, all filters, file/stdin behavior, event grouping, ordering, `-n`, errors, and help are documented and parity-tested.
+- Invalid dates/datetimes are caught, clearly explained on stderr, and return non-zero.
+- DRY/SRP/KISS constraints are demonstrably followed.
+- Existing application logging is unchanged.
+- CI verifies both script implementations and the existing .NET job.
+- Documentation is usable by a non-pro user.
+- Actor follows the one implementation step → one commit → Job B verification workflow, then pushes as required.
+- Claude/external verification occurs after GitHub Actions verification.
+- Planner does not mark `.clinerules/to-do.md`; only Reviewer may complete the stage after final verification.
