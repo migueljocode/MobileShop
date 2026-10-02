@@ -39,7 +39,8 @@ public class ProductsDataServiceTests : RepoTestBase
 
         var phoneCategory = new Category { Name = "Phone" };
         var appleIdCategory = new Category { Name = "AppleId" };
-        Context.Categories.AddRange(phoneCategory, appleIdCategory);
+        var glassCategory = new Category { Name = "Glass" };
+        Context.Categories.AddRange(phoneCategory, appleIdCategory, glassCategory);
         Context.SaveChanges();
 
         phoneModel = new Model { ManufacturerId = manufacturer.Id, CategoryId = phoneCategory.Id, Name = "iPhone 16" };
