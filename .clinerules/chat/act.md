@@ -1,20 +1,19 @@
-# Act Report — Stage P Step 2 (QuestPDF factor layout)
+# Act Report — Stage P Step 3 (factor entry points)
 
 ## Commit
-`f2fe3c8d13dd492eadd9115a67f4f2505bcd40c2` — fix: correct Stage P factor RTL and party context
+`fd9ee7ab2d14431990ee4febd6ac65db1e4cf08c` — test: cover mixed factor entry point context
 
 ## Verification
-- GitHub Actions for `f2fe3c8d13dd492eadd9115a67f4f2505bcd40c2` — **Successful**, as confirmed by the owner.
-- The implementation commit is limited to `src/MobileShop.Services/PDF/Configuration/QuestPdfGenerator.cs`.
-- Factor header, content, and footer now use container-level RTL direction.
-- Mixed Buy/Sell party context now aggregates distinct labels by role instead of selecting only the first matching row.
-- Existing invoice rendering remains untouched.
+- GitHub Actions **#41 — Successful** for the Actor implementation commit.
+- The selected-factor entry-point test now verifies that mixed Buy/Sell rows preserve both `PersonRole` and `PersonLabel`.
+- Existing Details-page single-transaction factor coverage remains in place and continues to exercise the same `IPdfGenerator` factor path.
+- No PDF rendering logic was duplicated or changed in this step.
 
 ## Limitations
-- Rendered-PDF visual inspection remains part of the later planned Step 5 validation; this report does not claim that evidence is complete.
+- This step adds focused entry-point coverage only. Broader PDF regression coverage and rendered-PDF inspection remain planned for Steps 4–5.
 
 ## Friction noted
-- The previous Step 2 review exposed that RTL direction was not established at the factor container level and that the party cards could misrepresent mixed transactions. Both were corrected in the implementation commit above.
+None.
 
 ## Problems
 None.
