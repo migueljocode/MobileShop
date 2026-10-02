@@ -1,41 +1,21 @@
-# Audit — Stage P — Step 1 Job B
+# Audit — Stage P — Step 2 Job B
 
 ## Verdict
 
-**PASS — Step 1 complete.**
+**FAIL — Step 2 cannot be signed off from the repository evidence currently available.**
 
 ## Evidence reviewed
 
-### Actor commit
-- Commit: `a27c09ea79eefa3ca8ab82c2be4d7575c74c73a9`
-- Message: `feat: define Stage P factor presentation contract`
-- Exactly two files changed:
-  - `src/MobileShop.Models/ViewModels/Web/TransactionFactorViewModel.cs`
-  - `src/MobileShop.Tests/Models/Extensions/TransactionFactorExtensionsTests.cs`
+- Latest Actor correction commit: `f2fe3c8d13dd492eadd9115a67f4f2505bcd40c2`
+- Commit message: `fix: correct Stage P factor RTL and party context`
+- Diff is limited to `src/MobileShop.Services/PDF/Configuration/QuestPdfGenerator.cs`.
+- The diff moves factor header/content/footer into right-to-left container direction and aggregates distinct party labels by role, addressing the previously identified RTL and mixed-party-context issues.
+- The current `.clinerules/chat/act.md` is still the old Stage O report; it does not report this Stage P Step 2 Actor job, its verification, or its evidence.
+- GitHub's commit-status endpoint currently returns no status entries for `f2fe3c8d13dd492eadd9115a67f4f2505bcd40c2`, so the required successful Actions build/test gate is not independently evidenced in the repository tooling available to this review.
+- The plan requires Step 2 Job B to verify the implementation and PDF tests before Step 3 starts.
 
-### Presentation contract
-- `TransactionFactorViewModel` remains the existing factor contract.
-- Static shop identity/contact information remains outside the transaction-specific model and is supplied by PDF configuration.
-- No invoice number, global buyer/seller, notes, or other unsupported business data was invented.
-- Existing `TotalPrice` behavior remains unchanged.
+## Required fix
 
-### Party context
-- Added focused test coverage proving mixed Buy/Sell factor rows preserve their own `PersonRole` and `PersonLabel`.
-- This supports the planned row-level party presentation required by the redesigned factor.
+Update `.clinerules/chat/act.md` for this exact Stage P Step 2 Actor job, including the commit, verification, GitHub Actions result, scope, limitations, and status. A successful GitHub Actions build/test result for `f2fe3c8d13dd492eadd9115a67f4f2505bcd40c2` must be evidenced before Step 2 can receive PASS.
 
-### Scope / regression
-- No API, authentication, schema/migration, transaction-recording, or unrelated implementation changes.
-- No PDF renderer changes were made in Step 1.
-- The Actor commit is a single clean implementation commit for this step.
-
-### CI
-- GitHub Actions .NET CI run **#17** for commit `a27c09ea79eefa3ca8ab82c2be4d7575c74c73a9` completed with conclusion **success**.
-- Local build/test execution was not required for this Job B because the repository workflow uses GitHub Actions as the build/test gate.
-
-## Reviewer decision
-
-All Step 1 Job B criteria are satisfied.
-
-**Step 1: PASS**
-
-Step 2 is cleared to begin: professional QuestPDF factor layout, reusing the existing verified Persian/Vazirmatn font setup and keeping invoice rendering unchanged.
+**FAIL**
