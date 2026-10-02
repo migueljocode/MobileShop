@@ -8,7 +8,7 @@ $runnable = Join-Path $tmp 'log.ps1'
 Copy-Item -LiteralPath $script -Destination $runnable
 try {
   function Fail($m) { throw "FAIL: $m" }
-  function Lines($o) { @((@($o) -join [Environment]::NewLine) -split [Environment]::NewLine | Where-Object { $_ -match '^2026-' }) }
+  function Lines($o) { [regex]::Matches(($o -join [Environment]::NewLine), '(?m)^2026-') }
   function Expect-Fail([scriptblock]$Command, [string]$Label) {
     $stdout = & $Command 2>&1
     $code = $LASTEXITCODE
