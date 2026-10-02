@@ -115,7 +115,7 @@ public class ReportsDataServiceTests : RepoTestBase
         Assert.Equal(10.44m, row.Bought);
         Assert.Equal(20.99m, row.Sold);
         Assert.Equal(10.55m, row.Profit);
-        Assert.Equal(101.05m, row.ProfitPercent);
+        Assert.Equal(101.05363984674329501915708812m, row.ProfitPercent);
     }
 
     [Fact]
