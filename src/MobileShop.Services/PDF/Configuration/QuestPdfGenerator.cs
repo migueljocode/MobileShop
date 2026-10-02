@@ -49,9 +49,9 @@ public sealed class QuestPdfGenerator(IOptions<PdfSettings> options) : IPdfGener
         page.MarginLeft(_settings.MarginLeft);
         page.DefaultTextStyle(x => x.FontFamily("Vazirmatn").FontSize(9).FontColor("#25313C"));
 
-        page.Header().Element(c => RenderFactorHeader(c, model));
-        page.Content().Element(c => RenderFactorContent(c, model));
-        page.Footer().Element(RenderFactorFooter);
+        page.Header().Element(c => c.ContentFromRightToLeft().Element(x => RenderFactorHeader(x, model)));
+        page.Content().Element(c => c.ContentFromRightToLeft().Element(x => RenderFactorContent(x, model)));
+        page.Footer().Element(c => c.ContentFromRightToLeft().Element(RenderFactorFooter));
     }
 
     private void RenderFactorHeader(IContainer container, TransactionFactorViewModel model)
@@ -103,11 +103,15 @@ public sealed class QuestPdfGenerator(IOptions<PdfSettings> options) : IPdfGener
         });
 
     private static string FindParty(TransactionFactorViewModel model, string role)
-        => model.Rows
-            .Where(x => string.Equals(x.PersonRole, role, StringComparison.OrdinalIgnoreCase))
-            .Select(x => x.PersonLabel)
-            .FirstOrDefault(x => !string.IsNullOrWhiteSpace(x))
-            ?? "در ردیف‌های فاکتور مشخص شده است";
+        => string.Join("، ",
+            model.Rows
+                .Where(x => string.Equals(x.PersonRole, role, StringComparison.OrdinalIgnoreCase))
+                .Select(x => x.PersonLabel)
+                .Where(x => !string.IsNullOrWhiteSpace(x))
+                .Distinct(StringComparer.OrdinalIgnoreCase))
+           is { Length: > 0 } value
+            ? value
+            : "در ردیف‌های فاکتور مشخص شده است";
 
     private static void FactorInfoCard(IContainer container, string title, string value)
         => container
