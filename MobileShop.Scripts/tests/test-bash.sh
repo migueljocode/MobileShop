@@ -2,7 +2,7 @@
 set -euo pipefail
 root="$(cd "$(dirname "$0")/../.." && pwd)"
 script="$root/MobileShop.Scripts/Bash/log.sh"
-ps_source="$root/MobileShop.Scripts/PowerShell/log.ps2"
+ps_source="$root/MobileShop.Scripts/PowerShell/log.ps1"
 fixture="$root/MobileShop.Scripts/tests/fixtures/sample.log"
 tmp="$(mktemp -d)"
 trap 'rm -rf "$tmp"' EXIT
