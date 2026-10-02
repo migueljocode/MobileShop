@@ -1,7 +1,7 @@
 $ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-$script = Join-Path $root 'MobileShop.Scripts/PowerShell/log.ps1'
-$fixture = Join-Path $root 'MobileShop.Scripts/tests/fixtures/sample.log'
+$script = Join-Path $root 'PowerShell/log.ps1'
+$fixture = Join-Path $root 'tests/fixtures/sample.log'
 $tmp = Join-Path ([IO.Path]::GetTempPath()) ("MobileShopLogTests-" + [guid]::NewGuid())
 New-Item -ItemType Directory -Path $tmp | Out-Null
 $runnable = Join-Path $tmp 'log.ps1'
@@ -70,7 +70,7 @@ try {
   $help = @(& $scriptBlock -Help) -join [Environment]::NewLine
   if ($help -notmatch '-DateFrom' -or $help -notmatch '-DateTimeFrom' -or $help -notmatch '-Number') { Fail 'help missing date/number options' }
 
-  $bashScript = Join-Path $root 'MobileShop.Scripts/Bash/log.sh'
+  $bashScript = Join-Path $root 'Bash/log.sh'
   $bashOut = @(& bash $bashScript --level error $fixture)
   if (($bashOut -join [Environment]::NewLine) -ne ($exact -join [Environment]::NewLine)) { Fail 'cross-platform parity' }
 

@@ -3,7 +3,7 @@ name: .NET CI
 
 on:
   push:
-    branches: [main, stage-r-log-utilities]
+    branches: [main]
   pull_request:
     branches: [main]
   workflow_dispatch:
@@ -31,10 +31,10 @@ jobs:
         run: dotnet test src/MobileShop.slnx --nologo --no-build --no-restore
       - name: Test Bash log utility
         shell: bash
-        run: bash MobileShop.Scripts/tests/test-bash.sh
+        run: bash src/MobileShop.Scripts/tests/test-bash.sh
       - name: Test PowerShell log utility
         shell: pwsh
-        run: ./MobileShop.Scripts/tests/test-powershell.ps1
+        run: ./src/MobileShop.Scripts/tests/test-powershell.ps1
       - name: Upload factor PDF inspection artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -49,4 +49,4 @@ jobs:
       - uses: actions/checkout@v5
       - name: Test PowerShell log utility
         shell: pwsh
-        run: ./MobileShop.Scripts/tests/test-powershell.ps1
+        run: ./src/MobileShop.Scripts/tests/test-powershell.ps1

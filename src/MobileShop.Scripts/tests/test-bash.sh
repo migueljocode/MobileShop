@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 root="$(cd "$(dirname "$0")/../.." && pwd)"
-script="$root/MobileShop.Scripts/Bash/log.sh"
-ps_source="$root/MobileShop.Scripts/PowerShell/log.ps1"
-fixture="$root/MobileShop.Scripts/tests/fixtures/sample.log"
+script="$root/Bash/log.sh"
+ps_source="$root/PowerShell/log.ps1"
+fixture="$root/tests/fixtures/sample.log"
 tmp="$(mktemp -d)"
 trap 'rm -rf "$tmp"' EXIT
 
