@@ -11,7 +11,7 @@ public sealed class BuyInputModel
 
     [Range(0, double.MaxValue)]
     [Display(Name = "Finished price")]
-    public decimal Price { get; set; }
+    public int Price { get; set; }
 
     [DataType(DataType.DateTime)]
     public DateTime? Date { get; set; }
