@@ -1,8 +1,9 @@
 name: .NET CI
+# Stage R runs Bash on Ubuntu and PowerShell on both Ubuntu and Windows.
 
 on:
   push:
-    branches: [main]
+    branches: [main, stage-r-log-utilities]
   pull_request:
     branches: [main]
   workflow_dispatch:
@@ -16,26 +17,36 @@ jobs:
 
     steps:
       - uses: actions/checkout@v5
-
       - name: Setup .NET
         uses: actions/setup-dotnet@v5
         with:
           dotnet-version: '10.0.x'
-
       - name: Restore
         run: dotnet restore src/MobileShop.slnx --nologo
-
       - name: Build
         run: dotnet build src/MobileShop.slnx --nologo --no-restore
-
       - name: Test
         env:
           FACTOR_PDF_INSPECTION_DIR: ${{ github.workspace }}/TestResults/FactorPdfInspection
         run: dotnet test src/MobileShop.slnx --nologo --no-build --no-restore
-
+      - name: Test Bash log utility
+        shell: bash
+        run: bash MobileShop.Scripts/tests/test-bash.sh
+      - name: Test PowerShell log utility
+        shell: pwsh
+        run: ./MobileShop.Scripts/tests/test-powershell.ps1
       - name: Upload factor PDF inspection artifacts
         uses: actions/upload-artifact@v4
         with:
           name: factor-pdf-inspection
           path: TestResults/FactorPdfInspection/
           if-no-files-found: error
+
+  powershell-windows:
+    name: PowerShell log utility (Windows)
+    runs-on: windows-2025
+    steps:
+      - uses: actions/checkout@v5
+      - name: Test PowerShell log utility
+        shell: pwsh
+        run: ./MobileShop.Scripts/tests/test-powershell.ps1

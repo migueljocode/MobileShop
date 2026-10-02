@@ -1,9 +1,9 @@
-# Actor Report — Stage Q Step 3
+# Actor Report — Stage R final correction
 
-- Commit: 8355688a68fb6665bb6eae3928275a2c8f4d8a09 — feat(stage-q): add Create Glass navigation
-- Verification: GitHub Actions #85 -> success; build and full test suite passed.
-- Changes: Added a clearly labeled `Create glass` action to `Products/Index.cshtml` using the existing `asp-page="/Products/CreateGlass"` convention; marked Step 3 complete in `plan.md`.
-- Limitations: No additional focused tests were needed; the navigation change is a direct Razor link and the existing Create Glass page has focused coverage from Step 2.
-- Friction noted: None.
+- Commit: 199ecf7fc29162459b1c48077d13bd4df7283482 — fix(stage-r): update Bash parity test for log.ps1
+- Verification: Action #260 — Success. .NET build/test passed (316/316), Bash passed, PowerShell on Ubuntu passed, PowerShell on Windows passed, and artifact upload passed.
+- Changes: Corrected the remaining Bash parity-test reference from `log.ps2` to the standard `log.ps1` extension. The public PowerShell entry point is now `MobileShop.Scripts/PowerShell/log.ps1`.
+- Limitations: Unused branch deletion is not available through the current GitHub connector.
+- Friction noted: One CI failure immediately after the extension rename exposed one stale test reference; it was corrected and the full CI gate passed on the next run.
 - Problems: None.
 - Status: COMPLETE

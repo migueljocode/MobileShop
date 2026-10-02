@@ -3,8 +3,8 @@
 ## Reviewer Briefing
 - Replace the previous 30-script design with exactly two user-facing entry points:
   - `MobileShop.Scripts/Bash/log.sh`
-  - `MobileShop.Scripts/PowerShell/log.ps2`
-- The PowerShell filename `log.ps2` is intentional for this Stage R contract; do not create per-command wrapper scripts.
+  - `MobileShop.Scripts/PowerShell/log.ps1`
+- The PowerShell filename `log.ps1` is the standard PowerShell extension; do not create per-command wrapper scripts.
 - Both entry points implement the same behavior and one shared conceptual command model.
 - Selection is explicit through options:
   - `--level <debug|info|warning|error|fatal>` (short `-l`)
@@ -30,7 +30,7 @@
 
 ### New Stage R files
 - `MobileShop.Scripts/Bash/log.sh`
-- `MobileShop.Scripts/PowerShell/log.ps2`
+- `MobileShop.Scripts/PowerShell/log.ps1`
 - `MobileShop.Scripts/README.md`
 - `MobileShop.Scripts/tests/fixtures/` — deterministic log fixtures.
 - `MobileShop.Scripts/tests/` — lightweight cross-platform test scripts only; no new test framework unless unavoidable and approved by plan revision.
@@ -39,7 +39,7 @@
 ## Step 1 — Canonical CLI contract
 - Invocation shape:
   - `log.sh --level LEVEL [--above|--below] [filters] [--number N] [PATH|-]`
-  - `log.ps2 --level LEVEL [--above|--below] [filters] [--number N] [PATH|-]`
+  - `log.ps1 --level LEVEL [--above|--below] [filters] [--number N] [PATH|-]`
 - `--level/-l` is required unless help is requested.
 - Exact mode is the default.
 - `--above` includes the selected level and every more severe level.
@@ -88,7 +88,7 @@
 - Keep implementation directly runnable by a non-pro user.
 
 ## Step 5 — PowerShell implementation
-- `log.ps2` is the only public PowerShell script.
+- `log.ps1` is the only public PowerShell script.
 - Mirror the same logical functions and behavior as Bash without copying Bash-specific mechanisms.
 - Use built-in PowerShell only.
 - Accept both direct file input and pipeline input.
@@ -98,7 +98,7 @@
 - No module installation or project-specific dependency.
 
 ## Step 6 — Self-contained help
-- `log.sh --help` and `log.ps2 --help` must each be complete enough to use without opening another file.
+- `log.sh --help` and `log.ps1 --help` must each be complete enough to use without opening another file.
 - Help must include:
   - purpose;
   - required `--level/-l`;
@@ -148,7 +148,7 @@
   - `./log.sh --level warning --date-from 2026-01-01 --date-to 2026-01-31`
   - `./log.sh --level error --date-time-from "2026-01-01 08:00:00" --date-time-to "2026-01-01 18:00:00"`
   - `cat logs/app-*.log | ./log.sh --level error`
-  - `./log.ps2 --level error --above -n 20`
+  - `./log.ps1 --level error --above -n 20`
 - Explain that no grep/awk knowledge is required.
 - Root README, if touched, gets only a concise pointer.
 
@@ -161,7 +161,7 @@
 - Any duplicated logic introduced must be justified in the implementation commit/PR.
 
 ## Global Definition of Done
-- Exactly `MobileShop.Scripts/Bash/log.sh` and `MobileShop.Scripts/PowerShell/log.ps2` are the public scripts.
+- Exactly `MobileShop.Scripts/Bash/log.sh` and `MobileShop.Scripts/PowerShell/log.ps1` are the public scripts.
 - No 15-command wrapper family remains.
 - CLI level/severity selection, all filters, file/stdin behavior, event grouping, ordering, `-n`, errors, and help are documented and parity-tested.
 - Invalid dates/datetimes are caught, clearly explained on stderr, and return non-zero.
