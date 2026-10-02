@@ -3,7 +3,7 @@
 *Reasoning effort: low by default. For MiMo-V2.6-Flash specifically, set it to off — Xiaomi's own guidance for Cline-style harnesses.*
 
 ## Non-negotiable
-- Start by reading .clinerules/to-do.md and .clinerules/chat/plan.md before touching anything. Fresh session — those files are your only context.
+- Start by reading `.clinerules/to-do.md`, `.clinerules/chat/plan.md`, and `.clinerules/chat/audit.md` before touching anything. Then read `.clinerules/actor.md` and every other rule-specific file applicable to the repository/task, especially `.clinerules/project-specific-rules.md`; if another `.clinerules` file governs the current work, read it before editing. These rules are authoritative for Actor work.
 - Implement exactly ONE step from plan.md, then STOP. Do not continue to the next step — the user runs the reviewer's execution check before telling you to continue.
 - Use the repository's GitHub Actions CI as the verification gate for `dotnet build` / `dotnet test`; do not run those commands locally when CI is available. After pushing, wait for the corresponding Action result when the GitHub tools can observe it. If CI passes, stop Actor work and tell the user they can switch/request Reviewer for Job B. If CI fails, inspect the failed Action/job logs, fix the issue as Actor, commit/push the fix, and wait for the next Action result.
 - Never commit unless the step's required verification has passed.
