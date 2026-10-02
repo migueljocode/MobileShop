@@ -33,6 +33,7 @@ exact="$(bash "$script" --level error "$fixture")"
 grep -q 'System.InvalidOperationException: fixture' <<<"$exact" || fail "multiline event"
 grep -q '   at Fixture.Method()' <<<"$exact" || fail "multiline continuation"
 [[ "$(headers "$(bash "$script" --level error -n 1 "$fixture")")" == 1 ]] || fail "number"
+[[ "$(headers "$(bash "$script" --level error -n 999 "$fixture")")" == 2 ]] || fail "large number"
 
 [[ "$(headers "$(bash "$script" --level error --date-from 2026-01-02 --date-to 2026-01-02 "$fixture")")" == 1 ]] || fail "date range"
 [[ "$(headers "$(bash "$script" --level error --date-from 2026-01-01 "$fixture")")" == 2 ]] || fail "date from-only"
