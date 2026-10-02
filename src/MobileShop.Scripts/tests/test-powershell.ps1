@@ -1,5 +1,5 @@
 $ErrorActionPreference = 'Stop'
-$root = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
+$root = Split-Path -Parent $PSScriptRoot
 $script = Join-Path $root 'PowerShell/log.ps1'
 $fixture = Join-Path $root 'tests/fixtures/sample.log'
 $tmp = Join-Path ([IO.Path]::GetTempPath()) ("MobileShopLogTests-" + [guid]::NewGuid())
