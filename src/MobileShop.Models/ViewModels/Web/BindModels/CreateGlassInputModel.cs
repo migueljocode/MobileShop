@@ -4,10 +4,13 @@ namespace MobileShop.Models.ViewModels.Web.BindModels;
 public sealed class CreateGlassInputModel
 {
     [Required]
-    public int ManufacturerId { get; set; }
+    public int CompatibleManufacturerId { get; set; }
 
     [Required]
-    public int ModelId { get; set; }
+    public int GlassManufacturerId { get; set; }
+
+    [Required]
+    public int CompatibleModelId { get; set; }
 
     [Range(0, double.MaxValue)]
     public decimal Price { get; set; }

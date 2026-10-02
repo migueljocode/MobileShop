@@ -40,9 +40,12 @@ public class CreateGlassModelTests : RepoTestBase
         return (manufacturer, model);
     }
 
-    private static CreateGlassInputModel ValidInput(int manufacturerId, int modelId) => new()
+    private static CreateGlassInputModel ValidInput(int compatibleManufacturerId, int compatibleModelId, int glassManufacturerId) => new()
     {
-        ManufacturerId = manufacturerId, ModelId = modelId, Price = 100m, ProfitPercent = 20m, Count = 3
+        CompatibleManufacturerId = compatibleManufacturerId,
+        CompatibleModelId = compatibleModelId,
+        GlassManufacturerId = glassManufacturerId,
+        Price = 100m, ProfitPercent = 20m, Count = 3
     };
 
     [Fact]
@@ -68,13 +71,13 @@ public class CreateGlassModelTests : RepoTestBase
     public async Task OnPostAsync_InvalidModelState_RedisplaysAndDoesNotCreate()
     {
         var (manufacturer, model) = SeedModel();
-        _model.Input = ValidInput(manufacturer.Id, model.Id);
+        _model.Input = ValidInput(manufacturer.Id, model.Id, Context.Manufacturers.First(m => m.Name == "Samsung").Id);
         _model.ModelState.AddModelError(nameof(CreateGlassInputModel.Count), "Count is invalid.");
         var result = await _model.OnPostAsync();
         Assert.IsType<PageResult>(result);
         Assert.Empty(Context.Products);
         Assert.Equal(2, _model.Manufacturers.Count);
-        Assert.Single(_model.Models);
+        Assert.Single(_model.CompatibleModels);
     }
 
     [Fact]

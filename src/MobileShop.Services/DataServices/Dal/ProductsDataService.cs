@@ -421,18 +421,44 @@ public class ProductsDataService(
         if (input.Count < 1)
             return new ServiceResult(false, "Count must be at least 1.", nameof(CreateGlassInputModel.Count), null);
 
-        var manufacturer = await manufacturers.FindAsync(input.ManufacturerId);
-        if (manufacturer is null)
-            return new ServiceResult(false, "Selected manufacturer not found.", nameof(CreateGlassInputModel.ManufacturerId), null);
+        var compatibleManufacturer = await manufacturers.FindAsync(input.CompatibleManufacturerId);
+        if (compatibleManufacturer is null)
+            return new ServiceResult(false, "Selected compatible phone manufacturer not found.", nameof(CreateGlassInputModel.CompatibleManufacturerId), null);
 
-        var model = await models.FindAsync(m =>
-            m.Id == input.ModelId &&
-            m.ManufacturerId == manufacturer.Id);
-        if (model is null)
-            return new ServiceResult(false, "Selected model not found for this manufacturer.", nameof(CreateGlassInputModel.ModelId), null);
+        var glassManufacturer = await manufacturers.FindAsync(input.GlassManufacturerId);
+        if (glassManufacturer is null)
+            return new ServiceResult(false, "Selected glass manufacturer not found.", nameof(CreateGlassInputModel.GlassManufacturerId), null);
 
-        if (model.CategoryNavigation.Name is not ("Phone" or "Tablet" or "SmartWatch"))
-            return new ServiceResult(false, "Selected model cannot be used for a glass product.", nameof(CreateGlassInputModel.ModelId), null);
+        var compatibleModel = await models.FindAsync(m =>
+            m.Id == input.CompatibleModelId &&
+            m.ManufacturerId == compatibleManufacturer.Id);
+        if (compatibleModel is null)
+            return new ServiceResult(false, "Selected compatible model not found for this manufacturer.", nameof(CreateGlassInputModel.CompatibleModelId), null);
+
+        var compatibleCategory = await categories.FindAsync(compatibleModel.CategoryId);
+        if (compatibleCategory is null || compatibleCategory.Name is not ("Phone" or "Tablet" or "SmartWatch"))
+            return new ServiceResult(false, "Selected model cannot be used for a glass product.", nameof(CreateGlassInputModel.CompatibleModelId), null);
+
+        var glassCategory = await categories.FindAsync(c => c.Name == "Glass");
+        if (glassCategory is null)
+            return new ServiceResult(false, "The 'Glass' category is missing from the catalog seed data.", nameof(CreateGlassInputModel.GlassManufacturerId), null);
+
+        var glassModelName = compatibleModel.Name + " Glass";
+        var glassModel = await models.FindAsync(m =>
+            m.ManufacturerId == glassManufacturer.Id &&
+            m.CategoryId == glassCategory.Id &&
+            m.Name == glassModelName);
+
+        if (glassModel is null)
+        {
+            glassModel = new Model
+            {
+                ManufacturerId = glassManufacturer.Id,
+                CategoryId = glassCategory.Id,
+                Name = glassModelName,
+            };
+            await models.AddAsync(glassModel, persist: false);
+        }
 
         var finishedPrice = ComputeFinishedPrice(input.Price, input.ProfitPercent, input.ProfitAmount);
         var batch = new List<Product>(input.Count);
@@ -441,8 +467,8 @@ public class ProductsDataService(
         {
             var product = new Product
             {
-                ModelId = model.Id,
-                ModelNavigation = model,
+                ModelId = glassModel.Id,
+                ModelNavigation = glassModel,
                 Barcode = Guid.NewGuid().ToString("N")[..12],
                 Price = finishedPrice,
             };
@@ -455,8 +481,8 @@ public class ProductsDataService(
             glass.ModelFits.Add(new GlassModelFit
             {
                 GlassNavigation = glass,
-                ModelId = model.Id,
-                ModelNavigation = model,
+                ModelId = compatibleModel.Id,
+                ModelNavigation = compatibleModel,
             });
 
             product.GlassProfile = glass;
@@ -470,7 +496,7 @@ public class ProductsDataService(
             return new ServiceResult(false, "The glass products could not be saved. Check the details and try again.", null, null);
         }
 
-        Logger.LogInformation("Added glass batch of {Count} products for ModelId={ModelId}", input.Count, model.Id);
+        Logger.LogInformation("Added glass batch of {Count} products for GlassModelId={GlassModelId} and CompatibleModelId={CompatibleModelId}", input.Count, glassModel.Id, compatibleModel.Id);
         return new ServiceResult(true, null, null, batch[0].Id);
     }
 

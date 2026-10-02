@@ -1059,7 +1059,7 @@ public class ProductsDataServiceTests : RepoTestBase
         SeedCatalog(out var phoneModel, out _);
         var input = new MobileShop.Models.ViewModels.Web.BindModels.CreateGlassInputModel
         {
-            ManufacturerId = 1, ModelId = phoneModel.Id, Price = 100m, ProfitPercent = 25m, Count = 3
+            CompatibleManufacturerId = 1, CompatibleModelId = phoneModel.Id, GlassManufacturerId = 1, Price = 100m, ProfitPercent = 25m, Count = 3
         };
 
         var result = await _service.CreateGlassesAsync(input);
@@ -1144,7 +1144,7 @@ public class ProductsDataServiceTests : RepoTestBase
 
         var result = await _service.CreateGlassesAsync(new MobileShop.Models.ViewModels.Web.BindModels.CreateGlassInputModel
         {
-            ManufacturerId = 1, ModelId = otherModel.Id, Price = 10m, Count = 2
+            CompatibleManufacturerId = 1, CompatibleModelId = otherModel.Id, GlassManufacturerId = 1, Price = 10m, Count = 2
         });
 
         Assert.False(result.Succeeded);
@@ -1159,7 +1159,7 @@ public class ProductsDataServiceTests : RepoTestBase
 
         var result = await _service.CreateGlassesAsync(new MobileShop.Models.ViewModels.Web.BindModels.CreateGlassInputModel
         {
-            ManufacturerId = 1, ModelId = appleIdModel.Id, Price = 10m, Count = 2
+            CompatibleManufacturerId = 1, CompatibleModelId = appleIdModel.Id, GlassManufacturerId = 1, Price = 10m, Count = 2
         });
 
         Assert.False(result.Succeeded);
@@ -1174,7 +1174,7 @@ public class ProductsDataServiceTests : RepoTestBase
 
         var result = await _service.CreateGlassesAsync(new MobileShop.Models.ViewModels.Web.BindModels.CreateGlassInputModel
         {
-            ManufacturerId = 999, ModelId = phoneModel.Id, Price = 10m, Count = 2
+            CompatibleManufacturerId = 999, CompatibleModelId = phoneModel.Id, GlassManufacturerId = 1, Price = 10m, Count = 2
         });
 
         Assert.False(result.Succeeded);

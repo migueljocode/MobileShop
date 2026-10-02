@@ -5,9 +5,25 @@ public class CreateGlassModel(IProductsDataService dataService) : PageModel
     [BindProperty] public CreateGlassInputModel Input { get; set; } = new();
     public string? Message { get; private set; }
     public IReadOnlyList<DropdownOptionViewModel> Manufacturers { get; private set; } = [];
-    public IReadOnlyList<DropdownOptionViewModel> Models { get; private set; } = [];
+    public IReadOnlyList<DropdownOptionViewModel> CompatibleModels { get; private set; } = [];
 
     public async Task OnGetAsync() => await PopulateDropdownsAsync();
+
+    public async Task<IActionResult> OnPostCreateManufacturerAsync(string name)
+    {
+        var result = await dataService.CreateManufacturerAsync(name);
+        if (!result.Succeeded)
+            return new JsonResult(new { error = result.Error! }) { StatusCode = result.StatusCode };
+        return new JsonResult(new { result.Option!.Id, result.Option.Name });
+    }
+
+    public async Task<IActionResult> OnPostCreateModelAsync(int manufacturerId, string name)
+    {
+        var result = await dataService.CreateModelAsync(manufacturerId, name);
+        if (!result.Succeeded)
+            return new JsonResult(new { error = result.Error! }) { StatusCode = result.StatusCode };
+        return new JsonResult(new { result.Option!.Id, result.Option.Name });
+    }
 
     public async Task<IActionResult> OnGetModelsAsync(int manufacturerId)
     {
@@ -42,8 +58,8 @@ public class CreateGlassModel(IProductsDataService dataService) : PageModel
     private async Task PopulateDropdownsAsync()
     {
         Manufacturers = await dataService.GetManufacturersAsync();
-        Models = Input.ManufacturerId > 0
-            ? await dataService.GetModelsAsync(Input.ManufacturerId)
+        CompatibleModels = Input.CompatibleManufacturerId > 0
+            ? await dataService.GetModelsAsync(Input.CompatibleManufacturerId)
             : [];
     }
 }
