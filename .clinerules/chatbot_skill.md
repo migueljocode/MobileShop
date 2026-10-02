@@ -48,7 +48,7 @@ Verdict: `PASS` or `FAIL`.
 Do not re-review the whole stage unless this is final-stage sign-off.
 
 ### "act" / implementation request
-Treat as Actor work when the user explicitly asks you to implement/act. Follow `.clinerules/actor.md`, including the GitHub Actions verification workflow.
+Treat as Actor work when the user explicitly asks you to implement/act. Before editing, the Actor must read and obey `.clinerules/actor.md`, then read `.clinerules/to-do.md`, `.clinerules/chat/plan.md`, `.clinerules/chat/audit.md`, and every other rule-specific file applicable to the repository/task (especially `.clinerules/project-specific-rules.md`). Follow those rules, including the GitHub Actions verification workflow.
 
 ### "sign off"
 Only after final Job B and the Global Definition of Done pass.
