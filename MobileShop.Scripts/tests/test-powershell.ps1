@@ -18,6 +18,8 @@ try {
     if((Get-Item $err).Length -eq 0){Fail "$Label wrote no stderr"}
   }
 
+  $expected=@{debug=1;info=2;warning=1;error=2;fatal=1}
+  foreach($level in $expected.Keys){if((Lines @(& $scriptBlock -Level $level -Path $fixture)).Count -ne $expected[$level]){Fail "exact $level"}}
   $exact = @(& $scriptBlock -Level error -Path $fixture)
   if ((Lines $exact).Count -ne 2) { Fail 'exact error count' }
   if (-not ($exact -match 'System.InvalidOperationException: fixture')) { Fail 'multiline event missing' }
@@ -61,6 +63,8 @@ try {
   $spaceOut = @(& $scriptBlock -Level error -Path $spaced)
   if (($spaceOut -join [Environment]::NewLine) -ne ($exact -join [Environment]::NewLine)) { Fail 'path with spaces' }
   if (@(& $scriptBlock -Level fatal -DateFrom 2026-01-03 -DateTo 2026-01-03 -Path $fixture).Count -ne 0) { Fail 'no-match output' }
+  $empty=Join-Path $tmp 'empty.log';New-Item -ItemType File -Path $empty | Out-Null
+  if(-not $IsWindows){Expect-Fail @('-Level','error','-DateTo','2026-01-02','-Path',$empty) 'empty first-entry inference'}
 
   $help = @(& $scriptBlock -Help) -join [Environment]::NewLine
   if ($help -notmatch '-DateFrom' -or $help -notmatch '-DateTimeFrom' -or $help -notmatch '-Number') { Fail 'help missing date/number options' }
