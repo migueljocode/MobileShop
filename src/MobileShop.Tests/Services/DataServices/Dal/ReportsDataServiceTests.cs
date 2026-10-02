@@ -46,7 +46,7 @@ public class ReportsDataServiceTests : RepoTestBase
         int customerId,
         TransactionDirection direction,
         DateTime date,
-        decimal price)
+        int price)
     {
         var transaction = new Transaction
         {
@@ -99,7 +99,7 @@ public class ReportsDataServiceTests : RepoTestBase
         var seller = AddSeller();
         var customer = AddCustomer();
         var product = TestDataHelpers.CreateProduct(Context);
-        product.Price = 11.48m;
+        product.Price = 11;
         Context.SaveChanges();
 
         var glass = new Glass { ProductId = product.Id };
