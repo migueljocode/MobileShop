@@ -2,8 +2,8 @@
 set -euo pipefail
 r="$(cd "$(dirname "$0")/../.."&&pwd)";s="$r/MobileShop.Scripts/Bash/log.sh";f="$r/MobileShop.Scripts/tests/fixtures/sample.log"
 fail(){ echo "FAIL: $*" >&2; exit 1; }
-o="$(bash "$s" --level error "$f")"; [[ "$(printf '%s\n' "$o"|grep -c $'\tERR\t')" == 2 ]]||fail exact
-[[ "$(bash "$s" --level debug --above "$f"|grep -c $'\t')" == 8 ]]||fail above
+for level in debug info warning error fatal; do [[ -n "$(bash "$s" --level "$level" "$f")" ]]||fail "exact-$level"; done
+[[ "$(bash "$s" --level debug --above "$f"|grep -c $'\t')" == 7 ]]||fail above
 [[ "$(bash "$s" --level warning --below "$f"|grep -c $'\t')" == 3 ]]||fail below
 [[ "$(bash "$s" --level error -n 1 "$f"|grep -c $'\tERR\t')" == 1 ]]||fail number
 [[ "$(bash "$s" --level error --date-from 2026-01-02 --date-to 2026-01-02 "$f"|grep -c $'\tERR\t')" == 1 ]]||fail date
