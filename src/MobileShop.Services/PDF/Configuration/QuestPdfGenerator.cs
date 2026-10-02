@@ -247,22 +247,21 @@ public sealed class QuestPdfGenerator(IOptions<PdfSettings> options) : IPdfGener
             .Text(text =>
             {
                 if (!string.IsNullOrWhiteSpace(_settings.ShopAddress))
-                    text.Span(_settings.ShopAddress);
+                    text.Span(_settings.ShopAddress).FontSize(7.5f).FontColor("#829AB1");
 
                 if (!string.IsNullOrWhiteSpace(_settings.ShopPhone))
                 {
                     if (!string.IsNullOrWhiteSpace(_settings.ShopAddress))
-                        text.Span("  |  ");
-                    text.Span(_settings.ShopPhone);
+                        text.Span("  |  ").FontSize(7.5f).FontColor("#829AB1");
+                    text.Span(_settings.ShopPhone).FontSize(7.5f).FontColor("#829AB1");
                 }
 
                 if (!string.IsNullOrWhiteSpace(_settings.ShopInstagram))
                 {
                     if (!string.IsNullOrWhiteSpace(_settings.ShopAddress) || !string.IsNullOrWhiteSpace(_settings.ShopPhone))
-                        text.Span("  |  ");
-                    text.Span(_settings.ShopInstagram);
+                        text.Span("  |  ").FontSize(7.5f).FontColor("#829AB1");
+                    text.Span(_settings.ShopInstagram).FontSize(7.5f).FontColor("#829AB1");
                 }
-                text.FontSize(7.5f).FontColor("#829AB1");
             });
 
 
