@@ -1,5 +1,5 @@
 #!/usr/bin/env pwsh
-param([Alias('l')][string]$Level,[Alias('h','help')][switch]$Help,[switch]$Above,[switch]$Below,[Alias('n')][long]$Number,[string]$DateFrom,[string]$DateTo,[string]$DateTimeFrom,[string]$DateTimeTo,[string]$Path)
+param([Alias('l')][string]$Level,[Alias('h')][switch]$Help,[switch]$Above,[switch]$Below,[Alias('n')][long]$Number,[string]$DateFrom,[string]$DateTo,[string]$DateTimeFrom,[string]$DateTimeTo,[string]$Path)
 function Help(){@'
 Usage: log.ps2 --Level LEVEL [--Above|--Below] [filters] [-n N] [PATH|-]
 LEVEL: debug info warning error fatal. Exact is default; Above/Below include selected and more/less severe.
