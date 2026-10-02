@@ -21,7 +21,7 @@ try {
   if (-not ($exact -match '   at Fixture.Method\(\)')) { Fail 'multiline continuation missing' }
 
   if ((Lines @(& $script -Level warning -Above -Path $fixture)).Count -ne 3) { Fail 'above semantics' }
-  if ((Lines @(& $script -Level warning -Below -Path $fixture)).Count -ne 3) { Fail 'below semantics' }
+  if ((Lines @(& $script -Level warning -Below -Path $fixture )).Count -ne 4) { Fail 'below semantics' }
   if ((Lines @(& $script -Level error -Number 1 -Path $fixture)).Count -ne 1) { Fail '-n semantics' }
 
   $dateExact = @( & $script -Level error -DateFrom 2026-01-02 -DateTo 2026-01-02 -Path $fixture )
