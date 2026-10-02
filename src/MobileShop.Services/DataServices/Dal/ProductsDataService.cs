@@ -19,6 +19,7 @@ public class ProductsDataService(
     IBaseRepo<Guarantee> guarantees,
     IBaseRepo<Transaction> transactions,
     IBaseRepo<PartNumber> partNumbers,
+    IBaseRepo<Product> products,
     ILogger<ProductsDataService> logger)
     : IProductsDataService
 {
@@ -412,6 +413,65 @@ public class ProductsDataService(
 
         Logger.LogInformation("Added Phone Id={Id}", phone.Id);
         return new ServiceResult(true, null, null, phone.Id);
+    }
+
+    /// <inheritdoc />
+    public async Task<ServiceResult> CreateGlassesAsync(CreateGlassInputModel input)
+    {
+        if (input.Count is < 1 or > 500)
+            return new ServiceResult(false, "Count must be between 1 and 500.", nameof(CreateGlassInputModel.Count), null);
+
+        var manufacturer = await manufacturers.FindAsync(input.ManufacturerId);
+        if (manufacturer is null)
+            return new ServiceResult(false, "Selected manufacturer not found.", nameof(CreateGlassInputModel.ManufacturerId), null);
+
+        var model = await models.FindAsync(m =>
+            m.Id == input.ModelId &&
+            m.ManufacturerId == manufacturer.Id);
+        if (model is null)
+            return new ServiceResult(false, "Selected model not found for this manufacturer.", nameof(CreateGlassInputModel.ModelId), null);
+
+        if (model.CategoryNavigation.Name is not ("Phone" or "Tablet" or "SmartWatch"))
+            return new ServiceResult(false, "Selected model cannot be used for a glass product.", nameof(CreateGlassInputModel.ModelId), null);
+
+        var finishedPrice = ComputeFinishedPrice(input.Price, input.ProfitPercent, input.ProfitAmount);
+        var batch = new List<Product>(input.Count);
+
+        for (var i = 0; i < input.Count; i++)
+        {
+            var product = new Product
+            {
+                ModelId = model.Id,
+                ModelNavigation = model,
+                Barcode = Guid.NewGuid().ToString("N")[..12],
+                Price = finishedPrice,
+            };
+
+            var glass = new Glass
+            {
+                ProductNavigation = product,
+            };
+
+            glass.ModelFits.Add(new GlassModelFit
+            {
+                GlassNavigation = glass,
+                ModelId = model.Id,
+                ModelNavigation = model,
+            });
+
+            product.GlassProfile = glass;
+            batch.Add(product);
+        }
+
+        var saved = await products.AddRangeAsync(batch) > 0;
+        if (!saved)
+        {
+            Logger.LogWarning("Failed to add glass batch of {Count} products", input.Count);
+            return new ServiceResult(false, "The glass products could not be saved. Check the details and try again.", null, null);
+        }
+
+        Logger.LogInformation("Added glass batch of {Count} products for ModelId={ModelId}", input.Count, model.Id);
+        return new ServiceResult(true, null, null, batch[0].Id);
     }
 
     /// <inheritdoc />

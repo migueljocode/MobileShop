@@ -27,6 +27,7 @@ public class ProductsDataServiceTests : RepoTestBase
             new BaseRepo<Guarantee>(Context),
             new BaseRepo<Transaction>(Context),
             new BaseRepo<PartNumber>(Context),
+            new BaseRepo<Product>(Context),
             NullLogger<ProductsDataService>.Instance);
     }
 
@@ -1048,6 +1049,139 @@ public class ProductsDataServiceTests : RepoTestBase
         Assert.Equal(15, phone.ProductNavigation.SecondHandProfile!.TestPeriodDays);
         Assert.Equal("Premium Care", phone.ProductNavigation.GuaranteeProfile!.Corporation);
         Assert.Equal(DateTime.Today.AddYears(1), phone.ProductNavigation.GuaranteeProfile.ExpirationDate);
+    }
+
+    // ── CreateGlassesAsync ────────────────────────────────────
+
+    [Fact]
+    public async Task CreateGlassesAsync_creates_exact_count_with_shared_price_distinct_barcodes_and_fits()
+    {
+        SeedCatalog(out var phoneModel, out _);
+        var input = new MobileShop.Models.ViewModels.Web.BindModels.CreateGlassInputModel
+        {
+            ManufacturerId = 1, ModelId = phoneModel.Id, Price = 100m, ProfitPercent = 25m, Count = 3
+        };
+
+        var result = await _service.CreateGlassesAsync(input);
+
+        Assert.True(result.Succeeded);
+        var products = await Context.Products.Include(p => p.GlassProfile).ThenInclude(g => g!.ModelFits)
+            .Where(p => p.ModelId == phoneModel.Id).ToListAsync();
+
+        Assert.Equal(3, products.Count);
+        Assert.All(products, p => Assert.Equal(125m, p.Price));
+        Assert.Equal(3, products.Select(p => p.Barcode).Distinct().Count());
+        Assert.All(products, p => Assert.Equal(12, p.Barcode.Length));
+        Assert.All(products, p => Assert.NotNull(p.GlassProfile));
+        Assert.All(products, p => Assert.Single(p.GlassProfile!.ModelFits));
+        Assert.All(products, p => Assert.Equal(phoneModel.Id, p.GlassProfile!.ModelFits.Single().ModelId));
+    }
+
+    [Fact]
+    public async Task CreateGlassesAsync_uses_profit_amount_over_percent()
+    {
+        SeedCatalog(out var phoneModel, out _);
+        var result = await _service.CreateGlassesAsync(new MobileShop.Models.ViewModels.Web.BindModels.CreateGlassInputModel
+        {
+            ManufacturerId = 1, ModelId = phoneModel.Id, Price = 100m, ProfitPercent = 50m, ProfitAmount = 20m, Count = 2
+        });
+
+        Assert.True(result.Succeeded);
+        Assert.Equal(2, await Context.Products.CountAsync());
+        Assert.All(await Context.Products.ToListAsync(), p => Assert.Equal(120m, p.Price));
+    }
+
+    [Fact]
+    public async Task CreateGlassesAsync_accepts_count_boundaries()
+    {
+        SeedCatalog(out var phoneModel, out _);
+
+        var one = await _service.CreateGlassesAsync(new MobileShop.Models.ViewModels.Web.BindModels.CreateGlassInputModel
+        {
+            ManufacturerId = 1, ModelId = phoneModel.Id, Price = 10m, Count = 1
+        });
+        Assert.True(one.Succeeded);
+        Assert.Single(await Context.Products.ToListAsync());
+
+        var fiveHundred = await _service.CreateGlassesAsync(new MobileShop.Models.ViewModels.Web.BindModels.CreateGlassInputModel
+        {
+            ManufacturerId = 1, ModelId = phoneModel.Id, Price = 10m, Count = 500
+        });
+        Assert.True(fiveHundred.Succeeded);
+        Assert.Equal(501, await Context.Products.CountAsync());
+    }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(501)]
+    public async Task CreateGlassesAsync_rejects_count_outside_bounds(int count)
+    {
+        SeedCatalog(out var phoneModel, out _);
+
+        var result = await _service.CreateGlassesAsync(new MobileShop.Models.ViewModels.Web.BindModels.CreateGlassInputModel
+        {
+            ManufacturerId = 1, ModelId = phoneModel.Id, Price = 10m, Count = count
+        });
+
+        Assert.False(result.Succeeded);
+        Assert.Equal(nameof(MobileShop.Models.ViewModels.Web.BindModels.CreateGlassInputModel.Count), result.ErrorField);
+        Assert.Empty(await Context.Products.ToListAsync());
+    }
+
+    [Fact]
+    public async Task CreateGlassesAsync_rejects_model_from_another_manufacturer()
+    {
+        SeedCatalog(out _, out _);
+        var otherManufacturer = new Manufacturer { Name = "Samsung" };
+        Context.Manufacturers.Add(otherManufacturer);
+        Context.SaveChanges();
+        var otherModel = new Model
+        {
+            ManufacturerId = otherManufacturer.Id,
+            CategoryId = Context.Categories.First(c => c.Name == "Phone").Id,
+            Name = "Galaxy S24"
+        };
+        Context.Models.Add(otherModel);
+        Context.SaveChanges();
+
+        var result = await _service.CreateGlassesAsync(new MobileShop.Models.ViewModels.Web.BindModels.CreateGlassInputModel
+        {
+            ManufacturerId = 1, ModelId = otherModel.Id, Price = 10m, Count = 2
+        });
+
+        Assert.False(result.Succeeded);
+        Assert.Equal(nameof(MobileShop.Models.ViewModels.Web.BindModels.CreateGlassInputModel.ModelId), result.ErrorField);
+        Assert.Empty(await Context.Products.ToListAsync());
+    }
+
+    [Fact]
+    public async Task CreateGlassesAsync_rejects_disallowed_model_category()
+    {
+        SeedCatalog(out _, out var appleIdModel);
+
+        var result = await _service.CreateGlassesAsync(new MobileShop.Models.ViewModels.Web.BindModels.CreateGlassInputModel
+        {
+            ManufacturerId = 1, ModelId = appleIdModel.Id, Price = 10m, Count = 2
+        });
+
+        Assert.False(result.Succeeded);
+        Assert.Equal(nameof(MobileShop.Models.ViewModels.Web.BindModels.CreateGlassInputModel.ModelId), result.ErrorField);
+        Assert.Empty(await Context.Products.ToListAsync());
+    }
+
+    [Fact]
+    public async Task CreateGlassesAsync_rejects_unknown_manufacturer()
+    {
+        SeedCatalog(out var phoneModel, out _);
+
+        var result = await _service.CreateGlassesAsync(new MobileShop.Models.ViewModels.Web.BindModels.CreateGlassInputModel
+        {
+            ManufacturerId = 999, ModelId = phoneModel.Id, Price = 10m, Count = 2
+        });
+
+        Assert.False(result.Succeeded);
+        Assert.Equal(nameof(MobileShop.Models.ViewModels.Web.BindModels.CreateGlassInputModel.ManufacturerId), result.ErrorField);
+        Assert.Empty(await Context.Products.ToListAsync());
     }
 
     // ── CreateAppleIdAsync ───────────────────────────────────

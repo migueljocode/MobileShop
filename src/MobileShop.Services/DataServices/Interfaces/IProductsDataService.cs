@@ -69,6 +69,10 @@ public interface IProductsDataService
     /// <param name="input">The phone input.</param>
     Task<ServiceResult> CreatePhoneAsync(CreatePhoneInputModel input);
 
+    /// <summary>Creates a batch of glass products from the submitted input.</summary>
+    /// <param name="input">The glass batch input.</param>
+    Task<ServiceResult> CreateGlassesAsync(CreateGlassInputModel input);
+
     /// <summary>Creates an Apple ID from the submitted input.</summary>
     /// <param name="input">The Apple ID input.</param>
     Task<ServiceResult> CreateAppleIdAsync(CreateAppleIdInputModel input);
