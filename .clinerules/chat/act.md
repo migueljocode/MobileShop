@@ -1,31 +1,9 @@
-# Act Report — Stage P Step 5 (rendered PDF inspection)
+# Actor Report — Stage Q Step 1
 
-## Commit
-
-test(pdf): inspect rendered factor layouts
-
-## Verification
-
-- GitHub Actions **#59 — Success** for Actor commit 7b1c1203ac41e473b527f6343c077ab3a906cbc4.
-- CI generated representative rendered PDFs for both factor entry paths:
-  - single Persian/RTL factor;
-  - selected/mixed 12-row Buy/Sell factor.
-- Visual inspection of the actual rendered A4 PDFs confirmed readable hierarchy, party cards, aligned transaction table, totals, signatures, footer/shop information, Persian/RTL text, mixed Persian/Latin wrapping, decimal/large-value formatting, and no overlap or clipping.
-- Initial inspection exposed an orphaned signature block on page 2 for the 12-row case. The layout was tightened and the signature block guarded against page splitting.
-- Final inspection shows both representative PDFs fit cleanly on one A4 page with the signature area retained.
-
-## Limitations
-
-Inspection covers representative single-row Persian and selected/mixed multi-row factors; no new business data or schema behavior was introduced.
-
-## Friction noted
-
-The first rendered multi-row inspection exposed a pagination defect. It was corrected before final verification.
-
-## Problems
-
-None remaining.
-
-## Status
-
-COMPLETE
+- Commit: 133403c77b7a6383a0b9863168324f6924ea0f17 — feat(stage-q): bulk glass creation
+- Additional required fix: c8ad17a1b7c0147b380eda960eea283771be3f35 — fix(stage-q): update service test construction
+- Verification: GitHub Actions for the implementation commit could not be observed through the available GitHub Actions integration; combined status returned no statuses. No local dotnet build/test was run.
+- Limitations: The repository GitHub file API required separate commits for the five implementation files, so the step was assembled through PR #3 and squash-merged. A direct service-constructor test instantiation outside the original Step 1 file list was also required to keep the existing test suite compiling.
+- Friction noted: GitHub connector exposes file updates as individual commits and does not expose push-triggered workflow runs for the resulting main commit.
+- Problems: CI verification is unavailable, so Step 1 cannot be marked complete and plan.md remains unchecked.
+- Status: BLOCKED
