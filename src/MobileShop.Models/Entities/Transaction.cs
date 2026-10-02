@@ -19,7 +19,7 @@ public class Transaction : BaseEntity
 
     [Range(0, double.MaxValue, ErrorMessage = "{0} cannot be negative.")]
     [Column(TypeName = "decimal(18,2)")]
-    public decimal FinishedPrice { get; set; }
+    public int FinishedPrice { get; set; }
 
     public TransactionDirection Direction { get; set; }
 }
