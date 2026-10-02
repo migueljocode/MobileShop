@@ -43,7 +43,7 @@ public class ProfitLossTests
 
         serviceMock.Setup(s => s.GetProfitLossTotalAsync(
             It.IsAny<DateTime?>(), It.IsAny<DateTime?>()))
-            .ReturnsAsync(0m);
+            .ReturnsAsync(0);
     }
 
     // ── Automatic presets ──────────────────────────────────────
@@ -417,7 +417,7 @@ public class ProfitLossTests
                 capturedTotalFrom = f;
                 capturedTotalTo = t;
             })
-            .ReturnsAsync(0m);
+            .ReturnsAsync(0);
         mock.Setup(s => s.GetEarliestTransactionDateAsync())
             .ReturnsAsync(new DateTime(2024, 1, 1));
 
@@ -458,7 +458,7 @@ public class ProfitLossTests
                 capturedTotalFrom = f;
                 capturedTotalTo = t;
             })
-            .ReturnsAsync(0m);
+            .ReturnsAsync(0);
         mock.Setup(s => s.GetEarliestTransactionDateAsync())
             .ReturnsAsync(new DateTime(2024, 1, 1));
 
