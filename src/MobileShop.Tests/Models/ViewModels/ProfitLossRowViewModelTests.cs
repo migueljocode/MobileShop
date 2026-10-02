@@ -14,36 +14,36 @@ public class ProfitLossRowViewModelTests
         [Fact]
     public void Positive_profit_returns_correct_percentage()
     {
-        var row = new ProfitLossRowViewModel(1, "Product A", 100m, 150m);
+        var row = new ProfitLossRowViewModel(1, "Product A", 100, 150);
 
-        Assert.Equal(50m, row.Profit);
+        Assert.Equal(50, row.Profit);
         Assert.Equal(50m, row.ProfitPercent); // (50 / 100) * 100 = 50%
     }
 
     [Fact]
     public void Zero_profit_returns_zero_percent()
     {
-        var row = new ProfitLossRowViewModel(1, "Product A", 100m, 100m);
+        var row = new ProfitLossRowViewModel(1, "Product A", 100, 100);
 
-        Assert.Equal(0m, row.Profit);
+        Assert.Equal(0, row.Profit);
         Assert.Equal(0m, row.ProfitPercent);
     }
 
     [Fact]
     public void Negative_profit_returns_negative_percentage()
     {
-        var row = new ProfitLossRowViewModel(1, "Product A", 100m, 50m);
+        var row = new ProfitLossRowViewModel(1, "Product A", 100, 50);
 
-        Assert.Equal(-50m, row.Profit);
+        Assert.Equal(-50, row.Profit);
         Assert.Equal(-50m, row.ProfitPercent); // (-50 / 100) * 100 = -50%
     }
 
     [Fact]
     public void Zero_bought_returns_zero_percent_without_division_by_zero()
     {
-        var row = new ProfitLossRowViewModel(1, "Product A", 0m, 50m);
+        var row = new ProfitLossRowViewModel(1, "Product A", 0, 50);
 
-        Assert.Equal(50m, row.Profit);
+        Assert.Equal(50, row.Profit);
         Assert.Equal(0m, row.ProfitPercent); // Bought == 0 → safe zero
     }
 }
