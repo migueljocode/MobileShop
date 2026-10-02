@@ -1092,7 +1092,7 @@ public class ProductsDataServiceTests : RepoTestBase
     }
 
     [Fact]
-    public async Task CreateGlassesAsync_accepts_count_boundaries()
+    public async Task CreateGlassesAsync_accepts_count_without_an_upper_cap()
     {
         SeedCatalog(out var phoneModel, out _);
 
@@ -1103,24 +1103,22 @@ public class ProductsDataServiceTests : RepoTestBase
         Assert.True(one.Succeeded);
         Assert.Single(await Context.Products.ToListAsync());
 
-        var fiveHundred = await _service.CreateGlassesAsync(new MobileShop.Models.ViewModels.Web.BindModels.CreateGlassInputModel
+        var fiveHundredAndOne = await _service.CreateGlassesAsync(new MobileShop.Models.ViewModels.Web.BindModels.CreateGlassInputModel
         {
-            ManufacturerId = 1, ModelId = phoneModel.Id, Price = 10m, Count = 500
+            ManufacturerId = 1, ModelId = phoneModel.Id, Price = 10m, Count = 501
         });
-        Assert.True(fiveHundred.Succeeded);
-        Assert.Equal(501, await Context.Products.CountAsync());
+        Assert.True(fiveHundredAndOne.Succeeded);
+        Assert.Equal(502, await Context.Products.CountAsync());
     }
 
-    [Theory]
-    [InlineData(0)]
-    [InlineData(501)]
-    public async Task CreateGlassesAsync_rejects_count_outside_bounds(int count)
+    [Fact]
+    public async Task CreateGlassesAsync_rejects_non_positive_count()
     {
         SeedCatalog(out var phoneModel, out _);
 
         var result = await _service.CreateGlassesAsync(new MobileShop.Models.ViewModels.Web.BindModels.CreateGlassInputModel
         {
-            ManufacturerId = 1, ModelId = phoneModel.Id, Price = 10m, Count = count
+            ManufacturerId = 1, ModelId = phoneModel.Id, Price = 10m, Count = 0
         });
 
         Assert.False(result.Succeeded);
