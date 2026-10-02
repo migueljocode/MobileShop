@@ -801,7 +801,7 @@ public class ProductsDataServiceTests : RepoTestBase
     public async Task CreatePhoneAsync_finished_price_with_percent_only()
     {
         SeedCatalog(out var phoneModel, out _);
-        var input = PhonePricing(1000m, percent: 10m, amount: null);
+        var input = PhonePricing(1000, percent: 10m, amount: null);
         input.ModelId = phoneModel.Id;
 
         var result = await _service.CreatePhoneAsync(input);
@@ -809,14 +809,14 @@ public class ProductsDataServiceTests : RepoTestBase
         Assert.True(result.Succeeded);
         var phone = await Context.Phones.FirstAsync(p => p.IMEI1 == input.IMEI1);
         var product = await Context.Products.FirstAsync(p => p.Id == phone.ProductId);
-        Assert.Equal(1100m, product.Price);
+        Assert.Equal(1100, product.Price);
     }
 
     [Fact]
     public async Task CreatePhoneAsync_finished_price_with_amount_only()
     {
         SeedCatalog(out var phoneModel, out _);
-        var input = PhonePricing(1000m, percent: null, amount: 250m);
+        var input = PhonePricing(1000, percent: null, amount: 250);
         input.ModelId = phoneModel.Id;
 
         var result = await _service.CreatePhoneAsync(input);
@@ -824,7 +824,7 @@ public class ProductsDataServiceTests : RepoTestBase
         Assert.True(result.Succeeded);
         var phone = await Context.Phones.FirstAsync(p => p.IMEI1 == input.IMEI1);
         var product = await Context.Products.FirstAsync(p => p.Id == phone.ProductId);
-        Assert.Equal(1250m, product.Price);
+        Assert.Equal(1250, product.Price);
     }
 
     [Fact]
@@ -832,7 +832,7 @@ public class ProductsDataServiceTests : RepoTestBase
     {
         SeedCatalog(out var phoneModel, out _);
         // Amount-first safety net: 1000 + 50 (amount) wins over 1000 + 10% (1100).
-        var input = PhonePricing(1000m, percent: 10m, amount: 50m);
+        var input = PhonePricing(1000, percent: 10m, amount: 50);
         input.ModelId = phoneModel.Id;
 
         var result = await _service.CreatePhoneAsync(input);
@@ -840,14 +840,14 @@ public class ProductsDataServiceTests : RepoTestBase
         Assert.True(result.Succeeded);
         var phone = await Context.Phones.FirstAsync(p => p.IMEI1 == input.IMEI1);
         var product = await Context.Products.FirstAsync(p => p.Id == phone.ProductId);
-        Assert.Equal(1050m, product.Price);
+        Assert.Equal(1050, product.Price);
     }
 
     [Fact]
     public async Task CreatePhoneAsync_persists_second_hand_and_guarantee_notes()
     {
         SeedCatalog(out var phoneModel, out _);
-        var input = PhonePricing(1000m, null, null);
+        var input = PhonePricing(1000, null, null);
         input.ModelId = phoneModel.Id;
         input.IsSecondHand = true;
         input.SecondHandNotes = "  scuffed corner  ";
@@ -869,7 +869,7 @@ public class ProductsDataServiceTests : RepoTestBase
     public async Task CreatePhoneAsync_flags_false_leave_profiles_null_and_blank_notes_trim_to_null()
     {
         SeedCatalog(out var phoneModel, out _);
-        var input = PhonePricing(1000m, null, null);
+        var input = PhonePricing(1000, null, null);
         input.ModelId = phoneModel.Id;
         input.IsSecondHand = false;
         input.SecondHandNotes = "   ";
@@ -903,7 +903,7 @@ public class ProductsDataServiceTests : RepoTestBase
         Assert.True(result.Succeeded);
         var appleId = await Context.AppleIds.FirstAsync(a => a.Email == input.Email);
         var product = await Context.Products.FirstAsync(p => p.Id == appleId.ProductId);
-        Assert.Equal(300m, product.Price);
+        Assert.Equal(300, product.Price);
     }
 
     [Fact]
@@ -923,7 +923,7 @@ public class ProductsDataServiceTests : RepoTestBase
         Assert.True(result.Succeeded);
         var appleId = await Context.AppleIds.FirstAsync(a => a.Email == input.Email);
         var product = await Context.Products.FirstAsync(p => p.Id == appleId.ProductId);
-        Assert.Equal(240m, product.Price);
+        Assert.Equal(240, product.Price);
     }
 
     // ── CreatePhoneAsync: PartNumber ─────────────────────────
@@ -1097,7 +1097,7 @@ public class ProductsDataServiceTests : RepoTestBase
         Assert.All(products, p => Assert.Equal(125m, p.Price));
         var purchases = await Context.Transactions.Where(t => t.Direction == TransactionDirection.Buy).ToListAsync();
         Assert.Equal(3, purchases.Count);
-        Assert.All(purchases, t => Assert.Equal(100m, t.FinishedPrice));
+        Assert.All(purchases, t => Assert.Equal(100, t.FinishedPrice));
         Assert.All(purchases, t => Assert.Equal(DateTime.Today, t.Date));
         Assert.All(products, p => Assert.Equal(glassModel.Id, p.ModelId));
         Assert.Equal(3, products.Select(p => p.Barcode).Distinct().Count());
@@ -1124,9 +1124,9 @@ public class ProductsDataServiceTests : RepoTestBase
 
         Assert.True(result.Succeeded);
         var product = Assert.Single(await Context.Products.ToListAsync());
-        Assert.Equal(31.32m, product.Price);
+        Assert.Equal(31, product.Price);
         var purchase = Assert.Single(await Context.Transactions.Where(t => t.Direction == TransactionDirection.Buy).ToListAsync());
-        Assert.Equal(10.44m, purchase.FinishedPrice);
+        Assert.Equal(10, purchase.FinishedPrice);
         Assert.Equal(DateTime.Today, purchase.Date);
     }
 
