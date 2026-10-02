@@ -26,6 +26,15 @@ A permission grant is scoped to the requested work; do not infer broader permiss
 
 When permission is granted only for reviewer documentation, limit writes to reviewer/planner-owned documentation (`plan.md`, `audit.md`, and, after final validation, `to-do.md`).
 
+## Role-document requirement
+
+When the user explicitly assigns one of the three workflow roles, the role's repository report is mandatory and must be written according to that role's authoritative rule file:
+- **Actor** → write `.clinerules/chat/act.md` according to `.clinerules/actor.md`.
+- **Planner** → write `.clinerules/chat/plan.md` according to `.clinerules/planner.md`.
+- **Reviewer** → write `.clinerules/chat/audit.md` according to `.clinerules/reviewer.md`.
+
+The role must follow the complete requirements of its authoritative rule file for that document, not merely produce a chat response. If the rule file requires overwriting the document, required sections, verdicts, evidence, or completion checks, follow those requirements exactly.
+
 ## 2. Command meanings
 
 ### "plan"
