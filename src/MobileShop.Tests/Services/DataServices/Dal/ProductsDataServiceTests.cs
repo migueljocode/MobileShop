@@ -1165,7 +1165,7 @@ public class ProductsDataServiceTests : RepoTestBase
         });
 
         Assert.False(result.Succeeded);
-        Assert.Equal(nameof(MobileShop.Models.ViewModels.Web.BindModels.CreateGlassInputModel.ModelId), result.ErrorField);
+        Assert.Equal(nameof(MobileShop.Models.ViewModels.Web.BindModels.CreateGlassInputModel.CompatibleModelId), result.ErrorField);
         Assert.Empty(await Context.Products.ToListAsync());
     }
 
