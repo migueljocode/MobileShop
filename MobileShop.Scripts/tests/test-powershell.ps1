@@ -67,7 +67,7 @@ Expect-Fail { & pwsh -NoProfile -File $runnable -Level error -Number abc -Path $
   if ($noMatch.Count -ne 0) { Fail 'no-match output' }
 
   $help = @(& pwsh -NoProfile -File $runnable -Help) -join [Environment]::NewLine
-  if ($help -notmatch '--date-from') { Fail 'help missing date options' }
+  if ($help -notmatch '-DateFrom' -or $help -notmatch '-DateTimeFrom' -or $help -notmatch '-Number') { Fail 'help missing date/number options' }
 
   $bashScript = Join-Path $root 'MobileShop.Scripts/Bash/log.sh'
   $bashOut = @(& bash $bashScript --level error $fixture)
