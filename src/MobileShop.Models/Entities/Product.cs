@@ -6,7 +6,7 @@ public class Product : BaseEntity
     // the asking price to sell it at - discount is calculated against this
     [Range(0, double.MaxValue, ErrorMessage = "{0} cannot be negative.")]
     [Column(TypeName = "decimal(18,2)")]
-    public decimal Price { get; set; }
+    public int Price { get; set; }
 
     // the manufacturer and the category are both reached through the model - a model's category
     // is a permanent fact about that model, so neither is duplicated on the product
