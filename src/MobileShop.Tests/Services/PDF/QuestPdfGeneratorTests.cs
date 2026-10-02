@@ -92,7 +92,7 @@ public class QuestPdfGeneratorTests
             ],
             DateTime.UtcNow);
 
-        Assert.Equal(87_000_000m, model.TotalPrice);
+        Assert.Equal(87000000, model.TotalPrice);
         AssertValidPdf(_generator.GenerateTransactionFactor(model));
     }
 
@@ -109,7 +109,7 @@ public class QuestPdfGeneratorTests
                 "Seller",
                 "Ali Seller"));
 
-        Assert.Equal(123_456_789.45m, model.TotalPrice);
+        Assert.Equal(123456789, model.TotalPrice);
         AssertValidPdf(_generator.GenerateTransactionFactor(model));
     }
 
@@ -134,7 +134,7 @@ public class QuestPdfGeneratorTests
     {
         var model = Factor();
 
-        Assert.Equal(0m, model.TotalPrice);
+        Assert.Equal(0, model.TotalPrice);
         AssertValidPdf(_generator.GenerateTransactionFactor(model));
     }
 
