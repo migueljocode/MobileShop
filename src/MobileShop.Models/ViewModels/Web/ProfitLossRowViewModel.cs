@@ -3,10 +3,10 @@ namespace MobileShop.Models.ViewModels.Web;
 public sealed record ProfitLossRowViewModel(
     int ProductId,
     string ProductLabel,
-    decimal Bought,
-    decimal Sold)
+    int Bought,
+    int Sold)
 {
-    public decimal Profit => Sold - Bought;
+    public int Profit => Sold - Bought;
 
     /// <summary>
     /// Profit as a percentage of the amount bought: (Profit / Bought) * 100.
