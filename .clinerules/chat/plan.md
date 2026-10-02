@@ -6,7 +6,8 @@
 - Reuse the existing Stage N finished-price calculation; do not duplicate pricing logic.
 - Keep API source/stubs, schema, migrations, authentication, and unrelated product flows untouched.
 
-## [ ] Step 1 — Bulk glass contract and DAL creation
+## ~~[x] Step 1 — Bulk glass contract and DAL creation~~
+**PASS — Reviewer Job B; GitHub Actions #72 succeeded on the final Step 1 fix.**
 - Files: create `src/MobileShop.Models/ViewModels/Web/BindModels/CreateGlassInputModel.cs`; modify `src/MobileShop.Services/DataServices/Interfaces/IProductsDataService.cs`, `src/MobileShop.Services/DataServices/Dal/ProductsDataService.cs`, and focused `ProductsDataServiceTests`; do not touch API source/stubs.
 - Add ManufacturerId, ModelId, paid Price, ProfitPercent/ProfitAmount, and Count (1–500).
 - Validate manufacturer/model ownership and ensure the model category is Phone, Tablet, or SmartWatch.
