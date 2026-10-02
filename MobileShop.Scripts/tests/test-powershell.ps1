@@ -6,7 +6,7 @@ $tmp = Join-Path ([IO.Path]::GetTempPath()) ("MobileShopLogTests-" + [guid]::New
 New-Item -ItemType Directory -Path $tmp | Out-Null
 try {
   function Fail($m) { throw "FAIL: $m" }
-  function Lines($o) { @($o | Where-Object { $_ -match '^2026-' }) }
+  function Lines($o) { @((@($o) -join [Environment]::NewLine) -split [Environment]::NewLine | Where-Object { $_ -match '^2026-' }) }
   function Expect-Fail([scriptblock]$Command, [string]$Label) {
     $stdout = & $Command 2>&1
     $code = $LASTEXITCODE
