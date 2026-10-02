@@ -10,7 +10,7 @@ public class TransactionFactorExtensionsTests
     public void Sale_row_is_written_to_the_customer()
     {
         var transaction = new TransactionListItemViewModel(
-            7, SampleDate, TransactionDirection.Sell, "Apple iPhone 13", 45_000_000m, "Shop", "Sara Ahmadi");
+            7, SampleDate, TransactionDirection.Sell, "Apple iPhone 13", 45_000_000, "Shop", "Sara Ahmadi");
 
         var row = transaction.ToFactorRow();
 
@@ -27,7 +27,7 @@ public class TransactionFactorExtensionsTests
     public void Buy_row_is_written_to_the_seller()
     {
         var transaction = new TransactionListItemViewModel(
-            8, SampleDate, TransactionDirection.Buy, "Anker 20W Charger", 900_000m, "Ali Rezaei", "Shop");
+            8, SampleDate, TransactionDirection.Buy, "Anker 20W Charger", 900_000, "Ali Rezaei", "Shop");
 
         var row = transaction.ToFactorRow();
 
@@ -39,7 +39,7 @@ public class TransactionFactorExtensionsTests
     public void Details_row_keeps_the_supplied_identifier()
     {
         var details = new TransactionDetailsViewModel(
-            SampleDate, TransactionDirection.Sell, 1_200_000m, "Anker 20W Charger", "Shop", "Sara Ahmadi");
+            SampleDate, TransactionDirection.Sell, 1_200_000, "Anker 20W Charger", "Shop", "Sara Ahmadi");
 
         var row = details.ToFactorRow(42);
 
