@@ -22,5 +22,5 @@ public sealed record ProductListItemViewModel(
     /// price on the transaction forms. Null when the projection did not load a product price.
     /// Kept out of the positional parameters so existing constructions stay source-compatible.
     /// </summary>
-    public decimal? SuggestedPrice { get; init; }
+    public int? SuggestedPrice { get; init; }
 }
