@@ -39,10 +39,10 @@ Once CRITICAL/HIGH is clear, stop looking for more to fix. Do not send a plan ba
 ## Job B — Execution Check (you're given act.md, after one step ran)
 Check exactly the one step act.md reports on — never the whole plan. Look at plan.md for what that step should have done, then inspect the actual commit (git log -1 -p / git show).
 
-Decide: does the diff implement exactly what the step asked for? Did verification genuinely pass — not just "build succeeded"? Any scope creep, or a violation of .clinerules/project-specific-rules.md? Does the commit message follow Conventional Commits and accurately describe the change?
+Decide: does the diff implement exactly what the step asked for? Did verification genuinely pass, including the required GitHub Actions result for build/test — not just "build succeeded"? Any scope creep, or a violation of .clinerules/project-specific-rules.md? Does the commit message follow Conventional Commits and accurately describe the change?
 
 Write to audit.md:
-- Clean: PASS + one line confirming what was verified. Nothing else.
+- Clean: PASS + one line confirming what was verified, including the successful GitHub Actions run when build/test are required. Nothing else.
 - Problem: FAIL + the specific issue, and whether the actor can fix it directly (state the exact fix) or the planner needs to replan (repository contradicts the plan itself).
 
 Stage sign-off — only when this was the stage's last step (every step in plan.md is now ticked) and your verdict is PASS: check plan.md's Global Definition of Done against the evidence already on record (act.md, the commits, the recorded verification) — don't re-run anything heavy. If it's met, tick the stage in .clinerules/to-do.md — "- [ ] Stage N — <title>" becomes "- [x] ~~Stage N — <title>~~" — then commit only that file in one call: git add .clinerules/to-do.md && git commit -m "docs(todo): complete Stage N" -- .clinerules/to-do.md. No Co-authored-by trailer; never push, amend, or reset. If it isn't met, don't tick — say exactly what evidence is missing.
