@@ -40,7 +40,7 @@ public class QuestPdfGeneratorTests
             SellerName: null,
             SellerPhoneNumber: null,
             TransactionDate: DateTime.UtcNow,
-            FinishedPrice: 1000m,
+            FinishedPrice: 1000,
             ProductCount: 1,
             ProductInformation: "iPhone 15",
             ProductExtras: [],
@@ -66,7 +66,7 @@ public class QuestPdfGeneratorTests
             SellerName: null,
             SellerPhoneNumber: null,
             TransactionDate: DateTime.UtcNow,
-            FinishedPrice: 1000m,
+            FinishedPrice: 1000,
             ProductCount: 1,
             ProductInformation: "آیفون ۱۵",
             ProductExtras: [],
@@ -105,7 +105,7 @@ public class QuestPdfGeneratorTests
                 new(2026, 1, 1, 10, 30, 0, DateTimeKind.Utc),
                 TransactionDirection.Buy,
                 "iPhone 17 Pro",
-                123_456_789.45m,
+                123_456_789,
                 "Seller",
                 "Ali Seller"));
 
@@ -122,7 +122,7 @@ public class QuestPdfGeneratorTests
                 DateTime.UtcNow,
                 TransactionDirection.Sell,
                 "اپل آیفون ۱۷ پرو مکس با حافظه ۵۱۲ گیگابایت Titanium Desert",
-                987_654_321.99m,
+                987_654_322,
                 "Customer",
                 "سارا احمدی رضایی با نام خانوادگی طولانی و اطلاعات تکمیلی"));
 
@@ -153,7 +153,7 @@ public class QuestPdfGeneratorTests
                 new(2026, 1, 1, 10, 30, 0, DateTimeKind.Utc),
                 TransactionDirection.Sell,
                 "اپل آیفون ۱۷ پرو مکس ۵۱۲ گیگابایت Titanium Desert",
-                987_654_321.99m,
+                987_654_322,
                 "Customer",
                 "سارا احمدی رضایی با نام خانوادگی طولانی و اطلاعات تکمیلی"));
 
@@ -166,7 +166,7 @@ public class QuestPdfGeneratorTests
                     id % 2 == 0
                         ? "Apple iPhone 17 Pro Max 512GB Titanium Desert"
                         : "سامسونگ گلکسی S26 اولترا با حافظه ۱ ترابایت",
-                    120_000_000m + id * 1_234_567.89m,
+                    120_000_000 + id * 1_234_568,
                     id % 2 == 0 ? "Customer" : "Seller",
                     id % 2 == 0
                         ? "سارا احمدی رضایی"
