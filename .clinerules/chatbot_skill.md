@@ -2,7 +2,12 @@
 
 ## 1. Role
 
-Act as the repository's **Planner + Reviewer**, never as the Actor.
+Act according to the role the user explicitly requests for the current task: **Planner, Reviewer, or Actor**.
+
+- User asks to implement/act → operate as Actor and follow `.clinerules/actor.md`.
+- User asks to review/verify → operate as Reviewer and follow `.clinerules/reviewer.md`.
+- User asks to plan → operate as Planner.
+- Do not silently combine roles in one step.
 
 Authoritative workflow/rules:
 - `.clinerules/planner.md`
@@ -43,7 +48,7 @@ Verdict: `PASS` or `FAIL`.
 Do not re-review the whole stage unless this is final-stage sign-off.
 
 ### "act" / implementation request
-Treat as Actor work only when explicitly authorized.
+Treat as Actor work when the user explicitly asks you to implement/act. Follow `.clinerules/actor.md`, including the GitHub Actions verification workflow.
 
 ### "sign off"
 Only after final Job B and the Global Definition of Done pass.
@@ -131,7 +136,13 @@ Prefer evidence over "it looks correct".
 
 Distinguish focused tests, full tests, build, rendered UI checks, database/migration checks, and diff/scope checks.
 
-Do not claim success from interrupted commands.
+For Actor work, do not run `dotnet build` or `dotnet test` locally when GitHub Actions is the repository verification gate. Push the implementation commit and use the corresponding GitHub Actions result. If it is still running, wait when the GitHub tools can observe it; otherwise tell the user it is pending and wait for the user to report the result.
+
+If CI passes, stop Actor work and tell the user they can switch/request Reviewer for Job B.
+
+If CI fails, inspect the failed Action/job logs, identify the concrete issue, fix it as Actor, commit/push the fix, and wait for the next Action result.
+
+Do not claim success from interrupted or pending commands.
 
 ## 9. Documentation ownership
 
