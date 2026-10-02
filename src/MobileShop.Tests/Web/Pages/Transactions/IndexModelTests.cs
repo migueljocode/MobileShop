@@ -104,6 +104,8 @@ public class IndexModelTests : RepoTestBase
         Assert.Equal(PdfBytes, file.FileContents);
         Assert.NotNull(_pdfGenerator.LastFactor);
         Assert.Equal([_tx2.Id, _tx1.Id], _pdfGenerator.LastFactor!.Rows.Select(row => row.TransactionId));
+        Assert.Equal(["Customer", "Seller"], _pdfGenerator.LastFactor.Rows.Select(row => row.PersonRole));
+        Assert.Equal(["Sara Customer", "Ali Seller"], _pdfGenerator.LastFactor.Rows.Select(row => row.PersonLabel));
         Assert.Equal(310m, _pdfGenerator.LastFactor.TotalPrice);
     }
 
