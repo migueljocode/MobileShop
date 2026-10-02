@@ -113,7 +113,7 @@ public class CreateGlassModelTests : RepoTestBase
     {
         var (manufacturer, model) = SeedModel();
         _model.Input = ValidInput(manufacturer.Id, model.Id, Context.Manufacturers.First(m => m.Name == "Samsung").Id);
-        _model.Input.Price = 10.44m;
+        _model.Input.Price = 10;
         _model.Input.ProfitPercent = 200m;
         _model.Input.ProfitAmount = null;
 
