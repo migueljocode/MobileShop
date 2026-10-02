@@ -26,7 +26,7 @@ document.addEventListener('DOMContentLoaded', function () {
             updateFinished();
             return;
         }
-        amountEl.value = (price * percent / 100)Math.floor(price * percent / 100).toString();
+        amountEl.value = Math.floor(price * percent / 100).toString();
         updateFinished();
     }
 
@@ -38,7 +38,7 @@ document.addEventListener('DOMContentLoaded', function () {
             updateFinished();
             return;
         }
-        percentEl.value = (amount / price * 100)Math.floor(price * percent / 100).toString();
+        percentEl.value = (amount / price * 100).toFixed(2);
         updateFinished();
     }
 
@@ -62,7 +62,7 @@ document.addEventListener('DOMContentLoaded', function () {
         if (finished < 0) finished = 0;
 
         // Must set .value on <input>; textContent does not update the input display.
-        const text = finishedMath.floor(price * percent / 100).toString();
+        const text = Math.floor(finished).toString();
         if ('value' in finishedEl) {
             finishedEl.value = text;
         } else {
