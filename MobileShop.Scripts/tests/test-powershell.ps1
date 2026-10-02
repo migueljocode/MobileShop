@@ -33,6 +33,7 @@ try {
   }
 
   if ((Lines @(& $scriptBlock -Level error -Number 1 -Path $fixture)).Count -ne 1) { Fail '-n semantics' }
+  if ((Lines @(& $scriptBlock -Level error -Number 999 -Path $fixture)).Count -ne 2) { Fail 'large number' }
   if ((Lines @(& $scriptBlock -Level error -DateFrom 2026-01-02 -DateTo 2026-01-02 -Path $fixture)).Count -ne 1) { Fail 'date boundary' }
   if ((Lines @(& $scriptBlock -Level error -DateTimeFrom '2026-01-01 08:03:00' -DateTimeTo '2026-01-01 08:03:00' -Path $fixture)).Count -ne 1) { Fail 'datetime boundary' }
   if ((Lines @(& $scriptBlock -Level error -DateFrom 2026-01-01 -Path $fixture)).Count -ne 2) { Fail 'date from-only' }
