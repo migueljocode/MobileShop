@@ -56,7 +56,7 @@ public sealed class QuestPdfGenerator(IOptions<PdfSettings> options) : IPdfGener
 
     private void RenderFactorHeader(IContainer container, TransactionFactorViewModel model)
         => container
-            .PaddingBottom(14)
+             .PaddingBottom(10)
             .BorderBottom(1.5f)
             .BorderColor("#243B53")
             .Row(row =>
@@ -87,7 +87,7 @@ public sealed class QuestPdfGenerator(IOptions<PdfSettings> options) : IPdfGener
     private static void RenderFactorContent(IContainer container, TransactionFactorViewModel model)
         => container.Column(column =>
         {
-            column.Spacing(16);
+            column.Spacing(10);
             column.Item().Element(c => RenderFactorParties(c, model));
             column.Item().Element(c => RenderFactorTable(c, model));
             column.Item().Element(c => RenderFactorSummary(c, model));
@@ -118,7 +118,7 @@ public sealed class QuestPdfGenerator(IOptions<PdfSettings> options) : IPdfGener
             .Border(1)
             .BorderColor("#D9E2EC")
             .Background("#F8FAFC")
-            .Padding(10)
+            .Padding(7)
             .Column(column =>
             {
                 column.Item().Text(title).FontSize(8).SemiBold().FontColor("#627D98");
@@ -165,8 +165,8 @@ public sealed class QuestPdfGenerator(IOptions<PdfSettings> options) : IPdfGener
     private static void HeaderCell(IContainer cell, string text)
         => cell
             .Background("#243B53")
-            .PaddingVertical(8)
-            .PaddingHorizontal(7)
+            .PaddingVertical(3)
+            .PaddingHorizontal(6)
             .AlignMiddle()
             .Text(text)
             .FontSize(8)
@@ -208,7 +208,7 @@ public sealed class QuestPdfGenerator(IOptions<PdfSettings> options) : IPdfGener
                 .Background("#F1F5F9")
                 .Border(1)
                 .BorderColor("#CBD5E1")
-                .Padding(12)
+                .Padding(8)
                 .Row(summary =>
                 {
                     summary.RelativeItem().Text("جمع کل").FontSize(11).SemiBold().FontColor("#102A43");
@@ -222,7 +222,8 @@ public sealed class QuestPdfGenerator(IOptions<PdfSettings> options) : IPdfGener
 
     private static void RenderFactorSignatures(IContainer container)
         => container
-            .PaddingTop(4)
+            .PaddingTop(2)
+            .PreventPageBreak()
             .Row(row =>
             {
                 row.RelativeItem().Element(c => SignatureBox(c, "امضای طرف معامله"));
@@ -232,14 +233,14 @@ public sealed class QuestPdfGenerator(IOptions<PdfSettings> options) : IPdfGener
 
     private static void SignatureBox(IContainer container, string title)
         => container
-            .Height(62)
+            .Height(45)
             .Border(1)
             .BorderColor("#D9E2EC")
-            .Padding(9)
+            .Padding(6)
             .Column(column =>
             {
                 column.Item().Text(title).FontSize(8).SemiBold().FontColor("#627D98");
-                column.Item().PaddingTop(23).BorderBottom(1).BorderColor("#9FB3C8");
+                column.Item().PaddingTop(14).BorderBottom(1).BorderColor("#9FB3C8");
             });
 
     private void RenderFactorFooter(IContainer container)
