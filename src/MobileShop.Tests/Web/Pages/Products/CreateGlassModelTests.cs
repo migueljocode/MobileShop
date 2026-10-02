@@ -24,7 +24,8 @@ public class CreateGlassModelTests : RepoTestBase
             new BaseRepo<Product>(Context),
             NullLogger<ProductsDataService>.Instance);
 
-        Context.Categories.AddRange(new Category { Name = "Phone" }, new Category { Name = "Glass" });
+        TestDataHelpers.SeedShopSentinels(Context);
+                Context.Categories.AddRange(new Category { Name = "Phone" }, new Category { Name = "Glass" });
         Context.Manufacturers.AddRange(new Manufacturer { Name = "Apple" }, new Manufacturer { Name = "Samsung" });
         Context.SaveChanges();
         _model = new CreateGlassModel(dataService);
@@ -89,6 +90,12 @@ public class CreateGlassModelTests : RepoTestBase
         Assert.IsType<PageResult>(result);
         Assert.Equal("Created 3 glass product(s) successfully.", _model.Message);
         Assert.Equal(3, Context.Products.Count());
+        Assert.Equal(3, Context.Transactions.Count(t => t.Direction == TransactionDirection.Buy));
+        Assert.All(Context.Transactions.Where(t => t.Direction == TransactionDirection.Buy), t =>
+        {
+            Assert.Equal(100m, t.FinishedPrice);
+            Assert.Equal(DateTime.Today, t.Date);
+        });
         Assert.All(Context.Glasses, glass => Assert.Equal(model.Id, glass.ModelFits.Single().ModelId));
         var glassCategoryId = Context.Categories.Single(c => c.Name == "Glass").Id;
         Assert.All(Context.Products, product => Assert.Equal(glassCategoryId, Context.Models.Single(m => m.Id == product.ModelId).CategoryId));
@@ -99,6 +106,23 @@ public class CreateGlassModelTests : RepoTestBase
         Assert.Equal(2, _model.Manufacturers.Count);
         Assert.Single(_model.CompatibleModels);
         Assert.Equal(6, Context.Products.Count());
+    }
+
+    [Fact]
+    public async Task OnPostAsync_allows_profit_percent_above_100()
+    {
+        var (manufacturer, model) = SeedModel();
+        _model.Input = ValidInput(manufacturer.Id, model.Id, Context.Manufacturers.First(m => m.Name == "Samsung").Id);
+        _model.Input.Price = 10.44m;
+        _model.Input.ProfitPercent = 200m;
+        _model.Input.ProfitAmount = null;
+
+        var result = await _model.OnPostAsync();
+
+        Assert.IsType<PageResult>(result);
+        Assert.True(_model.ModelState.IsValid);
+        Assert.Equal(31.32m, Context.Products.Single().Price);
+        Assert.Equal(10.44m, Context.Transactions.Single(t => t.Direction == TransactionDirection.Buy).FinishedPrice);
     }
 
     [Fact]
