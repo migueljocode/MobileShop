@@ -20,13 +20,9 @@
 **Job B: PASS — Actor commit `f2fe3c8d13dd492eadd9115a67f4f2505bcd40c2`; GitHub Actions successful.**
 **Carry-over:** Rendered-PDF visual inspection remains planned for Step 5; invoice rendering remains unchanged.
 
-## [ ] Step 3 — Preserve and verify both factor entry points
-- Verify the Details-page single-transaction factor still uses the same generator and produces the redesigned document.
-- Verify the Transactions-page selected/filtered factor still uses the same generator and produces the redesigned document.
-- Preserve the existing snapshot/selection semantics of `GenerateListFactorPdfAsync`.
-- Add/update service/page tests only where required to prove both entry points continue to pass the correct factor model.
-- Do not duplicate PDF rendering logic.
-- Job B must verify both paths before Step 4 starts.
+## ~~[x] Step 3 — Preserve and verify both factor entry points~~
+**Actor commit `fd9ee7ab2d14431990ee4febd6ac65db1e4cf08c`; GitHub Actions #41 succeeded.**
+**Result:** Selected-factor coverage now verifies mixed Buy/Sell party roles and labels; existing single-factor coverage remains intact.
 
 ## [ ] Step 4 — Expand PDF regression tests
 - Update `QuestPdfGeneratorTests` and relevant factor/model tests.
