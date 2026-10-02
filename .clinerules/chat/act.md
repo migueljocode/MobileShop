@@ -1,22 +1,27 @@
-# Act Report — Stage P Step 3 (factor entry points)
+# Act Report — Stage P Step 4 (PDF regression coverage)
 
 ## Commit
-`fd9ee7ab2d14431990ee4febd6ac65db1e4cf08c` — test: cover mixed factor entry point context
+
+This commit — `test(pdf): expand factor regression coverage`
 
 ## Verification
-- GitHub Actions **#41 — Successful** for the Actor implementation commit.
-- The selected-factor entry-point test now verifies that mixed Buy/Sell rows preserve both `PersonRole` and `PersonLabel`.
-- Existing Details-page single-transaction factor coverage remains in place and continues to exercise the same `IPdfGenerator` factor path.
-- No PDF rendering logic was duplicated or changed in this step.
+
+- Expanded `QuestPdfGeneratorTests` for one-row factors, mixed Buy/Sell totals, Persian/RTL and long text, decimal/large prices, empty factor data, valid PDF payloads, and configured header/footer/signature paths.
+- Existing invoice and Persian invoice tests remain covered.
+- GitHub Actions **#53 — Success**.
 
 ## Limitations
-- This step adds focused entry-point coverage only. Broader PDF regression coverage and rendered-PDF inspection remain planned for Steps 4–5.
+
+Rendered-PDF visual inspection remains planned for Step 5.
 
 ## Friction noted
-None.
+
+The original Step 4 implementation was split by the GitHub file-update workflow; this remediation consolidates the step back to a single Actor commit.
 
 ## Problems
+
 None.
 
 ## Status
-COMPLETE — STOP for Reviewer Job B.
+
+COMPLETE

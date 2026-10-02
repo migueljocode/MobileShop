@@ -18,6 +18,9 @@ public class QuestPdfGeneratorTests
         _optionsMock.Setup(o => o.Value).Returns(new PdfSettings
         {
             ShopName = "Test Shop",
+            ShopAddress = "Test Address",
+            ShopPhone = "09120000000",
+            ShopInstagram = "@testshop",
             PageSize = "A4",
             MarginTop = 25,
             MarginRight = 25,
@@ -46,21 +49,12 @@ public class QuestPdfGeneratorTests
             Notes: "Test invoice"
         );
 
-        var pdfBytes = _generator.Generate(model);
-
-        Assert.NotNull(pdfBytes);
-        Assert.NotEmpty(pdfBytes);
-        Assert.Equal(0x25, pdfBytes[0]);
-        Assert.Equal(0x50, pdfBytes[1]);
-        Assert.Equal(0x44, pdfBytes[2]);
-        Assert.Equal(0x46, pdfBytes[3]);
+        AssertValidPdf(_generator.Generate(model));
     }
 
     [Fact]
     public void Generate_throws_for_null_model()
-    {
-        Assert.Throws<ArgumentNullException>(() => _generator.Generate(null!));
-    }
+        => Assert.Throws<ArgumentNullException>(() => _generator.Generate(null!));
 
     [Fact]
     public void GeneratePersian_returns_pdf_bytes_for_valid_invoice()
@@ -81,21 +75,12 @@ public class QuestPdfGeneratorTests
             Notes: "فاکتور تست"
         );
 
-        var pdfBytes = _generator.GeneratePersian(model);
-
-        Assert.NotNull(pdfBytes);
-        Assert.NotEmpty(pdfBytes);
-        Assert.Equal(0x25, pdfBytes[0]);
-        Assert.Equal(0x50, pdfBytes[1]);
-        Assert.Equal(0x44, pdfBytes[2]);
-        Assert.Equal(0x46, pdfBytes[3]);
+        AssertValidPdf(_generator.GeneratePersian(model));
     }
 
     [Fact]
     public void GeneratePersian_throws_for_null_model()
-    {
-        Assert.Throws<ArgumentNullException>(() => _generator.GeneratePersian(null!));
-    }
+        => Assert.Throws<ArgumentNullException>(() => _generator.GeneratePersian(null!));
 
     [Fact]
     public void GenerateTransactionFactor_returns_valid_pdf_payload()
@@ -107,19 +92,63 @@ public class QuestPdfGeneratorTests
             ],
             DateTime.UtcNow);
 
-        var bytes = _generator.GenerateTransactionFactor(model);
+        Assert.Equal(87_000_000m, model.TotalPrice);
+        AssertValidPdf(_generator.GenerateTransactionFactor(model));
+    }
 
-        Assert.NotNull(bytes);
-        Assert.NotEmpty(bytes);
-        Assert.Equal(0x25, bytes[0]);
-        Assert.Equal(0x50, bytes[1]);
-        Assert.Equal(0x44, bytes[2]);
-        Assert.Equal(0x46, bytes[3]);
+    [Fact]
+    public void GenerateTransactionFactor_supports_one_row_and_exact_total()
+    {
+        var model = Factor(
+            new TransactionFactorRowViewModel(
+                1,
+                new(2026, 1, 1, 10, 30, 0, DateTimeKind.Utc),
+                TransactionDirection.Buy,
+                "iPhone 17 Pro",
+                123_456_789.45m,
+                "Seller",
+                "Ali Seller"));
+
+        Assert.Equal(123_456_789.45m, model.TotalPrice);
+        AssertValidPdf(_generator.GenerateTransactionFactor(model));
+    }
+
+    [Fact]
+    public void GenerateTransactionFactor_supports_persian_rtl_and_long_text()
+    {
+        var model = Factor(
+            new TransactionFactorRowViewModel(
+                1,
+                DateTime.UtcNow,
+                TransactionDirection.Sell,
+                "اپل آیفون ۱۷ پرو مکس با حافظه ۵۱۲ گیگابایت Titanium Desert",
+                987_654_321.99m,
+                "Customer",
+                "سارا احمدی رضایی با نام خانوادگی طولانی و اطلاعات تکمیلی"));
+
+        AssertValidPdf(_generator.GenerateTransactionFactor(model));
+    }
+
+    [Fact]
+    public void GenerateTransactionFactor_supports_empty_factor()
+    {
+        var model = Factor();
+
+        Assert.Equal(0m, model.TotalPrice);
+        AssertValidPdf(_generator.GenerateTransactionFactor(model));
     }
 
     [Fact]
     public void GenerateTransactionFactor_throws_for_null_model()
+        => Assert.Throws<ArgumentNullException>(() => _generator.GenerateTransactionFactor(null!));
+
+    private static TransactionFactorViewModel Factor(params TransactionFactorRowViewModel[] rows)
+        => new(rows, DateTime.UtcNow);
+
+    private static void AssertValidPdf(byte[] bytes)
     {
-        Assert.Throws<ArgumentNullException>(() => _generator.GenerateTransactionFactor(null!));
+        Assert.NotNull(bytes);
+        Assert.NotEmpty(bytes);
+        Assert.Equal("%PDF"u8.ToArray(), bytes[..4]);
     }
 }

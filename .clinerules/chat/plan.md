@@ -24,7 +24,7 @@
 **Actor commit `fd9ee7ab2d14431990ee4febd6ac65db1e4cf08c`; GitHub Actions #41 succeeded.**
 **Result:** Selected-factor coverage now verifies mixed Buy/Sell party roles and labels; existing single-factor coverage remains intact.
 
-## [ ] Step 4 — Expand PDF regression tests
+## ~~[x] Step 4 — Expand PDF regression tests~~
 - Update `QuestPdfGeneratorTests` and relevant factor/model tests.
 - Cover at minimum:
   - one-row factor;
