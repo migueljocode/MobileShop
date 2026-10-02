@@ -25,10 +25,9 @@ Coverage includes single/multi-row factors, totals, valid PDFs, Persian/RTL, lon
 **PASS — Actor 7b1c1203ac41e473b527f6343c077ab3a906cbc4; GitHub Actions #59 succeeded.**
 Both representative PDFs were rendered and inspected: single Persian/RTL factor and selected 12-row mixed Buy/Sell factor. Both are clean one-page A4 output with readable hierarchy, parties, transaction table, totals, signatures, footer/shop info, Persian/RTL and mixed Persian/Latin wrapping, decimal/large-value formatting, and no overlap/clipping. The signature-area pagination issue found during inspection was corrected and rechecked.
 
-## [ ] Step 6 — Final Stage P validation
-- Reviewer validates all stage evidence, CI, both entry points, rendered English/Persian PDFs, and scope compliance.
-- Require 0 warnings/errors and passing GitHub CI.
-- Only after all criteria pass may Reviewer mark Step 6 and Stage P complete in plan.md and .clinerules/to-do.md.
+## ~~[x] Step 6 — Final Stage P validation~~
+**PASS — Reviewer final validation; Actions #59 succeeded.**
+All stage evidence, both factor entry points, representative rendered Persian/RTL and mixed Buy/Sell PDFs, CI, and scope compliance passed. Stage P Definition of Done is satisfied.
 
 ## Customer-facing factor requirements
 - Use a credible commercial-document hierarchy: shop identity → title/date → parties/context → line items → total → signatures → footer/contact.
