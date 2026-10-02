@@ -8,7 +8,7 @@
 // Hooks:
 //   [data-price]           paid price input (binds to Input.Price)
 //   [data-percent]         profit % input (binds to Input.ProfitPercent)
-//   [data-amount]          profit $ input (binds to Input.ProfitAmount)
+//   [data-amount]          profit Rial input (binds to Input.ProfitAmount)
 //   [data-finished-price]  read-only finished price display element (not posted)
 document.addEventListener('DOMContentLoaded', function () {
     const priceEl = document.querySelector('[data-price]');
@@ -26,7 +26,7 @@ document.addEventListener('DOMContentLoaded', function () {
             updateFinished();
             return;
         }
-        amountEl.value = (price * percent / 100).toFixed(2);
+        amountEl.value = (price * percent / 100)Math.floor(price * percent / 100).toString();
         updateFinished();
     }
 
@@ -38,7 +38,7 @@ document.addEventListener('DOMContentLoaded', function () {
             updateFinished();
             return;
         }
-        percentEl.value = (amount / price * 100).toFixed(2);
+        percentEl.value = (amount / price * 100)Math.floor(price * percent / 100).toString();
         updateFinished();
     }
 
@@ -62,7 +62,7 @@ document.addEventListener('DOMContentLoaded', function () {
         if (finished < 0) finished = 0;
 
         // Must set .value on <input>; textContent does not update the input display.
-        const text = finished.toFixed(2);
+        const text = finishedMath.floor(price * percent / 100).toString();
         if ('value' in finishedEl) {
             finishedEl.value = text;
         } else {
