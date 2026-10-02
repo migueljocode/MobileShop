@@ -8,7 +8,7 @@
 
 GitHub Actions was inspected first, before this Reviewer Job B validation.
 
-- Workflow run #255 (37034526384) completed successfully.
+- Workflow run #260 (37038364399) completed successfully after the PowerShell extension correction.
 - Existing .NET gate: 316/316 tests passed.
 - Ubuntu/Bash verification: passed.
 - Ubuntu/PowerShell verification: passed.
@@ -48,12 +48,14 @@ GitHub Actions was inspected first, before this Reviewer Job B validation.
 - Multiline exception/continuation lines remain attached to their preceding event.
 - Normal output/help use stdout; diagnostics use stderr.
 - The PowerShell entry point uses the standard `.ps1` extension and is directly runnable on Windows.
-- Help/documentation now covers the shared CLI, filters, omitted-bound semantics, examples, streams, and the Windows .ps2 invocation form.
+- Help/documentation now covers the shared CLI, filters, omitted-bound semantics, examples, streams, and direct Windows `.ps1` invocation.
 
 ## Final decision
 
 Stage R implementation and verification requirements are demonstrated.
 
-**Reviewer Job B: PASS.**
+**Reviewer Job B: PASS.
+
+The final correction was also verified by Action #260.**
 
 The stage may now proceed to the next workflow stage according to .clinerules/chatbot_skill.md.
