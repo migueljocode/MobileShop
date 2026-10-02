@@ -1,5 +1,5 @@
 #!/usr/bin/env pwsh
-param([Alias('l')][string]$Level,[switch]$Above,[switch]$Below,[Alias('n')][long]$Number,[string]$DateFrom,[string]$DateTo,[string]$DateTimeFrom,[string]$DateTimeTo,[string]$Path)
+param([Alias('l')][string]$Level,[Alias('h','help')][switch]$Help,[switch]$Above,[switch]$Below,[Alias('n')][long]$Number,[string]$DateFrom,[string]$DateTo,[string]$DateTimeFrom,[string]$DateTimeTo,[string]$Path)
 function Help(){@'
 Usage: log.ps2 --Level LEVEL [--Above|--Below] [filters] [-n N] [PATH|-]
 LEVEL: debug info warning error fatal. Exact is default; Above/Below include selected and more/less severe.
@@ -11,7 +11,7 @@ Examples: pwsh ./log.ps2 --Level error; pwsh ./log.ps2 --Level error --Above -Nu
 Invalid examples: -DateFrom 2026-02-30, reversed ranges, -Above -Below, and -Number 0 are rejected with stderr diagnostics.
 '@}
 function Fail($m){[Console]::Error.WriteLine("log.ps2: $m");exit 2}
-if($args -contains '-h' -or $args -contains '--help'){Help;exit 0}
+if($Help -or $args -contains '--help' -or $args -contains '-h'){Help;exit 0}
 if(!$Level){Fail '--Level is required (use --Help)'}
 $levels=@{debug=0;info=1;warning=2;error=3;fatal=4}
 if(!$levels.ContainsKey($Level)){Fail "invalid level '$Level'"}
