@@ -153,17 +153,18 @@ If CI fails, inspect the failed Action/job logs, identify the concrete issue, fi
 
 Do not claim success from interrupted or pending commands.
 
-### GitHub Actions run-number reporting
+GitHub Actions reporting must use the **human-visible workflow run number** (for example `#35`, `#41`), not the internal run ID, commit SHA, or check-suite ID.
 
-Whenever an Actor task triggers a GitHub Actions workflow, include the **GitHub Actions run number** in the final chat response — the human-visible number shown as #35, #41, etc. This is the identifier the owner uses to track the verification run. Do not substitute the workflow run's internal numeric database ID or commit SHA.
+To find it for an Actor commit, query GitHub Actions workflow runs by that commit SHA using the repository Actions API:
+`GET /repos/{owner}/{repo}/actions/runs?head_sha={commit_sha}`.
+Read the matching run's `run_number`, `status`, and `conclusion`.
 
-- Report the run number after the main result/status, for example: Action: #35 — Success.
-- If the Action is still running, report its run number and state that verification is pending.
-- If multiple Actions were triggered for the same Actor task, report each relevant run number.
-- Never invent a run number. If GitHub tooling does not expose the human-visible run number and the user has not supplied it, explicitly say Action: unavailable.
-- If the user supplies the run number or result, use that exact run number in subsequent status reporting for the task.
-- When reviewing Actor work, treat a user-confirmed Action success as verification evidence when the user identifies the corresponding run; do not manufacture or infer a run number from another GitHub identifier.
-
+Whenever an Actor task triggers a workflow:
+- Report `Action: #<run_number> — <Success|Failure|Pending>` in the final response.
+- If multiple workflows match, report each relevant run number.
+- Never infer the run number from another identifier.
+- If the API lookup genuinely returns no matching run, report `Action: unavailable` and state that no matching workflow run was found.
+- A successful matching run is valid CI evidence for Reviewer Job B.
 
 ## 9. Documentation ownership
 
