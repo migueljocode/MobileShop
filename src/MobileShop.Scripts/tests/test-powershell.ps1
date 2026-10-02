@@ -58,7 +58,9 @@ try {
     Expect-Fail @('-Level','error','-Path',(Join-Path $tmp 'no-such.log')) 'missing input'
   }
 
-  $stdinOut = @(Get-Content -LiteralPath $fixture | & $scriptBlock -Level error -Path -)
+  $customOut = @(& $scriptBlock -Level error -Path $fixture)
+if (($customOut -join [Environment]::NewLine) -ne ($exact -join [Environment]::NewLine)) { Fail 'custom -Path' }
+$stdinOut = @(Get-Content -LiteralPath $fixture | & $scriptBlock -Level error -Path -)
   if (($stdinOut -join [Environment]::NewLine) -ne ($exact -join [Environment]::NewLine)) { Fail 'stdin parity' }
   $spaced = Join-Path $tmp 'log with spaces.log';Copy-Item $fixture $spaced
   $spaceOut = @(& $scriptBlock -Level error -Path $spaced)
