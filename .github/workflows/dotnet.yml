@@ -1,4 +1,5 @@
 name: .NET CI
+# Stage R runs Bash on Ubuntu and PowerShell on both Ubuntu and Windows.
 
 on:
   push:
