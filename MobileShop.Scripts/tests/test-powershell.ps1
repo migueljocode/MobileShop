@@ -28,6 +28,10 @@ try {
   if ((Lines $dateExact).Count -ne 1 -or $dateExact -notmatch 'second error') { Fail 'date boundary' }
   $dtExact = @( & $script -Level error -DateTimeFrom '2026-01-01 08:03:00' -DateTimeTo '2026-01-01 08:03:00' -Path $fixture )
   if ((Lines $dtExact).Count -ne 1) { Fail 'datetime boundary' }
+  if ((Lines @(& $script -Level error -DateFrom 2026-01-01 -Path $fixture)).Count -ne 2) { Fail 'date from-only' }
+  if ((Lines @(& $script -Level error -DateTo 2026-01-02 -Path $fixture)).Count -ne 2) { Fail 'date to-only' }
+  if ((Lines @(& $script -Level error -DateTimeFrom '2026-01-01 08:03:00' -Path $fixture)).Count -ne 2) { Fail 'datetime from-only' }
+  if ((Lines @(& $script -Level error -DateTimeTo '2026-01-01 08:03:00' -Path $fixture)).Count -ne 1) { Fail 'datetime to-only' }
 
   Expect-Fail { & $script -Level nope -Path $fixture } 'invalid level'
   Expect-Fail { & $script -Path $fixture } 'missing level'
@@ -40,6 +44,8 @@ try {
   Expect-Fail { & $script -Level error -DateFrom 2026-01-01 -DateTimeFrom '2026-01-01 08:00:00' -Path $fixture } 'conflicting filters'
   Expect-Fail { & $script -Level error -Above -Below -Path $fixture } 'conflicting severity modes'
   Expect-Fail { & $script -Level error -Number 0 -Path $fixture } 'bad number'
+Expect-Fail { & $script -Level error -Number -1 -Path $fixture } 'negative number'
+Expect-Fail { & $script -Level error -Number abc -Path $fixture } 'non-numeric number'
   Expect-Fail { & $script -Level error -Path (Join-Path $tmp 'no-such.log') } 'missing input'
 
   $stdinOut = @($null)
