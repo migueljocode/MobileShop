@@ -74,12 +74,12 @@ public sealed class QuestPdfGenerator(IOptions<PdfSettings> options) : IPdfGener
                     column.Item().PaddingTop(4).AlignRight().Text(text =>
                     {
                         text.Span("تاریخ صدور: ").SemiBold();
-                        text.Span(model.GeneratedAt.ToString("yyyy/MM/dd HH:mm")).ContentFromLeftToRight();
+                        text.Span(model.GeneratedAt.ToString("yyyy/MM/dd HH:mm"));
                     });
                     column.Item().PaddingTop(2).AlignRight().Text(text =>
                     {
                         text.Span("تعداد اقلام: ").SemiBold();
-                        text.Span(model.Rows.Count.ToString()).ContentFromLeftToRight();
+                        text.Span(model.Rows.Count.ToString());
                     });
                 });
             });
@@ -186,9 +186,9 @@ public sealed class QuestPdfGenerator(IOptions<PdfSettings> options) : IPdfGener
             .AlignMiddle();
 
         if (amount)
-            content.Text(text).FontSize(8.5f).SemiBold().ContentFromLeftToRight();
+            content.ContentFromLeftToRight().Text(text).FontSize(8.5f).SemiBold();
         else if (centered)
-            content.AlignCenter().Text(text).FontSize(8).ContentFromLeftToRight();
+            content.ContentFromLeftToRight().AlignCenter().Text(text).FontSize(8);
         else
             content.AlignLeft().Text(text).FontSize(8);
     }
@@ -210,7 +210,7 @@ public sealed class QuestPdfGenerator(IOptions<PdfSettings> options) : IPdfGener
                     summary.RelativeItem().Text("جمع کل").FontSize(11).SemiBold().FontColor("#102A43");
                     summary.ConstantItem(120).AlignRight().Text(text =>
                     {
-                        text.Span(model.TotalPrice.ToString("N0")).FontSize(13).SemiBold().FontColor("#102A43").ContentFromLeftToRight();
+                        text.Span(model.TotalPrice.ToString("N0")).FontSize(13).SemiBold().FontColor("#102A43");
                         text.Span("  ریال").FontSize(9).FontColor("#627D98");
                     });
                 });
@@ -253,14 +253,14 @@ public sealed class QuestPdfGenerator(IOptions<PdfSettings> options) : IPdfGener
                 {
                     if (!string.IsNullOrWhiteSpace(_settings.ShopAddress))
                         text.Span("  |  ");
-                    text.Span(_settings.ShopPhone).ContentFromLeftToRight();
+                    text.Span(_settings.ShopPhone);
                 }
 
                 if (!string.IsNullOrWhiteSpace(_settings.ShopInstagram))
                 {
                     if (!string.IsNullOrWhiteSpace(_settings.ShopAddress) || !string.IsNullOrWhiteSpace(_settings.ShopPhone))
                         text.Span("  |  ");
-                    text.Span(_settings.ShopInstagram).ContentFromLeftToRight();
+                    text.Span(_settings.ShopInstagram);
                 }
             })
             .FontSize(7.5f)
