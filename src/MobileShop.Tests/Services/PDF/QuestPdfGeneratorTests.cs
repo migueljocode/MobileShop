@@ -87,8 +87,8 @@ public class QuestPdfGeneratorTests
     {
         var model = new TransactionFactorViewModel(
             [
-                new TransactionFactorRowViewModel(1, DateTime.UtcNow, TransactionDirection.Buy, "iPhone 13", 42_000_000m, "Seller", "Ali"),
-                new TransactionFactorRowViewModel(2, DateTime.UtcNow, TransactionDirection.Sell, "iPhone 13", 45_000_000m, "Customer", "Sara")
+                new TransactionFactorRowViewModel(1, DateTime.UtcNow, TransactionDirection.Buy, "iPhone 13", 42_000_000, "Seller", "Ali"),
+                new TransactionFactorRowViewModel(2, DateTime.UtcNow, TransactionDirection.Sell, "iPhone 13", 45_000_000, "Customer", "Sara")
             ],
             DateTime.UtcNow);
 
