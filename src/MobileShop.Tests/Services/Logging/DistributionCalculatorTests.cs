@@ -38,7 +38,7 @@ public class DistributionCalculatorTests
     {
         var employees = CreateDefaultEmployees();
         // 101 profit: floor(101 * 0.40) = 40, floor(101 * 0.50) = 50, Shop = 101 - 40 - 50 = 11
-        var rows = DistributionCalculator.Calculate(101m, employees, _settings);
+        var rows = DistributionCalculator.Calculate(101, employees, _settings);
 
         Assert.Equal(3, rows.Count);
 
@@ -54,12 +54,12 @@ public class DistributionCalculatorTests
         Assert.Equal(100, rows.Sum(r => r.SharePercent));
 
         // Verify amounts with floor rounding
-        Assert.Equal(50m, rows[0].CalculatedAmount);
-        Assert.Equal(40m, rows[1].CalculatedAmount);
-        Assert.Equal(11m, rows[2].CalculatedAmount);
+        Assert.Equal(50, rows[0].CalculatedAmount);
+        Assert.Equal(40, rows[1].CalculatedAmount);
+        Assert.Equal(11, rows[2].CalculatedAmount);
 
         // Shop gets remainder
-        Assert.Equal(101m, rows[0].CalculatedAmount + rows[1].CalculatedAmount + rows[2].CalculatedAmount);
+        Assert.Equal(101, rows[0].CalculatedAmount + rows[1].CalculatedAmount + rows[2].CalculatedAmount);
 
         // Not a loss period
         Assert.All(rows, r => Assert.False(r.IsLossPeriod));
@@ -74,13 +74,13 @@ public class DistributionCalculatorTests
             (2, "Anis", "Sahabi", 10, true)
         );
 
-        var rows = DistributionCalculator.Calculate(100m, employees, _settings);
+        var rows = DistributionCalculator.Calculate(100, employees, _settings);
 
         Assert.Equal(3, rows.Count);
         Assert.Equal(50, rows[0].SharePercent);
         Assert.Equal(40, rows[1].SharePercent);
         Assert.Equal(10, rows[2].SharePercent);
-        Assert.Equal(100m, rows.Sum(r => r.CalculatedAmount)); // 40 + 50 + 10 = 100
+        Assert.Equal(100, rows.Sum(r => r.CalculatedAmount)); // 40 + 50 + 10 = 100
     }
 
     // ── Zero and loss cases ────────────────────────────────────
@@ -89,7 +89,7 @@ public class DistributionCalculatorTests
     public void ZeroProfit_ReturnsThreeRowsWithZeroAmountsAndLossFlag()
     {
         var employees = CreateDefaultEmployees();
-        var rows = DistributionCalculator.Calculate(0m, employees, _settings);
+        var rows = DistributionCalculator.Calculate(0, employees, _settings);
 
         Assert.Equal(3, rows.Count);
         // Sorted by SharePercent desc: Anis (50), Mikaeeil (40), Shop (10)
@@ -101,18 +101,18 @@ public class DistributionCalculatorTests
         Assert.Equal(40, rows[1].SharePercent);
         Assert.Equal(10, rows[2].SharePercent);
 
-        Assert.All(rows, r => Assert.Equal(0m, r.CalculatedAmount));
+        Assert.All(rows, r => Assert.Equal(0, r.CalculatedAmount));
         Assert.All(rows, r => Assert.True(r.IsLossPeriod));
 
         // Sum still equals total (0)
-        Assert.Equal(0m, rows.Sum(r => r.CalculatedAmount));
+        Assert.Equal(0, rows.Sum(r => r.CalculatedAmount));
     }
 
     [Fact]
     public void Loss_ReturnsThreeRowsWithEmployeesZeroShopGetsFullLoss()
     {
         var employees = CreateDefaultEmployees();
-        var loss = -50000m;
+        var loss = -50000;
 
         var rows = DistributionCalculator.Calculate(loss, employees, _settings);
 
@@ -127,8 +127,8 @@ public class DistributionCalculatorTests
         Assert.Equal(10, rows[2].SharePercent);
 
         // Employees get nothing, shop absorbs entire loss
-        Assert.Equal(0m, rows[0].CalculatedAmount);
-        Assert.Equal(0m, rows[1].CalculatedAmount);
+        Assert.Equal(0, rows[0].CalculatedAmount);
+        Assert.Equal(0, rows[1].CalculatedAmount);
         Assert.Equal(loss, rows[2].CalculatedAmount);
 
         Assert.All(rows, r => Assert.True(r.IsLossPeriod));
@@ -147,7 +147,7 @@ public class DistributionCalculatorTests
         );
 
         var ex = Assert.Throws<InvalidOperationException>(() =>
-            DistributionCalculator.Calculate(1000m, employees, _settings));
+            DistributionCalculator.Calculate(1000, employees, _settings));
         Assert.Contains("Mikaeeil Jorjany", ex.Message);
     }
 
@@ -161,7 +161,7 @@ public class DistributionCalculatorTests
         );
 
         var ex = Assert.Throws<InvalidOperationException>(() =>
-            DistributionCalculator.Calculate(1000m, employees, _settings));
+            DistributionCalculator.Calculate(1000, employees, _settings));
         Assert.Contains("Anis Sahabi", ex.Message);
     }
 
@@ -176,7 +176,7 @@ public class DistributionCalculatorTests
         );
 
         var ex = Assert.Throws<InvalidOperationException>(() =>
-            DistributionCalculator.Calculate(1000m, employees, _settings));
+            DistributionCalculator.Calculate(1000, employees, _settings));
         Assert.Contains("Mikaeeil Jorjany", ex.Message);
     }
 
@@ -189,7 +189,7 @@ public class DistributionCalculatorTests
         );
 
         var ex = Assert.Throws<InvalidOperationException>(() =>
-            DistributionCalculator.Calculate(1000m, employees, _settings));
+            DistributionCalculator.Calculate(1000, employees, _settings));
         Assert.Contains("Anis Sahabi", ex.Message);
     }
 
@@ -205,7 +205,7 @@ public class DistributionCalculatorTests
         );
 
         var ex = Assert.Throws<InvalidOperationException>(() =>
-            DistributionCalculator.Calculate(1000m, employees, _settings));
+            DistributionCalculator.Calculate(1000, employees, _settings));
         Assert.Contains("Mikaeeil Jorjany", ex.Message);
     }
 
@@ -219,7 +219,7 @@ public class DistributionCalculatorTests
         );
 
         var ex = Assert.Throws<InvalidOperationException>(() =>
-            DistributionCalculator.Calculate(1000m, employees, _settings));
+            DistributionCalculator.Calculate(1000, employees, _settings));
         Assert.Contains("Anis Sahabi", ex.Message);
     }
 
@@ -237,7 +237,7 @@ public class DistributionCalculatorTests
             (5, "Reza", "Mousavi", 15, true)
         );
 
-        var rows = DistributionCalculator.Calculate(1000m, employees, _settings);
+        var rows = DistributionCalculator.Calculate(1000, employees, _settings);
 
         Assert.Equal(3, rows.Count); // only 3 rows, not 5+
         Assert.Contains(rows, r => r.EmployeeName == "Mikaeeil Jorjany");
