@@ -17,7 +17,7 @@ public class Transaction : BaseEntity
     public int ProductId { get; set; }
     public virtual Product ProductNavigation { get; set; } = null!;
 
-    [Range(0, double.MaxValue, ErrorMessage = "{0} cannot be negative.")]
+    [Range(0, int.MaxValue, ErrorMessage = "{0} cannot be negative.")]
     [Column(TypeName = "decimal(18,2)")]
     public int FinishedPrice { get; set; }
 
