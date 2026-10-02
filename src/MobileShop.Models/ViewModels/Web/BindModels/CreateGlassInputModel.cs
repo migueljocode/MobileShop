@@ -12,7 +12,7 @@ public sealed class CreateGlassInputModel
     [Required]
     public int CompatibleModelId { get; set; }
 
-    [Range(0, double.MaxValue)]
+    [Range(0, int.MaxValue)]
     public int Price { get; set; }
 
     [Range(0, double.MaxValue)]
