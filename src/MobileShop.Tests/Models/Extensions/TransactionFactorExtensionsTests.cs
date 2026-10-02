@@ -59,8 +59,8 @@ public class TransactionFactorExtensionsTests
     {
         var model = new TransactionFactorViewModel(
             [
-                new TransactionFactorRowViewModel(1, SampleDate, TransactionDirection.Buy, "iPhone 13", 100m, "Seller", "Ali"),
-                new TransactionFactorRowViewModel(2, SampleDate, TransactionDirection.Sell, "iPhone 13", 250m, "Customer", "Sara")
+                new TransactionFactorRowViewModel(1, SampleDate, TransactionDirection.Buy, "iPhone 13", 100, "Seller", "Ali"),
+                new TransactionFactorRowViewModel(2, SampleDate, TransactionDirection.Sell, "iPhone 13", 250, "Customer", "Sara")
             ],
             SampleDate);
 
@@ -83,8 +83,8 @@ public class TransactionFactorExtensionsTests
     {
         var model = new TransactionFactorViewModel(
             [
-                new TransactionFactorRowViewModel(1, SampleDate, TransactionDirection.Buy, "Apple iPhone 13", 100m, "Seller", "Ali"),
-                new TransactionFactorRowViewModel(2, SampleDate, TransactionDirection.Sell, "Apple iPhone 13", 250m, "Customer", "Sara")
+                new TransactionFactorRowViewModel(1, SampleDate, TransactionDirection.Buy, "Apple iPhone 13", 100, "Seller", "Ali"),
+                new TransactionFactorRowViewModel(2, SampleDate, TransactionDirection.Sell, "Apple iPhone 13", 250, "Customer", "Sara")
             ],
             SampleDate);
 
