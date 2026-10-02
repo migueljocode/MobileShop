@@ -29,13 +29,4 @@ jobs:
         run: dotnet build src/MobileShop.slnx --nologo --no-restore
 
       - name: Test
-        env:
-          FACTOR_PDF_INSPECTION_DIR: ${{ github.workspace }}/TestResults/FactorPdfInspection
         run: dotnet test src/MobileShop.slnx --nologo --no-build --no-restore
-
-      - name: Upload factor PDF inspection artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: factor-pdf-inspection
-          path: TestResults/FactorPdfInspection/
-          if-no-files-found: error
