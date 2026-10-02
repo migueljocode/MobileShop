@@ -10,7 +10,7 @@ public sealed class SellInputModel
     public int CustomerId { get; set; }
 
     [Display(Name = "Finished price")]
-    [Range(0, double.MaxValue)]
+    [Range(0, int.MaxValue)]
     public int Price { get; set; }
 
     [DataType(DataType.DateTime)]
