@@ -418,8 +418,8 @@ public class ProductsDataService(
     /// <inheritdoc />
     public async Task<ServiceResult> CreateGlassesAsync(CreateGlassInputModel input)
     {
-        if (input.Count is < 1 or > 500)
-            return new ServiceResult(false, "Count must be between 1 and 500.", nameof(CreateGlassInputModel.Count), null);
+        if (input.Count < 1)
+            return new ServiceResult(false, "Count must be at least 1.", nameof(CreateGlassInputModel.Count), null);
 
         var manufacturer = await manufacturers.FindAsync(input.ManufacturerId);
         if (manufacturer is null)
