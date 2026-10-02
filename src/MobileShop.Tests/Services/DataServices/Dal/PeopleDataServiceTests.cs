@@ -46,7 +46,7 @@ public class PeopleDataServiceTests : RepoTestBase
             ProductId = productId,
             SellerId = sellerId,
             CustomerId = customerId,
-            FinishedPrice = 100m,
+            FinishedPrice = 100,
             Date = DateTime.UtcNow,
             Direction = direction,
         });
@@ -65,7 +65,7 @@ public class PeopleDataServiceTests : RepoTestBase
             ProductId = productId,
             SellerId = sellerId,
             CustomerId = customerId,
-            FinishedPrice = 100m,
+            FinishedPrice = 100,
             Date = DateTime.UtcNow,
             Direction = direction,
         };
