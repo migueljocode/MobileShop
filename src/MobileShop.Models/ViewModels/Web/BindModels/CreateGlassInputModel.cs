@@ -15,7 +15,7 @@ public sealed class CreateGlassInputModel
     [Range(0, double.MaxValue)]
     public decimal Price { get; set; }
 
-    [Range(0, 100)]
+    [Range(0, double.MaxValue)]
     public decimal? ProfitPercent { get; set; }
 
     [Range(0, double.MaxValue)]
