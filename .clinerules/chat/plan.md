@@ -20,7 +20,8 @@
 - Added focused coverage proving Buy/Sell rows retain their own `PersonRole` and `PersonLabel`.
 - Scope remained limited to the factor view model documentation and focused model test.
 
-## [ ] Step 2 — Redesign the QuestPDF factor layout
+## ~~[x] Step 2 — Redesign the QuestPDF factor layout~~
+**Job B pending reviewer sign-off; Actor implementation commit `f2fe3c8d13dd492eadd9115a67f4f2505bcd40c2` and GitHub Actions successful.**
 - Rework `QuestPdfGenerator.GenerateTransactionFactor` / factor composition into a professional printable A4 layout.
 - Include:
   - shop/header section;
