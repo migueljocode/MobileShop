@@ -40,7 +40,7 @@ public class QuestPdfGeneratorTests
             SellerName: null,
             SellerPhoneNumber: null,
             TransactionDate: DateTime.UtcNow,
-            FinishedPrice: 1000m,
+            FinishedPrice: 1000,
             ProductCount: 1,
             ProductInformation: "iPhone 15",
             ProductExtras: [],
@@ -66,7 +66,7 @@ public class QuestPdfGeneratorTests
             SellerName: null,
             SellerPhoneNumber: null,
             TransactionDate: DateTime.UtcNow,
-            FinishedPrice: 1000m,
+            FinishedPrice: 1000,
             ProductCount: 1,
             ProductInformation: "آیفون ۱۵",
             ProductExtras: [],
@@ -87,12 +87,12 @@ public class QuestPdfGeneratorTests
     {
         var model = new TransactionFactorViewModel(
             [
-                new TransactionFactorRowViewModel(1, DateTime.UtcNow, TransactionDirection.Buy, "iPhone 13", 42_000_000m, "Seller", "Ali"),
-                new TransactionFactorRowViewModel(2, DateTime.UtcNow, TransactionDirection.Sell, "iPhone 13", 45_000_000m, "Customer", "Sara")
+                new TransactionFactorRowViewModel(1, DateTime.UtcNow, TransactionDirection.Buy, "iPhone 13", 42_000_000, "Seller", "Ali"),
+                new TransactionFactorRowViewModel(2, DateTime.UtcNow, TransactionDirection.Sell, "iPhone 13", 45_000_000, "Customer", "Sara")
             ],
             DateTime.UtcNow);
 
-        Assert.Equal(87_000_000m, model.TotalPrice);
+        Assert.Equal(87000000, model.TotalPrice);
         AssertValidPdf(_generator.GenerateTransactionFactor(model));
     }
 
@@ -105,11 +105,11 @@ public class QuestPdfGeneratorTests
                 new(2026, 1, 1, 10, 30, 0, DateTimeKind.Utc),
                 TransactionDirection.Buy,
                 "iPhone 17 Pro",
-                123_456_789.45m,
+                123_456_789,
                 "Seller",
                 "Ali Seller"));
 
-        Assert.Equal(123_456_789.45m, model.TotalPrice);
+        Assert.Equal(123456789, model.TotalPrice);
         AssertValidPdf(_generator.GenerateTransactionFactor(model));
     }
 
@@ -122,7 +122,7 @@ public class QuestPdfGeneratorTests
                 DateTime.UtcNow,
                 TransactionDirection.Sell,
                 "اپل آیفون ۱۷ پرو مکس با حافظه ۵۱۲ گیگابایت Titanium Desert",
-                987_654_321.99m,
+                987_654_322,
                 "Customer",
                 "سارا احمدی رضایی با نام خانوادگی طولانی و اطلاعات تکمیلی"));
 
@@ -134,7 +134,7 @@ public class QuestPdfGeneratorTests
     {
         var model = Factor();
 
-        Assert.Equal(0m, model.TotalPrice);
+        Assert.Equal(0, model.TotalPrice);
         AssertValidPdf(_generator.GenerateTransactionFactor(model));
     }
 
@@ -153,7 +153,7 @@ public class QuestPdfGeneratorTests
                 new(2026, 1, 1, 10, 30, 0, DateTimeKind.Utc),
                 TransactionDirection.Sell,
                 "اپل آیفون ۱۷ پرو مکس ۵۱۲ گیگابایت Titanium Desert",
-                987_654_321.99m,
+                987_654_322,
                 "Customer",
                 "سارا احمدی رضایی با نام خانوادگی طولانی و اطلاعات تکمیلی"));
 
@@ -166,7 +166,7 @@ public class QuestPdfGeneratorTests
                     id % 2 == 0
                         ? "Apple iPhone 17 Pro Max 512GB Titanium Desert"
                         : "سامسونگ گلکسی S26 اولترا با حافظه ۱ ترابایت",
-                    120_000_000m + id * 1_234_567.89m,
+                    120_000_000 + id * 1_234_568,
                     id % 2 == 0 ? "Customer" : "Seller",
                     id % 2 == 0
                         ? "سارا احمدی رضایی"

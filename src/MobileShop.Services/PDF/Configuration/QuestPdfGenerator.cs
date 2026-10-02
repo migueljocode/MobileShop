@@ -495,7 +495,7 @@ internal sealed record InvoicePresentation
     public string? PartyPhone { get; init; }
     public string? BuyerNationalId { get; init; }
     public string? ProductInformation { get; init; }
-    public decimal FinishedPrice { get; init; }
+    public int FinishedPrice { get; init; }
     public int ProductCount { get; init; }
     public string? OwnershipStatus { get; init; }
     public DateTime TransactionDate { get; init; }
@@ -516,7 +516,7 @@ internal sealed record PersianInvoicePresentation
     public string? PartyPhone { get; init; }
     public string? BuyerNationalId { get; init; }
     public string? ProductInformation { get; init; }
-    public decimal FinishedPrice { get; init; }
+    public int FinishedPrice { get; init; }
     public int ProductCount { get; init; }
     public string? OwnershipStatus { get; init; }
     public DateTime TransactionDate { get; init; }

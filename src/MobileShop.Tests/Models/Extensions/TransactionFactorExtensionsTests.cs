@@ -10,7 +10,7 @@ public class TransactionFactorExtensionsTests
     public void Sale_row_is_written_to_the_customer()
     {
         var transaction = new TransactionListItemViewModel(
-            7, SampleDate, TransactionDirection.Sell, "Apple iPhone 13", 45_000_000m, "Shop", "Sara Ahmadi");
+            7, SampleDate, TransactionDirection.Sell, "Apple iPhone 13", 45_000_000, "Shop", "Sara Ahmadi");
 
         var row = transaction.ToFactorRow();
 
@@ -18,7 +18,7 @@ public class TransactionFactorExtensionsTests
         Assert.Equal(SampleDate, row.Date);
         Assert.Equal(TransactionDirection.Sell, row.Direction);
         Assert.Equal("Apple iPhone 13", row.ProductLabel);
-        Assert.Equal(45_000_000m, row.FinishedPrice);
+        Assert.Equal(45000000, row.FinishedPrice);
         Assert.Equal("Customer", row.PersonRole);
         Assert.Equal("Sara Ahmadi", row.PersonLabel);
     }
@@ -27,7 +27,7 @@ public class TransactionFactorExtensionsTests
     public void Buy_row_is_written_to_the_seller()
     {
         var transaction = new TransactionListItemViewModel(
-            8, SampleDate, TransactionDirection.Buy, "Anker 20W Charger", 900_000m, "Ali Rezaei", "Shop");
+            8, SampleDate, TransactionDirection.Buy, "Anker 20W Charger", 900_000, "Ali Rezaei", "Shop");
 
         var row = transaction.ToFactorRow();
 
@@ -39,7 +39,7 @@ public class TransactionFactorExtensionsTests
     public void Details_row_keeps_the_supplied_identifier()
     {
         var details = new TransactionDetailsViewModel(
-            SampleDate, TransactionDirection.Sell, 1_200_000m, "Anker 20W Charger", "Shop", "Sara Ahmadi");
+            SampleDate, TransactionDirection.Sell, 1_200_000, "Anker 20W Charger", "Shop", "Sara Ahmadi");
 
         var row = details.ToFactorRow(42);
 
@@ -59,8 +59,8 @@ public class TransactionFactorExtensionsTests
     {
         var model = new TransactionFactorViewModel(
             [
-                new TransactionFactorRowViewModel(1, SampleDate, TransactionDirection.Buy, "iPhone 13", 100m, "Seller", "Ali"),
-                new TransactionFactorRowViewModel(2, SampleDate, TransactionDirection.Sell, "iPhone 13", 250m, "Customer", "Sara")
+                new TransactionFactorRowViewModel(1, SampleDate, TransactionDirection.Buy, "iPhone 13", 100, "Seller", "Ali"),
+                new TransactionFactorRowViewModel(2, SampleDate, TransactionDirection.Sell, "iPhone 13", 250, "Customer", "Sara")
             ],
             SampleDate);
 
@@ -83,11 +83,11 @@ public class TransactionFactorExtensionsTests
     {
         var model = new TransactionFactorViewModel(
             [
-                new TransactionFactorRowViewModel(1, SampleDate, TransactionDirection.Buy, "Apple iPhone 13", 100m, "Seller", "Ali"),
-                new TransactionFactorRowViewModel(2, SampleDate, TransactionDirection.Sell, "Apple iPhone 13", 250m, "Customer", "Sara")
+                new TransactionFactorRowViewModel(1, SampleDate, TransactionDirection.Buy, "Apple iPhone 13", 100, "Seller", "Ali"),
+                new TransactionFactorRowViewModel(2, SampleDate, TransactionDirection.Sell, "Apple iPhone 13", 250, "Customer", "Sara")
             ],
             SampleDate);
 
-        Assert.Equal(350m, model.TotalPrice);
+        Assert.Equal(350, model.TotalPrice);
     }
 }

@@ -813,8 +813,8 @@ namespace MobileShop.Dal.Migrations
                     b.Property<int>("ModelId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<decimal>("Price")
-                        .HasColumnType("decimal(18,2)");
+                    b.Property<int>("Price")
+                        .HasColumnType("INTEGER");
 
                     b.Property<byte[]>("TimeStamp")
                         .IsConcurrencyToken()
@@ -999,8 +999,8 @@ namespace MobileShop.Dal.Migrations
                     b.Property<int>("Direction")
                         .HasColumnType("INTEGER");
 
-                    b.Property<decimal>("FinishedPrice")
-                        .HasColumnType("decimal(18,2)");
+                    b.Property<int>("FinishedPrice")
+                        .HasColumnType("INTEGER");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("INTEGER");

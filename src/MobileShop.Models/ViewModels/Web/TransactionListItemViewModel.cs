@@ -5,6 +5,6 @@ public sealed record TransactionListItemViewModel(
     DateTime Date,
     TransactionDirection Direction,
     string ProductLabel,
-    decimal FinishedPrice,
+    int FinishedPrice,
     string SellerLabel,
     string CustomerLabel);

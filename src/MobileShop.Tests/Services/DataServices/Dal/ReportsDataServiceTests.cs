@@ -46,7 +46,7 @@ public class ReportsDataServiceTests : RepoTestBase
         int customerId,
         TransactionDirection direction,
         DateTime date,
-        decimal price)
+        int price)
     {
         var transaction = new Transaction
         {
@@ -81,16 +81,16 @@ public class ReportsDataServiceTests : RepoTestBase
         var customer = AddCustomer();
         var product = TestDataHelpers.CreateProduct(Context);
 
-        AddTransaction(product, seller.Id, customer.Id, TransactionDirection.Buy, new DateTime(2024, 3, 1), 300m);
-        AddTransaction(product, seller.Id, customer.Id, TransactionDirection.Sell, new DateTime(2024, 3, 5), 500m);
+        AddTransaction(product, seller.Id, customer.Id, TransactionDirection.Buy, new DateTime(2024, 3, 1), 300);
+        AddTransaction(product, seller.Id, customer.Id, TransactionDirection.Sell, new DateTime(2024, 3, 5), 500);
 
         var rows = await _service.GetProfitLossRowsAsync(null, null);
 
         var row = Assert.Single(rows);
         Assert.Equal(product.Id, row.ProductId);
-        Assert.Equal(300m, row.Bought);
-        Assert.Equal(500m, row.Sold);
-        Assert.Equal(200m, row.Profit);
+        Assert.Equal(300, row.Bought);
+        Assert.Equal(500, row.Sold);
+        Assert.Equal(200, row.Profit);
     }
 
     [Fact]
@@ -99,23 +99,23 @@ public class ReportsDataServiceTests : RepoTestBase
         var seller = AddSeller();
         var customer = AddCustomer();
         var product = TestDataHelpers.CreateProduct(Context);
-        product.Price = 11.48m;
+        product.Price = 11;
         Context.SaveChanges();
 
         var glass = new Glass { ProductId = product.Id };
         Context.Glasses.Add(glass);
         Context.SaveChanges();
 
-        AddTransaction(product, seller.Id, customer.Id, TransactionDirection.Buy, DateTime.Today, 10.44m);
-        AddTransaction(product, seller.Id, customer.Id, TransactionDirection.Sell, DateTime.Today, 20.99m);
+        AddTransaction(product, seller.Id, customer.Id, TransactionDirection.Buy, DateTime.Today, 10);
+        AddTransaction(product, seller.Id, customer.Id, TransactionDirection.Sell, DateTime.Today, 20);
 
         var rows = await _service.GetProfitLossRowsAsync(null, null);
 
         var row = Assert.Single(rows);
-        Assert.Equal(10.44m, row.Bought);
-        Assert.Equal(20.99m, row.Sold);
-        Assert.Equal(10.55m, row.Profit);
-        Assert.Equal(101.05363984674329501915708812m, row.ProfitPercent);
+        Assert.Equal(10, row.Bought);
+        Assert.Equal(20, row.Sold);
+        Assert.Equal(10, row.Profit);
+        Assert.Equal(100, row.ProfitPercent);
     }
 
     [Fact]
@@ -127,9 +127,9 @@ public class ReportsDataServiceTests : RepoTestBase
         var before = TestDataHelpers.CreateProduct(Context);
         var after = TestDataHelpers.CreateProduct(Context);
 
-        AddTransaction(inside, seller.Id, customer.Id, TransactionDirection.Sell, new DateTime(2024, 3, 10), 100m);
-        AddTransaction(before, seller.Id, customer.Id, TransactionDirection.Sell, new DateTime(2024, 2, 28), 900m);
-        AddTransaction(after, seller.Id, customer.Id, TransactionDirection.Sell, new DateTime(2024, 3, 12), 900m);
+        AddTransaction(inside, seller.Id, customer.Id, TransactionDirection.Sell, new DateTime(2024, 3, 10), 100);
+        AddTransaction(before, seller.Id, customer.Id, TransactionDirection.Sell, new DateTime(2024, 2, 28), 900);
+        AddTransaction(after, seller.Id, customer.Id, TransactionDirection.Sell, new DateTime(2024, 3, 12), 900);
 
         var rows = await _service.GetProfitLossRowsAsync(
             new DateTime(2024, 3, 1),
@@ -137,7 +137,7 @@ public class ReportsDataServiceTests : RepoTestBase
 
         var row = Assert.Single(rows);
         Assert.Equal(inside.Id, row.ProductId);
-        Assert.Equal(100m, row.Sold);
+        Assert.Equal(100, row.Sold);
     }
 
     [Fact]
@@ -146,14 +146,14 @@ public class ReportsDataServiceTests : RepoTestBase
         var seller = AddSeller();
         var customer = AddCustomer();
         var product = TestDataHelpers.CreateProduct(Context);
-        AddTransaction(product, seller.Id, customer.Id, TransactionDirection.Sell, new DateTime(2024, 3, 10), 100m);
+        AddTransaction(product, seller.Id, customer.Id, TransactionDirection.Sell, new DateTime(2024, 3, 10), 100);
 
         var rows = await _service.GetProfitLossRowsAsync(
             new DateTime(2025, 1, 1),
             new DateTime(2025, 12, 31));
 
         Assert.Empty(rows);
-        Assert.Equal(0m, await _service.GetProfitLossTotalAsync(
+        Assert.Equal(0, await _service.GetProfitLossTotalAsync(
             new DateTime(2025, 1, 1),
             new DateTime(2025, 12, 31)));
     }
@@ -166,13 +166,13 @@ public class ReportsDataServiceTests : RepoTestBase
         var profitable = TestDataHelpers.CreateProduct(Context);
         var losing = TestDataHelpers.CreateProduct(Context);
 
-        AddTransaction(profitable, seller.Id, customer.Id, TransactionDirection.Buy, new DateTime(2024, 4, 1), 100m);
-        AddTransaction(profitable, seller.Id, customer.Id, TransactionDirection.Sell, new DateTime(2024, 4, 2), 350m);
-        AddTransaction(losing, seller.Id, customer.Id, TransactionDirection.Buy, new DateTime(2024, 4, 3), 200m);
+        AddTransaction(profitable, seller.Id, customer.Id, TransactionDirection.Buy, new DateTime(2024, 4, 1), 100);
+        AddTransaction(profitable, seller.Id, customer.Id, TransactionDirection.Sell, new DateTime(2024, 4, 2), 350);
+        AddTransaction(losing, seller.Id, customer.Id, TransactionDirection.Buy, new DateTime(2024, 4, 3), 200);
 
         var total = await _service.GetProfitLossTotalAsync(new DateTime(2024, 4, 1), new DateTime(2024, 4, 30));
 
-        Assert.Equal(50m, total);
+        Assert.Equal(50, total);
     }
 
     [Fact]
@@ -187,8 +187,8 @@ public class ReportsDataServiceTests : RepoTestBase
         var seller = AddSeller();
         var customer = AddCustomer();
         var product = TestDataHelpers.CreateProduct(Context);
-        AddTransaction(product, seller.Id, customer.Id, TransactionDirection.Sell, new DateTime(2024, 6, 15, 14, 30, 0), 100m);
-        AddTransaction(product, seller.Id, customer.Id, TransactionDirection.Sell, new DateTime(2024, 7, 1, 9, 0, 0), 100m);
+        AddTransaction(product, seller.Id, customer.Id, TransactionDirection.Sell, new DateTime(2024, 6, 15, 14, 30, 0), 100);
+        AddTransaction(product, seller.Id, customer.Id, TransactionDirection.Sell, new DateTime(2024, 7, 1, 9, 0, 0), 100);
 
         var earliest = await _service.GetEarliestTransactionDateAsync();
 
@@ -202,14 +202,14 @@ public class ReportsDataServiceTests : RepoTestBase
         var mikaeeil = AddEmployee("Mikaeeil", "Jorjany");
         var anis = AddEmployee("Anis", "Sahabi");
 
-        var rows = await _service.GetDistributionRowsAsync(1000m);
+        var rows = await _service.GetDistributionRowsAsync(1000);
 
         Assert.Equal(3, rows.Count);
-        Assert.Equal(400m, rows.Single(row => row.EmployeeId == mikaeeil.Id).CalculatedAmount);
-        Assert.Equal(500m, rows.Single(row => row.EmployeeId == anis.Id).CalculatedAmount);
+        Assert.Equal(400, rows.Single(row => row.EmployeeId == mikaeeil.Id).CalculatedAmount);
+        Assert.Equal(500, rows.Single(row => row.EmployeeId == anis.Id).CalculatedAmount);
 
         var shop = rows.Single(row => row.EmployeeName == "Shop");
-        Assert.Equal(100m, shop.CalculatedAmount);
+        Assert.Equal(100, shop.CalculatedAmount);
         Assert.Equal(10, shop.SharePercent);
         Assert.All(rows, row => Assert.False(row.IsLossPeriod));
     }
@@ -220,12 +220,12 @@ public class ReportsDataServiceTests : RepoTestBase
         AddEmployee("Mikaeeil", "Jorjany");
         AddEmployee("Anis", "Sahabi");
 
-        var rows = await _service.GetDistributionRowsAsync(-250m);
+        var rows = await _service.GetDistributionRowsAsync(-250);
 
         Assert.Equal(3, rows.Count);
         Assert.All(rows, row => Assert.True(row.IsLossPeriod));
-        Assert.Equal(-250m, rows.Single(row => row.EmployeeName == "Shop").CalculatedAmount);
-        Assert.Equal(0m, rows.Single(row => row.EmployeeName == "Mikaeeil Jorjany").CalculatedAmount);
+        Assert.Equal(-250, rows.Single(row => row.EmployeeName == "Shop").CalculatedAmount);
+        Assert.Equal(0, rows.Single(row => row.EmployeeName == "Mikaeeil Jorjany").CalculatedAmount);
     }
 
     [Fact]
@@ -234,7 +234,7 @@ public class ReportsDataServiceTests : RepoTestBase
         AddEmployee("Anis", "Sahabi");
 
         await Assert.ThrowsAsync<InvalidOperationException>(
-            () => _service.GetDistributionRowsAsync(100m));
+            () => _service.GetDistributionRowsAsync(100));
     }
 
     [Fact]
@@ -244,11 +244,11 @@ public class ReportsDataServiceTests : RepoTestBase
         var customer = AddCustomer();
         var product = TestDataHelpers.CreateProduct(Context);
 
-        var deleted = AddTransaction(product, seller.Id, customer.Id, TransactionDirection.Sell, new DateTime(2024, 1, 1), 50m);
+        var deleted = AddTransaction(product, seller.Id, customer.Id, TransactionDirection.Sell, new DateTime(2024, 1, 1), 50);
         deleted.IsDeleted = true;
         Context.SaveChanges();
 
-        AddTransaction(product, seller.Id, customer.Id, TransactionDirection.Sell, new DateTime(2024, 5, 20), 50m);
+        AddTransaction(product, seller.Id, customer.Id, TransactionDirection.Sell, new DateTime(2024, 5, 20), 50);
 
         var earliest = await _service.GetEarliestTransactionDateAsync();
 
@@ -263,6 +263,6 @@ public class ReportsDataServiceTests : RepoTestBase
         AddEmployee("Anis", "Sahabi");
 
         await Assert.ThrowsAsync<InvalidOperationException>(
-            () => _service.GetDistributionRowsAsync(100m));
+            () => _service.GetDistributionRowsAsync(100));
     }
 }

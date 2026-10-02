@@ -88,12 +88,12 @@
 
 <div class="tab-content" id="profitLossTabsContent">
     <div class="tab-pane fade show active" id="profit" role="tabpanel">
-        <p class="lead">Total profit: <strong><span class="@(Model.TotalProfit >= 0 ? "text-success" : "text-danger")">@(Model.TotalProfit > 0 ? "+" : "")@Model.TotalProfit.ToString("N2")</span></strong></p>
+        <p class="lead">Total profit: <strong><span class="@(Model.TotalProfit >= 0 ? "text-success" : "text-danger")">@(Model.TotalProfit > 0 ? "+" : "")@Model.TotalProfit.ToString("N0")</span></strong></p>
         <table class="table table-striped"><thead><tr><th>Product</th><th>Bought</th><th>Sold</th><th>Profit / loss</th><th>By percent</th></tr></thead><tbody>
 @foreach (var row in Model.Rows)
 {
     var profitClass = row.Profit >= 0 ? "text-success" : "text-danger";
-    <tr><td>@row.ProductLabel</td><td>@row.Bought.ToString("N2")</td><td>@row.Sold.ToString("N2")</td><td class="@profitClass">@row.Profit.ToString("N2")</td><td class="@profitClass">@row.ProfitPercent.ToString("F2")%</td></tr>
+    <tr><td>@row.ProductLabel</td><td>@row.Bought.ToString("N0")</td><td>@row.Sold.ToString("N0")</td><td class="@profitClass">@row.Profit.ToString("N0")</td><td class="@profitClass">@row.ProfitPercent.ToString("F2")%</td></tr>
 }
 </tbody></table>
     </div>
@@ -106,7 +106,7 @@
     <tr class="@(row.IsLossPeriod ? "table-danger" : "")">
         <td>@row.EmployeeName</td>
         <td>@row.SharePercent%</td>
-        <td>@row.CalculatedAmount.ToString("N2")</td>
+        <td>@row.CalculatedAmount.ToString("N0")</td>
     </tr>
 }
 </tbody></table>

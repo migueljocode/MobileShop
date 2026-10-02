@@ -43,7 +43,7 @@ public class CreatePhoneModelTests : RepoTestBase
     {
         ManufacturerId = manufacturerId,
         ModelId = modelId,
-        Price = 1_500_000m,
+        Price = 1500000,
         IMEI1 = "123456789012345",
     };
 
@@ -379,9 +379,9 @@ public class CreatePhoneModelTests : RepoTestBase
         Context.SaveChanges();
         var products = new[]
         {
-            new Product { ModelId = 1, Price = 100m },
-            new Product { ModelId = 1, Price = 100m },
-            new Product { ModelId = 1, Price = 100m },
+            new Product { ModelId = 1, Price = 100 },
+            new Product { ModelId = 1, Price = 100 },
+            new Product { ModelId = 1, Price = 100 },
         };
         Context.Products.AddRange(products);
         await Context.SaveChangesAsync();
@@ -417,7 +417,7 @@ public class CreatePhoneModelTests : RepoTestBase
     {
         var products = new[]
         {
-            new Product { ModelId = 1, Price = 100m },
+            new Product { ModelId = 1, Price = 100 },
         };
         Context.Products.AddRange(products);
         await Context.SaveChangesAsync();
@@ -449,7 +449,7 @@ public class CreatePhoneModelTests : RepoTestBase
         Context.Colors.Add(new Color { Name = "Black" });
         var products = new[]
         {
-            new Product { ModelId = 1, Price = 100m },
+            new Product { ModelId = 1, Price = 100 },
         };
         Context.Products.AddRange(products);
         await Context.SaveChangesAsync();

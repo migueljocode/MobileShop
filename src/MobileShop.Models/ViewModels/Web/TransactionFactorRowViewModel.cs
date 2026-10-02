@@ -9,6 +9,6 @@ public sealed record TransactionFactorRowViewModel(
     DateTime Date,
     TransactionDirection Direction,
     string ProductLabel,
-    decimal FinishedPrice,
+    int FinishedPrice,
     string PersonRole,
     string PersonLabel);

@@ -61,7 +61,7 @@ public class TransactionsDataServiceTests : RepoTestBase
             ProductId = product.Id,
             SellerId = sellerId,
             CustomerId = customerId,
-            FinishedPrice = 100m,
+            FinishedPrice = 100,
             Date = date,
             Direction = direction,
         };
@@ -175,7 +175,7 @@ public class TransactionsDataServiceTests : RepoTestBase
         {
             ProductId = product.Id,
             SellerId = seller.Id,
-            Price = 250m,
+            Price = 250,
         });
 
         Assert.True(result.Succeeded);
@@ -184,13 +184,13 @@ public class TransactionsDataServiceTests : RepoTestBase
         Assert.Equal(TransactionDirection.Buy, transaction.Direction);
         Assert.Equal(seller.Id, transaction.SellerId);
         Assert.Equal(1, transaction.CustomerId);
-        Assert.Equal(250m, transaction.FinishedPrice);
+        Assert.Equal(250, transaction.FinishedPrice);
 
         var duplicate = await _service.RecordBuyAsync(new BuyInputModel
         {
             ProductId = product.Id,
             SellerId = seller.Id,
-            Price = 300m,
+            Price = 300,
         });
 
         Assert.False(duplicate.Succeeded);
@@ -208,7 +208,7 @@ public class TransactionsDataServiceTests : RepoTestBase
         {
             ProductId = product.Id,
             CustomerId = customer.Id,
-            Price = 400m,
+            Price = 400,
         });
 
         Assert.True(result.Succeeded);
@@ -221,7 +221,7 @@ public class TransactionsDataServiceTests : RepoTestBase
         {
             ProductId = product.Id,
             CustomerId = customer.Id,
-            Price = 500m,
+            Price = 500,
         });
 
         Assert.False(duplicate.Succeeded);
@@ -239,7 +239,7 @@ public class TransactionsDataServiceTests : RepoTestBase
         {
             ProductId = product.Id,
             CustomerId = customer.Id,
-            Price = -1m,
+            Price = -1,
         });
 
         Assert.False(result.Succeeded);
@@ -257,7 +257,7 @@ public class TransactionsDataServiceTests : RepoTestBase
         {
             ProductId = product.Id,
             SellerId = seller.Id,
-            Price = -1m,
+            Price = -1,
         });
 
         Assert.False(result.Succeeded);
@@ -304,7 +304,7 @@ public class TransactionsDataServiceTests : RepoTestBase
         var model = new Model { ManufacturerId = manufacturer.Id, CategoryId = glassCategory.Id, Name = "iPhone 16 Glass" };
         Context.Models.Add(model);
         Context.SaveChanges();
-        var product = new Product { ModelId = model.Id, Barcode = "GLASS123456", Price = 123m, GlassProfile = new Glass() };
+        var product = new Product { ModelId = model.Id, Barcode = "GLASS123456", Price = 123, GlassProfile = new Glass() };
         Context.Products.Add(product);
         Context.SaveChanges();
 
@@ -312,7 +312,7 @@ public class TransactionsDataServiceTests : RepoTestBase
         var glass = Assert.Single(selectable);
         Assert.Equal("Glass", glass.Type);
         Assert.Equal("Barcode: GLASS123456", glass.Identifier);
-        Assert.Equal(123m, glass.SuggestedPrice);
+        Assert.Equal(123, glass.SuggestedPrice);
 
         var seller = AddSeller("Ali", "Zed");
         var customer = AddCustomer("Sara", "Ahmadi");
@@ -324,8 +324,8 @@ public class TransactionsDataServiceTests : RepoTestBase
     [Fact]
     public async Task GetSelectableProductsAsync_carries_catalog_price_as_suggested_price()
     {
-        var product = TestDataHelpers.CreateProduct(Context, price: 1234.50m);
-        var appleIdProduct = TestDataHelpers.CreateProduct(Context, price: 99.99m);
+        var product = TestDataHelpers.CreateProduct(Context, price: 1235);
+        var appleIdProduct = TestDataHelpers.CreateProduct(Context, price: 100);
 
         Context.Phones.Add(new Phone { ProductId = product.Id, IMEI1 = TestDataHelpers.GenerateImei() });
         Context.AppleIds.Add(new AppleId { ProductId = appleIdProduct.Id, Email = "a@b.c" });
@@ -335,9 +335,9 @@ public class TransactionsDataServiceTests : RepoTestBase
 
         Assert.Equal(2, selectable.Count);
         var phoneRow = Assert.Single(selectable, row => row.Type == "Phone");
-        Assert.Equal(1234.50m, phoneRow.SuggestedPrice);
+        Assert.Equal(1235, phoneRow.SuggestedPrice);
         var appleIdRow = Assert.Single(selectable, row => row.Type == "Apple ID");
-        Assert.Equal(99.99m, appleIdRow.SuggestedPrice);
+        Assert.Equal(100, appleIdRow.SuggestedPrice);
     }
 
     [Fact]

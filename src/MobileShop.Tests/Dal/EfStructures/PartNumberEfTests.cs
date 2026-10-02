@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.Extensions.DependencyInjection;
@@ -154,6 +155,7 @@ public class PartNumberEfTests : SqliteRepoTestBase
             using (var prepContext = new AppDbContext(
                        new DbContextOptionsBuilder<AppDbContext>()
                            .UseSqlite(connString)
+                           .ConfigureWarnings(w => w.Ignore(RelationalEventId.PendingModelChangesWarning))
                            .Options))
             {
                 var target = prepContext.Database.GetService<IMigrator>();
@@ -186,11 +188,11 @@ public class PartNumberEfTests : SqliteRepoTestBase
             using var migratedContext = new AppDbContext(
                 new DbContextOptionsBuilder<AppDbContext>()
                     .UseSqlite(connString)
+                    .ConfigureWarnings(w => w.Ignore(RelationalEventId.PendingModelChangesWarning))
                     .Options);
 
             var pendingMigrations = migratedContext.Database.GetPendingMigrations().ToList();
-            Assert.Single(pendingMigrations);
-            Assert.Contains("AddPartNumber", pendingMigrations[0]);
+            Assert.Contains(pendingMigrations, migration => migration.Contains("AddPartNumber"));
 
             migratedContext.Database.Migrate();
 

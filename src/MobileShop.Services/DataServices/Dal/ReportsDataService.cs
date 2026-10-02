@@ -45,7 +45,7 @@ public class ReportsDataService(
                         ? group.Where(t => t.Direction == TransactionDirection.Buy).Sum(t => t.FinishedPrice)
                         : first.IsGlass
                             ? first.ProductPrice
-                            : 0m,
+                            : 0,
                     group.Where(t => t.Direction == TransactionDirection.Sell).Sum(t => t.FinishedPrice));
             })
             .OrderBy(row => row.ProductId)
@@ -53,7 +53,7 @@ public class ReportsDataService(
     }
 
     /// <inheritdoc />
-    public async Task<decimal> GetProfitLossTotalAsync(DateTime? from, DateTime? to)
+    public async Task<int> GetProfitLossTotalAsync(DateTime? from, DateTime? to)
         => (await GetProfitLossRowsAsync(from, to)).Sum(row => row.Profit);
 
     /// <inheritdoc />
@@ -72,7 +72,7 @@ public class ReportsDataService(
     }
 
     /// <inheritdoc />
-    public async Task<IReadOnlyList<DistributionRow>> GetDistributionRowsAsync(decimal totalProfit)
+    public async Task<IReadOnlyList<DistributionRow>> GetDistributionRowsAsync(int totalProfit)
     {
         // The calculator matches the required employees by exact full name, so the projection must
         // supply the employee id plus the person's first and last name. Ordering by name mirrors

@@ -10,8 +10,8 @@ public sealed class SellInputModel
     public int CustomerId { get; set; }
 
     [Display(Name = "Finished price")]
-    [Range(0, double.MaxValue)]
-    public decimal Price { get; set; }
+    [Range(0, int.MaxValue)]
+    public int Price { get; set; }
 
     [DataType(DataType.DateTime)]
     public DateTime? Date { get; set; }

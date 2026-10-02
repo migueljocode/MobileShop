@@ -46,7 +46,7 @@ public class CreateGlassModelTests : RepoTestBase
         CompatibleManufacturerId = compatibleManufacturerId,
         CompatibleModelId = compatibleModelId,
         GlassManufacturerId = glassManufacturerId,
-        Price = 100m, ProfitPercent = 20m, Count = 3
+        Price = 100, ProfitPercent = 20m, Count = 3
     };
 
     [Fact]
@@ -93,7 +93,7 @@ public class CreateGlassModelTests : RepoTestBase
         Assert.Equal(3, Context.Transactions.Count(t => t.Direction == TransactionDirection.Buy));
         Assert.All(Context.Transactions.Where(t => t.Direction == TransactionDirection.Buy), t =>
         {
-            Assert.Equal(100m, t.FinishedPrice);
+            Assert.Equal(100, t.FinishedPrice);
             Assert.Equal(DateTime.Today, t.Date);
         });
         Assert.All(Context.Glasses, glass => Assert.Equal(model.Id, glass.ModelFits.Single().ModelId));
@@ -113,7 +113,7 @@ public class CreateGlassModelTests : RepoTestBase
     {
         var (manufacturer, model) = SeedModel();
         _model.Input = ValidInput(manufacturer.Id, model.Id, Context.Manufacturers.First(m => m.Name == "Samsung").Id);
-        _model.Input.Price = 10.44m;
+        _model.Input.Price = 10;
         _model.Input.ProfitPercent = 200m;
         _model.Input.ProfitAmount = null;
 
@@ -121,8 +121,8 @@ public class CreateGlassModelTests : RepoTestBase
 
         Assert.IsType<PageResult>(result);
         Assert.True(_model.ModelState.IsValid);
-        Assert.All(Context.Products, product => Assert.Equal(31.32m, product.Price));
-        Assert.All(Context.Transactions.Where(t => t.Direction == TransactionDirection.Buy), t => Assert.Equal(10.44m, t.FinishedPrice));
+        Assert.All(Context.Products, product => Assert.Equal(30, product.Price));
+        Assert.All(Context.Transactions.Where(t => t.Direction == TransactionDirection.Buy), t => Assert.Equal(10, t.FinishedPrice));
     }
 
     [Fact]
