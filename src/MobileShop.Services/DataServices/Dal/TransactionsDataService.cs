@@ -7,6 +7,7 @@ public class TransactionsDataService(
     IBaseRepo<Customer> customers,
     IBaseRepo<Phone> phones,
     IBaseRepo<AppleId> appleIds,
+    IBaseRepo<Product> products,
     AppDbContext context,
     IPdfGenerator pdfGenerator,
     ILogger<TransactionsDataService> logger)
@@ -128,6 +129,21 @@ public class TransactionsDataService(
                 SuggestedPrice = phone.ProductNavigation.Price,
             });
 
+        var glassRows = await products.SelectAllAsync(
+            product => product.GlassProfile != null && product.Transactions.All(transaction => transaction.Direction != direction),
+            product => new ProductListItemViewModel(
+                product.Id,
+                product.Id,
+                "Glass",
+                product.ModelNavigation.ManufacturerNavigation.Name + " " + product.ModelNavigation.Name,
+                "Barcode: " + product.Barcode,
+                null,
+                product.Transactions.Any(t => t.Direction == TransactionDirection.Sell),
+                product.SecondHandProfile != null)
+            {
+                SuggestedPrice = product.Price,
+            });
+
         var appleIdRows = await appleIds.SelectAllAsync(
             appleId => appleId.ProductNavigation.Transactions.All(transaction => transaction.Direction != direction),
             appleId => new ProductListItemViewModel(
@@ -144,6 +160,7 @@ public class TransactionsDataService(
             });
 
         return phoneRows
+            .Concat(glassRows)
             .Concat(appleIdRows)
             .OrderBy(row => row.Name)
             .ToList();

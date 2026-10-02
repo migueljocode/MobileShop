@@ -11,9 +11,12 @@
 
     <div class="col-md-6">
         <label asp-for="Input.CompatibleManufacturerId" class="form-label">Compatible phone manufacturer</label>
-        <select asp-for="Input.CompatibleManufacturerId" asp-items="@(new SelectList(Model.Manufacturers, "Id", "Name"))" class="form-select" id="compatibleManufacturerSelect">
-            <option value="">-- Select manufacturer --</option>
-        </select>
+        <div class="input-group">
+            <select asp-for="Input.CompatibleManufacturerId" asp-items="@(new SelectList(Model.Manufacturers, "Id", "Name"))" class="form-select" id="compatibleManufacturerSelect">
+                <option value="">-- Select manufacturer --</option>
+            </select>
+            <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#addCompatibleManufacturerModal">Add New</button>
+        </div>
         <span asp-validation-for="Input.CompatibleManufacturerId" class="text-danger"></span>
     </div>
 

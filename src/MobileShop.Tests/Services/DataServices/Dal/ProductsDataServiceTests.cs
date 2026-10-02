@@ -165,6 +165,29 @@ public class ProductsDataServiceTests : RepoTestBase
     }
 
     [Fact]
+    public async Task GetInventoryRowsAsync_includes_glass_products_and_supports_glass_filter()
+    {
+        SeedCatalog(out _, out _);
+        var glassCategory = Context.Categories.Single(c => c.Name == "Glass");
+        var manufacturer = Context.Manufacturers.Single(m => m.Name == "Apple");
+        var glassModel = new Model { ManufacturerId = manufacturer.Id, CategoryId = glassCategory.Id, Name = "iPhone 16 Glass" };
+        Context.Models.Add(glassModel);
+        Context.SaveChanges();
+
+        var product = new Product { ModelId = glassModel.Id, Barcode = "GLASS123456", Price = 120m, GlassProfile = new Glass() };
+        Context.Products.Add(product);
+        Context.SaveChanges();
+
+        var allRows = await _service.GetInventoryRowsAsync();
+        var glassRows = await _service.GetInventoryRowsAsync("glass");
+
+        var row = Assert.Single(allRows, r => r.Type == "Glass");
+        Assert.Equal("Barcode: GLASS123456", row.Identifier);
+        Assert.Single(glassRows);
+        Assert.Equal("Glass", glassRows[0].Type);
+    }
+
+    [Fact]
     public async Task GetInventoryRowsAsync_returns_empty_list_when_no_phones_or_apple_ids_exist()
     {
         SeedCatalog(out _, out _);

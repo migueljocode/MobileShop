@@ -52,6 +52,7 @@ public class CreateGlassModel(IProductsDataService dataService) : PageModel
         }
 
         Message = $"Created {Input.Count} glass product(s) successfully.";
+        await PopulateDropdownsAsync();
         return Page();
     }
 

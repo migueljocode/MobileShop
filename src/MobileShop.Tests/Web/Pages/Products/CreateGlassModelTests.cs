@@ -92,6 +92,13 @@ public class CreateGlassModelTests : RepoTestBase
         Assert.All(Context.Glasses, glass => Assert.Equal(model.Id, glass.ModelFits.Single().ModelId));
         var glassCategoryId = Context.Categories.Single(c => c.Name == "Glass").Id;
         Assert.All(Context.Products, product => Assert.Equal(glassCategoryId, Context.Models.Single(m => m.Id == product.ModelId).CategoryId));
+
+        var secondResult = await _model.OnPostAsync();
+        Assert.IsType<PageResult>(secondResult);
+        Assert.Equal("Created 3 glass product(s) successfully.", _model.Message);
+        Assert.Equal(2, _model.Manufacturers.Count);
+        Assert.Single(_model.CompatibleModels);
+        Assert.Equal(6, Context.Products.Count());
     }
 
     [Fact]

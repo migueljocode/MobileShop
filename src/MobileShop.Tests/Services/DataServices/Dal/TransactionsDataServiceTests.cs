@@ -24,6 +24,7 @@ public class TransactionsDataServiceTests : RepoTestBase
             new BaseRepo<Customer>(Context),
             new BaseRepo<Phone>(Context),
             new BaseRepo<AppleId>(Context),
+            new BaseRepo<Product>(Context),
             Context,
             _pdfGenerator,
             NullLogger<TransactionsDataService>.Instance);
@@ -290,6 +291,34 @@ public class TransactionsDataServiceTests : RepoTestBase
 
         Assert.Single(afterBuy);
         Assert.Equal("Apple ID", afterBuy[0].Type);
+    }
+
+    [Fact]
+    public async Task GetSelectableProductsAsync_includes_glass_products_and_excludes_glass_after_buy()
+    {
+        var glassCategory = new Category { Name = "Glass" };
+        var manufacturer = new Manufacturer { Name = "Apple" };
+        Context.Categories.Add(glassCategory);
+        Context.Manufacturers.Add(manufacturer);
+        Context.SaveChanges();
+        var model = new Model { ManufacturerId = manufacturer.Id, CategoryId = glassCategory.Id, Name = "iPhone 16 Glass" };
+        Context.Models.Add(model);
+        Context.SaveChanges();
+        var product = new Product { ModelId = model.Id, Barcode = "GLASS123456", Price = 123m, GlassProfile = new Glass() };
+        Context.Products.Add(product);
+        Context.SaveChanges();
+
+        var selectable = await _service.GetSelectableProductsAsync(TransactionDirection.Buy);
+        var glass = Assert.Single(selectable);
+        Assert.Equal("Glass", glass.Type);
+        Assert.Equal("Barcode: GLASS123456", glass.Identifier);
+        Assert.Equal(123m, glass.SuggestedPrice);
+
+        var seller = AddSeller("Ali", "Zed");
+        var customer = AddCustomer("Sara", "Ahmadi");
+        AddTransaction(product, seller.Id, customer.Id, TransactionDirection.Buy, DateTime.UtcNow);
+
+        Assert.Empty(await _service.GetSelectableProductsAsync(TransactionDirection.Buy));
     }
 
     [Fact]

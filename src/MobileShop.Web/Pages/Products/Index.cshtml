@@ -7,10 +7,11 @@
 <h1>Products</h1>
 <div class="d-flex flex-wrap gap-2 align-items-center mb-3">
     <div class="btn-group" role="group">
-        @* Only the phones view can be narrowed by a part number, so All/Apple IDs links must drop it. *@
+        @* Only the phones view can be narrowed by a part number, so other product links drop it. *@
         <a class="btn @(Model.Type == "all" ? "btn-primary" : "btn-outline-primary")" asp-route-type="all">All</a>
         <a class="btn @(Model.Type == "phone" ? "btn-primary" : "btn-outline-primary")" asp-route-type="phone" asp-route-partNumberId="@Model.PartNumberId">Phones</a>
         <a class="btn @(Model.Type == "appleid" ? "btn-primary" : "btn-outline-primary")" asp-route-type="appleid">Apple IDs</a>
+        <a class="btn @(Model.Type == "glass" ? "btn-primary" : "btn-outline-primary")" asp-route-type="glass">Glasses</a>
     </div>
     <a asp-page="/Products/SecondHand" class="btn btn-outline-warning">Second-hand</a>
     <a asp-page="/Products/CreatePhone" class="btn btn-success">Create phone</a>

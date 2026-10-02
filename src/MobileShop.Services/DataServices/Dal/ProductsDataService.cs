@@ -35,9 +35,9 @@ public class ProductsDataService(
         // is treated as no selection so the filter never hides everything by accident.
         var hasPartNumberFilter = partNumberId is > 0;
 
-        // Only "appleid" excludes phones; only "phone" excludes Apple IDs — null, "all"
-        // and any unrecognised value return both blocks. Pages lowercase before calling.
-        if (type is not "appleid")
+        // "phone" and "appleid" keep their dedicated views; "glass" is a dedicated glass view.
+        // Null, "all" and unrecognised values return the complete inventory. Pages lowercase before calling.
+        if (type is not "appleid" and not "glass")
         {
             Expression<Func<Phone, ProductListItemViewModel>> project = phone => new ProductListItemViewModel(
                 phone.Id,
@@ -62,7 +62,7 @@ public class ProductsDataService(
         }
 
         // Apple IDs never carry a part number, so an active part-number filter excludes them entirely.
-        if (type is not "phone" && !hasPartNumberFilter)
+        if (type is not "phone" and not "glass" && !hasPartNumberFilter)
             rows.AddRange((await appleIds.SelectAllAsync(
                 appleId => new ProductListItemViewModel(
                     appleId.Id,
@@ -74,6 +74,23 @@ public class ProductsDataService(
                     appleId.ProductNavigation.Transactions.Any(t => t.Direction == TransactionDirection.Sell),
                     appleId.ProductNavigation.SecondHandProfile != null)))
                 .OrderBy(row => row.ProductId));
+
+        // Glass is stored as a Product with a Glass profile, so it has no separate subtype repository.
+        if (type is not "phone" and not "appleid")
+        {
+            Expression<Func<Product, ProductListItemViewModel>> project = product => new ProductListItemViewModel(
+                product.Id,
+                product.Id,
+                "Glass",
+                product.ModelNavigation.ManufacturerNavigation.Name + " " + product.ModelNavigation.Name,
+                "Barcode: " + product.Barcode,
+                null,
+                product.Transactions.Any(t => t.Direction == TransactionDirection.Sell),
+                product.SecondHandProfile != null);
+
+            rows.AddRange((await products.SelectAllAsync(product => product.GlassProfile != null, project))
+                .OrderBy(row => row.ProductId));
+        }
 
         return rows.AsReadOnly();
     }
@@ -120,7 +137,29 @@ public class ProductsDataService(
     {
         ProductDetailsViewModel? details;
 
-        if (string.Equals(type, "appleid", StringComparison.OrdinalIgnoreCase))
+        if (string.Equals(type, "glass", StringComparison.OrdinalIgnoreCase))
+        {
+            details = await products.SelectAsync(
+                id,
+                product => new ProductDetailsViewModel(
+                    "Glass",
+                    product.Id,
+                    product.ModelNavigation.ManufacturerNavigation.Name,
+                    product.ModelNavigation.Name,
+                    "Barcode: " + product.Barcode,
+                    null,
+                    product.Transactions
+                        .Where(t => t.Direction == TransactionDirection.Sell)
+                        .OrderByDescending(t => t.Date)
+                        .Select(t => t.CustomerNavigation.PersonNavigation)
+                        .Select(person => person.FirstName + " " + person.LastName)
+                        .FirstOrDefault() ?? "Not sold",
+                    product.GuaranteeProfile == null
+                        ? "None"
+                        : product.GuaranteeProfile.Corporation + " until " + product.GuaranteeProfile.ExpirationDate,
+                    product.SecondHandProfile != null));
+        }
+        else if (string.Equals(type, "appleid", StringComparison.OrdinalIgnoreCase))
         {
             details = await appleIds.SelectAsync(
                 id,
