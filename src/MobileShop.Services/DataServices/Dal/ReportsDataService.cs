@@ -23,6 +23,8 @@ public class ReportsDataService(
                 transaction.Date,
                 transaction.Direction,
                 transaction.FinishedPrice,
+                ProductPrice = transaction.ProductNavigation.Price,
+                IsGlass = transaction.ProductNavigation.GlassProfile != null,
                 ProductLabel = transaction.ProductNavigation.ModelNavigation.ManufacturerNavigation.Name + " " + transaction.ProductNavigation.ModelNavigation.Name
             })
             .ConfigureAwait(false);
@@ -39,7 +41,11 @@ public class ReportsDataService(
                 return new ProfitLossRowViewModel(
                     group.Key,
                     first.ProductLabel,
-                    group.Where(t => t.Direction == TransactionDirection.Buy).Sum(t => t.FinishedPrice),
+                    group.Any(t => t.Direction == TransactionDirection.Buy)
+                        ? group.Where(t => t.Direction == TransactionDirection.Buy).Sum(t => t.FinishedPrice)
+                        : first.IsGlass
+                            ? first.ProductPrice
+                            : 0m,
                     group.Where(t => t.Direction == TransactionDirection.Sell).Sum(t => t.FinishedPrice));
             })
             .OrderBy(row => row.ProductId)
