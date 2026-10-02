@@ -57,7 +57,7 @@ public class DetailsModelTests : RepoTestBase
         Context.Sellers.Add(seller);
         Context.SaveChanges();
 
-        var product = TestDataHelpers.CreateProduct(Context, 200m);
+        var product = TestDataHelpers.CreateProduct(Context, 200);
         var transaction = new Transaction
         {
             ProductId = product.Id,
