@@ -1108,7 +1108,7 @@ public class ProductsDataServiceTests : RepoTestBase
     }
 
     [Fact]
-    public async Task CreateGlassesAsync_preserves_decimal_paid_price_and_allows_profit_over_100_percent()
+    public async Task CreateGlassesAsync_uses_integer_paid_price_and_allows_profit_over_100_percent()
     {
         SeedCatalog(out var phoneModel, out _);
 
@@ -1124,7 +1124,7 @@ public class ProductsDataServiceTests : RepoTestBase
 
         Assert.True(result.Succeeded);
         var product = Assert.Single(await Context.Products.ToListAsync());
-        Assert.Equal(31, product.Price);
+        Assert.Equal(30, product.Price);
         var purchase = Assert.Single(await Context.Transactions.Where(t => t.Direction == TransactionDirection.Buy).ToListAsync());
         Assert.Equal(10, purchase.FinishedPrice);
         Assert.Equal(DateTime.Today, purchase.Date);
