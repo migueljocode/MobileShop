@@ -1,15 +1,16 @@
 #!/usr/bin/env bash
 set -u
 usage(){ cat <<'EOF'
-Usage: log.sh --level LEVEL [--above|--below] [filters] [-n N] [PATH|-]
+Usage: log.sh --level LEVEL [--above|--below] [filters] [-n N] [-p|--path PATH] [PATH|-]
 LEVEL: debug info warning error fatal. Exact is default.
 --above/--below include selected plus more/less severe.
 -n/--number N prints first N matching events; N must be positive.
+-p/--path PATH selects one log file; PATH may also be supplied positionally. Use - for stdin.
 --date-from/--date-to: YYYY-MM-DD. --date-time-from/--date-time-to: "YYYY-MM-DD HH:mm:ss".
 Date/datetime modes cannot mix. From-only uses current local date/time as to; to-only uses first event as from.
 Default input: logs/app-*.log. PATH selects one file literally; - reads stdin and pipelines. Events/help stdout; diagnostics stderr; invalid usage is non-zero.
 Bounds are inclusive. From-only uses current local date/time; to-only infers the lower bound from the first event; no bounds means no time restriction. Date and datetime modes cannot mix.
-Examples: ./log.sh --level error; ./log.sh --level error --above -n 20; ./log.sh --level warning --date-from 2026-01-01 --date-to 2026-01-31; ./log.sh --level error --date-time-from '2026-01-01 08:00:00' --date-time-to '2026-01-01 18:00:00'; cat logs/app-*.log | ./log.sh --level error.
+Examples: ./log.sh --level error; ./log.sh --level error --path 'logs/my app.log'; ./log.sh --level error --above -n 20; ./log.sh --level warning --date-from 2026-01-01 --date-to 2026-01-31; ./log.sh --level error --date-time-from '2026-01-01 08:00:00' --date-time-to '2026-01-01 18:00:00'; cat logs/app-*.log | ./log.sh --level error.
 Invalid examples: --date-from 2026-02-30, reversed ranges, --above --below, and -n 0 are rejected with stderr diagnostics.
 EOF
 }
@@ -26,6 +27,7 @@ while (($#));do case "$1" in
 --above)((mode==0))||die "--above and --below are mutually exclusive";mode=1;shift;;
 --below)((mode==0))||die "--above and --below are mutually exclusive";mode=-1;shift;;
 -n|--number)(($#>1))||die "missing value for $1";n="$2";shift 2;;
+-p|--path)(($#>1))||die "missing value for $1";[[ -z "$p" ]]||die "multiple input paths";p="$2";shift 2;;
 --date-from)(($#>1))||die "missing value for --date-from";df="$2";shift 2;;
 --date-to)(($#>1))||die "missing value for --date-to";dt="$2";shift 2;;
 --date-time-from)(($#>1))||die "missing value for --date-time-from";tf="$2";shift 2;;
