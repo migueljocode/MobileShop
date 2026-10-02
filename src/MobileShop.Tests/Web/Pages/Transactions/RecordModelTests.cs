@@ -24,6 +24,7 @@ public class RecordModelTests : RepoTestBase
         new BaseRepo<Customer>(Context),
         new BaseRepo<Phone>(Context),
         new BaseRepo<AppleId>(Context),
+        new BaseRepo<Product>(Context),
         Context,
         new StubPdfGenerator(),
         NullLogger<TransactionsDataService>.Instance);

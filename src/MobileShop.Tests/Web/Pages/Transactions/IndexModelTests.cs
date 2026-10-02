@@ -87,6 +87,7 @@ public class IndexModelTests : RepoTestBase
         new BaseRepo<Customer>(Context),
         new BaseRepo<Phone>(Context),
         new BaseRepo<AppleId>(Context),
+        new BaseRepo<Product>(Context),
         Context,
         _pdfGenerator,
         NullLogger<TransactionsDataService>.Instance);
