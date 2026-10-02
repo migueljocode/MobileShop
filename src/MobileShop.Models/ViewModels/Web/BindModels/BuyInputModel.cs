@@ -9,7 +9,7 @@ public sealed class BuyInputModel
     [Range(1, int.MaxValue, ErrorMessage = "The seller should be selected.")]
     public int SellerId { get; set; }
 
-    [Range(0, double.MaxValue)]
+    [Range(0, int.MaxValue)]
     [Display(Name = "Finished price")]
     public int Price { get; set; }
 
