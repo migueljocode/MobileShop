@@ -21,7 +21,8 @@
 - Risk: MEDIUM
 - Confidence: MEDIUM
 
-## [ ] Step 2 — Create Glass page and pricing UX
+## ~~[x] Step 2 — Create Glass page and pricing UX~~
+**PASS — Actor implementation merged; Actions #78 succeeded on the final main commit.**
 - Files: create `src/MobileShop.Web/Pages/Products/CreateGlass.cshtml.cs`, `CreateGlass.cshtml`, and focused `CreateGlassModelTests`; reuse CreatePhone dropdown patterns and `wwwroot/js/create-product-pricing.js`.
 - Form fields: Manufacturer, Model, Paid price, Profit %, Profit amount, read-only Finished price, Count, Save, Back.
 - Reuse existing manufacturer/model service methods and pricing JS hooks; keep pricing server-authoritative.
