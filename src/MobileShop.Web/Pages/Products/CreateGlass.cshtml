@@ -1,0 +1,97 @@
+@page
+@model MobileShop.Web.Pages.Products.CreateGlassModel
+@{
+    ViewData["Title"] = "Create glass";
+}
+
+<h1>Create glass</h1>
+
+<form method="post" class="row g-3 col-lg-7">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+    <div class="col-md-6">
+        <label asp-for="Input.ManufacturerId" class="form-label">Manufacturer</label>
+        <select asp-for="Input.ManufacturerId" asp-items="@(new SelectList(Model.Manufacturers, "Id", "Name"))" class="form-select" id="manufacturerSelect">
+            <option value="">-- Select manufacturer --</option>
+        </select>
+        <span asp-validation-for="Input.ManufacturerId" class="text-danger"></span>
+    </div>
+
+    <div class="col-md-6">
+        <label asp-for="Input.ModelId" class="form-label">Model</label>
+        <select asp-for="Input.ModelId" asp-items="@(new SelectList(Model.Models, "Id", "Name"))" class="form-select" id="modelSelect">
+            <option value="">-- Select model --</option>
+        </select>
+        <span asp-validation-for="Input.ModelId" class="text-danger"></span>
+    </div>
+
+    <div class="col-md-3">
+        <label asp-for="Input.Price" class="form-label">Paid price</label>
+        <input asp-for="Input.Price" class="form-control" data-price />
+        <span asp-validation-for="Input.Price" class="text-danger"></span>
+    </div>
+
+    <div class="col-md-3">
+        <label asp-for="Input.ProfitPercent" class="form-label">Profit %</label>
+        <div class="input-group">
+            <input asp-for="Input.ProfitPercent" class="form-control" data-percent />
+            <span class="input-group-text">%</span>
+        </div>
+        <span asp-validation-for="Input.ProfitPercent" class="text-danger"></span>
+    </div>
+
+    <div class="col-md-3">
+        <label asp-for="Input.ProfitAmount" class="form-label">Profit amount</label>
+        <input asp-for="Input.ProfitAmount" class="form-control" data-amount />
+        <span asp-validation-for="Input.ProfitAmount" class="text-danger"></span>
+    </div>
+
+    <div class="col-md-3">
+        <label class="form-label">Finished price</label>
+        <input type="text" class="form-control" data-finished-price readonly aria-readonly="true" tabindex="-1" style="background:#e9ecef;" />
+        <span class="form-text text-muted">Server-stored price (paid + profit).</span>
+    </div>
+
+    <div class="col-md-4">
+        <label asp-for="Input.Count" class="form-label">Count</label>
+        <input asp-for="Input.Count" class="form-control" min="1" max="500" />
+        <span asp-validation-for="Input.Count" class="text-danger"></span>
+        <span class="form-text">Create 1–500 glass products in one save.</span>
+    </div>
+
+    <div class="col-12">
+        <button class="btn btn-primary" type="submit">Save glass</button>
+        <a asp-page="/Products/Index" class="btn btn-outline-secondary ms-2">Back to products</a>
+    </div>
+</form>
+
+@if (!string.IsNullOrWhiteSpace(Model.Message))
+{
+    <div class="alert alert-success mt-3" role="status">@Model.Message</div>
+}
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script src="~/js/create-product-pricing.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const manufacturer = document.getElementById('manufacturerSelect');
+            const model = document.getElementById('modelSelect');
+            if (!manufacturer || !model) return;
+
+            manufacturer.addEventListener('change', async function () {
+                model.innerHTML = '<option value="">-- Select model --</option>';
+                if (!manufacturer.value) return;
+                const response = await fetch('?handler=Models&manufacturerId=' + encodeURIComponent(manufacturer.value));
+                if (!response.ok) return;
+                const models = await response.json();
+                for (const item of models) {
+                    const option = document.createElement('option');
+                    option.value = item.id;
+                    option.textContent = item.name;
+                    model.appendChild(option);
+                }
+            });
+        });
+    </script>
+}
