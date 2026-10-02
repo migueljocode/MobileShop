@@ -5,7 +5,8 @@
 ## Non-negotiable
 - Start by reading .clinerules/to-do.md and .clinerules/chat/plan.md before touching anything. Fresh session — those files are your only context.
 - Implement exactly ONE step from plan.md, then STOP. Do not continue to the next step — the user runs the reviewer's execution check before telling you to continue.
-- Never commit unless the step's verification command actually ran and passed.
+- Use the repository's GitHub Actions CI as the verification gate for `dotnet build` / `dotnet test`; do not run those commands locally when CI is available. After pushing, wait for the corresponding Action result when the GitHub tools can observe it. If CI passes, stop Actor work and tell the user they can switch/request Reviewer for Job B. If CI fails, inspect the failed Action/job logs, fix the issue as Actor, commit/push the fix, and wait for the next Action result.
+- Never commit unless the step's required verification has passed.
 - Never modify a file the current step doesn't list. Never change architecture, public contracts, or API design — stop and report instead.
 - Always write your report into .clinerules/chat/act.md, overwriting whatever was there before.
 - Your role is fixed by this file (actor.md), never by which Cline mode is active — the reverse also holds: if Cline is ever in its native Plan Mode for a moment of read-only investigation, you are still the actor, not the pipeline's planner.
@@ -27,7 +28,7 @@ Workflow: READ -> IMPLEMENT -> VERIFY -> COMMIT -> REPORT -> STOP. Don't narrate
   - Verify in one chained call and read the result before committing — never fold the commit into the verification chain.
   - One purpose per chain, roughly four commands at most, so a failure is obvious.
 - Keep command output and your own report compact — enough to verify correctness, not a transcript.
-- Commands can run long. A test suite or build may exceed the ~30s window before output settles, and tests over 45s are common — that's not a failure. Use an attached "Proceed While Running" command and keep reading that same session until it actually completes. Never background it with &, nohup, disown, or any detached process, and never judge success/failure before it finishes.
+- Commands can run long. For build/test gates, rely on GitHub Actions rather than detached or background local commands. Do not judge a pending Action as success or failure.
 
 ## Before editing
 Confirm the target file/class/method actually exists and matches what plan.md describes. Never edit based on assumptions or filenames alone. If plan.md still has a "Proposed stages" section, the planner hasn't finalized it — stop and tell the user.
@@ -62,7 +63,7 @@ ARCHITECTURAL BLOCKER — what you found, where, why the plan can't proceed as w
 ## Before you finish, confirm
 - [ ] I read to-do.md and plan.md before starting.
 - [ ] I touched only the files this step names (plus plan.md and act.md) — never to-do.md.
-- [ ] Verification actually ran and passed — not just "looks right" — and I gave long-running commands room to finish.
+- [ ] Verification actually ran and passed — not just "looks right"; required build/test gates are satisfied by a successful GitHub Actions run.
 - [ ] plan.md and act.md are both updated for this step.
 - [ ] No error was swallowed or papered over, and nothing unrelated went into the commit.
 - [ ] This is exactly one commit for exactly one step, and I am stopping here.
