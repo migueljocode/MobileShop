@@ -17,6 +17,7 @@ public class ProductsDataServiceTests : RepoTestBase
 
     public ProductsDataServiceTests()
     {
+        TestDataHelpers.SeedShopSentinels(Context);
         _service = new ProductsDataService(
             new BaseRepo<Phone>(Context),
             new BaseRepo<AppleId>(Context),
@@ -1094,12 +1095,39 @@ public class ProductsDataServiceTests : RepoTestBase
 
         Assert.Equal(3, products.Count);
         Assert.All(products, p => Assert.Equal(125m, p.Price));
+        var purchases = await Context.Transactions.Where(t => t.Direction == TransactionDirection.Buy).ToListAsync();
+        Assert.Equal(3, purchases.Count);
+        Assert.All(purchases, t => Assert.Equal(100m, t.FinishedPrice));
+        Assert.All(purchases, t => Assert.Equal(DateTime.Today, t.Date));
         Assert.All(products, p => Assert.Equal(glassModel.Id, p.ModelId));
         Assert.Equal(3, products.Select(p => p.Barcode).Distinct().Count());
         Assert.All(products, p => Assert.Equal(12, p.Barcode.Length));
         Assert.All(products, p => Assert.NotNull(p.GlassProfile));
         Assert.All(products, p => Assert.Single(p.GlassProfile!.ModelFits));
         Assert.All(products, p => Assert.Equal(phoneModel.Id, p.GlassProfile!.ModelFits.Single().ModelId));
+    }
+
+    [Fact]
+    public async Task CreateGlassesAsync_preserves_decimal_paid_price_and_allows_profit_over_100_percent()
+    {
+        SeedCatalog(out var phoneModel, out _);
+
+        var result = await _service.CreateGlassesAsync(new MobileShop.Models.ViewModels.Web.BindModels.CreateGlassInputModel
+        {
+            CompatibleManufacturerId = 1,
+            CompatibleModelId = phoneModel.Id,
+            GlassManufacturerId = 1,
+            Price = 10.44m,
+            ProfitPercent = 200m,
+            Count = 1,
+        });
+
+        Assert.True(result.Succeeded);
+        var product = Assert.Single(await Context.Products.ToListAsync());
+        Assert.Equal(31.32m, product.Price);
+        var purchase = Assert.Single(await Context.Transactions.Where(t => t.Direction == TransactionDirection.Buy).ToListAsync());
+        Assert.Equal(10.44m, purchase.FinishedPrice);
+        Assert.Equal(DateTime.Today, purchase.Date);
     }
 
     [Fact]
