@@ -25,7 +25,1032 @@ grep -q 'System.InvalidOperationException: fixture' <<<"$exact" || fail "multili
 grep -q '   at Fixture.Method()' <<<"$exact" || fail "multiline continuation missing"
 
 [[ "$(bash "$script" --level error --above "$fixture" | grep -c '^2026-')" == 4 ]] || fail "above semantics"
-[[ "$(bash "$script" --level error --below "$fixture" | grep -c '^2026-')" == 4 ]] || fail "below semantics"
+below="$(bash "$script" --level error --below "$fixture")"
+grep -q 
+[[ "$(bash "$script" --level error --date-from 2026-01-01 "$fixture" | grep -c 
+[[ "$(bash "$script" --level error -n 1 "$fixture" | grep -c '^2026-')" == 1 ]] || fail "-n semantics"
+
+date_exact="$(bash "$script" --level error --date-from 2026-01-02 --date-to 2026-01-02 "$fixture")"
+[[ "$(count_events "$date_exact")" == 1 ]] || fail "date boundary"
+grep -q 'second error' <<<"$date_exact" || fail "date boundary selected wrong event"
+dt_exact="$(bash "$script" --level error --date-time-from '2026-01-01 08:03:00' --date-time-to '2026-01-01 08:03:00' "$fixture")"
+[[ "$(count_events "$dt_exact")" == 1 ]] || fail "datetime boundary"
+
+expect_fail "invalid level" bash "$script" --level nope "$fixture"
+expect_fail "missing level" bash "$script" "$fixture"
+expect_fail "missing date value" bash "$script" --level error --date-from
+expect_fail "missing datetime value" bash "$script" --level error --date-time-from
+expect_fail "invalid date" bash "$script" --level error --date-from 2026-02-30 "$fixture"
+expect_fail "invalid datetime" bash "$script" --level error --date-time-from '2026-01-01 25:00:00' "$fixture"
+expect_fail "reversed date" bash "$script" --level error --date-from 2026-01-03 --date-to 2026-01-02 "$fixture"
+expect_fail "reversed datetime" bash "$script" --level error --date-time-from '2026-01-03 10:00:00' --date-time-to '2026-01-02 10:00:00' "$fixture"
+expect_fail "conflicting filters" bash "$script" --level error --date-from 2026-01-01 --date-time-from '2026-01-01 08:00:00' "$fixture"
+expect_fail "conflicting severity modes" bash "$script" --level error --above --below "$fixture"
+expect_fail "bad number" bash "$script" --level error -n 0 "$fixture"
+expect_fail "negative number" bash "$script" --level error -n -1 "$fixture"
+expect_fail "non-numeric number" bash "$script" --level error -n abc "$fixture"
+expect_fail "unknown option" bash "$script" --level error --wat "$fixture"
+expect_fail "missing input" bash "$script" --level error "$tmp/no-such.log"
+
+stdin_out="$(cat "$fixture" | bash "$script" --level error -)"
+[[ "$stdin_out" == "$exact" ]] || fail "stdin parity"
+
+cp "$fixture" "$tmp/log with spaces.log"
+spaced="$(bash "$script" --level error "$tmp/log with spaces.log")"
+[[ "$spaced" == "$exact" ]] || fail "path with spaces"
+
+no_match="$(bash "$script" --level fatal --date-from 2026-01-03 --date-to 2026-01-03 "$fixture")"
+[[ -z "$no_match" ]] || fail "no-match output"
+
+help="$(bash "$script" --help)"
+grep -q -- '--date-from/--date-to' <<<"$help" || fail "help missing date options"
+grep -q -- 'PATH selects one file' <<<"$help" || fail "help missing path contract"
+
+printf 'PASS-Bash comprehensive\n'
+\\tERR\\t')" == 2 ]] || fail "date from-only"
+[[ "$(bash "$script" --level error --date-to 2026-01-02 "$fixture" | grep -c 
+[[ "$(bash "$script" --level error -n 1 "$fixture" | grep -c '^2026-')" == 1 ]] || fail "-n semantics"
+
+date_exact="$(bash "$script" --level error --date-from 2026-01-02 --date-to 2026-01-02 "$fixture")"
+[[ "$(count_events "$date_exact")" == 1 ]] || fail "date boundary"
+grep -q 'second error' <<<"$date_exact" || fail "date boundary selected wrong event"
+dt_exact="$(bash "$script" --level error --date-time-from '2026-01-01 08:03:00' --date-time-to '2026-01-01 08:03:00' "$fixture")"
+[[ "$(count_events "$dt_exact")" == 1 ]] || fail "datetime boundary"
+
+expect_fail "invalid level" bash "$script" --level nope "$fixture"
+expect_fail "missing level" bash "$script" "$fixture"
+expect_fail "missing date value" bash "$script" --level error --date-from
+expect_fail "missing datetime value" bash "$script" --level error --date-time-from
+expect_fail "invalid date" bash "$script" --level error --date-from 2026-02-30 "$fixture"
+expect_fail "invalid datetime" bash "$script" --level error --date-time-from '2026-01-01 25:00:00' "$fixture"
+expect_fail "reversed date" bash "$script" --level error --date-from 2026-01-03 --date-to 2026-01-02 "$fixture"
+expect_fail "reversed datetime" bash "$script" --level error --date-time-from '2026-01-03 10:00:00' --date-time-to '2026-01-02 10:00:00' "$fixture"
+expect_fail "conflicting filters" bash "$script" --level error --date-from 2026-01-01 --date-time-from '2026-01-01 08:00:00' "$fixture"
+expect_fail "conflicting severity modes" bash "$script" --level error --above --below "$fixture"
+expect_fail "bad number" bash "$script" --level error -n 0 "$fixture"
+expect_fail "negative number" bash "$script" --level error -n -1 "$fixture"
+expect_fail "non-numeric number" bash "$script" --level error -n abc "$fixture"
+expect_fail "unknown option" bash "$script" --level error --wat "$fixture"
+expect_fail "missing input" bash "$script" --level error "$tmp/no-such.log"
+
+stdin_out="$(cat "$fixture" | bash "$script" --level error -)"
+[[ "$stdin_out" == "$exact" ]] || fail "stdin parity"
+
+cp "$fixture" "$tmp/log with spaces.log"
+spaced="$(bash "$script" --level error "$tmp/log with spaces.log")"
+[[ "$spaced" == "$exact" ]] || fail "path with spaces"
+
+no_match="$(bash "$script" --level fatal --date-from 2026-01-03 --date-to 2026-01-03 "$fixture")"
+[[ -z "$no_match" ]] || fail "no-match output"
+
+help="$(bash "$script" --help)"
+grep -q -- '--date-from/--date-to' <<<"$help" || fail "help missing date options"
+grep -q -- 'PATH selects one file' <<<"$help" || fail "help missing path contract"
+
+printf 'PASS-Bash comprehensive\n'
+\\tERR\\t')" == 2 ]] || fail "date to-only"
+[[ "$(bash "$script" --level error --date-time-from '2026-01-01 08:03:00' "$fixture" | grep -c 
+[[ "$(bash "$script" --level error -n 1 "$fixture" | grep -c '^2026-')" == 1 ]] || fail "-n semantics"
+
+date_exact="$(bash "$script" --level error --date-from 2026-01-02 --date-to 2026-01-02 "$fixture")"
+[[ "$(count_events "$date_exact")" == 1 ]] || fail "date boundary"
+grep -q 'second error' <<<"$date_exact" || fail "date boundary selected wrong event"
+dt_exact="$(bash "$script" --level error --date-time-from '2026-01-01 08:03:00' --date-time-to '2026-01-01 08:03:00' "$fixture")"
+[[ "$(count_events "$dt_exact")" == 1 ]] || fail "datetime boundary"
+
+expect_fail "invalid level" bash "$script" --level nope "$fixture"
+expect_fail "missing level" bash "$script" "$fixture"
+expect_fail "missing date value" bash "$script" --level error --date-from
+expect_fail "missing datetime value" bash "$script" --level error --date-time-from
+expect_fail "invalid date" bash "$script" --level error --date-from 2026-02-30 "$fixture"
+expect_fail "invalid datetime" bash "$script" --level error --date-time-from '2026-01-01 25:00:00' "$fixture"
+expect_fail "reversed date" bash "$script" --level error --date-from 2026-01-03 --date-to 2026-01-02 "$fixture"
+expect_fail "reversed datetime" bash "$script" --level error --date-time-from '2026-01-03 10:00:00' --date-time-to '2026-01-02 10:00:00' "$fixture"
+expect_fail "conflicting filters" bash "$script" --level error --date-from 2026-01-01 --date-time-from '2026-01-01 08:00:00' "$fixture"
+expect_fail "conflicting severity modes" bash "$script" --level error --above --below "$fixture"
+expect_fail "bad number" bash "$script" --level error -n 0 "$fixture"
+expect_fail "negative number" bash "$script" --level error -n -1 "$fixture"
+expect_fail "non-numeric number" bash "$script" --level error -n abc "$fixture"
+expect_fail "unknown option" bash "$script" --level error --wat "$fixture"
+expect_fail "missing input" bash "$script" --level error "$tmp/no-such.log"
+
+stdin_out="$(cat "$fixture" | bash "$script" --level error -)"
+[[ "$stdin_out" == "$exact" ]] || fail "stdin parity"
+
+cp "$fixture" "$tmp/log with spaces.log"
+spaced="$(bash "$script" --level error "$tmp/log with spaces.log")"
+[[ "$spaced" == "$exact" ]] || fail "path with spaces"
+
+no_match="$(bash "$script" --level fatal --date-from 2026-01-03 --date-to 2026-01-03 "$fixture")"
+[[ -z "$no_match" ]] || fail "no-match output"
+
+help="$(bash "$script" --help)"
+grep -q -- '--date-from/--date-to' <<<"$help" || fail "help missing date options"
+grep -q -- 'PATH selects one file' <<<"$help" || fail "help missing path contract"
+
+printf 'PASS-Bash comprehensive\n'
+\\tERR\\t')" == 2 ]] || fail "datetime from-only"
+[[ "$(bash "$script" --level error --date-time-to '2026-01-01 08:03:00' "$fixture" | grep -c 
+[[ "$(bash "$script" --level error -n 1 "$fixture" | grep -c '^2026-')" == 1 ]] || fail "-n semantics"
+
+date_exact="$(bash "$script" --level error --date-from 2026-01-02 --date-to 2026-01-02 "$fixture")"
+[[ "$(count_events "$date_exact")" == 1 ]] || fail "date boundary"
+grep -q 'second error' <<<"$date_exact" || fail "date boundary selected wrong event"
+dt_exact="$(bash "$script" --level error --date-time-from '2026-01-01 08:03:00' --date-time-to '2026-01-01 08:03:00' "$fixture")"
+[[ "$(count_events "$dt_exact")" == 1 ]] || fail "datetime boundary"
+
+expect_fail "invalid level" bash "$script" --level nope "$fixture"
+expect_fail "missing level" bash "$script" "$fixture"
+expect_fail "missing date value" bash "$script" --level error --date-from
+expect_fail "missing datetime value" bash "$script" --level error --date-time-from
+expect_fail "invalid date" bash "$script" --level error --date-from 2026-02-30 "$fixture"
+expect_fail "invalid datetime" bash "$script" --level error --date-time-from '2026-01-01 25:00:00' "$fixture"
+expect_fail "reversed date" bash "$script" --level error --date-from 2026-01-03 --date-to 2026-01-02 "$fixture"
+expect_fail "reversed datetime" bash "$script" --level error --date-time-from '2026-01-03 10:00:00' --date-time-to '2026-01-02 10:00:00' "$fixture"
+expect_fail "conflicting filters" bash "$script" --level error --date-from 2026-01-01 --date-time-from '2026-01-01 08:00:00' "$fixture"
+expect_fail "conflicting severity modes" bash "$script" --level error --above --below "$fixture"
+expect_fail "bad number" bash "$script" --level error -n 0 "$fixture"
+expect_fail "negative number" bash "$script" --level error -n -1 "$fixture"
+expect_fail "non-numeric number" bash "$script" --level error -n abc "$fixture"
+expect_fail "unknown option" bash "$script" --level error --wat "$fixture"
+expect_fail "missing input" bash "$script" --level error "$tmp/no-such.log"
+
+stdin_out="$(cat "$fixture" | bash "$script" --level error -)"
+[[ "$stdin_out" == "$exact" ]] || fail "stdin parity"
+
+cp "$fixture" "$tmp/log with spaces.log"
+spaced="$(bash "$script" --level error "$tmp/log with spaces.log")"
+[[ "$spaced" == "$exact" ]] || fail "path with spaces"
+
+no_match="$(bash "$script" --level fatal --date-from 2026-01-03 --date-to 2026-01-03 "$fixture")"
+[[ -z "$no_match" ]] || fail "no-match output"
+
+help="$(bash "$script" --help)"
+grep -q -- '--date-from/--date-to' <<<"$help" || fail "help missing date options"
+grep -q -- 'PATH selects one file' <<<"$help" || fail "help missing path contract"
+
+printf 'PASS-Bash comprehensive\n'
+\\tERR\\t')" == 1 ]] || fail "datetime to-only"
+[[ "$(bash "$script" --level error -n 1 "$fixture" | grep -c '^2026-')" == 1 ]] || fail "-n semantics"
+
+date_exact="$(bash "$script" --level error --date-from 2026-01-02 --date-to 2026-01-02 "$fixture")"
+[[ "$(count_events "$date_exact")" == 1 ]] || fail "date boundary"
+grep -q 'second error' <<<"$date_exact" || fail "date boundary selected wrong event"
+dt_exact="$(bash "$script" --level error --date-time-from '2026-01-01 08:03:00' --date-time-to '2026-01-01 08:03:00' "$fixture")"
+[[ "$(count_events "$dt_exact")" == 1 ]] || fail "datetime boundary"
+
+expect_fail "invalid level" bash "$script" --level nope "$fixture"
+expect_fail "missing level" bash "$script" "$fixture"
+expect_fail "missing date value" bash "$script" --level error --date-from
+expect_fail "missing datetime value" bash "$script" --level error --date-time-from
+expect_fail "invalid date" bash "$script" --level error --date-from 2026-02-30 "$fixture"
+expect_fail "invalid datetime" bash "$script" --level error --date-time-from '2026-01-01 25:00:00' "$fixture"
+expect_fail "reversed date" bash "$script" --level error --date-from 2026-01-03 --date-to 2026-01-02 "$fixture"
+expect_fail "reversed datetime" bash "$script" --level error --date-time-from '2026-01-03 10:00:00' --date-time-to '2026-01-02 10:00:00' "$fixture"
+expect_fail "conflicting filters" bash "$script" --level error --date-from 2026-01-01 --date-time-from '2026-01-01 08:00:00' "$fixture"
+expect_fail "conflicting severity modes" bash "$script" --level error --above --below "$fixture"
+expect_fail "bad number" bash "$script" --level error -n 0 "$fixture"
+expect_fail "negative number" bash "$script" --level error -n -1 "$fixture"
+expect_fail "non-numeric number" bash "$script" --level error -n abc "$fixture"
+expect_fail "unknown option" bash "$script" --level error --wat "$fixture"
+expect_fail "missing input" bash "$script" --level error "$tmp/no-such.log"
+
+stdin_out="$(cat "$fixture" | bash "$script" --level error -)"
+[[ "$stdin_out" == "$exact" ]] || fail "stdin parity"
+
+cp "$fixture" "$tmp/log with spaces.log"
+spaced="$(bash "$script" --level error "$tmp/log with spaces.log")"
+[[ "$spaced" == "$exact" ]] || fail "path with spaces"
+
+no_match="$(bash "$script" --level fatal --date-from 2026-01-03 --date-to 2026-01-03 "$fixture")"
+[[ -z "$no_match" ]] || fail "no-match output"
+
+help="$(bash "$script" --help)"
+grep -q -- '--date-from/--date-to' <<<"$help" || fail "help missing date options"
+grep -q -- 'PATH selects one file' <<<"$help" || fail "help missing path contract"
+
+printf 'PASS-Bash comprehensive\n'
+\\tDBG\\t' <<<"$below" || fail "below missing debug"
+grep -q 
+[[ "$(bash "$script" --level error --date-from 2026-01-01 "$fixture" | grep -c 
+[[ "$(bash "$script" --level error -n 1 "$fixture" | grep -c '^2026-')" == 1 ]] || fail "-n semantics"
+
+date_exact="$(bash "$script" --level error --date-from 2026-01-02 --date-to 2026-01-02 "$fixture")"
+[[ "$(count_events "$date_exact")" == 1 ]] || fail "date boundary"
+grep -q 'second error' <<<"$date_exact" || fail "date boundary selected wrong event"
+dt_exact="$(bash "$script" --level error --date-time-from '2026-01-01 08:03:00' --date-time-to '2026-01-01 08:03:00' "$fixture")"
+[[ "$(count_events "$dt_exact")" == 1 ]] || fail "datetime boundary"
+
+expect_fail "invalid level" bash "$script" --level nope "$fixture"
+expect_fail "missing level" bash "$script" "$fixture"
+expect_fail "missing date value" bash "$script" --level error --date-from
+expect_fail "missing datetime value" bash "$script" --level error --date-time-from
+expect_fail "invalid date" bash "$script" --level error --date-from 2026-02-30 "$fixture"
+expect_fail "invalid datetime" bash "$script" --level error --date-time-from '2026-01-01 25:00:00' "$fixture"
+expect_fail "reversed date" bash "$script" --level error --date-from 2026-01-03 --date-to 2026-01-02 "$fixture"
+expect_fail "reversed datetime" bash "$script" --level error --date-time-from '2026-01-03 10:00:00' --date-time-to '2026-01-02 10:00:00' "$fixture"
+expect_fail "conflicting filters" bash "$script" --level error --date-from 2026-01-01 --date-time-from '2026-01-01 08:00:00' "$fixture"
+expect_fail "conflicting severity modes" bash "$script" --level error --above --below "$fixture"
+expect_fail "bad number" bash "$script" --level error -n 0 "$fixture"
+expect_fail "negative number" bash "$script" --level error -n -1 "$fixture"
+expect_fail "non-numeric number" bash "$script" --level error -n abc "$fixture"
+expect_fail "unknown option" bash "$script" --level error --wat "$fixture"
+expect_fail "missing input" bash "$script" --level error "$tmp/no-such.log"
+
+stdin_out="$(cat "$fixture" | bash "$script" --level error -)"
+[[ "$stdin_out" == "$exact" ]] || fail "stdin parity"
+
+cp "$fixture" "$tmp/log with spaces.log"
+spaced="$(bash "$script" --level error "$tmp/log with spaces.log")"
+[[ "$spaced" == "$exact" ]] || fail "path with spaces"
+
+no_match="$(bash "$script" --level fatal --date-from 2026-01-03 --date-to 2026-01-03 "$fixture")"
+[[ -z "$no_match" ]] || fail "no-match output"
+
+help="$(bash "$script" --help)"
+grep -q -- '--date-from/--date-to' <<<"$help" || fail "help missing date options"
+grep -q -- 'PATH selects one file' <<<"$help" || fail "help missing path contract"
+
+printf 'PASS-Bash comprehensive\n'
+\\tERR\\t')" == 2 ]] || fail "date from-only"
+[[ "$(bash "$script" --level error --date-to 2026-01-02 "$fixture" | grep -c 
+[[ "$(bash "$script" --level error -n 1 "$fixture" | grep -c '^2026-')" == 1 ]] || fail "-n semantics"
+
+date_exact="$(bash "$script" --level error --date-from 2026-01-02 --date-to 2026-01-02 "$fixture")"
+[[ "$(count_events "$date_exact")" == 1 ]] || fail "date boundary"
+grep -q 'second error' <<<"$date_exact" || fail "date boundary selected wrong event"
+dt_exact="$(bash "$script" --level error --date-time-from '2026-01-01 08:03:00' --date-time-to '2026-01-01 08:03:00' "$fixture")"
+[[ "$(count_events "$dt_exact")" == 1 ]] || fail "datetime boundary"
+
+expect_fail "invalid level" bash "$script" --level nope "$fixture"
+expect_fail "missing level" bash "$script" "$fixture"
+expect_fail "missing date value" bash "$script" --level error --date-from
+expect_fail "missing datetime value" bash "$script" --level error --date-time-from
+expect_fail "invalid date" bash "$script" --level error --date-from 2026-02-30 "$fixture"
+expect_fail "invalid datetime" bash "$script" --level error --date-time-from '2026-01-01 25:00:00' "$fixture"
+expect_fail "reversed date" bash "$script" --level error --date-from 2026-01-03 --date-to 2026-01-02 "$fixture"
+expect_fail "reversed datetime" bash "$script" --level error --date-time-from '2026-01-03 10:00:00' --date-time-to '2026-01-02 10:00:00' "$fixture"
+expect_fail "conflicting filters" bash "$script" --level error --date-from 2026-01-01 --date-time-from '2026-01-01 08:00:00' "$fixture"
+expect_fail "conflicting severity modes" bash "$script" --level error --above --below "$fixture"
+expect_fail "bad number" bash "$script" --level error -n 0 "$fixture"
+expect_fail "negative number" bash "$script" --level error -n -1 "$fixture"
+expect_fail "non-numeric number" bash "$script" --level error -n abc "$fixture"
+expect_fail "unknown option" bash "$script" --level error --wat "$fixture"
+expect_fail "missing input" bash "$script" --level error "$tmp/no-such.log"
+
+stdin_out="$(cat "$fixture" | bash "$script" --level error -)"
+[[ "$stdin_out" == "$exact" ]] || fail "stdin parity"
+
+cp "$fixture" "$tmp/log with spaces.log"
+spaced="$(bash "$script" --level error "$tmp/log with spaces.log")"
+[[ "$spaced" == "$exact" ]] || fail "path with spaces"
+
+no_match="$(bash "$script" --level fatal --date-from 2026-01-03 --date-to 2026-01-03 "$fixture")"
+[[ -z "$no_match" ]] || fail "no-match output"
+
+help="$(bash "$script" --help)"
+grep -q -- '--date-from/--date-to' <<<"$help" || fail "help missing date options"
+grep -q -- 'PATH selects one file' <<<"$help" || fail "help missing path contract"
+
+printf 'PASS-Bash comprehensive\n'
+\\tERR\\t')" == 2 ]] || fail "date to-only"
+[[ "$(bash "$script" --level error --date-time-from '2026-01-01 08:03:00' "$fixture" | grep -c 
+[[ "$(bash "$script" --level error -n 1 "$fixture" | grep -c '^2026-')" == 1 ]] || fail "-n semantics"
+
+date_exact="$(bash "$script" --level error --date-from 2026-01-02 --date-to 2026-01-02 "$fixture")"
+[[ "$(count_events "$date_exact")" == 1 ]] || fail "date boundary"
+grep -q 'second error' <<<"$date_exact" || fail "date boundary selected wrong event"
+dt_exact="$(bash "$script" --level error --date-time-from '2026-01-01 08:03:00' --date-time-to '2026-01-01 08:03:00' "$fixture")"
+[[ "$(count_events "$dt_exact")" == 1 ]] || fail "datetime boundary"
+
+expect_fail "invalid level" bash "$script" --level nope "$fixture"
+expect_fail "missing level" bash "$script" "$fixture"
+expect_fail "missing date value" bash "$script" --level error --date-from
+expect_fail "missing datetime value" bash "$script" --level error --date-time-from
+expect_fail "invalid date" bash "$script" --level error --date-from 2026-02-30 "$fixture"
+expect_fail "invalid datetime" bash "$script" --level error --date-time-from '2026-01-01 25:00:00' "$fixture"
+expect_fail "reversed date" bash "$script" --level error --date-from 2026-01-03 --date-to 2026-01-02 "$fixture"
+expect_fail "reversed datetime" bash "$script" --level error --date-time-from '2026-01-03 10:00:00' --date-time-to '2026-01-02 10:00:00' "$fixture"
+expect_fail "conflicting filters" bash "$script" --level error --date-from 2026-01-01 --date-time-from '2026-01-01 08:00:00' "$fixture"
+expect_fail "conflicting severity modes" bash "$script" --level error --above --below "$fixture"
+expect_fail "bad number" bash "$script" --level error -n 0 "$fixture"
+expect_fail "negative number" bash "$script" --level error -n -1 "$fixture"
+expect_fail "non-numeric number" bash "$script" --level error -n abc "$fixture"
+expect_fail "unknown option" bash "$script" --level error --wat "$fixture"
+expect_fail "missing input" bash "$script" --level error "$tmp/no-such.log"
+
+stdin_out="$(cat "$fixture" | bash "$script" --level error -)"
+[[ "$stdin_out" == "$exact" ]] || fail "stdin parity"
+
+cp "$fixture" "$tmp/log with spaces.log"
+spaced="$(bash "$script" --level error "$tmp/log with spaces.log")"
+[[ "$spaced" == "$exact" ]] || fail "path with spaces"
+
+no_match="$(bash "$script" --level fatal --date-from 2026-01-03 --date-to 2026-01-03 "$fixture")"
+[[ -z "$no_match" ]] || fail "no-match output"
+
+help="$(bash "$script" --help)"
+grep -q -- '--date-from/--date-to' <<<"$help" || fail "help missing date options"
+grep -q -- 'PATH selects one file' <<<"$help" || fail "help missing path contract"
+
+printf 'PASS-Bash comprehensive\n'
+\\tERR\\t')" == 2 ]] || fail "datetime from-only"
+[[ "$(bash "$script" --level error --date-time-to '2026-01-01 08:03:00' "$fixture" | grep -c 
+[[ "$(bash "$script" --level error -n 1 "$fixture" | grep -c '^2026-')" == 1 ]] || fail "-n semantics"
+
+date_exact="$(bash "$script" --level error --date-from 2026-01-02 --date-to 2026-01-02 "$fixture")"
+[[ "$(count_events "$date_exact")" == 1 ]] || fail "date boundary"
+grep -q 'second error' <<<"$date_exact" || fail "date boundary selected wrong event"
+dt_exact="$(bash "$script" --level error --date-time-from '2026-01-01 08:03:00' --date-time-to '2026-01-01 08:03:00' "$fixture")"
+[[ "$(count_events "$dt_exact")" == 1 ]] || fail "datetime boundary"
+
+expect_fail "invalid level" bash "$script" --level nope "$fixture"
+expect_fail "missing level" bash "$script" "$fixture"
+expect_fail "missing date value" bash "$script" --level error --date-from
+expect_fail "missing datetime value" bash "$script" --level error --date-time-from
+expect_fail "invalid date" bash "$script" --level error --date-from 2026-02-30 "$fixture"
+expect_fail "invalid datetime" bash "$script" --level error --date-time-from '2026-01-01 25:00:00' "$fixture"
+expect_fail "reversed date" bash "$script" --level error --date-from 2026-01-03 --date-to 2026-01-02 "$fixture"
+expect_fail "reversed datetime" bash "$script" --level error --date-time-from '2026-01-03 10:00:00' --date-time-to '2026-01-02 10:00:00' "$fixture"
+expect_fail "conflicting filters" bash "$script" --level error --date-from 2026-01-01 --date-time-from '2026-01-01 08:00:00' "$fixture"
+expect_fail "conflicting severity modes" bash "$script" --level error --above --below "$fixture"
+expect_fail "bad number" bash "$script" --level error -n 0 "$fixture"
+expect_fail "negative number" bash "$script" --level error -n -1 "$fixture"
+expect_fail "non-numeric number" bash "$script" --level error -n abc "$fixture"
+expect_fail "unknown option" bash "$script" --level error --wat "$fixture"
+expect_fail "missing input" bash "$script" --level error "$tmp/no-such.log"
+
+stdin_out="$(cat "$fixture" | bash "$script" --level error -)"
+[[ "$stdin_out" == "$exact" ]] || fail "stdin parity"
+
+cp "$fixture" "$tmp/log with spaces.log"
+spaced="$(bash "$script" --level error "$tmp/log with spaces.log")"
+[[ "$spaced" == "$exact" ]] || fail "path with spaces"
+
+no_match="$(bash "$script" --level fatal --date-from 2026-01-03 --date-to 2026-01-03 "$fixture")"
+[[ -z "$no_match" ]] || fail "no-match output"
+
+help="$(bash "$script" --help)"
+grep -q -- '--date-from/--date-to' <<<"$help" || fail "help missing date options"
+grep -q -- 'PATH selects one file' <<<"$help" || fail "help missing path contract"
+
+printf 'PASS-Bash comprehensive\n'
+\\tERR\\t')" == 1 ]] || fail "datetime to-only"
+[[ "$(bash "$script" --level error -n 1 "$fixture" | grep -c '^2026-')" == 1 ]] || fail "-n semantics"
+
+date_exact="$(bash "$script" --level error --date-from 2026-01-02 --date-to 2026-01-02 "$fixture")"
+[[ "$(count_events "$date_exact")" == 1 ]] || fail "date boundary"
+grep -q 'second error' <<<"$date_exact" || fail "date boundary selected wrong event"
+dt_exact="$(bash "$script" --level error --date-time-from '2026-01-01 08:03:00' --date-time-to '2026-01-01 08:03:00' "$fixture")"
+[[ "$(count_events "$dt_exact")" == 1 ]] || fail "datetime boundary"
+
+expect_fail "invalid level" bash "$script" --level nope "$fixture"
+expect_fail "missing level" bash "$script" "$fixture"
+expect_fail "missing date value" bash "$script" --level error --date-from
+expect_fail "missing datetime value" bash "$script" --level error --date-time-from
+expect_fail "invalid date" bash "$script" --level error --date-from 2026-02-30 "$fixture"
+expect_fail "invalid datetime" bash "$script" --level error --date-time-from '2026-01-01 25:00:00' "$fixture"
+expect_fail "reversed date" bash "$script" --level error --date-from 2026-01-03 --date-to 2026-01-02 "$fixture"
+expect_fail "reversed datetime" bash "$script" --level error --date-time-from '2026-01-03 10:00:00' --date-time-to '2026-01-02 10:00:00' "$fixture"
+expect_fail "conflicting filters" bash "$script" --level error --date-from 2026-01-01 --date-time-from '2026-01-01 08:00:00' "$fixture"
+expect_fail "conflicting severity modes" bash "$script" --level error --above --below "$fixture"
+expect_fail "bad number" bash "$script" --level error -n 0 "$fixture"
+expect_fail "negative number" bash "$script" --level error -n -1 "$fixture"
+expect_fail "non-numeric number" bash "$script" --level error -n abc "$fixture"
+expect_fail "unknown option" bash "$script" --level error --wat "$fixture"
+expect_fail "missing input" bash "$script" --level error "$tmp/no-such.log"
+
+stdin_out="$(cat "$fixture" | bash "$script" --level error -)"
+[[ "$stdin_out" == "$exact" ]] || fail "stdin parity"
+
+cp "$fixture" "$tmp/log with spaces.log"
+spaced="$(bash "$script" --level error "$tmp/log with spaces.log")"
+[[ "$spaced" == "$exact" ]] || fail "path with spaces"
+
+no_match="$(bash "$script" --level fatal --date-from 2026-01-03 --date-to 2026-01-03 "$fixture")"
+[[ -z "$no_match" ]] || fail "no-match output"
+
+help="$(bash "$script" --help)"
+grep -q -- '--date-from/--date-to' <<<"$help" || fail "help missing date options"
+grep -q -- 'PATH selects one file' <<<"$help" || fail "help missing path contract"
+
+printf 'PASS-Bash comprehensive\n'
+\\tINF\\t' <<<"$below" || fail "below missing info"
+grep -q 
+[[ "$(bash "$script" --level error --date-from 2026-01-01 "$fixture" | grep -c 
+[[ "$(bash "$script" --level error -n 1 "$fixture" | grep -c '^2026-')" == 1 ]] || fail "-n semantics"
+
+date_exact="$(bash "$script" --level error --date-from 2026-01-02 --date-to 2026-01-02 "$fixture")"
+[[ "$(count_events "$date_exact")" == 1 ]] || fail "date boundary"
+grep -q 'second error' <<<"$date_exact" || fail "date boundary selected wrong event"
+dt_exact="$(bash "$script" --level error --date-time-from '2026-01-01 08:03:00' --date-time-to '2026-01-01 08:03:00' "$fixture")"
+[[ "$(count_events "$dt_exact")" == 1 ]] || fail "datetime boundary"
+
+expect_fail "invalid level" bash "$script" --level nope "$fixture"
+expect_fail "missing level" bash "$script" "$fixture"
+expect_fail "missing date value" bash "$script" --level error --date-from
+expect_fail "missing datetime value" bash "$script" --level error --date-time-from
+expect_fail "invalid date" bash "$script" --level error --date-from 2026-02-30 "$fixture"
+expect_fail "invalid datetime" bash "$script" --level error --date-time-from '2026-01-01 25:00:00' "$fixture"
+expect_fail "reversed date" bash "$script" --level error --date-from 2026-01-03 --date-to 2026-01-02 "$fixture"
+expect_fail "reversed datetime" bash "$script" --level error --date-time-from '2026-01-03 10:00:00' --date-time-to '2026-01-02 10:00:00' "$fixture"
+expect_fail "conflicting filters" bash "$script" --level error --date-from 2026-01-01 --date-time-from '2026-01-01 08:00:00' "$fixture"
+expect_fail "conflicting severity modes" bash "$script" --level error --above --below "$fixture"
+expect_fail "bad number" bash "$script" --level error -n 0 "$fixture"
+expect_fail "negative number" bash "$script" --level error -n -1 "$fixture"
+expect_fail "non-numeric number" bash "$script" --level error -n abc "$fixture"
+expect_fail "unknown option" bash "$script" --level error --wat "$fixture"
+expect_fail "missing input" bash "$script" --level error "$tmp/no-such.log"
+
+stdin_out="$(cat "$fixture" | bash "$script" --level error -)"
+[[ "$stdin_out" == "$exact" ]] || fail "stdin parity"
+
+cp "$fixture" "$tmp/log with spaces.log"
+spaced="$(bash "$script" --level error "$tmp/log with spaces.log")"
+[[ "$spaced" == "$exact" ]] || fail "path with spaces"
+
+no_match="$(bash "$script" --level fatal --date-from 2026-01-03 --date-to 2026-01-03 "$fixture")"
+[[ -z "$no_match" ]] || fail "no-match output"
+
+help="$(bash "$script" --help)"
+grep -q -- '--date-from/--date-to' <<<"$help" || fail "help missing date options"
+grep -q -- 'PATH selects one file' <<<"$help" || fail "help missing path contract"
+
+printf 'PASS-Bash comprehensive\n'
+\\tERR\\t')" == 2 ]] || fail "date from-only"
+[[ "$(bash "$script" --level error --date-to 2026-01-02 "$fixture" | grep -c 
+[[ "$(bash "$script" --level error -n 1 "$fixture" | grep -c '^2026-')" == 1 ]] || fail "-n semantics"
+
+date_exact="$(bash "$script" --level error --date-from 2026-01-02 --date-to 2026-01-02 "$fixture")"
+[[ "$(count_events "$date_exact")" == 1 ]] || fail "date boundary"
+grep -q 'second error' <<<"$date_exact" || fail "date boundary selected wrong event"
+dt_exact="$(bash "$script" --level error --date-time-from '2026-01-01 08:03:00' --date-time-to '2026-01-01 08:03:00' "$fixture")"
+[[ "$(count_events "$dt_exact")" == 1 ]] || fail "datetime boundary"
+
+expect_fail "invalid level" bash "$script" --level nope "$fixture"
+expect_fail "missing level" bash "$script" "$fixture"
+expect_fail "missing date value" bash "$script" --level error --date-from
+expect_fail "missing datetime value" bash "$script" --level error --date-time-from
+expect_fail "invalid date" bash "$script" --level error --date-from 2026-02-30 "$fixture"
+expect_fail "invalid datetime" bash "$script" --level error --date-time-from '2026-01-01 25:00:00' "$fixture"
+expect_fail "reversed date" bash "$script" --level error --date-from 2026-01-03 --date-to 2026-01-02 "$fixture"
+expect_fail "reversed datetime" bash "$script" --level error --date-time-from '2026-01-03 10:00:00' --date-time-to '2026-01-02 10:00:00' "$fixture"
+expect_fail "conflicting filters" bash "$script" --level error --date-from 2026-01-01 --date-time-from '2026-01-01 08:00:00' "$fixture"
+expect_fail "conflicting severity modes" bash "$script" --level error --above --below "$fixture"
+expect_fail "bad number" bash "$script" --level error -n 0 "$fixture"
+expect_fail "negative number" bash "$script" --level error -n -1 "$fixture"
+expect_fail "non-numeric number" bash "$script" --level error -n abc "$fixture"
+expect_fail "unknown option" bash "$script" --level error --wat "$fixture"
+expect_fail "missing input" bash "$script" --level error "$tmp/no-such.log"
+
+stdin_out="$(cat "$fixture" | bash "$script" --level error -)"
+[[ "$stdin_out" == "$exact" ]] || fail "stdin parity"
+
+cp "$fixture" "$tmp/log with spaces.log"
+spaced="$(bash "$script" --level error "$tmp/log with spaces.log")"
+[[ "$spaced" == "$exact" ]] || fail "path with spaces"
+
+no_match="$(bash "$script" --level fatal --date-from 2026-01-03 --date-to 2026-01-03 "$fixture")"
+[[ -z "$no_match" ]] || fail "no-match output"
+
+help="$(bash "$script" --help)"
+grep -q -- '--date-from/--date-to' <<<"$help" || fail "help missing date options"
+grep -q -- 'PATH selects one file' <<<"$help" || fail "help missing path contract"
+
+printf 'PASS-Bash comprehensive\n'
+\\tERR\\t')" == 2 ]] || fail "date to-only"
+[[ "$(bash "$script" --level error --date-time-from '2026-01-01 08:03:00' "$fixture" | grep -c 
+[[ "$(bash "$script" --level error -n 1 "$fixture" | grep -c '^2026-')" == 1 ]] || fail "-n semantics"
+
+date_exact="$(bash "$script" --level error --date-from 2026-01-02 --date-to 2026-01-02 "$fixture")"
+[[ "$(count_events "$date_exact")" == 1 ]] || fail "date boundary"
+grep -q 'second error' <<<"$date_exact" || fail "date boundary selected wrong event"
+dt_exact="$(bash "$script" --level error --date-time-from '2026-01-01 08:03:00' --date-time-to '2026-01-01 08:03:00' "$fixture")"
+[[ "$(count_events "$dt_exact")" == 1 ]] || fail "datetime boundary"
+
+expect_fail "invalid level" bash "$script" --level nope "$fixture"
+expect_fail "missing level" bash "$script" "$fixture"
+expect_fail "missing date value" bash "$script" --level error --date-from
+expect_fail "missing datetime value" bash "$script" --level error --date-time-from
+expect_fail "invalid date" bash "$script" --level error --date-from 2026-02-30 "$fixture"
+expect_fail "invalid datetime" bash "$script" --level error --date-time-from '2026-01-01 25:00:00' "$fixture"
+expect_fail "reversed date" bash "$script" --level error --date-from 2026-01-03 --date-to 2026-01-02 "$fixture"
+expect_fail "reversed datetime" bash "$script" --level error --date-time-from '2026-01-03 10:00:00' --date-time-to '2026-01-02 10:00:00' "$fixture"
+expect_fail "conflicting filters" bash "$script" --level error --date-from 2026-01-01 --date-time-from '2026-01-01 08:00:00' "$fixture"
+expect_fail "conflicting severity modes" bash "$script" --level error --above --below "$fixture"
+expect_fail "bad number" bash "$script" --level error -n 0 "$fixture"
+expect_fail "negative number" bash "$script" --level error -n -1 "$fixture"
+expect_fail "non-numeric number" bash "$script" --level error -n abc "$fixture"
+expect_fail "unknown option" bash "$script" --level error --wat "$fixture"
+expect_fail "missing input" bash "$script" --level error "$tmp/no-such.log"
+
+stdin_out="$(cat "$fixture" | bash "$script" --level error -)"
+[[ "$stdin_out" == "$exact" ]] || fail "stdin parity"
+
+cp "$fixture" "$tmp/log with spaces.log"
+spaced="$(bash "$script" --level error "$tmp/log with spaces.log")"
+[[ "$spaced" == "$exact" ]] || fail "path with spaces"
+
+no_match="$(bash "$script" --level fatal --date-from 2026-01-03 --date-to 2026-01-03 "$fixture")"
+[[ -z "$no_match" ]] || fail "no-match output"
+
+help="$(bash "$script" --help)"
+grep -q -- '--date-from/--date-to' <<<"$help" || fail "help missing date options"
+grep -q -- 'PATH selects one file' <<<"$help" || fail "help missing path contract"
+
+printf 'PASS-Bash comprehensive\n'
+\\tERR\\t')" == 2 ]] || fail "datetime from-only"
+[[ "$(bash "$script" --level error --date-time-to '2026-01-01 08:03:00' "$fixture" | grep -c 
+[[ "$(bash "$script" --level error -n 1 "$fixture" | grep -c '^2026-')" == 1 ]] || fail "-n semantics"
+
+date_exact="$(bash "$script" --level error --date-from 2026-01-02 --date-to 2026-01-02 "$fixture")"
+[[ "$(count_events "$date_exact")" == 1 ]] || fail "date boundary"
+grep -q 'second error' <<<"$date_exact" || fail "date boundary selected wrong event"
+dt_exact="$(bash "$script" --level error --date-time-from '2026-01-01 08:03:00' --date-time-to '2026-01-01 08:03:00' "$fixture")"
+[[ "$(count_events "$dt_exact")" == 1 ]] || fail "datetime boundary"
+
+expect_fail "invalid level" bash "$script" --level nope "$fixture"
+expect_fail "missing level" bash "$script" "$fixture"
+expect_fail "missing date value" bash "$script" --level error --date-from
+expect_fail "missing datetime value" bash "$script" --level error --date-time-from
+expect_fail "invalid date" bash "$script" --level error --date-from 2026-02-30 "$fixture"
+expect_fail "invalid datetime" bash "$script" --level error --date-time-from '2026-01-01 25:00:00' "$fixture"
+expect_fail "reversed date" bash "$script" --level error --date-from 2026-01-03 --date-to 2026-01-02 "$fixture"
+expect_fail "reversed datetime" bash "$script" --level error --date-time-from '2026-01-03 10:00:00' --date-time-to '2026-01-02 10:00:00' "$fixture"
+expect_fail "conflicting filters" bash "$script" --level error --date-from 2026-01-01 --date-time-from '2026-01-01 08:00:00' "$fixture"
+expect_fail "conflicting severity modes" bash "$script" --level error --above --below "$fixture"
+expect_fail "bad number" bash "$script" --level error -n 0 "$fixture"
+expect_fail "negative number" bash "$script" --level error -n -1 "$fixture"
+expect_fail "non-numeric number" bash "$script" --level error -n abc "$fixture"
+expect_fail "unknown option" bash "$script" --level error --wat "$fixture"
+expect_fail "missing input" bash "$script" --level error "$tmp/no-such.log"
+
+stdin_out="$(cat "$fixture" | bash "$script" --level error -)"
+[[ "$stdin_out" == "$exact" ]] || fail "stdin parity"
+
+cp "$fixture" "$tmp/log with spaces.log"
+spaced="$(bash "$script" --level error "$tmp/log with spaces.log")"
+[[ "$spaced" == "$exact" ]] || fail "path with spaces"
+
+no_match="$(bash "$script" --level fatal --date-from 2026-01-03 --date-to 2026-01-03 "$fixture")"
+[[ -z "$no_match" ]] || fail "no-match output"
+
+help="$(bash "$script" --help)"
+grep -q -- '--date-from/--date-to' <<<"$help" || fail "help missing date options"
+grep -q -- 'PATH selects one file' <<<"$help" || fail "help missing path contract"
+
+printf 'PASS-Bash comprehensive\n'
+\\tERR\\t')" == 1 ]] || fail "datetime to-only"
+[[ "$(bash "$script" --level error -n 1 "$fixture" | grep -c '^2026-')" == 1 ]] || fail "-n semantics"
+
+date_exact="$(bash "$script" --level error --date-from 2026-01-02 --date-to 2026-01-02 "$fixture")"
+[[ "$(count_events "$date_exact")" == 1 ]] || fail "date boundary"
+grep -q 'second error' <<<"$date_exact" || fail "date boundary selected wrong event"
+dt_exact="$(bash "$script" --level error --date-time-from '2026-01-01 08:03:00' --date-time-to '2026-01-01 08:03:00' "$fixture")"
+[[ "$(count_events "$dt_exact")" == 1 ]] || fail "datetime boundary"
+
+expect_fail "invalid level" bash "$script" --level nope "$fixture"
+expect_fail "missing level" bash "$script" "$fixture"
+expect_fail "missing date value" bash "$script" --level error --date-from
+expect_fail "missing datetime value" bash "$script" --level error --date-time-from
+expect_fail "invalid date" bash "$script" --level error --date-from 2026-02-30 "$fixture"
+expect_fail "invalid datetime" bash "$script" --level error --date-time-from '2026-01-01 25:00:00' "$fixture"
+expect_fail "reversed date" bash "$script" --level error --date-from 2026-01-03 --date-to 2026-01-02 "$fixture"
+expect_fail "reversed datetime" bash "$script" --level error --date-time-from '2026-01-03 10:00:00' --date-time-to '2026-01-02 10:00:00' "$fixture"
+expect_fail "conflicting filters" bash "$script" --level error --date-from 2026-01-01 --date-time-from '2026-01-01 08:00:00' "$fixture"
+expect_fail "conflicting severity modes" bash "$script" --level error --above --below "$fixture"
+expect_fail "bad number" bash "$script" --level error -n 0 "$fixture"
+expect_fail "negative number" bash "$script" --level error -n -1 "$fixture"
+expect_fail "non-numeric number" bash "$script" --level error -n abc "$fixture"
+expect_fail "unknown option" bash "$script" --level error --wat "$fixture"
+expect_fail "missing input" bash "$script" --level error "$tmp/no-such.log"
+
+stdin_out="$(cat "$fixture" | bash "$script" --level error -)"
+[[ "$stdin_out" == "$exact" ]] || fail "stdin parity"
+
+cp "$fixture" "$tmp/log with spaces.log"
+spaced="$(bash "$script" --level error "$tmp/log with spaces.log")"
+[[ "$spaced" == "$exact" ]] || fail "path with spaces"
+
+no_match="$(bash "$script" --level fatal --date-from 2026-01-03 --date-to 2026-01-03 "$fixture")"
+[[ -z "$no_match" ]] || fail "no-match output"
+
+help="$(bash "$script" --help)"
+grep -q -- '--date-from/--date-to' <<<"$help" || fail "help missing date options"
+grep -q -- 'PATH selects one file' <<<"$help" || fail "help missing path contract"
+
+printf 'PASS-Bash comprehensive\n'
+\\tWRN\\t' <<<"$below" || fail "below missing warning"
+grep -q 
+[[ "$(bash "$script" --level error --date-from 2026-01-01 "$fixture" | grep -c 
+[[ "$(bash "$script" --level error -n 1 "$fixture" | grep -c '^2026-')" == 1 ]] || fail "-n semantics"
+
+date_exact="$(bash "$script" --level error --date-from 2026-01-02 --date-to 2026-01-02 "$fixture")"
+[[ "$(count_events "$date_exact")" == 1 ]] || fail "date boundary"
+grep -q 'second error' <<<"$date_exact" || fail "date boundary selected wrong event"
+dt_exact="$(bash "$script" --level error --date-time-from '2026-01-01 08:03:00' --date-time-to '2026-01-01 08:03:00' "$fixture")"
+[[ "$(count_events "$dt_exact")" == 1 ]] || fail "datetime boundary"
+
+expect_fail "invalid level" bash "$script" --level nope "$fixture"
+expect_fail "missing level" bash "$script" "$fixture"
+expect_fail "missing date value" bash "$script" --level error --date-from
+expect_fail "missing datetime value" bash "$script" --level error --date-time-from
+expect_fail "invalid date" bash "$script" --level error --date-from 2026-02-30 "$fixture"
+expect_fail "invalid datetime" bash "$script" --level error --date-time-from '2026-01-01 25:00:00' "$fixture"
+expect_fail "reversed date" bash "$script" --level error --date-from 2026-01-03 --date-to 2026-01-02 "$fixture"
+expect_fail "reversed datetime" bash "$script" --level error --date-time-from '2026-01-03 10:00:00' --date-time-to '2026-01-02 10:00:00' "$fixture"
+expect_fail "conflicting filters" bash "$script" --level error --date-from 2026-01-01 --date-time-from '2026-01-01 08:00:00' "$fixture"
+expect_fail "conflicting severity modes" bash "$script" --level error --above --below "$fixture"
+expect_fail "bad number" bash "$script" --level error -n 0 "$fixture"
+expect_fail "negative number" bash "$script" --level error -n -1 "$fixture"
+expect_fail "non-numeric number" bash "$script" --level error -n abc "$fixture"
+expect_fail "unknown option" bash "$script" --level error --wat "$fixture"
+expect_fail "missing input" bash "$script" --level error "$tmp/no-such.log"
+
+stdin_out="$(cat "$fixture" | bash "$script" --level error -)"
+[[ "$stdin_out" == "$exact" ]] || fail "stdin parity"
+
+cp "$fixture" "$tmp/log with spaces.log"
+spaced="$(bash "$script" --level error "$tmp/log with spaces.log")"
+[[ "$spaced" == "$exact" ]] || fail "path with spaces"
+
+no_match="$(bash "$script" --level fatal --date-from 2026-01-03 --date-to 2026-01-03 "$fixture")"
+[[ -z "$no_match" ]] || fail "no-match output"
+
+help="$(bash "$script" --help)"
+grep -q -- '--date-from/--date-to' <<<"$help" || fail "help missing date options"
+grep -q -- 'PATH selects one file' <<<"$help" || fail "help missing path contract"
+
+printf 'PASS-Bash comprehensive\n'
+\\tERR\\t')" == 2 ]] || fail "date from-only"
+[[ "$(bash "$script" --level error --date-to 2026-01-02 "$fixture" | grep -c 
+[[ "$(bash "$script" --level error -n 1 "$fixture" | grep -c '^2026-')" == 1 ]] || fail "-n semantics"
+
+date_exact="$(bash "$script" --level error --date-from 2026-01-02 --date-to 2026-01-02 "$fixture")"
+[[ "$(count_events "$date_exact")" == 1 ]] || fail "date boundary"
+grep -q 'second error' <<<"$date_exact" || fail "date boundary selected wrong event"
+dt_exact="$(bash "$script" --level error --date-time-from '2026-01-01 08:03:00' --date-time-to '2026-01-01 08:03:00' "$fixture")"
+[[ "$(count_events "$dt_exact")" == 1 ]] || fail "datetime boundary"
+
+expect_fail "invalid level" bash "$script" --level nope "$fixture"
+expect_fail "missing level" bash "$script" "$fixture"
+expect_fail "missing date value" bash "$script" --level error --date-from
+expect_fail "missing datetime value" bash "$script" --level error --date-time-from
+expect_fail "invalid date" bash "$script" --level error --date-from 2026-02-30 "$fixture"
+expect_fail "invalid datetime" bash "$script" --level error --date-time-from '2026-01-01 25:00:00' "$fixture"
+expect_fail "reversed date" bash "$script" --level error --date-from 2026-01-03 --date-to 2026-01-02 "$fixture"
+expect_fail "reversed datetime" bash "$script" --level error --date-time-from '2026-01-03 10:00:00' --date-time-to '2026-01-02 10:00:00' "$fixture"
+expect_fail "conflicting filters" bash "$script" --level error --date-from 2026-01-01 --date-time-from '2026-01-01 08:00:00' "$fixture"
+expect_fail "conflicting severity modes" bash "$script" --level error --above --below "$fixture"
+expect_fail "bad number" bash "$script" --level error -n 0 "$fixture"
+expect_fail "negative number" bash "$script" --level error -n -1 "$fixture"
+expect_fail "non-numeric number" bash "$script" --level error -n abc "$fixture"
+expect_fail "unknown option" bash "$script" --level error --wat "$fixture"
+expect_fail "missing input" bash "$script" --level error "$tmp/no-such.log"
+
+stdin_out="$(cat "$fixture" | bash "$script" --level error -)"
+[[ "$stdin_out" == "$exact" ]] || fail "stdin parity"
+
+cp "$fixture" "$tmp/log with spaces.log"
+spaced="$(bash "$script" --level error "$tmp/log with spaces.log")"
+[[ "$spaced" == "$exact" ]] || fail "path with spaces"
+
+no_match="$(bash "$script" --level fatal --date-from 2026-01-03 --date-to 2026-01-03 "$fixture")"
+[[ -z "$no_match" ]] || fail "no-match output"
+
+help="$(bash "$script" --help)"
+grep -q -- '--date-from/--date-to' <<<"$help" || fail "help missing date options"
+grep -q -- 'PATH selects one file' <<<"$help" || fail "help missing path contract"
+
+printf 'PASS-Bash comprehensive\n'
+\\tERR\\t')" == 2 ]] || fail "date to-only"
+[[ "$(bash "$script" --level error --date-time-from '2026-01-01 08:03:00' "$fixture" | grep -c 
+[[ "$(bash "$script" --level error -n 1 "$fixture" | grep -c '^2026-')" == 1 ]] || fail "-n semantics"
+
+date_exact="$(bash "$script" --level error --date-from 2026-01-02 --date-to 2026-01-02 "$fixture")"
+[[ "$(count_events "$date_exact")" == 1 ]] || fail "date boundary"
+grep -q 'second error' <<<"$date_exact" || fail "date boundary selected wrong event"
+dt_exact="$(bash "$script" --level error --date-time-from '2026-01-01 08:03:00' --date-time-to '2026-01-01 08:03:00' "$fixture")"
+[[ "$(count_events "$dt_exact")" == 1 ]] || fail "datetime boundary"
+
+expect_fail "invalid level" bash "$script" --level nope "$fixture"
+expect_fail "missing level" bash "$script" "$fixture"
+expect_fail "missing date value" bash "$script" --level error --date-from
+expect_fail "missing datetime value" bash "$script" --level error --date-time-from
+expect_fail "invalid date" bash "$script" --level error --date-from 2026-02-30 "$fixture"
+expect_fail "invalid datetime" bash "$script" --level error --date-time-from '2026-01-01 25:00:00' "$fixture"
+expect_fail "reversed date" bash "$script" --level error --date-from 2026-01-03 --date-to 2026-01-02 "$fixture"
+expect_fail "reversed datetime" bash "$script" --level error --date-time-from '2026-01-03 10:00:00' --date-time-to '2026-01-02 10:00:00' "$fixture"
+expect_fail "conflicting filters" bash "$script" --level error --date-from 2026-01-01 --date-time-from '2026-01-01 08:00:00' "$fixture"
+expect_fail "conflicting severity modes" bash "$script" --level error --above --below "$fixture"
+expect_fail "bad number" bash "$script" --level error -n 0 "$fixture"
+expect_fail "negative number" bash "$script" --level error -n -1 "$fixture"
+expect_fail "non-numeric number" bash "$script" --level error -n abc "$fixture"
+expect_fail "unknown option" bash "$script" --level error --wat "$fixture"
+expect_fail "missing input" bash "$script" --level error "$tmp/no-such.log"
+
+stdin_out="$(cat "$fixture" | bash "$script" --level error -)"
+[[ "$stdin_out" == "$exact" ]] || fail "stdin parity"
+
+cp "$fixture" "$tmp/log with spaces.log"
+spaced="$(bash "$script" --level error "$tmp/log with spaces.log")"
+[[ "$spaced" == "$exact" ]] || fail "path with spaces"
+
+no_match="$(bash "$script" --level fatal --date-from 2026-01-03 --date-to 2026-01-03 "$fixture")"
+[[ -z "$no_match" ]] || fail "no-match output"
+
+help="$(bash "$script" --help)"
+grep -q -- '--date-from/--date-to' <<<"$help" || fail "help missing date options"
+grep -q -- 'PATH selects one file' <<<"$help" || fail "help missing path contract"
+
+printf 'PASS-Bash comprehensive\n'
+\\tERR\\t')" == 2 ]] || fail "datetime from-only"
+[[ "$(bash "$script" --level error --date-time-to '2026-01-01 08:03:00' "$fixture" | grep -c 
+[[ "$(bash "$script" --level error -n 1 "$fixture" | grep -c '^2026-')" == 1 ]] || fail "-n semantics"
+
+date_exact="$(bash "$script" --level error --date-from 2026-01-02 --date-to 2026-01-02 "$fixture")"
+[[ "$(count_events "$date_exact")" == 1 ]] || fail "date boundary"
+grep -q 'second error' <<<"$date_exact" || fail "date boundary selected wrong event"
+dt_exact="$(bash "$script" --level error --date-time-from '2026-01-01 08:03:00' --date-time-to '2026-01-01 08:03:00' "$fixture")"
+[[ "$(count_events "$dt_exact")" == 1 ]] || fail "datetime boundary"
+
+expect_fail "invalid level" bash "$script" --level nope "$fixture"
+expect_fail "missing level" bash "$script" "$fixture"
+expect_fail "missing date value" bash "$script" --level error --date-from
+expect_fail "missing datetime value" bash "$script" --level error --date-time-from
+expect_fail "invalid date" bash "$script" --level error --date-from 2026-02-30 "$fixture"
+expect_fail "invalid datetime" bash "$script" --level error --date-time-from '2026-01-01 25:00:00' "$fixture"
+expect_fail "reversed date" bash "$script" --level error --date-from 2026-01-03 --date-to 2026-01-02 "$fixture"
+expect_fail "reversed datetime" bash "$script" --level error --date-time-from '2026-01-03 10:00:00' --date-time-to '2026-01-02 10:00:00' "$fixture"
+expect_fail "conflicting filters" bash "$script" --level error --date-from 2026-01-01 --date-time-from '2026-01-01 08:00:00' "$fixture"
+expect_fail "conflicting severity modes" bash "$script" --level error --above --below "$fixture"
+expect_fail "bad number" bash "$script" --level error -n 0 "$fixture"
+expect_fail "negative number" bash "$script" --level error -n -1 "$fixture"
+expect_fail "non-numeric number" bash "$script" --level error -n abc "$fixture"
+expect_fail "unknown option" bash "$script" --level error --wat "$fixture"
+expect_fail "missing input" bash "$script" --level error "$tmp/no-such.log"
+
+stdin_out="$(cat "$fixture" | bash "$script" --level error -)"
+[[ "$stdin_out" == "$exact" ]] || fail "stdin parity"
+
+cp "$fixture" "$tmp/log with spaces.log"
+spaced="$(bash "$script" --level error "$tmp/log with spaces.log")"
+[[ "$spaced" == "$exact" ]] || fail "path with spaces"
+
+no_match="$(bash "$script" --level fatal --date-from 2026-01-03 --date-to 2026-01-03 "$fixture")"
+[[ -z "$no_match" ]] || fail "no-match output"
+
+help="$(bash "$script" --help)"
+grep -q -- '--date-from/--date-to' <<<"$help" || fail "help missing date options"
+grep -q -- 'PATH selects one file' <<<"$help" || fail "help missing path contract"
+
+printf 'PASS-Bash comprehensive\n'
+\\tERR\\t')" == 1 ]] || fail "datetime to-only"
+[[ "$(bash "$script" --level error -n 1 "$fixture" | grep -c '^2026-')" == 1 ]] || fail "-n semantics"
+
+date_exact="$(bash "$script" --level error --date-from 2026-01-02 --date-to 2026-01-02 "$fixture")"
+[[ "$(count_events "$date_exact")" == 1 ]] || fail "date boundary"
+grep -q 'second error' <<<"$date_exact" || fail "date boundary selected wrong event"
+dt_exact="$(bash "$script" --level error --date-time-from '2026-01-01 08:03:00' --date-time-to '2026-01-01 08:03:00' "$fixture")"
+[[ "$(count_events "$dt_exact")" == 1 ]] || fail "datetime boundary"
+
+expect_fail "invalid level" bash "$script" --level nope "$fixture"
+expect_fail "missing level" bash "$script" "$fixture"
+expect_fail "missing date value" bash "$script" --level error --date-from
+expect_fail "missing datetime value" bash "$script" --level error --date-time-from
+expect_fail "invalid date" bash "$script" --level error --date-from 2026-02-30 "$fixture"
+expect_fail "invalid datetime" bash "$script" --level error --date-time-from '2026-01-01 25:00:00' "$fixture"
+expect_fail "reversed date" bash "$script" --level error --date-from 2026-01-03 --date-to 2026-01-02 "$fixture"
+expect_fail "reversed datetime" bash "$script" --level error --date-time-from '2026-01-03 10:00:00' --date-time-to '2026-01-02 10:00:00' "$fixture"
+expect_fail "conflicting filters" bash "$script" --level error --date-from 2026-01-01 --date-time-from '2026-01-01 08:00:00' "$fixture"
+expect_fail "conflicting severity modes" bash "$script" --level error --above --below "$fixture"
+expect_fail "bad number" bash "$script" --level error -n 0 "$fixture"
+expect_fail "negative number" bash "$script" --level error -n -1 "$fixture"
+expect_fail "non-numeric number" bash "$script" --level error -n abc "$fixture"
+expect_fail "unknown option" bash "$script" --level error --wat "$fixture"
+expect_fail "missing input" bash "$script" --level error "$tmp/no-such.log"
+
+stdin_out="$(cat "$fixture" | bash "$script" --level error -)"
+[[ "$stdin_out" == "$exact" ]] || fail "stdin parity"
+
+cp "$fixture" "$tmp/log with spaces.log"
+spaced="$(bash "$script" --level error "$tmp/log with spaces.log")"
+[[ "$spaced" == "$exact" ]] || fail "path with spaces"
+
+no_match="$(bash "$script" --level fatal --date-from 2026-01-03 --date-to 2026-01-03 "$fixture")"
+[[ -z "$no_match" ]] || fail "no-match output"
+
+help="$(bash "$script" --help)"
+grep -q -- '--date-from/--date-to' <<<"$help" || fail "help missing date options"
+grep -q -- 'PATH selects one file' <<<"$help" || fail "help missing path contract"
+
+printf 'PASS-Bash comprehensive\n'
+\\tERR\\t' <<<"$below" || fail "below missing error"
+! grep -q 
+[[ "$(bash "$script" --level error --date-from 2026-01-01 "$fixture" | grep -c 
+[[ "$(bash "$script" --level error -n 1 "$fixture" | grep -c '^2026-')" == 1 ]] || fail "-n semantics"
+
+date_exact="$(bash "$script" --level error --date-from 2026-01-02 --date-to 2026-01-02 "$fixture")"
+[[ "$(count_events "$date_exact")" == 1 ]] || fail "date boundary"
+grep -q 'second error' <<<"$date_exact" || fail "date boundary selected wrong event"
+dt_exact="$(bash "$script" --level error --date-time-from '2026-01-01 08:03:00' --date-time-to '2026-01-01 08:03:00' "$fixture")"
+[[ "$(count_events "$dt_exact")" == 1 ]] || fail "datetime boundary"
+
+expect_fail "invalid level" bash "$script" --level nope "$fixture"
+expect_fail "missing level" bash "$script" "$fixture"
+expect_fail "missing date value" bash "$script" --level error --date-from
+expect_fail "missing datetime value" bash "$script" --level error --date-time-from
+expect_fail "invalid date" bash "$script" --level error --date-from 2026-02-30 "$fixture"
+expect_fail "invalid datetime" bash "$script" --level error --date-time-from '2026-01-01 25:00:00' "$fixture"
+expect_fail "reversed date" bash "$script" --level error --date-from 2026-01-03 --date-to 2026-01-02 "$fixture"
+expect_fail "reversed datetime" bash "$script" --level error --date-time-from '2026-01-03 10:00:00' --date-time-to '2026-01-02 10:00:00' "$fixture"
+expect_fail "conflicting filters" bash "$script" --level error --date-from 2026-01-01 --date-time-from '2026-01-01 08:00:00' "$fixture"
+expect_fail "conflicting severity modes" bash "$script" --level error --above --below "$fixture"
+expect_fail "bad number" bash "$script" --level error -n 0 "$fixture"
+expect_fail "negative number" bash "$script" --level error -n -1 "$fixture"
+expect_fail "non-numeric number" bash "$script" --level error -n abc "$fixture"
+expect_fail "unknown option" bash "$script" --level error --wat "$fixture"
+expect_fail "missing input" bash "$script" --level error "$tmp/no-such.log"
+
+stdin_out="$(cat "$fixture" | bash "$script" --level error -)"
+[[ "$stdin_out" == "$exact" ]] || fail "stdin parity"
+
+cp "$fixture" "$tmp/log with spaces.log"
+spaced="$(bash "$script" --level error "$tmp/log with spaces.log")"
+[[ "$spaced" == "$exact" ]] || fail "path with spaces"
+
+no_match="$(bash "$script" --level fatal --date-from 2026-01-03 --date-to 2026-01-03 "$fixture")"
+[[ -z "$no_match" ]] || fail "no-match output"
+
+help="$(bash "$script" --help)"
+grep -q -- '--date-from/--date-to' <<<"$help" || fail "help missing date options"
+grep -q -- 'PATH selects one file' <<<"$help" || fail "help missing path contract"
+
+printf 'PASS-Bash comprehensive\n'
+\\tERR\\t')" == 2 ]] || fail "date from-only"
+[[ "$(bash "$script" --level error --date-to 2026-01-02 "$fixture" | grep -c 
+[[ "$(bash "$script" --level error -n 1 "$fixture" | grep -c '^2026-')" == 1 ]] || fail "-n semantics"
+
+date_exact="$(bash "$script" --level error --date-from 2026-01-02 --date-to 2026-01-02 "$fixture")"
+[[ "$(count_events "$date_exact")" == 1 ]] || fail "date boundary"
+grep -q 'second error' <<<"$date_exact" || fail "date boundary selected wrong event"
+dt_exact="$(bash "$script" --level error --date-time-from '2026-01-01 08:03:00' --date-time-to '2026-01-01 08:03:00' "$fixture")"
+[[ "$(count_events "$dt_exact")" == 1 ]] || fail "datetime boundary"
+
+expect_fail "invalid level" bash "$script" --level nope "$fixture"
+expect_fail "missing level" bash "$script" "$fixture"
+expect_fail "missing date value" bash "$script" --level error --date-from
+expect_fail "missing datetime value" bash "$script" --level error --date-time-from
+expect_fail "invalid date" bash "$script" --level error --date-from 2026-02-30 "$fixture"
+expect_fail "invalid datetime" bash "$script" --level error --date-time-from '2026-01-01 25:00:00' "$fixture"
+expect_fail "reversed date" bash "$script" --level error --date-from 2026-01-03 --date-to 2026-01-02 "$fixture"
+expect_fail "reversed datetime" bash "$script" --level error --date-time-from '2026-01-03 10:00:00' --date-time-to '2026-01-02 10:00:00' "$fixture"
+expect_fail "conflicting filters" bash "$script" --level error --date-from 2026-01-01 --date-time-from '2026-01-01 08:00:00' "$fixture"
+expect_fail "conflicting severity modes" bash "$script" --level error --above --below "$fixture"
+expect_fail "bad number" bash "$script" --level error -n 0 "$fixture"
+expect_fail "negative number" bash "$script" --level error -n -1 "$fixture"
+expect_fail "non-numeric number" bash "$script" --level error -n abc "$fixture"
+expect_fail "unknown option" bash "$script" --level error --wat "$fixture"
+expect_fail "missing input" bash "$script" --level error "$tmp/no-such.log"
+
+stdin_out="$(cat "$fixture" | bash "$script" --level error -)"
+[[ "$stdin_out" == "$exact" ]] || fail "stdin parity"
+
+cp "$fixture" "$tmp/log with spaces.log"
+spaced="$(bash "$script" --level error "$tmp/log with spaces.log")"
+[[ "$spaced" == "$exact" ]] || fail "path with spaces"
+
+no_match="$(bash "$script" --level fatal --date-from 2026-01-03 --date-to 2026-01-03 "$fixture")"
+[[ -z "$no_match" ]] || fail "no-match output"
+
+help="$(bash "$script" --help)"
+grep -q -- '--date-from/--date-to' <<<"$help" || fail "help missing date options"
+grep -q -- 'PATH selects one file' <<<"$help" || fail "help missing path contract"
+
+printf 'PASS-Bash comprehensive\n'
+\\tERR\\t')" == 2 ]] || fail "date to-only"
+[[ "$(bash "$script" --level error --date-time-from '2026-01-01 08:03:00' "$fixture" | grep -c 
+[[ "$(bash "$script" --level error -n 1 "$fixture" | grep -c '^2026-')" == 1 ]] || fail "-n semantics"
+
+date_exact="$(bash "$script" --level error --date-from 2026-01-02 --date-to 2026-01-02 "$fixture")"
+[[ "$(count_events "$date_exact")" == 1 ]] || fail "date boundary"
+grep -q 'second error' <<<"$date_exact" || fail "date boundary selected wrong event"
+dt_exact="$(bash "$script" --level error --date-time-from '2026-01-01 08:03:00' --date-time-to '2026-01-01 08:03:00' "$fixture")"
+[[ "$(count_events "$dt_exact")" == 1 ]] || fail "datetime boundary"
+
+expect_fail "invalid level" bash "$script" --level nope "$fixture"
+expect_fail "missing level" bash "$script" "$fixture"
+expect_fail "missing date value" bash "$script" --level error --date-from
+expect_fail "missing datetime value" bash "$script" --level error --date-time-from
+expect_fail "invalid date" bash "$script" --level error --date-from 2026-02-30 "$fixture"
+expect_fail "invalid datetime" bash "$script" --level error --date-time-from '2026-01-01 25:00:00' "$fixture"
+expect_fail "reversed date" bash "$script" --level error --date-from 2026-01-03 --date-to 2026-01-02 "$fixture"
+expect_fail "reversed datetime" bash "$script" --level error --date-time-from '2026-01-03 10:00:00' --date-time-to '2026-01-02 10:00:00' "$fixture"
+expect_fail "conflicting filters" bash "$script" --level error --date-from 2026-01-01 --date-time-from '2026-01-01 08:00:00' "$fixture"
+expect_fail "conflicting severity modes" bash "$script" --level error --above --below "$fixture"
+expect_fail "bad number" bash "$script" --level error -n 0 "$fixture"
+expect_fail "negative number" bash "$script" --level error -n -1 "$fixture"
+expect_fail "non-numeric number" bash "$script" --level error -n abc "$fixture"
+expect_fail "unknown option" bash "$script" --level error --wat "$fixture"
+expect_fail "missing input" bash "$script" --level error "$tmp/no-such.log"
+
+stdin_out="$(cat "$fixture" | bash "$script" --level error -)"
+[[ "$stdin_out" == "$exact" ]] || fail "stdin parity"
+
+cp "$fixture" "$tmp/log with spaces.log"
+spaced="$(bash "$script" --level error "$tmp/log with spaces.log")"
+[[ "$spaced" == "$exact" ]] || fail "path with spaces"
+
+no_match="$(bash "$script" --level fatal --date-from 2026-01-03 --date-to 2026-01-03 "$fixture")"
+[[ -z "$no_match" ]] || fail "no-match output"
+
+help="$(bash "$script" --help)"
+grep -q -- '--date-from/--date-to' <<<"$help" || fail "help missing date options"
+grep -q -- 'PATH selects one file' <<<"$help" || fail "help missing path contract"
+
+printf 'PASS-Bash comprehensive\n'
+\\tERR\\t')" == 2 ]] || fail "datetime from-only"
+[[ "$(bash "$script" --level error --date-time-to '2026-01-01 08:03:00' "$fixture" | grep -c 
+[[ "$(bash "$script" --level error -n 1 "$fixture" | grep -c '^2026-')" == 1 ]] || fail "-n semantics"
+
+date_exact="$(bash "$script" --level error --date-from 2026-01-02 --date-to 2026-01-02 "$fixture")"
+[[ "$(count_events "$date_exact")" == 1 ]] || fail "date boundary"
+grep -q 'second error' <<<"$date_exact" || fail "date boundary selected wrong event"
+dt_exact="$(bash "$script" --level error --date-time-from '2026-01-01 08:03:00' --date-time-to '2026-01-01 08:03:00' "$fixture")"
+[[ "$(count_events "$dt_exact")" == 1 ]] || fail "datetime boundary"
+
+expect_fail "invalid level" bash "$script" --level nope "$fixture"
+expect_fail "missing level" bash "$script" "$fixture"
+expect_fail "missing date value" bash "$script" --level error --date-from
+expect_fail "missing datetime value" bash "$script" --level error --date-time-from
+expect_fail "invalid date" bash "$script" --level error --date-from 2026-02-30 "$fixture"
+expect_fail "invalid datetime" bash "$script" --level error --date-time-from '2026-01-01 25:00:00' "$fixture"
+expect_fail "reversed date" bash "$script" --level error --date-from 2026-01-03 --date-to 2026-01-02 "$fixture"
+expect_fail "reversed datetime" bash "$script" --level error --date-time-from '2026-01-03 10:00:00' --date-time-to '2026-01-02 10:00:00' "$fixture"
+expect_fail "conflicting filters" bash "$script" --level error --date-from 2026-01-01 --date-time-from '2026-01-01 08:00:00' "$fixture"
+expect_fail "conflicting severity modes" bash "$script" --level error --above --below "$fixture"
+expect_fail "bad number" bash "$script" --level error -n 0 "$fixture"
+expect_fail "negative number" bash "$script" --level error -n -1 "$fixture"
+expect_fail "non-numeric number" bash "$script" --level error -n abc "$fixture"
+expect_fail "unknown option" bash "$script" --level error --wat "$fixture"
+expect_fail "missing input" bash "$script" --level error "$tmp/no-such.log"
+
+stdin_out="$(cat "$fixture" | bash "$script" --level error -)"
+[[ "$stdin_out" == "$exact" ]] || fail "stdin parity"
+
+cp "$fixture" "$tmp/log with spaces.log"
+spaced="$(bash "$script" --level error "$tmp/log with spaces.log")"
+[[ "$spaced" == "$exact" ]] || fail "path with spaces"
+
+no_match="$(bash "$script" --level fatal --date-from 2026-01-03 --date-to 2026-01-03 "$fixture")"
+[[ -z "$no_match" ]] || fail "no-match output"
+
+help="$(bash "$script" --help)"
+grep -q -- '--date-from/--date-to' <<<"$help" || fail "help missing date options"
+grep -q -- 'PATH selects one file' <<<"$help" || fail "help missing path contract"
+
+printf 'PASS-Bash comprehensive\n'
+\\tERR\\t')" == 1 ]] || fail "datetime to-only"
+[[ "$(bash "$script" --level error -n 1 "$fixture" | grep -c '^2026-')" == 1 ]] || fail "-n semantics"
+
+date_exact="$(bash "$script" --level error --date-from 2026-01-02 --date-to 2026-01-02 "$fixture")"
+[[ "$(count_events "$date_exact")" == 1 ]] || fail "date boundary"
+grep -q 'second error' <<<"$date_exact" || fail "date boundary selected wrong event"
+dt_exact="$(bash "$script" --level error --date-time-from '2026-01-01 08:03:00' --date-time-to '2026-01-01 08:03:00' "$fixture")"
+[[ "$(count_events "$dt_exact")" == 1 ]] || fail "datetime boundary"
+
+expect_fail "invalid level" bash "$script" --level nope "$fixture"
+expect_fail "missing level" bash "$script" "$fixture"
+expect_fail "missing date value" bash "$script" --level error --date-from
+expect_fail "missing datetime value" bash "$script" --level error --date-time-from
+expect_fail "invalid date" bash "$script" --level error --date-from 2026-02-30 "$fixture"
+expect_fail "invalid datetime" bash "$script" --level error --date-time-from '2026-01-01 25:00:00' "$fixture"
+expect_fail "reversed date" bash "$script" --level error --date-from 2026-01-03 --date-to 2026-01-02 "$fixture"
+expect_fail "reversed datetime" bash "$script" --level error --date-time-from '2026-01-03 10:00:00' --date-time-to '2026-01-02 10:00:00' "$fixture"
+expect_fail "conflicting filters" bash "$script" --level error --date-from 2026-01-01 --date-time-from '2026-01-01 08:00:00' "$fixture"
+expect_fail "conflicting severity modes" bash "$script" --level error --above --below "$fixture"
+expect_fail "bad number" bash "$script" --level error -n 0 "$fixture"
+expect_fail "negative number" bash "$script" --level error -n -1 "$fixture"
+expect_fail "non-numeric number" bash "$script" --level error -n abc "$fixture"
+expect_fail "unknown option" bash "$script" --level error --wat "$fixture"
+expect_fail "missing input" bash "$script" --level error "$tmp/no-such.log"
+
+stdin_out="$(cat "$fixture" | bash "$script" --level error -)"
+[[ "$stdin_out" == "$exact" ]] || fail "stdin parity"
+
+cp "$fixture" "$tmp/log with spaces.log"
+spaced="$(bash "$script" --level error "$tmp/log with spaces.log")"
+[[ "$spaced" == "$exact" ]] || fail "path with spaces"
+
+no_match="$(bash "$script" --level fatal --date-from 2026-01-03 --date-to 2026-01-03 "$fixture")"
+[[ -z "$no_match" ]] || fail "no-match output"
+
+help="$(bash "$script" --help)"
+grep -q -- '--date-from/--date-to' <<<"$help" || fail "help missing date options"
+grep -q -- 'PATH selects one file' <<<"$help" || fail "help missing path contract"
+
+printf 'PASS-Bash comprehensive\n'
+\\tFTL\\t' <<<"$below" || fail "below included fatal"
 [[ "$(bash "$script" --level error --date-from 2026-01-01 "$fixture" | grep -c 
 [[ "$(bash "$script" --level error -n 1 "$fixture" | grep -c '^2026-')" == 1 ]] || fail "-n semantics"
 
