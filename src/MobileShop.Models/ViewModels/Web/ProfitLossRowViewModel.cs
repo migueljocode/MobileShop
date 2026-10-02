@@ -13,6 +13,6 @@ public sealed record ProfitLossRowViewModel(
     /// Returns 0 when Bought is zero to avoid division by zero.
     /// </summary>
     public decimal ProfitPercent => Bought != 0
-        ? (Profit / Bought) * 100m
+        ? (Profit / (decimal)Bought) * 100m
         : 0m;
 }
