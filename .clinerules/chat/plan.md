@@ -15,28 +15,10 @@
 
 ## ~~[x] Step 1 — Define the factor presentation contract~~
 **Job B: PASS — Actor commit `a27c09ea79eefa3ca8ab82c2be4d7575c74c73a9`; GitHub Actions #17 succeeded.**
-- Existing factor presentation model was sufficient; no unnecessary EF/schema or transaction-flow changes were introduced.
-- `TransactionFactorViewModel` documentation now explicitly identifies the document as customer-facing and keeps static shop identity/contact data in PDF configuration.
-- Added focused coverage proving Buy/Sell rows retain their own `PersonRole` and `PersonLabel`.
-- Scope remained limited to the factor view model documentation and focused model test.
 
 ## ~~[x] Step 2 — Redesign the QuestPDF factor layout~~
-**Job B pending reviewer sign-off; Actor implementation commit `f2fe3c8d13dd492eadd9115a67f4f2505bcd40c2` and GitHub Actions successful.**
-- Rework `QuestPdfGenerator.GenerateTransactionFactor` / factor composition into a professional printable A4 layout.
-- Include:
-  - shop/header section;
-  - factor title and generated date;
-  - row-level party context;
-  - transaction table with date, direction, product, person, and finished price;
-  - prominent total;
-  - notes/terms area only where backed by legitimate data;
-  - signature areas;
-  - footer/shop information where configured.
-- Use reusable QuestPDF composition methods rather than one monolithic renderer.
-- Use proper tables, spacing, borders, alignment, wrapping, and pagination.
-- Reuse the existing verified Persian/RTL Vazirmatn font-registration/resource path.
-- Keep invoice PDF generation unchanged.
-- Job B must verify the implementation and PDF tests before Step 3 starts.
+**Job B: PASS — Actor commit `f2fe3c8d13dd492eadd9115a67f4f2505bcd40c2`; GitHub Actions successful.**
+**Carry-over:** Rendered-PDF visual inspection remains planned for Step 5; invoice rendering remains unchanged.
 
 ## [ ] Step 3 — Preserve and verify both factor entry points
 - Verify the Details-page single-transaction factor still uses the same generator and produces the redesigned document.
