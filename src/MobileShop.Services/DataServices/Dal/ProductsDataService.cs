@@ -21,14 +21,12 @@ public class ProductsDataService(
     IBaseRepo<PartNumber> partNumbers,
     IBaseRepo<Product> products,
     ILogger<ProductsDataService> logger)
+    : IProductsDataService
 {
     // Glass creation represents stock intake, so its paid cost is recorded as a Buy leg.
     // The seeded shop sentinel is used because the Create Glass form intentionally has no seller field.
     private const int ShopSellerId = 1;
     private const int ShopCustomerId = 1;
-
-    : IProductsDataService
-{
         /// <summary>Gets the structured logger for this products service.</summary>
     protected ILogger<ProductsDataService> Logger { get; } = logger;
 
