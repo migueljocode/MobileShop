@@ -94,26 +94,28 @@ public class ReportsDataServiceTests : RepoTestBase
     }
 
     [Fact]
-    public async Task GetProfitLossRowsAsync_uses_glass_paid_price_when_glass_was_sold_without_buy_transaction()
+    public async Task GetProfitLossRowsAsync_uses_glass_paid_price_from_inventory_buy_when_sold()
     {
         var seller = AddSeller();
         var customer = AddCustomer();
         var product = TestDataHelpers.CreateProduct(Context);
-        product.Price = 300m;
+        product.Price = 11.48m;
         Context.SaveChanges();
 
         var glass = new Glass { ProductId = product.Id };
         Context.Glasses.Add(glass);
         Context.SaveChanges();
 
-        AddTransaction(product, seller.Id, customer.Id, TransactionDirection.Sell, new DateTime(2024, 3, 5), 500m);
+        AddTransaction(product, seller.Id, customer.Id, TransactionDirection.Buy, DateTime.Today, 10.44m);
+        AddTransaction(product, seller.Id, customer.Id, TransactionDirection.Sell, DateTime.Today, 20.99m);
 
         var rows = await _service.GetProfitLossRowsAsync(null, null);
 
         var row = Assert.Single(rows);
-        Assert.Equal(300m, row.Bought);
-        Assert.Equal(500m, row.Sold);
-        Assert.Equal(200m, row.Profit);
+        Assert.Equal(10.44m, row.Bought);
+        Assert.Equal(20.99m, row.Sold);
+        Assert.Equal(10.55m, row.Profit);
+        Assert.Equal(101.05m, row.ProfitPercent);
     }
 
     [Fact]
