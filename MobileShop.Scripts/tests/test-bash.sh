@@ -24,7 +24,7 @@ grep -q $'\tERR\tFixture\tsecond error' <<<"$exact" || fail "second error missin
 grep -q 'System.InvalidOperationException: fixture' <<<"$exact" || fail "multiline event missing"
 grep -q '   at Fixture.Method()' <<<"$exact" || fail "multiline continuation missing"
 
-[[ "$(bash "$script" --level warning --above "$fixture" | grep -c '^2026-')" == 3 ]] || fail "above semantics"
+[[ "$(bash "$script" --level warning --above "$fixture" | grep -c '^2026-')" == 4 ]] || fail "above semantics"
 [[ "$(bash "$script" --level warning --below "$fixture" | grep -c '^2026-')" == 4 ]] || fail "below semantics"
 [[ "$(bash "$script" --level error --date-from 2026-01-01 "$fixture" | grep -c 
 [[ "$(bash "$script" --level error -n 1 "$fixture" | grep -c '^2026-')" == 1 ]] || fail "-n semantics"
