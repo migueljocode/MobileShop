@@ -13,7 +13,7 @@ EOF
 die(){ printf 'log.sh: %s\n' "$*" >&2; exit 2; }
 rank(){ case "$1" in debug)echo 0;;info)echo 1;;warning)echo 2;;error)echo 3;;fatal)echo 4;;*)return 1;;esac; }
 valid_date(){ [[ "$1" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ ]]||return 1; date -d "$1" '+%Y-%m-%d' >/dev/null 2>&1&&[[ "$(date -d "$1" '+%Y-%m-%d')" == "$1" ]]&&return 0; date -j -f '%Y-%m-%d' "$1" '+%Y-%m-%d' >/dev/null 2>&1; }
-valid_dt(){ [[ "$1" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}$ ]]||return 1;valid_date "${1:0:10}"||return 1;local h=${1:11:2} m=${1:14:2} s=${1:17:2};((10#$h<24&&10#$m<60&&10#$s<60));}
+valid_dt(){ [[ "$1" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}[[:space:]][0-9]{2}:[0-9]{2}:[0-9]{2}$ ]]||return 1;valid_date "${1:0:10}"||return 1;local h=${1:11:2} m=${1:14:2} s=${1:17:2};((10#$h<24&&10#$m<60&&10#$s<60));}
 E=();T=();L=()
 read_events(){ local x c='' t='' r='' re='^([0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}\.[0-9]{3}) [+-][0-9]{2}:[0-9]{2}';re+=$'\t(DBG|INF|WRN|ERR|FTL)\t';while IFS= read -r x||[[ -n "$x" ]];do if [[ "$x" =~ $re ]];then [[ -z "$c" ]]||{ E+=( "$c" );T+=( "$t" );L+=( "$r" );};t="${BASH_REMATCH[1]}";case "${BASH_REMATCH[2]}" in DBG)r=0;;INF)r=1;;WRN)r=2;;ERR)r=3;;FTL)r=4;;esac;c="$x";elif [[ -n "$c" ]];then c+=$'\n'"$x";fi;done;[[ -z "$c" ]]||{ E+=( "$c" );T+=( "$t" );L+=( "$r" );};}
 main(){ local lev='' mode=0 n='' p='' df='' dt='' tf='' tt=''
