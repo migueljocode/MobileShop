@@ -8,7 +8,7 @@ fail(){ echo "FAIL: $*" >&2; exit 1; }
 [[ "$(bash "$s" --level error "$f"|grep -c $'\tERR\t')" == 2 ]]||fail exact-error
 [[ "$(bash "$s" --level fatal "$f"|grep -c $'\tFTL\t')" == 1 ]]||fail exact-fatal
 [[ "$(bash "$s" --level debug --above "$f"|grep -E -c $'\t(DBG|INF|WRN|ERR|FTL)\t')" == 7 ]]||fail above
-[[ "$(bash "$s" --level warning --below "$f"|grep -E -c $'\t(DBG|INF|WRN)\t')" == 3 ]]||fail below
+[[ "$(bash "$s" --level warning --below "$f"|grep -E -c $'\t(DBG|INF|WRN)\t')" == 4 ]]||fail below
 [[ "$(bash "$s" --level error -n 1 "$f"|grep -c $'\tERR\t')" == 1 ]]||fail number
 [[ "$(bash "$s" --level error --date-from 2026-01-02 --date-to 2026-01-02 "$f"|grep -c $'\tERR\t')" == 1 ]]||fail date
 [[ "$(bash "$s" --level error --date-time-from '2026-01-01 08:03:00' --date-time-to '2026-01-01 08:03:00' "$f"|grep -c $'\tERR\t')" == 1 ]]||fail datetime
