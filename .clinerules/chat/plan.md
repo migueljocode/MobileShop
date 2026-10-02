@@ -9,7 +9,7 @@
 ## ~~[x] Step 1 — Bulk glass contract and DAL creation~~
 **PASS — Reviewer Job B; GitHub Actions #72 succeeded on the final Step 1 fix.**
 - Files: create `src/MobileShop.Models/ViewModels/Web/BindModels/CreateGlassInputModel.cs`; modify `src/MobileShop.Services/DataServices/Interfaces/IProductsDataService.cs`, `src/MobileShop.Services/DataServices/Dal/ProductsDataService.cs`, and focused `ProductsDataServiceTests`; do not touch API source/stubs.
-- Add ManufacturerId, ModelId, paid Price, ProfitPercent/ProfitAmount, and Count (1–500).
+- Add ManufacturerId, ModelId, paid Price, ProfitPercent/ProfitAmount, and Count (1+; no artificial upper cap).
 - Validate manufacturer/model ownership and ensure the model category is Phone, Tablet, or SmartWatch.
 - Compute finished price once using the existing `ComputeFinishedPrice` amount-first rule.
 - Build exactly Count Product + Glass + GlassModelFit graphs in memory, with the same finished price and distinct 12-character barcodes.
@@ -46,7 +46,7 @@
 
 ## [ ] Step 4 — Final Stage Q validation
 - Inspect all Stage Q diffs, Actor evidence, audit evidence, and CI evidence; do not change implementation during validation.
-- Confirm Count 1/500 boundaries, rejection of 0/501, invalid/disallowed models, same finished price, distinct barcodes, exact Product/Glass/Fit counts, one-save persistence, and no API/schema/unrelated changes.
+- Confirm positive Count validation with no artificial upper cap, rejection of 0, invalid/disallowed models, same finished price, distinct barcodes, exact Product/Glass/Fit counts, one-save persistence, and no API/schema/unrelated changes.
 - Full solution validation must use GitHub Actions.
 - Record the human-visible Actions run number and conclusion for the final Actor commit.
 - Done when all Global Definition of Done items are evidenced and Reviewer can perform final sign-off.
@@ -55,7 +55,7 @@
 
 ## Global Definition of Done
 - `/Products/CreateGlass` exists and is reachable from Products.
-- Form supports Manufacturer → Model, Paid price, Profit %, Profit amount, read-only Finished price, and Count 1–500.
+- Form supports Manufacturer → Model, Paid price, Profit %, Profit amount, read-only Finished price, and any positive Count.
 - Finished price is calculated server-side by the existing `ProductsDataService.ComputeFinishedPrice` rule.
 - One submit creates exactly Count Products, each with one Glass and one GlassModelFit for the selected model.
 - All Products share the same finished price and have distinct 12-character barcodes.
