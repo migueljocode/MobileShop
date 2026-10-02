@@ -22,8 +22,8 @@ try {
   if (-not ($exact -match 'System.InvalidOperationException: fixture')) { Fail 'multiline event missing' }
   if (-not ($exact -match '   at Fixture.Method\(\)')) { Fail 'multiline continuation missing' }
 
-  if ((Lines @(& pwsh -NoProfile -File $runnable -Level warning -Above -Path $fixture)).Count -ne 3) { Fail 'above semantics' }
-  if ((Lines @(& pwsh -NoProfile -File $runnable -Level warning -Below -Path $fixture )).Count -ne 4) { Fail 'below semantics' }
+  if ((Lines @(& pwsh -NoProfile -File $runnable -Level error -Above -Path $fixture)).Count -ne 3) { Fail 'above semantics' }
+  if ((Lines @(& pwsh -NoProfile -File $runnable -Level error -Below -Path $fixture )).Count -ne 4) { Fail 'below semantics' }
   if ((Lines @(& pwsh -NoProfile -File $runnable -Level error -Number 1 -Path $fixture)).Count -ne 1) { Fail '-n semantics' }
 
   $dateExact = @( & pwsh -NoProfile -File $runnable -Level error -DateFrom 2026-01-02 -DateTo 2026-01-02 -Path $fixture )
