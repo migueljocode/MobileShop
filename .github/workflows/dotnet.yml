@@ -1,33 +1,42 @@
 name: .NET CI
+
 on:
-  push: { branches: [main] }
-  pull_request: { branches: [main] }
+  push:
+    branches: [main, stage-r-log-utilities]
+  pull_request:
+    branches: [main]
   workflow_dispatch:
-permissions: { contents: read }
+
+permissions:
+  contents: read
+
 jobs:
   test:
     runs-on: ubuntu-24.04
+
     steps:
       - uses: actions/checkout@v5
-      - uses: actions/setup-dotnet@v5
-        with: { dotnet-version: '10.0.x' }
-      - run: dotnet restore src/MobileShop.slnx --nologo
-      - run: dotnet build src/MobileShop.slnx --nologo --no-restore
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: '10.0.x'
+      - name: Restore
+        run: dotnet restore src/MobileShop.slnx --nologo
+      - name: Build
+        run: dotnet build src/MobileShop.slnx --nologo --no-restore
       - name: Test
         env:
           FACTOR_PDF_INSPECTION_DIR: ${{ github.workspace }}/TestResults/FactorPdfInspection
         run: dotnet test src/MobileShop.slnx --nologo --no-build --no-restore
-      - name: Verify Bash log utility
+      - name: Test Bash log utility
         shell: bash
         run: bash MobileShop.Scripts/tests/test-bash.sh
-      - uses: actions/upload-artifact@v4
-        with: { name: factor-pdf-inspection, path: TestResults/FactorPdfInspection/, if-no-files-found: error }
-  powershell:
-    runs-on: windows-2025
-    steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-dotnet@v5
-        with: { dotnet-version: '10.0.x' }
-      - name: Verify PowerShell log utility
+      - name: Test PowerShell log utility
         shell: pwsh
         run: ./MobileShop.Scripts/tests/test-powershell.ps1
+      - name: Upload factor PDF inspection artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: factor-pdf-inspection
+          path: TestResults/FactorPdfInspection/
+          if-no-files-found: error
