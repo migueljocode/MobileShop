@@ -1,0 +1,3 @@
+$ErrorActionPreference='Stop'
+$r=Split-Path -Parent (Split-Path -Parent $PSScriptRoot);$s=Join-Path $r 'MobileShop.Scripts/PowerShell/log.ps2';$f=Join-Path $r 'MobileShop.Scripts/tests/fixtures/sample.log';$sb=[scriptblock]::Create((Get-Content -Raw -LiteralPath $s))
+$o=&$sb -Level error -Path $f|Out-String;if(!$o){throw 'exact'};$o=&$sb -Level warning -Above -Path $f|Out-String;if(!$o){throw 'above'};$o=&$sb -Level warning -Below -Path $f|Out-String;if(!$o){throw 'below'};$o=&$sb -Level error -Number 1 -Path $f|Out-String;if(!$o){throw 'number'};$o=&$sb -Level error -DateTimeFrom '2026-01-01 08:03:00' -DateTimeTo '2026-01-01 08:03:00' -Path $f|Out-String;if(!$o){throw 'datetime'};&$sb -h|Out-Null;echo PASS-PowerShell
