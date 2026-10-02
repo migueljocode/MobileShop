@@ -53,7 +53,7 @@ public class IndexModelTests : RepoTestBase
             ProductId = p1.Id,
             SellerId = seller.Id,
             CustomerId = 1,
-            FinishedPrice = 90m,
+            FinishedPrice = 90,
             Date = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc),
             Direction = TransactionDirection.Buy
         };
@@ -62,7 +62,7 @@ public class IndexModelTests : RepoTestBase
             ProductId = p2.Id,
             SellerId = 1,
             CustomerId = customer.Id,
-            FinishedPrice = 220m,
+            FinishedPrice = 220,
             Date = new DateTime(2026, 1, 2, 0, 0, 0, DateTimeKind.Utc),
             Direction = TransactionDirection.Sell
         };
@@ -71,7 +71,7 @@ public class IndexModelTests : RepoTestBase
             ProductId = p3.Id,
             SellerId = seller.Id,
             CustomerId = 1,
-            FinishedPrice = 270m,
+            FinishedPrice = 270,
             Date = new DateTime(2026, 1, 3, 0, 0, 0, DateTimeKind.Utc),
             Direction = TransactionDirection.Buy
         };
@@ -107,7 +107,7 @@ public class IndexModelTests : RepoTestBase
         Assert.Equal([_tx2.Id, _tx1.Id], _pdfGenerator.LastFactor!.Rows.Select(row => row.TransactionId));
         Assert.Equal(["Customer", "Seller"], _pdfGenerator.LastFactor.Rows.Select(row => row.PersonRole));
         Assert.Equal(["Sara Customer", "Ali Seller"], _pdfGenerator.LastFactor.Rows.Select(row => row.PersonLabel));
-        Assert.Equal(310m, _pdfGenerator.LastFactor.TotalPrice);
+        Assert.Equal(310, _pdfGenerator.LastFactor.TotalPrice);
     }
 
     [Fact]
