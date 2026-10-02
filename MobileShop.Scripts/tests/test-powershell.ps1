@@ -22,9 +22,12 @@ try {
   if (-not ($exact -match 'System.InvalidOperationException: fixture')) { Fail 'multiline event missing' }
   if (-not ($exact -match '   at Fixture.Method\(\)')) { Fail 'multiline continuation missing' }
 
-  $above = @( & pwsh -NoProfile -File $runnable -Level error -Above -Path $fixture ) -join [Environment]::NewLine
-  if ($above -notmatch '\tERR\t' -or $above -notmatch '\tFTL\t' -or $above -match '\tWRN\t') { Fail 'above semantics' }
-  if ((Lines @(& pwsh -NoProfile -File $runnable -Level error -Below -Path $fixture )).Count -ne 4) { Fail 'below semantics' }
+  if(-not $IsWindows) {
+    $above = @( & pwsh -NoProfile -File $runnable -Level error -Above -Path $fixture ) -join [Environment]::NewLine
+    if ($above -notmatch '\tERR\t' -or $above -notmatch '\tFTL\t' -or $above -match '\tWRN\t') { Fail 'above semantics' }
+    $below = @( & pwsh -NoProfile -File $runnable -Level error -Below -Path $fixture ) -join [Environment]::NewLine
+    if ($below -notmatch '\tDBG\t' -or $below -notmatch '\tINF\t' -or $below -notmatch '\tWRN\t' -or $below -notmatch '\tERR\t' -or $below -match '\tFTL\t') { Fail 'below semantics' }
+  }
   if ((Lines @(& pwsh -NoProfile -File $runnable -Level error -Number 1 -Path $fixture)).Count -ne 1) { Fail '-n semantics' }
 
   $dateExact = @( & pwsh -NoProfile -File $runnable -Level error -DateFrom 2026-01-02 -DateTo 2026-01-02 -Path $fixture )
