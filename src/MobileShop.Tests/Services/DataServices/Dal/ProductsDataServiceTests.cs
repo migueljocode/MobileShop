@@ -175,7 +175,7 @@ public class ProductsDataServiceTests : RepoTestBase
         Context.Models.Add(glassModel);
         Context.SaveChanges();
 
-        var product = new Product { ModelId = glassModel.Id, Barcode = "GLASS123456", Price = 120m, GlassProfile = new Glass() };
+        var product = new Product { ModelId = glassModel.Id, Barcode = "GLASS123456", Price = 120, GlassProfile = new Glass() };
         Context.Products.Add(product);
         Context.SaveChanges();
 
@@ -548,8 +548,8 @@ public class ProductsDataServiceTests : RepoTestBase
         // which InMemory cannot express (it inner-joins and drops the row), so this test
         // covers the named-label branches with real people on both legs.
         Context.Transactions.AddRange(
-            new Transaction { ProductId = product.Id, SellerId = seller.Id, CustomerId = customer.Id, FinishedPrice = 100m, Date = new DateTime(2026, 1, 1), Direction = TransactionDirection.Buy },
-            new Transaction { ProductId = product.Id, SellerId = seller.Id, CustomerId = customer.Id, FinishedPrice = 150m, Date = new DateTime(2026, 2, 1), Direction = TransactionDirection.Sell });
+            new Transaction { ProductId = product.Id, SellerId = seller.Id, CustomerId = customer.Id, FinishedPrice = 100, Date = new DateTime(2026, 1, 1), Direction = TransactionDirection.Buy },
+            new Transaction { ProductId = product.Id, SellerId = seller.Id, CustomerId = customer.Id, FinishedPrice = 150, Date = new DateTime(2026, 2, 1), Direction = TransactionDirection.Sell });
         Context.SaveChanges();
 
         var details = await _service.GetDetailsAsync(phone.Id, "phone");
@@ -787,7 +787,7 @@ public class ProductsDataServiceTests : RepoTestBase
 
     // ── Stage N Step 1: finished price + notes ────────────────
 
-    private static MobileShop.Models.ViewModels.Web.BindModels.CreatePhoneInputModel PhonePricing(decimal paid, decimal? percent, decimal? amount) => new()
+    private static MobileShop.Models.ViewModels.Web.BindModels.CreatePhoneInputModel PhonePricing(int paid, decimal? percent, int? amount) => new()
     {
         ManufacturerId = 1,
         ModelId = 0, // set by caller after catalog seeding
@@ -892,7 +892,7 @@ public class ProductsDataServiceTests : RepoTestBase
         SeedCatalog(out _, out _);
         var input = new MobileShop.Models.ViewModels.Web.BindModels.CreateAppleIdInputModel
         {
-            Price = 200m,
+            Price = 200,
             ProfitPercent = 50m,
             Email = "pricing-percent@example.com",
             Password = "secret123",
@@ -912,7 +912,7 @@ public class ProductsDataServiceTests : RepoTestBase
         SeedCatalog(out _, out _);
         var input = new MobileShop.Models.ViewModels.Web.BindModels.CreateAppleIdInputModel
         {
-            Price = 200m,
+            Price = 200,
             ProfitAmount = 40m,
             Email = "pricing-amount@example.com",
             Password = "secret123",
@@ -940,7 +940,7 @@ public class ProductsDataServiceTests : RepoTestBase
         {
             ManufacturerId = 1,
             ModelId = phoneModel.Id,
-            Price = 999m,
+            Price = 999,
             IMEI1 = TestDataHelpers.GenerateImei(),
             PartNumberId = pnId,
         };
@@ -961,7 +961,7 @@ public class ProductsDataServiceTests : RepoTestBase
         {
             ManufacturerId = 1,
             ModelId = phoneModel.Id,
-            Price = 999m,
+            Price = 999,
             IMEI1 = TestDataHelpers.GenerateImei(),
             PartNumberId = null,
         };
@@ -989,7 +989,7 @@ public class ProductsDataServiceTests : RepoTestBase
         {
             ManufacturerId = 1,
             ModelId = phoneModel.Id,
-            Price = 999m,
+            Price = 999,
             IMEI1 = TestDataHelpers.GenerateImei(),
             PartNumberId = foreignPnId,
         };
@@ -1015,7 +1015,7 @@ public class ProductsDataServiceTests : RepoTestBase
         {
             ManufacturerId = 1,
             ModelId = phoneModel.Id,
-            Price = 999m,
+            Price = 999,
             IMEI1 = TestDataHelpers.GenerateImei(),
             ColorId = color.Id,
         };
@@ -1040,7 +1040,7 @@ public class ProductsDataServiceTests : RepoTestBase
         {
             ManufacturerId = 1,
             ModelId = phoneModel.Id,
-            Price = 999m,
+            Price = 999,
             IMEI1 = "123456789012345",
         };
 
@@ -1058,7 +1058,7 @@ public class ProductsDataServiceTests : RepoTestBase
         {
             ManufacturerId = 1,
             ModelId = phoneModel.Id,
-            Price = 500m,
+            Price = 500,
             IMEI1 = TestDataHelpers.GenerateImei(),
             IsSecondHand = true,
             TestPeriodDays = 15,
@@ -1084,7 +1084,7 @@ public class ProductsDataServiceTests : RepoTestBase
         SeedCatalog(out var phoneModel, out _);
         var input = new MobileShop.Models.ViewModels.Web.BindModels.CreateGlassInputModel
         {
-            CompatibleManufacturerId = 1, CompatibleModelId = phoneModel.Id, GlassManufacturerId = 1, Price = 100m, ProfitPercent = 25m, Count = 3
+            CompatibleManufacturerId = 1, CompatibleModelId = phoneModel.Id, GlassManufacturerId = 1, Price = 100, ProfitPercent = 25m, Count = 3
         };
 
         var result = await _service.CreateGlassesAsync(input);
@@ -1117,7 +1117,7 @@ public class ProductsDataServiceTests : RepoTestBase
             CompatibleManufacturerId = 1,
             CompatibleModelId = phoneModel.Id,
             GlassManufacturerId = 1,
-            Price = 10.44m,
+            Price = 10,
             ProfitPercent = 200m,
             Count = 1,
         });
@@ -1136,7 +1136,7 @@ public class ProductsDataServiceTests : RepoTestBase
         SeedCatalog(out var phoneModel, out _);
         var result = await _service.CreateGlassesAsync(new MobileShop.Models.ViewModels.Web.BindModels.CreateGlassInputModel
         {
-            CompatibleManufacturerId = 1, CompatibleModelId = phoneModel.Id, GlassManufacturerId = 1, Price = 100m, ProfitPercent = 50m, ProfitAmount = 20m, Count = 2
+            CompatibleManufacturerId = 1, CompatibleModelId = phoneModel.Id, GlassManufacturerId = 1, Price = 100, ProfitPercent = 50m, ProfitAmount = 20m, Count = 2
         });
 
         Assert.True(result.Succeeded);
@@ -1151,14 +1151,14 @@ public class ProductsDataServiceTests : RepoTestBase
 
         var one = await _service.CreateGlassesAsync(new MobileShop.Models.ViewModels.Web.BindModels.CreateGlassInputModel
         {
-            CompatibleManufacturerId = 1, CompatibleModelId = phoneModel.Id, GlassManufacturerId = 1, Price = 10m, Count = 1
+            CompatibleManufacturerId = 1, CompatibleModelId = phoneModel.Id, GlassManufacturerId = 1, Price = 10, Count = 1
         });
         Assert.True(one.Succeeded);
         Assert.Single(await Context.Products.ToListAsync());
 
         var fiveHundredAndOne = await _service.CreateGlassesAsync(new MobileShop.Models.ViewModels.Web.BindModels.CreateGlassInputModel
         {
-            CompatibleManufacturerId = 1, CompatibleModelId = phoneModel.Id, GlassManufacturerId = 1, Price = 10m, Count = 501
+            CompatibleManufacturerId = 1, CompatibleModelId = phoneModel.Id, GlassManufacturerId = 1, Price = 10, Count = 501
         });
         Assert.True(fiveHundredAndOne.Succeeded);
         Assert.Equal(502, await Context.Products.CountAsync());
@@ -1171,7 +1171,7 @@ public class ProductsDataServiceTests : RepoTestBase
 
         var result = await _service.CreateGlassesAsync(new MobileShop.Models.ViewModels.Web.BindModels.CreateGlassInputModel
         {
-            CompatibleManufacturerId = 1, CompatibleModelId = phoneModel.Id, GlassManufacturerId = 1, Price = 10m, Count = 0
+            CompatibleManufacturerId = 1, CompatibleModelId = phoneModel.Id, GlassManufacturerId = 1, Price = 10, Count = 0
         });
 
         Assert.False(result.Succeeded);
@@ -1197,7 +1197,7 @@ public class ProductsDataServiceTests : RepoTestBase
 
         var result = await _service.CreateGlassesAsync(new MobileShop.Models.ViewModels.Web.BindModels.CreateGlassInputModel
         {
-            CompatibleManufacturerId = 1, CompatibleModelId = otherModel.Id, GlassManufacturerId = 1, Price = 10m, Count = 2
+            CompatibleManufacturerId = 1, CompatibleModelId = otherModel.Id, GlassManufacturerId = 1, Price = 10, Count = 2
         });
 
         Assert.False(result.Succeeded);
@@ -1212,7 +1212,7 @@ public class ProductsDataServiceTests : RepoTestBase
 
         var result = await _service.CreateGlassesAsync(new MobileShop.Models.ViewModels.Web.BindModels.CreateGlassInputModel
         {
-            CompatibleManufacturerId = 1, CompatibleModelId = appleIdModel.Id, GlassManufacturerId = 1, Price = 10m, Count = 2
+            CompatibleManufacturerId = 1, CompatibleModelId = appleIdModel.Id, GlassManufacturerId = 1, Price = 10, Count = 2
         });
 
         Assert.False(result.Succeeded);
@@ -1227,7 +1227,7 @@ public class ProductsDataServiceTests : RepoTestBase
 
         var result = await _service.CreateGlassesAsync(new MobileShop.Models.ViewModels.Web.BindModels.CreateGlassInputModel
         {
-            CompatibleManufacturerId = 999, CompatibleModelId = phoneModel.Id, GlassManufacturerId = 1, Price = 10m, Count = 2
+            CompatibleManufacturerId = 999, CompatibleModelId = phoneModel.Id, GlassManufacturerId = 1, Price = 10, Count = 2
         });
 
         Assert.False(result.Succeeded);
@@ -1243,7 +1243,7 @@ public class ProductsDataServiceTests : RepoTestBase
         SeedCatalog(out _, out var appleIdModel);
         var input = new MobileShop.Models.ViewModels.Web.BindModels.CreateAppleIdInputModel
         {
-            Price = 99m,
+            Price = 99,
             Email = "new@example.com",
             Password = "secret123",
             Notes = "note",
@@ -1270,7 +1270,7 @@ public class ProductsDataServiceTests : RepoTestBase
 
         var input = new MobileShop.Models.ViewModels.Web.BindModels.CreateAppleIdInputModel
         {
-            Price = 99m,
+            Price = 99,
             Email = "dupe@example.com",
             Password = "secret123",
         };
@@ -1308,7 +1308,7 @@ public class ProductsDataServiceTests : RepoTestBase
 
         var input = new MobileShop.Models.ViewModels.Web.BindModels.CreateAppleIdInputModel
         {
-            Price = 99m,
+            Price = 99,
             Email = "new@example.com",
             Password = "secret123",
         };
@@ -1326,7 +1326,7 @@ public class ProductsDataServiceTests : RepoTestBase
         {
             ManufacturerId = 999,
             ModelId = phoneModel.Id,
-            Price = 999m,
+            Price = 999,
             IMEI1 = TestDataHelpers.GenerateImei(),
         };
 
@@ -1353,7 +1353,7 @@ public class ProductsDataServiceTests : RepoTestBase
         {
             ManufacturerId = 1,
             ModelId = otherModel.Id,
-            Price = 999m,
+            Price = 999,
             IMEI1 = TestDataHelpers.GenerateImei(),
         };
 
@@ -1373,7 +1373,7 @@ public class ProductsDataServiceTests : RepoTestBase
         {
             ManufacturerId = 1,
             ModelId = phoneModel.Id,
-            Price = 999m,
+            Price = 999,
             IMEI1 = TestDataHelpers.GenerateImei(),
             ColorId = 999,
         };
@@ -1392,13 +1392,13 @@ public class ProductsDataServiceTests : RepoTestBase
         SeedCatalog(out _, out _);
         var input1 = new MobileShop.Models.ViewModels.Web.BindModels.CreateAppleIdInputModel
         {
-            Price = 99m,
+            Price = 99,
             Email = "first@example.com",
             Password = "secret123",
         };
         var input2 = new MobileShop.Models.ViewModels.Web.BindModels.CreateAppleIdInputModel
         {
-            Price = 99m,
+            Price = 99,
             Email = "second@example.com",
             Password = "secret456",
         };
@@ -1424,7 +1424,7 @@ public class ProductsDataServiceTests : RepoTestBase
 
         var input = new MobileShop.Models.ViewModels.Web.BindModels.CreateAppleIdInputModel
         {
-            Price = 99m,
+            Price = 99,
             Email = "dupe@example.com",
             Password = "secret123",
         };
@@ -1445,7 +1445,7 @@ public class ProductsDataServiceTests : RepoTestBase
         {
             ManufacturerId = 1,
             ModelId = phoneModel.Id,
-            Price = 999m,
+            Price = 999,
             IMEI1 = TestDataHelpers.GenerateImei(),
         };
 
