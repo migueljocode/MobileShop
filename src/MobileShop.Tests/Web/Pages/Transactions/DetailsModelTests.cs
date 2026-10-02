@@ -63,7 +63,7 @@ public class DetailsModelTests : RepoTestBase
             ProductId = product.Id,
             SellerId = seller.Id,
             CustomerId = 1,
-            FinishedPrice = 180m,
+            FinishedPrice = 180,
             Date = new DateTime(2026, 2, 1, 10, 0, 0, DateTimeKind.Utc),
             Direction = TransactionDirection.Buy
         };
@@ -88,7 +88,7 @@ public class DetailsModelTests : RepoTestBase
         Assert.Single(_pdfGenerator.LastFactor!.Rows);
         var row = _pdfGenerator.LastFactor.Rows[0];
         Assert.Equal(transaction.Id, row.TransactionId);
-        Assert.Equal(180m, row.FinishedPrice);
+        Assert.Equal(180, row.FinishedPrice);
         Assert.Equal("Seller", row.PersonRole);
         Assert.Equal("Details Seller", row.PersonLabel);
     }
@@ -111,7 +111,7 @@ public class DetailsModelTests : RepoTestBase
 
         Assert.IsType<PageResult>(page);
         Assert.NotNull(_model.Transaction);
-        Assert.Equal(180m, _model.Transaction!.FinishedPrice);
+        Assert.Equal(180, _model.Transaction!.FinishedPrice);
         Assert.IsType<NotFoundResult>(await _model.OnGetAsync(99_999));
     }
 }
