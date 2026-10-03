@@ -105,3 +105,38 @@ The authorized correction pass is exhausted by the CI failure. No further Step 3
 ## Limitation / Problem
 
 The correction still requires the appropriate logging and EF infrastructure access namespaces/API usage before it can compile. Per the Job B gate, no Step 4 work was started.
+
+
+# Stage S — Step 3 Second Correction Act Report
+
+## Correction
+
+Commit:
+7673a2b35fd839097e82e4577f7899bbacd26cf8 — fix(migrations): add missing usings and parameterise the schema query
+
+No local dotnet build or dotnet test was run, per the audit instruction.
+
+The correction was limited to `src/MobileShop.Dal/Initialization/DatabaseMigrator.cs`:
+- added file-local `Microsoft.EntityFrameworkCore.Infrastructure` and `Microsoft.Extensions.Logging` usings;
+- replaced the interpolated `pragma_table_info` query with the requested parameterised `SqlQueryRaw` form;
+- made no other code changes.
+
+## CI Verification
+
+Action: #298 — Success  
+Run ID: 37109046164  
+Head SHA: 7673a2b35fd839097e82e4577f7899bbacd26cf8
+
+Jobs:
+- Windows PowerShell log utility: passed.
+- Ubuntu `test`: passed.
+- Restore: passed.
+- Build: passed with no reported build failure/warning.
+- .NET tests: passed.
+- Bash log utility tests: passed.
+- PowerShell log utility tests: passed.
+- Factor PDF inspection artifact upload: passed.
+
+## Status
+
+The Stage S Step 3 second correction passed its CI gate. Step 4 remains unauthorized pending Job B review.
