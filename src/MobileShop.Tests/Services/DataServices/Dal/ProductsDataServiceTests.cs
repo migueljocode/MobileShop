@@ -1555,4 +1555,42 @@ public class ProductsDataServiceTests : RepoTestBase
         Assert.Equal("Code is required.", result.Error);
     }
 
+    [Fact]
+    public async Task CreatePhoneAsync_computes_large_finished_price_exactly()
+    {
+        SeedCatalog(out var phoneModel, out _);
+
+        var result = await _service.CreatePhoneAsync(new CreatePhoneInputModel
+        {
+            ModelId = phoneModel.Id,
+            ManufacturerId = phoneModel.ManufacturerId,
+            Price = 2_000_000_000L,
+            ProfitPercent = 25m,
+            IMEI1 = TestDataHelpers.GenerateImei()
+        });
+
+        Assert.True(result.Succeeded);
+        var phone = Context.Phones.Single(p => p.Id == result.EntityId);
+        Assert.Equal(2_500_000_000L, phone.ProductNavigation.Price);
+    }
+
+    [Fact]
+    public async Task CreatePhoneAsync_rejects_price_above_money_limit_without_writing()
+    {
+        SeedCatalog(out var phoneModel, out _);
+
+        var result = await _service.CreatePhoneAsync(new CreatePhoneInputModel
+        {
+            ModelId = phoneModel.Id,
+            ManufacturerId = phoneModel.ManufacturerId,
+            Price = MoneyLimits.MaxRials + 1,
+            IMEI1 = TestDataHelpers.GenerateImei()
+        });
+
+        Assert.False(result.Succeeded);
+        Assert.Equal("The price is too large.", result.Message);
+        Assert.Equal(nameof(CreatePhoneInputModel.Price), result.ErrorField);
+        Assert.Empty(Context.Products);
+    }
+
 }

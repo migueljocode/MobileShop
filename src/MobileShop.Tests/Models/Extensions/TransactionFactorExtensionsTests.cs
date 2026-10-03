@@ -90,4 +90,18 @@ public class TransactionFactorExtensionsTests
 
         Assert.Equal(350, model.TotalPrice);
     }
+    [Fact]
+    public void Factor_total_sums_large_rial_rows_exactly()
+    {
+        var model = new TransactionFactorViewModel(
+            [
+                new TransactionFactorRowViewModel(1, SampleDate, TransactionDirection.Sell, "iPhone 17", 1_500_000_000L, "Customer", "Sara"),
+                new TransactionFactorRowViewModel(2, SampleDate, TransactionDirection.Sell, "iPhone 17", 1_500_000_000L, "Customer", "Sara"),
+                new TransactionFactorRowViewModel(3, SampleDate, TransactionDirection.Sell, "iPhone 17", 1_500_000_000L, "Customer", "Sara")
+            ],
+            SampleDate);
+
+        Assert.Equal(4_500_000_000L, model.TotalPrice);
+    }
+
 }

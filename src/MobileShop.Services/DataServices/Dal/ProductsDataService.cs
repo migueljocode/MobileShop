@@ -381,6 +381,17 @@ public class ProductsDataService(
     /// <inheritdoc />
     public async Task<ServiceResult> CreatePhoneAsync(CreatePhoneInputModel input)
     {
+        if (input.Price > MoneyLimits.MaxRials)
+            return new ServiceResult(false, "The price is too large.", nameof(CreatePhoneInputModel.Price), null);
+        if (input.ProfitAmount > MoneyLimits.MaxRials)
+            return new ServiceResult(false, "The profit amount is too large.", nameof(CreatePhoneInputModel.ProfitAmount), null);
+
+        var finishedPrice = ComputeFinishedPrice(input.Price, input.ProfitPercent, input.ProfitAmount);
+        if (finishedPrice > MoneyLimits.MaxRials)
+            return new ServiceResult(false, "The price is too large.", nameof(CreateGlassInputModel.Price), null);
+        if (finishedPrice > MoneyLimits.MaxRials)
+            return new ServiceResult(false, "The price is too large.", nameof(CreatePhoneInputModel.Price), null);
+
         var imei1 = input.IMEI1.Trim();
         if (await phones.AnyAsync(p => p.IMEI1 == imei1))
             return new ServiceResult(false, "A phone with this IMEI already exists.", nameof(CreatePhoneInputModel.IMEI1), null);
@@ -422,7 +433,7 @@ public class ProductsDataService(
             ModelId = model.Id,
             ColorId = color?.Id,
             Barcode = Guid.NewGuid().ToString("N")[..12],
-            Price = ComputeFinishedPrice(input.Price, input.ProfitPercent, input.ProfitAmount),
+            Price = finishedPrice,
             SecondHandProfile = input.IsSecondHand ? new SecondHand
             {
                 TestPeriodDays = input.TestPeriodDays ?? 30,
@@ -461,6 +472,11 @@ public class ProductsDataService(
     /// <inheritdoc />
     public async Task<ServiceResult> CreateGlassesAsync(CreateGlassInputModel input)
     {
+        if (input.Price > MoneyLimits.MaxRials)
+            return new ServiceResult(false, "The price is too large.", nameof(CreateGlassInputModel.Price), null);
+        if (input.ProfitAmount > MoneyLimits.MaxRials)
+            return new ServiceResult(false, "The profit amount is too large.", nameof(CreateGlassInputModel.ProfitAmount), null);
+
         if (input.Count < 1)
             return new ServiceResult(false, "Count must be at least 1.", nameof(CreateGlassInputModel.Count), null);
 
@@ -560,6 +576,15 @@ public class ProductsDataService(
     /// <inheritdoc />
     public async Task<ServiceResult> CreateAppleIdAsync(CreateAppleIdInputModel input)
     {
+        if (input.Price > MoneyLimits.MaxRials)
+            return new ServiceResult(false, "The price is too large.", nameof(CreateAppleIdInputModel.Price), null);
+        if (input.ProfitAmount > MoneyLimits.MaxRials)
+            return new ServiceResult(false, "The profit amount is too large.", nameof(CreateAppleIdInputModel.ProfitAmount), null);
+
+        var finishedPrice = ComputeFinishedPrice(input.Price, input.ProfitPercent, input.ProfitAmount);
+        if (finishedPrice > MoneyLimits.MaxRials)
+            return new ServiceResult(false, "The price is too large.", nameof(CreateAppleIdInputModel.Price), null);
+
         var email = input.Email.Trim();
         if (await appleIds.AnyAsync(x => x.Email.ToLower() == email.ToLower()))
             return new ServiceResult(false, "This Apple ID email already exists.", nameof(CreateAppleIdInputModel.Email), null);
@@ -583,7 +608,7 @@ public class ProductsDataService(
         {
             ModelId = model.Id,
             Barcode = Guid.NewGuid().ToString("N")[..12],
-            Price = ComputeFinishedPrice(input.Price, input.ProfitPercent, input.ProfitAmount),
+            Price = finishedPrice,
         };
 
         var appleId = new AppleId

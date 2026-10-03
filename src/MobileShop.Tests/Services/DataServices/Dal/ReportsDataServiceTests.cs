@@ -46,7 +46,7 @@ public class ReportsDataServiceTests : RepoTestBase
         int customerId,
         TransactionDirection direction,
         DateTime date,
-        int price)
+        long price)
     {
         var transaction = new Transaction
         {
@@ -265,4 +265,24 @@ public class ReportsDataServiceTests : RepoTestBase
         await Assert.ThrowsAsync<InvalidOperationException>(
             () => _service.GetDistributionRowsAsync(100));
     }
+    [Fact]
+    public async Task GetProfitLossRowsAsync_handles_large_rial_profit_exactly()
+    {
+        var seller = AddSeller();
+        var customer = AddCustomer();
+        var product = TestDataHelpers.CreateProduct(Context);
+
+        AddTransaction(product, seller.Id, customer.Id, TransactionDirection.Buy, new DateTime(2026, 3, 1), 3_000_000_000L);
+        AddTransaction(product, seller.Id, customer.Id, TransactionDirection.Sell, new DateTime(2026, 3, 5), 5_000_000_000L);
+
+        var rows = await _service.GetProfitLossRowsAsync(null, null);
+        var row = Assert.Single(rows);
+
+        Assert.Equal(3_000_000_000L, row.Bought);
+        Assert.Equal(5_000_000_000L, row.Sold);
+        Assert.Equal(2_000_000_000L, row.Profit);
+        Assert.Equal(66.66666666666667m, row.ProfitPercent);
+        Assert.Equal(2_000_000_000L, await _service.GetProfitLossTotalAsync(null, null));
+    }
+
 }

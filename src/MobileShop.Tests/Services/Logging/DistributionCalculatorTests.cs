@@ -247,4 +247,24 @@ public class DistributionCalculatorTests
         Assert.DoesNotContain(rows, r => r.EmployeeName == "Sara Ahmadi");
         Assert.DoesNotContain(rows, r => r.EmployeeName == "Reza Mousavi");
     }
+    [Fact]
+    public void Profit_AboveIntMaxValue_DistributesWithoutOverflow()
+    {
+        var rows = DistributionCalculator.Calculate(5_000_000_000L, CreateDefaultEmployees(), _settings);
+
+        Assert.Equal(2_000_000_000L, rows.Single(r => r.EmployeeName == "Mikaeeil Jorjany").CalculatedAmount);
+        Assert.Equal(2_500_000_000L, rows.Single(r => r.EmployeeName == "Anis Sahabi").CalculatedAmount);
+        Assert.Equal(500_000_000L, rows.Single(r => r.EmployeeName == "Shop").CalculatedAmount);
+    }
+
+    [Fact]
+    public void Loss_AboveIntMinValue_GoesEntirelyToShop()
+    {
+        var rows = DistributionCalculator.Calculate(-3_000_000_000L, CreateDefaultEmployees(), _settings);
+
+        Assert.Equal(0L, rows.Single(r => r.EmployeeName == "Mikaeeil Jorjany").CalculatedAmount);
+        Assert.Equal(0L, rows.Single(r => r.EmployeeName == "Anis Sahabi").CalculatedAmount);
+        Assert.Equal(-3_000_000_000L, rows.Single(r => r.EmployeeName == "Shop").CalculatedAmount);
+    }
+
 }

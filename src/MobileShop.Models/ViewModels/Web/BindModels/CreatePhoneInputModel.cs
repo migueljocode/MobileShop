@@ -9,13 +9,13 @@ public sealed class CreatePhoneInputModel
     [Required]
     public int ModelId { get; set; }
 
-    [Range(0, long.MaxValue)]
+    [Range(0, MoneyLimits.MaxRials)]
     public long Price { get; set; }
 
     [Range(0, 100)]
     public decimal? ProfitPercent { get; set; }
 
-    [Range(0, long.MaxValue)]
+    [Range(0, MoneyLimits.MaxRials)]
     public long? ProfitAmount { get; set; }
 
     [Required]

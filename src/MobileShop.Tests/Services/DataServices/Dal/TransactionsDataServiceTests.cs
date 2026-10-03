@@ -418,4 +418,43 @@ public class TransactionsDataServiceTests : RepoTestBase
         await Assert.ThrowsAsync<KeyNotFoundException>(() => _service.GenerateInvoicePdfAsync(999));
         Assert.Null(await _service.GetInvoiceAsync(999));
     }
+    [Fact]
+    public async Task RecordSellAsync_accepts_price_above_int_max_value()
+    {
+        TestDataHelpers.SeedShopSentinels(Context);
+        var product = TestDataHelpers.CreateProduct(Context);
+        var customer = AddCustomer("Sara", "Ahmadi");
+
+        var result = await _service.RecordSellAsync(new SellInputModel
+        {
+            ProductId = product.Id,
+            CustomerId = customer.Id,
+            Price = 5_000_000_000L,
+        });
+
+        Assert.True(result.Succeeded);
+        var transaction = Context.Transactions.Single(t => t.Id == result.EntityId);
+        Assert.Equal(5_000_000_000L, transaction.FinishedPrice);
+    }
+
+    [Fact]
+    public async Task RecordSellAsync_rejects_price_above_money_limit_without_writing()
+    {
+        TestDataHelpers.SeedShopSentinels(Context);
+        var product = TestDataHelpers.CreateProduct(Context);
+        var customer = AddCustomer("Sara", "Ahmadi");
+
+        var result = await _service.RecordSellAsync(new SellInputModel
+        {
+            ProductId = product.Id,
+            CustomerId = customer.Id,
+            Price = MoneyLimits.MaxRials + 1,
+        });
+
+        Assert.False(result.Succeeded);
+        Assert.Equal("The price is too large.", result.Message);
+        Assert.Equal(nameof(SellInputModel.Price), result.ErrorField);
+        Assert.Empty(Context.Transactions);
+    }
+
 }

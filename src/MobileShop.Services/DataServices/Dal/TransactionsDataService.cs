@@ -169,10 +169,10 @@ public class TransactionsDataService(
     /// <inheritdoc />
     public async Task<ServiceResult> RecordBuyAsync(BuyInputModel input)
     {
-        if (input.Price < 0)
+        if (input.Price < 0 || input.Price > MoneyLimits.MaxRials)
         {
-            Logger.LogWarning("RecordBuy rejected: negative price {Price}", input.Price);
-            return new ServiceResult(false, "The buy could not be recorded. Check the product and price.", null, null);
+            Logger.LogWarning("RecordBuy rejected: invalid price {Price}", input.Price);
+            return new ServiceResult(false, input.Price > MoneyLimits.MaxRials ? "The price is too large." : "The buy could not be recorded. Check the product and price.", nameof(BuyInputModel.Price), null);
         }
 
         var existingBuy = (await transactions.FindAllAsync(transaction => transaction.ProductId == input.ProductId))
@@ -211,10 +211,10 @@ public class TransactionsDataService(
     /// <inheritdoc />
     public async Task<ServiceResult> RecordSellAsync(SellInputModel input)
     {
-        if (input.Price < 0)
+        if (input.Price < 0 || input.Price > MoneyLimits.MaxRials)
         {
-            Logger.LogWarning("RecordSell rejected: negative price {Price}", input.Price);
-            return new ServiceResult(false, "The sale could not be recorded. Check the product and price.", null, null);
+            Logger.LogWarning("RecordSell rejected: invalid price {Price}", input.Price);
+            return new ServiceResult(false, input.Price > MoneyLimits.MaxRials ? "The price is too large." : "The sale could not be recorded. Check the product and price.", nameof(SellInputModel.Price), null);
         }
 
         var alreadySold = (await transactions.FindAllAsync(transaction => transaction.ProductId == input.ProductId))
