@@ -1,53 +1,50 @@
-# Stage S — Step 1 Act Report
+# Stage S — Step 2 Act Report
 
 ## Step
-Add the EF migration Designer metadata and the three migration-chain tests for `UseIntegerRialMoney`.
+Legacy-upgrade test: verify data preservation and fractional-money rounding when upgrading from `20261001161450_AddPartNumber` to the latest migration.
 
-## Initial Implementation
+## Implementation
 Committed as:
-`4635012a73d9ffeb51c7b3f7d2f76d40310430a5` — `test: verify EF migration chain`
+`9fc17df278b6b367d3d7460e499f2dbe20d3da6f` — `test: verify legacy money upgrade`
 
-The initial CI run #282 failed because the generated Designer was missing EF's `MigrationAttribute`.
+Created:
+`src/MobileShop.Tests/Dal/EfStructures/LegacyMoneyUpgradeTests.cs`
 
-## Correction
-Committed as:
-`9d1e7d0fc6d247b3459bb9a7ce2d987a9ad288b5` — `fix(migrations): register UseIntegerRialMoney with its Migration attribute`
+The test is intended to:
+- create a SQLite database through `AddPartNumber`;
+- insert two products and two transactions with fractional legacy prices using raw SQL;
+- migrate to the latest schema;
+- verify row counts, rounded values, INTEGER column types, foreign-key integrity, SQLite integrity, and both non-negative money constraints.
 
-Changed exactly one file:
-`src/MobileShop.Dal/Migrations/20261002060000_UseIntegerRialMoney.Designer.cs`
-
-Added:
-- `using Microsoft.EntityFrameworkCore.Migrations;`
-- `[Migration("20261002060000_UseIntegerRialMoney")]` directly below `[DbContext(typeof(AppDbContext))]`
-
-No tests, snapshot, migration SQL, production code, or other files were changed in the correction.
-
-Per the correction instructions, no local `dotnet build` or `dotnet test` was run.
+No production code or migration SQL was changed.
 
 ## CI Verification
 
-**Action: #284 — Success**
+**Action: #288 — Failure**
 
-Run ID: `37100383021`  
-Head SHA: `9d1e7d0fc6d247b3459bb9a7ce2d987a9ad288b5`
+Run ID: `37100680734`  
+Head SHA: `9fc17df278b6b367d3d7460e499f2dbe20d3da6f`
 
 Jobs:
-- Ubuntu `test`: passed.
 - Windows PowerShell log utility: passed.
+- Ubuntu `test`: failed during build.
 
-The full CI run completed successfully. The three Stage S migration-chain tests passed as part of the Ubuntu test job:
-- `Migrations_are_discovered_in_order`
-- `Snapshot_matches_the_current_model`
-- `Chain_applies_to_an_empty_database`
+The failure occurred before the test suite executed:
 
-## Limitations / Problems
+`src/MobileShop.Tests/Dal/EfStructures/LegacyMoneyUpgradeTests.cs(21,66): error CS0246: The type or namespace name 'IMigrator' could not be found (are you missing a using directive or an assembly reference?)`
 
-The original Step 1 implementation failed CI due to the missing migration attribute. That defect was corrected in the authorized one-file correction pass.
-
-The correction CI run passed, so no remaining Step 1 CI problem is recorded.
+Build result:
+- 0 warnings
+- 1 error
 
 ## Status
 
-**Step 1 correction PASSED CI.**
+**Step 2 FAILED CI.**
 
-Job B is complete for this correction pass. Step 2 was not started. No `to-do.md`, `plan.md`, or `audit.md` changes were made.
+Per the Stage S execution rule, STOP after the failed verification. No corrective implementation was made and Step 3 was not started.
+
+## Limitations / Problems
+
+The failure is a test-file compilation issue: `IMigrator` is referenced without the namespace import used by the existing migration tests. The CI run therefore did not execute the new legacy-upgrade test, so data preservation and rounding remain unverified.
+
+The plan requires the failing statement/test outcome to be recorded and does not authorize changing migration SQL or tests to make a failing migration scenario pass without the appropriate correction pass.
