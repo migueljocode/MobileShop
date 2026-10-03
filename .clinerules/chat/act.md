@@ -281,3 +281,49 @@ The Step 1 implementation's intended money-bearing declarations were widened, in
 **Step 1 is NOT closed.** The CI gate failed, so Step 2 is not authorized.
 
 Per Job B's Step 1 authorization, no correction was made after the failed run. The exact compiler failure above must be addressed by a separately authorized correction pass before Step 1 can close.
+
+
+# Stage T — Step 1 Correction Act Report
+
+## Correction
+
+Correction commit:
+`81927e98340e1765f53f6ab9b47a6989a5ca80bd` — `fix: widen Persian invoice presentation price to long`
+
+The authorized correction changed only `src/MobileShop.Services/PDF/Configuration/QuestPdfGenerator.cs`, widening `PersianInvoicePresentation.FinishedPrice` from `int` to `long`. No other production/test/migration/snapshot/workflow/script/plan/audit/to-do file was changed. No local `dotnet build` or `dotnet test` was run.
+
+## CI Verification
+
+**Action: #316 — Failure**  
+Run ID: `37123756678`  
+Head SHA: `81927e98340e1765f53f6ab9b47a6989a5ca80bd`
+
+Jobs:
+- **PowerShell log utility (Windows): Success.**
+- **Ubuntu `test`: Failure** at **Test**.
+
+Ubuntu steps:
+- Checkout: Success.
+- Setup .NET: Success.
+- Restore: Success.
+- Build: **Success — 0 warnings, 0 errors.**
+- Test: **Failure — 5 failed, 325 passed, 0 skipped, 330 total.**
+- Bash log utility test: Skipped.
+- PowerShell log utility test: Skipped.
+- Factor PDF artifact upload: Skipped.
+- Production smoke: Skipped.
+
+Failed tests:
+1. `DatabaseMigratorTests.Empty_database_file_is_created_and_migrated_without_backup`: expected 7 migrations, actual 6.
+2. `DatabaseMigratorTests.Fresh_database_is_created_and_migrated_without_backup`: expected 7 migrations, actual 6.
+3. `LegacyMoneyUpgradeTests.Legacy_money_upgrade_preserves_rows_and_rounds_fractions`: expected 1500001, actual 1500000.
+4. `MigrationChainTests.Migrations_are_discovered_in_order`: expected the seven-migration chain including `20261002060000_UseIntegerRialMoney`, but the actual discovered chain omitted that migration and contained only six migrations including `20261004090000_WidenMoneyToLong`.
+5. `MigrationChainTests.Chain_applies_to_an_empty_database`: expected 7 migrations, actual 6.
+
+The CI evidence therefore shows the correction fixed compilation, but the Step 1 implementation does not preserve the required seven-migration chain: `20261002060000_UseIntegerRialMoney` is no longer discovered. The legacy-upgrade failure is consistent with that missing migration in the executed chain.
+
+## Status
+
+**Step 1 is NOT closed.** The authorized correction pass failed its CI gate. Step 2 remains **not authorized**.
+
+The Job B authorization allowed only the single Persian invoice `int` → `long` correction, with no further production/test/migration/snapshot changes. No additional correction was made after Action #316.
