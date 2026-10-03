@@ -1,11 +1,11 @@
-# Reviewer Audit — Stage T Plan (Steps 3–5)
+# Reviewer Audit — Stage T Step 3
 
 ## Verdict
-**APPROVED**
+**FAIL — Stage T Step 3 is incomplete.**
 
-- Steps 1 and 2 are closed with passing CI evidence (Actions #325 and #353).
-- Remaining Steps 3–5 are well-formed, mechanically specific, and adhere strictly to repository invariants (no `MobileShop.Api`, no auth changes, invariant culture formatting, integer-only inputs, and CI-gated verification).
-- Open step specifications, symbol definitions (`MoneyExtensions`), and verification gates are complete and safe to execute.
+- Commit `9d20a9b8bd51ac65a84d337a21dcb925763d1e77` scaled all 17 product prices and 26 transaction finished prices in `sample-data.json` by ×10, and Action #364 is `Success`.
+- The required test `Sample_data_money_is_expressed_in_rials` was not implemented in `src/MobileShop.Tests/Dal/Initialization/SampleDataSeedTests.cs`.
+- The actor can fix this directly.
 
-## Gate
-**Step 3 is approved to execute.**
+## Fix
+Add `Sample_data_money_is_expressed_in_rials` to `SampleDataSeedTests.cs` asserting every seeded `Price` and `FinishedPrice` is a multiple of 10, >= 1,000,000, and <= `MoneyLimits.MaxRials`. Update `act.md`, push the correction commit, and verify CI.
