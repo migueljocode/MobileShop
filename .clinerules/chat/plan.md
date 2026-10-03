@@ -25,48 +25,13 @@
 - **Step 4 is MEDIUM / MEDIUM:** Razor and JS output is not unit-testable; evidence is the CI smoke greps plus reading the diff for every `.ToString("N0")` replaced.
 - No `int` money may remain: search for `int` near `Price|Profit|Amount|Total|Sold|Bought|FinishedPrice|SuggestedPrice` after Step 1.
 
-## [ ] Step 1 — Widen money to `long` end to end (no behaviour change)
-- Files
-  - inspect: `src/MobileShop.Models/Entities/{Product,Transaction}.cs`, the view models and bind models listed below, `ProductsDataService.cs` (`ComputeFinishedPrice`, create flows), `TransactionsDataService.cs`, `ReportsDataService.cs`, `IReportsDataService.cs`, `ApiReportsDataService.cs`, `Logging/Settings/DistributionSettings.cs`, `PDF/Configuration/QuestPdfGenerator.cs` (DTOs near lines 498 and 519), `AppDbContextModelSnapshot.cs`, `20261002060000_UseIntegerRialMoney.Designer.cs` (format reference)
-  - modify
-    - Entities: `Product.Price` and `Transaction.FinishedPrice` → `long`.
-    - View models: `InvoiceViewModel`, `ProductTransactionViewModel`, `TransactionFactorRowViewModel`, `TransactionCardViewModel`, `TransactionDetailsViewModel`, `TransactionListItemViewModel` (`FinishedPrice`), `TransactionFactorViewModel.TotalPrice`, `ProfitLossRowViewModel` (`Bought`, `Sold`, `Profit` → `long`; `ProfitPercent` stays `decimal`), `ProductListItemViewModel.SuggestedPrice` → `long?`.
-    - Bind models: `CreatePhoneInputModel`, `CreateAppleIdInputModel`, `CreateGlassInputModel` (`Price`, `ProfitAmount` → `long`/`long?`), `BuyInputModel`, `SellInputModel` (`Price` → `long`). Leave all id fields as `int` and all percent fields as `decimal?`.
-    - Services: `ProductsDataService.ComputeFinishedPrice(long paid, decimal? percent, long? amount)` (floor to `long`), `ReportsDataService`/`IReportsDataService`/`ApiReportsDataService` (`GetProfitLossTotalAsync` → `Task<long>`, `GetDistributionRowsAsync(long totalProfit)`), `DistributionSettings.cs` (`Calculate(long totalProfit, …)`, `DistributionRow.CalculatedAmount` → `long`), `QuestPdfGenerator` DTOs and mappings, `TransactionsDataService`/`HomeDataService` assignments, `Reports/ProfitLoss.cshtml.cs` (`TotalProfit` → `long`).
-    - Dal: `AppDbContextModelSnapshot.cs` (`b.Property<long>("Price")` and `b.Property<long>("FinishedPrice")` only).
-    - create: `src/MobileShop.Dal/Migrations/20261004090000_WidenMoneyToLong.cs` and `…Designer.cs`.
-    - Tests/scripts: only what CI or the history count requires — `MigrationChainTests` (7 migration ids in order, history rows 7), `DatabaseMigratorTests` (history rows 6 → 7 where the DB is migrated to latest; the 5-row backup assertion for a DB migrated only to `AddPartNumber` stays 5), `.github/scripts/production-smoke.sh` (`HISTORY_COUNT == "7"`), and `int` → `long` literal fixes in tests.
-  - do not touch: `src/MobileShop.Api`, authentication, `DatabaseInitializer`, EF configuration (the CHECK constraints stay `>= 0`), the `UseIntegerRialMoney` migration, any other migration
-- Symbols
-  - `partial class WidenMoneyToLong : Migration` with `Up`/`Down` containing only a comment: SQLite stores `int` and `long` as INTEGER (64-bit), so no SQL is needed and the migration only records the model type change.
-  - The Designer carries `using Microsoft.EntityFrameworkCore.Migrations;`, `[DbContext(typeof(AppDbContext))]`, `[Migration("20261004090000_WidenMoneyToLong")]` and `BuildTargetModel` whose body is the **updated** snapshot body (same `ProductVersion` annotation).
-- Current → Desired: money is `int`, sums and distribution math overflow at Rial scale → money is `long` everywhere with identical behaviour for values that already fit.
-- Edge cases: `Sum` on `long`; remove `(int)` casts; `ProfitPercent` division stays decimal; JSON seed loading maps numbers to `long`; the CI harness (`Snapshot_matches_the_current_model`) must pass with the snapshot and model both `long`; do not regenerate the whole snapshot — change only the two property types. If the snapshot test reports other differences, stop and report them.
-- Verify: push and report `Action: #<run_number>`; expect a clean build (0 warnings) and every test passing, including the Stage S migration tests with 7 migrations.
-- Done when: no `int` money remains (search recorded in `act.md`), the build and the whole suite are green, and Stage S's tests and smoke still pass.
-- Risk: HIGH
-- Confidence: MEDIUM
+## [x] Step 1 — Widen money to `long` end to end (no behaviour change)
+- Completed: CI Action #325 — Success; 330/330 .NET tests passed, build had 0 warnings/errors, and Production smoke passed.
+- Carry-over: none.
 
-## [ ] Step 2 — Money limit and overflow-boundary tests
-- Files
-  - create: `src/MobileShop.Models/MoneyLimits.cs`; `src/MobileShop.Tests/Dal/EfStructures/MoneyBoundaryTests.cs`; boundary tests added next to the existing ones in `DistributionCalculatorTests.cs`, `ReportsDataServiceTests.cs`, `TransactionFactorExtensionsTests.cs`, `ProductsDataServiceTests.cs`, `TransactionsDataServiceTests.cs`
-  - modify: the six money inputs' `[Range]` attributes, `TransactionsDataService` (`RecordBuyAsync`/`RecordSellAsync`), the three create flows in `ProductsDataService`
-  - do not touch: entities, migrations, pages, PDF
-- Symbols
-  - `public static class MoneyLimits { public const long MaxRials = 10_000_000_000_000L; }`
-  - `[Range(0, MoneyLimits.MaxRials)]` on `Price`/`ProfitAmount` of the three create inputs and on `Price` of Buy and Sell (compiles to the `double` overload, exact up to 2^53).
-  - Services reject `Price > MoneyLimits.MaxRials` with a friendly message ("The price is too large.") in the existing validation style; a computed finished price above the limit returns a failed `ServiceResult` with `ErrorField` `Price`.
-- Tests (each value must cross `int.MaxValue`)
-  1. `MoneyBoundaryTests`: persist `Product.Price = 5_000_000_000L` and `Transaction.FinishedPrice = 3_000_000_000L` and read them back exactly (temp-file SQLite, migrated database).
-  2. Factor: three rows of 1,500,000,000 give `TotalPrice` 4,500,000,000.
-  3. Reports: bought 3,000,000,000 and sold 5,000,000,000 give `Profit` 2,000,000,000, correct `ProfitPercent`, and `GetProfitLossTotalAsync` exact.
-  4. Distribution: `Calculate(5_000_000_000L, …)` gives 2,000,000,000 / 2,500,000,000 / 500,000,000; a loss of -3,000,000,000 goes entirely to the shop.
-  5. Create flows: paid 2,000,000,000 plus a 25% profit stores 2,500,000,000 (amount-first rule unchanged).
-  6. Limits: model validation rejects `MoneyLimits.MaxRials + 1` on the six inputs and accepts `MaxRials`; services reject an over-limit price and write nothing.
-- Verify: CI run number; expect all tests passing.
-- Done when: the limit exists, all six boundary scenarios pass in CI and no behaviour below the limit changed.
-- Risk: MEDIUM
-- Confidence: MEDIUM
+## [x] Step 2 — Money limit and overflow-boundary tests
+- Completed: CI Action #353 — Success; final correction verified the large-Rial report percentage assertion while preserving exact Bought/Sold/Profit/total-profit checks.
+- Carry-over: none.
 
 ## [ ] Step 3 — Seed data in Rials
 - Files
