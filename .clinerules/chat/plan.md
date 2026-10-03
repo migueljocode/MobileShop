@@ -12,8 +12,8 @@
 ## Reviewer Briefing
 - **Step 1:** HIGH risk / MEDIUM confidence (completed).
 - **Step 2:** boundary tests (completed).
-- **Step 3:** MEDIUM risk / HIGH confidence — sample data ×10; verify with CI smoke.
-- **Step 4:** MEDIUM risk / MEDIUM confidence — Razor, JS, PDF formatting with `MoneyExtensions`; verified by CI smoke greps.
+- **Step 3:** MEDIUM risk / HIGH confidence (completed).
+- **Step 4:** MEDIUM risk / MEDIUM confidence (completed).
 - **Step 5:** LOW risk / HIGH confidence — README and final stage diff check.
 
 ## [x] Step 1 — Widen money to `long` end to end (no behaviour change)
@@ -28,26 +28,9 @@
 - Completed: CI Actions #364 and #366 — Success; sample data scaled to IRR and asserted >= 1,000,000, <= MaxRials, and multiple of 10.
 - Carry-over: none.
 
-## [ ] Step 4 — IRR indicator on every page and integer-only price inputs
-- Files
-  - create: `src/MobileShop.Models/Extensions/MoneyExtensions.cs`, `src/MobileShop.Tests/Models/Extensions/MoneyExtensionsTests.cs`
-  - modify (Razor/JS/PDF)
-    - Displays: `Pages/Index.cshtml` (finished price), `Pages/Reports/ProfitLoss.cshtml` (bought, sold, profit, percent table amounts, distribution amounts, totals), `Pages/Products/Details.cshtml`, `Pages/Transactions/Index.cshtml`, `Pages/Transactions/Details.cshtml`, `Pages/Shared/_ProductPickerOptions.cshtml` (suggested price) and any other `.ToString("N0")` money display.
-    - Labels: "Paid price (IRR)", "Profit amount (IRR)" (replacing the stray "Profit $"), Buy/Sell `[Display(Name = "Finished price (IRR)"])`, and "(IRR)" on the money table headers (Price, Bought, Sold, Profit / loss, Amount) and total-profit lines. Percent labels stay as they are.
-    - Inputs: the six money inputs get `inputmode="numeric"`, `step="1"`, `min="0"`, `max="@MoneyLimits.MaxRials"`; percent inputs are untouched.
-    - JS: `create-product-pricing.js` and `product-picker.js` keep whole-number math (`Math.floor`); fix the stale "profit Rial/$" comments.
-    - PDF: `QuestPdfGenerator.cs` formats row and total prices with `ToGroupedDigits()`, keeps "ریال" for the total, adds the unit to the price column header, and adds the unit to the two plain-text fallback lines (`Price: …`, `قیمت : …`); keep the Persian/RTL tests green and update tests that assert the old format.
-    - CI smoke: `.github/scripts/production-smoke.sh` — after the route loop, `curl` `/`, `/Transactions` and `/Reports/ProfitLoss` and require `IRR` in each response.
-  - do not touch: services, entities, migrations, `src/MobileShop.Api`
-- Symbols (`MoneyExtensions`)
-  - `ToGroupedDigits(this long value)` → `value.ToString("N0", CultureInfo.InvariantCulture)`
-  - `ToIrr(this long value)` → `ToGroupedDigits() + " IRR"`; add `long?` overloads that return an empty string for `null`.
-- Tests: `MoneyExtensionsTests` covers 0, 1,234,567, 4,500,000,000, negative -1,500 and `null`; update PDF and page-model tests that asserted the previous formatting.
-- Edge cases: use invariant culture so the separator never depends on the server locale; negative profit keeps its sign and the existing success/danger CSS class; Razor is not unit-tested, so verify by the smoke greps and by reading the diff for any remaining `ToString("N0")` on money.
-- Verify: CI run number; the smoke step shows `IRR` on the three pages; all tests pass.
-- Done when: every money display and money label shows the IRR unit, inputs are integer-only, the PDF keeps its Persian unit, and the smoke greps pass in CI.
-- Risk: MEDIUM
-- Confidence: MEDIUM
+## [x] Step 4 — IRR indicator on every page and integer-only price inputs
+- Completed: CI Action #370 — Success (PR #9); invariant `MoneyExtensions`, integer-only inputs, Razor/JS/PDF IRR formatting, and production smoke greps passed.
+- Carry-over: none.
 
 ## [ ] Step 5 — Docs and final Stage T validation
 - Files: modify `README.md` with a "Money" section: IRR/Rial whole numbers stored as `long`, the `MoneyLimits.MaxRials` cap, the display convention (grouped digits plus IRR; Persian "ریال" on the factor PDF), seeded data in Rials, and the note that existing Production rows are not converted (D4).
