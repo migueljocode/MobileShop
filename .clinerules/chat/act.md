@@ -539,3 +539,31 @@ The money-boundary and glass tests no longer failed.
 **Stage T Step 2 remains FAILED. Step 3 is NOT authorized.**
 
 The correction resolved three of the four Action #347 failures, but the percentage assertion still does not match the service's decimal calculation. Job B stops here pending further authorization.
+
+
+# Stage T — Step 2 Final Correction Act Report
+
+## Correction
+
+Implementation commit:
+`a817da1ccdc59ab768e35caba2f805d1fc02c411` — `test: align large-rial profit percentage assertion`
+
+The authorized correction changed only `src/MobileShop.Tests/Services/DataServices/Dal/ReportsDataServiceTests.cs`. The large-rial profit-percentage assertion was changed to compare the service result after rounding both values to 12 decimal places. No production code was changed.
+
+No local `dotnet build` or `dotnet test` was run.
+
+## CI Verification
+
+**Action: #353 — Success**
+
+The CI run for the final correction passed successfully.
+
+The correction resolved the remaining large-rial percentage assertion failure from Action #350. The prior money-boundary and glass-limit failures had already been resolved by the preceding correction.
+
+## Status
+
+**Stage T Step 2 PASSED its CI gate and is closed.**
+
+The final authorized correction passed Action #353. Step 3 has not been started and remains pending explicit authorization.
+
+No production code, migration, entity, API, authentication, Razor page, PDF implementation, `to-do.md`, `plan.md`, or unrelated scope was changed by this final correction.
