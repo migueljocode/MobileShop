@@ -17,7 +17,7 @@ document.addEventListener('DOMContentLoaded', function () {
     picker.addEventListener('change', function () {
         var option = picker.options[picker.selectedIndex];
         var suggested = option ? option.getAttribute('data-suggested-price') : '';
-        if (suggestedDisplay) suggestedDisplay.textContent = suggested ? suggested : '—';
+        if (suggestedDisplay) suggestedDisplay.textContent = suggested ? Number(suggested).toLocaleString('en-US') + ' IRR' : '—';
         if (suggested) priceInput.value = suggested;
     });
 });
