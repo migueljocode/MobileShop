@@ -116,20 +116,20 @@ Commit:
 
 No local dotnet build or dotnet test was run, per the audit instruction.
 
-The correction was limited to `src/MobileShop.Dal/Initialization/DatabaseMigrator.cs`:
-- added file-local `Microsoft.EntityFrameworkCore.Infrastructure` and `Microsoft.Extensions.Logging` usings;
-- replaced the interpolated `pragma_table_info` query with the requested parameterised `SqlQueryRaw` form;
+The correction was limited to src/MobileShop.Dal/Initialization/DatabaseMigrator.cs:
+- added file-local Microsoft.EntityFrameworkCore.Infrastructure and Microsoft.Extensions.Logging usings;
+- replaced the interpolated pragma_table_info query with the requested parameterised SqlQueryRaw form;
 - made no other code changes.
 
 ## CI Verification
 
-Action: #298 — Success  
-Run ID: 37109046164  
+Action: #298 — Success
+Run ID: 37109046164
 Head SHA: 7673a2b35fd839097e82e4577f7899bbacd26cf8
 
 Jobs:
 - Windows PowerShell log utility: passed.
-- Ubuntu `test`: passed.
+- Ubuntu test: passed.
 - Restore: passed.
 - Build: passed with no reported build failure/warning.
 - .NET tests: passed.
@@ -150,21 +150,21 @@ CI Production smoke (non-destructive proof).
 ## Implementation
 
 Commit:
-`f8525af2b629d53611542c6d453b2a095fb6ea89` — `ci: add production database smoke test`
+f8525af2b629d53611542c6d453b2a095fb6ea89 — ci: add production database smoke test
 
 Changed only:
-- `.github/scripts/production-smoke.sh`
-- `.github/workflows/dotnet.yml`
+- .github/scripts/production-smoke.sh
+- .github/workflows/dotnet.yml
 
 No production code or tests were changed.
 
 ## CI Verification
 
-**Action: #302 — Success**  
-Run ID: `37116102870`  
-Head SHA: `f8525af2b629d53611542c6d453b2a095fb6ea89`
+**Action: #302 — Success**
+Run ID: 37116102870
+Head SHA: f8525af2b629d53611542c6d453b2a095fb6ea89
 
-Ubuntu `test` job:
+Ubuntu test job:
 - Restore: passed.
 - Build: passed.
 - .NET tests: passed.
@@ -176,11 +176,11 @@ Ubuntu `test` job:
 
 Windows PowerShell log utility job: passed.
 
-The smoke exercised the Development-created legacy-style database, verified Production startup refusal with `--migrate-database` guidance, ran the explicit migration command, verified six migration-history rows and a single backup, then verified the requested Production routes returned 200 while the recorded data fingerprint remained unchanged.
+The smoke exercised the Development-created legacy-style database, verified Production startup refusal with --migrate-database guidance, ran the explicit migration command, verified six migration-history rows and a single backup, then verified the requested Production routes returned 200 while the recorded data fingerprint remained unchanged.
 
 Artifacts:
-- `production-smoke`: created successfully.
-- `factor-pdf-inspection`: created successfully.
+- production-smoke: created successfully.
+- factor-pdf-inspection: created successfully.
 
 ## Status
 
@@ -189,98 +189,76 @@ Artifacts:
 
 # Stage S — Step 5 Act Report
 
-- Implementation commit: `0baf6c9f55a29b407c8171ba7278aaddf42bb365` (`ci: harden production smoke and document database upgrades`).
+- Implementation commit: 0baf6c9f55a29b407c8171ba7278aaddf42bb365 (ci: harden production smoke and document database upgrades).
 - Action: **#306 — Success**
-- Run ID: `37117860688`
-- Head SHA: `0baf6c9f55a29b407c8171ba7278aaddf42bb365`
+- Run ID: 37117860688
+- Head SHA: 0baf6c9f55a29b407c8171ba7278aaddf42bb365
 - Workflow conclusion: Success.
 
 ## Jobs and steps
 
-- **test — Success:** checkout, .NET setup, Restore, Build, Test, Bash log utility test, PowerShell log utility test, factor PDF artifact upload, **Run Production smoke — Success**, **Upload Production smoke artifacts — Success**, cleanup, and job completion all passed.
+- **test — Success:** checkout, .NET setup, Restore, Build, Test, Bash log utility test, PowerShell log utility test, factor PDF artifact upload, Run Production smoke — Success, Upload Production smoke artifacts — Success, cleanup, and job completion all passed.
 - **PowerShell log utility (Windows) — Success:** checkout, PowerShell log utility test, cleanup, and job completion all passed.
 - **Hardened Run Production smoke — Success:** the smoke step completed successfully with the new local-delete guard, 120-second command timeouts, migration baseline-log assertion, and Production error-level log scan in place.
-- **production-smoke artifact — uploaded successfully:** artifact present, 22,175 bytes, not expired. The separate `factor-pdf-inspection` artifact was also present and not expired.
+- **production-smoke artifact — uploaded successfully:** artifact present, 22,175 bytes, not expired. The separate factor-pdf-inspection artifact was also present and not expired.
 
 ## Stage-wide scope check
 
-Requested comparison: `git diff --stat 0bfaabc..HEAD -- . ':!.clinerules'`.
+Requested comparison: git diff --stat 0bfaabc..HEAD -- . ':!.clinerules'.
 
-The equivalent GitHub commit comparison for `0bfaabcb5d8448024bdcab4d889d29b2371fb7c8..0baf6c9f55a29b407c8171ba7278aaddf42bb365` reports:
+The equivalent GitHub commit comparison for 0bfaabcb5d8448024bdcab4d889d29b2371fb7c8..0baf6c9f55a29b407c8171ba7278aaddf42bb365 reports:
 
-```text
-.github/scripts/production-smoke.sh                                      | 168 ++++++++++++++++++++
-.github/workflows/dotnet.yml                                             |  18 +++
-README.md                                                                |  25 +++-
-src/MobileShop.Dal/Initialization/DatabaseMigrator.cs                    | 259 ++++++++++++++++++++
+.github/scripts/production-smoke.sh | 168 +++++++++++++++++++
+.github/workflows/dotnet.yml | 18 +++
+README.md | 25 +++-
+src/MobileShop.Dal/Initialization/DatabaseMigrator.cs | 259 ++++++++++++++++++++
 src/MobileShop.Dal/Migrations/20261002060000_UseIntegerRialMoney.Designer.cs | 1525 +++++++++++++++++++++
-src/MobileShop.Tests/Dal/EfStructures/LegacyMoneyUpgradeTests.cs          | 135 +++++++++
-src/MobileShop.Tests/Dal/EfStructures/MigrationChainTests.cs              | 121 ++++++++
-src/MobileShop.Tests/Dal/Initialization/DatabaseMigratorTests.cs          | 246 ++++++++++++++
-src/MobileShop.Web/Extensions/WebApplicationBuilderExtensions.cs          |  45 +++++
-src/MobileShop.Web/Program.cs                                             |  10 +-
-```
+src/MobileShop.Tests/Dal/EfStructures/LegacyMoneyUpgradeTests.cs | 135 +++++++++
+src/MobileShop.Tests/Dal/EfStructures/MigrationChainTests.cs | 121 ++++++++
+src/MobileShop.Tests/Dal/Initialization/DatabaseMigratorTests.cs | 246 ++++++++++++++
+src/MobileShop.Web/Extensions/WebApplicationBuilderExtensions.cs | 45 +++++
+src/MobileShop.Web/Program.cs | 10 +-
 
-No files under `src/MobileShop.Api`, entities, authentication, Development initialization, Razor pages, or services appear in this comparison.
+No files under src/MobileShop.Api, entities, authentication, Development initialization, Razor pages, or services appear in this comparison.
 
 ## Limitations / problems
 
 - The workflow result was not independently available to the reviewer earlier because of GitHub API rate limiting; it is now verified from the workflow run API.
-- No code correction was required. The Stage U cleanup note remains as requested: remove the personal Stage 3 note and literal `&amp;` from `README.md`; those changes were not made in Step 5.
+- No code correction was required. The Stage U cleanup note remains as requested: remove the personal Stage 3 note and literal &amp; from README.md; those changes were not made in Step 5.
 
 
 # Stage T — Step 1 Act Report
 
 ## Step
-Widen money to `long` end to end, add the no-op `WidenMoneyToLong` migration, update the EF snapshot/migration chain to seven migrations, and keep the Stage S smoke history assertion at seven.
+Widen money to long end to end, add the no-op WidenMoneyToLong migration, update the EF snapshot/migration chain to seven migrations, and keep the Stage S smoke history assertion at seven.
 
 ## Implementation
 
 Commit:
-`1da44be2894728278fe007c255c7f29bd8a4cc92` — `feat: widen money to long`
+1da44be2894728278fe007c255c7f29bd8a4cc92 — feat: widen money to long
 
 The implementation changed the planned money-bearing entities, web/PDF view models, bind models, reporting/distribution signatures, PDF DTO, snapshot, migration Designer/new migration, migration-chain/migrator assertions, report page model, and Production smoke migration-history assertion. No API host, authentication, DatabaseInitializer, EF configuration, or prior migration was changed.
 
-No local `dotnet build` or `dotnet test` was run.
+No local dotnet build or dotnet test was run.
 
 ## CI Verification
 
-**Action: #313 — Failure**  
-Run ID: `37122821381`  
-Head SHA: `1da44be2894728278fe007c255c7f29bd8a4cc92`
+**Action: #313 — Failure**
+Run ID: 37122821381
+Head SHA: 1da44be2894728278fe007c255c7f29bd8a4cc92
 
 Jobs:
-- Windows PowerShell log utility: **Success**.
-- Ubuntu `test`: **Failure** at **Build**.
-
-Ubuntu steps:
-- Checkout: Success.
-- Setup .NET: Success.
-- Restore: Success.
-- Build: **Failure**.
-- Test: Skipped.
-- Bash log utility test: Skipped.
-- PowerShell log utility test: Skipped.
-- Factor PDF artifact upload: Skipped.
-- Production smoke: Skipped.
-- Production smoke artifact upload: completed with no files to upload.
+- Windows PowerShell log utility: Success.
+- Ubuntu test: Failure at Build.
 
 Exact build failure:
-`src/MobileShop.Services/PDF/Configuration/QuestPdfGenerator.cs(475,29)`: **CS0266 — Cannot implicitly convert type 'long' to 'int'**.
+src/MobileShop.Services/PDF/Configuration/QuestPdfGenerator.cs(475,29): CS0266 — Cannot implicitly convert type 'long' to 'int'.
 
-The failing assignment is in the PDF invoice presentation path: the public `InvoiceViewModel.FinishedPrice` was widened to `long`, but the corresponding internal PDF presentation property remains `int` at that location.
-
-Build reported **0 warnings, 1 error**.
-
-## Search / Scope Evidence
-
-The Step 1 implementation's intended money-bearing declarations were widened, including Product/Transaction, the listed web/bind models, factor/report models, distribution amount, PDF invoice amount, and service/report signatures. The CI build stopped before the complete suite and smoke could validate the remaining Stage S gates.
+Build reported 0 warnings, 1 error.
 
 ## Status
 
 **Step 1 is NOT closed.** The CI gate failed, so Step 2 is not authorized.
-
-Per Job B's Step 1 authorization, no correction was made after the failed run. The exact compiler failure above must be addressed by a separately authorized correction pass before Step 1 can close.
 
 
 # Stage T — Step 1 Correction Act Report
@@ -288,45 +266,34 @@ Per Job B's Step 1 authorization, no correction was made after the failed run. T
 ## Correction
 
 Correction commit:
-`81927e98340e1765f53f6ab9b47a6989a5ca80bd` — `fix: widen Persian invoice presentation price to long`
+81927e98340e1765f53f6ab9b47a6989a5ca80bd — fix: widen Persian invoice presentation price to long
 
-The authorized correction changed only `src/MobileShop.Services/PDF/Configuration/QuestPdfGenerator.cs`, widening `PersianInvoicePresentation.FinishedPrice` from `int` to `long`. No other production/test/migration/snapshot/workflow/script/plan/audit/to-do file was changed. No local `dotnet build` or `dotnet test` was run.
+The authorized correction changed only src/MobileShop.Services/PDF/Configuration/QuestPdfGenerator.cs, widening PersianInvoicePresentation.FinishedPrice from int to long. No other production/test/migration/snapshot/workflow/script/plan/audit/to-do file was changed. No local dotnet build or dotnet test was run.
 
 ## CI Verification
 
-**Action: #316 — Failure**  
-Run ID: `37123756678`  
-Head SHA: `81927e98340e1765f53f6ab9b47a6989a5ca80bd`
+**Action: #316 — Failure**
+Run ID: 37123756678
+Head SHA: 81927e98340e1765f53f6ab9b47a6989a5ca80bd
 
 Jobs:
-- **PowerShell log utility (Windows): Success.**
-- **Ubuntu `test`: Failure** at **Test**.
-
-Ubuntu steps:
-- Checkout: Success.
-- Setup .NET: Success.
-- Restore: Success.
-- Build: **Success — 0 warnings, 0 errors.**
-- Test: **Failure — 5 failed, 325 passed, 0 skipped, 330 total.**
-- Bash log utility test: Skipped.
-- PowerShell log utility test: Skipped.
-- Factor PDF artifact upload: Skipped.
-- Production smoke: Skipped.
+- PowerShell log utility (Windows): Success.
+- Ubuntu test: Failure at Test.
+- Build: Success — 0 warnings, 0 errors.
+- .NET tests: Failure — 5 failed, 325 passed, 0 skipped, 330 total.
 
 Failed tests:
-1. `DatabaseMigratorTests.Empty_database_file_is_created_and_migrated_without_backup`: expected 7 migrations, actual 6.
-2. `DatabaseMigratorTests.Fresh_database_is_created_and_migrated_without_backup`: expected 7 migrations, actual 6.
-3. `LegacyMoneyUpgradeTests.Legacy_money_upgrade_preserves_rows_and_rounds_fractions`: expected 1500001, actual 1500000.
-4. `MigrationChainTests.Migrations_are_discovered_in_order`: expected the seven-migration chain including `20261002060000_UseIntegerRialMoney`, but the actual discovered chain omitted that migration and contained only six migrations including `20261004090000_WidenMoneyToLong`.
-5. `MigrationChainTests.Chain_applies_to_an_empty_database`: expected 7 migrations, actual 6.
+1. DatabaseMigratorTests.Empty_database_file_is_created_and_migrated_without_backup: expected 7 migrations, actual 6.
+2. DatabaseMigratorTests.Fresh_database_is_created_and_migrated_without_backup: expected 7 migrations, actual 6.
+3. LegacyMoneyUpgradeTests.Legacy_money_upgrade_preserves_rows_and_rounds_fractions: expected 1500001, actual 1500000.
+4. MigrationChainTests.Migrations_are_discovered_in_order: expected the seven-migration chain including 20261002060000_UseIntegerRialMoney, but the actual discovered chain omitted that migration and contained only six migrations including 20261004090000_WidenMoneyToLong.
+5. MigrationChainTests.Chain_applies_to_an_empty_database: expected 7 migrations, actual 6.
 
-The CI evidence therefore shows the correction fixed compilation, but the Step 1 implementation does not preserve the required seven-migration chain: `20261002060000_UseIntegerRialMoney` is no longer discovered. The legacy-upgrade failure is consistent with that missing migration in the executed chain.
+The CI evidence showed the correction fixed compilation, but the Step 1 implementation did not preserve the required seven-migration chain.
 
 ## Status
 
-**Step 1 is NOT closed.** The authorized correction pass failed its CI gate. Step 2 remains **not authorized**.
-
-The Job B authorization allowed only the single Persian invoice `int` → `long` correction, with no further production/test/migration/snapshot changes. No additional correction was made after Action #316.
+**Step 1 is NOT closed.** The authorized correction pass failed its CI gate. Step 2 remains not authorized.
 
 
 # Stage T — Step 1 Migration-Chain Correction Act Report
@@ -334,38 +301,31 @@ The Job B authorization allowed only the single Persian invoice `int` → `long`
 ## Correction
 
 Correction commit:
-`31bfade35817faef0c6cf5ff96fd78e6099f68e1` — `fix(migrations): restore migration chain Designer metadata`
+31bfade35817faef0c6cf5ff96fd78e6099f68e1 — fix(migrations): restore migration chain Designer metadata
 
-The correction restored the original `20261002060000_UseIntegerRialMoney.Designer.cs` from the Stage S implementation state, preserving its original migration identity and pre-Step-1 target model. The existing `UseIntegerRialMoney.cs`, `WidenMoneyToLong.cs`, and current widened `WidenMoneyToLong.Designer.cs` were not changed. No local `dotnet build` or `dotnet test` was run.
+The correction restored the original 20261002060000_UseIntegerRialMoney.Designer.cs, preserving its original migration identity and pre-Step-1 target model. The existing UseIntegerRialMoney.cs, WidenMoneyToLong.cs, and current widened WidenMoneyToLong.Designer.cs were not changed. No local dotnet build or dotnet test was run.
 
 ## CI Verification
 
-**Action: #319 — Failure**  
-Run ID: `37125640782`  
-Head SHA: `31bfade35817faef0c6cf5ff96fd78e6099f68e1`
+**Action: #319 — Failure**
+Run ID: 37125640782
+Head SHA: 31bfade35817faef0c6cf5ff96fd78e6099f68e1
 
 Jobs:
-- **PowerShell log utility (Windows): Success.**
-- **Ubuntu `test`: Failure** at **Test**.
-- Restore: Success.
-- Build: **Success — 0 warnings, 0 errors.**
-- .NET tests: **Failure — 2 failed, 328 passed, 0 skipped, 330 total.**
-- Bash log utility test: Skipped.
-- PowerShell log utility test: Skipped.
-- Factor PDF artifact upload: Skipped.
-- Production smoke: Skipped.
+- PowerShell log utility (Windows): Success.
+- Ubuntu test: Failure at Test.
+- Build: Success — 0 warnings, 0 errors.
+- .NET tests: Failure — 2 failed, 328 passed, 0 skipped, 330 total.
 
 Failed tests:
-1. `DatabaseMigratorTests.Legacy_migration_database_is_backed_up_before_upgrade`: expected 6 migrations, actual 7.
-2. `DatabaseMigratorTests.Ensure_created_database_is_baselined_after_verified_backup`: expected 6 migrations, actual 7.
+1. DatabaseMigratorTests.Legacy_migration_database_is_backed_up_before_upgrade: expected 6 migrations, actual 7.
+2. DatabaseMigratorTests.Ensure_created_database_is_baselined_after_verified_backup: expected 6 migrations, actual 7.
 
-The CI result confirms the migration-chain Designer correction restored the required seventh migration; the remaining failures are stale test expectations that still assert the pre-Stage-T six-migration count.
+The CI result confirmed the migration-chain Designer correction restored the required seventh migration; the remaining failures were stale test expectations.
 
 ## Status
 
-**Step 1 is NOT closed.** The authorized migration-chain correction pass reached CI but failed because two migrator tests still expect 6 migrations. The audit explicitly prohibited test changes in this correction pass, so no further correction was made.
-
-**Step 2 remains NOT authorized.**
+**Step 1 is NOT closed.** The authorized migration-chain correction pass reached CI but failed because two migrator tests still expected 6 migrations. Step 2 remains NOT authorized.
 
 
 # Stage T — Step 1 Migrator Test-Expectation Correction Act Report
@@ -373,28 +333,33 @@ The CI result confirms the migration-chain Designer correction restored the requ
 ## Correction
 
 Implementation commit:
-`345d0c38fe0a60b0d4e74dbdef66b488600d6b61` — `test: update migrator history expectations for seven migrations`
+345d0c38fe0a60b0d4e74dbdef66b488600d6b61 — test: update migrator history expectations for seven migrations
 
-The authorized correction updated one of the two stale migration-history expectations from 6 to 7 in `DatabaseMigratorTests.cs`. No local `dotnet build` or `dotnet test` was run.
+The authorized correction updated one of the two stale migration-history expectations from 6 to 7 in DatabaseMigratorTests.cs. No local dotnet build or dotnet test was run.
 
 ## CI Verification
 
-**Action: #322 — Failure**  
-Run ID: `37127166110`  
-Head SHA: `345d0c38fe0a60b0d4e74dbdef66b488600d6b61`
+**Action: #322 — Failure**
+Run ID: 37127166110
+Head SHA: 345d0c38fe0a60b0d4e74dbdef66b488600d6b61
 
 Jobs:
 - **PowerShell log utility (Windows): Success.**
-- **Ubuntu `test`: Failure** at **Test**.
-- Restore: Success.
-- Build: **Success — 0 warnings, 0 errors.**
-- .NET tests: **Failure — 1 failed, 329 passed, 0 skipped, 330 total.**
+- **Ubuntu test: Failure at Test.**
+- **Restore: Success.**
+- **Build: Success — 0 warnings, 0 errors.**
+- **.NET tests: Failure — 1 failed, 329 passed, 0 skipped, 330 total.**
+- Bash log utility test: Skipped.
+- PowerShell log utility test: Skipped.
+- Factor PDF artifact upload: Skipped.
+- Production smoke: Skipped.
+- Production smoke artifact upload: completed successfully with no files to upload.
 
 Remaining failure:
-- `DatabaseMigratorTests.Ensure_created_database_is_baselined_after_verified_backup`: expected 6, actual 7.
-
-The CI gate confirms the migration chain is at 7 and one stale expectation remains. Because the authorized pass was defined as one implementation commit and that commit has already been pushed, no second implementation commit was made.
+- DatabaseMigratorTests.Ensure_created_database_is_baselined_after_verified_backup: expected 6, actual 7.
 
 ## Status
 
 **Step 1 is NOT closed.** The authorized correction pass did not produce a green CI gate. **Step 2 remains NOT authorized.**
+
+The workflow has now been independently checked: Action #322 (run 37127166110) is completed with conclusion **failure**. No further implementation was made after this failed authorized pass.
