@@ -328,38 +328,44 @@ The CI result confirmed the migration-chain Designer correction restored the req
 **Step 1 is NOT closed.** The authorized migration-chain correction pass reached CI but failed because two migrator tests still expected 6 migrations. Step 2 remains NOT authorized.
 
 
-# Stage T — Step 1 Migrator Test-Expectation Correction Act Report
+# Stage T — Step 1 Final Correction Act Report
 
 ## Correction
 
 Implementation commit:
-345d0c38fe0a60b0d4e74dbdef66b488600d6b61 — test: update migrator history expectations for seven migrations
+9fb1d374bac734f0e5f6f9c3814ef84c2cc15f44 — test: fix remaining migrator history expectation
 
-The authorized correction updated one of the two stale migration-history expectations from 6 to 7 in DatabaseMigratorTests.cs. No local dotnet build or dotnet test was run.
+The authorized correction updated the remaining stale migration-history expectation in DatabaseMigratorTests.cs from 6 to 7. No local dotnet build or dotnet test was run.
 
 ## CI Verification
 
-**Action: #322 — Failure**
-Run ID: 37127166110
-Head SHA: 345d0c38fe0a60b0d4e74dbdef66b488600d6b61
+**Action: #325 — Success**
+Run ID: 37128953318
+Head SHA: 9fb1d374bac734f0e5f6f9c3814ef84c2cc15f44
 
 Jobs:
 - **PowerShell log utility (Windows): Success.**
-- **Ubuntu test: Failure at Test.**
+- **Ubuntu test: Success.**
 - **Restore: Success.**
 - **Build: Success — 0 warnings, 0 errors.**
-- **.NET tests: Failure — 1 failed, 329 passed, 0 skipped, 330 total.**
-- Bash log utility test: Skipped.
-- PowerShell log utility test: Skipped.
-- Factor PDF artifact upload: Skipped.
-- Production smoke: Skipped.
-- Production smoke artifact upload: completed successfully with no files to upload.
+- **.NET tests: Success — 330 passed, 0 failed, 0 skipped, 330 total.**
+- **Bash log utility test: Success.**
+- **PowerShell log utility test: Success.**
+- **Factor PDF inspection artifact upload: Success.**
+- **Production smoke: Success.**
+- **Production smoke artifact upload: Success.**
 
-Remaining failure:
-- DatabaseMigratorTests.Ensure_created_database_is_baselined_after_verified_backup: expected 6, actual 7.
+Production smoke evidence included:
+- Production startup initially refused the legacy database with the required `--migrate-database` guidance.
+- The explicit migration command successfully baselined the legacy database and created a verified backup.
+- The final production smoke check passed.
+
+## Action #326
+
+Action #326 (run ID 37129575983) was triggered by the documentation commit that records this act report. It completed successfully. It is **not** a new Stage T Step 1 implementation/correction CI gate; Action #325 is the relevant verification of commit `9fb1d374bac734f0e5f6f9c3814ef84c2cc15f44`.
 
 ## Status
 
-**Step 1 is NOT closed.** The authorized correction pass did not produce a green CI gate. **Step 2 remains NOT authorized.**
+**Stage T Step 1 PASSED its CI gate and is closed. Step 2 is authorized.**
 
-The workflow has now been independently checked: Action #322 (run 37127166110) is completed with conclusion **failure**. No further implementation was made after this failed authorized pass.
+The remaining migrator history expectation was corrected, and the complete CI pipeline passed with 330/330 .NET tests passing and the production smoke succeeding.
