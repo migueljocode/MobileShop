@@ -37,3 +37,68 @@ Read this section as the instruction; do not wait for a separate prompt.
 
 ## Gate
 Step 2 second correction → CI run → Job B. Step 3 starts only after Step 2 passes in CI.
+
+
+# Reviewer Audit — Stage T Step 2 after Action #347
+
+## Evidence reviewed
+
+- Current `.clinerules/chat/act.md`, including the Stage T Step 2 second-correction report.
+- Current test sources for `MoneyBoundaryTests`, `ProductsDataServiceTests`, and `ReportsDataServiceTests`.
+- Current `MobileShop.Tests/GlobalUsings.cs`.
+- Current `ProductsDataService.cs`.
+- Recorded CI result for Action **#347**, run ID **37149558795**, head SHA `c3bffa20d8d9691949c6cf52df9c2bb930791107`.
+
+## Verdict
+
+**FAIL — Stage T Step 2 is not closed. Step 3 is NOT authorized.**
+
+Action #347 reached the test phase after a clean build, but the .NET test suite failed: **342 passed, 4 failed, 0 skipped, 346 total**. The production smoke and later verification stages were therefore not reached.
+
+## Findings
+
+### HIGH — the second-correction act report does not match the source tested by CI
+
+The second-correction report says the two rejected-glass tests changed their model-count assertions from 3 to 2. The current repository source still contains:
+
+- `CreateGlassesAsync_rejects_computed_price_above_money_limit_without_writing_any_rows`: `Assert.Equal(3, Context.Models.Count())`
+- `CreateGlassesAsync_rejects_decimal_overflow_in_computed_price_instead_of_throwing`: `Assert.Equal(3, Context.Models.Count())`
+
+Action #347 reports both failures as **Expected: 3; Actual: 2**, which is consistent with the source currently present, not with the claimed correction.
+
+This is an audit/evidence integrity problem. The reviewer must not silently change these assertions during this review.
+
+### HIGH — the money-validation boundary test is not isolated to money validation
+
+`MoneyBoundaryTests.Money_inputs_accept_max_and_reject_above_max` validates partially populated models. The MaxRials cases trigger unrelated required-field validation errors for IMEI, email/password, and product/seller/customer fields.
+
+The test therefore does not cleanly prove that MaxRials is accepted. Its failure does not establish a money-range defect; it establishes that the test fixtures are incomplete for the models being validated.
+
+### MEDIUM — the percentage assertion is too representation-specific
+
+`ReportsDataServiceTests.GetProfitLossRowsAsync_handles_large_rial_profit_exactly` asserts:
+
+`66.66666666666667m`
+
+CI reported the actual value as:
+
+`66.666666666666666666666666666666666666666666666670`
+
+The underlying large-rial bought/sold/profit values are exact. The failure is caused by requiring one decimal representation of the percentage rather than asserting an appropriate precision/tolerance or the mathematically expected result.
+
+## Verified positives
+
+- The test-project `global using MobileShop.Models;` is now present, resolving the prior `MoneyLimits` visibility failure.
+- `ProductsDataServiceTests.cs` now has the BindModels namespace import required by the new tests.
+- `MoneyBoundaryTests.cs` now uses `object[]` for the heterogeneous input collection.
+- Action #347 build passed with **0 warnings, 0 errors**.
+- The recorded CI test run reached the complete .NET suite, so the previous compile-time blockers were resolved.
+- The production implementation's decimal-safe computed-price limit handling is present and is not being identified as a failing production-code issue by Action #347.
+
+## Required disposition
+
+The Stage T Step 2 gate remains **FAILED**.
+
+The audit-defined correction allowance is exhausted. **No further correction is authorized by this audit.** A new explicit correction authorization or updated audit is required before any code/test correction is made.
+
+Do not start Step 3. Do not modify `to-do.md` or `plan.md`.
