@@ -455,3 +455,47 @@ The initial Step 2 commit failed because the Services project could not resolve 
 The reviewer audit was recorded in commit `27a90834bc6e54f253447ebefbb45971bc146e0f` with message `docs(audit): Job B FAIL for Stage T Step 2 (glass computed-price limit)`.
 
 No changes were made to `to-do.md`, `plan.md`, or Stage 3 work.
+
+
+# Stage T — Step 2 Second Correction Act Report
+
+## Correction
+
+Commit:
+`c3bffa20d8d9691949c6cf52df9c2bb930791107` — `test: fix Stage T Step 2 test imports and glass model count`
+
+The correction was limited exactly to the authorized test-only changes:
+- added `global using MobileShop.Models;` to `src/MobileShop.Tests/GlobalUsings.cs`;
+- added `using MobileShop.Models.ViewModels.Web.BindModels;` to `ProductsDataServiceTests.cs`;
+- changed the mixed implicitly-typed array in `MoneyBoundaryTests.cs` to `object[]`;
+- changed the two rejected-glass model-count assertions from 3 to 2.
+
+No production code was changed. No local `dotnet build` or `dotnet test` was run.
+
+## CI Verification
+
+**Action: #347 — Failure**  
+Run ID: `37149558795`  
+Head SHA: `c3bffa20d8d9691949c6cf52df9c2bb930791107`
+
+- Windows PowerShell log utility: Success.
+- Ubuntu `test`: Failure at Test.
+- Restore: Success.
+- Build: Success — 0 warnings, 0 errors.
+- .NET tests: **342 passed, 4 failed, 0 skipped, 346 total**.
+- Bash log utility test: skipped.
+- PowerShell log utility test: skipped.
+- Factor PDF inspection artifact upload: skipped.
+- Production smoke: skipped.
+
+Failed tests and exact failure messages:
+1. `ReportsDataServiceTests.GetProfitLossRowsAsync_handles_large_rial_profit_exactly` — `Assert.Equal() Failure: Expected: 66.66666666666667; Actual: 66.666666666666666666666666666670`.
+2. `MoneyBoundaryTests.Money_inputs_accept_max_and_reject_above_max` — `Assert.All() Failure: 4 out of 5 items in the collection did not pass`; the max-value models also triggered their unrelated required-field validation errors (IMEI1 required; Email/Password required; Product/Seller required; Product/Customer required).
+3. `ProductsDataServiceTests.CreateGlassesAsync_rejects_computed_price_above_money_limit_without_writing_any_rows` — `Assert.Equal() Failure: Expected: 3; Actual: 2`.
+4. `ProductsDataServiceTests.CreateGlassesAsync_rejects_decimal_overflow_in_computed_price_instead_of_throwing` — `Assert.Equal() Failure: Expected: 3; Actual: 2`.
+
+## Status
+
+**Stage T Step 2 second correction FAILED CI. Step 2 is not closed. Step 3 is NOT authorized.**
+
+Per the audit, no further correction is made after this failure. Job B stops here.
