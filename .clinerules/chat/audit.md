@@ -92,3 +92,29 @@ The logger is ignored; the command catches only `InvalidOperationException`; bas
 ## Gate
 Step 3 correction → CI run → Job B. Step 4 starts only after Step 3 passes in CI.
 
+
+
+# Audit — Job B (Execution Check): Stage S Step 3 second correction (7673a2b)
+
+**Verdict: PASS — Step 3 second correction passed CI. Step 4 remains NOT authorized pending the Job B gate.**
+
+## Evidence
+
+- Correction commit: `7673a2b35fd839097e82e4577f7899bbacd26cf8`
+- Action **#298** — **Success**
+- Run ID: `37109046164`
+- Ubuntu `test`: passed.
+- Windows PowerShell log utility: passed.
+- Restore: passed.
+- Build: passed.
+- .NET tests: passed.
+- Bash log utility tests: passed.
+- PowerShell log utility tests: passed.
+
+The authorized second correction added the two required file-local usings and parameterised the schema query. No further code correction was required.
+
+## Gate
+
+**Stage S Step 3 second correction PASSED CI. Step 3 is eligible for closure by Job B. Step 4 is NOT authorized by this audit.**
+
+Per the execution workflow, no Step 4 work was started.
