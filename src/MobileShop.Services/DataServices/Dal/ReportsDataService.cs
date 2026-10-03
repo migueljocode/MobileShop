@@ -53,7 +53,7 @@ public class ReportsDataService(
     }
 
     /// <inheritdoc />
-    public async Task<int> GetProfitLossTotalAsync(DateTime? from, DateTime? to)
+    public async Task<long> GetProfitLossTotalAsync(DateTime? from, DateTime? to)
         => (await GetProfitLossRowsAsync(from, to)).Sum(row => row.Profit);
 
     /// <inheritdoc />
@@ -72,7 +72,7 @@ public class ReportsDataService(
     }
 
     /// <inheritdoc />
-    public async Task<IReadOnlyList<DistributionRow>> GetDistributionRowsAsync(int totalProfit)
+    public async Task<IReadOnlyList<DistributionRow>> GetDistributionRowsAsync(long totalProfit)
     {
         // The calculator matches the required employees by exact full name, so the projection must
         // supply the employee id plus the person's first and last name. Ordering by name mirrors
