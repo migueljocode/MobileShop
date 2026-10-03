@@ -19,6 +19,42 @@ public static class WebApplicationBuilderExtensions
     }
 
     /// <summary>
+    /// Handles the explicit production database migration command without starting the web host.
+    /// </summary>
+    public static bool TryRunDatabaseCommand(this WebApplication app, string[] args)
+    {
+        if (!args.Contains("--migrate-database", StringComparer.Ordinal))
+        {
+            return false;
+        }
+
+        try
+        {
+            using var scope = app.Services.CreateScope();
+            var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            var result = DatabaseMigrator.Migrate(context, SolutionPaths.DatabaseFile, app.Logger);
+
+            Console.WriteLine(result.Status switch
+            {
+                DatabaseMigrationStatus.Created => "Database created and all migrations applied.",
+                DatabaseMigrationStatus.UpToDate => "Database is already up to date.",
+                DatabaseMigrationStatus.Upgraded => $"Database upgraded successfully. Verified backup: {result.BackupPath}",
+                DatabaseMigrationStatus.Baselined => $"Legacy database baselined successfully. Verified backup: {result.BackupPath}",
+                _ => throw new ArgumentOutOfRangeException()
+            });
+
+            Environment.ExitCode = 0;
+        }
+        catch (InvalidOperationException exception)
+        {
+            Console.Error.WriteLine(exception.Message);
+            Environment.ExitCode = 1;
+        }
+
+        return true;
+    }
+
+    /// <summary>
     /// Configures the web request pipeline without enabling authentication.
     /// </summary>
     public static WebApplication ConfigureApp(this WebApplication app)
@@ -30,6 +66,12 @@ public static class WebApplicationBuilderExtensions
             // Dev-only: the freshly seeded sample data ships a placeholder hash, so the admin account gets a real one.
             using var scope = app.Services.CreateScope();
             scope.ServiceProvider.GetRequiredService<IAccountDataService>().EnsureAdminUser();
+        }
+        else
+        {
+            using var scope = app.Services.CreateScope();
+            var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            DatabaseMigrator.EnsureCurrent(context);
         }
 
         app.UseRouting();
