@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace MobileShop.Tests.Dal.EfStructures;
 
@@ -80,15 +81,15 @@ public class LegacyMoneyUpgradeTests
                 Assert.Equal("INTEGER", Scalar<string>(migratedContext, "SELECT type FROM pragma_table_info('Products') WHERE name = 'Price';"));
                 Assert.Equal("INTEGER", Scalar<string>(migratedContext, "SELECT type FROM pragma_table_info('Transactions') WHERE name = 'FinishedPrice';"));
 
-                Assert.Empty(Scalar<string>(migratedContext, "PRAGMA foreign_key_check;"));
+                Assert.Equal(0L, Scalar<long>(migratedContext, "SELECT COUNT(*) FROM pragma_foreign_key_check;"));
                 Assert.Equal("ok", Scalar<string>(migratedContext, "PRAGMA integrity_check;"));
 
-                Assert.True(Scalar<long>(
+                Assert.Equal(1L, Scalar<long>(
                     migratedContext,
-                    "SELECT COUNT(*) FROM sqlite_master WHERE type = 'table' AND name = 'Transactions' AND sql LIKE '%CK_Transactions_FinishedPrice_NonNegative%';") == 1);
-                Assert.True(Scalar<long>(
+                    "SELECT COUNT(*) FROM sqlite_master WHERE type = 'table' AND name = 'Transactions' AND sql LIKE '%CK_Transactions_FinishedPrice_NonNegative%';"));
+                Assert.Equal(1L, Scalar<long>(
                     migratedContext,
-                    "SELECT COUNT(*) FROM sqlite_master WHERE type = 'table' AND name = 'Products' AND sql LIKE '%CK_Products_Price_NonNegative%';") == 1);
+                    "SELECT COUNT(*) FROM sqlite_master WHERE type = 'table' AND name = 'Products' AND sql LIKE '%CK_Products_Price_NonNegative%';"));
             }
         }
         finally
