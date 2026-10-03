@@ -316,109 +316,109 @@
   "products": [
     {
       "id": 1,
-      "price": 45000000,
+      "price": 450000000,
       "modelId": 1,
       "colorId": 1,
       "barcode": "8900000000001"
     },
     {
       "id": 2,
-      "price": 32000000,
+      "price": 320000000,
       "modelId": 2,
       "colorId": 2,
       "barcode": "8900000000002"
     },
     {
       "id": 3,
-      "price": 18000000,
+      "price": 180000000,
       "modelId": 3,
       "colorId": 3,
       "barcode": "8900000000003"
     },
     {
       "id": 4,
-      "price": 1200000,
+      "price": 12000000,
       "modelId": 4,
       "barcode": "8900000000004"
     },
     {
       "id": 5,
-      "price": 350000,
+      "price": 3500000,
       "modelId": 5,
       "barcode": "8900000000005"
     },
     {
       "id": 6,
-      "price": 55000000,
+      "price": 550000000,
       "modelId": 6,
       "colorId": 4,
       "barcode": "8900000000006"
     },
     {
       "id": 7,
-      "price": 21000000,
+      "price": 210000000,
       "modelId": 7,
       "colorId": 5,
       "barcode": "8900000000007"
     },
     {
       "id": 8,
-      "price": 9500000,
+      "price": 95000000,
       "modelId": 8,
       "colorId": 2,
       "barcode": "8900000000008"
     },
     {
       "id": 9,
-      "price": 1800000,
+      "price": 18000000,
       "modelId": 9,
       "barcode": "8900000000009"
     },
     {
       "id": 10,
-      "price": 450000,
+      "price": 4500000,
       "modelId": 10,
       "barcode": "8900000000010"
     },
     {
       "id": 11,
-      "price": 800000,
+      "price": 8000000,
       "modelId": 11,
       "barcode": "8900000000011"
     },
     {
       "id": 12,
-      "price": 650000,
+      "price": 6500000,
       "modelId": 12,
       "barcode": "8900000000012"
     },
     {
       "id": 13,
-      "price": 750000,
+      "price": 7500000,
       "modelId": 13,
       "barcode": "8900000000013"
     },
     {
       "id": 14,
-      "price": 2200000,
+      "price": 22000000,
       "modelId": 14,
       "barcode": "8900000000014"
     },
     {
       "id": 15,
-      "price": 450000,
+      "price": 4500000,
       "modelId": 15,
       "barcode": "8900000000015"
     },
     {
       "id": 16,
-      "price": 800000,
+      "price": 8000000,
       "modelId": 11,
       "barcode": "8900000000016"
     },
     {
       "id": 17,
-      "price": 65000000,
+      "price": 650000000,
       "modelId": 16,
       "colorId": 5,
       "barcode": "8900000000017"
@@ -431,7 +431,7 @@
       "sellerId": 2,
       "customerId": 1,
       "productId": 1,
-      "finishedPrice": 42000000,
+      "finishedPrice": 420000000,
       "direction": "Buy"
     },
     {
@@ -440,7 +440,7 @@
       "sellerId": 1,
       "customerId": 2,
       "productId": 1,
-      "finishedPrice": 45000000,
+      "finishedPrice": 450000000,
       "direction": "Sell"
     },
     {
@@ -449,7 +449,7 @@
       "sellerId": 2,
       "customerId": 1,
       "productId": 2,
-      "finishedPrice": 29000000,
+      "finishedPrice": 290000000,
       "direction": "Buy"
     },
     {
@@ -458,7 +458,7 @@
       "sellerId": 2,
       "customerId": 1,
       "productId": 3,
-      "finishedPrice": 15000000,
+      "finishedPrice": 150000000,
       "direction": "Buy"
     },
     {
@@ -467,7 +467,7 @@
       "sellerId": 2,
       "customerId": 1,
       "productId": 4,
-      "finishedPrice": 900000,
+      "finishedPrice": 9000000,
       "direction": "Buy"
     },
     {
@@ -476,7 +476,7 @@
       "sellerId": 3,
       "customerId": 1,
       "productId": 7,
-      "finishedPrice": 18500000,
+      "finishedPrice": 185000000,
       "direction": "Buy"
     },
     {
@@ -485,7 +485,7 @@
       "sellerId": 1,
       "customerId": 3,
       "productId": 7,
-      "finishedPrice": 22500000,
+      "finishedPrice": 225000000,
       "direction": "Sell"
     },
     {
@@ -494,7 +494,7 @@
       "sellerId": 2,
       "customerId": 1,
       "productId": 8,
-      "finishedPrice": 7800000,
+      "finishedPrice": 78000000,
       "direction": "Buy"
     },
     {
@@ -503,7 +503,7 @@
       "sellerId": 1,
       "customerId": 4,
       "productId": 8,
-      "finishedPrice": 9900000,
+      "finishedPrice": 99000000,
       "direction": "Sell"
     },
     {
@@ -512,7 +512,7 @@
       "sellerId": 3,
       "customerId": 1,
       "productId": 9,
-      "finishedPrice": 1400000,
+      "finishedPrice": 14000000,
       "direction": "Buy"
     },
     {
@@ -521,7 +521,7 @@
       "sellerId": 1,
       "customerId": 2,
       "productId": 9,
-      "finishedPrice": 1800000,
+      "finishedPrice": 18000000,
       "direction": "Sell"
     },
     {
@@ -530,7 +530,7 @@
       "sellerId": 2,
       "customerId": 1,
       "productId": 12,
-      "finishedPrice": 480000,
+      "finishedPrice": 4800000,
       "direction": "Buy"
     },
     {
@@ -539,7 +539,7 @@
       "sellerId": 1,
       "customerId": 3,
       "productId": 12,
-      "finishedPrice": 650000,
+      "finishedPrice": 6500000,
       "direction": "Sell"
     },
     {
@@ -548,7 +548,7 @@
       "sellerId": 3,
       "customerId": 1,
       "productId": 14,
-      "finishedPrice": 1750000,
+      "finishedPrice": 17500000,
       "direction": "Buy"
     },
     {
@@ -557,7 +557,7 @@
       "sellerId": 2,
       "customerId": 1,
       "productId": 13,
-      "finishedPrice": 520000,
+      "finishedPrice": 5200000,
       "direction": "Buy"
     },
     {
@@ -566,7 +566,7 @@
       "sellerId": 1,
       "customerId": 4,
       "productId": 13,
-      "finishedPrice": 750000,
+      "finishedPrice": 7500000,
       "direction": "Sell"
     },
     {
@@ -575,7 +575,7 @@
       "sellerId": 1,
       "customerId": 4,
       "productId": 2,
-      "finishedPrice": 34000000,
+      "finishedPrice": 340000000,
       "direction": "Sell"
     },
     {
@@ -584,7 +584,7 @@
       "sellerId": 3,
       "customerId": 1,
       "productId": 6,
-      "finishedPrice": 50000000,
+      "finishedPrice": 500000000,
       "direction": "Buy"
     },
     {
@@ -593,7 +593,7 @@
       "sellerId": 2,
       "customerId": 1,
       "productId": 10,
-      "finishedPrice": 300000,
+      "finishedPrice": 3000000,
       "direction": "Buy"
     },
     {
@@ -602,7 +602,7 @@
       "sellerId": 1,
       "customerId": 3,
       "productId": 10,
-      "finishedPrice": 450000,
+      "finishedPrice": 4500000,
       "direction": "Sell"
     },
     {
@@ -611,7 +611,7 @@
       "sellerId": 2,
       "customerId": 1,
       "productId": 5,
-      "finishedPrice": 250000,
+      "finishedPrice": 2500000,
       "direction": "Buy"
     },
     {
@@ -620,7 +620,7 @@
       "sellerId": 1,
       "customerId": 2,
       "productId": 5,
-      "finishedPrice": 400000,
+      "finishedPrice": 4000000,
       "direction": "Sell"
     },
     {
@@ -629,7 +629,7 @@
       "sellerId": 1,
       "customerId": 3,
       "productId": 4,
-      "finishedPrice": 1200000,
+      "finishedPrice": 12000000,
       "direction": "Sell"
     },
     {
@@ -638,7 +638,7 @@
       "sellerId": 1,
       "customerId": 3,
       "productId": 11,
-      "finishedPrice": 800000,
+      "finishedPrice": 8000000,
       "direction": "Sell"
     },
     {
@@ -647,7 +647,7 @@
       "sellerId": 2,
       "customerId": 1,
       "productId": 15,
-      "finishedPrice": 320000,
+      "finishedPrice": 3200000,
       "direction": "Buy"
     },
     {
@@ -656,7 +656,7 @@
       "sellerId": 1,
       "customerId": 4,
       "productId": 6,
-      "finishedPrice": 57000000,
+      "finishedPrice": 570000000,
       "direction": "Sell"
     }
   ],
