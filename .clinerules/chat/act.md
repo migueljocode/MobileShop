@@ -366,3 +366,35 @@ The CI result confirms the migration-chain Designer correction restored the requ
 **Step 1 is NOT closed.** The authorized migration-chain correction pass reached CI but failed because two migrator tests still expect 6 migrations. The audit explicitly prohibited test changes in this correction pass, so no further correction was made.
 
 **Step 2 remains NOT authorized.**
+
+
+# Stage T — Step 1 Migrator Test-Expectation Correction Act Report
+
+## Correction
+
+Implementation commit:
+`345d0c38fe0a60b0d4e74dbdef66b488600d6b61` — `test: update migrator history expectations for seven migrations`
+
+The authorized correction updated one of the two stale migration-history expectations from 6 to 7 in `DatabaseMigratorTests.cs`. No local `dotnet build` or `dotnet test` was run.
+
+## CI Verification
+
+**Action: #322 — Failure**  
+Run ID: `37127166110`  
+Head SHA: `345d0c38fe0a60b0d4e74dbdef66b488600d6b61`
+
+Jobs:
+- **PowerShell log utility (Windows): Success.**
+- **Ubuntu `test`: Failure** at **Test**.
+- Restore: Success.
+- Build: **Success — 0 warnings, 0 errors.**
+- .NET tests: **Failure — 1 failed, 329 passed, 0 skipped, 330 total.**
+
+Remaining failure:
+- `DatabaseMigratorTests.Ensure_created_database_is_baselined_after_verified_backup`: expected 6, actual 7.
+
+The CI gate confirms the migration chain is at 7 and one stale expectation remains. Because the authorized pass was defined as one implementation commit and that commit has already been pushed, no second implementation commit was made.
+
+## Status
+
+**Step 1 is NOT closed.** The authorized correction pass did not produce a green CI gate. **Step 2 remains NOT authorized.**
