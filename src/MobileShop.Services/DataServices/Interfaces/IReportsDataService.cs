@@ -11,12 +11,12 @@ public interface IReportsDataService
     /// <summary>Gets the total profit or loss within an optional date range.</summary>
     /// <param name="from">The inclusive start date.</param>
     /// <param name="to">The inclusive end date.</param>
-    Task<int> GetProfitLossTotalAsync(DateTime? from, DateTime? to);
+    Task<long> GetProfitLossTotalAsync(DateTime? from, DateTime? to);
 
     /// <summary>Gets the earliest transaction date, or <see langword="null"/> when none exists.</summary>
     Task<DateTime?> GetEarliestTransactionDateAsync();
 
     /// <summary>Gets distribution rows for a total profit amount.</summary>
     /// <param name="totalProfit">The total profit to distribute.</param>
-    Task<IReadOnlyList<DistributionRow>> GetDistributionRowsAsync(int totalProfit);
+    Task<IReadOnlyList<DistributionRow>> GetDistributionRowsAsync(long totalProfit);
 }

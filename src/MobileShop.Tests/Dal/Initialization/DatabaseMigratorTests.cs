@@ -20,7 +20,7 @@ public sealed class DatabaseMigratorTests : IDisposable
 
         Assert.Equal(DatabaseMigrationStatus.Created, result.Status);
         Assert.Null(result.BackupPath);
-        Assert.Equal(6, Scalar<long>(context, "SELECT COUNT(*) FROM \"__EFMigrationsHistory\""));
+        Assert.Equal(7, Scalar<long>(context, "SELECT COUNT(*) FROM \"__EFMigrationsHistory\""));
         Assert.Empty(BackupFiles());
     }
 
@@ -33,7 +33,7 @@ public sealed class DatabaseMigratorTests : IDisposable
         var result = DatabaseMigrator.Migrate(context, databaseFile, NullLogger.Instance);
         Assert.Equal(DatabaseMigrationStatus.Created, result.Status);
         Assert.Null(result.BackupPath);
-        Assert.Equal(6L, Scalar<long>(context, "SELECT COUNT(*) FROM \"__EFMigrationsHistory\""));
+        Assert.Equal(7L, Scalar<long>(context, "SELECT COUNT(*) FROM \"__EFMigrationsHistory\""));
         Assert.Empty(BackupFiles());
     }
 

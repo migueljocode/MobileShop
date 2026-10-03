@@ -11,8 +11,8 @@ using MobileShop.Dal.EfStructures;
 namespace MobileShop.Dal.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20261002060000_UseIntegerRialMoney")]
-    partial class UseIntegerRialMoney
+    [Migration("20261004090000_WidenMoneyToLong")]
+    partial class WidenMoneyToLong
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -815,7 +815,7 @@ namespace MobileShop.Dal.Migrations
                     b.Property<int>("ModelId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("Price")
+                    b.Property<long>("Price")
                         .HasColumnType("INTEGER");
 
                     b.Property<byte[]>("TimeStamp")
@@ -1001,7 +1001,7 @@ namespace MobileShop.Dal.Migrations
                     b.Property<int>("Direction")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("FinishedPrice")
+                    b.Property<long>("FinishedPrice")
                         .HasColumnType("INTEGER");
 
                     b.Property<bool>("IsDeleted")

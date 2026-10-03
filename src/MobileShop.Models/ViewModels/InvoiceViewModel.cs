@@ -8,7 +8,7 @@ public sealed record InvoiceViewModel(
     string? SellerName,
     string? SellerPhoneNumber,
     DateTime TransactionDate,
-    int FinishedPrice,
+    long FinishedPrice,
     int ProductCount,
     string ProductInformation,
     IEnumerable<(string Label, string Value)> ProductExtras,

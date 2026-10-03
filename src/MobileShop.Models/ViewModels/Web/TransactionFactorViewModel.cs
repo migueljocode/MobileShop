@@ -9,5 +9,5 @@ public sealed record TransactionFactorViewModel(
     DateTime GeneratedAt)
 {
     /// <summary>Sum of every included row's finished price.</summary>
-    public int TotalPrice => Rows.Sum(row => row.FinishedPrice);
+    public long TotalPrice => Rows.Sum(row => row.FinishedPrice);
 }

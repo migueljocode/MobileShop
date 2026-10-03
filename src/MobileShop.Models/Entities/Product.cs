@@ -4,8 +4,8 @@ namespace MobileShop.Models.Entities;
 public class Product : BaseEntity
 {
     // the asking price to sell it at - discount is calculated against this
-    [Range(0, int.MaxValue, ErrorMessage = "{0} cannot be negative.")]
-    public int Price { get; set; }
+    [Range(0, long.MaxValue, ErrorMessage = "{0} cannot be negative.")]
+    public long Price { get; set; }
 
     // the manufacturer and the category are both reached through the model - a model's category
     // is a permanent fact about that model, so neither is duplicated on the product

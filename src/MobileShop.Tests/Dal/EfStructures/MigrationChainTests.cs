@@ -35,7 +35,8 @@ public class MigrationChainTests : IDisposable
                 "20260920163656_NormalizeCatalog",
                 "20260923232224_AddEmployeeEntity",
                 "20261001161450_AddPartNumber",
-                "20261002060000_UseIntegerRialMoney"
+                "20261002060000_UseIntegerRialMoney",
+                "20261004090000_WidenMoneyToLong"
             },
             migrations);
     }
@@ -69,7 +70,7 @@ public class MigrationChainTests : IDisposable
             .SqlQueryRaw<int>("SELECT COUNT(*) AS Value FROM \"__EFMigrationsHistory\"")
             .Single();
 
-        Assert.Equal(6, migrationHistoryCount);
+        Assert.Equal(7, migrationHistoryCount);
 
         Assert.Equal(
             "INTEGER",

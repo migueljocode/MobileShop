@@ -12,14 +12,14 @@ public sealed class CreateGlassInputModel
     [Required]
     public int CompatibleModelId { get; set; }
 
-    [Range(0, int.MaxValue)]
-    public int Price { get; set; }
+    [Range(0, long.MaxValue)]
+    public long Price { get; set; }
 
     [Range(0, double.MaxValue)]
     public decimal? ProfitPercent { get; set; }
 
-    [Range(0, int.MaxValue)]
-    public int? ProfitAmount { get; set; }
+    [Range(0, long.MaxValue)]
+    public long? ProfitAmount { get; set; }
 
     [Range(1, int.MaxValue, ErrorMessage = "Count must be at least 1.")]
     public int Count { get; set; } = 1;
