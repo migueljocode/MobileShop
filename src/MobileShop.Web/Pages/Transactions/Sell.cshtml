@@ -9,7 +9,7 @@
     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
     <label asp-for="Input.ProductId" class="form-label">Product</label><select asp-for="Input.ProductId" class="form-select" data-product-picker><option value="0">Select product</option><partial name="/Pages/Shared/_ProductPickerOptions.cshtml" model="new ProductPickerViewModel(Model.Products, Model.Input.ProductId)" /></select><span asp-validation-for="Input.ProductId" class="text-danger"></span>
     <label asp-for="Input.CustomerId" class="form-label mt-2">Customer</label><select asp-for="Input.CustomerId" class="form-select"><option value="0">Select customer</option>@foreach (var customer in Model.Customers) { <option value="@customer.Id">@customer.Label@(string.IsNullOrWhiteSpace(customer.TypeLabel) ? string.Empty : $" ({customer.TypeLabel})")</option> }</select><span asp-validation-for="Input.CustomerId" class="text-danger"></span>
-    <label asp-for="Input.Price" class="form-label mt-2"></label><input asp-for="Input.Price" class="form-control" data-finished-price-input /><span asp-validation-for="Input.Price" class="text-danger"></span>
+    <label asp-for="Input.Price" class="form-label mt-2"></label><input asp-for="Input.Price" class="form-control" data-finished-price-input inputmode="numeric" step="1" min="0" max="@MobileShop.Models.MoneyLimits.MaxRials" /><span asp-validation-for="Input.Price" class="text-danger"></span>
     <label asp-for="Input.Date" class="form-label mt-2"></label><input asp-for="Input.Date" type="date" class="form-control" /><button class="btn btn-primary mt-3">Record sell</button>
 </form>
 @if (Model.Message is not null) { <div class="alert alert-success mt-3">@Model.Message</div> }
