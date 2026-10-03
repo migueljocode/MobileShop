@@ -242,3 +242,44 @@ Make exactly this mechanical correction:
 
 **Authorized:** one Stage T Step 1 correction pass only.
 **Next:** correction commit → CI → actor report in `act.md` → STOP for Job B.
+
+
+# Audit — Job B: Stage T Step 1 migration-chain correction authorization
+
+**Verdict: FAIL — Step 1 remains open; one narrowly scoped migration metadata correction is authorized. Step 2 remains NOT authorized.**
+
+## Finding
+
+### HIGH — the existing UseIntegerRialMoney migration Designer was renamed/replaced
+
+Action **#316** / run **37123756678** failed in the Ubuntu test job after the build passed.
+
+The migration chain discovered six migrations instead of the required seven, and the legacy-money upgrade test failed because 20261002060000_UseIntegerRialMoney was no longer discovered/applied. The Stage T plan explicitly requires preserving UseIntegerRialMoney and all prior migrations.
+
+The implementation incorrectly moved the existing 20261002060000_UseIntegerRialMoney.Designer.cs metadata onto 20261004090000_WidenMoneyToLong.Designer.cs. This removed the Designer registration for the existing migration.
+
+## Correction authorized
+
+1. Restore src/MobileShop.Dal/Migrations/20261002060000_UseIntegerRialMoney.Designer.cs as the Designer for the existing 20261002060000_UseIntegerRialMoney migration.
+   - Preserve its original migration identity: [Migration("20261002060000_UseIntegerRialMoney")]
+   - Preserve its existing BuildTargetModel for the pre-Step-1 model.
+   - Preserve [DbContext(typeof(AppDbContext))] and the required migrations namespace.
+2. Keep src/MobileShop.Dal/Migrations/20261002060000_UseIntegerRialMoney.cs unchanged.
+3. Keep src/MobileShop.Dal/Migrations/20261004090000_WidenMoneyToLong.cs unchanged.
+4. Create/fix src/MobileShop.Dal/Migrations/20261004090000_WidenMoneyToLong.Designer.cs so it is the Designer for only 20261004090000_WidenMoneyToLong, with [Migration("20261004090000_WidenMoneyToLong")], and its BuildTargetModel matching the current snapshot with the widened money properties.
+5. Do not change migration IDs, migration operations, snapshot, EF configuration, tests, workflow, scripts, API/authentication, DatabaseInitializer, plan, to-do, or any unrelated migration.
+6. Both Designer files must exist side-by-side; no rename of the existing UseIntegerRialMoney migration is permitted.
+7. Do not run local dotnet build or dotnet test.
+
+## Commit and gate
+
+- Use one implementation commit with exact message:
+  fix(migrations): restore migration chain Designer metadata
+- Push the correction and use its GitHub Actions run as the Step 1 correction gate.
+- After the CI gate, update act.md separately with the correction result.
+- Step 2 must not start regardless of the correction result.
+
+## Gate
+
+**Authorized:** one Stage T Step 1 migration-chain correction pass only.
+**Next:** correction commit → CI → actor report in act.md → STOP for Job B.
