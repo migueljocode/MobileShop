@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using MobileShop.Dal.EfStructures;
 
@@ -10,6 +11,7 @@ using MobileShop.Dal.EfStructures;
 namespace MobileShop.Dal.Migrations
 {
     [DbContext(typeof(AppDbContext))]
+    [Migration("20261002060000_UseIntegerRialMoney")]
     partial class UseIntegerRialMoney
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
