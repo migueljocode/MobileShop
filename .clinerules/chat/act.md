@@ -327,3 +327,42 @@ The CI evidence therefore shows the correction fixed compilation, but the Step 1
 **Step 1 is NOT closed.** The authorized correction pass failed its CI gate. Step 2 remains **not authorized**.
 
 The Job B authorization allowed only the single Persian invoice `int` → `long` correction, with no further production/test/migration/snapshot changes. No additional correction was made after Action #316.
+
+
+# Stage T — Step 1 Migration-Chain Correction Act Report
+
+## Correction
+
+Correction commit:
+`31bfade35817faef0c6cf5ff96fd78e6099f68e1` — `fix(migrations): restore migration chain Designer metadata`
+
+The correction restored the original `20261002060000_UseIntegerRialMoney.Designer.cs` from the Stage S implementation state, preserving its original migration identity and pre-Step-1 target model. The existing `UseIntegerRialMoney.cs`, `WidenMoneyToLong.cs`, and current widened `WidenMoneyToLong.Designer.cs` were not changed. No local `dotnet build` or `dotnet test` was run.
+
+## CI Verification
+
+**Action: #319 — Failure**  
+Run ID: `37125640782`  
+Head SHA: `31bfade35817faef0c6cf5ff96fd78e6099f68e1`
+
+Jobs:
+- **PowerShell log utility (Windows): Success.**
+- **Ubuntu `test`: Failure** at **Test**.
+- Restore: Success.
+- Build: **Success — 0 warnings, 0 errors.**
+- .NET tests: **Failure — 2 failed, 328 passed, 0 skipped, 330 total.**
+- Bash log utility test: Skipped.
+- PowerShell log utility test: Skipped.
+- Factor PDF artifact upload: Skipped.
+- Production smoke: Skipped.
+
+Failed tests:
+1. `DatabaseMigratorTests.Legacy_migration_database_is_backed_up_before_upgrade`: expected 6 migrations, actual 7.
+2. `DatabaseMigratorTests.Ensure_created_database_is_baselined_after_verified_backup`: expected 6 migrations, actual 7.
+
+The CI result confirms the migration-chain Designer correction restored the required seventh migration; the remaining failures are stale test expectations that still assert the pre-Stage-T six-migration count.
+
+## Status
+
+**Step 1 is NOT closed.** The authorized migration-chain correction pass reached CI but failed because two migrator tests still expect 6 migrations. The audit explicitly prohibited test changes in this correction pass, so no further correction was made.
+
+**Step 2 remains NOT authorized.**
