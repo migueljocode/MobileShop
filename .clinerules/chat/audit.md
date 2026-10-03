@@ -1,11 +1,11 @@
-# Reviewer Audit — Stage T Plan (Steps 4–5)
+# Reviewer Audit — Stage T Step 4
 
 ## Verdict
-**APPROVED**
+**PASS — Stage T Step 4 is closed.**
 
-- Steps 1–3 are closed with passing CI evidence (Actions #325, #353, and #366) and properly trimmed.
-- Step 4 is actor-ready with precise symbols, invariant-culture formatting, exact input constraints, PDF Persian unit preservation, and CI smoke greps.
-- Step 5 provides clean completion and diff-hygiene gates.
+- Implemented invariant `MoneyExtensions`, integer-only price inputs bounded to `MoneyLimits.MaxRials`, Razor/JS/PDF IRR labels and formatting across all planned surfaces, and smoke greps.
+- Verified via CI **Action #370 — Success** (PR #9 / commit `25dddf6ce6a2e63371f8bc9db077909d7b3d789e`).
+- PR #9 is approved and merged into `main`.
 
 ## Gate
-**Step 4 is approved to execute.**
+**Step 5 is the active next step.**
