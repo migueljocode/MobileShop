@@ -179,3 +179,34 @@ Next: the actor does **Stage S Step 5** (smoke hardening, README documentation, 
 
 ## Gate
 Next: the **planner** plans **Stage T — IRR money foundation** (`to-do.md` is ticked for Stage S). Decided inputs: money widens to `long`; Stage S's migration, legacy-upgrade and smoke checks must stay green; the overflow-boundary tests live in Stage T.
+
+
+# Audit — Job B: Stage T plan review and Step 1 authorization
+
+**Verdict: PASS. The Stage T plan is coherent and Step 1 is authorized.**
+
+## Review
+
+- The owner decision to widen money to `long` is consistent with the identified overflow risks: the current factor total is an `int`, and the distribution calculation performs percentage multiplication in `int` arithmetic.
+- The planned Step 1 scope correctly covers the two money-bearing entities, the listed view/bind models, reporting/distribution/PDF paths, snapshot, migration chain, and the CI history-count assertions.
+- The planned SQLite migration is appropriately a no-op schema migration: SQLite represents both CLR `int` and `long` money columns as 64-bit INTEGER, while the migration records the CLR model change for EF's snapshot/chain.
+- The plan preserves the existing EF configuration/check constraints, API host, authentication, Development initialization policy, and prior `UseIntegerRialMoney` migration.
+- The Designer requirements learned from Stage S are explicit: migration using, `[DbContext(typeof(AppDbContext))]`, `[Migration("20261004090000_WidenMoneyToLong")]`, and a `BuildTargetModel` matching the updated snapshot.
+- The Stage T boundary strategy is appropriate: Step 1 establishes the wider type end-to-end; Step 2 then proves persistence, factor totals, reports, distribution and create-flow calculations across `int.MaxValue`.
+- The IRR-unit, seed-data and integer-input work is correctly separated into later steps, reducing Step 1 behavioral scope.
+- The plan explicitly requires CI as the gate and forbids local `dotnet build`/`dotnet test`, matching the established workflow.
+
+## Step 1 gate
+
+**Authorized:** Stage T Step 1 — Widen money to `long` end to end (no behaviour change).
+
+Execution constraints:
+- One implementation commit, then push and read the resulting GitHub Actions run.
+- Do not run local `dotnet build` or `dotnet test`.
+- Do not touch `to-do.md`, `plan.md`, or `audit.md` during implementation/reporting.
+- Do not touch API, authentication, `DatabaseInitializer`, EF configuration, `UseIntegerRialMoney`, or unrelated migrations.
+- Preserve the exact planned migration id and Designer requirements.
+- Record the no-`int`-money search and CI evidence in `act.md` after the gate as instructed.
+- Stop after the Step 1 CI gate; Step 2 is not authorized by this audit.
+
+**Carry-forward note:** D4 (existing Production rows are assumed to already be Rials; no automatic ×10 conversion) remains a planner assumption to be revisited only if the owner overrules it.
