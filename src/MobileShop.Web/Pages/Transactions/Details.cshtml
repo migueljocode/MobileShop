@@ -1,4 +1,5 @@
 @page
+@using MobileShop.Models.Extensions
 @model MobileShop.Web.Pages.Transactions.DetailsModel
 @{
     ViewData["Title"] = "Transaction details";
@@ -10,7 +11,7 @@
         <dt class="col-sm-3">Direction</dt><dd class="col-sm-9">@Model.Transaction.Direction</dd>
         <dt class="col-sm-3">Date</dt><dd class="col-sm-9">@Model.Transaction.Date.ToString("yyyy-MM-dd HH:mm")</dd>
         <dt class="col-sm-3">Product</dt><dd class="col-sm-9">@Model.Transaction.ProductLabel</dd>
-        <dt class="col-sm-3">Finished price</dt><dd class="col-sm-9">@Model.Transaction.FinishedPrice.ToString("N0")</dd>
+        <dt class="col-sm-3">Finished price (IRR)</dt><dd class="col-sm-9">@Model.Transaction.FinishedPrice.ToIrr()</dd>
         <dt class="col-sm-3">Seller</dt><dd class="col-sm-9">@Model.Transaction.SellerLabel</dd>
         <dt class="col-sm-3">Customer</dt><dd class="col-sm-9">@Model.Transaction.CustomerLabel</dd>
     </dl>
