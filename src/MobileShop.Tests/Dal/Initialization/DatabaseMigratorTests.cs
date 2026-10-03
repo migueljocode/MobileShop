@@ -92,7 +92,7 @@ public sealed class DatabaseMigratorTests : IDisposable
         Assert.Equal(DatabaseMigrationStatus.Baselined, result.Status);
         Assert.NotNull(result.BackupPath);
         Assert.True(File.Exists(result.BackupPath));
-        Assert.Equal(6L, Scalar<long>(context, "SELECT COUNT(*) FROM \"__EFMigrationsHistory\""));
+        Assert.Equal(7L, Scalar<long>(context, "SELECT COUNT(*) FROM \"__EFMigrationsHistory\""));
         Assert.Equal(
             "kept",
             Scalar<string>(context, "SELECT \"Notes\" FROM \"People\" WHERE \"FirstName\" = 'Legacy'"));
