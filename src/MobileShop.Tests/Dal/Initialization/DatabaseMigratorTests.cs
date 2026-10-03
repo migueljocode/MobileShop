@@ -74,7 +74,7 @@ public sealed class DatabaseMigratorTests : IDisposable
         Assert.Equal(
             5L,
             Scalar<long>(backup, "SELECT COUNT(*) FROM \"__EFMigrationsHistory\""));
-        Assert.Equal(6L, Scalar<long>(context, "SELECT COUNT(*) FROM \"__EFMigrationsHistory\""));
+        Assert.Equal(7L, Scalar<long>(context, "SELECT COUNT(*) FROM \"__EFMigrationsHistory\""));
     }
 
     [Fact]
