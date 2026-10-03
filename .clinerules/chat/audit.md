@@ -1,10 +1,42 @@
-# Audit — Job B (Execution Check): Stage S Step 1 correction (`9d1e7d0`)
+# Audit — Job B (Execution Check): Stage S Step 2 (`9fc17df`)
 
-**Verdict: PASS. Step 1 is closed; Step 2 is authorized.**
+**Verdict: FAIL — Step 2 was not done initially; one correction pass was authorized.**
 
-- **Fix:** exactly the two lines from the previous audit (`using Microsoft.EntityFrameworkCore.Migrations;` and `[Migration("20261002060000_UseIntegerRialMoney")]` under `[DbContext]`) in `20261002060000_UseIntegerRialMoney.Designer.cs`. No other file changed.
-- **CI evidence (actor-reported):** `Action: #284 — Success` for `9d1e7d0`; Ubuntu test and Windows PowerShell jobs passed, including `Migrations_are_discovered_in_order`, `Snapshot_matches_the_current_model` and `Chain_applies_to_an_empty_database`. This also resolves the two open points from the previous audit: the snapshot matches the model, and both CHECK constraints survive the migration chain.
-- **MEDIUM/LOW:** none.
+## Findings
 
-## Gate
-Next: the actor does **Stage S Step 2** (legacy-upgrade test). One step → one commit → report `Action: #<run_number>` → STOP for Job B.
+### HIGH — missing `using Microsoft.EntityFrameworkCore.Migrations;`
+`IMigrator` was referenced without the required namespace import, causing Action #288 to fail during build.
+
+### HIGH — nullable `PRAGMA foreign_key_check` assertion
+The original `Assert.Empty(Scalar<string>(..., "PRAGMA foreign_key_check;"))` could receive null when the pragma returned no rows.
+
+### LOW — CHECK constraint assertions
+The original `Assert.True(... == 1)` assertions hid the actual value on failure.
+
+## Correction
+
+Correction commit:
+`8cc7a67ba8f89001b041469390dda3d1a1c2db30` — `test: fix legacy money upgrade test compile and assertions`
+
+Only `src/MobileShop.Tests/Dal/EfStructures/LegacyMoneyUpgradeTests.cs` was changed.
+
+## CI Gate
+
+Action **#290** — **Success**  
+Run ID: `37101311917`
+
+- Windows PowerShell log utility: passed.
+- Ubuntu `test`: passed.
+- Build: 0 warnings, 0 errors.
+- .NET tests: **320 passed, 0 failed, 0 skipped**.
+- Bash comprehensive tests: passed.
+- PowerShell tests: passed.
+
+The legacy-upgrade test therefore passed as part of the full .NET suite.
+
+**Gate: Step 2 correction PASSED. Step 2 is closed. Step 3 is authorized by the CI gate.**
+
+Actor report recorded separately in `act.md` commit:
+`ef83abd934e5ffb5b637adcda14f350237040898`.
+
+Per the correction instructions, `to-do.md` and `plan.md` were not changed.
