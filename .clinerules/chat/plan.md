@@ -1,29 +1,20 @@
-# Plan — Stage T — IRR money foundation
+# Stage T — IRR money foundation
 
-## Requirements
-- Functional
-  - Every money amount in the app is whole IRR (Rials), stored and calculated as `long` (prices can reach 1,000,000,000 IRR and more; `int` caps at 2,147,483,647).
-  - A single unit indicator (**IRR**) appears on every page that shows or asks for money; the Persian factor PDF keeps the Persian name of the same unit ("ریال").
-  - All seeded sample data is expressed in Rials.
-  - Price inputs accept whole numbers only (no decimals, no precision); thousands separators are display-only. Percentages stay decimal.
-  - Sums, profit/loss totals, factor totals and the 40/50/10 distribution never overflow.
-- Non-functional: no data loss, the Stage S migration/CI harness stays green, CI evidence for every step, no change to the Api host, authentication or Development initialization policy.
-- Constraints (project-specific-rules.md): API untouched, no auth changes, Apple ID inventory passwords stay plaintext, EF configuration centralized, project-wide usings in `GlobalUsings.cs`, no `bin`/ `obj` changes.
-
-## Assumptions and decisions (labelled)
-- **D1 (owner, decided):** money is `long`. Real overflow risks found while planning: `TransactionFactorViewModel.TotalPrice` uses checked `Enumerable.Sum` on `int` (throws above 2.1B), and `DistributionCalculator` computes `totalProfit * 40 / 100` / `* 50 / 100` in `int` arithmetic, which silently wraps once a period's profit passes about 53.7 million IRR (it is already wrong at Rial scale).
-- **D2 (planner):** `MoneyLimits.MaxRials = 10_000_000_000_000` (10^13 IRR). It keeps every client-side calculation exact (10^13 × 100 < 2^53 in JavaScript) and is far above any real price.
-- **D3 (planner default, owner can overrule):** the factor PDF keeps "ریال" (Persian for Rial = IRR); web pages show "IRR".
-- **D4 (planner assumption — owner please confirm):** existing Production rows are taken to be Rials already (the earlier `UseIntegerRialMoney` stage and the PDF's "ریال" label assume it); no automatic ×10 data conversion is performed. If real data was entered in Toman, a separate, reviewed data-migration step is needed before Production use.
-- **D5 (planner):** the seeded values (phones around 45,000,000) are Toman-scale, so the sample data is multiplied by 10.
-- **D6 (planner):** SQLite stores `int` and `long` as the same 64-bit `INTEGER`, so widening needs **no table rebuild**. A no-op migration `WidenMoneyToLong` records the CLR type change in the model snapshot; this is what keeps the Stage S snapshot test green.
-- **A1:** GitHub Actions is the build/test gate. The actor does not run `dotnet` locally; each step is verified by the pushed commit's run, reported as `Action: #<run_number> — <Success|Failure|Pending>`.
+## Decisions
+- **D1:** money widened to `long` across the stack; percentages stay `decimal`.
+- **D2:** unit is IRR (Rial) everywhere; Persian "ریال" on the factor PDF; English "IRR" on Razor displays and table headers.
+- **D3:** whole numbers only for money inputs (`step="1"`, `min="0"`, `max="@MoneyLimits.MaxRials"`); no fractional Rials.
+- **D4:** Production migration policy: the widening migration is non-destructive, but existing values are assumed to already be in Rials (the PDF's "ریال" label assumed it); no automatic ×10 data conversion is performed.
+- **D5:** Seeded values are Toman-scale, so sample data is multiplied by 10.
+- **D6:** SQLite stores `int` and `long` as 64-bit `INTEGER`; widening uses a no-op migration `WidenMoneyToLong` to update the EF model snapshot.
+- **A1:** GitHub Actions is the build/test gate (`Action: #<run_number> — <Success|Failure|Pending>`).
 
 ## Reviewer Briefing
-- **Step 1 is HIGH risk / MEDIUM confidence:** a wide mechanical type change plus a hand-written migration, Designer and snapshot edit. Lessons from Stage S apply: the Designer needs `using Microsoft.EntityFrameworkCore.Migrations;`, `[DbContext(typeof(AppDbContext))]`, `[Migration("<id>")]` and a `BuildTargetModel` equal to the updated snapshot; the history count assertions change from 6 to 7 in tests and in `production-smoke.sh`.
-- **Step 2** adds the boundary tests the plan promised in Stage S; check that each test crosses `int.MaxValue`.
-- **Step 4 is MEDIUM / MEDIUM:** Razor and JS output is not unit-testable; evidence is the CI smoke greps plus reading the diff for every `.ToString("N0")` replaced.
-- No `int` money may remain: search for `int` near `Price|Profit|Amount|Total|Sold|Bought|FinishedPrice|SuggestedPrice` after Step 1.
+- **Step 1:** HIGH risk / MEDIUM confidence (completed).
+- **Step 2:** boundary tests (completed).
+- **Step 3:** MEDIUM risk / HIGH confidence — sample data ×10; verify with CI smoke.
+- **Step 4:** MEDIUM risk / MEDIUM confidence — Razor, JS, PDF formatting with `MoneyExtensions`; verified by CI smoke greps.
+- **Step 5:** LOW risk / HIGH confidence — README and final stage diff check.
 
 ## [x] Step 1 — Widen money to `long` end to end (no behaviour change)
 - Completed: CI Action #325 — Success; 330/330 .NET tests passed, build had 0 warnings/errors, and Production smoke passed.
