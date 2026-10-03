@@ -264,6 +264,26 @@ public class SampleDataSeedTests : IDisposable
     }
 
     [Fact]
+    public void Sample_data_money_is_expressed_in_rials()
+    {
+        using var context = SeedFreshDatabase();
+
+        Assert.All(context.Products, product =>
+        {
+            Assert.True(product.Price >= 1_000_000);
+            Assert.True(product.Price <= MobileShop.Models.MoneyLimits.MaxRials);
+            Assert.Equal(0, product.Price % 10);
+        });
+
+        Assert.All(context.Transactions, transaction =>
+        {
+            Assert.True(transaction.FinishedPrice >= 1_000_000);
+            Assert.True(transaction.FinishedPrice <= MobileShop.Models.MoneyLimits.MaxRials);
+            Assert.Equal(0, transaction.FinishedPrice % 10);
+        });
+    }
+
+    [Fact]
     public void Seeded_credentials_keep_required_formats()
     {
         using var context = SeedFreshDatabase();
