@@ -132,3 +132,22 @@ Per the execution workflow, no Step 4 work was started.
 ## Gate
 
 Stage S Step 4 is authorized: CI Production smoke using `.github/scripts/production-smoke.sh` plus its workflow step. One implementation commit, one CI gate, then STOP for Job B.
+
+
+# Audit — Job B (Execution Check): Stage S Step 4 (`f8525af`)
+
+**Verdict: PASS. Step 4 is closed; Step 5 is authorized.**
+
+- **CI evidence (actor-reported):** Action **#302 — Success** for `f8525af`; restore, build, .NET tests, Bash and PowerShell log tests, the Production smoke step and both artifact uploads passed, plus the Windows PowerShell job. The run was not independently readable because of GitHub API rate limiting.
+- **What the script proves:** a Development-seeded `EnsureCreated` database (no history) is refused by Production startup with `--migrate-database` guidance; `--migrate-database` baselines it with exactly one backup and six history rows; seven routes return 200 in Production; the row-count fingerprint is unchanged after migration and after Production startup; no second backup appears.
+- **Scope:** only `.github/scripts/production-smoke.sh` and `.github/workflows/dotnet.yml` (plus `act.md`); no production code or tests changed.
+
+## Step 5 findings carried forward
+
+1. **MEDIUM — local-run data loss:** add a guard refusing to run unless `CI=true` or `MOBILESHOP_SMOKE_ALLOW_DELETE=1` because the script deletes repo-root database/log artifacts.
+2. **MEDIUM — possible CI hang:** wrap the foreground Production guard and `--migrate-database` invocations in `timeout 120`, treating exit 124 as failure, and set `timeout-minutes: 10` on the smoke step.
+3. **LOW — stronger evidence:** grep the migration log for `Legacy database baselined successfully`; fail if the Production log contains `[ERR]`, `[FTL]`, `fail:`, `crit:`, or `Unhandled exception`.
+
+## Gate
+
+Next: the actor does **Stage S Step 5** (smoke hardening, README documentation, and final validation). One step → one commit → report `Action: #<run_number>` → STOP for Job B.
