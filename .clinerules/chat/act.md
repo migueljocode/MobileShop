@@ -369,3 +369,89 @@ Action #326 (run ID 37129575983) was triggered by the documentation commit that 
 **Stage T Step 1 PASSED its CI gate and is closed. Step 2 is authorized.**
 
 The remaining migrator history expectation was corrected, and the complete CI pipeline passed with 330/330 .NET tests passing and the production smoke succeeding.
+
+
+# Stage T — Step 2 Act Report
+
+## Initial Implementation
+
+Commit:
+`32b55110492d0aa56e639b8c2926528162687c76` — `feat: Stage T Step 2 money limits and overflow boundaries`
+
+**Action: #342 — Failure**  
+Run ID: `37148731873`  
+Head SHA: `32b55110492d0aa56e639b8c2926528162687c76`
+
+- Windows PowerShell log utility: Success.
+- Ubuntu `test`: Failure at Build.
+- Restore: Success.
+- Build: Failure — 0 warnings, 13 errors.
+- Tests and later verification steps: skipped.
+- All 13 build errors were `CS0103: The name 'MoneyLimits' does not exist in the current context` in `ProductsDataService.cs` and `TransactionsDataService.cs`.
+
+The reviewer audit then authorized one correction pass.
+
+## Correction
+
+Commit:
+`a6b60263adad7e61bbdb87026c3ee2bdcf90bd92` — `fix(products): reject over-limit computed prices in all create flows`
+
+The correction replaced the finished-price helper with decimal-safe limit checking, applied it to phone/Apple ID/glass creation, removed the duplicate phone check, added the requested Buy/Apple ID/glass boundary tests, and added the missing `MobileShop.Models` project-wide using required for `MoneyLimits`.
+
+No local `dotnet build` or `dotnet test` was run.
+
+## CI Verification
+
+**Action: #344 — Failure**  
+Run ID: `37149102396`  
+Head SHA: `a6b60263adad7e61bbdb87026c3ee2bdcf90bd92`
+
+- Windows PowerShell log utility: Success.
+- Ubuntu `test`: Failure at Build.
+- Restore: Success.
+- Build: Failure — 0 warnings, 27 errors.
+- .NET tests: skipped because build failed.
+- Bash/PowerShell utility tests and production smoke: skipped.
+
+Exact build failure messages:
+- `MoneyBoundaryTests.cs(73,49)`: CS0103 — `The name 'MoneyLimits' does not exist in the current context`.
+- `MoneyBoundaryTests.cs(73,86)`: CS0103 — `The name 'MoneyLimits' does not exist in the current context`.
+- `MoneyBoundaryTests.cs(74,51)`: CS0103 — `The name 'MoneyLimits' does not exist in the current context`.
+- `MoneyBoundaryTests.cs(74,88)`: CS0103 — `The name 'MoneyLimits' does not exist in the current context`.
+- `MoneyBoundaryTests.cs(75,49)`: CS0103 — `The name 'MoneyLimits' does not exist in the current context`.
+- `MoneyBoundaryTests.cs(75,86)`: CS0103 — `The name 'MoneyLimits' does not exist in the current context`.
+- `MoneyBoundaryTests.cs(76,41)`: CS0103 — `The name 'MoneyLimits' does not exist in the current context`.
+- `MoneyBoundaryTests.cs(77,42)`: CS0103 — `The name 'MoneyLimits' does not exist in the current context`.
+- `MoneyBoundaryTests.cs(84,49)`: CS0103 — `The name 'MoneyLimits' does not exist in the current context`.
+- `MoneyBoundaryTests.cs(84,90)`: CS0103 — `The name 'MoneyLimits' does not exist in the current context`.
+- `MoneyBoundaryTests.cs(85,51)`: CS0103 — `The name 'MoneyLimits' does not exist in the current context`.
+- `MoneyBoundaryTests.cs(85,92)`: CS0103 — `The name 'MoneyLimits' does not exist in the current context`.
+- `MoneyBoundaryTests.cs(86,49)`: CS0103 — `The name 'MoneyLimits' does not exist in the current context`.
+- `MoneyBoundaryTests.cs(86,90)`: CS0103 — `The name 'MoneyLimits' does not exist in the current context`.
+- `MoneyBoundaryTests.cs(87,41)`: CS0103 — `The name 'MoneyLimits' does not exist in the current context`.
+- `MoneyBoundaryTests.cs(88,42)`: CS0103 — `The name 'MoneyLimits' does not exist in the current context`.
+- `MoneyBoundaryTests.cs(82,25)`: CS0826 — `No best type found for implicitly-typed array`.
+- `TransactionsDataServiceTests.cs(451,21)`: CS0103 — `The name 'MoneyLimits' does not exist in the current context`.
+- `TransactionsDataServiceTests.cs(471,21)`: CS0103 — `The name 'MoneyLimits' does not exist in the current context`.
+- `ProductsDataServiceTests.cs(1563,58)`: CS0246 — `The type or namespace name 'CreatePhoneInputModel' could not be found (are you missing a using directive or an assembly reference?)`.
+- `ProductsDataServiceTests.cs(1582,58)`: CS0246 — `The type or namespace name 'CreatePhoneInputModel' could not be found (are you missing a using directive or an assembly reference?)`.
+- `ProductsDataServiceTests.cs(1586,21)`: CS0103 — `The name 'MoneyLimits' does not exist in the current context`.
+- `ProductsDataServiceTests.cs(1592,29)`: CS0103 — `The name 'CreatePhoneInputModel' does not exist in the current context`.
+- `ProductsDataServiceTests.cs(1603,21)`: CS0103 — `The name 'MoneyLimits' does not exist in the current context`.
+- `ProductsDataServiceTests.cs(1622,21)`: CS0103 — `The name 'MoneyLimits' does not exist in the current context`.
+- `ProductsDataServiceTests.cs(1645,21)`: CS0103 — `The name 'MoneyLimits' does not exist in the current context`.
+- `ProductsDataServiceTests.cs(1668,21)`: CS0103 — `The name 'MoneyLimits' does not exist in the current context`.
+
+## Status
+
+**Stage T Step 2 correction FAILED CI. Step 2 is not closed. Step 3 is NOT authorized.**
+
+The single authorized correction pass is exhausted by Action #344. No further code correction was made.
+
+## Limitations / Problems
+
+The initial Step 2 commit failed because the Services project could not resolve `MoneyLimits`. The correction added that project-wide namespace import, but the test project still lacks the corresponding `MobileShop.Models` visibility and also lacks the existing bind-model visibility needed by the newly added `CreatePhoneInputModel` references. Because CI failed at Build, no test results are available.
+
+The reviewer audit was recorded in commit `27a90834bc6e54f253447ebefbb45971bc146e0f` with message `docs(audit): Job B FAIL for Stage T Step 2 (glass computed-price limit)`.
+
+No changes were made to `to-do.md`, `plan.md`, or Stage 3 work.
