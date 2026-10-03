@@ -210,3 +210,35 @@ Execution constraints:
 - Stop after the Step 1 CI gate; Step 2 is not authorized by this audit.
 
 **Carry-forward note:** D4 (existing Production rows are assumed to already be Rials; no automatic ×10 conversion) remains a planner assumption to be revisited only if the owner overrules it.
+
+# Audit — Job B: Stage T Step 1 correction authorization (`1da44be`)
+
+**Verdict: FAIL — Step 1 implementation does not compile; one narrow correction pass is authorized. Step 2 remains NOT authorized.**
+
+## Finding
+
+### HIGH — Persian invoice presentation money type remains `int`
+
+Action **#313** / run **37122821381** failed during Ubuntu Build with:
+
+`src/MobileShop.Services/PDF/Configuration/QuestPdfGenerator.cs(475,29): error CS0266: Cannot implicitly convert type 'long' to 'int'`
+
+The failing path is `ResolvePersian(InvoiceViewModel model)`: `InvoiceViewModel.FinishedPrice` was widened to `long`, while `PersianInvoicePresentation.FinishedPrice` remains `int`. The corresponding `InvoicePresentation.FinishedPrice` is already `long`.
+
+## Correction authorized
+
+Make exactly this mechanical correction:
+
+- Change `PersianInvoicePresentation.FinishedPrice` from `int` to `long` in `src/MobileShop.Services/PDF/Configuration/QuestPdfGenerator.cs`.
+- No other production, test, migration, snapshot, workflow, script, plan, audit, or to-do changes.
+- Do not run local `dotnet build` or `dotnet test`.
+- Use one implementation commit with message:
+  `fix: widen Persian invoice presentation price to long`
+- Push the correction and use its GitHub Actions run as the Step 1 correction gate.
+- After the CI gate, update `act.md` separately with the correction result.
+- Step 2 must not start regardless of the correction result.
+
+## Gate
+
+**Authorized:** one Stage T Step 1 correction pass only.
+**Next:** correction commit → CI → actor report in `act.md` → STOP for Job B.
