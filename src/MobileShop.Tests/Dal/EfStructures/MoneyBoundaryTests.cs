@@ -79,7 +79,7 @@ public class MoneyBoundaryTests : IDisposable
 
         Assert.All(inputs, input => Assert.Empty(Validate(input)));
 
-        var overLimit = new[]
+        var overLimit = new object[]
         {
             new CreatePhoneInputModel { Price = MoneyLimits.MaxRials + 1, ProfitAmount = MoneyLimits.MaxRials + 1 },
             new CreateAppleIdInputModel { Price = MoneyLimits.MaxRials + 1, ProfitAmount = MoneyLimits.MaxRials + 1 },

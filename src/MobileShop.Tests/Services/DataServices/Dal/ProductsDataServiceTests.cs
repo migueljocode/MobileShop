@@ -1,3 +1,5 @@
+using MobileShop.Models.ViewModels.Web.BindModels;
+
 namespace MobileShop.Tests.Services.DataServices.Dal;
 
 /// <summary>
