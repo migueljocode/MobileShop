@@ -52,3 +52,43 @@ Per the correction instructions, `to-do.md` and `plan.md` were not changed.
 
 ## Gate
 Next: the actor does **Stage S Step 3** (explicit backed-up `--migrate-database` command and read-only Production startup guard; HIGH risk). One step → one commit → report `Action: #<run_number>` → STOP for Job B.
+
+
+# Audit — Job B (Execution Check): Stage S Step 3 (`3e6bbdf`)
+
+**Evidence**: `act.md` still holds the Step 2 report, so there is **no Step 3 report and no `Action: #<run_number>`** for `3e6bbdf`. I could not read the run myself (GitHub API rate limit). The verdict below comes from reading the code.
+
+**Verdict: FAIL — Step 3 does not compile (two HIGH findings in `DatabaseMigrator.cs`). One correction pass is authorized; Step 4 is NOT authorized.**
+
+## Findings
+
+### HIGH — unescaped quotes inside the interpolated SQL
+`DatabaseMigrator.cs:186` contains an unescaped `"notnull"` inside a C# string.
+
+### HIGH — `SchemaColumn` is not defined
+`SqlQueryRaw<SchemaColumn>(...)` references an undefined type.
+
+### MEDIUM
+An existing empty database file should be treated like a fresh database and migrated, not refused.
+
+### LOW
+The logger is ignored; the command catches only `InvalidOperationException`; baseline product version should come from the migration snapshot when available.
+
+## Correction authorized
+
+- Correct the two HIGH compile errors.
+- Handle an existing zero-table file as a fresh database.
+- Add outcome logging.
+- Use snapshot `ProductVersion` with fallback.
+- Broaden command exception handling.
+- Update the empty-file test.
+- No local build/test.
+- Correction commit must be:
+`fix(migrations): compile DatabaseMigrator and harden the migrate command`
+- After CI, update `act.md` separately with:
+`docs(act): record Stage S Step 3 result`
+- Do not touch `to-do.md`, `plan.md`, or this audit after this audit commit.
+
+## Gate
+Step 3 correction → CI run → Job B. Step 4 starts only after Step 3 passes in CI.
+
