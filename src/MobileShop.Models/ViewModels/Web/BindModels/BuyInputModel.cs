@@ -10,7 +10,7 @@ public sealed class BuyInputModel
     public int SellerId { get; set; }
 
     [Range(0, MoneyLimits.MaxRials)]
-    [Display(Name = "Finished price")]
+    [Display(Name = "Finished price (IRR)")]
     public long Price { get; set; }
 
     [DataType(DataType.DateTime)]

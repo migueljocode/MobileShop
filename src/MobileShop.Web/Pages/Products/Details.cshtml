@@ -1,4 +1,5 @@
 @page
+@using MobileShop.Models.Extensions
 @model MobileShop.Web.Pages.Products.DetailsModel
 @{
     ViewData["Title"] = "Product details";
@@ -26,8 +27,8 @@
     @if (Model.Transactions.Count == 0) { <p class="text-muted">No transactions.</p> }
     else
     {
-        <table class="table"><thead><tr><th>Date</th><th>Direction</th><th>Price</th><th>Seller</th><th>Customer</th></tr></thead>
+        <table class="table"><thead><tr><th>Date</th><th>Direction</th><th>Price (IRR)</th><th>Seller</th><th>Customer</th></tr></thead>
         <tbody>@foreach (var transaction in Model.Transactions)
-        { <tr><td>@transaction.Date.ToString("yyyy-MM-dd")</td><td>@transaction.Direction</td><td>@transaction.FinishedPrice.ToString("N0")</td><td>@transaction.SellerLabel</td><td>@transaction.CustomerLabel</td></tr> }</tbody></table>
+        { <tr><td>@transaction.Date.ToString("yyyy-MM-dd")</td><td>@transaction.Direction</td><td>@transaction.FinishedPrice.ToIrr()</td><td>@transaction.SellerLabel</td><td>@transaction.CustomerLabel</td></tr> }</tbody></table>
     }
 }
