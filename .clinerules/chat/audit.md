@@ -56,3 +56,40 @@ The remaining correction is narrowly scoped to the percentage test expectation/a
 **Step 3 is NOT authorized.**
 
 A new explicit actor authorization is required before another correction pass.
+
+# Reviewer Audit — Stage T Step 2 Final Correction
+
+## Evidence reviewed
+
+- Final implementation commit: `a817da1ccdc59ab768e35caba2f805d1fc02c411`.
+- Final test change in `ReportsDataServiceTests.cs`.
+- Stage T Step 2 Act report recording **Action #353 — Success**.
+- Commit comparison from the preceding correction shows the final implementation change is limited to the single large-Rial percentage assertion.
+- The test at the final commit asserts the Bought, Sold, Profit, ProfitPercent, and total-profit values for 3B/5B transactions.
+
+## Verdict
+
+**PASS — Stage T Step 2 is closed.**
+
+The final correction is narrowly scoped and addresses the remaining CI failure. The final assertion rounds both the expected and actual percentage to 12 decimal places, avoiding an incompatible exact-decimal comparison while still verifying the intended percentage value. No production-code defect is indicated by the CI evidence.
+
+## Verified positives
+
+- **Action #353 — Success** is recorded for the final correction.
+- The final implementation commit changes only the failing report test assertion; no production code was changed.
+- The large-Rial integer assertions remain exact: Bought = 3,000,000,000; Sold = 5,000,000,000; Profit = 2,000,000,000; total profit = 2,000,000,000.
+- The final percentage assertion verifies the mathematical 200/3 percentage to 12 decimal places.
+- Earlier Action #347 failures for money-boundary fixtures and glass computed-price limits were resolved by the subsequent correction cycle.
+- Step 3 work has not been started.
+
+## Documentation note
+
+### LOW — Third-correction Act wording is stale/inaccurate
+
+The earlier Stage T Step 2 Third Correction Act Report says that the large-profit percentage assertion was changed to a rounded 14-decimal representation. The source at commit `1312570d8f55b2aa773f24450cbb5e0f2403a29a` shows that assertion was still an exact `Assert.Equal(200m / 3m, row.ProfitPercent)`. This is documentation-only and does not affect the final implementation or CI gate. The final-correction Act Report correctly describes the current 12-decimal rounding assertion.
+
+## Disposition
+
+**Stage T Step 2 PASSED review and is closed.**
+
+**Step 3 remains NOT authorized.** It may begin only after explicit authorization under the Job B workflow.
