@@ -1,3 +1,5 @@
+using MobileShop.Models.Extensions;
+
 namespace MobileShop.Services.PDF.Configuration;
 
 /// <summary>QuestPDF-backed invoice generator with English and Persian RTL support.</summary>
@@ -140,7 +142,7 @@ public sealed class QuestPdfGenerator(IOptions<PdfSettings> options) : IPdfGener
 
             table.Header(header =>
             {
-                HeaderCell(header.Cell(), "مبلغ");
+                HeaderCell(header.Cell(), "مبلغ (ریال)");
                 HeaderCell(header.Cell(), "طرف معامله");
                 HeaderCell(header.Cell(), "محصول");
                 HeaderCell(header.Cell(), "نوع");
@@ -153,7 +155,7 @@ public sealed class QuestPdfGenerator(IOptions<PdfSettings> options) : IPdfGener
                 var row = model.Rows[index];
                 var background = index % 2 == 0 ? "#FFFFFF" : "#F8FAFC";
 
-                BodyCell(table.Cell(), row.FinishedPrice.ToString("N0"), background, true);
+                BodyCell(table.Cell(), row.FinishedPrice.ToGroupedDigits(), background, true);
                 BodyCell(table.Cell(), row.PersonLabel, background);
                 BodyCell(table.Cell(), row.ProductLabel, background);
                 BodyCell(table.Cell(), DirectionLabel(row.Direction), background, false, true);
@@ -214,7 +216,7 @@ public sealed class QuestPdfGenerator(IOptions<PdfSettings> options) : IPdfGener
                     summary.RelativeItem().Text("جمع کل").FontSize(11).SemiBold().FontColor("#102A43");
                     summary.ConstantItem(120).AlignRight().Text(text =>
                     {
-                        text.Span(model.TotalPrice.ToString("N0")).FontSize(13).SemiBold().FontColor("#102A43");
+                        text.Span(model.TotalPrice.ToGroupedDigits()).FontSize(13).SemiBold().FontColor("#102A43");
                         text.Span("  ریال").FontSize(9).FontColor("#627D98");
                     });
                 });
@@ -329,7 +331,7 @@ public sealed class QuestPdfGenerator(IOptions<PdfSettings> options) : IPdfGener
         if (!string.IsNullOrWhiteSpace(p.ProductInformation))
             column.Item().PaddingTop(8).Text(p.ProductInformation);
 
-        column.Item().Text($"Price: {p.FinishedPrice:N0}");
+        column.Item().Text($"Price: {p.FinishedPrice.ToGroupedDigits()} IRR");
         column.Item().Text($"Count: {p.ProductCount}");
 
         if (!string.IsNullOrWhiteSpace(p.OwnershipStatus))
@@ -395,7 +397,7 @@ public sealed class QuestPdfGenerator(IOptions<PdfSettings> options) : IPdfGener
         if (!string.IsNullOrWhiteSpace(p.ProductInformation))
             column.Item().PaddingTop(8).Text(p.ProductInformation).FontFamily("Vazirmatn");
 
-        column.Item().Text($"قیمت : {p.FinishedPrice:N0}").FontFamily("Vazirmatn");
+        column.Item().Text($"قیمت : {p.FinishedPrice.ToGroupedDigits()} ریال").FontFamily("Vazirmatn");
         column.Item().Text($"تعداد : {p.ProductCount}").FontFamily("Vazirmatn");
 
         if (!string.IsNullOrWhiteSpace(p.OwnershipStatus))
