@@ -8,7 +8,7 @@
 // Hooks:
 //   [data-price]           paid price input (binds to Input.Price)
 //   [data-percent]         profit % input (binds to Input.ProfitPercent)
-//   [data-amount]          profit Rial input (binds to Input.ProfitAmount)
+//   [data-amount]          profit IRR input (binds to Input.ProfitAmount)
 //   [data-finished-price]  read-only finished price display element (not posted)
 document.addEventListener('DOMContentLoaded', function () {
     const priceEl = document.querySelector('[data-price]');
@@ -70,7 +70,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    // When paid price changes, re-link %/$ then refresh finished (same live feel as profit fields).
+    // When paid price changes, re-link percent/amount then refresh finished (same live feel as profit fields).
     function onPaidPriceInput() {
         const percent = parseFloat(percentEl.value);
         const amount = parseFloat(amountEl.value);
