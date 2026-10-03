@@ -140,3 +140,48 @@ Jobs:
 ## Status
 
 The Stage S Step 3 second correction passed its CI gate. Step 4 remains unauthorized pending Job B review.
+
+
+# Stage S — Step 4 Act Report
+
+## Step
+CI Production smoke (non-destructive proof).
+
+## Implementation
+
+Commit:
+`f8525af2b629d53611542c6d453b2a095fb6ea89` — `ci: add production database smoke test`
+
+Changed only:
+- `.github/scripts/production-smoke.sh`
+- `.github/workflows/dotnet.yml`
+
+No production code or tests were changed.
+
+## CI Verification
+
+**Action: #302 — Success**  
+Run ID: `37116102870`  
+Head SHA: `f8525af2b629d53611542c6d453b2a095fb6ea89`
+
+Ubuntu `test` job:
+- Restore: passed.
+- Build: passed.
+- .NET tests: passed.
+- Bash log utility tests: passed.
+- PowerShell log utility tests: passed.
+- Factor PDF inspection artifact upload: passed.
+- Production smoke: passed.
+- Production smoke artifact upload: passed.
+
+Windows PowerShell log utility job: passed.
+
+The smoke exercised the Development-created legacy-style database, verified Production startup refusal with `--migrate-database` guidance, ran the explicit migration command, verified six migration-history rows and a single backup, then verified the requested Production routes returned 200 while the recorded data fingerprint remained unchanged.
+
+Artifacts:
+- `production-smoke`: created successfully.
+- `factor-pdf-inspection`: created successfully.
+
+## Status
+
+**Step 4 passed its CI gate. Job B is now stopped here. Step 5 was not started.**
