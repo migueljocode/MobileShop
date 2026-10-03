@@ -9,9 +9,9 @@ public sealed class BuyInputModel
     [Range(1, int.MaxValue, ErrorMessage = "The seller should be selected.")]
     public int SellerId { get; set; }
 
-    [Range(0, int.MaxValue)]
+    [Range(0, long.MaxValue)]
     [Display(Name = "Finished price")]
-    public int Price { get; set; }
+    public long Price { get; set; }
 
     [DataType(DataType.DateTime)]
     public DateTime? Date { get; set; }
