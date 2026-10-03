@@ -1,14 +1,11 @@
-# Reviewer Audit — Stage T Step 2
+# Reviewer Audit — Stage T Plan (Steps 3–5)
 
 ## Verdict
+**APPROVED**
 
-**PASS — Stage T Step 2 is closed.**
-
-- Action **#353 — Success** is the recorded CI gate for the final correction.
-- The final correction is limited to the large-Rial percentage assertion; the exact Bought, Sold, Profit, and total-profit checks remain intact.
-- Stage T Step 1 is also already closed with **Action #325 — Success**.
-- `.clinerules/chat/plan.md` has been updated to mark Steps 1 and 2 complete and retain only compact completion results, as required after Job B.
+- Steps 1 and 2 are closed with passing CI evidence (Actions #325 and #353).
+- Remaining Steps 3–5 are well-formed, mechanically specific, and adhere strictly to repository invariants (no `MobileShop.Api`, no auth changes, invariant culture formatting, integer-only inputs, and CI-gated verification).
+- Open step specifications, symbol definitions (`MoneyExtensions`), and verification gates are complete and safe to execute.
 
 ## Gate
-
-**Step 3 remains the active next step.**
+**Step 3 is approved to execute.**
