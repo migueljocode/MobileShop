@@ -227,3 +227,57 @@ No files under `src/MobileShop.Api`, entities, authentication, Development initi
 
 - The workflow result was not independently available to the reviewer earlier because of GitHub API rate limiting; it is now verified from the workflow run API.
 - No code correction was required. The Stage U cleanup note remains as requested: remove the personal Stage 3 note and literal `&amp;` from `README.md`; those changes were not made in Step 5.
+
+
+# Stage T — Step 1 Act Report
+
+## Step
+Widen money to `long` end to end, add the no-op `WidenMoneyToLong` migration, update the EF snapshot/migration chain to seven migrations, and keep the Stage S smoke history assertion at seven.
+
+## Implementation
+
+Commit:
+`1da44be2894728278fe007c255c7f29bd8a4cc92` — `feat: widen money to long`
+
+The implementation changed the planned money-bearing entities, web/PDF view models, bind models, reporting/distribution signatures, PDF DTO, snapshot, migration Designer/new migration, migration-chain/migrator assertions, report page model, and Production smoke migration-history assertion. No API host, authentication, DatabaseInitializer, EF configuration, or prior migration was changed.
+
+No local `dotnet build` or `dotnet test` was run.
+
+## CI Verification
+
+**Action: #313 — Failure**  
+Run ID: `37122821381`  
+Head SHA: `1da44be2894728278fe007c255c7f29bd8a4cc92`
+
+Jobs:
+- Windows PowerShell log utility: **Success**.
+- Ubuntu `test`: **Failure** at **Build**.
+
+Ubuntu steps:
+- Checkout: Success.
+- Setup .NET: Success.
+- Restore: Success.
+- Build: **Failure**.
+- Test: Skipped.
+- Bash log utility test: Skipped.
+- PowerShell log utility test: Skipped.
+- Factor PDF artifact upload: Skipped.
+- Production smoke: Skipped.
+- Production smoke artifact upload: completed with no files to upload.
+
+Exact build failure:
+`src/MobileShop.Services/PDF/Configuration/QuestPdfGenerator.cs(475,29)`: **CS0266 — Cannot implicitly convert type 'long' to 'int'**.
+
+The failing assignment is in the PDF invoice presentation path: the public `InvoiceViewModel.FinishedPrice` was widened to `long`, but the corresponding internal PDF presentation property remains `int` at that location.
+
+Build reported **0 warnings, 1 error**.
+
+## Search / Scope Evidence
+
+The Step 1 implementation's intended money-bearing declarations were widened, including Product/Transaction, the listed web/bind models, factor/report models, distribution amount, PDF invoice amount, and service/report signatures. The CI build stopped before the complete suite and smoke could validate the remaining Stage S gates.
+
+## Status
+
+**Step 1 is NOT closed.** The CI gate failed, so Step 2 is not authorized.
+
+Per Job B's Step 1 authorization, no correction was made after the failed run. The exact compiler failure above must be addressed by a separately authorized correction pass before Step 1 can close.
