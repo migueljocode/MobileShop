@@ -1,10 +1,11 @@
-# Reviewer Audit — Stage T Step 3
+# Reviewer Audit — Stage T Plan (Steps 4–5)
 
 ## Verdict
-**PASS — Stage T Step 3 is closed.**
+**APPROVED**
 
-- Scaled 17 product prices and 26 transaction finished prices in `sample-data.json` to IRR (Action #364 — Success).
-- Added `Sample_data_money_is_expressed_in_rials` in `SampleDataSeedTests.cs` validating boundaries and multiple-of-10 constraints (Action #366 — Success).
+- Steps 1–3 are closed with passing CI evidence (Actions #325, #353, and #366) and properly trimmed.
+- Step 4 is actor-ready with precise symbols, invariant-culture formatting, exact input constraints, PDF Persian unit preservation, and CI smoke greps.
+- Step 5 provides clean completion and diff-hygiene gates.
 
 ## Gate
-**Step 4 is the active next step.**
+**Step 4 is approved to execute.**
