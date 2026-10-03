@@ -133,7 +133,7 @@ if [[ "${#BACKUPS[@]}" -ne 1 || ! -f "${BACKUPS[0]}" ]]; then
 fi
 
 HISTORY_COUNT="$(sqlite3 "$DB" 'SELECT COUNT(*) FROM __EFMigrationsHistory;')"
-[[ "$HISTORY_COUNT" == "6" ]]
+[[ "$HISTORY_COUNT" == "7" ]]
 
 fingerprint "$SMOKE_DIR/fingerprint-after-migrate.txt"
 diff -u "$SMOKE_DIR/fingerprint-before.txt" "$SMOKE_DIR/fingerprint-after-migrate.txt"
