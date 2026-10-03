@@ -813,7 +813,7 @@ namespace MobileShop.Dal.Migrations
                     b.Property<int>("ModelId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("Price")
+                    b.Property<long>("Price")
                         .HasColumnType("INTEGER");
 
                     b.Property<byte[]>("TimeStamp")
@@ -999,7 +999,7 @@ namespace MobileShop.Dal.Migrations
                     b.Property<int>("Direction")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("FinishedPrice")
+                    b.Property<long>("FinishedPrice")
                         .HasColumnType("INTEGER");
 
                     b.Property<bool>("IsDeleted")
