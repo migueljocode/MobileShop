@@ -5,6 +5,13 @@ ROOT="$(git rev-parse --show-toplevel)"
 DB="$ROOT/MobileShop.db"
 LOG_DIR="$ROOT/MobileShop.Log"
 SMOKE_DIR="$ROOT/TestResults/ProductionSmoke"
+
+if [[ "${CI:-}" != "true" && "${MOBILESHOP_SMOKE_ALLOW_DELETE:-}" != "1" ]]; then
+  echo "Refusing to run Production smoke outside CI because it deletes these workspace artifacts:" >&2
+  printf "  %s\n" "$DB" "$DB-wal" "$DB-shm" "$DB.*.bak" "$LOG_DIR" >&2
+  echo "Set CI=true in CI, or explicitly set MOBILESHOP_SMOKE_ALLOW_DELETE=1 for a disposable local workspace." >&2
+  exit 1
+fi
 DEV_LOG="$SMOKE_DIR/development.log"
 PROD_GUARD_LOG="$SMOKE_DIR/production-guard.log"
 MIGRATE_LOG="$SMOKE_DIR/migrate.log"
@@ -85,10 +92,15 @@ fingerprint "$SMOKE_DIR/fingerprint-before.txt"
 cp "$SMOKE_DIR/fingerprint-before.txt" "$SMOKE_DIR/fingerprint-before-copy.txt"
 
 set +e
-ASPNETCORE_ENVIRONMENT=Production ASPNETCORE_URLS="http://127.0.0.1:5099"   dotnet run --no-build --no-launch-profile --project src/MobileShop.Web >"$PROD_GUARD_LOG" 2>&1
+timeout 120 env ASPNETCORE_ENVIRONMENT=Production ASPNETCORE_URLS="http://127.0.0.1:5099"   dotnet run --no-build --no-launch-profile --project src/MobileShop.Web >"$PROD_GUARD_LOG" 2>&1
 GUARD_EXIT=$?
 set -e
 
+if [[ "$GUARD_EXIT" -eq 124 ]]; then
+  echo "Production startup guard exceeded the 120-second timeout." >&2
+  cat "$PROD_GUARD_LOG" >&2
+  exit 1
+fi
 if [[ "$GUARD_EXIT" -eq 0 ]]; then
   echo "Production startup unexpectedly succeeded against a no-history database." >&2
   cat "$PROD_GUARD_LOG" >&2
@@ -96,7 +108,22 @@ if [[ "$GUARD_EXIT" -eq 0 ]]; then
 fi
 grep -F -- "--migrate-database" "$PROD_GUARD_LOG"
 
-ASPNETCORE_ENVIRONMENT=Production   dotnet run --no-build --no-launch-profile --project src/MobileShop.Web -- --migrate-database >"$MIGRATE_LOG" 2>&1
+set +e
+timeout 120 env ASPNETCORE_ENVIRONMENT=Production   dotnet run --no-build --no-launch-profile --project src/MobileShop.Web -- --migrate-database >"$MIGRATE_LOG" 2>&1
+MIGRATE_EXIT=$?
+set -e
+
+if [[ "$MIGRATE_EXIT" -eq 124 ]]; then
+  echo "The --migrate-database command exceeded the 120-second timeout." >&2
+  cat "$MIGRATE_LOG" >&2
+  exit 1
+fi
+if [[ "$MIGRATE_EXIT" -ne 0 ]]; then
+  echo "--migrate-database failed with exit code $MIGRATE_EXIT." >&2
+  cat "$MIGRATE_LOG" >&2
+  exit "$MIGRATE_EXIT"
+fi
+grep -F "Legacy database baselined successfully" "$MIGRATE_LOG"
 
 BACKUPS=( "$DB".*.bak )
 if [[ "${#BACKUPS[@]}" -ne 1 || ! -f "${BACKUPS[0]}" ]]; then
@@ -119,6 +146,11 @@ for route in / /Products /Products/SecondHand /Transactions /People/Customers /P
 done
 
 stop_app
+if grep -Eq "\[ERR\]|\[FTL\]|fail:|crit:|Unhandled exception" "$PROD_LOG"; then
+  echo "Production log contains an error-level entry." >&2
+  grep -En "\[ERR\]|\[FTL\]|fail:|crit:|Unhandled exception" "$PROD_LOG" >&2 || true
+  exit 1
+fi
 fingerprint "$SMOKE_DIR/fingerprint-after-production.txt"
 diff -u "$SMOKE_DIR/fingerprint-after-migrate.txt" "$SMOKE_DIR/fingerprint-after-production.txt"
 
