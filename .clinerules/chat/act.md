@@ -53,3 +53,55 @@ The legacy-upgrade scenario compiled and the complete test suite passed. Step 3 
 The initial Step 2 implementation failed to compile and required the authorized correction pass. After the correction, CI passed with 320/320 .NET tests passing.
 
 No remaining Step 2 CI problem was observed.
+
+
+# Stage S — Step 3 Act Report
+
+## Step
+Explicit backed-up --migrate-database command and read-only Production startup guard.
+
+## Initial Implementation
+
+Commit:
+3e6bbdfde6c4ca8649b2c03391e931fe5d71a783 — feat: add explicit database migration command and production guard
+
+Action: #294 — Failure
+
+The Ubuntu build failed before tests ran. The Windows PowerShell job passed.
+
+Build errors included:
+- unescaped "notnull" inside the interpolated SQL string in DatabaseMigrator.cs;
+- undefined SchemaColumn.
+
+## Correction
+
+Correction commit:
+b3e0254dc380e8a7dc10c5c392a76251d24f06b1 — fix(migrations): compile DatabaseMigrator and harden the migrate command
+
+No local dotnet build or dotnet test was run.
+
+The correction added the requested schema-column materialization type, empty-file handling, outcome logging, snapshot product-version lookup, broader migration-command exception handling, and the empty-file test.
+
+## CI Verification
+
+Action: #296 — Failure
+Run ID: 37103464059
+
+- Windows PowerShell log utility: passed.
+- Ubuntu test: failed during build; tests were skipped.
+- Restore: passed.
+
+Exact Ubuntu build failures:
+- DatabaseMigrator.cs(29,20), (41,24), (47,20), (58,20), (72,16): ILogger has no LogInformation extension method available.
+- DatabaseMigrator.cs(215,23), (216,26), (220,30): AppDbContext does not expose the GetService extension used by the correction.
+- One EF1002 warning was also emitted for the interpolated raw SQL; the build failed because of the eight errors.
+
+## Status
+
+Step 3 correction FAILED CI. Step 3 is not closed. Step 4 is not authorized.
+
+The authorized correction pass is exhausted by the CI failure. No further Step 3 correction was made after Action #296.
+
+## Limitation / Problem
+
+The correction still requires the appropriate logging and EF infrastructure access namespaces/API usage before it can compile. Per the Job B gate, no Step 4 work was started.
