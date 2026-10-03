@@ -281,7 +281,7 @@ public class ReportsDataServiceTests : RepoTestBase
         Assert.Equal(3_000_000_000L, row.Bought);
         Assert.Equal(5_000_000_000L, row.Sold);
         Assert.Equal(2_000_000_000L, row.Profit);
-        Assert.Equal(66.66666666666667m, row.ProfitPercent);
+        Assert.Equal(200m / 3m, row.ProfitPercent);
         Assert.Equal(2_000_000_000L, await _service.GetProfitLossTotalAsync(null, null));
     }
 

@@ -1654,7 +1654,7 @@ public class ProductsDataServiceTests : RepoTestBase
         Assert.Equal(nameof(MobileShop.Models.ViewModels.Web.BindModels.CreateGlassInputModel.Price), result.ErrorField);
         Assert.Empty(Context.Products);
         Assert.Empty(Context.Glasses);
-        Assert.Equal(3, Context.Models.Count());
+        Assert.Equal(2, Context.Models.Count());
     }
 
     [Fact]
@@ -1677,7 +1677,7 @@ public class ProductsDataServiceTests : RepoTestBase
         Assert.Equal(nameof(MobileShop.Models.ViewModels.Web.BindModels.CreateGlassInputModel.Price), result.ErrorField);
         Assert.Empty(Context.Products);
         Assert.Empty(Context.Glasses);
-        Assert.Equal(3, Context.Models.Count());
+        Assert.Equal(2, Context.Models.Count());
     }
 
     [Fact]
