@@ -499,3 +499,43 @@ Failed tests and exact failure messages:
 **Stage T Step 2 second correction FAILED CI. Step 2 is not closed. Step 3 is NOT authorized.**
 
 Per the audit, no further correction is made after this failure. Job B stops here.
+
+
+# Stage T — Step 2 Third Correction Act Report
+
+## Correction
+
+Commit:
+`1312570d8f55b2aa773f24450cbb5e0f2403a29a` — `test: fix Stage T Step 2 boundary assertions`
+
+This correction addressed the reviewer findings by:
+- isolating the money-boundary validation fixtures from unrelated required-field validation;
+- changing the two rejected-glass model-count assertions from 3 to 2;
+- changing the large-profit percentage assertion to compare against the rounded 14-decimal representation.
+
+No production code was changed. No local `dotnet build` or `dotnet test` was run.
+
+## CI Verification
+
+**Action: #350 — Failure**  
+Run ID: `37150091734`  
+Head SHA: `1312570d8f55b2aa773f24450cbb5e0f2403a29a`
+
+- Windows PowerShell log utility: Success.
+- Ubuntu `test`: Failure at Test.
+- Build: Success.
+- .NET tests: **345 passed, 1 failed, 0 skipped, 346 total**.
+- Later verification steps: skipped.
+
+Failed test:
+- `ReportsDataServiceTests.GetProfitLossRowsAsync_handles_large_rial_profit_exactly`
+- Expected: `66.666666666666666666666666667`
+- Actual: `66.666666666666666666666666670`
+
+The money-boundary and glass tests no longer failed.
+
+## Status
+
+**Stage T Step 2 remains FAILED. Step 3 is NOT authorized.**
+
+The correction resolved three of the four Action #347 failures, but the percentage assertion still does not match the service's decimal calculation. Job B stops here pending further authorization.

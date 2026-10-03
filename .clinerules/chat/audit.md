@@ -102,3 +102,27 @@ The Stage T Step 2 gate remains **FAILED**.
 The audit-defined correction allowance is exhausted. **No further correction is authorized by this audit.** A new explicit correction authorization or updated audit is required before any code/test correction is made.
 
 Do not start Step 3. Do not modify `to-do.md` or `plan.md`.
+
+
+# Reviewer Follow-up — Action #350
+
+## Evidence
+
+Correction commit `1312570d8f55b2aa773f24450cbb5e0f2403a29a` was verified by CI Action **#350**, run ID `37150091734`.
+
+## Result
+
+**FAIL — Step 2 remains open.**
+
+Build passed. The .NET suite reported **345 passed, 1 failed, 0 skipped, 346 total**.
+
+Only the percentage test remains failing:
+- `ReportsDataServiceTests.GetProfitLossRowsAsync_handles_large_rial_profit_exactly`
+- Expected: `66.666666666666666666666666667`
+- Actual: `66.666666666666666666666666670`
+
+The previous glass model-count failures and money-boundary fixture failures are resolved.
+
+## Disposition
+
+No Step 3 work is authorized. Further correction requires explicit authorization.
