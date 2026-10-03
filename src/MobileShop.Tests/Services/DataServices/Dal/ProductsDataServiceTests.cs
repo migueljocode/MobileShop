@@ -1593,4 +1593,110 @@ public class ProductsDataServiceTests : RepoTestBase
         Assert.Empty(Context.Products);
     }
 
+    [Fact]
+    public async Task CreateAppleIdAsync_rejects_price_above_money_limit_without_writing()
+    {
+        SeedCatalog(out _, out _);
+
+        var result = await _service.CreateAppleIdAsync(new MobileShop.Models.ViewModels.Web.BindModels.CreateAppleIdInputModel
+        {
+            Price = MoneyLimits.MaxRials + 1,
+            Email = "limit@example.com",
+            Password = "password",
+        });
+
+        Assert.False(result.Succeeded);
+        Assert.Equal("The price is too large.", result.Message);
+        Assert.Equal(nameof(MobileShop.Models.ViewModels.Web.BindModels.CreateAppleIdInputModel.Price), result.ErrorField);
+        Assert.Empty(Context.Products);
+        Assert.Empty(Context.AppleIds);
+    }
+
+    [Fact]
+    public async Task CreateAppleIdAsync_rejects_computed_price_above_money_limit_without_writing()
+    {
+        SeedCatalog(out _, out _);
+
+        var result = await _service.CreateAppleIdAsync(new MobileShop.Models.ViewModels.Web.BindModels.CreateAppleIdInputModel
+        {
+            Price = MoneyLimits.MaxRials - 1,
+            ProfitPercent = 1m,
+            Email = "computed-limit@example.com",
+            Password = "password",
+        });
+
+        Assert.False(result.Succeeded);
+        Assert.Equal("The price is too large.", result.Message);
+        Assert.Equal(nameof(MobileShop.Models.ViewModels.Web.BindModels.CreateAppleIdInputModel.Price), result.ErrorField);
+        Assert.Empty(Context.Products);
+        Assert.Empty(Context.AppleIds);
+    }
+
+    [Fact]
+    public async Task CreateGlassesAsync_rejects_computed_price_above_money_limit_without_writing_any_rows()
+    {
+        SeedCatalog(out var phoneModel, out _);
+
+        var result = await _service.CreateGlassesAsync(new MobileShop.Models.ViewModels.Web.BindModels.CreateGlassInputModel
+        {
+            CompatibleManufacturerId = 1,
+            CompatibleModelId = phoneModel.Id,
+            GlassManufacturerId = 1,
+            Price = MoneyLimits.MaxRials,
+            ProfitPercent = 1m,
+            Count = 3,
+        });
+
+        Assert.False(result.Succeeded);
+        Assert.Equal("The price is too large.", result.Message);
+        Assert.Equal(nameof(MobileShop.Models.ViewModels.Web.BindModels.CreateGlassInputModel.Price), result.ErrorField);
+        Assert.Empty(Context.Products);
+        Assert.Empty(Context.Glasses);
+        Assert.Equal(3, Context.Models.Count());
+    }
+
+    [Fact]
+    public async Task CreateGlassesAsync_rejects_decimal_overflow_in_computed_price_instead_of_throwing()
+    {
+        SeedCatalog(out var phoneModel, out _);
+
+        var result = await _service.CreateGlassesAsync(new MobileShop.Models.ViewModels.Web.BindModels.CreateGlassInputModel
+        {
+            CompatibleManufacturerId = 1,
+            CompatibleModelId = phoneModel.Id,
+            GlassManufacturerId = 1,
+            Price = MoneyLimits.MaxRials,
+            ProfitPercent = decimal.MaxValue,
+            Count = 1,
+        });
+
+        Assert.False(result.Succeeded);
+        Assert.Equal("The price is too large.", result.Message);
+        Assert.Equal(nameof(MobileShop.Models.ViewModels.Web.BindModels.CreateGlassInputModel.Price), result.ErrorField);
+        Assert.Empty(Context.Products);
+        Assert.Empty(Context.Glasses);
+        Assert.Equal(3, Context.Models.Count());
+    }
+
+    [Fact]
+    public async Task CreateGlassesAsync_stores_large_valid_finished_price_for_every_product()
+    {
+        SeedCatalog(out var phoneModel, out _);
+
+        var result = await _service.CreateGlassesAsync(new MobileShop.Models.ViewModels.Web.BindModels.CreateGlassInputModel
+        {
+            CompatibleManufacturerId = 1,
+            CompatibleModelId = phoneModel.Id,
+            GlassManufacturerId = 1,
+            Price = 2_000_000_000L,
+            ProfitPercent = 25m,
+            Count = 3,
+        });
+
+        Assert.True(result.Succeeded);
+        var products = await Context.Products.ToListAsync();
+        Assert.Equal(3, products.Count);
+        Assert.All(products, product => Assert.Equal(2_500_000_000L, product.Price));
+    }
+
 }

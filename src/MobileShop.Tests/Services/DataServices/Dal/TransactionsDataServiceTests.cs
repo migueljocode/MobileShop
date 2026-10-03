@@ -457,4 +457,24 @@ public class TransactionsDataServiceTests : RepoTestBase
         Assert.Empty(Context.Transactions);
     }
 
+    [Fact]
+    public async Task RecordBuyAsync_rejects_price_above_money_limit_without_writing()
+    {
+        TestDataHelpers.SeedShopSentinels(Context);
+        var product = TestDataHelpers.CreateProduct(Context);
+        var seller = AddSeller("Ali", "Zed");
+
+        var result = await _service.RecordBuyAsync(new BuyInputModel
+        {
+            ProductId = product.Id,
+            SellerId = seller.Id,
+            Price = MoneyLimits.MaxRials + 1,
+        });
+
+        Assert.False(result.Succeeded);
+        Assert.Equal("The price is too large.", result.Message);
+        Assert.Equal(nameof(BuyInputModel.Price), result.ErrorField);
+        Assert.Empty(Context.Transactions);
+    }
+
 }

@@ -386,10 +386,7 @@ public class ProductsDataService(
         if (input.ProfitAmount > MoneyLimits.MaxRials)
             return new ServiceResult(false, "The profit amount is too large.", nameof(CreatePhoneInputModel.ProfitAmount), null);
 
-        var finishedPrice = ComputeFinishedPrice(input.Price, input.ProfitPercent, input.ProfitAmount);
-        if (finishedPrice > MoneyLimits.MaxRials)
-            return new ServiceResult(false, "The price is too large.", nameof(CreateGlassInputModel.Price), null);
-        if (finishedPrice > MoneyLimits.MaxRials)
+        if (!TryComputeFinishedPrice(input.Price, input.ProfitPercent, input.ProfitAmount, out var finishedPrice))
             return new ServiceResult(false, "The price is too large.", nameof(CreatePhoneInputModel.Price), null);
 
         var imei1 = input.IMEI1.Trim();
@@ -480,6 +477,9 @@ public class ProductsDataService(
         if (input.Count < 1)
             return new ServiceResult(false, "Count must be at least 1.", nameof(CreateGlassInputModel.Count), null);
 
+        if (!TryComputeFinishedPrice(input.Price, input.ProfitPercent, input.ProfitAmount, out var finishedPrice))
+            return new ServiceResult(false, "The price is too large.", nameof(CreateGlassInputModel.Price), null);
+
         var compatibleManufacturer = await manufacturers.FindAsync(input.CompatibleManufacturerId);
         if (compatibleManufacturer is null)
             return new ServiceResult(false, "Selected compatible phone manufacturer not found.", nameof(CreateGlassInputModel.CompatibleManufacturerId), null);
@@ -519,7 +519,6 @@ public class ProductsDataService(
             await models.AddAsync(glassModel, persist: false);
         }
 
-        var finishedPrice = ComputeFinishedPrice(input.Price, input.ProfitPercent, input.ProfitAmount);
         var batch = new List<Product>(input.Count);
 
         for (var i = 0; i < input.Count; i++)
@@ -581,8 +580,7 @@ public class ProductsDataService(
         if (input.ProfitAmount > MoneyLimits.MaxRials)
             return new ServiceResult(false, "The profit amount is too large.", nameof(CreateAppleIdInputModel.ProfitAmount), null);
 
-        var finishedPrice = ComputeFinishedPrice(input.Price, input.ProfitPercent, input.ProfitAmount);
-        if (finishedPrice > MoneyLimits.MaxRials)
+        if (!TryComputeFinishedPrice(input.Price, input.ProfitPercent, input.ProfitAmount, out var finishedPrice))
             return new ServiceResult(false, "The price is too large.", nameof(CreateAppleIdInputModel.Price), null);
 
         var email = input.Email.Trim();
@@ -644,15 +642,31 @@ public class ProductsDataService(
     /// a safety net for partial/stale posts — when the client keeps percent and amount in sync both
     /// branches agree. The result is never negative.
     /// </summary>
-    private static long ComputeFinishedPrice(long paid, decimal? percent, long? amount)
+    private static bool TryComputeFinishedPrice(long paid, decimal? percent, long? amount, out long finished)
     {
-        var finished = amount.HasValue
-            ? paid + amount.Value
-            : percent.HasValue
-                ? paid + (long)Math.Floor(paid * percent.Value / 100m)
-                : paid;
+        finished = 0;
 
-        return finished < 0 ? 0 : finished;
+        try
+        {
+            var value = amount.HasValue
+                ? (decimal)paid + amount.Value
+                : percent.HasValue
+                    ? (decimal)paid + Math.Floor((decimal)paid * percent.Value / 100m)
+                    : paid;
+
+            if (value < 0)
+                value = 0;
+
+            if (value > MoneyLimits.MaxRials)
+                return false;
+
+            finished = (long)value;
+            return true;
+        }
+        catch (OverflowException)
+        {
+            return false;
+        }
     }
 
     /// <summary>Trims a free-text note and maps whitespace-only input to null.</summary>
