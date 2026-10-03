@@ -1,11 +1,11 @@
-# Reviewer Audit — Stage T Step 4
+# Reviewer Audit — Stage T Step 5
 
 ## Verdict
-**PASS — Stage T Step 4 is closed.**
+**HOLD — Awaiting PR #9 merge into main.**
 
-- Implemented invariant `MoneyExtensions`, integer-only price inputs bounded to `MoneyLimits.MaxRials`, Razor/JS/PDF IRR labels and formatting across all planned surfaces, and smoke greps.
-- Verified via CI **Action #370 — Success** (PR #9 / commit `25dddf6ce6a2e63371f8bc9db077909d7b3d789e`).
-- PR #9 is approved and merged into `main`.
+- Commit `455fef1e983d72d8da6a1cc9b19c4ab1252b60c4` successfully added the required Money documentation to `README.md`.
+- PR #9 (`stage-t-step4-irr-ui`) containing the 19 Step 4 files has passed CI (Action #370) but must be merged into `main` to satisfy the Global Definition of Done on the primary branch.
+- Final stage sign-off is held until PR #9 is merged and the post-merge CI run is recorded.
 
 ## Gate
-**Step 5 is the active next step.**
+**Merge PR #9 into main, record the post-merge CI run, and refresh act.md.**
