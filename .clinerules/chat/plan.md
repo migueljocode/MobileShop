@@ -24,17 +24,9 @@
 - Completed: CI Action #353 — Success; final correction verified the large-Rial report percentage assertion while preserving exact Bought/Sold/Profit/total-profit checks.
 - Carry-over: none.
 
-## [ ] Step 3 — Seed data in Rials
-- Files
-  - modify: `src/MobileShop.Dal/Initialization/sample-data.json` — **only** `products[].price` (17 rows) and `transactions[].finishedPrice` (26 rows), multiplied by 10; tests that assert seeded money values (for example `SampleDataSeedTests` and any report/home test that sums seeded rows — CI will show them)
-  - do not touch: any other JSON field, the loader, entities
-- Method: apply the ×10 with a script (python/jq) so no value is hand-edited; the diff must show only those two fields changing.
-- Test: `Sample_data_money_is_expressed_in_rials`: every seeded `Price` and `FinishedPrice` is a multiple of 10, at least 1,000,000 and at most `MoneyLimits.MaxRials`.
-- Edge cases: the Production smoke seeds a Development database from this file, so its fingerprints change but must stay equal before and after migration within one run.
-- Verify: CI run number; expect all tests and the smoke step passing.
-- Done when: the seeded data is in Rials, tests updated, CI green.
-- Risk: MEDIUM
-- Confidence: HIGH
+## [x] Step 3 — Seed data in Rials
+- Completed: CI Actions #364 and #366 — Success; sample data scaled to IRR and asserted >= 1,000,000, <= MaxRials, and multiple of 10.
+- Carry-over: none.
 
 ## [ ] Step 4 — IRR indicator on every page and integer-only price inputs
 - Files
