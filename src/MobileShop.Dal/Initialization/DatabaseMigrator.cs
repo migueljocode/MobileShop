@@ -1,3 +1,6 @@
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.Extensions.Logging;
+
 namespace MobileShop.Dal.Initialization;
 
 public enum DatabaseMigrationStatus
@@ -184,10 +187,10 @@ public static class DatabaseMigrator
 
         foreach (var table in tables)
         {
-            var safeTable = table.Replace("'", "''", StringComparison.Ordinal);
             var columns = context.Database
                 .SqlQueryRaw<SchemaColumn>(
-                    $"SELECT name AS Name, type AS DeclaredType, \"notnull\" AS NotNullFlag, pk AS PrimaryKey FROM pragma_table_info('{safeTable}') ORDER BY cid")
+                    "SELECT name AS Name, type AS DeclaredType, \"notnull\" AS NotNullFlag, pk AS PrimaryKey FROM pragma_table_info({0}) ORDER BY cid",
+                    table)
                 .ToList();
 
             foreach (var column in columns)
