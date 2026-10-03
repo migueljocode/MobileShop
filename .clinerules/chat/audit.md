@@ -317,3 +317,30 @@ The actor may make exactly this narrow correction:
 
 **Authorized:** one Stage T Step 1 DatabaseMigrator test-expectation correction pass only.
 **Next:** correction commit → CI → actor report in `act.md` → STOP for Job B.
+
+
+# Audit — Job B: Stage T Step 1 final migrator-test correction authorization
+
+**Verdict: FAIL — Step 1 remains open; one narrowly scoped test-expectation correction is authorized. Step 2 remains NOT authorized.**
+
+## Finding
+
+Action **#322** / run **37127166110** reached the test gate with a clean build (**0 warnings, 0 errors**) and **329 passed / 1 failed / 0 skipped**.
+
+The remaining failure is the second stale migration-history expectation in DatabaseMigratorTests.Ensure_created_database_is_baselined_after_verified_backup: expected **6**, actual **7**. The seven-migration chain is the intended Stage T chain.
+
+## Correction authorized
+
+1. In src/MobileShop.Tests/Dal/Initialization/DatabaseMigratorTests.cs, change only the remaining assertion in Ensure_created_database_is_baselined_after_verified_backup from **6L** to **7L**.
+2. Do not alter production code, migration files, Designer files, snapshot, EF configuration, workflow, scripts, API/authentication, DatabaseInitializer, plan, to-do, or any other test.
+3. Do not change test logic beyond that single expected migration-count literal.
+4. Do not run local dotnet build or dotnet test.
+5. Use one implementation commit with exact message: test: fix remaining migrator history expectation
+6. Push the correction and use its GitHub Actions run as the Step 1 correction gate.
+7. After the CI gate, update act.md separately with the result.
+8. Step 2 must not start regardless of the correction result.
+
+## Gate
+
+**Authorized:** one final Stage T Step 1 DatabaseMigrator test-expectation correction pass only.
+**Next:** correction commit → CI → actor report in act.md → STOP for Job B.
