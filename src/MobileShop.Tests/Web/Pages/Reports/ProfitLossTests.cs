@@ -21,7 +21,7 @@ public class ProfitLossTests
     {
         // The page now receives distribution rows from the area service rather than computing them
         // from employee entities, so the double returns a representative fixed three-row result.
-        serviceMock.Setup(s => s.GetDistributionRowsAsync(It.IsAny<int>()))
+        serviceMock.Setup(s => s.GetDistributionRowsAsync(It.IsAny<long>()))
             .ReturnsAsync(new[]
             {
                 new DistributionRow { EmployeeName = "Anis Sahabi", SharePercent = 50, CalculatedAmount = 500 },
