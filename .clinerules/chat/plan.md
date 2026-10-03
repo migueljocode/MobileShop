@@ -13,7 +13,7 @@
 - **Step 1:** HIGH risk / MEDIUM confidence (completed).
 - **Step 2:** boundary tests (completed).
 - **Step 3:** MEDIUM risk / HIGH confidence (completed).
-- **Step 4:** MEDIUM risk / MEDIUM confidence (completed in PR #9; awaiting merge to main).
+- **Step 4:** MEDIUM risk / MEDIUM confidence (completed on branch `stage-t-step4-irr-ui`; awaiting PR #9 merge to `main`).
 - **Step 5:** LOW risk / HIGH confidence — README docs committed; awaiting PR #9 merge and final CI run.
 
 ## [x] Step 1 — Widen money to `long` end to end (no behaviour change)
@@ -30,7 +30,7 @@
 
 ## [x] Step 4 — IRR indicator on every page and integer-only price inputs
 - Completed: CI Action #370 — Success (PR #9); invariant `MoneyExtensions`, integer-only inputs, Razor/JS/PDF IRR formatting, and production smoke greps passed.
-- Carry-over: PR #9 merge to main required for final stage sign-off.
+- Carry-over: PR #9 merge into `main` required before final sign-off.
 
 ## [ ] Step 5 — Docs and final Stage T validation
 - Files: modify `README.md` with a "Money" section: IRR/Rial whole numbers stored as `long`, the `MoneyLimits.MaxRials` cap, the display convention (grouped digits plus IRR; Persian "ریال" on the factor PDF), seeded data in Rials, and the note that existing Production rows are not converted (D4).
