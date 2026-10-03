@@ -185,3 +185,45 @@ Artifacts:
 ## Status
 
 **Step 4 passed its CI gate. Job B is now stopped here. Step 5 was not started.**
+
+
+# Stage S — Step 5 Act Report
+
+- Implementation commit: `0baf6c9f55a29b407c8171ba7278aaddf42bb365` (`ci: harden production smoke and document database upgrades`).
+- Action: **#306 — Success**
+- Run ID: `37117860688`
+- Head SHA: `0baf6c9f55a29b407c8171ba7278aaddf42bb365`
+- Workflow conclusion: Success.
+
+## Jobs and steps
+
+- **test — Success:** checkout, .NET setup, Restore, Build, Test, Bash log utility test, PowerShell log utility test, factor PDF artifact upload, **Run Production smoke — Success**, **Upload Production smoke artifacts — Success**, cleanup, and job completion all passed.
+- **PowerShell log utility (Windows) — Success:** checkout, PowerShell log utility test, cleanup, and job completion all passed.
+- **Hardened Run Production smoke — Success:** the smoke step completed successfully with the new local-delete guard, 120-second command timeouts, migration baseline-log assertion, and Production error-level log scan in place.
+- **production-smoke artifact — uploaded successfully:** artifact present, 22,175 bytes, not expired. The separate `factor-pdf-inspection` artifact was also present and not expired.
+
+## Stage-wide scope check
+
+Requested comparison: `git diff --stat 0bfaabc..HEAD -- . ':!.clinerules'`.
+
+The equivalent GitHub commit comparison for `0bfaabcb5d8448024bdcab4d889d29b2371fb7c8..0baf6c9f55a29b407c8171ba7278aaddf42bb365` reports:
+
+```text
+.github/scripts/production-smoke.sh                                      | 168 ++++++++++++++++++++
+.github/workflows/dotnet.yml                                             |  18 +++
+README.md                                                                |  25 +++-
+src/MobileShop.Dal/Initialization/DatabaseMigrator.cs                    | 259 ++++++++++++++++++++
+src/MobileShop.Dal/Migrations/20261002060000_UseIntegerRialMoney.Designer.cs | 1525 +++++++++++++++++++++
+src/MobileShop.Tests/Dal/EfStructures/LegacyMoneyUpgradeTests.cs          | 135 +++++++++
+src/MobileShop.Tests/Dal/EfStructures/MigrationChainTests.cs              | 121 ++++++++
+src/MobileShop.Tests/Dal/Initialization/DatabaseMigratorTests.cs          | 246 ++++++++++++++
+src/MobileShop.Web/Extensions/WebApplicationBuilderExtensions.cs          |  45 +++++
+src/MobileShop.Web/Program.cs                                             |  10 +-
+```
+
+No files under `src/MobileShop.Api`, entities, authentication, Development initialization, Razor pages, or services appear in this comparison.
+
+## Limitations / problems
+
+- The workflow result was not independently available to the reviewer earlier because of GitHub API rate limiting; it is now verified from the workflow run API.
+- No code correction was required. The Stage U cleanup note remains as requested: remove the personal Stage 3 note and literal `&amp;` from `README.md`; those changes were not made in Step 5.
