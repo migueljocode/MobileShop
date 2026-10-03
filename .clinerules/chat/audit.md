@@ -166,3 +166,16 @@ Next: the actor does **Stage S Step 5** (smoke hardening, README documentation, 
 
 - Remove the personal note in `README.md` about being in Stage 3 and asking Claude to verify it.
 - Remove the literal `&amp;` in the first sentence of `README.md`.
+
+
+# Audit — Job B (Execution Check): Stage S Step 5 and Stage S sign-off
+
+**Verdict: PASS. Stage S is complete and signed off (ticked in `to-do.md`).**
+
+- **Evidence (actor-recorded, `act.md`):** `Action: #306 — Success` for `0baf6c9` (run `37117860688`): restore, build, all .NET tests, Bash and PowerShell log tests, the hardened **Run Production smoke** step, both artifact uploads and the Windows PowerShell job all passed; the `production-smoke` artifact is present (22,175 bytes). The hardened script ran green with the local-delete guard, the 120-second timeouts, the baseline-log assertion and the Production error-log scan.
+- **Stage-wide scope (checked independently):** `0bfaabc..HEAD` touches only the 10 planned files; nothing under `src/MobileShop.Api`, entities, authentication, Development initialization, Razor pages or services.
+- **Stage S outcome:** the six migrations are discoverable and match the snapshot, the chain applies to an empty database, a legacy-shaped database upgrades with rows preserved and fractions rounded, `--migrate-database` creates/upgrades/baselines with a verified backup, normal Production startup is a read-only schema guard, and CI proves non-destructive startup (run #306). From now on DB/migration/CI claims in a review cite the run number.
+- **MEDIUM/LOW:** none open. The README personal note and the literal `&amp;` are already recorded for Stage U.
+
+## Gate
+Next: the **planner** plans **Stage T — IRR money foundation** (`to-do.md` is ticked for Stage S). Decided inputs: money widens to `long`; Stage S's migration, legacy-upgrade and smoke checks must stay green; the overflow-boundary tests live in Stage T.
