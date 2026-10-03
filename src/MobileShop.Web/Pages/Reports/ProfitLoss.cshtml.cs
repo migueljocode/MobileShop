@@ -17,7 +17,7 @@ public class ProfitLossModel(
     public string? EmptyDatabaseNote { get; private set; }
 
     public IReadOnlyList<ProfitLossRowViewModel> Rows { get; private set; } = [];
-    public int TotalProfit { get; private set; }
+    public long TotalProfit { get; private set; }
 
     // Distribution
     public IReadOnlyList<DistributionRow> DistributionRows { get; private set; } = [];
