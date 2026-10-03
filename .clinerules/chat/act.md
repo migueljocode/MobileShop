@@ -1,19 +1,15 @@
-# Stage T — Step 4 Act Summary
+# Stage T — Step 5 Act Summary
 
 ## Work completed
-- Implemented the approved Step 4 IRR money-formatting/UI changes across the planned 19 files.
-- Added invariant-culture grouped-Rial formatting through `MoneyExtensions` with unit tests.
-- Applied `IRR` labels/formatting across dashboard, product, transaction, report, picker, input, and PDF surfaces.
-- Constrained money inputs to whole Rials within `MoneyLimits.MaxRials`.
-- Added production-smoke assertions for visible `IRR` output.
-- Step 4 implementation was merged through PR #9 as merge commit `25dddf6ce6a2e63371f8bc9db077909d7b3d789e`.
-- CI Action #370 for the implementation head completed successfully.
+- Updated `README.md` with the required Stage T Money conventions: whole IRR/Rial amounts stored in `long`, the `MoneyLimits.MaxRials` cap, grouped-digit `IRR` web displays, Persian `ریال` on factor PDFs, Rials in seed data, and no automatic conversion of existing Production rows.
+- Step 5 documentation commit: `455fef1e983d72d8da6a1cc9b19c4ab1252b60c4`.
+- PR #9 is recorded with merge commit `25dddf6ce6a2e63371f8bc9db077909d7b3d789e`.
 - No local build/test was run, per repository workflow.
 
 ## Verification
-- Reviewer audit: **APPROVED**.
-- CI Action #370: **Success**.
-- Main-branch merge commit is recorded as `25dddf6ce6a2e63371f8bc9db077909d7b3d789e`.
+- Reviewer audit currently says the gate is to confirm the PR #9 merge and record the post-merge CI run.
+- PR #9 merge commit is present on `main`.
+- GitHub Actions currently exposes no post-merge workflow run/status for the merge commit, so final CI verification remains pending.
 
 ## Status
-**Step 4 is closed.**
+**Step 5 is pending post-merge CI verification and final reviewer sign-off.**
