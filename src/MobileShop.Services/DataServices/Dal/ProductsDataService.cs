@@ -619,12 +619,12 @@ public class ProductsDataService(
     /// a safety net for partial/stale posts — when the client keeps percent and amount in sync both
     /// branches agree. The result is never negative.
     /// </summary>
-    private static int ComputeFinishedPrice(int paid, decimal? percent, int? amount)
+    private static long ComputeFinishedPrice(long paid, decimal? percent, long? amount)
     {
         var finished = amount.HasValue
             ? paid + amount.Value
             : percent.HasValue
-                ? paid + (int)Math.Floor(paid * percent.Value / 100m)
+                ? paid + (long)Math.Floor(paid * percent.Value / 100m)
                 : paid;
 
         return finished < 0 ? 0 : finished;
