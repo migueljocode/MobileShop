@@ -145,6 +145,10 @@ for route in / /Products /Products/SecondHand /Transactions /People/Customers /P
   curl --silent --show-error --fail --max-time 10 -o /dev/null "http://127.0.0.1:5099$route"
 done
 
+for route in / /Transactions /Reports/ProfitLoss; do
+  curl --silent --show-error --fail --max-time 10 "http://127.0.0.1:5099$route" | grep -F "IRR" >/dev/null
+done
+
 stop_app
 if grep -Eq "\[ERR\]|\[FTL\]|fail:|crit:|Unhandled exception" "$PROD_LOG"; then
   echo "Production log contains an error-level entry." >&2
