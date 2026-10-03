@@ -3,6 +3,6 @@ namespace MobileShop.Models.ViewModels.Web;
 public sealed record ProductTransactionViewModel(
     DateTime Date,
     TransactionDirection Direction,
-    int FinishedPrice,
+    long FinishedPrice,
     string SellerLabel,
     string CustomerLabel);
