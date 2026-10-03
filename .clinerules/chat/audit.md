@@ -92,4 +92,4 @@ The earlier Stage T Step 2 Third Correction Act Report says that the large-profi
 
 **Stage T Step 2 PASSED review and is closed.**
 
-**Step 3 remains NOT authorized.** It may begin only after explicit authorization under the Job B workflow.
+**Step 3 authorized.** It may begin.
