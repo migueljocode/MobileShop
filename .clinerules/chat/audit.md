@@ -40,3 +40,15 @@ Actor report recorded separately in `act.md` commit:
 `ef83abd934e5ffb5b637adcda14f350237040898`.
 
 Per the correction instructions, `to-do.md` and `plan.md` were not changed.
+
+
+# Audit — Job B (Execution Check): Stage S Step 2 correction (`8cc7a67`)
+
+**Verdict: PASS. Step 2 is closed; Step 3 is authorized.**
+
+- **Fix:** exactly the three changes from the previous audit in `LegacyMoneyUpgradeTests.cs`: the `Microsoft.EntityFrameworkCore.Migrations` using; the foreign-key assertion replaced by `SELECT COUNT(*) FROM pragma_foreign_key_check` = 0; both CHECK-constraint assertions as `Assert.Equal(1L, …)`. No other file changed.
+- **CI evidence (actor-reported):** `Action: #290 — Success` for `8cc7a67`; Ubuntu 320 passed / 0 failed / 0 skipped with 0 warnings, Windows PowerShell and the Bash/PowerShell script tests passed. The legacy-upgrade test therefore proves rows are preserved and fractional prices are rounded when upgrading from `AddPartNumber`.
+- **MEDIUM/LOW:** none.
+
+## Gate
+Next: the actor does **Stage S Step 3** (explicit backed-up `--migrate-database` command and read-only Production startup guard; HIGH risk). One step → one commit → report `Action: #<run_number>` → STOP for Job B.
