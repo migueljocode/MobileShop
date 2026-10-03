@@ -283,3 +283,37 @@ The implementation incorrectly moved the existing 20261002060000_UseIntegerRialM
 
 **Authorized:** one Stage T Step 1 migration-chain correction pass only.
 **Next:** correction commit → CI → actor report in act.md → STOP for Job B.
+
+
+# Audit — Job B: Stage T Step 1 migrator-test correction authorization
+
+**Verdict: FAIL — Step 1 remains open; one narrowly scoped test-expectation correction is authorized. Step 2 remains NOT authorized.**
+
+## Finding
+
+Action **#319** / run **37125640782** reached the test gate with a clean build (**0 warnings, 0 errors**) and **328 passed / 2 failed / 0 skipped**.
+
+The migration-chain correction successfully restored the required seven-migration chain. The only remaining failures are two existing `DatabaseMigratorTests` whose expected migration-history count is still 6. With the restored `UseIntegerRialMoney` Designer, the actual chain is correctly 7.
+
+Failed tests:
+1. `DatabaseMigratorTests.Legacy_migration_database_is_backed_up_before_upgrade`: expected 6, actual 7.
+2. `DatabaseMigratorTests.Ensure_created_database_is_baselined_after_verified_backup`: expected 6, actual 7.
+
+## Correction authorized
+
+The actor may make exactly this narrow correction:
+
+1. In `src/MobileShop.Tests/Dal/Initialization/DatabaseMigratorTests.cs`, update the two stale migration-history assertions above from **6** to **7**.
+2. Do not alter production code, migration files, Designer files, snapshot, EF configuration, workflow, scripts, API/authentication, DatabaseInitializer, plan, to-do, or unrelated tests.
+3. Do not change test logic beyond the two expected migration-count literals required by Action #319.
+4. Do not run local `dotnet build` or `dotnet test`.
+5. Use one implementation commit with exact message:
+   `test: update migrator history expectations for seven migrations`
+6. Push the correction and use its GitHub Actions run as the Step 1 correction gate.
+7. After the CI gate, update `act.md` separately with the result.
+8. Step 2 must not start regardless of the correction result.
+
+## Gate
+
+**Authorized:** one Stage T Step 1 DatabaseMigrator test-expectation correction pass only.
+**Next:** correction commit → CI → actor report in `act.md` → STOP for Job B.
