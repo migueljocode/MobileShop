@@ -45,7 +45,10 @@ public static class WebApplicationBuilderExtensions
 
             Environment.ExitCode = 0;
         }
-        catch (InvalidOperationException exception)
+        catch (Exception exception) when (exception is InvalidOperationException
+            or IOException
+            or Microsoft.Data.Sqlite.SqliteException
+            or Microsoft.EntityFrameworkCore.DbUpdateException)
         {
             Console.Error.WriteLine(exception.Message);
             Environment.ExitCode = 1;

@@ -23,11 +23,10 @@ public static class DatabaseMigrator
         string databaseFile,
         Microsoft.Extensions.Logging.ILogger logger)
     {
-        _ = logger;
-
         if (!File.Exists(databaseFile))
         {
             context.Database.Migrate();
+            logger.LogInformation("Database was created and all migrations were applied.");
             return new DatabaseMigrationResult(DatabaseMigrationStatus.Created, null);
         }
 
@@ -39,11 +38,13 @@ public static class DatabaseMigrator
         {
             if (!context.Database.GetPendingMigrations().Any())
             {
+                logger.LogInformation("Database is already up to date.");
                 return new DatabaseMigrationResult(DatabaseMigrationStatus.UpToDate, null);
             }
 
             var backupPath = CreateVerifiedBackup(databaseFile);
             context.Database.Migrate();
+            logger.LogInformation("Database upgraded successfully. Verified backup: {BackupPath}", backupPath);
             return new DatabaseMigrationResult(DatabaseMigrationStatus.Upgraded, backupPath);
         }
 
@@ -53,7 +54,9 @@ public static class DatabaseMigrator
 
         if (tableCount == 0)
         {
-            throw new InvalidOperationException(CurrentMigrationMessage);
+            context.Database.Migrate();
+            logger.LogInformation("Database was an existing empty file and has been created with all migrations applied.");
+            return new DatabaseMigrationResult(DatabaseMigrationStatus.Created, null);
         }
 
         var differences = CompareWithCurrentSchema(context, databaseFile);
@@ -66,6 +69,7 @@ public static class DatabaseMigrator
 
         var baselineBackup = CreateVerifiedBackup(databaseFile);
         BaselineHistory(context);
+        logger.LogInformation("Legacy database baselined successfully. Verified backup: {BackupPath}", baselineBackup);
         return new DatabaseMigrationResult(DatabaseMigrationStatus.Baselined, baselineBackup);
     }
 
@@ -183,7 +187,7 @@ public static class DatabaseMigrator
             var safeTable = table.Replace("'", "''", StringComparison.Ordinal);
             var columns = context.Database
                 .SqlQueryRaw<SchemaColumn>(
-                    $"SELECT name AS Name, type AS DeclaredType, "notnull" AS NotNullFlag, pk AS PrimaryKey FROM pragma_table_info('{safeTable}') ORDER BY cid")
+                    $"SELECT name AS Name, type AS DeclaredType, \"notnull\" AS NotNullFlag, pk AS PrimaryKey FROM pragma_table_info('{safeTable}') ORDER BY cid")
                 .ToList();
 
             foreach (var column in columns)
@@ -213,10 +217,10 @@ public static class DatabaseMigrator
             .Migrations
             .Keys
             .ToArray();
-        var productVersion = typeof(Microsoft.EntityFrameworkCore.DbContext).Assembly
-            .GetName()
-            .Version?
-            .ToString(3) ?? "10.0.0";
+        var productVersion = context.GetService<Microsoft.EntityFrameworkCore.Migrations.IMigrationsAssembly>()
+            .ModelSnapshot?.Model["ProductVersion"]?.ToString()
+            ?? typeof(Microsoft.EntityFrameworkCore.DbContext).Assembly.GetName().Version?.ToString(3)
+            ?? "10.0.0";
 
         using var transaction = context.Database.BeginTransaction();
         context.Database.ExecuteSqlRaw(history.GetCreateScript());
@@ -228,6 +232,14 @@ public static class DatabaseMigrator
         }
 
         transaction.Commit();
+    }
+
+    internal sealed class SchemaColumn
+    {
+        public string Name { get; set; } = string.Empty;
+        public string DeclaredType { get; set; } = string.Empty;
+        public int NotNullFlag { get; set; }
+        public int PrimaryKey { get; set; }
     }
 
     private static void DeleteDatabaseFiles(string databaseFile)

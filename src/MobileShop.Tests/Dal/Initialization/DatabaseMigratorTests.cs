@@ -20,7 +20,20 @@ public sealed class DatabaseMigratorTests : IDisposable
 
         Assert.Equal(DatabaseMigrationStatus.Created, result.Status);
         Assert.Null(result.BackupPath);
-        Assert.Equal(6, Scalar<long>(context, "SELECT COUNT(*) FROM "__EFMigrationsHistory""));
+        Assert.Equal(6, Scalar<long>(context, "SELECT COUNT(*) FROM \"__EFMigrationsHistory\""));
+        Assert.Empty(BackupFiles());
+    }
+
+    [Fact]
+    public void Empty_database_file_is_created_and_migrated_without_backup()
+    {
+        var databaseFile = DatabaseFile();
+        File.WriteAllBytes(databaseFile, Array.Empty<byte>());
+        using var context = CreateContext(databaseFile);
+        var result = DatabaseMigrator.Migrate(context, databaseFile, NullLogger.Instance);
+        Assert.Equal(DatabaseMigrationStatus.Created, result.Status);
+        Assert.Null(result.BackupPath);
+        Assert.Equal(6L, Scalar<long>(context, "SELECT COUNT(*) FROM \"__EFMigrationsHistory\""));
         Assert.Empty(BackupFiles());
     }
 
@@ -60,8 +73,8 @@ public sealed class DatabaseMigratorTests : IDisposable
             Scalar<string>(backup, "SELECT type FROM pragma_table_info('Products') WHERE name = 'Price'"));
         Assert.Equal(
             5L,
-            Scalar<long>(backup, "SELECT COUNT(*) FROM "__EFMigrationsHistory""));
-        Assert.Equal(6L, Scalar<long>(context, "SELECT COUNT(*) FROM "__EFMigrationsHistory""));
+            Scalar<long>(backup, "SELECT COUNT(*) FROM \"__EFMigrationsHistory\""));
+        Assert.Equal(6L, Scalar<long>(context, "SELECT COUNT(*) FROM \"__EFMigrationsHistory\""));
     }
 
     [Fact]
@@ -72,17 +85,17 @@ public sealed class DatabaseMigratorTests : IDisposable
 
         context.Database.EnsureCreated();
         context.Database.ExecuteSqlRaw(
-            "INSERT INTO "People" ("FirstName", "LastName", "PhoneNumber", "Notes", "IsDeleted") VALUES ('Legacy', 'Owner', '000', 'kept', 0)");
+            "INSERT INTO \"People\" (\"FirstName\", \"LastName\", \"PhoneNumber\", \"Notes\", \"IsDeleted\") VALUES ('Legacy', 'Owner', '000', 'kept', 0)");
 
         var result = DatabaseMigrator.Migrate(context, databaseFile, NullLogger.Instance);
 
         Assert.Equal(DatabaseMigrationStatus.Baselined, result.Status);
         Assert.NotNull(result.BackupPath);
         Assert.True(File.Exists(result.BackupPath));
-        Assert.Equal(6L, Scalar<long>(context, "SELECT COUNT(*) FROM "__EFMigrationsHistory""));
+        Assert.Equal(6L, Scalar<long>(context, "SELECT COUNT(*) FROM \"__EFMigrationsHistory\""));
         Assert.Equal(
             "kept",
-            Scalar<string>(context, "SELECT "Notes" FROM "People" WHERE "FirstName" = 'Legacy'"));
+            Scalar<string>(context, "SELECT \"Notes\" FROM \"People\" WHERE \"FirstName\" = 'Legacy'"));
     }
 
     [Fact]
@@ -92,7 +105,7 @@ public sealed class DatabaseMigratorTests : IDisposable
         using var context = CreateContext(databaseFile);
 
         context.Database.EnsureCreated();
-        context.Database.ExecuteSqlRaw("ALTER TABLE "People" ADD COLUMN "Unexpected" TEXT");
+        context.Database.ExecuteSqlRaw("ALTER TABLE \"People\" ADD COLUMN \"Unexpected\" TEXT");
 
         var exception = Assert.Throws<InvalidOperationException>(
             () => DatabaseMigrator.Migrate(context, databaseFile, NullLogger.Instance));
