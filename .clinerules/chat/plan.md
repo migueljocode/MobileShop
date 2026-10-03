@@ -37,7 +37,7 @@
 - **Invariant change, explicit and approved by this plan:** normal Production startup now checks the schema and refuses to start when it is stale. It still performs no writes; schema changes happen only through `--migrate-database`.
 - **Reviewer rule from this stage on:** DB/migration/CI claims in Job B cite the Actions run number. (The owner may add this sentence to `reviewer.md`; the actor does not edit rule files.)
 
-## [ ] Step 1 — Make `UseIntegerRialMoney` discoverable and add the migration-chain tests
+## ~~[x] Step 1 — Make `UseIntegerRialMoney` discoverable and add the migration-chain tests~~
 - Files
   - inspect: `src/MobileShop.Dal/Migrations/20261002060000_UseIntegerRialMoney.cs`, `20261001161450_AddPartNumber.Designer.cs` (format reference), `AppDbContextModelSnapshot.cs`, `src/MobileShop.Tests/Dal/BaseClass/SqliteRepoTestBase.cs`, `src/MobileShop.Tests/Dal/EfStructures/PartNumberEfTests.cs`
   - create: `src/MobileShop.Dal/Migrations/20261002060000_UseIntegerRialMoney.Designer.cs`, `src/MobileShop.Tests/Dal/EfStructures/MigrationChainTests.cs`
@@ -57,7 +57,7 @@
 - Risk: MEDIUM
 - Confidence: MEDIUM
 
-## [ ] Step 2 — Legacy-upgrade test: data preserved, fractions rounded
+## ~~[x] Step 2 — Legacy-upgrade test: data preserved, fractions rounded~~
 - Files
   - inspect: `AddPartNumber`/`NormalizeCatalog` migration SQL (NOT NULL columns, FKs, CHECK constraints), `Initialization/sample-data.json` shapes for realistic values
   - create: `src/MobileShop.Tests/Dal/EfStructures/LegacyMoneyUpgradeTests.cs`
@@ -71,7 +71,7 @@
 - Risk: MEDIUM
 - Confidence: MEDIUM
 
-## [ ] Step 3 — Explicit backed-up migration command and read-only Production startup guard
+## ~~[x] Step 3 — Explicit backed-up migration command and read-only Production startup guard~~
 - Files
   - inspect: `src/MobileShop.Web/Program.cs`, `Extensions/WebApplicationBuilderExtensions.cs` (`ConfigureApp`), `src/MobileShop.Dal/Initialization/DatabaseInitializer.cs`, `EfStructures/SolutionPaths.cs`, `AppDbContext`
   - create: `src/MobileShop.Dal/Initialization/DatabaseMigrator.cs`, `src/MobileShop.Tests/Dal/Initialization/DatabaseMigratorTests.cs`
@@ -97,7 +97,7 @@
 - Risk: HIGH
 - Confidence: MEDIUM
 
-## [ ] Step 4 — CI Production smoke (non-destructive proof)
+## ~~[x] Step 4 — CI Production smoke (non-destructive proof)~~
 - Files
   - inspect: `.github/workflows/dotnet.yml`, `src/MobileShop.Scripts/tests/` (style reference), Razor page routes
   - create: `.github/scripts/production-smoke.sh`
@@ -116,12 +116,17 @@
 - Risk: MEDIUM
 - Confidence: LOW
 
-## [ ] Step 5 — Docs and final Stage S validation
-- Files: modify `README.md` (new "Database upgrades (Production)" section: always back up, run `--migrate-database`, what each outcome means, what a refusal means for a legacy database, where backups are written); no other file.
-- Verify (record all evidence in `act.md`): on the final commit the workflow run is green: build, full test suite (including the new migration, legacy-upgrade and migrator tests), Bash and PowerShell log utility tests, and the production smoke step; `git diff --stat <stage-start>..HEAD` shows no change under `src/MobileShop.Api`, entities, authentication, Development initialization or any unrelated file.
-- Done when: README section exists, the final run is `Success` and its number is recorded, and the reviewer signs Stage S off (only the reviewer ticks `to-do.md`).
+## [ ] Step 5 — Smoke hardening, docs and final Stage S validation
+- Files: modify `.github/scripts/production-smoke.sh`, `.github/workflows/dotnet.yml`, `README.md`; no other file.
+- **Smoke hardening (carried from the Step 4 Job B; do all three in this step):**
+  1. *Local-run guard (MEDIUM):* the script deletes the repo-root `MobileShop.db`, its `-wal`/`-shm`, `MobileShop.db.*.bak` and `MobileShop.Log`, which on a developer machine is the real database. At the top, refuse to run (print what it would delete, exit 1) unless `CI=true` or `MOBILESHOP_SMOKE_ALLOW_DELETE=1`. GitHub Actions sets `CI=true`, so CI behaviour does not change.
+  2. *Hang protection (MEDIUM):* the foreground Production guard invocation and the `--migrate-database` invocation run `dotnet run` with no time limit, so a regression where the guard stops refusing would hang the job until the platform timeout. Wrap both in `timeout 120` (treat exit 124 as a failure with a clear message) and add `timeout-minutes: 10` to the "Run Production smoke" step.
+  3. *Stronger evidence (LOW):* after the migrate step, `grep -F "Legacy database baselined successfully"` in `$MIGRATE_LOG`; after the Production run, fail if `$PROD_LOG` contains an error-level line (`[ERR]`, `[FTL]`, `fail:`, `crit:` or `Unhandled exception`). If the log format makes the pattern unreliable, say so in `act.md` instead of guessing.
+- README: modify `README.md` with a new "Database upgrades (Production)" section: always back up, run `--migrate-database`, what each outcome means (Created, UpToDate, Upgraded, Baselined), what a refusal means for a legacy database, where backups are written, and that the CI smoke script deletes the repo-root database unless `CI=true`.
+- Verify (record all evidence in `act.md`): on the final commit the workflow run is green: build, full test suite (including the new migration, legacy-upgrade and migrator tests), Bash and PowerShell log utility tests, and the hardened production smoke step with its artifact; `git diff --stat <stage-start>..HEAD` shows no change under `src/MobileShop.Api`, entities, authentication, Development initialization or any unrelated file.
+- Done when: README section exists, the smoke hardening is in place and passing in CI, the final run is `Success` and its number is recorded, and the reviewer signs Stage S off (only the reviewer ticks `to-do.md`).
 - Risk: LOW
-- Confidence: HIGH
+- Confidence: MEDIUM
 
 ## Global Definition of Done
 - All six migrations are discoverable, match the snapshot, apply to an empty database and upgrade a legacy database with data preserved (CI tests).
