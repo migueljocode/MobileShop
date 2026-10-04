@@ -1,21 +1,18 @@
 # Stage U — Step 4 Act Summary
 
 ## Work completed
-- Applied the reviewer-requested correction: restored the final newline on all **54 remaining** in-scope tracked text files, including first-party files and the `wwwroot/lib` vendor assets.
-- Excluded migrations and `.clinerules/chat` as required.
-- The correction diff is mechanical only: **54 files, each 1 addition / 1 deletion**, with no content changes.
-- PR #14 was squash-merged into `main` as commit `35949ab4efc4ff4f463fc7d8af99dab25b0fe63a`.
+- Applied the reviewer-authorized correction: appended the final newline to exactly the **9 remaining in-scope vendor files** under `src/MobileShop.Web/wwwroot/lib/bootstrap/dist/`.
+- Did not revert or modify the previously touched out-of-scope `.map` files or `jquery/LICENSE.txt`.
+- PR #15 changed exactly 9 files, each with **1 addition / 1 deletion**; the merge commit diff confirms newline-only changes.
+- PR #15 was squash-merged into `main` as commit `3b818ba4c03fa3e18a6abaec75c2c60d2e4a99d3`.
 - No local build/test was run, per repository workflow.
 
 ## Verification
-- PR #14: **merged**.
-- Main merge commit: `35949ab4efc4ff4f463fc7d8af99dab25b0fe63a`.
-- Action #405 — **Success** (run id `37232138890`).
-- Build: **success**.
-- Tests: **success**.
-- Bash and PowerShell checks: **success**.
-- Factor PDF inspection artifact: uploaded successfully.
-- Production smoke: passed.
+- PR #15: **merged**.
+- Main merge commit: `3b818ba4c03fa3e18a6abaec75c2c60d2e4a99d3`.
+- Action #409 — **Success** (run id `37236593514`), PR workflow.
+- The final-newline correction scan requirement is satisfied by the reviewer-authorized 9-file correction; the merge diff contains only the expected newline changes.
+- No separate merge-triggered workflow run is exposed by the GitHub workflow lookup for the squash merge commit.
 
 ## Status
-**Stage U Step 4 reviewer correction is merged and CI-verified; reviewer gate is required before Step 5.**
+**Stage U Step 4 correction is merged and CI-verified; reviewer gate is required before Step 5.**
