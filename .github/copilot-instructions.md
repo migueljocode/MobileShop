@@ -46,12 +46,14 @@ The database is SQLite and is stored next to the solution root via `SolutionPath
 - Use the solution file at `src/MobileShop.slnx`; do not assume the repo root contains the solution.
 - The app expects a repo-root SQLite database at `MobileShop.db` and resolves it through `SolutionPaths` rather than hard-coded relative paths.
 - Development seeding is intentionally destructive: `DatabaseInitializer.InitializeForDevelopment(...)` calls `EnsureDeleted()` + `EnsureCreated()` before seeding. This is a dev-only workflow, not a production pattern.
-- Most of the repo uses the repository pattern over EF Core `DbContext` (`*Repo` classes in `MobileShop.Dal/Repos`), with service-layer DTO/data-service abstractions sitting on top.
+- Most of the repo uses the repository pattern over EF Core `DbContext` (`*Repo` classes in `MobileShop.Dal/Repo`), with service-layer DTO/data-service abstractions sitting on top.
 - Entity configuration is centralized with `ApplyConfigurationsFromAssembly(...)` in `AppDbContext.OnModelCreating(...)`, so entity metadata and relationships are configured in dedicated configuration classes rather than in each model file.
 - Project-wide usings live in each project's `GlobalUsings.cs`, and feature files carry no `using` directives (EF migrations, `*.Designer.cs`, and `_ViewImports.cshtml` are the exceptions).
 - The QuestPDF licence is set once by `QuestPdfSetup.UseCommunityLicense()`, invoked from the host's `ConfigureBuilder`, not from `Program.cs`.
 - Because `QuestPDF.Infrastructure` is global in `MobileShop.Services`, the entity type `Color` must be written as `MobileShop.Models.Entities.Color` inside that project.
-- Tests are xUnit-based and use EF Core InMemory. Prefer targeted repository/service tests under `src/MobileShop.Tests` when validating a change.
+- Tests are xUnit-based. Use EF Core InMemory for most tests, plus temp-file SQLite tests for migrations and the database migrator. Prefer targeted repository/service tests under `src/MobileShop.Tests` when validating a change.
+- For Production database changes, back up the database first, then run `dotnet run --project src/MobileShop.Web -- --migrate-database`; normal Production startup only checks that the schema is current.
+- Monetary values are whole IRR amounts stored as `long`, bounded by `MoneyLimits.MaxRials`; use `ToIrr()` or `ToGroupedDigits()` for display.
 - The app is a local shop system with strongly typed product families (`Phone`, `Laptop`, `Tablet`, `SmartWatch`, `Case`, `Glass`, `SecondHand`, etc.), so changes affecting product catalogs or transaction flows often touch multiple layers together.
 
 ## Working effectively in this repo
@@ -64,5 +66,5 @@ The database is SQLite and is stored next to the solution root via `SolutionPath
 ## Project-specific cues
 
 - The `UseApi` flag is a switch read by `AddMobileShop(...)`; it is set only in `src/MobileShop.Web/appsettings.json` (the Api host omits the key and relies on the `false` default). When it is `true`, it selects the `MobileShop.Services.DataServices.Api` implementations, which are currently stubbed and throw `NotImplementedException` on every data call.
-- Default admin/login setup is dev-only and depends on the sample seed data; the app now calls `IUserDataService.EnsureAdminUser()` from the Web host's Development-only startup path instead of using a separate `AdminSeeder` class.
+- Default admin/login setup is dev-only and depends on the sample seed data; the app now calls `IAccountDataService.EnsureAdminUser()` from the Web host's Development-only startup path instead of using a separate `AdminSeeder` class.
 - PDF generation is included in the service stack (`QuestPdfGenerator`), so invoice/report changes may require updates across the services and app configuration settings.
