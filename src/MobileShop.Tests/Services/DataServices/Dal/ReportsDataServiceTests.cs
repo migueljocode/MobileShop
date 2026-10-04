@@ -1,5 +1,3 @@
-using MobileShop.Services.Logging.Settings;
-using Microsoft.Extensions.Options;
 
 namespace MobileShop.Tests.Services.DataServices.Dal;
 

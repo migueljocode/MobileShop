@@ -1,5 +1,4 @@
 using System.Runtime.CompilerServices;
-using MobileShop.Services.PDF.Configuration;
 
 namespace MobileShop.Tests;
 

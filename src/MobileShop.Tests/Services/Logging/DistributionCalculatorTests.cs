@@ -1,5 +1,3 @@
-using MobileShop.Services.Logging.Settings;
-using Xunit;
 
 namespace MobileShop.Tests.Services.Logging;
 

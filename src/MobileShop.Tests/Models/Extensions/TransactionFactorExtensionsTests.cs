@@ -1,5 +1,3 @@
-using MobileShop.Models.ViewModels;
-
 namespace MobileShop.Tests.Models.Extensions;
 
 public class TransactionFactorExtensionsTests
