@@ -21,57 +21,17 @@
 - **Step 4 is LOW risk but touches ~99 files:** verify it is mechanical — every changed file differs only by the final newline.
 - Do not widen scope: no analyzer tooling, no refactors, no style reformatting beyond the listed items.
 
-## [ ] Step 1 — Phone-category consistency in the model dropdown
-- Files
-  - inspect: `ProductsDataService.cs` (`GetModelsAsync` line ~238, the `CategoryNavigation.Name == "Phone"` check line ~403), `IProductsDataService.cs`, `ApiProductsDataService.cs`, `Pages/Products/CreatePhone.cshtml.cs`, `Pages/Products/CreateGlass.cshtml.cs`, `ProductsDataServiceTests.cs` (the `GetModelsAsync_only_returns_models_for_the_given_manufacturer` test and `SeedCatalog`), `CreatePhoneModelTests.cs`, `CreateGlassModelTests.cs` (`SeedModel()`)
-  - modify: `IProductsDataService.cs`, `ProductsDataService.cs`, `ApiProductsDataService.cs`, `ProductsDataServiceTests.cs`, and the two page-model test files only if their seeded models are not in a category named `"Phone"`
-  - do not touch: the two Razor pages, entities, migrations, `src/MobileShop.Api`, authentication
-- Symbols
-  - `Task<IReadOnlyList<DropdownOptionViewModel>> GetModelsAsync(int manufacturerId, string categoryName = "Phone");` in the interface, with the same default repeated on the `ProductsDataService` and `ApiProductsDataService` implementations (the stub still throws).
-  - `ProductsDataService`: a private const `PhoneCategoryName = "Phone"` used both by `GetModelsAsync`'s default usage and by the existing check in `CreatePhoneAsync` (replace the literal); `GetModelsAsync` filters `m.ManufacturerId == manufacturerId && m.CategoryNavigation.Name == categoryName` (include the category navigation as the existing check does).
-- Current → Desired: the form lists every model of a manufacturer (including Apple's AppleId-category "Apple ID" model) but rejects non-Phone models with "Selected model not found for this manufacturer." → the list offers exactly what the validation accepts.
-- Edge cases: a manufacturer with no Phone models returns an empty list; an unknown `categoryName` returns an empty list; case-sensitivity follows the existing check.
-- Tests
-  - Update the existing manufacturer-filter test to the new default behaviour.
-  - Add `GetModelsAsync_defaults_to_phone_category_and_excludes_the_apple_id_model` and `GetModelsAsync_can_return_another_category` (use the category names `SeedCatalog` creates).
-  - If `CreateGlassModelTests.SeedModel()` or `CreatePhoneModelTests` seed a model whose category is not `"Phone"`, change the seed to the Phone category so the page tests keep passing.
-- Verify: push and report `Action: #<run_number>`; expect a clean build (0 warnings) and every test passing.
-- Done when: the dropdown and validation agree, the new tests pass in CI, and nothing else changed.
-- Risk: MEDIUM
-- Confidence: HIGH
+## ~~[x] Step 1 — Phone-category consistency in the model dropdown~~
+- **Done** — Job B PASS (`c754e0b`; Action #388). `GetModelsAsync(manufacturerId, categoryName = "Phone")` on interface, service and Api stub; dropdown and `CreatePhoneAsync` validation agree.
 
-## [ ] Step 2 — Display and documentation drift
-- Files
-  - modify: `src/MobileShop.Web/Pages/Reports/ProfitLoss.cshtml`, `README.md`, `docs/erd_v1.mermaid`, `docs/erd_v2.mermaid`, `.github/copilot-instructions.md`
-  - do not touch: any other file
-- Changes
-  - `ProfitLoss.cshtml` (Distribution tab): change "Total profit:" to "Total profit (IRR):"; format `Model.TotalProfit` (line 103) and `row.CalculatedAmount` (line 110) with `ToGroupedDigits()` instead of `ToString("N0")`, keeping the sign prefix and the success/danger classes exactly as they are.
-  - `README.md`: `inventory &amp; sales` → `inventory & sales` (first sentence); nothing else.
-  - ERD files: change the money fields `int FinishedPrice` and `int Price` to `long` (four lines).
-  - `.github/copilot-instructions.md`: `MobileShop.Dal/Repos` → `MobileShop.Dal/Repo`; `IUserDataService.EnsureAdminUser()` → `IAccountDataService.EnsureAdminUser()`; the test description now reads "EF Core InMemory for most tests, plus temp-file SQLite tests for migrations and the database migrator"; add one bullet for the Production database command (`dotnet run --project src/MobileShop.Web -- --migrate-database`, backup first, normal Production startup only checks the schema) and one for money (whole IRR as `long`, `MoneyLimits.MaxRials`, `ToIrr()`/`ToGroupedDigits()` for display).
-- Edge cases: change only the lines named above; do not rewrap or reformat paragraphs.
-- Verify: CI run number; build and tests green, Production smoke still green (it requires `IRR` on `/Reports/ProfitLoss`).
-- Done when: the listed lines are corrected and CI is green.
-- Risk: LOW
-- Confidence: HIGH
+## ~~[x] Step 2 — Display and documentation drift~~
+- **Done** — Job B PASS (`cdf06c3`; Action #394). ProfitLoss unit and `ToGroupedDigits()`, README `&`, ERD `long` money, `.github/copilot-instructions.md` corrections.
 
-## [ ] Step 3 — Usings policy and empty-namespace usings
-- Files
-  - modify
-    - Dal: `GlobalUsings.cs` gains `global using Microsoft.EntityFrameworkCore.Infrastructure;` and `global using Microsoft.Extensions.Logging;`; `Initialization/DatabaseMigrator.cs` loses its two file-local usings.
-    - Web: `GlobalUsings.cs` gains `global using Microsoft.AspNetCore.Mvc.Rendering;`; `Pages/Products/Index.cshtml.cs` loses its file-local using.
-    - Tests: `GlobalUsings.cs` gains the namespaces used by two or more test files — `MobileShop.Models.ViewModels`, `MobileShop.Models.ViewModels.Web.BindModels`, `MobileShop.Services.Logging.Settings`, `MobileShop.Services.PDF`, `MobileShop.Services.PDF.Configuration`, `Microsoft.Extensions.Options` — and the file-local usings for those namespaces are removed from `TransactionFactorExtensionsTests`, `ProfitLossRowViewModelTests`, `DistributionCalculatorTests`, `ReportsDataServiceTests`, `PeopleDataServiceTests`, `TransactionsDataServiceTests`, `ProductsDataServiceTests`, `QuestPdfGeneratorTests`, `ModuleInitializer.cs`; the redundant `using MobileShop.Models.Extensions;` in `MoneyExtensionsTests.cs` is removed (already global). `using Xunit;` in `DistributionCalculatorTests.cs` is removed only if the Tests project already has `Xunit` implicitly available (it does through the test SDK usings; if CI says otherwise, restore it).
-    - Empty namespaces: remove `global using MobileShop.Web;` from the Web `GlobalUsings.cs` and `global using MobileShop.Tests.Dal;` from the Tests `GlobalUsings.cs` (neither namespace declares a type). Keep a removal only if the CI build is green without it.
-  - `.github/copilot-instructions.md`: keep the statement that feature files carry no `using` directives and list the remaining exceptions precisely (EF migrations, `*.Designer.cs`, `_ViewImports.cshtml`, `ModuleInitializer.cs` if `System.Runtime.CompilerServices` stays file-local, and any using restored under the fallback below).
-  - do not touch: production logic, entity files, other files
-- Fallback: if a promotion causes an ambiguous-type error (`CS0104`, for example `Color`) or another conflict, revert only that one using to file-local and list it in `act.md` as a documented exception. Do not rename types to resolve it.
-- Edge cases: `QuestPDF.Infrastructure` is global in `MobileShop.Services` and makes `Color` ambiguous there; do not add it to other projects' global usings.
-- Verify: CI run number; clean build with 0 warnings and every test passing; `grep -rn "^using " --include=*.cs src` outside migrations, Designer files and the recorded exceptions returns nothing.
-- Done when: the convention holds (or its documented exceptions are listed) and CI is green.
-- Risk: MEDIUM
-- Confidence: MEDIUM
+## ~~[x] Step 3 — Usings policy and empty-namespace usings~~
+- **Done** — Job B PASS (`e9f7da9`). Planned promotions made; `global using MobileShop.Web;` and `global using MobileShop.Tests.Dal;` removed.
 
 ## [ ] Step 4 — `.editorconfig` and final newlines
+- **Status:** implemented in PRs #13 and #14 (Action #405 and #406 green) but Job B FAIL: 9 in-scope vendor files under `wwwroot/lib/bootstrap/dist` (`*.rtl.css`, `*.rtl.min.css`, `bootstrap.esm.min.js`) still lack a final newline. The actor appends `\n` to exactly those 9 files in one commit, waits for a green run before merging, records the result, and stops. (Already-touched `.map` and `jquery/LICENSE.txt` stay as they are.)
 - Files
   - create: `.editorconfig` at the repository root with `root = true`, `[*]`, `charset = utf-8`, `insert_final_newline = true`
   - modify: every tracked text file with extension `cs|cshtml|js|css|sh|ps1|yml|yaml|md|json|csproj|props|slnx` that lacks a final newline (99 at planning time; excluding `src/MobileShop.Dal/Migrations/*` and `.clinerules/chat/*`)
@@ -89,6 +49,7 @@
   - final clean build with 0 warnings and `0 skipped` tests (`Skip` search recorded), all suites and the Production smoke green; run number recorded;
   - `git diff --stat <stage-start>..HEAD` shows no change under `src/MobileShop.Api`, authentication, entities, migrations, `DatabaseInitializer`/`SampleDataInitializer` logic or any unrelated file;
   - a repository search shows no remaining `&amp;`, `Dal/Repos`, `IUserDataService` or `ToString("N0")` on money.
+- **Carried from the independent Job B review (MEDIUM — do in this step):** `.github/copilot-instructions.md` line 51 says feature files carry no `using` directives and lists only migrations, Designers, `_ViewImports.cshtml`, `ModuleInitializer.cs` and restored singles, but about 20 test files (page-model, PDF, EF and logging tests) and three production files (`MoneyExtensions.cs`: `System.Globalization`; `ProductsDataService.cs`: `MobileShop.Services.DataServices.Shared`; `QuestPdfGenerator.cs`: `MobileShop.Models.Extensions`) still keep file-local usings. Do not promote more usings. Change only that one sentence so it states the real convention: project-wide usings live in `GlobalUsings.cs`; file-local usings remain only for namespaces used by few files (mainly test files), the three production files above, EF migrations, `*.Designer.cs`, `_ViewImports.cshtml` and `ModuleInitializer.cs`. `.github/copilot-instructions.md` becomes a modified file of this step.
 - Done when: all of the above pass and are recorded; the reviewer signs Stage U off (only the reviewer ticks `to-do.md`).
 - Risk: LOW
 - Confidence: HIGH
