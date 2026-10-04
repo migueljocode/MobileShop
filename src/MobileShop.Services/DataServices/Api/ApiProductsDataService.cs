@@ -19,7 +19,7 @@ public class ApiProductsDataService : IProductsDataService
         => throw new NotImplementedException("ApiProductsDataService is not implemented yet.");
 
     /// <inheritdoc />
-    public Task<IReadOnlyList<DropdownOptionViewModel>> GetModelsAsync(int manufacturerId)
+    public Task<IReadOnlyList<DropdownOptionViewModel>> GetModelsAsync(int manufacturerId, string categoryName = "Phone")
         => throw new NotImplementedException("ApiProductsDataService is not implemented yet.");
 
     /// <inheritdoc />

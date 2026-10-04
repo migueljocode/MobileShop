@@ -24,7 +24,7 @@ public interface IProductsDataService
 
     /// <summary>Gets the model dropdown options for a manufacturer.</summary>
     /// <param name="manufacturerId">The manufacturer identifier.</param>
-    Task<IReadOnlyList<DropdownOptionViewModel>> GetModelsAsync(int manufacturerId);
+    Task<IReadOnlyList<DropdownOptionViewModel>> GetModelsAsync(int manufacturerId, string categoryName = "Phone");
 
     /// <summary>Gets all color dropdown options.</summary>
     Task<IReadOnlyList<DropdownOptionViewModel>> GetColorsAsync();
