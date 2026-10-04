@@ -1,4 +1,5 @@
 global using Microsoft.AspNetCore.Mvc;
+global using Microsoft.AspNetCore.Mvc.Rendering;
 global using Microsoft.AspNetCore.Mvc.RazorPages;
 global using Microsoft.EntityFrameworkCore;
 global using Microsoft.Extensions.Options;
@@ -17,7 +18,6 @@ global using MobileShop.Services.Logging.Settings;
 global using MobileShop.Services.PDF.Configuration;
 global using MobileShop.Services.PDF;
 global using MobileShop.Services.Security;
-global using MobileShop.Web;
 global using MobileShop.Web.Extensions;
 global using System.Diagnostics;
 global using static Microsoft.AspNetCore.Builder.WebApplication;

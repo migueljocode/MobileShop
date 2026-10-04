@@ -1,8 +1,4 @@
-using Microsoft.Extensions.Options;
-using MobileShop.Services.PDF;
-using MobileShop.Services.PDF.Configuration;
 using MobileShop.Services.PDF.Settings;
-using MobileShop.Models.ViewModels;
 using Moq;
 
 namespace MobileShop.Tests.Services.PDF;

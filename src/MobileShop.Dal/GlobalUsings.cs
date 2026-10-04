@@ -1,6 +1,7 @@
 global using System.Linq.Expressions;
 global using Microsoft.EntityFrameworkCore;
 global using Microsoft.EntityFrameworkCore.Design;
+global using Microsoft.EntityFrameworkCore.Infrastructure;
 global using MobileShop.Dal.EfStructures;
 global using MobileShop.Models.Extensions;
 global using MobileShop.Dal.Initialization;
@@ -10,5 +11,6 @@ global using MobileShop.Models.Entities.Base;
 global using MobileShop.Models.Entities.Configuration;
 global using MobileShop.Models.Enums;
 global using Microsoft.Extensions.DependencyInjection;
+global using Microsoft.Extensions.Logging;
 global using System.Text.Json;
 global using System.Text.Json.Serialization;

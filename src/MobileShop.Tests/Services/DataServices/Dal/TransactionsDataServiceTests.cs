@@ -1,6 +1,3 @@
-using MobileShop.Models.ViewModels;
-using MobileShop.Models.ViewModels.Web.BindModels;
-using MobileShop.Services.PDF;
 
 namespace MobileShop.Tests.Services.DataServices.Dal;
 

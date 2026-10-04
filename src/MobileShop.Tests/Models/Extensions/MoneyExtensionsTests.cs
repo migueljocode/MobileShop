@@ -1,5 +1,3 @@
-using MobileShop.Models.Extensions;
-
 namespace MobileShop.Tests.Models.Extensions;
 
 public class MoneyExtensionsTests

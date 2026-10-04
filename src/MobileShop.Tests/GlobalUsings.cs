@@ -4,6 +4,12 @@ global using MobileShop.Models.Entities.Configuration;
 global using MobileShop.Models.Enums;
 global using MobileShop.Models.Extensions;
 global using MobileShop.Models.ViewModels.Web;
+global using MobileShop.Models.ViewModels;
+global using MobileShop.Models.ViewModels.Web.BindModels;
+global using MobileShop.Services.Logging.Settings;
+global using MobileShop.Services.PDF;
+global using MobileShop.Services.PDF.Configuration;
+global using Microsoft.Extensions.Options;
 
 global using MobileShop.Models.Entities;
 
@@ -19,7 +25,6 @@ global using System.ComponentModel.DataAnnotations;
 global using System.ComponentModel.DataAnnotations.Schema;
 
 global using MobileShop.Tests.Dal.BaseClass;
-global using MobileShop.Tests.Dal;
 global using MobileShop.Services.Security;
 global using MobileShop.Services.DataServices.Dal;
 global using MobileShop.Services.DataServices.Interfaces;

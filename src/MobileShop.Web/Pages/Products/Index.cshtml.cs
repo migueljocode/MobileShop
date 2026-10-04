@@ -1,5 +1,3 @@
-using Microsoft.AspNetCore.Mvc.Rendering;
-
 namespace MobileShop.Web.Pages.Products;
 
 public class IndexModel(
