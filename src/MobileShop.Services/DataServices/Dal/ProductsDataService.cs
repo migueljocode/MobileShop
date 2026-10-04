@@ -25,6 +25,7 @@ public class ProductsDataService(
 {
     // Glass creation represents stock intake, so its paid cost is recorded as a Buy leg.
     // The seeded shop sentinel is used because the Create Glass form intentionally has no seller field.
+    private const string PhoneCategoryName = "Phone";
     private const int ShopSellerId = 1;
     private const int ShopCustomerId = 1;
         /// <summary>Gets the structured logger for this products service.</summary>
@@ -235,8 +236,11 @@ public class ProductsDataService(
         => (await manufacturers.FindAllAsync()).Select(m => new DropdownOptionViewModel(m.Id, m.Name)).ToList().AsReadOnly();
 
     /// <inheritdoc />
-    public async Task<IReadOnlyList<DropdownOptionViewModel>> GetModelsAsync(int manufacturerId)
-        => (await models.FindAllAsync(m => m.ManufacturerId == manufacturerId)).Select(m => new DropdownOptionViewModel(m.Id, m.Name)).ToList().AsReadOnly();
+    public async Task<IReadOnlyList<DropdownOptionViewModel>> GetModelsAsync(int manufacturerId, string categoryName = PhoneCategoryName)
+        => (await models.FindAllAsync(m => m.ManufacturerId == manufacturerId && m.CategoryNavigation.Name == categoryName))
+            .Select(m => new DropdownOptionViewModel(m.Id, m.Name))
+            .ToList()
+            .AsReadOnly();
 
     /// <inheritdoc />
     public async Task<IReadOnlyList<DropdownOptionViewModel>> GetColorsAsync()
@@ -400,7 +404,7 @@ public class ProductsDataService(
         var model = await models.FindAsync(m =>
             m.Id == input.ModelId &&
             m.ManufacturerId == manufacturer.Id &&
-            m.CategoryNavigation.Name == "Phone");
+            m.CategoryNavigation.Name == PhoneCategoryName);
         if (model is null)
             return new ServiceResult(false, "Selected model not found for this manufacturer.", nameof(CreatePhoneInputModel.ModelId), null);
 
