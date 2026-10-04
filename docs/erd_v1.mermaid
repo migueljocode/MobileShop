@@ -40,12 +40,12 @@ erDiagram
         int SellerId FK
         int CustomerId FK
         int ProductId FK
-        int FinishedPrice
+        long FinishedPrice
         enum Direction "Buy / Sell"
     }
     PRODUCT {
         int Id PK
-        int Price
+        long Price
         string Manufacturer
         string Model
     }

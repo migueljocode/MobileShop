@@ -100,14 +100,14 @@
     </div>
 
     <div class="tab-pane fade" id="distribution" role="tabpanel">
-        <p class="lead">Total profit: <strong><span class="@(Model.TotalProfit >= 0 ? "text-success" : "text-danger")">@(Model.TotalProfit > 0 ? "+" : "")@Model.TotalProfit.ToString("N0")</span></strong></p>
+        <p class="lead">Total profit (IRR): <strong><span class="@(Model.TotalProfit >= 0 ? "text-success" : "text-danger")">@(Model.TotalProfit > 0 ? "+" : "")@Model.TotalProfit.ToGroupedDigits()</span></strong></p>
         <table class="table table-striped"><thead><tr><th>Employee</th><th>Share %</th><th>Amount (IRR)</th></tr></thead><tbody>
 @foreach (var row in Model.DistributionRows)
 {
     <tr class="@(row.IsLossPeriod ? "table-danger" : "")">
         <td>@row.EmployeeName</td>
         <td>@row.SharePercent%</td>
-        <td>@row.CalculatedAmount.ToString("N0")</td>
+        <td>@row.CalculatedAmount.ToGroupedDigits()</td>
     </tr>
 }
 </tbody></table>
