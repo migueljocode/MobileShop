@@ -1,21 +1,22 @@
-# Stage U — Step 2 Act Summary
+# Stage U — Step 4 Act Summary
 
 ## Work completed
-- Updated the Profit/Loss Distribution tab to label total profit as IRR and use invariant grouped-digit formatting via `ToGroupedDigits()` for total profit and distribution amounts.
-- Corrected the README entity text from `&amp;` to `&`.
-- Updated both ERD documents so transaction `FinishedPrice` and product `Price` are `long`.
-- Corrected `.github/copilot-instructions.md` repository path and account-service references, clarified the test storage strategy, documented the Production migration command/backup requirement, and documented whole-IRR money conventions.
-- PR #11 was squash-merged into `main` as commit `cdf06c3fb0133f5756557d52573bcf55cb432417`.
+- Added the repository-root `.editorconfig` with UTF-8 encoding and final-newline enforcement.
+- Restored the final newline on every currently affected tracked text file in Step 4 scope, excluding migrations and `.clinerules/chat`.
+- The final merged diff is mechanical: `.editorconfig` plus 45 text files, each showing only a one-line deletion/addition caused by the missing final newline.
+- PR #13 was squash-merged into `main` as commit `e72db9da985bf6da5c2f921a935f5fc813e5563b`.
 - No local build/test was run, per repository workflow.
 
 ## Verification
-- PR #11: **merged**.
-- Main merge commit: `cdf06c3fb0133f5756557d52573bcf55cb432417`.
-- Changed scope: exactly 5 planned files; no production logic, API host, authentication, entities, or migrations were changed.
-- Action #394 — **Success** (run id `37215984971`), PR #11 workflow; head SHA `82f0e51fc85bef889c34d296574e56949cbbfc39`.
-- Build, .NET tests, Bash and PowerShell checks, factor PDF artifact upload, and Production smoke all completed successfully.
-- The workflow was green before PR #11 was merged, as required by the audit.
-- No separate workflow run is exposed for the final squash-merge commit by the GitHub workflow lookup.
+- PR #13: **merged**.
+- Main merge commit: `e72db9da985bf6da5c2f921a935f5fc813e5563b`.
+- Changed scope: exactly 46 files: `.editorconfig` plus 45 final-newline-only text-file changes; no migration, API host, authentication, entity, or unrelated logic changes.
+- Action #401 — **Success** (run id `37230371791`), PR #13 workflow.
+- Build: **0 warnings, 0 errors**.
+- Tests: **351 passed, 0 failed, 0 skipped**.
+- Bash and PowerShell checks: passed.
+- Factor PDF inspection artifact: uploaded successfully.
+- Production smoke: passed.
 
 ## Status
-**Stage U Step 2 implementation is merged and CI-verified; reviewer gate is required before Step 3.**
+**Stage U Step 4 implementation is merged and CI-verified; reviewer gate is required before Step 5.**
