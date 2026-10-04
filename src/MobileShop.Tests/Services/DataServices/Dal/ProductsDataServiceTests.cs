@@ -67,7 +67,7 @@ public class ProductsDataServiceTests : RepoTestBase
     }
 
     [Fact]
-    public async Task GetModelsAsync_only_returns_models_for_the_given_manufacturer()
+    public async Task GetModelsAsync_defaults_to_phone_category_and_excludes_the_apple_id_model()
     {
         SeedCatalog(out var phoneModel, out var appleIdModel);
         var otherManufacturer = new Manufacturer { Name = "Samsung" };
@@ -79,8 +79,21 @@ public class ProductsDataServiceTests : RepoTestBase
         var options = await _service.GetModelsAsync(1);
 
         Assert.Contains(options, o => o.Id == phoneModel.Id && o.Name == "iPhone 16");
-        Assert.Contains(options, o => o.Id == appleIdModel.Id && o.Name == "Apple ID");
+        Assert.DoesNotContain(options, o => o.Id == appleIdModel.Id);
         Assert.DoesNotContain(options, o => o.Name == "Galaxy S24");
+    }
+
+    [Fact]
+    public async Task GetModelsAsync_can_return_another_category()
+    {
+        SeedCatalog(out var phoneModel, out var appleIdModel);
+
+        var options = await _service.GetModelsAsync(1, "AppleId");
+
+        Assert.Single(options);
+        Assert.Equal(appleIdModel.Id, options[0].Id);
+        Assert.Equal("Apple ID", options[0].Name);
+        Assert.DoesNotContain(options, o => o.Id == phoneModel.Id);
     }
 
     [Fact]
