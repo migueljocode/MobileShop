@@ -1,22 +1,21 @@
 # Stage U — Step 4 Act Summary
 
 ## Work completed
-- Added the repository-root `.editorconfig` with UTF-8 encoding and final-newline enforcement.
-- Restored the final newline on every currently affected tracked text file in Step 4 scope, excluding migrations and `.clinerules/chat`.
-- The final merged diff is mechanical: `.editorconfig` plus 45 text files, each showing only a one-line deletion/addition caused by the missing final newline.
-- PR #13 was squash-merged into `main` as commit `e72db9da985bf6da5c2f921a935f5fc813e5563b`.
+- Applied the reviewer-requested correction: restored the final newline on all **54 remaining** in-scope tracked text files, including first-party files and the `wwwroot/lib` vendor assets.
+- Excluded migrations and `.clinerules/chat` as required.
+- The correction diff is mechanical only: **54 files, each 1 addition / 1 deletion**, with no content changes.
+- PR #14 was squash-merged into `main` as commit `35949ab4efc4ff4f463fc7d8af99dab25b0fe63a`.
 - No local build/test was run, per repository workflow.
 
 ## Verification
-- PR #13: **merged**.
-- Main merge commit: `e72db9da985bf6da5c2f921a935f5fc813e5563b`.
-- Changed scope: exactly 46 files: `.editorconfig` plus 45 final-newline-only text-file changes; no migration, API host, authentication, entity, or unrelated logic changes.
-- Action #401 — **Success** (run id `37230371791`), PR #13 workflow.
-- Build: **0 warnings, 0 errors**.
-- Tests: **351 passed, 0 failed, 0 skipped**.
-- Bash and PowerShell checks: passed.
+- PR #14: **merged**.
+- Main merge commit: `35949ab4efc4ff4f463fc7d8af99dab25b0fe63a`.
+- Action #405 — **Success** (run id `37232138890`).
+- Build: **success**.
+- Tests: **success**.
+- Bash and PowerShell checks: **success**.
 - Factor PDF inspection artifact: uploaded successfully.
 - Production smoke: passed.
 
 ## Status
-**Stage U Step 4 implementation is merged and CI-verified; reviewer gate is required before Step 5.**
+**Stage U Step 4 reviewer correction is merged and CI-verified; reviewer gate is required before Step 5.**
