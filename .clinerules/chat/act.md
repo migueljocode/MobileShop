@@ -1,16 +1,18 @@
-# Stage T — Step 5 Act Summary
+# Stage U — Step 1 Act Summary
 
 ## Work completed
-- Updated `README.md` with the required Stage T Money conventions: whole IRR/Rial amounts stored in `long`, the `MoneyLimits.MaxRials` cap, grouped-digit `IRR` web displays, Persian `ریال` on factor PDFs, Rials in seed data, and no automatic conversion of existing Production rows.
-- Step 5 documentation commit: `455fef1e983d72d8da6a1cc9b19c4ab1252b60c4`.
-- Merged PR #9 into `main` with merge commit `63315c5c258fbe8902f97f73738420d803792103`.
+- Made `GetModelsAsync` category-aware across the interface, DAL implementation, and API stub, with `Phone` as the default category.
+- Added the shared `PhoneCategoryName` constant and used it in `CreatePhoneAsync` validation.
+- Updated `ProductsDataServiceTests` to prove the default excludes the Apple ID category and that another category can be requested explicitly.
+- Verified `CreatePhoneModelTests` and `CreateGlassModelTests` already seed compatible models in the `Phone` category, so no page-test changes were needed.
+- PR #10 was squash-merged into `main` as commit `c754e0b65b471b229cfb55a9e629ccbf8179150e`.
 - No local build/test was run, per repository workflow.
 
 ## Verification
-- Reviewer audit gate was to merge PR #9, record the resulting main-branch CI run, and update `act.md`.
-- PR #9 is now confirmed closed and merged.
-- GitHub Actions workflow/status lookup currently exposes no post-merge run or status for merge commit `63315c5c258fbe8902f97f73738420d803792103`.
-- Final CI verification and reviewer sign-off remain pending.
+- PR #10: **merged**.
+- Main merge commit: `c754e0b65b471b229cfb55a9e629ccbf8179150e`.
+- Changed scope: exactly 4 planned files; no Razor pages, entities, migrations, API host, or authentication files were changed.
+- GitHub Actions workflow/status lookup currently exposes no run or status for the merge commit, so CI evidence is pending.
 
 ## Status
-**Step 5 is pending post-merge CI verification and final reviewer sign-off.**
+**Stage U Step 1 implementation is merged; CI verification is pending.**
