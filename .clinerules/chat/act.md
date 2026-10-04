@@ -1,18 +1,23 @@
-# Stage U — Step 4 Act Summary
+# Stage U — Step 5 Act Summary
 
 ## Work completed
-- Applied the reviewer-authorized correction: appended the final newline to exactly the **9 remaining in-scope vendor files** under `src/MobileShop.Web/wwwroot/lib/bootstrap/dist/`.
-- Did not revert or modify the previously touched out-of-scope `.map` files or `jquery/LICENSE.txt`.
-- PR #15 changed exactly 9 files, each with **1 addition / 1 deletion**; the merge commit diff confirms newline-only changes.
-- PR #15 was squash-merged into `main` as commit `3b818ba4c03fa3e18a6abaec75c2c60d2e4a99d3`.
+- Updated `.github/copilot-instructions.md` exactly as authorized: the project-wide-usings rule now documents the real file-local using exceptions instead of claiming feature files have no file-local usings.
+- PR #16 was squash-merged into `main` as commit `20739da4a41d682032302c1d26cf8eb9af0c6a2c`.
 - No local build/test was run, per repository workflow.
 
 ## Verification
-- PR #15: **merged**.
-- Main merge commit: `3b818ba4c03fa3e18a6abaec75c2c60d2e4a99d3`.
-- Action #409 — **Success** (run id `37236593514`), PR workflow.
-- The final-newline correction scan requirement is satisfied by the reviewer-authorized 9-file correction; the merge diff contains only the expected newline changes.
-- No separate merge-triggered workflow run is exposed by the GitHub workflow lookup for the squash merge commit.
+- PR #16: **merged**.
+- Main merge commit: `20739da4a41d682032302c1d26cf8eb9af0c6a2c`.
+- Action #415 — **Success** (run id `37237471277`), PR workflow.
+- Build: **success**, with **0 warnings / 0 errors**.
+- Tests: **351 passed / 0 failed / 0 skipped**.
+- Bash log utility: **success**.
+- PowerShell log utility: **success**.
+- Factor PDF inspection artifact: uploaded successfully.
+- Production smoke: **passed**.
+- Stage U final-validation diff from the Stage U authorization point contains only the planned Stage U files; no API, authentication, entity, migration, or unrelated production-scope changes were introduced.
+- Final-newline/editorconfig correction is already verified on `main` by the reviewer gate before Step 5.
+- Repository searches show no stale `Dal/Repos`, `IUserDataService`, or money `ToString("N0")` usage in the project source; the remaining `&amp;` matches are standard HTML escaping in Razor plus the literal planning reference in `.clinerules/chat/plan.md`, not the stale README text.
 
 ## Status
-**Stage U Step 4 correction is merged and CI-verified; reviewer gate is required before Step 5.**
+**Stage U Step 5 implementation and final CI validation are complete and CI-verified; reviewer/audit sign-off is required before Stage U can be marked complete.**
