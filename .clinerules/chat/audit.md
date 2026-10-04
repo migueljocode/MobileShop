@@ -1,10 +1,10 @@
-# Audit — Job B (Execution Check): Stage U Step 1 (`c754e0b`)
+# Audit — Job B (Execution Check): Stage U Step 2 (`cdf06c3`)
 
-**Verdict: PASS. Step 1 is closed; Step 2 is authorized.**
+**Verdict: PASS. Step 2 is closed; Step 3 is authorized.**
 
-- **CI evidence (actor-recorded):** `Action: #388 — Success` (run `37214694466`) for PR #10: build 0 warnings / 0 errors, .NET tests **351 passed, 0 failed, 0 skipped**, Bash and PowerShell log tests passed, Production smoke passed. I could not read the run myself (GitHub API rate limit).
-- **Code (reviewed earlier):** `GetModelsAsync(int manufacturerId, string categoryName = "Phone")` on the interface, service and Api stub; the dropdown filter matches the `CreatePhoneAsync` validation; the two new tests cover the default and an explicit category; four planned files only.
-- **LOW (no action):** the run was triggered for the PR head and checked out the PR merge ref; GitHub exposes no separate run for the squash-merge commit on `main`. Acceptable because the merge ref is the same tree.
+- **Diff:** exactly the five planned files. Distribution tab is `Total profit (IRR):` with `ToGroupedDigits()` (sign/CSS unchanged); README `&` → `&`; both ERDs `int` → `long` on `FinishedPrice`/`Price`; copilot-instructions path, `IAccountDataService`, SQLite migrator tests, Production `--migrate-database`, and IRR/`long` bullets.
+- **CI:** Action **#395 — Success** on the squash-merge commit `cdf06c3` ([run](https://github.com/migueljocode/MobileShop/actions/runs/37216101485)): build, tests, Bash/PowerShell log tests, Production smoke. PR pre-merge Action **#394 — Success**.
+- **LOW (no action):** commit subject is not Conventional Commits; `plan.md` step headers still unchecked (actor is not required to edit `plan.md` under current chatbot rules).
 
 ## Gate
-Next: the actor does **Stage U Step 2** (display and documentation drift: ProfitLoss unit and invariant formatting, README `&amp;`, ERD money types, `.github/copilot-instructions.md` corrections). One step → one commit → wait for a green run **before** merging → report `Action: #<run_number>` → STOP for Job B.
+Next: **Stage U Step 3** (usings policy). One step → one commit → wait for a green run **before** merging → report `Action: #<run_number>` → STOP for Job B.
