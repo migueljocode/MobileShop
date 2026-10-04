@@ -1,10 +1,13 @@
-# Audit — Job B (Execution Check): Stage U Step 3 (`58618dd`, PR #12)
+# Audit — Job B (Execution Check): Stage U Step 4 (`e72db9d`, PR #13)
 
-**Verdict: PASS. Step 3 is closed once PR #12 is merged; Step 4 is authorized after merge.**
+**Verdict: FAIL.** The actor can fix this directly. Do not start Step 5.
 
-- **Diff:** usings only. Dal gained `Microsoft.EntityFrameworkCore.Infrastructure` and `Microsoft.Extensions.Logging`; `DatabaseMigrator.cs` lost those file-local usings. Web gained `Microsoft.AspNetCore.Mvc.Rendering`; `Index.cshtml.cs` lost it; empty `global using MobileShop.Web` removed. Tests gained the six planned globals, dropped empty `global using MobileShop.Tests.Dal`, and dropped the listed file-local usings (`Xunit` included). `ModuleInitializer.cs` keeps `System.Runtime.CompilerServices`. copilot-instructions exceptions match. `QuestPdfGeneratorTests` still has `PDF.Settings` and `Moq` (single-file; allowed).
-- **CI:** Action **#398 — Success** ([run](https://github.com/migueljocode/MobileShop/actions/runs/37228864972)) on PR head `58618dd`: build, tests, Bash/PowerShell log tests, Production smoke.
-- **LOW (no action):** commit subject is not Conventional Commits; Tests `GlobalUsings.cs` lost its trailing newline (Step 4 will restore it); no `act.md` for this step yet.
+- **What is good:** `.editorconfig` matches the plan (`root = true`, `charset = utf-8`, `insert_final_newline = true`). The 46-file squash is mechanical: `git show e72db9d --ignore-space-at-eol --stat` is only `.editorconfig`; every other file is `1 1` on `--numstat`. No migrations, no `.clinerules/chat`. Action **#401 — Success** (PR) and **#402 — Success** (merge): build 0 warnings, 351 tests, smoke.
+- **Gap:** Step 4 is done when *no* in-scope tracked text file lacks a final newline. At planning time that list was 99. This commit fixed 45. **54 remain**, last byte is not `\\n`:
+  - First-party (30): entity configurations under `src/MobileShop.Models/Entities/Configuration/`, `PortableStorage.cs`, `StorageCapacity.cs`, `TransactionFactorExtensions.cs`, `CreateGlassInputModel.cs`, several Web view models, `ProfileModel.cs`, `CreateGlass.cshtml.cs`.
+  - Vendor (24): `src/MobileShop.Web/wwwroot/lib/**` (bootstrap/jquery). The plan did not exclude them; the 99 = 45 + 54.
+- **Exact fix:** one correction commit that appends a final `\\n` to every remaining in-scope file (same extensions, still excluding `Migrations/` and `.clinerules/chat/`, do not touch empty files). Record the new count in `act.md`. `git diff --ignore-space-at-eol --stat` must still show no content change besides `.editorconfig` already on main. Then wait for a green Action and STOP.
+- **LOW (no action):** squash subject is not Conventional Commits and the body repeats “add final newlines” once per file.
 
 ## Gate
-Merge [PR #12](https://github.com/migueljocode/MobileShop/pull/12), then **Stage U Step 4** (`.editorconfig` + final newlines). One step → one commit → wait for a green run **before** merging → report `Action: #<run_number>` → STOP for Job B.
+Step 5 is **not** authorized until the remaining 54 files (or a plan change excluding `wwwroot/lib`) are done and CI is green.
