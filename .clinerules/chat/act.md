@@ -7,8 +7,8 @@
 - Added Production smoke assertions for sold/available badge exclusivity and the phone + sold route.
 
 ## Verification
-- Pre-commit verification: reviewed the planned file set and implementation against Step 2 requirements; no local dotnet build/test was run because GitHub Actions is the verification gate.
-- Action: pending — the implementation commit was pushed and the matching workflow run is being awaited.
+- CI verification: build, tests, Bash and PowerShell checks, factor PDF artifact upload, and Production smoke all passed. No local dotnet build/test was run because GitHub Actions is the verification gate.
+- Action: #432 — Success (run `37259629990`).
 
 ## Limitations
 - None.
