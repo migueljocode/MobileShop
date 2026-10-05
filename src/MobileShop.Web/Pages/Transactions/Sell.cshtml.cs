@@ -34,7 +34,8 @@ public class SellModel(
     public async Task<IActionResult> OnPostCreateCustomerAsync(CreateCustomerInputModel input)
     {
         ModelState.Clear();
-        if (!TryValidateModel(input))
+        var validationResults = new List<ValidationResult>();
+        if (!Validator.TryValidateObject(input, new ValidationContext(input), validationResults, true))
             return CreateErrorResult("Please correct the customer details.");
 
         var result = await peopleDataService.CreateCustomerAsync(input);

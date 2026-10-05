@@ -34,7 +34,8 @@ public class BuyModel(
     public async Task<IActionResult> OnPostCreateSellerAsync(CreateSellerInputModel input)
     {
         ModelState.Clear();
-        if (!TryValidateModel(input))
+        var validationResults = new List<ValidationResult>();
+        if (!Validator.TryValidateObject(input, new ValidationContext(input), validationResults, true))
             return CreateErrorResult("Please correct the seller details.");
 
         var result = await peopleDataService.CreateSellerAsync(input);

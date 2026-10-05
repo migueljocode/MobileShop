@@ -1,31 +1,33 @@
-# Audit — Job B: Stage Y Step 2 (ModelState repair)
+# Audit — Job B: Stage Y Step 2
 
-**Verdict: FAIL**
+**Verdict: FAIL** (HIGH functional risk)
 
-**Repair commit:** `2a9f067` — `ModelState.Clear()` + `TryValidateModel(input)`  
-**CI:** Action **#484 — Failure** (3 tests)
+**Feature:** `dd2678e` handlers · **test ctor fix:** `6779278` · **CI:** Action **#482 — Success** (compile only)
 
-## Production intent: OK
-Clearing ModelState then validating only the create model is the right approach for AJAX handlers next to `[BindProperty] Input`.
+## What is OK
+- Buy `OnPostCreateSellerAsync` / Sell `OnPostCreateCustomerAsync` call `IPeopleDataService` and return `DropdownCreateResult` + `EntityId` / display name.
+- Api host / schema untouched; ctor tests updated.
 
-## Failure
-`PersonCreateHandlerTests` all NRE:
+## HIGH — `ModelState.IsValid` on the create handlers
 
-```
-PageModel.TryValidateModel(Object model, String name)
-```
-
-`TryValidateModel` needs a configured **PageContext** / object validator. Unit tests construct `new BuyModel(...)` without that infrastructure, so the handler throws before the service runs.
-
-## Required fix
-Prefer **DataAnnotations** validation that works in both host and tests, e.g.:
+Both handlers start with:
 
 ```csharp
-var results = new List<ValidationResult>();
-if (!Validator.TryValidateObject(input, new ValidationContext(input), results, validateAllProperties: true))
-    return CreateErrorResult(...);
+if (!ModelState.IsValid)
+    return CreateErrorResult("Please correct the … details.");
 ```
 
-(or set up `PageContext` + `IObjectModelValidator` in tests — heavier).
+The same page models also have `[BindProperty] public BuyInputModel/SellInputModel Input`.
 
-Re-run until Action is green. **Do not start Step 3.**
+An AJAX POST that only sends create-person fields will still populate **ModelState errors for `Input.*`** (product id, party id, price, etc.). The handler will often return **400** even when `CreateSellerInputModel` / `CreateCustomerInputModel` is valid.
+
+**Required fix (pick one pattern):**
+1. Validate **only** the create model: `TryValidateModel(input)` after clearing unrelated keys, or
+2. `ModelState.Clear()` then `TryValidateModel(input)`, or
+3. Bind with a distinct prefix and ignore `Input` for these handlers.
+
+Add at least one test that invokes the create handler with a valid create model **without** a valid `Input` and expects **200** + `EntityId`.
+
+## Gate
+
+Step 2 **not** complete. Actor: focused ModelState fix + test → green Action → STOP for Job B. **Do not start Step 3.**
