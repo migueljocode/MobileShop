@@ -1,17 +1,23 @@
-# Audit — Job B: Stage Y Step 2 (final)
+# Audit — Job B: Stage Y Steps 3–4 + stage sign-off
 
-**Verdict: PASS**
+**Verdict: PASS. Stage Y is complete.**
 
-**Commits:** handlers `dd2678e` → ModelState clear `2a9f067` → DataAnnotations `1b25692`  
-**CI:** Action **#486 — Success**
+**Step 3:** `7953860` — searchable person picker + modal  
+**CI:** Action **#488 — Success**
 
 | Requirement | Result |
 |-------------|--------|
-| Create handlers + DropdownCreateResult | **OK** |
-| Independent of `Input` ModelState | **OK** |
-| `Validator.TryValidateObject` (no PageContext) | **OK** |
-| Handler tests | **OK** |
+| Shared `_PersonPicker` + `person-picker.js` | **OK** |
+| Search handlers (Buy/Sell) | **OK** |
+| Create modal + AJAX + antiforgery token | **OK** |
+| Customer national id; seller entity type | **OK** |
+| Product picker unchanged | **OK** |
+| Scope | **OK** |
+
+## Soft notes (not blocking)
+- Search result list shows `label` only (TypeLabel omitted in JS render).
+- Initial server-rendered options still used as progressive enhancement.
 
 ## Gate
 
-**Step 3 authorized.** Shared person-picker UI + wire Buy/Sell.
+Stage Y signed off. Next open stage in `to-do.md`: **Stage Z**.
