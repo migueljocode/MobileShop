@@ -315,6 +315,46 @@ public class ProductsDataServiceTests : RepoTestBase
         Assert.Contains(rows, row => row.Type == "Glass");
     }
 
+    [Theory]
+    [InlineData(null)]
+    [InlineData("all")]
+    [InlineData("bogus")]
+    public async Task GetInventoryRowsAsync_null_all_and_unrecognised_availability_return_everything(string? availability)
+    {
+        var phoneProduct = TestDataHelpers.CreateProduct(Context);
+        var appleProduct = TestDataHelpers.CreateProduct(Context);
+        var glassProduct = TestDataHelpers.CreateProduct(Context);
+        Context.Phones.Add(new Phone { ProductId = phoneProduct.Id, IMEI1 = TestDataHelpers.GenerateImei() });
+        Context.AppleIds.Add(new AppleId { ProductId = appleProduct.Id, Email = "all-test@example.com", Password = "secret" });
+        Context.Products.Single(p => p.Id == glassProduct.Id).GlassProfile = new Glass();
+        Context.SaveChanges();
+
+        var rows = await _service.GetInventoryRowsAsync(availability: availability);
+
+        Assert.Equal(3, rows.Count);
+    }
+
+    [Fact]
+    public async Task GetInventoryRowsAsync_availability_combines_with_type()
+    {
+        var soldPhone = TestDataHelpers.CreateProduct(Context);
+        var availablePhone = TestDataHelpers.CreateProduct(Context);
+        var appleProduct = TestDataHelpers.CreateProduct(Context);
+        Context.Phones.AddRange(
+            new Phone { ProductId = soldPhone.Id, IMEI1 = TestDataHelpers.GenerateImei() },
+            new Phone { ProductId = availablePhone.Id, IMEI1 = TestDataHelpers.GenerateImei() });
+        Context.AppleIds.Add(new AppleId { ProductId = appleProduct.Id, Email = "type-test@example.com", Password = "secret" });
+        Context.SaveChanges();
+        AddSell(soldPhone);
+        AddSell(appleProduct);
+
+        var rows = await _service.GetInventoryRowsAsync("phone", availability: "sold");
+
+        Assert.Single(rows);
+        Assert.Equal(soldPhone.Id, rows[0].ProductId);
+        Assert.Equal("Phone", rows[0].Type);
+    }
+
     // ── Inventory type filter ──────────────────────────────────
 
     [Fact]
