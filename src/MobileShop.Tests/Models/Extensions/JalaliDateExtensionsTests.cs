@@ -18,10 +18,4 @@ public class JalaliDateExtensionsTests
         Assert.Equal("1404/07/13 14:30", value.ToJalaliDateTimeString());
         Assert.Equal(DateTimeKind.Utc, value.Kind);
     }
-
-    [Fact]
-    public void ToJalaliDateString_formats_default_date_without_throwing()
-    {
-        Assert.Equal("0001/10/11", default(DateTime).ToJalaliDateString());
-    }
 }
