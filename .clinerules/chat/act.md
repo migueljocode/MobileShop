@@ -1,21 +1,30 @@
-# Stage X — Step 1 Act Summary
+# Stage Y — Step 2 Act Summary
 
 ## Scope
-Implemented Stage X Step 1 people-search service changes and the focused compile fix.
+Implemented the planned AJAX create handlers for Record Buy and Record Sell.
 
 ## Changes
-- Added customer and seller search methods to IPeopleDataService.
-- Implemented DAL customer/seller search with trimmed query matching, result limits, and label ordering.
-- Added matching API-service stubs without changing API behavior.
-- Added unit coverage for name, phone, national-id, empty-query, and result-limit behavior.
-- Fixed search projection declarations to explicit Expression<Func<...>> types.
+- Injected IPeopleDataService into BuyModel and SellModel.
+- Added OnPostCreateSellerAsync and OnPostCreateCustomerAsync Razor Page handlers.
+- Reused CreateSellerInputModel/CreateCustomerInputModel and PeopleDataService Create*Async methods.
+- Mapped the returned EntityId into DropdownCreateResult / DropdownOptionViewModel.
+- Returned HTTP 400 JSON for validation or service failures.
+- Added focused page-model tests for successful option mapping and service failure behavior.
+- Left picker/modal/fetch UI wiring for Step 3.
 
 ## Verification
-- Implementation commit: c0b0698a1a8b5cccf97e4fd8a6a9e5404bf77c38
-- Action #477: Pending/queued at time of report.
+- Implementation commit: dd2678e809378f79b39d63d1ec687db7759c66b0
+- Action: #480 — Pending
 - Local dotnet build/test was not run because GitHub Actions is the CI gate.
 
-## Status
-STOPPED — awaiting green GitHub Action.
+## Limitations
+- No shared picker UI, modal markup, or fetch JavaScript was changed; those are Step 3.
 
-Do not start Step 2 until the matching Action for the implementation commit is green.
+## Friction noted
+- None.
+
+## Problems
+- None.
+
+## Status
+STOPPED — awaiting green GitHub Action for Step 2.
