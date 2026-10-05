@@ -9,7 +9,11 @@ public interface IProductsDataService
     /// The optional part-number filter. A positive value limits the result to phones carrying that part
     /// number (Apple IDs are excluded); null, zero or a negative value applies no part-number filter.
     /// </param>
-    Task<IReadOnlyList<ProductListItemViewModel>> GetInventoryRowsAsync(string? type = null, int? partNumberId = null);
+    /// <param name="availability">
+    /// The availability filter. "available" returns only unsold rows, "sold" returns only sold rows;
+    /// null, "all" or an unrecognised value returns both. Pages lowercase before calling.
+    /// </param>
+    Task<IReadOnlyList<ProductListItemViewModel>> GetInventoryRowsAsync(string? type = null, int? partNumberId = null, string? availability = null);
 
     /// <summary>Gets all second-hand product rows.</summary>
     Task<IReadOnlyList<ProductListItemViewModel>> GetSecondHandRowsAsync();
