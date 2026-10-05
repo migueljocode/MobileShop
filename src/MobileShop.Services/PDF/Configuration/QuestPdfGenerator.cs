@@ -49,7 +49,7 @@ public sealed class QuestPdfGenerator(IOptions<PdfSettings> options) : IPdfGener
         page.MarginRight(_settings.MarginRight);
         page.MarginBottom(_settings.MarginBottom);
         page.MarginLeft(_settings.MarginLeft);
-        page.DefaultTextStyle(x => x.FontFamily("Vazirmatn").FontSize(9).FontColor("#25313C"));
+        page.DefaultTextStyle(x => x.FontFamily("Vazirmatn").FontSize(9.5f).FontColor("#25313C"));
 
         page.Header().Element(c => c.ContentFromRightToLeft().Element(x => RenderFactorHeader(x, model)));
         page.Content().Element(c => c.ContentFromRightToLeft().Element(x => RenderFactorContent(x, model)));
@@ -58,7 +58,7 @@ public sealed class QuestPdfGenerator(IOptions<PdfSettings> options) : IPdfGener
 
     private void RenderFactorHeader(IContainer container, TransactionFactorViewModel model)
         => container
-             .PaddingBottom(10)
+            .PaddingBottom(12)
             .BorderBottom(1.5f)
             .BorderColor("#243B53")
             .Row(row =>
@@ -76,7 +76,7 @@ public sealed class QuestPdfGenerator(IOptions<PdfSettings> options) : IPdfGener
                     column.Item().PaddingTop(4).AlignRight().Text(text =>
                     {
                         text.Span("تاریخ صدور: ").SemiBold();
-                        text.Span(model.GeneratedAt.ToString("yyyy/MM/dd HH:mm"));
+                        text.Span(model.GeneratedAt.ToJalaliDateTimeString());
                     });
                     column.Item().PaddingTop(2).AlignRight().Text(text =>
                     {
@@ -89,7 +89,7 @@ public sealed class QuestPdfGenerator(IOptions<PdfSettings> options) : IPdfGener
     private static void RenderFactorContent(IContainer container, TransactionFactorViewModel model)
         => container.Column(column =>
         {
-            column.Spacing(10);
+            column.Spacing(12);
             column.Item().Element(c => RenderFactorParties(c, model));
             column.Item().Element(c => RenderFactorTable(c, model));
             column.Item().Element(c => RenderFactorSummary(c, model));
@@ -159,7 +159,7 @@ public sealed class QuestPdfGenerator(IOptions<PdfSettings> options) : IPdfGener
                 BodyCell(table.Cell(), row.PersonLabel, background);
                 BodyCell(table.Cell(), row.ProductLabel, background);
                 BodyCell(table.Cell(), DirectionLabel(row.Direction), background, false, true);
-                BodyCell(table.Cell(), row.Date.ToString("yyyy/MM/dd HH:mm"), background, false, true);
+                BodyCell(table.Cell(), row.Date.ToJalaliDateTimeString(), background, false, true);
                 BodyCell(table.Cell(), (index + 1).ToString(), background, false, true);
             }
         });
@@ -235,14 +235,14 @@ public sealed class QuestPdfGenerator(IOptions<PdfSettings> options) : IPdfGener
 
     private static void SignatureBox(IContainer container, string title)
         => container
-            .Height(45)
+            .Height(48)
             .Border(1)
             .BorderColor("#D9E2EC")
-            .Padding(6)
+            .Padding(7)
             .Column(column =>
             {
                 column.Item().Text(title).FontSize(8).SemiBold().FontColor("#627D98");
-                column.Item().PaddingTop(14).BorderBottom(1).BorderColor("#9FB3C8");
+                column.Item().PaddingTop(16).BorderBottom(1).BorderColor("#9FB3C8");
             });
 
     private void RenderFactorFooter(IContainer container)
@@ -454,7 +454,7 @@ public sealed class QuestPdfGenerator(IOptions<PdfSettings> options) : IPdfGener
             ProductInformation = model.ProductInformation,
             FinishedPrice = model.FinishedPrice,
             ProductCount = model.ProductCount,
-            OwnershipStatus = model.OwnershipTransferred is bool t ? (t ? "Transferred" : "Not transferred") : null,
+            OwnershipStatus = model.OwnershipStatus,
             TransactionDate = model.TransactionDate,
             ProductExtras = model.ProductExtras,
             GuaranteeInformation = model.GuaranteeInformation,
@@ -476,53 +476,50 @@ public sealed class QuestPdfGenerator(IOptions<PdfSettings> options) : IPdfGener
             ProductInformation = model.ProductInformation,
             FinishedPrice = model.FinishedPrice,
             ProductCount = model.ProductCount,
-            OwnershipStatus = model.OwnershipTransferred is bool t ? (t ? "انتقال یافته" : "انتقال نیافته") : null,
+            OwnershipStatus = model.OwnershipStatus,
             TransactionDate = model.TransactionDate,
             ProductExtras = model.ProductExtras,
             GuaranteeInformation = model.GuaranteeInformation,
             Notes = model.Notes
         };
     }
-}
 
-/// <summary>
-/// Fully-resolved presentation model for the English invoice PDF.
-/// </summary>
-internal sealed record InvoicePresentation
-{
-    public string ShopName { get; init; } = string.Empty;
-    public string InvoiceKind { get; init; } = string.Empty;
-    public string PartyLabel { get; init; } = string.Empty;
-    public string? PartyName { get; init; }
-    public string? PartyPhone { get; init; }
-    public string? BuyerNationalId { get; init; }
-    public string? ProductInformation { get; init; }
-    public long FinishedPrice { get; init; }
-    public int ProductCount { get; init; }
-    public string? OwnershipStatus { get; init; }
-    public DateTime TransactionDate { get; init; }
-    public IEnumerable<(string Label, string Value)> ProductExtras { get; init; } = [];
-    public IEnumerable<(string Label, string Value)> GuaranteeInformation { get; init; } = [];
-    public string? Notes { get; init; }
-}
+    private static Document Create(Action<IDocumentContainer> compose)
+        => Document.Create(container => compose(container));
 
-/// <summary>
-/// Fully-resolved presentation model for the Persian (RTL) invoice PDF.
-/// </summary>
-internal sealed record PersianInvoicePresentation
-{
-    public string ShopName { get; init; } = string.Empty;
-    public string InvoiceKind { get; init; } = string.Empty;
-    public string PartyLabel { get; init; } = string.Empty;
-    public string? PartyName { get; init; }
-    public string? PartyPhone { get; init; }
-    public string? BuyerNationalId { get; init; }
-    public string? ProductInformation { get; init; }
-    public long FinishedPrice { get; init; }
-    public int ProductCount { get; init; }
-    public string? OwnershipStatus { get; init; }
-    public DateTime TransactionDate { get; init; }
-    public IEnumerable<(string Label, string Value)> ProductExtras { get; init; } = [];
-    public IEnumerable<(string Label, string Value)> GuaranteeInformation { get; init; } = [];
-    public string? Notes { get; init; }
+    private sealed class InvoicePresentation
+    {
+        public string ShopName { get; init; } = "";
+        public string InvoiceKind { get; init; } = "";
+        public string PartyLabel { get; init; } = "";
+        public string? PartyName { get; init; }
+        public string? PartyPhone { get; init; }
+        public string? BuyerNationalId { get; init; }
+        public string? ProductInformation { get; init; }
+        public long FinishedPrice { get; init; }
+        public int ProductCount { get; init; }
+        public string? OwnershipStatus { get; init; }
+        public DateTime TransactionDate { get; init; }
+        public IReadOnlyList<(string Label, string Value)> ProductExtras { get; init; } = [];
+        public IReadOnlyList<(string Label, string Value)> GuaranteeInformation { get; init; } = [];
+        public string? Notes { get; init; }
+    }
+
+    private sealed class PersianInvoicePresentation
+    {
+        public string ShopName { get; init; } = "";
+        public string InvoiceKind { get; init; } = "";
+        public string PartyLabel { get; init; } = "";
+        public string? PartyName { get; init; }
+        public string? PartyPhone { get; init; }
+        public string? BuyerNationalId { get; init; }
+        public string? ProductInformation { get; init; }
+        public long FinishedPrice { get; init; }
+        public int ProductCount { get; init; }
+        public string? OwnershipStatus { get; init; }
+        public DateTime TransactionDate { get; init; }
+        public IReadOnlyList<(string Label, string Value)> ProductExtras { get; init; } = [];
+        public IReadOnlyList<(string Label, string Value)> GuaranteeInformation { get; init; } = [];
+        public string? Notes { get; init; }
+    }
 }
