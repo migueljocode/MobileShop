@@ -1,23 +1,23 @@
-# Audit — Job B: Stage Y Steps 3–4 + stage sign-off
+# Audit — Job A: Stage Z plan
 
-**Verdict: PASS. Stage Y is complete.**
+**Verdict: APPROVED**
 
-**Step 3:** `7953860` — searchable person picker + modal  
-**CI:** Action **#488 — Success**
+No CRITICAL/HIGH plan defects.
 
-| Requirement | Result |
-|-------------|--------|
-| Shared `_PersonPicker` + `person-picker.js` | **OK** |
-| Search handlers (Buy/Sell) | **OK** |
-| Create modal + AJAX + antiforgery token | **OK** |
-| Customer national id; seller entity type | **OK** |
-| Product picker unchanged | **OK** |
-| Scope | **OK** |
+| Check | Result |
+|-------|--------|
+| Matches Stage Z in `to-do.md` | **OK** |
+| Search keeps Buy/Sell selectable rules | **OK** (Transactions search) |
+| Person-picker UX parity + suggested price | **OK** |
+| Registry for AA/AB | **OK** |
+| Honest about nested Create Phone complexity | **OK** |
+| Create button default Buy-only | **OK** |
+| No schema | **OK** |
 
-## Soft notes (not blocking)
-- Search result list shows `label` only (TypeLabel omitted in JS render).
-- Initial server-rendered options still used as progressive enhancement.
+## Notes
+- Step 3 is HIGH risk — glass `EntityId` and nested catalog create must stay explicit in Act reports.
+- Nested "Add manufacturer" can defer to Products pages if needed for green CI.
 
 ## Gate
 
-Stage Y signed off. Next open stage in `to-do.md`: **Stage Z**.
+**Step 1 authorized.** Actor: `SearchSelectableProductsAsync` + tests only.
