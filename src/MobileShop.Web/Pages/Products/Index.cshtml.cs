@@ -4,6 +4,7 @@ public class IndexModel(
     IProductsDataService dataService) : PageModel
 {
     public string Type { get; private set; } = "all";
+    public string Availability { get; private set; } = "all";
     public IReadOnlyList<ProductListItemViewModel> Products { get; private set; } = [];
 
     /// <summary>The selected part-number filter, or null when no part number is selected.</summary>
@@ -18,9 +19,15 @@ public class IndexModel(
     /// <summary>Whether the part-number filter control applies to the current view (phones only).</summary>
     public bool ShowPartNumberFilter => Type == "phone";
 
-    public async Task OnGetAsync(string? type = null, int? partNumberId = null)
+    /// <summary>The route value for preserving the selected availability when switching product type.</summary>
+    public string? AvailabilityRoute => Availability == "all" ? null : Availability;
+
+    public async Task OnGetAsync(string? type = null, int? partNumberId = null, string? availability = null)
     {
         Type = string.IsNullOrWhiteSpace(type) ? "all" : type.ToLowerInvariant();
+
+        var normalizedAvailability = availability?.Trim().ToLowerInvariant();
+        Availability = normalizedAvailability is "available" or "sold" ? normalizedAvailability : "all";
 
         // Zero/negative ids are treated as no selection so a stray query value cannot blank the list.
         PartNumberId = partNumberId is > 0 ? partNumberId : null;
@@ -41,6 +48,9 @@ public class IndexModel(
                 .AsReadOnly();
         }
 
-        Products = await dataService.GetInventoryRowsAsync(Type, PartNumberId);
+        Products = await dataService.GetInventoryRowsAsync(
+            Type,
+            PartNumberId,
+            Availability == "all" ? null : Availability);
     }
 }

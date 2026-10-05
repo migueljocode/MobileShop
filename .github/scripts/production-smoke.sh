@@ -8,7 +8,7 @@ SMOKE_DIR="$ROOT/TestResults/ProductionSmoke"
 
 if [[ "${CI:-}" != "true" && "${MOBILESHOP_SMOKE_ALLOW_DELETE:-}" != "1" ]]; then
   echo "Refusing to run Production smoke outside CI because it deletes these workspace artifacts:" >&2
-  printf "  %s\n" "$DB" "$DB-wal" "$DB-shm" "$DB.*.bak" "$LOG_DIR" >&2
+  printf "  %s\\n" "$DB" "$DB-wal" "$DB-shm" "$DB.*.bak" "$LOG_DIR" >&2
   echo "Set CI=true in CI, or explicitly set MOBILESHOP_SMOKE_ALLOW_DELETE=1 for a disposable local workspace." >&2
   exit 1
 fi
@@ -128,7 +128,7 @@ grep -F "Legacy database baselined successfully" "$MIGRATE_LOG"
 BACKUPS=( "$DB".*.bak )
 if [[ "${#BACKUPS[@]}" -ne 1 || ! -f "${BACKUPS[0]}" ]]; then
   echo "Expected exactly one verified database backup." >&2
-  printf '%s\n' "${BACKUPS[@]}" >&2
+  printf '%s\\n' "${BACKUPS[@]}" >&2
   exit 1
 fi
 
@@ -149,6 +149,22 @@ for route in / /Transactions /Reports/ProfitLoss; do
   curl --silent --show-error --fail --max-time 10 "http://127.0.0.1:5099$route" | grep -F "IRR" >/dev/null
 done
 
+SOLD_PRODUCTS="$(curl --silent --show-error --fail --max-time 10 "http://127.0.0.1:5099/Products?availability=sold")"
+grep -F 'text-bg-secondary">Sold' <<<"$SOLD_PRODUCTS" >/dev/null
+if grep -F 'text-bg-success">Available' <<<"$SOLD_PRODUCTS" >/dev/null; then
+  echo "Sold availability filter rendered an Available badge." >&2
+  exit 1
+fi
+
+AVAILABLE_PRODUCTS="$(curl --silent --show-error --fail --max-time 10 "http://127.0.0.1:5099/Products?availability=available")"
+grep -F 'text-bg-success">Available' <<<"$AVAILABLE_PRODUCTS" >/dev/null
+if grep -F 'text-bg-secondary">Sold' <<<"$AVAILABLE_PRODUCTS" >/dev/null; then
+  echo "Available availability filter rendered a Sold badge." >&2
+  exit 1
+fi
+
+curl --silent --show-error --fail --max-time 10 -o /dev/null "http://127.0.0.1:5099/Products?type=phone&availability=sold"
+
 stop_app
 if grep -Eq "\[ERR\]|\[FTL\]|fail:|crit:|Unhandled exception" "$PROD_LOG"; then
   echo "Production log contains an error-level entry." >&2
@@ -163,7 +179,7 @@ BACKUPS=( "$DB".*.bak )
 
 {
   echo "Backup:"
-  printf '%s\n' "${BACKUPS[@]}"
+  printf '%s\\n' "${BACKUPS[@]}"
   echo
   echo "Migration command output:"
   cat "$MIGRATE_LOG"
