@@ -58,7 +58,7 @@
 - Risk: MEDIUM
 - Confidence: MEDIUM
 
-## [ ] Step 3 — Shared person-picker UI + wire Buy/Sell
+## ~~[x] Step 3 — Shared person-picker UI + wire Buy/Sell
 
 - Files
   - Create: `wwwroot/js/person-picker.js`, Shared partial for picker + modal markup (parameterized: role customer|seller, search URL, create handler name).

@@ -1,27 +1,29 @@
-# Stage Y — Step 2 Act Summary
+# Stage Y — Step 3 Act Summary
 
 ## Scope
-Repaired AJAX create-handler validation after Reviewer Job B found that MVC TryValidateModel cannot run in the lightweight page-model unit tests.
+Implemented the shared searchable person picker and create-person modal on Record Buy and Record Sell.
 
 ## Changes
-- Buy seller creation now validates only CreateSellerInputModel with DataAnnotations Validator.TryValidateObject after clearing unrelated page ModelState.
-- Sell customer creation now validates only CreateCustomerInputModel the same way.
-- Existing regression tests continue to inject an unrelated Input.* ModelState error and verify valid create requests reach the service and return HTTP 200 + EntityId.
+- Added shared `_PersonPicker.cshtml` markup for customer/seller role-specific comboboxes and Bootstrap create modals.
+- Added shared `person-picker.js` for debounced server search, selection, AJAX creation, antiforgery token submission, and post-create selection.
+- Added `OnGetSearchSellersAsync` and `OnGetSearchCustomersAsync` Razor Page handlers backed by `IPeopleDataService`.
+- Wired both transaction pages to the shared picker and script while leaving product-picker behavior unchanged.
+- Customer modal includes national ID; seller modal includes entity type and no national ID.
 
 ## Verification
-- Reviewer Action #484 — Failure: TryValidateModel threw NullReferenceException because the unit tests do not configure PageContext/object validation infrastructure.
-- Repair commit: pending.
 - Local dotnet build/test was not run because GitHub Actions is the CI gate.
-- Repair Action: pending.
+- Implementation commit: pending.
+- Action: pending.
 
 ## Limitations
-- None.
+- Existing GET party lists remain as the initial progressive-enhancement results; server search is the primary path.
+- The shared modal uses the existing Bootstrap runtime; no new dependency was added.
 
 ## Friction noted
-- First ModelState repair used PageModel.TryValidateModel, which requires MVC test infrastructure; Reviewer Job B exposed this through Action #484.
+- None.
 
 ## Problems
-- Previous repair could not execute in the existing page-model unit-test setup.
+- None.
 
 ## Status
-STOPPED — awaiting the repair commit's GitHub Action result.
+STOPPED — awaiting GitHub Action result.

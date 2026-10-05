@@ -31,6 +31,9 @@ public class BuyModel(
         return Page();
     }
 
+    public async Task<IActionResult> OnGetSearchSellersAsync(string? q) =>
+        new JsonResult(await peopleDataService.SearchSellersAsync(q));
+
     public async Task<IActionResult> OnPostCreateSellerAsync(CreateSellerInputModel input)
     {
         ModelState.Clear();

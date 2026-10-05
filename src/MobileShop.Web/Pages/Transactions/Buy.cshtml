@@ -9,8 +9,11 @@
     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
     <label asp-for="Input.ProductId" class="form-label">Product</label><select asp-for="Input.ProductId" class="form-select" data-product-picker><option value="0">Select product</option><partial name="/Pages/Shared/_ProductPickerOptions.cshtml" model="new ProductPickerViewModel(Model.Products, Model.Input.ProductId)" /></select><span asp-validation-for="Input.ProductId" class="text-danger"></span>
     <label asp-for="Input.Price" class="form-label mt-2"></label><input asp-for="Input.Price" class="form-control" data-finished-price-input inputmode="numeric" step="1" min="0" max="@MobileShop.Models.MoneyLimits.MaxRials" /><span asp-validation-for="Input.Price" class="text-danger"></span>
-    <label asp-for="Input.SellerId" class="form-label mt-2">Seller</label><select asp-for="Input.SellerId" class="form-select"><option value="0">Select seller</option>@foreach (var seller in Model.Sellers) { <option value="@seller.Id">@seller.Label@(string.IsNullOrWhiteSpace(seller.TypeLabel) ? string.Empty : $" ({seller.TypeLabel})")</option> }</select><span asp-validation-for="Input.SellerId" class="text-danger"></span>
+    @{
+        ViewData["PersonPickerRole"] = "seller";
+    }
+    <partial name="/Pages/Shared/_PersonPicker.cshtml" model="Model.Sellers" view-data="ViewData" />
     <label asp-for="Input.Date" class="form-label mt-2"></label><input asp-for="Input.Date" type="date" class="form-control" /><button class="btn btn-primary mt-3">Record buy</button>
 </form>
 @if (Model.Message is not null) { <div class="alert alert-success">@Model.Message</div> }
-@section Scripts { <partial name="_ValidationScriptsPartial" /><script src="~/js/product-picker.js"></script> }
+@section Scripts { <partial name="_ValidationScriptsPartial" /><script src="~/js/product-picker.js"></script><script src="~/js/person-picker.js"></script> }
