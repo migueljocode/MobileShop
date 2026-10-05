@@ -32,7 +32,7 @@
 - Seller has **no** NationalId today — search must not claim otherwise.
 - Existing full-page Create Customer/Seller routes stay; modal is an alternate entry for transaction flow.
 
-## [ ] Step 1 — People search on the service
+## ~~[x] Step 1 — People search on the service~~
 
 - Files
   - Modify: `IPeopleDataService`, `PeopleDataService`, `ApiPeopleDataService` (NIE).

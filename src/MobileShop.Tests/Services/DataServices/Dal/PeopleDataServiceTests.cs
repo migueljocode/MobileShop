@@ -76,6 +76,54 @@ public class PeopleDataServiceTests : RepoTestBase
         return transaction;
     }
 
+
+    [Fact]
+    public async Task SearchCustomersAsync_matches_name_phone_and_national_id_case_insensitively()
+    {
+        var ali = AddCustomer("Ali", "Rezaei", "09120000001", "1000000001");
+        var sara = AddCustomer("Sara", "Ahmadi", "09120000002", "2000000002");
+
+        var byName = await _service.SearchCustomersAsync("REZA");
+        Assert.Equal(ali.Id, Assert.Single(byName).Id);
+
+        var byPhone = await _service.SearchCustomersAsync("000002");
+        Assert.Equal(sara.Id, Assert.Single(byPhone).Id);
+
+        var byNationalId = await _service.SearchCustomersAsync("00000001");
+        Assert.Equal(ali.Id, Assert.Single(byNationalId).Id);
+    }
+
+    [Fact]
+    public async Task SearchSellersAsync_matches_name_and_phone_but_not_customer_only_fields()
+    {
+        var ali = AddSeller("Ali", "Zed", "09120000003");
+        var sara = AddSeller("Sara", "Ahmadi", "09120000004");
+
+        var byName = await _service.SearchSellersAsync("ALI Z");
+        Assert.Equal(ali.Id, Assert.Single(byName).Id);
+
+        var byPhone = await _service.SearchSellersAsync("000004");
+        Assert.Equal(sara.Id, Assert.Single(byPhone).Id);
+    }
+
+    [Fact]
+    public async Task SearchPeopleAsync_limits_results_and_empty_query_returns_first_names()
+    {
+        AddCustomer("Charlie", "C", "09120000005", "3000000005");
+        AddCustomer("Alice", "A", "09120000006", "3000000006");
+        AddCustomer("Bob", "B", "09120000007", "3000000007");
+
+        var limited = await _service.SearchCustomersAsync(null, 2);
+        Assert.Equal(2, limited.Count);
+        Assert.Equal("Alice A", limited[0].Label);
+        Assert.Equal("Bob B", limited[1].Label);
+
+        var empty = await _service.SearchCustomersAsync("   ", 2);
+        Assert.Equal(2, empty.Count);
+        Assert.Equal("Alice A", empty[0].Label);
+        Assert.Equal("Bob B", empty[1].Label);
+    }
+
     [Fact]
     public async Task GetCustomerRowsAsync_sorts_by_name_phone_and_count_with_invalid_sort_fallback()
     {

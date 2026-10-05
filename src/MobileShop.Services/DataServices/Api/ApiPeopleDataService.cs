@@ -19,6 +19,14 @@ public class ApiPeopleDataService : IPeopleDataService
         => throw new NotImplementedException("ApiPeopleDataService is not implemented yet.");
 
     /// <inheritdoc />
+    public Task<IReadOnlyList<PartyOptionViewModel>> SearchCustomersAsync(string? q, int take = 25)
+        => throw new NotImplementedException("ApiPeopleDataService is not implemented yet.");
+
+    /// <inheritdoc />
+    public Task<IReadOnlyList<PartyOptionViewModel>> SearchSellersAsync(string? q, int take = 25)
+        => throw new NotImplementedException("ApiPeopleDataService is not implemented yet.");
+
+    /// <inheritdoc />
     public Task<ServiceResult> CreateCustomerAsync(MobileShop.Models.ViewModels.Web.BindModels.CreateCustomerInputModel input)
         => throw new NotImplementedException("ApiPeopleDataService is not implemented yet.");
 

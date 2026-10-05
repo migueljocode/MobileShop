@@ -129,6 +129,55 @@ public class PeopleDataService(
     }
 
     /// <inheritdoc />
+    public async Task<IReadOnlyList<PartyOptionViewModel>> SearchCustomersAsync(string? q, int take = 25)
+    {
+        var limit = Math.Clamp(take, 1, 100);
+        var selector = (Customer customer) => new PartyOptionViewModel(
+            customer.Id,
+            customer.PersonNavigation.FirstName + " " + customer.PersonNavigation.LastName,
+            customer.PersonNavigation.PhoneNumber);
+
+        if (string.IsNullOrWhiteSpace(q))
+            return (await customers.SelectAllAsync(selector)).OrderBy(row => row.Label).Take(limit).ToList();
+
+        var term = q.Trim().ToLower();
+        var rows = await customers.SelectAllAsync(
+            customer =>
+                customer.PersonNavigation.FirstName.ToLower().Contains(term)
+                || customer.PersonNavigation.LastName.ToLower().Contains(term)
+                || (customer.PersonNavigation.FirstName + " " + customer.PersonNavigation.LastName).ToLower().Contains(term)
+                || customer.PersonNavigation.PhoneNumber.ToLower().Contains(term)
+                || customer.NationalId.ToLower().Contains(term),
+            selector);
+
+        return rows.OrderBy(row => row.Label).Take(limit).ToList();
+    }
+
+    /// <inheritdoc />
+    public async Task<IReadOnlyList<PartyOptionViewModel>> SearchSellersAsync(string? q, int take = 25)
+    {
+        var limit = Math.Clamp(take, 1, 100);
+        var selector = (Seller seller) => new PartyOptionViewModel(
+            seller.Id,
+            seller.PersonNavigation.FirstName + " " + seller.PersonNavigation.LastName,
+            seller.EntityType.ToString());
+
+        if (string.IsNullOrWhiteSpace(q))
+            return (await sellers.SelectAllAsync(selector)).OrderBy(row => row.Label).Take(limit).ToList();
+
+        var term = q.Trim().ToLower();
+        var rows = await sellers.SelectAllAsync(
+            seller =>
+                seller.PersonNavigation.FirstName.ToLower().Contains(term)
+                || seller.PersonNavigation.LastName.ToLower().Contains(term)
+                || (seller.PersonNavigation.FirstName + " " + seller.PersonNavigation.LastName).ToLower().Contains(term)
+                || seller.PersonNavigation.PhoneNumber.ToLower().Contains(term),
+            selector);
+
+        return rows.OrderBy(row => row.Label).Take(limit).ToList();
+    }
+
+    /// <inheritdoc />
     public async Task<ServiceResult> CreateCustomerAsync(CreateCustomerInputModel input)
     {
         var customer = new Customer

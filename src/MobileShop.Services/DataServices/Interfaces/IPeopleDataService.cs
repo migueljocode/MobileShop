@@ -21,6 +21,12 @@ public interface IPeopleDataService
     /// <param name="id">The seller identifier.</param>
     Task<SellerDetailsViewModel?> GetSellerDetailsAsync(int id);
 
+    /// <summary>Searches customer party options by name, phone, or national id.</summary>
+    Task<IReadOnlyList<PartyOptionViewModel>> SearchCustomersAsync(string? q, int take = 25);
+
+    /// <summary>Searches seller party options by name or phone.</summary>
+    Task<IReadOnlyList<PartyOptionViewModel>> SearchSellersAsync(string? q, int take = 25);
+
     /// <summary>Creates a customer from the submitted input.</summary>
     /// <param name="input">The customer input.</param>
     Task<ServiceResult> CreateCustomerAsync(MobileShop.Models.ViewModels.Web.BindModels.CreateCustomerInputModel input);
