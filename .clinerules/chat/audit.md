@@ -1,26 +1,37 @@
-# Audit — Job B: Stage W Step 1
+# Audit — Job B: Stage W Step 2
 
-**Verdict: PASS**
+**Verdict: FAIL**
 
-**Branch / PR:** `actor/stage-w-step-1` · **PR #22** (open) · head `61afd61` · feature `1eb77d5` + API stub repairs `88cc4be` / `73f0706`
+**PR #23** (`actor/stage-w-step-2`, head `f6c771c`) · CI Action **#452 — Success** (per act) does not override the functional gap.
 
-**CI:** Action **#447 — Success** (per `act.md`)
+## What is OK
+- Clickable headers for Date / Product / Price / Seller / Customer with toggle asc↔desc
+- Indicator + `aria-sort` only on active column
+- Direction header plain
+- Order dropdown removed
+- `LoadAsync` + `OnGetDownloadFactorAsync` pass `Sort` into the service
+- Per-row Download Factor links include `sort` and `order`
 
-| Requirement | Result |
-|-------------|--------|
-| `sortBy` optional on `GetListAsync` | **OK** |
-| Columns date/product/price/seller/customer | **OK** |
-| Unknown → date | **OK** |
-| Factor forwards `sortBy` | **OK** |
-| Api stubs only | **OK** |
-| Tests for four columns + unknown | **OK** |
-| Web UI untouched | **OK** |
+## HIGH — fix before re-review
 
-## Process notes (not FAIL)
-- Two CI repair commits for Api factor stub signature (expected friction).
-- Actor reported editing `plan.md` Step 1 checkbox — that is reviewer-owned; soft note only.
-- **PR #22 is still open** — merge to `main` before starting Step 2 on main.
+**Filter form drops `sort` / `order`.**
+
+The GET form only posts `direction` and `take`. Missing:
+
+```html
+<input type="hidden" name="sort" value="@Model.Sort" />
+<input type="hidden" name="order" value="@Model.Order" />
+```
+
+Effects:
+1. **Direction** `onchange` submit (and Count submit) **resets** sort to defaults (`date`/`desc`).
+2. Main **Download Factor (PDF)** button runs without `sort`/`order`, so the bulk factor can disagree with the sorted table (row links are fine).
+
+Plan D4/D5 and Step 2 require filters and factor to keep the current sort.
+
+## Fix (narrow)
+- Add the two hidden fields to the Transactions Index form.
+- Re-run CI; do not expand scope.
 
 ## Gate
-
-**Step 2 authorized** after PR #22 is merged. Actor: headers + indicator + query carry-over on Transactions Index only.
+Step 2 **not** authorized complete. Actor: one focused repair commit on PR #23 → green Action → STOP for Job B again.
