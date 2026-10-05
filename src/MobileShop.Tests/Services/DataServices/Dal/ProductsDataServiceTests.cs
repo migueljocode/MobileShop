@@ -147,6 +147,58 @@ public class ProductsDataServiceTests : RepoTestBase
     }
 
     [Fact]
+    public async Task GetInventoryRowsAsync_filters_available_and_sold_rows()
+    {
+        SeedCatalog(out _, out _);
+        var availableProduct = TestDataHelpers.CreateProduct(Context);
+        var soldProduct = TestDataHelpers.CreateProduct(Context);
+
+        Context.Phones.AddRange(
+            new Phone { ProductId = availableProduct.Id, IMEI1 = TestDataHelpers.GenerateImei() },
+            new Phone { ProductId = soldProduct.Id, IMEI1 = TestDataHelpers.GenerateImei() });
+        Context.Transactions.Add(new Transaction
+        {
+            ProductId = soldProduct.Id,
+            SellerId = 1,
+            CustomerId = 1,
+            FinishedPrice = 100,
+            Date = DateTime.Today,
+            Direction = TransactionDirection.Sell,
+        });
+        Context.SaveChanges();
+
+        var available = await _service.GetInventoryRowsAsync(availability: "available");
+        var sold = await _service.GetInventoryRowsAsync(availability: "sold");
+
+        var availableRow = Assert.Single(available);
+        Assert.Equal(availableProduct.Id, availableRow.ProductId);
+        Assert.False(availableRow.IsSold);
+
+        var soldRow = Assert.Single(sold);
+        Assert.Equal(soldProduct.Id, soldRow.ProductId);
+        Assert.True(soldRow.IsSold);
+    }
+
+    [Fact]
+    public async Task GetInventoryRowsAsync_treats_missing_and_unknown_availability_as_all()
+    {
+        SeedCatalog(out _, out _);
+        var product = TestDataHelpers.CreateProduct(Context);
+        Context.Phones.Add(new Phone { ProductId = product.Id, IMEI1 = TestDataHelpers.GenerateImei() });
+        Context.SaveChanges();
+
+        var all = await _service.GetInventoryRowsAsync();
+        var explicitAll = await _service.GetInventoryRowsAsync(availability: "all");
+        var unknown = await _service.GetInventoryRowsAsync(availability: "other");
+
+        Assert.Single(all);
+        Assert.Single(explicitAll);
+        Assert.Single(unknown);
+        Assert.Equal(all[0].ProductId, explicitAll[0].ProductId);
+        Assert.Equal(all[0].ProductId, unknown[0].ProductId);
+    }
+
+    [Fact]
     public async Task GetInventoryRowsAsync_returns_phones_first_then_apple_ids_each_ascending_by_product_id()
     {
         SeedCatalog(out _, out _);
