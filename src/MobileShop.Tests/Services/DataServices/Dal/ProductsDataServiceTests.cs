@@ -355,6 +355,45 @@ public class ProductsDataServiceTests : RepoTestBase
         Assert.Equal("Phone", rows[0].Type);
     }
 
+    [Fact]
+    public async Task GetInventoryRowsAsync_availability_combines_with_part_number_filter()
+    {
+        SeedCatalog(out var phoneModel, out _);
+        var firstProduct = TestDataHelpers.CreateProduct(Context);
+        var secondProduct = TestDataHelpers.CreateProduct(Context);
+        var firstPart = new PartNumber { ModelId = phoneModel.Id, Code = "AVAIL-1" };
+        var secondPart = new PartNumber { ModelId = phoneModel.Id, Code = "AVAIL-2" };
+        Context.PartNumbers.AddRange(firstPart, secondPart);
+        Context.SaveChanges();
+        Context.Phones.AddRange(
+            new Phone { ProductId = firstProduct.Id, PartNumberId = firstPart.Id, IMEI1 = TestDataHelpers.GenerateImei() },
+            new Phone { ProductId = secondProduct.Id, PartNumberId = secondPart.Id, IMEI1 = TestDataHelpers.GenerateImei() });
+        Context.SaveChanges();
+        AddSell(firstProduct);
+
+        var rows = await _service.GetInventoryRowsAsync(partNumberId: firstPart.Id, availability: "sold");
+
+        Assert.Single(rows);
+        Assert.Equal(firstProduct.Id, rows[0].ProductId);
+        Assert.True(rows[0].IsSold);
+    }
+
+    [Fact]
+    public async Task GetInventoryRowsAsync_soft_deleted_sell_transaction_counts_as_available()
+    {
+        var product = TestDataHelpers.CreateProduct(Context);
+        Context.Phones.Add(new Phone { ProductId = product.Id, IMEI1 = TestDataHelpers.GenerateImei() });
+        Context.SaveChanges();
+        AddSell(product, isDeleted: true);
+
+        var availableRows = await _service.GetInventoryRowsAsync(availability: "available");
+        var soldRows = await _service.GetInventoryRowsAsync(availability: "sold");
+
+        Assert.Single(availableRows);
+        Assert.False(availableRows[0].IsSold);
+        Assert.Empty(soldRows);
+    }
+
     // ── Inventory type filter ──────────────────────────────────
 
     [Fact]
