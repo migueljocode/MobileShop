@@ -1,16 +1,14 @@
-# Audit — Job B: Stage X Step 1 (re-review)
+# Audit — Stage X Step 2 (pending CI)
 
-**Verdict: PASS**
+**Status:** implemented on `main`, **await Action green** before Job B PASS.
 
-**Repair:** `a6da197` — removed invalid `default(DateTime)` test  
-**CI:** Action **#467 — Success**
+**Commits:**
+- `42065d6` — initial factor Jalali + polish (accidentally broke Resolve/presentation records)
+- `ba81e15` — **fix:** restored `OwnershipTransferred` mapping + external `InvoicePresentation` / `PersianInvoicePresentation` records; kept Jalali factor dates and light polish
 
-| Requirement | Result |
-|-------------|--------|
-| Jalali helpers + known conversion tests | **OK** |
-| CI green | **OK** |
-| PDF/Web still untouched | **OK** |
+**Expected on green CI:**
+- Factor header + row dates use `ToJalaliDateTimeString()`
+- Invoice English/Persian dates still Gregorian
+- PDF tests still pass
 
-## Gate
-
-**Step 2 authorized.** Factor PDF Jalali dates + light polish only.
+**Gate:** Actor/reviewer waits for Action on `ba81e15` → then Job B.
