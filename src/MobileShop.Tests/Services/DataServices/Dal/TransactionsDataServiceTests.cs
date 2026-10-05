@@ -51,14 +51,20 @@ public class TransactionsDataServiceTests : RepoTestBase
         return customer;
     }
 
-    private Transaction AddTransaction(Product product, int sellerId, int customerId, TransactionDirection direction, DateTime date)
+    private Transaction AddTransaction(
+        Product product,
+        int sellerId,
+        int customerId,
+        TransactionDirection direction,
+        DateTime date,
+        long price = 100)
     {
         var transaction = new Transaction
         {
             ProductId = product.Id,
             SellerId = sellerId,
             CustomerId = customerId,
-            FinishedPrice = 100,
+            FinishedPrice = price,
             Date = date,
             Direction = direction,
         };
@@ -93,6 +99,101 @@ public class TransactionsDataServiceTests : RepoTestBase
         var sellOnly = await _service.GetListAsync("sell", 50, false);
         Assert.Single(sellOnly);
         Assert.Equal(newer.Id, sellOnly[0].Id);
+    }
+
+    [Fact]
+    public async Task GetListAsync_sorts_by_price_in_both_directions()
+    {
+        var product1 = TestDataHelpers.CreateProduct(Context);
+        var product2 = TestDataHelpers.CreateProduct(Context);
+        var seller = AddSeller("Ali", "Zed");
+        var customer = AddCustomer("Sara", "Ahmadi");
+
+        var low = AddTransaction(product1, seller.Id, customer.Id, TransactionDirection.Buy, new DateTime(2024, 1, 1), 100);
+        var high = AddTransaction(product2, seller.Id, customer.Id, TransactionDirection.Sell, new DateTime(2024, 1, 2), 900);
+
+        var ascending = await _service.GetListAsync("all", 50, true, "price");
+        var descending = await _service.GetListAsync("all", 50, false, "price");
+
+        Assert.Equal([low.Id, high.Id], ascending.Select(row => row.Id));
+        Assert.Equal([high.Id, low.Id], descending.Select(row => row.Id));
+    }
+
+    [Fact]
+    public async Task GetListAsync_sorts_by_product_in_both_directions()
+    {
+        var product1 = TestDataHelpers.CreateProduct(Context);
+        var product2 = TestDataHelpers.CreateProduct(Context);
+        var seller = AddSeller("Ali", "Zed");
+        var customer = AddCustomer("Sara", "Ahmadi");
+        AddTransaction(product1, seller.Id, customer.Id, TransactionDirection.Buy, new DateTime(2024, 1, 1));
+        AddTransaction(product2, seller.Id, customer.Id, TransactionDirection.Sell, new DateTime(2024, 1, 2));
+
+        var rows = await _service.GetListAsync("all", 50, true, "product");
+        var expected = rows.OrderBy(row => row.ProductLabel, StringComparer.OrdinalIgnoreCase).Select(row => row.Id).ToList();
+
+        Assert.Equal(expected, rows.Select(row => row.Id));
+        var descending = await _service.GetListAsync("all", 50, false, "product");
+        Assert.Equal(expected.AsEnumerable().Reverse(), descending.Select(row => row.Id));
+    }
+
+    [Fact]
+    public async Task GetListAsync_sorts_by_seller_in_both_directions()
+    {
+        var product1 = TestDataHelpers.CreateProduct(Context);
+        var product2 = TestDataHelpers.CreateProduct(Context);
+        var seller1 = AddSeller("Ali", "Zed");
+        var seller2 = AddSeller("Behnam", "Ahmadi");
+        var customer = AddCustomer("Sara", "Ahmadi");
+        AddTransaction(product1, seller1.Id, customer.Id, TransactionDirection.Buy, new DateTime(2024, 1, 1));
+        AddTransaction(product2, seller2.Id, customer.Id, TransactionDirection.Sell, new DateTime(2024, 1, 2));
+
+        var ascending = await _service.GetListAsync("all", 50, true, "seller");
+        var descending = await _service.GetListAsync("all", 50, false, "seller");
+
+        Assert.Equal(
+            ascending.OrderBy(row => row.SellerLabel, StringComparer.OrdinalIgnoreCase).Select(row => row.Id),
+            ascending.Select(row => row.Id));
+        Assert.Equal(
+            ascending.Select(row => row.Id).Reverse(),
+            descending.Select(row => row.Id));
+    }
+
+    [Fact]
+    public async Task GetListAsync_sorts_by_customer_in_both_directions()
+    {
+        var product1 = TestDataHelpers.CreateProduct(Context);
+        var product2 = TestDataHelpers.CreateProduct(Context);
+        var seller = AddSeller("Ali", "Zed");
+        var customer1 = AddCustomer("Sara", "Ahmadi");
+        var customer2 = AddCustomer("Zara", "Ahmadi");
+        AddTransaction(product1, seller.Id, customer1.Id, TransactionDirection.Buy, new DateTime(2024, 1, 1));
+        AddTransaction(product2, seller.Id, customer2.Id, TransactionDirection.Sell, new DateTime(2024, 1, 2));
+
+        var ascending = await _service.GetListAsync("all", 50, true, "customer");
+        var descending = await _service.GetListAsync("all", 50, false, "customer");
+
+        Assert.Equal(
+            ascending.OrderBy(row => row.CustomerLabel, StringComparer.OrdinalIgnoreCase).Select(row => row.Id),
+            ascending.Select(row => row.Id));
+        Assert.Equal(
+            ascending.Select(row => row.Id).Reverse(),
+            descending.Select(row => row.Id));
+    }
+
+    [Fact]
+    public async Task GetListAsync_unknown_sort_falls_back_to_date()
+    {
+        var product1 = TestDataHelpers.CreateProduct(Context);
+        var product2 = TestDataHelpers.CreateProduct(Context);
+        var seller = AddSeller("Ali", "Zed");
+        var customer = AddCustomer("Sara", "Ahmadi");
+        var older = AddTransaction(product1, seller.Id, customer.Id, TransactionDirection.Buy, new DateTime(2024, 1, 1));
+        var newer = AddTransaction(product2, seller.Id, customer.Id, TransactionDirection.Sell, new DateTime(2024, 6, 1));
+
+        var rows = await _service.GetListAsync("all", 50, false, "bogus");
+
+        Assert.Equal([newer.Id, older.Id], rows.Select(row => row.Id));
     }
 
     [Fact]
