@@ -1,19 +1,12 @@
-# Audit — Job B: Stage W Step 2 (re-review)
+# Audit — Job B: Stage W Step 3 + stage sign-off
 
-**Verdict: PASS**
+**Verdict: PASS. Stage W is complete.**
 
-**PR #23** head `04dc7ba` · repair `631577a` · CI Action **#455 — Success**
-
-| Requirement | Result |
-|-------------|--------|
-| Sortable headers + indicators | **OK** |
-| Order dropdown removed | **OK** |
-| Service gets sort/order | **OK** |
-| Hidden `sort`/`order` on form | **OK** (HIGH fixed) |
-| Row + bulk factor carry sort | **OK** |
-| Direction plain header | **OK** |
-| Scope (Index only) | **OK** |
+**Evidence on `main` (`63ed065`):**
+- Step 1: multi-column `GetListAsync` + factor forward + tests (PR #22, Action #447)
+- Step 2: headers, indicators, hidden sort/order (PR #23, Action #455 after repair)
+- Scope: no Api host / auth / entities / migrations on the feature path
 
 ## Gate
 
-**Step 3 authorized** after PR #23 is merged. Final Stage W validation + reviewer ticks `to-do.md`.
+Stage W signed off. Planner may write **Stage X** (Persian/Shamsi dates + factor polish). Actor waits for Job A on the next plan.
