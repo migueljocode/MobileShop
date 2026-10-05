@@ -1,27 +1,34 @@
-# Stage V — Step 3 Act Summary
+# Stage W — Step 1 Act Summary
 
 ## Work completed
-- Repaired the unintended Production smoke-script `printf` escaping changes carried from Step 2.
-- Restored `.github/scripts/production-smoke.sh` executable mode to `100755`.
-- Preserved only the planned Availability smoke assertions from Step 2.
+- Extended `ITransactionsDataService.GetListAsync` with optional `sortBy` while preserving the existing `direction`, `take`, and `ascending` parameters.
+- Added server-side ordering for Date, Product, Price, Seller, and Customer after list-row projection, with unknown/empty sort keys falling back to Date.
+- Extended `GenerateListFactorPdfAsync` to pass the same sort key into `GetListAsync`, keeping factor ordering aligned with the visible list.
+- Updated the API data-service stub signature only; no API host, endpoints, auth, entities, schema, or initialization code changed.
+- Added service tests covering price, product, seller, customer, and unknown-sort fallback behavior while retaining date/direction/take coverage.
 
 ## Verification
-- Step 3 diff against `8415a3f` contains only the planned Availability assertion block; the repair commit itself changes only the three accidental `printf` lines.
-- Final script mode is `100755` in the merged tree.
-- The Step 3 workflow passed all configured CI gates: build/tests, Bash and PowerShell checks, and Production smoke.
-- Action: #436 — Success (run `37260221897`).
-- The repair PR was merged as #21 with merge commit `35545bd71894ff4868bbcc46355b741beb3b4ca8`.
-
-## Scope validation
-- Stage V changes contain no changes under `src/MobileShop.Api`, authentication, entities, migrations or initialization code.
-- The Second-hand and Transactions pages are unchanged.
+- Initial CI Action #445 failed at Build because the API factor-PDF stub signature had not yet been updated.
+- Fixed that signature in a focused follow-up commit.
+- CI Action #446 still failed at Build because the first repair did not match the API stub's actual one-line signature; corrected with the final focused follow-up.
+- Final CI Action #447 — Success (run `37261872904`): build, tests, Bash/PowerShell checks, factor PDF artifact upload, and Production smoke all passed.
 - No local `dotnet build`/test was run; GitHub Actions remained the verification gate.
 
+## Scope validation
+- Only Step 1 files plus `.clinerules/chat/plan.md` are part of the implementation changes.
+- No database/schema/migration changes.
+- No API host/auth/entity/initialization changes.
+- Step 1 header in `plan.md` is marked complete.
+
 ## Limitations
-- No workflow run was created for the squash merge commit itself; the pre-merge Step 3 commit was verified green before merging as required.
+- The workflow required two focused repair commits after the initial implementation commit; no unrelated changes were included.
+- Step 2 UI work was not started.
+
+## Friction noted
+- The API factor-PDF stub was initially missed because its signature was formatted on one line rather than matching the multiline implementation shape used by the DAL service; CI exposed this and the repair was corrected without expanding scope.
 
 ## Problems
-- None.
+- None after the final repair; Action #447 is green.
 
 ## Status
-READY FOR REVIEW
+COMPLETE
