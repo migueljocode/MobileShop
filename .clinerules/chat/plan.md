@@ -10,7 +10,7 @@
 - Constraints: Vazirmatn + QuestPDF stay the only PDF stack; Apple ID plaintext policy untouched.
 
 ## Decisions (labelled)
-- **D1:** Formatter lives in **`MobileShop.Models`** (e.g. `MobileShop.Models.Extensions.JalaliDateExtensions` or `Formatting/JalaliDateFormatter`) so Web and Services can both call it without a Services→Web dependency. Prefer **`System.Globalization.PersianCalendar`** — no new NuGet package.
+- **D1:** Formatter lives in **`MobileShop.Models`** (e.g. `MobileShop.Models.Extensions.JalaliDateExtensions` or `Formatting/JalaliDateFormatter`) so Web and Services can both call it without a Services→Web dependency. Prefer `System.Globalization.PersianCalendar` — no new NuGet package.
 - **D2:** Public API (minimal):
   - `ToJalaliDateString(this DateTime value)` → e.g. `1404/07/13`
   - `ToJalaliDateTimeString(this DateTime value)` → e.g. `1404/07/13 14:30` (time stays 24h clock from the instant; document Kind handling: format the **local calendar components of the given DateTime** without changing storage).
@@ -25,7 +25,7 @@
 - **Step 2 MEDIUM/MEDIUM:** QuestPdfGenerator string changes + layout polish; PDF tests must stay green; avoid accidental English-invoice churn.
 - Factor already RTL + Vazirmatn; only date strings are Gregorian today (`yyyy/MM/dd HH:mm`).
 
-## [ ] Step 1 — Shared Jalali formatter + unit tests
+## ~~[x] Step 1 — Shared Jalali formatter + unit tests~~
 
 - Files
   - **Create:** `src/MobileShop.Models/Extensions/JalaliDateExtensions.cs` (or `Formatting/` if Extensions is crowded — prefer Extensions to match `MoneyExtensions`).
