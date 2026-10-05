@@ -454,7 +454,7 @@ public sealed class QuestPdfGenerator(IOptions<PdfSettings> options) : IPdfGener
             ProductInformation = model.ProductInformation,
             FinishedPrice = model.FinishedPrice,
             ProductCount = model.ProductCount,
-            OwnershipStatus = model.OwnershipStatus,
+            OwnershipStatus = model.OwnershipTransferred is bool t ? (t ? "Transferred" : "Not transferred") : null,
             TransactionDate = model.TransactionDate,
             ProductExtras = model.ProductExtras,
             GuaranteeInformation = model.GuaranteeInformation,
@@ -476,50 +476,53 @@ public sealed class QuestPdfGenerator(IOptions<PdfSettings> options) : IPdfGener
             ProductInformation = model.ProductInformation,
             FinishedPrice = model.FinishedPrice,
             ProductCount = model.ProductCount,
-            OwnershipStatus = model.OwnershipStatus,
+            OwnershipStatus = model.OwnershipTransferred is bool t ? (t ? "انتقال یافته" : "انتقال نیافته") : null,
             TransactionDate = model.TransactionDate,
             ProductExtras = model.ProductExtras,
             GuaranteeInformation = model.GuaranteeInformation,
             Notes = model.Notes
         };
     }
+}
 
-    private static Document Create(Action<IDocumentContainer> compose)
-        => Document.Create(container => compose(container));
+/// <summary>
+/// Fully-resolved presentation model for the English invoice PDF.
+/// </summary>
+internal sealed record InvoicePresentation
+{
+    public string ShopName { get; init; } = string.Empty;
+    public string InvoiceKind { get; init; } = string.Empty;
+    public string PartyLabel { get; init; } = string.Empty;
+    public string? PartyName { get; init; }
+    public string? PartyPhone { get; init; }
+    public string? BuyerNationalId { get; init; }
+    public string? ProductInformation { get; init; }
+    public long FinishedPrice { get; init; }
+    public int ProductCount { get; init; }
+    public string? OwnershipStatus { get; init; }
+    public DateTime TransactionDate { get; init; }
+    public IEnumerable<(string Label, string Value)> ProductExtras { get; init; } = [];
+    public IEnumerable<(string Label, string Value)> GuaranteeInformation { get; init; } = [];
+    public string? Notes { get; init; }
+}
 
-    private sealed class InvoicePresentation
-    {
-        public string ShopName { get; init; } = "";
-        public string InvoiceKind { get; init; } = "";
-        public string PartyLabel { get; init; } = "";
-        public string? PartyName { get; init; }
-        public string? PartyPhone { get; init; }
-        public string? BuyerNationalId { get; init; }
-        public string? ProductInformation { get; init; }
-        public long FinishedPrice { get; init; }
-        public int ProductCount { get; init; }
-        public string? OwnershipStatus { get; init; }
-        public DateTime TransactionDate { get; init; }
-        public IReadOnlyList<(string Label, string Value)> ProductExtras { get; init; } = [];
-        public IReadOnlyList<(string Label, string Value)> GuaranteeInformation { get; init; } = [];
-        public string? Notes { get; init; }
-    }
-
-    private sealed class PersianInvoicePresentation
-    {
-        public string ShopName { get; init; } = "";
-        public string InvoiceKind { get; init; } = "";
-        public string PartyLabel { get; init; } = "";
-        public string? PartyName { get; init; }
-        public string? PartyPhone { get; init; }
-        public string? BuyerNationalId { get; init; }
-        public string? ProductInformation { get; init; }
-        public long FinishedPrice { get; init; }
-        public int ProductCount { get; init; }
-        public string? OwnershipStatus { get; init; }
-        public DateTime TransactionDate { get; init; }
-        public IReadOnlyList<(string Label, string Value)> ProductExtras { get; init; } = [];
-        public IReadOnlyList<(string Label, string Value)> GuaranteeInformation { get; init; } = [];
-        public string? Notes { get; init; }
-    }
+/// <summary>
+/// Fully-resolved presentation model for the Persian (RTL) invoice PDF.
+/// </summary>
+internal sealed record PersianInvoicePresentation
+{
+    public string ShopName { get; init; } = string.Empty;
+    public string InvoiceKind { get; init; } = string.Empty;
+    public string PartyLabel { get; init; } = string.Empty;
+    public string? PartyName { get; init; }
+    public string? PartyPhone { get; init; }
+    public string? BuyerNationalId { get; init; }
+    public string? ProductInformation { get; init; }
+    public long FinishedPrice { get; init; }
+    public int ProductCount { get; init; }
+    public string? OwnershipStatus { get; init; }
+    public DateTime TransactionDate { get; init; }
+    public IEnumerable<(string Label, string Value)> ProductExtras { get; init; } = [];
+    public IEnumerable<(string Label, string Value)> GuaranteeInformation { get; init; } = [];
+    public string? Notes { get; init; }
 }
