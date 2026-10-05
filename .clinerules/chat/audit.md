@@ -1,23 +1,23 @@
-# Audit — Job B: Stage X Steps 2–3 + stage sign-off
+# Audit — Job A: Stage Y plan
 
-**Verdict: PASS. Stage X is complete.**
+**Verdict: APPROVED**
 
-## Step 2
+No CRITICAL/HIGH issues.
 
-| Requirement | Result |
-|-------------|--------|
-| Factor header/row Jalali (`ToJalaliDateTimeString`) | **OK** |
-| Light polish (font 9.5, spacing, signature) | **OK** |
-| Invoice dates still Gregorian | **OK** |
-| Resolve + presentation records restored | **OK** (`ba81e15`) |
-| CI | **#470 Success** (`ba81e15`); **#471 Success** (follow-up) |
+| Check | Result |
+|-------|--------|
+| Matches Stage Y in `to-do.md` | **OK** |
+| Search on People service | **OK** |
+| Customer national id; seller phone/name only | **OK** |
+| Reuse Create* + EntityId / DropdownCreateResult | **OK** |
+| No new combobox NuGet; shared JS/partial | **OK** |
+| Api NIE if interface grows | **OK** |
+| No schema | **OK** |
 
-Note: `42065d6` failed CI (#469) until the Resolve fix.
-
-## Step 3
-
-Scope clean (no schema/Api host/auth). Stage DoD met.
+## Notes (not blocking)
+- Prefer Bootstrap modal already in the stack.
+- Empty search → first N by name is clearer than empty results for shop use.
 
 ## Gate
 
-Stage X signed off. Next open stage in `to-do.md`: **Stage Y**.
+**Step 1 authorized.** Actor: People search methods + tests only.
