@@ -8,10 +8,10 @@
 <div class="d-flex flex-wrap gap-2 align-items-center mb-3">
     <div class="btn-group" role="group">
         @* Only the phones view can be narrowed by a part number, so other product links drop it. *@
-        <a class="btn @(Model.Type == "all" ? "btn-primary" : "btn-outline-primary")" asp-route-type="all">All</a>
-        <a class="btn @(Model.Type == "phone" ? "btn-primary" : "btn-outline-primary")" asp-route-type="phone" asp-route-partNumberId="@Model.PartNumberId">Phones</a>
-        <a class="btn @(Model.Type == "appleid" ? "btn-primary" : "btn-outline-primary")" asp-route-type="appleid">Apple IDs</a>
-        <a class="btn @(Model.Type == "glass" ? "btn-primary" : "btn-outline-primary")" asp-route-type="glass">Glasses</a>
+        <a class="btn @(Model.Type == "all" ? "btn-primary" : "btn-outline-primary")" asp-route-type="all" asp-route-availability="@Model.AvailabilityRoute">All</a>
+        <a class="btn @(Model.Type == "phone" ? "btn-primary" : "btn-outline-primary")" asp-route-type="phone" asp-route-partNumberId="@Model.PartNumberId" asp-route-availability="@Model.AvailabilityRoute">Phones</a>
+        <a class="btn @(Model.Type == "appleid" ? "btn-primary" : "btn-outline-primary")" asp-route-type="appleid" asp-route-availability="@Model.AvailabilityRoute">Apple IDs</a>
+        <a class="btn @(Model.Type == "glass" ? "btn-primary" : "btn-outline-primary")" asp-route-type="glass" asp-route-availability="@Model.AvailabilityRoute">Glasses</a>
     </div>
     <a asp-page="/Products/SecondHand" class="btn btn-outline-warning">Second-hand</a>
     <a asp-page="/Products/CreatePhone" class="btn btn-success">Create phone</a>
@@ -19,17 +19,25 @@
     <a asp-page="/Products/CreateGlass" class="btn btn-success">Create glass</a>
 </div>
 
-@if (Model.ShowPartNumberFilter)
-{
-    <form method="get" class="row g-2 align-items-end mb-3">
-        <input type="hidden" name="type" value="@Model.Type" />
+<form method="get" class="row g-2 align-items-end mb-3">
+    <input type="hidden" name="type" value="@Model.Type" />
+    <div class="col-auto">
+        <label class="form-label" asp-for="Availability">Availability</label>
+        <select class="form-select" asp-for="Availability" onchange="this.form.submit()">
+            <option value="all">All</option>
+            <option value="available">Available</option>
+            <option value="sold">Sold</option>
+        </select>
+    </div>
+    @if (Model.ShowPartNumberFilter)
+    {
         <div class="col-auto">
             <label class="form-label" asp-for="PartNumberId">Part number</label>
             <select class="form-select" asp-for="PartNumberId" asp-items="Model.PartNumberOptions"
                     onchange="this.form.submit()"></select>
         </div>
-    </form>
-}
+    }
+</form>
 
 @if (Model.Products.Count == 0)
 {

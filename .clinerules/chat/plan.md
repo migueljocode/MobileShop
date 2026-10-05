@@ -46,7 +46,7 @@
 - Risk: LOW
 - Confidence: HIGH
 
-## [ ] Step 2 — Products page: live Availability filter, route carry-over, tests and smoke
+## ~~[x] Step 2 — Products page: live Availability filter, route carry-over, tests and smoke~~
 - Files
   - inspect: `src/MobileShop.Web/Pages/Products/Index.cshtml`, `Index.cshtml.cs`, `.github/scripts/production-smoke.sh` (the route loops near line 144), an existing page-model test such as `CreateGlassModelTests.cs` for the Moq style
   - create: `src/MobileShop.Tests/Web/Pages/Products/IndexModelTests.cs`
