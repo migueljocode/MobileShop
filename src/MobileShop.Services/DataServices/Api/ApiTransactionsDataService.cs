@@ -3,7 +3,7 @@ namespace MobileShop.Services.DataServices.Api;
 public class ApiTransactionsDataService : ITransactionsDataService
 {
     /// <inheritdoc />
-    public Task<IReadOnlyList<TransactionListItemViewModel>> GetListAsync(string? direction, int take, bool ascending)
+    public Task<IReadOnlyList<TransactionListItemViewModel>> GetListAsync(string? direction, int take, bool ascending, string? sortBy = null)
         => throw new NotImplementedException("ApiTransactionsDataService is not implemented yet.");
 
     /// <inheritdoc />

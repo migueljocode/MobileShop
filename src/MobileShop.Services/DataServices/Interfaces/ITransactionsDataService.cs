@@ -7,7 +7,8 @@ public interface ITransactionsDataService
     /// <param name="direction">The optional transaction direction.</param>
     /// <param name="take">The maximum number of rows to return.</param>
     /// <param name="ascending">Whether to sort ascending.</param>
-    Task<IReadOnlyList<TransactionListItemViewModel>> GetListAsync(string? direction, int take, bool ascending);
+    /// <param name="sortBy">The transaction column to sort by.</param>
+    Task<IReadOnlyList<TransactionListItemViewModel>> GetListAsync(string? direction, int take, bool ascending, string? sortBy = null);
 
     /// <summary>Gets transaction details.</summary>
     /// <param name="id">The transaction identifier.</param>
@@ -21,10 +22,11 @@ public interface ITransactionsDataService
     /// <summary>Generates a factor PDF for the selected or filtered transactions.</summary>
     /// <param name="direction">The optional transaction direction filter.</param>
     /// <param name="take">The maximum number of list rows considered.</param>
-    /// <param name="ascending">Whether the list is ordered ascending by date.</param>
+    /// <param name="ascending">Whether the list is ordered ascending by the selected sort column.</param>
+    /// <param name="sortBy">The transaction column to sort by.</param>
     /// <param name="selectedIds">The explicitly selected transaction identifiers; when empty the filtered list is used.</param>
     Task<FactorPdfResult> GenerateListFactorPdfAsync(
-        string? direction, int take, bool ascending, IReadOnlyList<int> selectedIds);
+        string? direction, int take, bool ascending, IReadOnlyList<int> selectedIds, string? sortBy = null);
 
     /// <summary>Gets seller party options.</summary>
     Task<IReadOnlyList<PartyOptionViewModel>> GetSellersAsync();

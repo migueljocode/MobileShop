@@ -24,7 +24,7 @@
 - Direction column is **not** in the to-do sort list — leave it as a plain header.
 - Existing test `GetListAsync_filters_by_direction_and_orders_by_date` must be updated for the new signature without losing direction/take coverage.
 
-## [ ] Step 1 — Server-side multi-column sort in TransactionsDataService
+## ~~[x] Step 1 — Server-side multi-column sort in TransactionsDataService~~
 
 - Files
   - Modify: `ITransactionsDataService.GetListAsync` — add parameter e.g. `string? sortBy = null` (keep `ascending` or rename to clarity; prefer **keep `bool ascending`** + add `sortBy`).

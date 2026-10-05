@@ -25,13 +25,30 @@ public class TransactionsDataService(
     public async Task<IReadOnlyList<TransactionListItemViewModel>> GetListAsync(
         string? direction,
         int take,
-        bool ascending)
+        bool ascending,
+        string? sortBy = null)
     {
         var query = await SelectListRowsAsync(direction);
 
-        var ordered = ascending
-            ? query.OrderBy(transaction => transaction.Date)
-            : query.OrderByDescending(transaction => transaction.Date);
+        var normalizedSortBy = sortBy?.Trim().ToLowerInvariant();
+        var ordered = normalizedSortBy switch
+        {
+            "product" => ascending
+                ? query.OrderBy(transaction => transaction.ProductLabel, StringComparer.OrdinalIgnoreCase)
+                : query.OrderByDescending(transaction => transaction.ProductLabel, StringComparer.OrdinalIgnoreCase),
+            "price" => ascending
+                ? query.OrderBy(transaction => transaction.FinishedPrice)
+                : query.OrderByDescending(transaction => transaction.FinishedPrice),
+            "seller" => ascending
+                ? query.OrderBy(transaction => transaction.SellerLabel, StringComparer.OrdinalIgnoreCase)
+                : query.OrderByDescending(transaction => transaction.SellerLabel, StringComparer.OrdinalIgnoreCase),
+            "customer" => ascending
+                ? query.OrderBy(transaction => transaction.CustomerLabel, StringComparer.OrdinalIgnoreCase)
+                : query.OrderByDescending(transaction => transaction.CustomerLabel, StringComparer.OrdinalIgnoreCase),
+            _ => ascending
+                ? query.OrderBy(transaction => transaction.Date)
+                : query.OrderByDescending(transaction => transaction.Date),
+        };
 
         return ordered
             .Take(Math.Clamp(take, 1, 500))
@@ -309,10 +326,11 @@ public class TransactionsDataService(
         string? direction,
         int take,
         bool ascending,
-        IReadOnlyList<int> selectedIds)
+        IReadOnlyList<int> selectedIds,
+        string? sortBy = null)
     {
         // The factor always works from one list snapshot - the same read the list page shows.
-        var snapshot = await GetListAsync(direction, take, ascending);
+        var snapshot = await GetListAsync(direction, take, ascending, sortBy);
 
         IReadOnlyList<TransactionFactorRowViewModel> rows;
 
