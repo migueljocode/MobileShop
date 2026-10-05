@@ -1,23 +1,25 @@
-# Audit — Job A: Stage Y plan
+# Audit — Job B: Stage Y Step 1
 
-**Verdict: APPROVED**
+**Verdict: PASS**
 
-No CRITICAL/HIGH issues.
+**Commits:** `4e49c52` feat + `c0b0698` projection typing fix  
+**CI:** Action **#477 — Success**
 
-| Check | Result |
-|-------|--------|
-| Matches Stage Y in `to-do.md` | **OK** |
-| Search on People service | **OK** |
-| Customer national id; seller phone/name only | **OK** |
-| Reuse Create* + EntityId / DropdownCreateResult | **OK** |
-| No new combobox NuGet; shared JS/partial | **OK** |
-| Api NIE if interface grows | **OK** |
-| No schema | **OK** |
+| Requirement | Result |
+|-------------|--------|
+| `SearchCustomersAsync` / `SearchSellersAsync` | **OK** |
+| Customer: name, phone, national id | **OK** |
+| Seller: name, phone only | **OK** |
+| Empty query → first N by label | **OK** |
+| take clamp | **OK** |
+| Api NIE stubs | **OK** |
+| Unit tests | **OK** |
+| Web untouched | **OK** |
 
-## Notes (not blocking)
-- Prefer Bootstrap modal already in the stack.
-- Empty search → first N by name is clearer than empty results for shop use.
+## Notes
+- `act.md` title says Stage X; work is Stage Y Step 1 (process only).
+- Customer `TypeLabel` is phone; seller is `EntityType` — fine for picker secondary text.
 
 ## Gate
 
-**Step 1 authorized.** Actor: People search methods + tests only.
+**Step 2 authorized.** AJAX create handlers on Buy/Sell only.
