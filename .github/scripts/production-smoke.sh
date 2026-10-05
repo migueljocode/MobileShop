@@ -8,7 +8,7 @@ SMOKE_DIR="$ROOT/TestResults/ProductionSmoke"
 
 if [[ "${CI:-}" != "true" && "${MOBILESHOP_SMOKE_ALLOW_DELETE:-}" != "1" ]]; then
   echo "Refusing to run Production smoke outside CI because it deletes these workspace artifacts:" >&2
-  printf "  %s\\n" "$DB" "$DB-wal" "$DB-shm" "$DB.*.bak" "$LOG_DIR" >&2
+  printf "  %s\n" "$DB" "$DB-wal" "$DB-shm" "$DB.*.bak" "$LOG_DIR" >&2
   echo "Set CI=true in CI, or explicitly set MOBILESHOP_SMOKE_ALLOW_DELETE=1 for a disposable local workspace." >&2
   exit 1
 fi
@@ -128,7 +128,7 @@ grep -F "Legacy database baselined successfully" "$MIGRATE_LOG"
 BACKUPS=( "$DB".*.bak )
 if [[ "${#BACKUPS[@]}" -ne 1 || ! -f "${BACKUPS[0]}" ]]; then
   echo "Expected exactly one verified database backup." >&2
-  printf '%s\\n' "${BACKUPS[@]}" >&2
+  printf '%s\n' "${BACKUPS[@]}" >&2
   exit 1
 fi
 
@@ -179,7 +179,7 @@ BACKUPS=( "$DB".*.bak )
 
 {
   echo "Backup:"
-  printf '%s\\n' "${BACKUPS[@]}"
+  printf '%s\n' "${BACKUPS[@]}"
   echo
   echo "Migration command output:"
   cat "$MIGRATE_LOG"
