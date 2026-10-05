@@ -1,37 +1,37 @@
-# Stage W — Step 1 Act Summary
+# Stage W — Step 2 Act Summary
 
 ## Work completed
-- Extended `ITransactionsDataService.GetListAsync` with optional `sortBy` while preserving the existing `direction`, `take`, and `ascending` parameters.
-- Added server-side ordering for Date, Product, Price, Seller, and Customer after list-row projection, with unknown/empty sort keys falling back to Date.
-- Extended `GenerateListFactorPdfAsync` to pass the same sort key into `GetListAsync`, keeping factor ordering aligned with the visible list.
-- Updated the API data-service stub signature only; no API host, endpoints, auth, entities, schema, or initialization code changed.
-- Added service tests covering price, product, seller, customer, and unknown-sort fallback behavior while retaining date/direction/take coverage.
+- Extended `Transactions/Index.cshtml.cs` to accept and normalize `sort` and `order` query parameters.
+- Passed the selected sort key and direction to `GetListAsync`, preserving direction and take filters.
+- Passed the same sort key/order into `GenerateListFactorPdfAsync` so factor output follows the visible list ordering.
+- Replaced the Order dropdown in `Transactions/Index.cshtml` with clickable Date, Product, Price, Seller, and Customer headers.
+- Added active-column `aria-sort` values and visible ↑/↓ indicators.
+- Header links preserve `direction` and `take`; row factor links preserve `direction`, `take`, `sort`, `order`, and selected transaction ID.
+- Direction and count filters retain their existing auto-submit behavior.
+- Direction remains a plain, non-sortable header as required.
+- Reviewer Job B identified a HIGH functional gap: the GET filter form did not preserve `sort` / `order`.
+- Added hidden `sort` and `order` fields to the existing Transactions Index GET form so direction/count submissions and the bulk Download Factor action preserve the current sort.
 
 ## Verification
-- Initial CI Action #445 failed at Build because the API factor-PDF stub signature had not yet been updated.
-- Fixed that signature in a focused follow-up commit.
-- CI Action #446 still failed at Build because the first repair did not match the API stub's actual one-line signature; corrected with the final focused follow-up.
-- Final implementation CI Action #447 — Success: build, tests, Bash/PowerShell checks, factor PDF artifact upload, and Production smoke all passed.
+- Initial implementation Action #452 — Success.
+- Focused repair commit: `631577a1d2c373669b173a6c29180748ddc7b6db` — `fix(transactions): preserve sort and order in filters`.
+- GitHub Actions Action #455 — Success: build, tests, Bash/PowerShell checks, factor PDF artifact upload, and Production smoke all passed.
 - No local `dotnet build`/test was run; GitHub Actions remained the verification gate.
 
 ## Scope validation
-- Only Step 1 files plus `.clinerules/chat/plan.md` are part of the implementation changes.
-- No database/schema/migration changes.
-- No API host/auth/entity/initialization changes.
-- Step 1 header in `plan.md` is marked complete.
+- Repair touched only the planned `Transactions/Index.cshtml` file.
+- No API host, auth, entities, schema, migrations, PDF layout, or transaction create forms were changed.
+- Step 2 remains marked complete in `plan.md`.
 
 ## Limitations
-- The workflow required two focused repair commits after the initial implementation commit; no unrelated changes were included.
-- Step 2 UI work was not started.
+- No additional page-model tests were added; existing service coverage plus full CI and Production smoke were used for verification.
+- Step 3 final Stage W validation was not started.
 
 ## Friction noted
-- The API factor-PDF stub was initially missed because its signature was formatted on one line rather than matching the multiline implementation shape used by the DAL service; CI exposed this and the repair was corrected without expanding scope.
+- Reviewer found a functional query-carry-over gap that was not caught by the initial CI run; it was repaired in one focused commit.
 
 ## Problems
-- None after the final repair; Action #447 is green.
+- None after the focused repair; Action #455 is green.
 
 ## Status
 COMPLETE
-
-REPORT COMMIT:
-`61afd6100a1e26dbcb2f3353bc5e1df659e3b170`
