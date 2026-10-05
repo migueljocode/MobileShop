@@ -1,17 +1,20 @@
-# Audit — Job B (Execution Check): Stage V Step 2 (`88d8ee2`)
+# Audit — Job B (Execution Check): Stage V Step 3 (`35545bd`, PR #21)
 
-**Verdict: PASS. Step 2 is closed; Step 3 is authorized.** One MEDIUM (unintended edits in the smoke script) is appended to the Step 3 block in `plan.md`.
+**Evidence gap:** `act.md` still holds the Step 2 report, so there is no Step 3 report. The Actions API showed run **#437** for `35545bd` with no conclusion yet (still running when I looked), and a second lookup was rate limited. The code and scope checks below are mine.
 
-- **CI evidence (actor-recorded):** `Action: #432 — Success` (run `37259629990`): build, tests, Bash/PowerShell checks, factor PDF artifact and Production smoke green. I could not read the run myself (GitHub API rate limit).
-- **Page and model (checked):** `IndexModel.Availability` and `AvailabilityRoute`; `OnGetAsync(type, partNumberId, availability)` trims and lowercases, keeps only `"available"`/`"sold"`, and passes `null` for All; the view renders one GET form (hidden `type`, an `asp-for="Availability"` select with the three options and `onchange="this.form.submit()"`, and the unchanged phones-only part-number select) and the four type links carry `asp-route-availability`. Because the options are written in the page itself, the select tag helper marks the posted choice as selected.
-- **Tests (checked):** five `IndexModelTests` cover default, `"Sold"`/`" sold "`, `"available"`, unrecognised, and phone + part number + availability together.
-- **Smoke (checked):** the sold route must contain `text-bg-secondary">Sold` and no `text-bg-success">Available`, the available route the reverse, and `/Products?type=phone&availability=sold` must return 200, exactly as planned.
+**Verdict: PENDING — the repair is correct, the final run result is not recorded. Stage V is not signed off yet.**
 
-## MEDIUM — unintended changes in `.github/scripts/production-smoke.sh` (appended to `plan.md` Step 3)
-The diff of `88d8ee2` shows edits outside the planned assertion block: four `printf` format strings changed from `\n` to `\\n` (the local-run guard message and the backup listings, including the `Backup:` list written to the artifact summary), and the file mode changed from `100755` to `100644`. CI stayed green because the workflow runs the script through `bash` and the lines affected are messages and artifact text, but the listings no longer break lines and the executable bit is lost. The actor reports "Problems: None", so this slipped through the report. Step 3 restores the strings and the mode and requires the script diff against `8415a3f` to contain only the planned assertion block.
+## Verified myself
+- **Script repair (the MEDIUM from Step 2):** `git diff 8415a3f..HEAD -- .github/scripts/production-smoke.sh` now contains only the planned availability assertion block (sold route, available route, phone + sold route) and nothing else; the four `printf` strings are back to `\n`; the file mode is `100755` again (`git ls-files -s`). The repair commit touches one file (3 insertions, 3 deletions).
+- **Stage-wide scope (`f921da2..HEAD`, non-workflow files):** `production-smoke.sh`, `README.md` (your own commit `42b203a`), `ApiProductsDataService.cs`, `ProductsDataService.cs`, `IProductsDataService.cs`, `ProductsDataServiceTests.cs`, `IndexModelTests.cs`, `Products/Index.cshtml` and `Index.cshtml.cs`. Nothing changed under `src/MobileShop.Api`, `src/MobileShop.Models`, `src/MobileShop.Dal`, `Pages/Account`, `Pages/Transactions` or the Second-hand page; no `Skip =` remains in the tests.
+- **Earlier runs on this stage:** #434 (audit commit) and #435 (plan commit) succeeded; Step 1 (#427) and Step 2 (#432) are already recorded green.
 
-## LOW
-- `act.md` notes the changes were composed through the GitHub Git data API; that tooling is the likely cause of the escaped backslashes and the dropped mode. The plan now asks for a diff check of backslashes and file mode after any such write.
+## What the actor must do (report-only job)
+Read this section as the instruction; do not wait for a separate prompt.
+1. `git pull`.
+2. Read the workflow run for `35545bd` / PR #21 (run #437) and add a "Stage V — Step 3 Act Summary" to `act.md` in a `docs(act): record Stage V Step 3 verification` commit containing: `Action: #<run_number> — <Success|Failure|Pending>` with run id and head SHA; the result of build (warnings), tests (total, skipped), Bash/PowerShell checks, factor PDF artifact and the **Production smoke** step; the output of `git ls-files -s .github/scripts/production-smoke.sh` (expect `100755`); and the output of `git diff 8415a3f..HEAD -- .github/scripts/production-smoke.sh` (expect only the assertion block).
+3. Check every statement in the report (Limitations, Problems) against `git show 35545bd --stat` and the diff before writing it.
+4. If the run failed, STOP and report the failing step and its output; do not change code without a new instruction. Do not touch `to-do.md`, `plan.md` or `audit.md`.
 
 ## Gate
-Next: the actor does **Stage V Step 3** (script repair first, then the final validation). One step → one commit → green run before merge → report `Action: #<run_number>` → STOP for Job B.
+Green run recorded → reviewer PASS and Stage V sign-off (tick in `to-do.md`) → planner plans Stage W.
