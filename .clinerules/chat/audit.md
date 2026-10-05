@@ -1,24 +1,26 @@
-# Audit — Job A: Stage W plan
+# Audit — Job B: Stage W Step 1
 
-**Verdict: APPROVED**
+**Verdict: PASS**
 
-No CRITICAL/HIGH issues.
+**Branch / PR:** `actor/stage-w-step-1` · **PR #22** (open) · head `61afd61` · feature `1eb77d5` + API stub repairs `88cc4be` / `73f0706`
 
-| Check | Result |
-|-------|--------|
-| Matches open Stage W in `to-do.md` | **OK** |
-| Five columns + server-side + indicator | **OK** |
-| Direction/take kept; Order dropdown replaced by headers | **OK** |
-| VM fields exist for sort keys | **OK** (`Date`, `ProductLabel`, `FinishedPrice`, `SellerLabel`, `CustomerLabel`) |
-| `sortBy` optional default keeps existing `GetListAsync(..., ascending)` call sites | **OK** if added as last optional param |
-| Factor PDF same order (D5) | **OK** — extend `GenerateListFactorPdfAsync` in Step 1 |
-| Api host / auth / schema left alone | **OK** |
-| Risk/Confidence honest | **OK** |
+**CI:** Action **#447 — Success** (per `act.md`)
 
-## Notes (not blocking)
-- Prefer `GetListAsync(..., bool ascending, string? sortBy = null)` so current tests compile with only an optional arg.
-- Step 2: every factor/download URL must carry `sort` + `order` or the PDF drifts from the table after a non-date sort.
+| Requirement | Result |
+|-------------|--------|
+| `sortBy` optional on `GetListAsync` | **OK** |
+| Columns date/product/price/seller/customer | **OK** |
+| Unknown → date | **OK** |
+| Factor forwards `sortBy` | **OK** |
+| Api stubs only | **OK** |
+| Tests for four columns + unknown | **OK** |
+| Web UI untouched | **OK** |
+
+## Process notes (not FAIL)
+- Two CI repair commits for Api factor stub signature (expected friction).
+- Actor reported editing `plan.md` Step 1 checkbox — that is reviewer-owned; soft note only.
+- **PR #22 is still open** — merge to `main` before starting Step 2 on main.
 
 ## Gate
 
-**Step 1 authorized.** Actor: one commit → green Action → `act.md` → STOP for Job B.
+**Step 2 authorized** after PR #22 is merged. Actor: headers + indicator + query carry-over on Transactions Index only.
