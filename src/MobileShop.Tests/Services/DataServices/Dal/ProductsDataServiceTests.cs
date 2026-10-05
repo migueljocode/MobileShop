@@ -257,6 +257,143 @@ public class ProductsDataServiceTests : RepoTestBase
         Assert.True(rows[0].IsSecondHand);
     }
 
+    private void AddSell(Product product, bool isDeleted = false)
+    {
+        Context.Transactions.Add(new Transaction
+        {
+            ProductId = product.Id,
+            SellerId = 1,
+            CustomerId = 1,
+            FinishedPrice = 100,
+            Date = DateTime.Today,
+            Direction = TransactionDirection.Sell,
+            IsDeleted = isDeleted,
+        });
+        Context.SaveChanges();
+    }
+
+    // ── Availability filter ────────────────────────────────────
+
+    [Fact]
+    public async Task GetInventoryRowsAsync_availability_available_returns_only_unsold_rows()
+    {
+        var phoneProduct = TestDataHelpers.CreateProduct(Context);
+        var appleProduct = TestDataHelpers.CreateProduct(Context);
+        var glassProduct = TestDataHelpers.CreateProduct(Context);
+        Context.Phones.Add(new Phone { ProductId = phoneProduct.Id, IMEI1 = TestDataHelpers.GenerateImei() });
+        Context.AppleIds.Add(new AppleId { ProductId = appleProduct.Id, Email = "available-test@example.com", Password = "secret" });
+        Context.Products.Single(p => p.Id == glassProduct.Id).GlassProfile = new Glass();
+        Context.SaveChanges();
+        AddSell(appleProduct);
+        AddSell(glassProduct);
+
+        var rows = await _service.GetInventoryRowsAsync(availability: "available");
+
+        Assert.Single(rows);
+        Assert.Equal("Phone", rows[0].Type);
+        Assert.False(rows[0].IsSold);
+    }
+
+    [Fact]
+    public async Task GetInventoryRowsAsync_availability_sold_returns_only_sold_rows()
+    {
+        var phoneProduct = TestDataHelpers.CreateProduct(Context);
+        var appleProduct = TestDataHelpers.CreateProduct(Context);
+        var glassProduct = TestDataHelpers.CreateProduct(Context);
+        Context.Phones.Add(new Phone { ProductId = phoneProduct.Id, IMEI1 = TestDataHelpers.GenerateImei() });
+        Context.AppleIds.Add(new AppleId { ProductId = appleProduct.Id, Email = "sold-test@example.com", Password = "secret" });
+        Context.Products.Single(p => p.Id == glassProduct.Id).GlassProfile = new Glass();
+        Context.SaveChanges();
+        AddSell(appleProduct);
+        AddSell(glassProduct);
+
+        var rows = await _service.GetInventoryRowsAsync(availability: "sold");
+
+        Assert.Equal(2, rows.Count);
+        Assert.All(rows, row => Assert.True(row.IsSold));
+        Assert.Contains(rows, row => row.Type == "Apple ID");
+        Assert.Contains(rows, row => row.Type == "Glass");
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("all")]
+    [InlineData("bogus")]
+    public async Task GetInventoryRowsAsync_null_all_and_unrecognised_availability_return_everything(string? availability)
+    {
+        var phoneProduct = TestDataHelpers.CreateProduct(Context);
+        var appleProduct = TestDataHelpers.CreateProduct(Context);
+        var glassProduct = TestDataHelpers.CreateProduct(Context);
+        Context.Phones.Add(new Phone { ProductId = phoneProduct.Id, IMEI1 = TestDataHelpers.GenerateImei() });
+        Context.AppleIds.Add(new AppleId { ProductId = appleProduct.Id, Email = "all-test@example.com", Password = "secret" });
+        Context.Products.Single(p => p.Id == glassProduct.Id).GlassProfile = new Glass();
+        Context.SaveChanges();
+
+        var rows = await _service.GetInventoryRowsAsync(availability: availability);
+
+        Assert.Equal(3, rows.Count);
+    }
+
+    [Fact]
+    public async Task GetInventoryRowsAsync_availability_combines_with_type()
+    {
+        var soldPhone = TestDataHelpers.CreateProduct(Context);
+        var availablePhone = TestDataHelpers.CreateProduct(Context);
+        var appleProduct = TestDataHelpers.CreateProduct(Context);
+        Context.Phones.AddRange(
+            new Phone { ProductId = soldPhone.Id, IMEI1 = TestDataHelpers.GenerateImei() },
+            new Phone { ProductId = availablePhone.Id, IMEI1 = TestDataHelpers.GenerateImei() });
+        Context.AppleIds.Add(new AppleId { ProductId = appleProduct.Id, Email = "type-test@example.com", Password = "secret" });
+        Context.SaveChanges();
+        AddSell(soldPhone);
+        AddSell(appleProduct);
+
+        var rows = await _service.GetInventoryRowsAsync("phone", availability: "sold");
+
+        Assert.Single(rows);
+        Assert.Equal(soldPhone.Id, rows[0].ProductId);
+        Assert.Equal("Phone", rows[0].Type);
+    }
+
+    [Fact]
+    public async Task GetInventoryRowsAsync_availability_combines_with_part_number_filter()
+    {
+        SeedCatalog(out var phoneModel, out _);
+        var firstProduct = TestDataHelpers.CreateProduct(Context);
+        var secondProduct = TestDataHelpers.CreateProduct(Context);
+        var firstPart = new PartNumber { ModelId = phoneModel.Id, Code = "AVAIL-1" };
+        var secondPart = new PartNumber { ModelId = phoneModel.Id, Code = "AVAIL-2" };
+        Context.PartNumbers.AddRange(firstPart, secondPart);
+        Context.SaveChanges();
+        Context.Phones.AddRange(
+            new Phone { ProductId = firstProduct.Id, PartNumberId = firstPart.Id, IMEI1 = TestDataHelpers.GenerateImei() },
+            new Phone { ProductId = secondProduct.Id, PartNumberId = secondPart.Id, IMEI1 = TestDataHelpers.GenerateImei() });
+        Context.SaveChanges();
+        AddSell(firstProduct);
+
+        var rows = await _service.GetInventoryRowsAsync(partNumberId: firstPart.Id, availability: "sold");
+
+        Assert.Single(rows);
+        Assert.Equal(firstProduct.Id, rows[0].ProductId);
+        Assert.True(rows[0].IsSold);
+    }
+
+    [Fact]
+    public async Task GetInventoryRowsAsync_soft_deleted_sell_transaction_counts_as_available()
+    {
+        var product = TestDataHelpers.CreateProduct(Context);
+        Context.Phones.Add(new Phone { ProductId = product.Id, IMEI1 = TestDataHelpers.GenerateImei() });
+        Context.SaveChanges();
+        AddSell(product, isDeleted: true);
+
+        var availableRows = await _service.GetInventoryRowsAsync(availability: "available");
+        var soldRows = await _service.GetInventoryRowsAsync(availability: "sold");
+
+        Assert.Single(availableRows);
+        Assert.False(availableRows[0].IsSold);
+        Assert.Empty(soldRows);
+    }
+
     // ── Inventory type filter ──────────────────────────────────
 
     [Fact]
