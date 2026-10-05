@@ -1,12 +1,22 @@
-# Audit — Job B: Stage W Step 3 + stage sign-off
+# Audit — Job A: Stage X plan
 
-**Verdict: PASS. Stage W is complete.**
+**Verdict: APPROVED**
 
-**Evidence on `main` (`63ed065`):**
-- Step 1: multi-column `GetListAsync` + factor forward + tests (PR #22, Action #447)
-- Step 2: headers, indicators, hidden sort/order (PR #23, Action #455 after repair)
-- Scope: no Api host / auth / entities / migrations on the feature path
+No CRITICAL/HIGH issues.
+
+| Check | Result |
+|-------|--------|
+| Matches Stage X in `to-do.md` | **OK** |
+| Shared formatter in Models + `PersianCalendar` | **OK** |
+| Factor PDF Shamsi only (UI later) | **OK** |
+| Light polish vs Stage AC redesign | **OK** |
+| English invoice left alone unless forced | **OK** |
+| CI gate / no schema / no Api host | **OK** |
+
+## Notes (not blocking)
+- Prefer extension methods next to `MoneyExtensions` for discoverability.
+- Do not OCR PDF for Jalali in Step 2 unless the test suite already has text extraction.
 
 ## Gate
 
-Stage W signed off. Planner may write **Stage X** (Persian/Shamsi dates + factor polish). Actor waits for Job A on the next plan.
+**Step 1 authorized.** Actor: Jalali helper + unit tests only.
