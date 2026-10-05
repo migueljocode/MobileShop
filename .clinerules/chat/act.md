@@ -1,30 +1,26 @@
 # Stage Y — Step 2 Act Summary
 
 ## Scope
-Implemented the planned AJAX create handlers for Record Buy and Record Sell.
+Repaired the failed Step 2 CI build by updating existing transaction page-model tests for the new IPeopleDataService constructor dependency.
 
 ## Changes
-- Injected IPeopleDataService into BuyModel and SellModel.
-- Added OnPostCreateSellerAsync and OnPostCreateCustomerAsync Razor Page handlers.
-- Reused CreateSellerInputModel/CreateCustomerInputModel and PeopleDataService Create*Async methods.
-- Mapped the returned EntityId into DropdownCreateResult / DropdownOptionViewModel.
-- Returned HTTP 400 JSON for validation or service failures.
-- Added focused page-model tests for successful option mapping and service failure behavior.
-- Left picker/modal/fetch UI wiring for Step 3.
+- Updated existing Buy/Sell RecordModelTests constructor calls to provide the unused people-service dependency as null in tests that exercise only transaction behavior.
+- No production behavior or public API was changed.
 
 ## Verification
-- Implementation commit: dd2678e809378f79b39d63d1ec687db7759c66b0
-- Action: #480 — Pending
+- Failed Action: #480 — Failure.
+- Failure diagnosis: existing RecordModelTests still constructed BuyModel/SellModel with the old one-argument constructor after Step 2 added IPeopleDataService.
+- Repair commit: pending.
 - Local dotnet build/test was not run because GitHub Actions is the CI gate.
 
 ## Limitations
-- No shared picker UI, modal markup, or fetch JavaScript was changed; those are Step 3.
+- None.
 
 ## Friction noted
-- None.
+- GitHub update-ref/create-commit calls intermittently returned GraphQL UNKNOWN errors; the repair is being recreated from current main.
 
 ## Problems
-- None.
+- Action #480 failed because pre-existing transaction page-model tests were not updated for the added constructor dependency.
 
 ## Status
-STOPPED — awaiting green GitHub Action for Step 2.
+STOPPED — awaiting the repair commit and its GitHub Action result.

@@ -61,7 +61,7 @@ public class RecordModelTests : RepoTestBase
         Context.Phones.Add(new Phone { ProductId = product.Id, IMEI1 = TestDataHelpers.GenerateImei() });
         Context.SaveChanges();
 
-        var model = new BuyModel(CreateService());
+        var model = new BuyModel(CreateService(), null!);
         var result = await model.OnGetAsync();
 
         Assert.IsType<PageResult>(result);
@@ -73,7 +73,7 @@ public class RecordModelTests : RepoTestBase
     [Fact]
     public async Task Buy_OnGet_defaults_date_to_today()
     {
-        var model = new BuyModel(CreateService());
+        var model = new BuyModel(CreateService(), null!);
         var result = await model.OnGetAsync();
 
         Assert.IsType<PageResult>(result);
@@ -87,7 +87,7 @@ public class RecordModelTests : RepoTestBase
         var seller = AddSeller("Ali", "Zed");
         var product = TestDataHelpers.CreateProduct(Context);
 
-        var model = new BuyModel(CreateService())
+        var model = new BuyModel(CreateService(), null!)
         {
             Input = new BuyInputModel { ProductId = product.Id, SellerId = seller.Id, Price = 150 }
         };
@@ -119,7 +119,7 @@ public class RecordModelTests : RepoTestBase
         });
         Context.SaveChanges();
 
-        var model = new BuyModel(CreateService())
+        var model = new BuyModel(CreateService(), null!)
         {
             Input = new BuyInputModel { ProductId = product.Id, SellerId = seller.Id, Price = 150 }
         };
@@ -139,7 +139,7 @@ public class RecordModelTests : RepoTestBase
     {
         var customer = AddCustomer("Sara", "Ahmadi");
 
-        var model = new SellModel(CreateService());
+        var model = new SellModel(CreateService(), null!);
         var result = await model.OnGetAsync();
 
         Assert.IsType<PageResult>(result);
@@ -150,7 +150,7 @@ public class RecordModelTests : RepoTestBase
     [Fact]
     public async Task Sell_OnGet_defaults_date_to_today()
     {
-        var model = new SellModel(CreateService());
+        var model = new SellModel(CreateService(), null!);
         var result = await model.OnGetAsync();
 
         Assert.IsType<PageResult>(result);
@@ -164,7 +164,7 @@ public class RecordModelTests : RepoTestBase
         var customer = AddCustomer("Sara", "Ahmadi");
         var product = TestDataHelpers.CreateProduct(Context);
 
-        var model = new SellModel(CreateService())
+        var model = new SellModel(CreateService(), null!)
         {
             Input = new SellInputModel { ProductId = product.Id, CustomerId = customer.Id, Price = 250 }
         };
@@ -190,7 +190,7 @@ public class RecordModelTests : RepoTestBase
 
         if (direction == "Buy")
         {
-            var buyModel = new BuyModel(CreateService())
+            var buyModel = new BuyModel(CreateService(), null!)
             {
                 Input = new BuyInputModel { ProductId = 0, SellerId = seller.Id, Price = 150 }
             };
@@ -202,7 +202,7 @@ public class RecordModelTests : RepoTestBase
         }
         else
         {
-            var sellModel = new SellModel(CreateService())
+            var sellModel = new SellModel(CreateService(), null!)
             {
                 Input = new SellInputModel { ProductId = product.Id, CustomerId = 0, Price = 250 }
             };
@@ -220,7 +220,7 @@ public class RecordModelTests : RepoTestBase
         TestDataHelpers.SeedShopSentinels(Context);
         var product = TestDataHelpers.CreateProduct(Context);
 
-        var buyModel = new BuyModel(CreateService())
+        var buyModel = new BuyModel(CreateService(), null!)
         {
             Input = new BuyInputModel { ProductId = product.Id, SellerId = 0, Price = 150 }
         };
@@ -237,7 +237,7 @@ public class RecordModelTests : RepoTestBase
         TestDataHelpers.SeedShopSentinels(Context);
         var customer = AddCustomer("Sara", "Ahmadi");
 
-        var sellModel = new SellModel(CreateService())
+        var sellModel = new SellModel(CreateService(), null!)
         {
             Input = new SellInputModel { ProductId = 0, CustomerId = customer.Id, Price = 250 }
         };
@@ -260,7 +260,7 @@ public class RecordModelTests : RepoTestBase
 
         if (direction == "Buy")
         {
-            var buyModel = new BuyModel(CreateService())
+            var buyModel = new BuyModel(CreateService(), null!)
             {
                 Input = new BuyInputModel { ProductId = product.Id, SellerId = seller.Id, Price = 150 }
             };
@@ -270,7 +270,7 @@ public class RecordModelTests : RepoTestBase
         }
         else
         {
-            var sellModel = new SellModel(CreateService())
+            var sellModel = new SellModel(CreateService(), null!)
             {
                 Input = new SellInputModel { ProductId = product.Id, CustomerId = customer.Id, Price = 250 }
             };
