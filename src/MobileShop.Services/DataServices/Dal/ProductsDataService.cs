@@ -32,7 +32,7 @@ public class ProductsDataService(
     protected ILogger<ProductsDataService> Logger { get; } = logger;
 
     /// <inheritdoc />
-    public async Task<IReadOnlyList<ProductListItemViewModel>> GetInventoryRowsAsync(string? type = null, int? partNumberId = null)
+    public async Task<IReadOnlyList<ProductListItemViewModel>> GetInventoryRowsAsync(string? type = null, int? partNumberId = null, string? availability = null)
     {
         var rows = new List<ProductListItemViewModel>();
 
@@ -97,7 +97,14 @@ public class ProductsDataService(
                 .OrderBy(row => row.ProductId));
         }
 
-        return rows.AsReadOnly();
+        var filteredRows = availability switch
+        {
+            "available" => rows.Where(row => !row.IsSold),
+            "sold" => rows.Where(row => row.IsSold),
+            _ => rows,
+        };
+
+        return filteredRows.ToList().AsReadOnly();
     }
 
     /// <inheritdoc />
