@@ -132,7 +132,7 @@ public class PeopleDataService(
     public async Task<IReadOnlyList<PartyOptionViewModel>> SearchCustomersAsync(string? q, int take = 25)
     {
         var limit = Math.Clamp(take, 1, 100);
-        var selector = (Customer customer) => new PartyOptionViewModel(
+        Expression<Func<Customer, PartyOptionViewModel>> selector = customer => new PartyOptionViewModel(
             customer.Id,
             customer.PersonNavigation.FirstName + " " + customer.PersonNavigation.LastName,
             customer.PersonNavigation.PhoneNumber);
@@ -157,7 +157,7 @@ public class PeopleDataService(
     public async Task<IReadOnlyList<PartyOptionViewModel>> SearchSellersAsync(string? q, int take = 25)
     {
         var limit = Math.Clamp(take, 1, 100);
-        var selector = (Seller seller) => new PartyOptionViewModel(
+        Expression<Func<Seller, PartyOptionViewModel>> selector = seller => new PartyOptionViewModel(
             seller.Id,
             seller.PersonNavigation.FirstName + " " + seller.PersonNavigation.LastName,
             seller.EntityType.ToString());
