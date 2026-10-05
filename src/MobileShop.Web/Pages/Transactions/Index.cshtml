@@ -24,13 +24,6 @@
                 <label class="form-label" for="take">Count</label>
                 <input id="take" class="form-control" type="number" name="take" min="1" max="500" value="@Model.Take" />
             </div>
-            <div class="col-md-3">
-                <label class="form-label" for="order">Order</label>
-                <select id="order" name="order" class="form-select">
-                    <option value="desc" selected="@(Model.Order == "desc")">Newest first</option>
-                    <option value="asc" selected="@(Model.Order == "asc")">Oldest first</option>
-                </select>
-            </div>
         </div>
 
         <p class="d-flex flex-wrap gap-2">
@@ -47,18 +40,58 @@
         {
             <p class="text-muted small">
                 Tick one or more rows to download a factor for exactly those transactions, or leave every row
-                unticked to use the direction/count/order filters above.
+                unticked to use the direction/count/sort filters above.
             </p>
             <table class="table table-striped">
                 <thead>
                     <tr>
                         <th scope="col"><span class="visually-hidden">Select</span></th>
-                        <th scope="col">Date</th>
+                        <th scope="col" aria-sort="@(Model.Sort == "date" ? (Model.Order == "asc" ? "ascending" : "descending") : "none")">
+                            <a href="@Url.Page("/Transactions/Index", new { direction = Model.Direction, take = Model.Take, sort = "date", order = Model.Sort == "date" && Model.Order == "desc" ? "asc" : "desc" })">
+                                Date
+                                @if (Model.Sort == "date")
+                                {
+                                    <span aria-hidden="true">@(Model.Order == "asc" ? "↑" : "↓")</span>
+                                }
+                            </a>
+                        </th>
                         <th scope="col">Direction</th>
-                        <th scope="col">Product</th>
-                        <th scope="col">Price (IRR)</th>
-                        <th scope="col">Seller</th>
-                        <th scope="col">Customer</th>
+                        <th scope="col" aria-sort="@(Model.Sort == "product" ? (Model.Order == "asc" ? "ascending" : "descending") : "none")">
+                            <a href="@Url.Page("/Transactions/Index", new { direction = Model.Direction, take = Model.Take, sort = "product", order = Model.Sort == "product" && Model.Order == "desc" ? "asc" : "desc" })">
+                                Product
+                                @if (Model.Sort == "product")
+                                {
+                                    <span aria-hidden="true">@(Model.Order == "asc" ? "↑" : "↓")</span>
+                                }
+                            </a>
+                        </th>
+                        <th scope="col" aria-sort="@(Model.Sort == "price" ? (Model.Order == "asc" ? "ascending" : "descending") : "none")">
+                            <a href="@Url.Page("/Transactions/Index", new { direction = Model.Direction, take = Model.Take, sort = "price", order = Model.Sort == "price" && Model.Order == "desc" ? "asc" : "desc" })">
+                                Price (IRR)
+                                @if (Model.Sort == "price")
+                                {
+                                    <span aria-hidden="true">@(Model.Order == "asc" ? "↑" : "↓")</span>
+                                }
+                            </a>
+                        </th>
+                        <th scope="col" aria-sort="@(Model.Sort == "seller" ? (Model.Order == "asc" ? "ascending" : "descending") : "none")">
+                            <a href="@Url.Page("/Transactions/Index", new { direction = Model.Direction, take = Model.Take, sort = "seller", order = Model.Sort == "seller" && Model.Order == "desc" ? "asc" : "desc" })">
+                                Seller
+                                @if (Model.Sort == "seller")
+                                {
+                                    <span aria-hidden="true">@(Model.Order == "asc" ? "↑" : "↓")</span>
+                                }
+                            </a>
+                        </th>
+                        <th scope="col" aria-sort="@(Model.Sort == "customer" ? (Model.Order == "asc" ? "ascending" : "descending") : "none")">
+                            <a href="@Url.Page("/Transactions/Index", new { direction = Model.Direction, take = Model.Take, sort = "customer", order = Model.Sort == "customer" && Model.Order == "desc" ? "asc" : "desc" })">
+                                Customer
+                                @if (Model.Sort == "customer")
+                                {
+                                    <span aria-hidden="true">@(Model.Order == "asc" ? "↑" : "↓")</span>
+                                }
+                            </a>
+                        </th>
                         <th scope="col">Actions</th>
                     </tr>
                 </thead>
@@ -79,7 +112,7 @@
                             <td>
                                 <a asp-page="/Transactions/Details" asp-route-id="@transaction.Id">Details</a>
                                 |
-                                <a href="@Url.Page("/Transactions/Index", "DownloadFactor", new { direction = Model.Direction, take = Model.Take, order = Model.Order, selectedIds = transaction.Id })">Download Factor</a>
+                                <a href="@Url.Page("/Transactions/Index", "DownloadFactor", new { direction = Model.Direction, take = Model.Take, sort = Model.Sort, order = Model.Order, selectedIds = transaction.Id })">Download Factor</a>
                             </td>
                         </tr>
                     }
@@ -91,11 +124,8 @@
 
 @section Scripts {
     <script>
-        // Auto-submit the filter form when direction or order changes.
+        // Auto-submit the filter form when direction changes.
         document.getElementById('direction').addEventListener('change', function () {
-            this.form.requestSubmit();
-        });
-        document.getElementById('order').addEventListener('change', function () {
             this.form.requestSubmit();
         });
 

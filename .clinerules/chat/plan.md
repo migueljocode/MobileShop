@@ -47,7 +47,7 @@
 - Risk: LOW
 - Confidence: HIGH
 
-## [ ] Step 2 — Transactions Index: clickable headers + indicators + query carry-over
+## ~~[x] Step 2 — Transactions Index: clickable headers + indicators + query carry-over
 
 - Files
   - `Pages/Transactions/Index.cshtml.cs` — accept `sort` (or `sortBy`) + `order`; expose `Sort` / `Order` for the view; `LoadAsync` and `OnGetDownloadFactorAsync` pass them to the service.
