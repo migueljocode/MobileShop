@@ -1,22 +1,22 @@
-# Audit — Job A: Stage X plan
+# Audit — Job B: Stage X Step 1
 
-**Verdict: APPROVED**
+**Verdict: PASS**
 
-No CRITICAL/HIGH issues.
+**Commit:** `6664ed63` — `feat(models): add Jalali date formatting`
 
-| Check | Result |
-|-------|--------|
-| Matches Stage X in `to-do.md` | **OK** |
-| Shared formatter in Models + `PersianCalendar` | **OK** |
-| Factor PDF Shamsi only (UI later) | **OK** |
-| Light polish vs Stage AC redesign | **OK** |
-| English invoice left alone unless forced | **OK** |
-| CI gate / no schema / no Api host | **OK** |
+| Requirement | Result |
+|-------------|--------|
+| `JalaliDateExtensions` in Models | **OK** |
+| `PersianCalendar`, no new package | **OK** |
+| `ToJalaliDateString` / `ToJalaliDateTimeString` | **OK** |
+| Fixed conversion tests | **OK** (1403/01/01, 1404/01/01, 1404/07/13) |
+| PDF / Web untouched | **OK** |
 
-## Notes (not blocking)
-- Prefer extension methods next to `MoneyExtensions` for discoverability.
-- Do not OCR PDF for Jalali in Step 2 unless the test suite already has text extraction.
+## Notes
+- Actor also edited `plan.md` checkbox (reviewer-owned) — soft process note only.
+- `act.md` still describes Stage W Step 2; prefer a Stage X Step 1 report next time.
+- Confirm CI green on `6664ed63` if not already recorded in chat.
 
 ## Gate
 
-**Step 1 authorized.** Actor: Jalali helper + unit tests only.
+**Step 2 authorized.** Factor PDF Jalali dates + light polish only.
