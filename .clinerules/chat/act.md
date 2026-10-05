@@ -1,26 +1,27 @@
 # Stage Y — Step 2 Act Summary
 
 ## Scope
-Repaired the failed Step 2 CI build by updating existing transaction page-model tests for the new IPeopleDataService constructor dependency.
+Repaired the Stage Y Step 2 AJAX create handlers so unrelated transaction-page ModelState errors do not reject valid create-person requests.
 
 ## Changes
-- Updated existing Buy/Sell RecordModelTests constructor calls to provide the unused people-service dependency as null in tests that exercise only transaction behavior.
-- No production behavior or public API was changed.
+- Buy seller creation now clears page-level ModelState and validates only the supplied CreateSellerInputModel.
+- Sell customer creation now clears page-level ModelState and validates only the supplied CreateCustomerInputModel.
+- Extended handler tests to prove valid create requests still return HTTP 200 + EntityId when an unrelated Input.* ModelState error is present.
 
 ## Verification
-- Failed Action: #480 — Failure.
-- Failure diagnosis: existing RecordModelTests still constructed BuyModel/SellModel with the old one-argument constructor after Step 2 added IPeopleDataService.
-- Repair commit: pending.
+- Reviewer Job B found HIGH functional risk in the original handlers.
+- Previous repair Action: #482 — Success (compile-only CI result recorded by Reviewer).
 - Local dotnet build/test was not run because GitHub Actions is the CI gate.
+- Repair Action: pending.
 
 ## Limitations
 - None.
 
 ## Friction noted
-- GitHub update-ref/create-commit calls intermittently returned GraphQL UNKNOWN errors; the repair is being recreated from current main.
+- None.
 
 ## Problems
-- Action #480 failed because pre-existing transaction page-model tests were not updated for the added constructor dependency.
+- Original handlers used page-level ModelState.IsValid, which can contain errors for unrelated Buy/Sell Input fields during an AJAX create-only POST.
 
 ## Status
-STOPPED — awaiting the repair commit and its GitHub Action result.
+STOPPED — awaiting the repair commit's GitHub Action result.

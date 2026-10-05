@@ -13,6 +13,7 @@ public class PersonCreateHandlerTests
             CreateSellerResult = new ServiceResult(true, null, EntityId: 42)
         };
         var model = new BuyModel(null!, people);
+        model.ModelState.AddModelError("Input.ProductId", "The product is required.");
 
         var result = await model.OnPostCreateSellerAsync(new CreateSellerInputModel
         {
@@ -38,6 +39,7 @@ public class PersonCreateHandlerTests
             CreateCustomerResult = new ServiceResult(true, null, EntityId: 24)
         };
         var model = new SellModel(null!, people);
+        model.ModelState.AddModelError("Input.ProductId", "The product is required.");
 
         var result = await model.OnPostCreateCustomerAsync(new CreateCustomerInputModel
         {
