@@ -1,10 +1,22 @@
-# Audit — Job B (Execution Check): Stage U Step 4 final correction (`3b818ba`, PR #15)
+# Audit — Job A (Plan Review): Stage V — Products list: Available / Sold filter
 
-**Verdict: PASS. Step 4 is closed; Step 5 is authorized.**
+**Verdict: APPROVED. Step 1 is authorized.**
+Reviewed `plan.md` (3 steps) against `main` at `eb33206`; claims verified by reading the code (no CI needed for a plan review).
 
-- **Independently verified on `main` at `b7fb818`:** my rescan of the planned extensions (cs, cshtml, js, css, sh, ps1, yml, yaml, md, json, csproj, props, slnx; excluding `Migrations/` and `.clinerules/chat`) finds **no file without a final newline**. The correction commit changes exactly the 9 listed vendor files, each `1 1` in `--numstat`, and `git diff --ignore-space-at-eol` shows no content change. `.editorconfig` (`root = true`, `charset = utf-8`, `insert_final_newline = true`) is present.
-- **CI evidence (actor-recorded):** `Action: #409 — Success` (run `37236593514`) for PR #15, green before the merge. I could not read the run myself (GitHub API rate limit).
-- **MEDIUM/LOW:** none new. The `copilot-instructions.md` usings-sentence fix is already appended to the Step 5 block in `plan.md` and the actor does it there.
+## Verified against the repository
+- **Existing rule:** `ProductsDataService.GetInventoryRowsAsync` builds `IsSold` as `Transactions.Any(t => t.Direction == TransactionDirection.Sell)` for phones (line 54), Apple IDs and glass; `Index.cshtml` already renders the Sold/Available badge from it, so filtering on the same `IsSold` keeps filter and badge consistent. No new column or migration is needed.
+- **Signature:** `GetInventoryRowsAsync(string? type = null, int? partNumberId = null)` exists on the interface (line 12), the service (line 35) and the Api stub; an optional third parameter keeps every existing caller and test valid.
+- **Page today:** `IndexModel.OnGetAsync(type, partNumberId)` with a part-number form shown only for phones, using `onchange="this.form.submit()"` (the precedent the plan reuses); type links currently carry `partNumberId` only for phones.
+- **Tests:** there are no Products `IndexModel` tests (only the Create* page tests), so Step 2 creating `IndexModelTests` is right; `TestDataHelpers` has no transaction helper, so the plan correctly points the actor to the `TransactionsDataServiceTests` seeding pattern.
+- **Smoke:** the route loops are at `production-smoke.sh:144` and the IRR loop below it; the seed has 17 products and 12 with a Sell transaction, so both lists are non-empty in the smoke. The plan asserts badge markup, not plain words, because the filter's own options contain "Sold" and "Available".
+- **Usings:** the Web project already globally imports what the page needs; no new using is planned.
+
+## Review notes
+- The plan avoids the main risks seen in earlier stages: no new global usings, an optional parameter instead of a breaking signature, markup-level smoke assertions, and "wait for a green run before merging".
+- **LOW (no action):** a product sold and later bought back stays Sold; this is existing behaviour and the plan records it as unchanged (D1).
+
+## MEDIUM/LOW to append
+None.
 
 ## Gate
-Next: the actor does **Stage U Step 5** (final validation, including the one-sentence `.github/copilot-instructions.md` fix from the Step 5 block). One step → one commit → green run before merge → report `Action: #<run_number>` → STOP for Job B.
+Next: the actor does **Stage V Step 1** (availability filter in the service). One step → one commit → wait for a green run before merging → report `Action: #<run_number>` → STOP for Job B. Steps 2–3 are authorized one at a time after each PASS.
