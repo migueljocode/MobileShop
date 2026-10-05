@@ -44,7 +44,7 @@
 - Risk: LOW
 - Confidence: HIGH
 
-## [ ] Step 2 — AJAX create handlers (JSON)
+## ~~[x] Step 2 — AJAX create handlers (JSON)~~
 
 - Files
   - Modify: `Buy.cshtml.cs` / `Sell.cshtml.cs` (or a single shared page under `Pages/People` if cleaner — **prefer handlers on Buy and Sell** to keep antiforgery with the form page).

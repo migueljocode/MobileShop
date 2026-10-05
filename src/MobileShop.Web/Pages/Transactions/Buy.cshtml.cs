@@ -1,7 +1,8 @@
 namespace MobileShop.Web.Pages.Transactions;
 
 public class BuyModel(
-    ITransactionsDataService dataService) : PageModel
+    ITransactionsDataService dataService,
+    IPeopleDataService peopleDataService) : PageModel
 {
     [BindProperty] public BuyInputModel Input { get; set; } = new();
     public IReadOnlyList<PartyOptionViewModel> Sellers { get; private set; } = [];
@@ -30,6 +31,23 @@ public class BuyModel(
         return Page();
     }
 
+    public async Task<IActionResult> OnPostCreateSellerAsync(CreateSellerInputModel input)
+    {
+        if (!ModelState.IsValid)
+            return CreateErrorResult("Please correct the seller details.");
+
+        var result = await peopleDataService.CreateSellerAsync(input);
+        if (!result.Succeeded || result.EntityId is null)
+            return CreateErrorResult(result.Message ?? "The seller could not be created.");
+
+        var name = $"{input.FirstName.Trim()} {input.LastName.Trim()}".Trim();
+        return new JsonResult(new DropdownCreateResult(
+            true,
+            new DropdownOptionViewModel(result.EntityId.Value, name),
+            null,
+            200));
+    }
+
     private async Task<IActionResult> LoadSelectionsAsync()
     {
         Sellers = await dataService.GetSellersAsync();
@@ -37,4 +55,6 @@ public class BuyModel(
         return Page();
     }
 
+    private static JsonResult CreateErrorResult(string message) =>
+        new(new DropdownCreateResult(false, null, message, 400)) { StatusCode = 400 };
 }
