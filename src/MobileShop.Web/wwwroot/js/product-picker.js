@@ -27,6 +27,11 @@ document.addEventListener('DOMContentLoaded', function () {
             if (suggested) priceInput.value = suggested;
         }
 
+        document.addEventListener('product-created', function (event) {
+            var option = event.detail;
+            if (option && option.productId && option.label) setSelection(option);
+        });
+
         function renderResults(options) {
             results.replaceChildren();
             options.forEach(function (option) {
@@ -35,9 +40,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 button.className = 'list-group-item list-group-item-action';
                 button.setAttribute('role', 'option');
                 button.textContent = option.label;
-                button.addEventListener('click', function () {
-                    setSelection(option);
-                });
+                button.addEventListener('click', function () { setSelection(option); });
                 results.appendChild(button);
             });
             results.classList.toggle('d-none', options.length === 0);
@@ -78,9 +81,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
 
         searchInput.addEventListener('focus', function () {
-            if (!searchInput.value.trim()) {
-                search('').catch(function () { });
-            }
+            if (!searchInput.value.trim()) search('').catch(function () { });
         });
 
         picker.querySelectorAll('[data-product-option]').forEach(function (button) {

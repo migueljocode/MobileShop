@@ -44,7 +44,7 @@
 - Done when: both pages can search/select products; CI green; Job B PASS.
 - Risk: MEDIUM · Confidence: MEDIUM
 
-## [ ] Step 3 — Create-product modal + registry (Phone, Apple ID, Glass)
+## ~~[x] Step 3 — Create-product modal + registry (Phone, Apple ID, Glass)~~
 
 - Files: shared modal shell + registry; GET form fragment handlers; POST create handlers calling `IProductsDataService`; slim partials or reused field markup for the three types.
 - Ensure antiforgery + independent validation (same lesson as Stage Y: no `Input` ModelState pollution; prefer `Validator.TryValidateObject`).

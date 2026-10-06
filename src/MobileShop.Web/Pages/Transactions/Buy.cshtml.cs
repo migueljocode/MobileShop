@@ -2,7 +2,8 @@ namespace MobileShop.Web.Pages.Transactions;
 
 public class BuyModel(
     ITransactionsDataService dataService,
-    IPeopleDataService peopleDataService) : PageModel
+    IPeopleDataService peopleDataService,
+    IProductsDataService productsDataService) : PageModel
 {
     [BindProperty] public BuyInputModel Input { get; set; } = new();
     public IReadOnlyList<PartyOptionViewModel> Sellers { get; private set; } = [];
@@ -37,6 +38,82 @@ public class BuyModel(
     public async Task<IActionResult> OnGetSearchSellersAsync(string? q) =>
         new JsonResult(await peopleDataService.SearchSellersAsync(q));
 
+    public async Task<IActionResult> OnGetCreateProductFormAsync(string? type)
+    {
+        if (!MobileShop.Web.Pages.Shared.ProductCreateRegistry.TryGet(type, out var definition))
+            return new BadRequestResult();
+
+        switch (definition.Key)
+        {
+            case "phone":
+                ViewData["Manufacturers"] = await productsDataService.GetManufacturersAsync();
+                ViewData["Models"] = Array.Empty<DropdownOptionViewModel>();
+                ViewData["Colors"] = await productsDataService.GetColorsAsync();
+                ViewData["PartNumbers"] = Array.Empty<DropdownOptionViewModel>();
+                ViewData["Corporations"] = await productsDataService.GetGuaranteeCorporationsAsync();
+                return Partial(definition.PartialName, new CreatePhoneInputModel());
+
+            case "appleid":
+                return Partial(definition.PartialName, new CreateAppleIdInputModel());
+
+            case "glass":
+                ViewData["Manufacturers"] = await productsDataService.GetManufacturersAsync();
+                ViewData["Models"] = Array.Empty<DropdownOptionViewModel>();
+                return Partial(definition.PartialName, new CreateGlassInputModel());
+
+            default:
+                return new BadRequestResult();
+        }
+    }
+
+    public async Task<IActionResult> OnGetCreatePhoneModelsAsync(int manufacturerId)
+    {
+        if (manufacturerId <= 0)
+            return new JsonResult(Array.Empty<object>());
+
+        var options = await productsDataService.GetModelsAsync(manufacturerId);
+        return new JsonResult(options.Select(option => new { id = option.Id, name = option.Name }));
+    }
+
+    public async Task<IActionResult> OnGetCreateGlassModelsAsync(int manufacturerId)
+    {
+        if (manufacturerId <= 0)
+            return new JsonResult(Array.Empty<object>());
+
+        var options = await productsDataService.GetModelsAsync(manufacturerId);
+        return new JsonResult(options.Select(option => new { id = option.Id, name = option.Name }));
+    }
+
+    public async Task<IActionResult> OnPostCreatePhoneAsync(CreatePhoneInputModel input)
+    {
+        ModelState.Clear();
+        if (!TryValidate(input))
+            return CreateErrorResult("Please correct the phone details.");
+
+        var result = await productsDataService.CreatePhoneAsync(input);
+        return await FinishProductCreateAsync(result, "phone");
+    }
+
+    public async Task<IActionResult> OnPostCreateAppleIdAsync(CreateAppleIdInputModel input)
+    {
+        ModelState.Clear();
+        if (!TryValidate(input))
+            return CreateErrorResult("Please correct the Apple ID details.");
+
+        var result = await productsDataService.CreateAppleIdAsync(input);
+        return await FinishProductCreateAsync(result, "appleid");
+    }
+
+    public async Task<IActionResult> OnPostCreateGlassAsync(CreateGlassInputModel input)
+    {
+        ModelState.Clear();
+        if (!TryValidate(input))
+            return CreateErrorResult("Please correct the glass details.");
+
+        var result = await productsDataService.CreateGlassesAsync(input);
+        return await FinishProductCreateAsync(result, "glass");
+    }
+
     public async Task<IActionResult> OnPostCreateSellerAsync(CreateSellerInputModel input)
     {
         ModelState.Clear();
@@ -56,6 +133,31 @@ public class BuyModel(
             200));
     }
 
+    private async Task<IActionResult> FinishProductCreateAsync(ServiceResult result, string type)
+    {
+        if (!result.Succeeded || result.EntityId is null)
+            return CreateErrorResult(result.Message ?? "The product could not be created.");
+
+        var rows = await dataService.SearchSelectableProductsAsync(TransactionDirection.Buy, null, 500);
+        var row = rows.FirstOrDefault(item => item.EntityId == result.EntityId.Value);
+        if (row is null)
+            return CreateErrorResult("The product was created but could not be selected.");
+
+        return new JsonResult(new
+        {
+            productId = row.ProductId,
+            type,
+            label = FormatProductLabel(row),
+            suggestedPrice = row.SuggestedPrice
+        });
+    }
+
+    private static bool TryValidate<T>(T input)
+    {
+        var validationResults = new List<ValidationResult>();
+        return Validator.TryValidateObject(input!, new ValidationContext(input!), validationResults, true);
+    }
+
     private async Task<IActionResult> LoadSelectionsAsync()
     {
         Sellers = await dataService.GetSellersAsync();
@@ -63,6 +165,16 @@ public class BuyModel(
         return Page();
     }
 
+    private static string FormatProductLabel(ProductListItemViewModel row)
+    {
+        var label = $"{row.Type}: {row.Name} — {row.Identifier}";
+        if (!string.IsNullOrWhiteSpace(row.Color))
+            label += $" — {row.Color}";
+        if (!string.IsNullOrWhiteSpace(row.PartNumberLabel) && row.PartNumberLabel != "N/A")
+            label += $" — {row.PartNumberLabel}";
+        return label;
+    }
+
     private static JsonResult CreateErrorResult(string message) =>
-        new(new DropdownCreateResult(false, null, message, 400)) { StatusCode = 400 };
+        new(new { error = message }) { StatusCode = 400 };
 }
