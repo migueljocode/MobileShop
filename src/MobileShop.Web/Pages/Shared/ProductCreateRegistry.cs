@@ -10,6 +10,9 @@ public static class ProductCreateRegistry
             ["phone"] = new("phone", "Phone", "_ProductCreatePhoneForm", "CreatePhone"),
             ["appleid"] = new("appleid", "Apple ID", "_ProductCreateAppleIdForm", "CreateAppleId"),
             ["glass"] = new("glass", "Glass", "_ProductCreateGlassForm", "CreateGlass"),
+            ["tablet"] = new("tablet", "Tablet", "_ProductCreateTabletForm", "CreateTablet"),
+            ["smartwatch"] = new("smartwatch", "Smart Watch", "_ProductCreateSmartWatchForm", "CreateSmartWatch"),
+            ["laptop"] = new("laptop", "Laptop", "_ProductCreateLaptopForm", "CreateLaptop"),
         };
 
     public static bool TryGet(string? key, out ProductCreateDefinition definition)

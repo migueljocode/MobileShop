@@ -61,6 +61,13 @@ public class BuyModel(
                 ViewData["Models"] = Array.Empty<DropdownOptionViewModel>();
                 return Partial(definition.PartialName, new CreateGlassInputModel());
 
+            case "tablet":
+                return await CreateDeviceFormAsync(definition, "Tablet", new CreateTabletInputModel());
+            case "smartwatch":
+                return await CreateDeviceFormAsync(definition, "SmartWatch", new CreateSmartWatchInputModel());
+            case "laptop":
+                return await CreateDeviceFormAsync(definition, "Laptop", new CreateLaptopInputModel());
+
             default:
                 return new BadRequestResult();
         }
@@ -83,6 +90,10 @@ public class BuyModel(
         var options = await productsDataService.GetModelsAsync(manufacturerId);
         return new JsonResult(options.Select(option => new { id = option.Id, name = option.Name }));
     }
+
+    public async Task<IActionResult> OnGetCreateTabletModelsAsync(int manufacturerId) => await GetDeviceModelsAsync(manufacturerId, "Tablet");
+    public async Task<IActionResult> OnGetCreateSmartWatchModelsAsync(int manufacturerId) => await GetDeviceModelsAsync(manufacturerId, "SmartWatch");
+    public async Task<IActionResult> OnGetCreateLaptopModelsAsync(int manufacturerId) => await GetDeviceModelsAsync(manufacturerId, "Laptop");
 
     public async Task<IActionResult> OnPostCreatePhoneAsync(CreatePhoneInputModel input)
     {
@@ -112,6 +123,36 @@ public class BuyModel(
 
         var result = await productsDataService.CreateGlassesAsync(input);
         return await FinishProductCreateAsync(result, "glass");
+    }
+
+    public async Task<IActionResult> OnPostCreateTabletAsync(CreateTabletInputModel input)
+    {
+        ModelState.Clear();
+        if (!TryValidate(input))
+            return CreateErrorResult("Please correct the tablet details.");
+
+        var result = await productsDataService.CreateTabletAsync(input);
+        return await FinishProductCreateAsync(result, "tablet");
+    }
+
+    public async Task<IActionResult> OnPostCreateSmartWatchAsync(CreateSmartWatchInputModel input)
+    {
+        ModelState.Clear();
+        if (!TryValidate(input))
+            return CreateErrorResult("Please correct the smart watch details.");
+
+        var result = await productsDataService.CreateSmartWatchAsync(input);
+        return await FinishProductCreateAsync(result, "smartwatch");
+    }
+
+    public async Task<IActionResult> OnPostCreateLaptopAsync(CreateLaptopInputModel input)
+    {
+        ModelState.Clear();
+        if (!TryValidate(input))
+            return CreateErrorResult("Please correct the laptop details.");
+
+        var result = await productsDataService.CreateLaptopAsync(input);
+        return await FinishProductCreateAsync(result, "laptop");
     }
 
     public async Task<IActionResult> OnPostCreateSellerAsync(CreateSellerInputModel input)
@@ -150,6 +191,25 @@ public class BuyModel(
             label = FormatProductLabel(row),
             suggestedPrice = row.SuggestedPrice
         });
+    }
+
+
+    private async Task<IActionResult> CreateDeviceFormAsync<T>(ProductCreateDefinition definition, string category, T input)
+    {
+        ViewData["Manufacturers"] = await productsDataService.GetManufacturersAsync();
+        ViewData["Models"] = Array.Empty<DropdownOptionViewModel>();
+        ViewData["Corporations"] = await productsDataService.GetGuaranteeCorporationsAsync();
+        ViewData["Category"] = category;
+        return Partial(definition.PartialName, input);
+    }
+
+    private async Task<IActionResult> GetDeviceModelsAsync(int manufacturerId, string category)
+    {
+        if (manufacturerId <= 0)
+            return new JsonResult(Array.Empty<object>());
+
+        var options = await productsDataService.GetModelsAsync(manufacturerId, category);
+        return new JsonResult(options.Select(option => new { id = option.Id, name = option.Name }));
     }
 
     private static bool TryValidate<T>(T input)

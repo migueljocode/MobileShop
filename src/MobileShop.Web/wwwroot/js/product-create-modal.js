@@ -9,7 +9,16 @@ document.addEventListener('DOMContentLoaded', function () {
     var registry = Object.freeze({
         phone: { formHandler: 'CreateProductForm', postHandler: 'CreatePhone' },
         appleid: { formHandler: 'CreateProductForm', postHandler: 'CreateAppleId' },
-        glass: { formHandler: 'CreateProductForm', postHandler: 'CreateGlass' }
+        glass: { formHandler: 'CreateProductForm', postHandler: 'CreateGlass' },
+        tablet: { formHandler: 'CreateProductForm', postHandler: 'CreateTablet', modelsHandler: 'CreateTabletModels' },
+        smartwatch: { formHandler: 'CreateProductForm', postHandler: 'CreateSmartWatch', modelsHandler: 'CreateSmartWatchModels' },
+        laptop: { formHandler: 'CreateProductForm', postHandler: 'CreateLaptop', modelsHandler: 'CreateLaptopModels' }
+    });
+    Object.keys(registry).forEach(function (key) {
+        if (!typeSelect.querySelector('option[value="' + key + '"]')) {
+            var option = new Option(key === 'smartwatch' ? 'Smart Watch' : key === 'appleid' ? 'Apple ID' : key.charAt(0).toUpperCase() + key.slice(1), key);
+            typeSelect.appendChild(option);
+        }
     });
 
     function setStatus(message, isError) {
@@ -43,6 +52,23 @@ document.addEventListener('DOMContentLoaded', function () {
                     var response = await fetch(modelUrl, { headers: { Accept: 'application/json' } });
                     if (!response.ok) return;
                     for (var item of await response.json()) model.appendChild(new Option(item.name, item.id));
+                });
+            }
+        }
+
+        if (type === 'tablet' || type === 'smartwatch' || type === 'laptop') {
+            var deviceManufacturer = root.querySelector('[data-device-manufacturer]');
+            var deviceModel = root.querySelector('[data-device-model]');
+            if (deviceManufacturer && deviceModel) {
+                deviceManufacturer.addEventListener('change', async function () {
+                    deviceModel.replaceChildren(new Option('-- Select model --', ''));
+                    if (!deviceManufacturer.value) return;
+                    var modelUrl = new URL(window.location.href);
+                    modelUrl.searchParams.set('handler', registry[type].modelsHandler);
+                    modelUrl.searchParams.set('manufacturerId', deviceManufacturer.value);
+                    var response = await fetch(modelUrl, { headers: { Accept: 'application/json' } });
+                    if (!response.ok) return;
+                    for (var item of await response.json()) deviceModel.appendChild(new Option(item.name, item.id));
                 });
             }
         }
