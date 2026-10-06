@@ -22,6 +22,9 @@ public class ProductsDataServiceTests : RepoTestBase
         _service = new ProductsDataService(
             new BaseRepo<Phone>(Context),
             new BaseRepo<AppleId>(Context),
+            new BaseRepo<Tablet>(Context),
+            new BaseRepo<SmartWatch>(Context),
+            new BaseRepo<Laptop>(Context),
             new BaseRepo<Manufacturer>(Context),
             new BaseRepo<Model>(Context),
             new BaseRepo<Category>(Context),
@@ -1900,6 +1903,30 @@ public class ProductsDataServiceTests : RepoTestBase
         var products = await Context.Products.ToListAsync();
         Assert.Equal(3, products.Count);
         Assert.All(products, product => Assert.Equal(2_500_000_000L, product.Price));
+    }
+
+    [Fact]
+    public async Task CreateTabletAsync_creates_tablet_with_price_guarantee_and_second_hand()
+    {
+        var manufacturer = new Manufacturer { Name = "Samsung" }; var category = new Category { Name = "Tablet" }; Context.Manufacturers.Add(manufacturer); Context.Categories.Add(category); Context.SaveChanges();
+        var model = new Model { ManufacturerId = manufacturer.Id, CategoryId = category.Id, Name = "Tab S10" }; Context.Models.Add(model); Context.SaveChanges();
+        var result = await _service.CreateTabletAsync(new CreateTabletInputModel { ManufacturerId = manufacturer.Id, ModelId = model.Id, Price = 1_000_000, ProfitPercent = 10, IsSecondHand = true, SecondHandNotes = "Minor wear", HasGuarantee = true, GuaranteeCorporation = "Samsung" });
+        Assert.True(result.Succeeded); var tablet = await Context.Tablets.Include(x => x.ProductNavigation).SingleAsync(); Assert.Equal(result.EntityId, tablet.ProductId); Assert.Equal(1_100_000, tablet.ProductNavigation.Price); Assert.Equal("Minor wear", tablet.ProductNavigation.SecondHandProfile!.Notes); Assert.Equal("Samsung", tablet.ProductNavigation.GuaranteeProfile!.Corporation);
+    }
+    [Fact]
+    public async Task GetInventoryRowsAsync_includes_new_device_types()
+    {
+        var manufacturer = new Manufacturer { Name = "Test" }; Context.Manufacturers.Add(manufacturer); var categories = new[] { new Category { Name = "Tablet" }, new Category { Name = "SmartWatch" }, new Category { Name = "Laptop" } }; Context.Categories.AddRange(categories); Context.SaveChanges();
+        var models = categories.Select((c, i) => new Model { ManufacturerId = manufacturer.Id, CategoryId = c.Id, Name = $"Device {i}" }).ToArray(); Context.Models.AddRange(models); Context.SaveChanges();
+        Context.Tablets.Add(new Tablet { ProductNavigation = new Product { ModelId = models[0].Id, Barcode = "TAB001", Price = 1 } }); Context.SmartWatches.Add(new SmartWatch { ProductNavigation = new Product { ModelId = models[1].Id, Barcode = "WATCH001", Price = 2 } }); Context.Laptops.Add(new Laptop { ProductNavigation = new Product { ModelId = models[2].Id, Barcode = "LAP001", Price = 3 }, Cpu = "CPU", Gpu = "GPU", DisplaySize = 15.6m }); Context.SaveChanges();
+        var rows = await _service.GetInventoryRowsAsync(); Assert.Contains(rows, r => r.Type == "Tablet"); Assert.Contains(rows, r => r.Type == "Smart Watch"); Assert.Contains(rows, r => r.Type == "Laptop");
+    }
+    [Fact]
+    public async Task GetDetailsAsync_projects_laptop_specifications_and_notes()
+    {
+        var manufacturer = new Manufacturer { Name = "Lenovo" }; var category = new Category { Name = "Laptop" }; Context.Manufacturers.Add(manufacturer); Context.Categories.Add(category); Context.SaveChanges(); var model = new Model { ManufacturerId = manufacturer.Id, CategoryId = category.Id, Name = "ThinkPad" }; Context.Models.Add(model); Context.SaveChanges();
+        var laptop = new Laptop { Cpu = "Core Ultra 7", Gpu = "RTX 4060", DisplaySize = 16m, Notes = "Business", ProductNavigation = new Product { ModelId = model.Id, Barcode = "LAPDETAIL", Price = 10 } }; Context.Laptops.Add(laptop); Context.SaveChanges(); var details = await _service.GetDetailsAsync(laptop.Id, "laptop");
+        Assert.NotNull(details); Assert.Equal("Core Ultra 7", details!.Cpu); Assert.Equal("RTX 4060", details.Gpu); Assert.Equal(16m, details.DisplaySize); Assert.Equal("Business", details.Notes);
     }
 
 }

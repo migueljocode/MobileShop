@@ -29,7 +29,7 @@
 - **Step 3 MEDIUM/MEDIUM:** Modal registry entries (`ProductCreateRegistry`), partial form views, and `Buy.cshtml.cs` POST handlers.
 - **Step 4 LOW/HIGH:** Final Stage AA verification: full test suite, 0 warnings, clean diff stat check.
 
-## [ ] Step 1 — Input models, service contracts, DAL implementations & tests
+## ~~[x] Step 1 — Input models, service contracts, DAL implementations & tests~~
 - **Files**:
   - `create`:
     - `src/MobileShop.Models/ViewModels/Web/BindModels/CreateTabletInputModel.cs`

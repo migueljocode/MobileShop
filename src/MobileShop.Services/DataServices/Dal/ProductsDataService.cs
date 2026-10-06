@@ -12,6 +12,9 @@ namespace MobileShop.Services.DataServices.Dal;
 public class ProductsDataService(
     IBaseRepo<Phone> phones,
     IBaseRepo<AppleId> appleIds,
+    IBaseRepo<Tablet> tablets,
+    IBaseRepo<SmartWatch> smartWatches,
+    IBaseRepo<Laptop> laptops,
     IBaseRepo<Manufacturer> manufacturers,
     IBaseRepo<Model> models,
     IBaseRepo<Category> categories,
@@ -35,14 +38,10 @@ public class ProductsDataService(
     public async Task<IReadOnlyList<ProductListItemViewModel>> GetInventoryRowsAsync(string? type = null, int? partNumberId = null, string? availability = null)
     {
         var rows = new List<ProductListItemViewModel>();
-
-        // A positive part number narrows the list to the phones carrying it; zero/negative/null
-        // is treated as no selection so the filter never hides everything by accident.
+        var normalizedType = type?.Trim().ToLowerInvariant();
+        var showAll = string.IsNullOrEmpty(normalizedType) || normalizedType == "all" || normalizedType is not ("phone" or "appleid" or "glass" or "tablet" or "smartwatch" or "laptop");
         var hasPartNumberFilter = partNumberId is > 0;
-
-        // "phone" and "appleid" keep their dedicated views; "glass" is a dedicated glass view.
-        // Null, "all" and unrecognised values return the complete inventory. Pages lowercase before calling.
-        if (type is not "appleid" and not "glass")
+        if (showAll || normalizedType == "phone")
         {
             Expression<Func<Phone, ProductListItemViewModel>> project = phone => new ProductListItemViewModel(
                 phone.Id,
@@ -67,7 +66,7 @@ public class ProductsDataService(
         }
 
         // Apple IDs never carry a part number, so an active part-number filter excludes them entirely.
-        if (type is not "phone" and not "glass" && !hasPartNumberFilter)
+        if ((showAll || normalizedType == "appleid") && !hasPartNumberFilter)
             rows.AddRange((await appleIds.SelectAllAsync(
                 appleId => new ProductListItemViewModel(
                     appleId.Id,
@@ -81,7 +80,7 @@ public class ProductsDataService(
                 .OrderBy(row => row.ProductId));
 
         // Glass is stored as a Product with a Glass profile, so it has no separate subtype repository.
-        if (type is not "phone" and not "appleid")
+        if (showAll || normalizedType == "glass")
         {
             Expression<Func<Product, ProductListItemViewModel>> project = product => new ProductListItemViewModel(
                 product.Id,
@@ -96,6 +95,13 @@ public class ProductsDataService(
             rows.AddRange((await products.SelectAllAsync(product => product.GlassProfile != null, project))
                 .OrderBy(row => row.ProductId));
         }
+
+        if (showAll || normalizedType == "tablet")
+            rows.AddRange((await tablets.SelectAllAsync(tablet => new ProductListItemViewModel(tablet.Id, tablet.ProductId, "Tablet", tablet.ProductNavigation.ModelNavigation.ManufacturerNavigation.Name + " " + tablet.ProductNavigation.ModelNavigation.Name, "Barcode: " + tablet.ProductNavigation.Barcode, tablet.ProductNavigation.ColorNavigation == null ? null : tablet.ProductNavigation.ColorNavigation.Name, tablet.ProductNavigation.Transactions.Any(t => t.Direction == TransactionDirection.Sell), tablet.ProductNavigation.SecondHandProfile != null))).OrderBy(row => row.ProductId));
+        if (showAll || normalizedType == "smartwatch")
+            rows.AddRange((await smartWatches.SelectAllAsync(watch => new ProductListItemViewModel(watch.Id, watch.ProductId, "Smart Watch", watch.ProductNavigation.ModelNavigation.ManufacturerNavigation.Name + " " + watch.ProductNavigation.ModelNavigation.Name, "Barcode: " + watch.ProductNavigation.Barcode, watch.ProductNavigation.ColorNavigation == null ? null : watch.ProductNavigation.ColorNavigation.Name, watch.ProductNavigation.Transactions.Any(t => t.Direction == TransactionDirection.Sell), watch.ProductNavigation.SecondHandProfile != null))).OrderBy(row => row.ProductId));
+        if (showAll || normalizedType == "laptop")
+            rows.AddRange((await laptops.SelectAllAsync(laptop => new ProductListItemViewModel(laptop.Id, laptop.ProductId, "Laptop", laptop.ProductNavigation.ModelNavigation.ManufacturerNavigation.Name + " " + laptop.ProductNavigation.ModelNavigation.Name, "Barcode: " + laptop.ProductNavigation.Barcode, laptop.ProductNavigation.ColorNavigation == null ? null : laptop.ProductNavigation.ColorNavigation.Name, laptop.ProductNavigation.Transactions.Any(t => t.Direction == TransactionDirection.Sell), laptop.ProductNavigation.SecondHandProfile != null))).OrderBy(row => row.ProductId));
 
         var filteredRows = availability switch
         {
@@ -141,7 +147,10 @@ public class ProductsDataService(
             .OrderBy(row => row.ProductId)
             .ToList();
 
-        return phoneRows.Concat(appleRows).ToList().AsReadOnly();
+        var tabletRows = (await tablets.SelectAllAsync(tablet => tablet.ProductNavigation.SecondHandProfile != null, tablet => new ProductListItemViewModel(tablet.Id, tablet.ProductId, "Tablet", tablet.ProductNavigation.ModelNavigation.ManufacturerNavigation.Name + " " + tablet.ProductNavigation.ModelNavigation.Name, "Barcode: " + tablet.ProductNavigation.Barcode, tablet.ProductNavigation.ColorNavigation == null ? null : tablet.ProductNavigation.ColorNavigation.Name, tablet.ProductNavigation.Transactions.Any(t => t.Direction == TransactionDirection.Sell), true))).OrderBy(row => row.ProductId).ToList();
+        var watchRows = (await smartWatches.SelectAllAsync(watch => watch.ProductNavigation.SecondHandProfile != null, watch => new ProductListItemViewModel(watch.Id, watch.ProductId, "Smart Watch", watch.ProductNavigation.ModelNavigation.ManufacturerNavigation.Name + " " + watch.ProductNavigation.ModelNavigation.Name, "Barcode: " + watch.ProductNavigation.Barcode, watch.ProductNavigation.ColorNavigation == null ? null : watch.ProductNavigation.ColorNavigation.Name, true))).OrderBy(row => row.ProductId).ToList();
+        var laptopRows = (await laptops.SelectAllAsync(laptop => laptop.ProductNavigation.SecondHandProfile != null, laptop => new ProductListItemViewModel(laptop.Id, laptop.ProductId, "Laptop", laptop.ProductNavigation.ModelNavigation.ManufacturerNavigation.Name + " " + laptop.ProductNavigation.ModelNavigation.Name, "Barcode: " + laptop.ProductNavigation.Barcode, laptop.ProductNavigation.ColorNavigation == null ? null : laptop.ProductNavigation.ColorNavigation.Name, laptop.ProductNavigation.Transactions.Any(t => t.Direction == TransactionDirection.Sell), true))).OrderBy(row => row.ProductId).ToList();
+        return phoneRows.Concat(appleRows).Concat(tabletRows).Concat(watchRows).Concat(laptopRows).ToList().AsReadOnly();
     }
 
     /// <inheritdoc />
@@ -192,6 +201,18 @@ public class ProductsDataService(
                         ? "None"
                         : appleId.ProductNavigation.GuaranteeProfile.Corporation + " until " + appleId.ProductNavigation.GuaranteeProfile.ExpirationDate,
                     appleId.ProductNavigation.SecondHandProfile != null));
+        }
+        else if (string.Equals(type, "tablet", StringComparison.OrdinalIgnoreCase))
+        {
+            details = await tablets.SelectAsync(id, tablet => new ProductDetailsViewModel("Tablet", tablet.ProductId, tablet.ProductNavigation.ModelNavigation.ManufacturerNavigation.Name, tablet.ProductNavigation.ModelNavigation.Name, "Barcode: " + tablet.ProductNavigation.Barcode, tablet.ProductNavigation.ColorNavigation == null ? null : tablet.ProductNavigation.ColorNavigation.Name, tablet.ProductNavigation.Transactions.Where(t => t.Direction == TransactionDirection.Sell).OrderByDescending(t => t.Date).Select(t => t.CustomerNavigation.PersonNavigation).Select(person => person.FirstName + " " + person.LastName).FirstOrDefault() ?? "Not sold", tablet.ProductNavigation.GuaranteeProfile == null ? "None" : tablet.ProductNavigation.GuaranteeProfile.Corporation + " until " + tablet.ProductNavigation.GuaranteeProfile.ExpirationDate.ToString("d"), tablet.ProductNavigation.SecondHandProfile != null) { Notes = tablet.ProductNavigation.TabletProfile!.Notes });
+        }
+        else if (string.Equals(type, "smartwatch", StringComparison.OrdinalIgnoreCase))
+        {
+            details = await smartWatches.SelectAsync(id, watch => new ProductDetailsViewModel("Smart Watch", watch.ProductId, watch.ProductNavigation.ModelNavigation.ManufacturerNavigation.Name, watch.ProductNavigation.ModelNavigation.Name, "Barcode: " + watch.ProductNavigation.Barcode, watch.ProductNavigation.ColorNavigation == null ? null : watch.ProductNavigation.ColorNavigation.Name, watch.ProductNavigation.Transactions.Where(t => t.Direction == TransactionDirection.Sell).OrderByDescending(t => t.Date).Select(t => t.CustomerNavigation.PersonNavigation).Select(person => person.FirstName + " " + person.LastName).FirstOrDefault() ?? "Not sold", watch.ProductNavigation.GuaranteeProfile == null ? "None" : watch.ProductNavigation.GuaranteeProfile.Corporation + " until " + watch.ProductNavigation.GuaranteeProfile.ExpirationDate.ToString("d"), watch.ProductNavigation.SecondHandProfile != null) { Notes = watch.ProductNavigation.SmartWatchProfile!.Notes });
+        }
+        else if (string.Equals(type, "laptop", StringComparison.OrdinalIgnoreCase))
+        {
+            details = await laptops.SelectAsync(id, laptop => new ProductDetailsViewModel("Laptop", laptop.ProductId, laptop.ProductNavigation.ModelNavigation.ManufacturerNavigation.Name, laptop.ProductNavigation.ModelNavigation.Name, "Barcode: " + laptop.ProductNavigation.Barcode, laptop.ProductNavigation.ColorNavigation == null ? null : laptop.ProductNavigation.ColorNavigation.Name, laptop.ProductNavigation.Transactions.Where(t => t.Direction == TransactionDirection.Sell).OrderByDescending(t => t.Date).Select(t => t.CustomerNavigation.PersonNavigation).Select(person => person.FirstName + " " + person.LastName).FirstOrDefault() ?? "Not sold", laptop.ProductNavigation.GuaranteeProfile == null ? "None" : laptop.ProductNavigation.GuaranteeProfile.Corporation + " until " + laptop.ProductNavigation.GuaranteeProfile.ExpirationDate.ToString("d"), laptop.ProductNavigation.SecondHandProfile != null) { Cpu = laptop.ProductNavigation.LaptopProfile!.Cpu, Gpu = laptop.ProductNavigation.LaptopProfile.Gpu, DisplaySize = laptop.ProductNavigation.LaptopProfile.DisplaySize, Notes = laptop.ProductNavigation.LaptopProfile.Notes });
         }
         else
         {
@@ -637,6 +658,24 @@ public class ProductsDataService(
 
         Logger.LogInformation("Added AppleId Id={Id}", appleId.Id);
         return new ServiceResult(true, null, null, appleId.Id);
+    }
+
+
+    public async Task<ServiceResult> CreateTabletAsync(CreateTabletInputModel input) => await CreateDeviceAsync(input.ManufacturerId, input.ModelId, "Tablet", input.Price, input.ProfitPercent, input.ProfitAmount, input.IsSecondHand, input.TestPeriodDays, input.SecondHandNotes, input.HasGuarantee, input.GuaranteeCorporation, input.GuaranteeExpiry, input.GuaranteeNotes, new Tablet { Notes = NormalizeNote(input.Notes) });
+    public async Task<ServiceResult> CreateSmartWatchAsync(CreateSmartWatchInputModel input) => await CreateDeviceAsync(input.ManufacturerId, input.ModelId, "SmartWatch", input.Price, input.ProfitPercent, input.ProfitAmount, input.IsSecondHand, input.TestPeriodDays, input.SecondHandNotes, input.HasGuarantee, input.GuaranteeCorporation, input.GuaranteeExpiry, input.GuaranteeNotes, new SmartWatch { Notes = NormalizeNote(input.Notes) });
+    public async Task<ServiceResult> CreateLaptopAsync(CreateLaptopInputModel input) => await CreateDeviceAsync(input.ManufacturerId, input.ModelId, "Laptop", input.Price, input.ProfitPercent, input.ProfitAmount, input.IsSecondHand, input.TestPeriodDays, input.SecondHandNotes, input.HasGuarantee, input.GuaranteeCorporation, input.GuaranteeExpiry, input.GuaranteeNotes, new Laptop { Cpu = input.Cpu.Trim(), Gpu = input.Gpu.Trim(), DisplaySize = input.DisplaySize, Notes = NormalizeNote(input.Notes) });
+    private async Task<ServiceResult> CreateDeviceAsync(int manufacturerId, int modelId, string categoryName, long price, decimal? profitPercent, long? profitAmount, bool isSecondHand, int? testPeriodDays, string? secondHandNotes, bool hasGuarantee, string? guaranteeCorporation, DateTime? guaranteeExpiry, string? guaranteeNotes, object profile)
+    {
+        if (price > MoneyLimits.MaxRials || profitAmount > MoneyLimits.MaxRials || !TryComputeFinishedPrice(price, profitPercent, profitAmount, out var finishedPrice)) return new ServiceResult(false, "The price is too large.", null, null);
+        if (await manufacturers.FindAsync(manufacturerId) is null) return new ServiceResult(false, "Selected manufacturer not found.", nameof(manufacturerId), null);
+        var model = await models.FindAsync(m => m.Id == modelId && m.ManufacturerId == manufacturerId && m.CategoryNavigation.Name == categoryName);
+        if (model is null) return new ServiceResult(false, "Selected model not found for this manufacturer.", nameof(modelId), null);
+        var product = new Product { ModelId = model.Id, Barcode = Guid.NewGuid().ToString("N")[..12], Price = finishedPrice, SecondHandProfile = isSecondHand ? new SecondHand { TestPeriodDays = testPeriodDays ?? 30, UsedDurationDays = 0, Notes = NormalizeNote(secondHandNotes) } : null, GuaranteeProfile = hasGuarantee ? new Guarantee { StartDate = DateTime.Today, ExpirationDate = guaranteeExpiry ?? DateTime.Today.AddYears(1), Corporation = string.IsNullOrWhiteSpace(guaranteeCorporation) ? "Shop Warranty" : guaranteeCorporation.Trim(), Notes = NormalizeNote(guaranteeNotes) } : null };
+        switch (profile) { case Tablet x: x.ProductNavigation = product; break; case SmartWatch x: x.ProductNavigation = product; break; case Laptop x: x.ProductNavigation = product; break; default: throw new ArgumentException("Unsupported device profile.", nameof(profile)); }
+        var saved = profile switch { Tablet x => await tablets.AddAsync(x) > 0, SmartWatch x => await smartWatches.AddAsync(x) > 0, Laptop x => await laptops.AddAsync(x) > 0, _ => false };
+        if (!saved) return new ServiceResult(false, "The product could not be saved. Check the details and try again.", null, null);
+        var productId = profile switch { Tablet x => x.ProductId, SmartWatch x => x.ProductId, Laptop x => x.ProductId, _ => product.Id };
+        return new ServiceResult(true, null, null, productId);
     }
 
     private async Task<Model> AddModelAsync(int manufacturerId, int categoryId, string name)

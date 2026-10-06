@@ -80,4 +80,7 @@ public interface IProductsDataService
     /// <summary>Creates an Apple ID from the submitted input.</summary>
     /// <param name="input">The Apple ID input.</param>
     Task<ServiceResult> CreateAppleIdAsync(CreateAppleIdInputModel input);
+    Task<ServiceResult> CreateTabletAsync(CreateTabletInputModel input);
+    Task<ServiceResult> CreateSmartWatchAsync(CreateSmartWatchInputModel input);
+    Task<ServiceResult> CreateLaptopAsync(CreateLaptopInputModel input);
 }

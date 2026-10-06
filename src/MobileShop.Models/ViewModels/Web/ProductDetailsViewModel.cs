@@ -34,4 +34,9 @@ public sealed record ProductDetailsViewModel(
     /// when there is no part number, so a missing part number is never shown as <c>No</c>.
     /// </summary>
     public string EsimLabel { get; init; } = "N/A";
+
+    public string? Cpu { get; init; }
+    public string? Gpu { get; init; }
+    public decimal? DisplaySize { get; init; }
+    public string? Notes { get; init; }
 }

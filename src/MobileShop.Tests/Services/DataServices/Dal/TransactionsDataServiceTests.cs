@@ -21,6 +21,9 @@ public class TransactionsDataServiceTests : RepoTestBase
             new BaseRepo<Customer>(Context),
             new BaseRepo<Phone>(Context),
             new BaseRepo<AppleId>(Context),
+            new BaseRepo<Tablet>(Context),
+            new BaseRepo<SmartWatch>(Context),
+            new BaseRepo<Laptop>(Context),
             new BaseRepo<Product>(Context),
             Context,
             _pdfGenerator,
@@ -461,4 +464,12 @@ public class TransactionsDataServiceTests : RepoTestBase
         var afterSell = await _service.GetSelectableProductsAsync(TransactionDirection.Sell);
         Assert.DoesNotContain(afterSell, row => row.ProductId == product.Id);
     }
+    [Fact]
+    public async Task GetSelectableProductsAsync_returns_unsold_new_devices()
+    {
+        var manufacturer = new Manufacturer { Name = "Test" }; Context.Manufacturers.Add(manufacturer); var categories = new[] { new Category { Name = "Tablet" }, new Category { Name = "SmartWatch" }, new Category { Name = "Laptop" } }; Context.Categories.AddRange(categories); Context.SaveChanges(); var models = categories.Select((c, i) => new Model { ManufacturerId = manufacturer.Id, CategoryId = c.Id, Name = $"Device {i}" }).ToArray(); Context.Models.AddRange(models); Context.SaveChanges();
+        Context.Tablets.Add(new Tablet { ProductNavigation = new Product { ModelId = models[0].Id, Barcode = "T1", Price = 100 } }); Context.SmartWatches.Add(new SmartWatch { ProductNavigation = new Product { ModelId = models[1].Id, Barcode = "W1", Price = 200 } }); Context.Laptops.Add(new Laptop { ProductNavigation = new Product { ModelId = models[2].Id, Barcode = "L1", Price = 300 }, Cpu = "CPU", Gpu = "GPU", DisplaySize = 15.6m }); Context.SaveChanges();
+        var rows = await _service.GetSelectableProductsAsync(TransactionDirection.Buy); Assert.Contains(rows, r => r.Type == "Tablet"); Assert.Contains(rows, r => r.Type == "Smart Watch"); Assert.Contains(rows, r => r.Type == "Laptop");
+    }
+
 }
