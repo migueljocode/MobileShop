@@ -24,41 +24,15 @@
 - **A2:** Api service stubs (`ApiProductsDataService`) implement new interface members by throwing `NotImplementedException`.
 
 ## Reviewer Briefing
-- **Step 1 LOW/HIGH:** Bind models, `ProductDetailsViewModel` extension, service contracts, DAL implementations, and DAL unit tests.
+- **Step 1 LOW/HIGH:** Bind models, `ProductDetailsViewModel` extension, service contracts, DAL implementations, and DAL unit tests (completed).
 - **Step 2 MEDIUM/HIGH:** Razor create pages (`CreateTablet`, `CreateSmartWatch`, `CreateLaptop`), Details page enhancements, and Products Index filter buttons.
 - **Step 3 MEDIUM/MEDIUM:** Modal registry entries (`ProductCreateRegistry`), partial form views, and `Buy.cshtml.cs` POST handlers.
 - **Step 4 LOW/HIGH:** Final Stage AA verification: full test suite, 0 warnings, clean diff stat check.
 
 ## ~~[x] Step 1 — Input models, service contracts, DAL implementations & tests~~
-- **Files**:
-  - `create`:
-    - `src/MobileShop.Models/ViewModels/Web/BindModels/CreateTabletInputModel.cs`
-    - `src/MobileShop.Models/ViewModels/Web/BindModels/CreateSmartWatchInputModel.cs`
-    - `src/MobileShop.Models/ViewModels/Web/BindModels/CreateLaptopInputModel.cs`
-  - `modify`:
-    - `src/MobileShop.Models/ViewModels/Web/ProductDetailsViewModel.cs`
-    - `src/MobileShop.Services/DataServices/Interfaces/IProductsDataService.cs`
-    - `src/MobileShop.Services/DataServices/Dal/ProductsDataService.cs`
-    - `src/MobileShop.Services/DataServices/Dal/TransactionsDataService.cs`
-    - `src/MobileShop.Services/DataServices/Api/ApiProductsDataService.cs`
-    - `src/MobileShop.Tests/Services/DataServices/Dal/ProductsDataServiceTests.cs`
-    - `src/MobileShop.Tests/Services/DataServices/Dal/TransactionsDataServiceTests.cs`
-- **Symbols**:
-  - `ProductDetailsViewModel` (`Cpu`, `Gpu`, `DisplaySize`, `Notes` init properties)
-  - `CreateTabletInputModel`, `CreateSmartWatchInputModel`, `CreateLaptopInputModel`
-  - `IProductsDataService.CreateTabletAsync`, `CreateSmartWatchAsync`, `CreateLaptopAsync`
-  - `ProductsDataService.GetInventoryRowsAsync`, `GetSecondHandRowsAsync`, `GetDetailsAsync`
-  - `TransactionsDataService.GetSelectableProductsAsync`
-- **Change**:
-  - Extend `ProductDetailsViewModel` with optional `init` properties: `string? Cpu`, `string? Gpu`, `decimal? DisplaySize`, `string? Notes`.
-  - Add input models with Rial range validation, required manufacturer/model, optional second-hand and guarantee fields, and laptop CPU/GPU/DisplaySize fields.
-  - Implement `CreateTabletAsync`, `CreateSmartWatchAsync`, and `CreateLaptopAsync` in `ProductsDataService`, persisting the `Product` row and associated subtype row (`Tablet`, `SmartWatch`, `Laptop`).
-  - Extend `GetInventoryRowsAsync` to query and return Tablet, SmartWatch, and Laptop rows when filtered or in "all" view.
-  - Extend `GetDetailsAsync` to return device specifications and transaction history for `"tablet"`, `"smartwatch"`, and `"laptop"`.
-  - Extend `TransactionsDataService.GetSelectableProductsAsync` to include unsold tablets, smart watches, and laptops.
-  - Add unit tests verifying creation, inventory listing, details projection, and selectable products querying.
-- **Done when**: Build succeeds with 0 warnings, unit tests pass, CI is green, Job B PASS.
-- **Risk**: LOW · **Confidence**: HIGH
+- Files: input models created, `ProductDetailsViewModel` extended, `IProductsDataService` + `ProductsDataService` + `TransactionsDataService` updated, unit tests added.
+- Completed: CI Action #520 — Success.
+- Risk: LOW · Confidence: HIGH
 
 ## [ ] Step 2 — Dedicated Create pages, Details rendering & Products list integration
 - **Files**:
