@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using MobileShop.Web.Pages.Products;
 using MobileShop.Models.ViewModels.Web.BindModels;
+using MobileShop.Models.Entities;
 
 namespace MobileShop.Tests.Web.Pages.Products;
 
