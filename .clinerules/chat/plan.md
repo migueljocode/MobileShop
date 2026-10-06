@@ -30,7 +30,7 @@
 - **Step 3 HIGH/MEDIUM:** modal + registry + three create paths; largest risk is form complexity and EntityId for glass batch.
 - Person picker is the template for UX contracts (handlers, antiforgery, JSON shape).
 
-## [ ] Step 1 — Search selectable products (service)
+## ~~[x] Step 1 — Search selectable products (service)~~
 
 - Files: `ITransactionsDataService`, Dal `TransactionsDataService`, Api stub if present; tests for direction filter + query match + take/empty.
 - Do not touch Web UI yet.

@@ -364,6 +364,82 @@ public class TransactionsDataServiceTests : RepoTestBase
     }
 
     [Fact]
+    public async Task SearchSelectableProductsAsync_filters_by_direction_and_query()
+    {
+        var phoneProduct = TestDataHelpers.CreateProduct(Context);
+        var appleIdProduct = TestDataHelpers.CreateProduct(Context);
+        var seller = AddSeller("Ali", "Zed");
+        var customer = AddCustomer("Sara", "Ahmadi");
+        var phoneImei = TestDataHelpers.GenerateImei();
+        var appleEmail = "apple@example.com";
+
+        Context.Phones.Add(new Phone { ProductId = phoneProduct.Id, IMEI1 = phoneImei });
+        Context.AppleIds.Add(new AppleId { ProductId = appleIdProduct.Id, Email = appleEmail });
+        Context.SaveChanges();
+
+        AddTransaction(phoneProduct, seller.Id, customer.Id, TransactionDirection.Buy, DateTime.UtcNow);
+        AddTransaction(appleIdProduct, seller.Id, customer.Id, TransactionDirection.Sell, DateTime.UtcNow);
+
+        var buyResults = await _service.SearchSelectableProductsAsync(TransactionDirection.Buy, appleEmail);
+        var sellResults = await _service.SearchSelectableProductsAsync(TransactionDirection.Sell, phoneImei[6..]);
+        var typeResults = await _service.SearchSelectableProductsAsync(TransactionDirection.Buy, "apple id");
+
+        Assert.Single(buyResults);
+        Assert.Equal(appleIdProduct.Id, buyResults[0].EntityId);
+        Assert.Single(sellResults);
+        Assert.Equal(phoneProduct.Id, sellResults[0].EntityId);
+        Assert.Single(typeResults);
+        Assert.Equal("Apple ID", typeResults[0].Type);
+    }
+
+    [Fact]
+    public async Task SearchSelectableProductsAsync_matches_name_identifier_color_and_part_number_case_insensitively()
+    {
+        var product = TestDataHelpers.CreateProduct(Context);
+        Context.Phones.Add(new Phone { ProductId = product.Id, IMEI1 = TestDataHelpers.GenerateImei() });
+        Context.SaveChanges();
+
+        var color = new Color { Name = "Midnight Blue" };
+        Context.Colors.Add(color);
+        Context.SaveChanges();
+        var partNumber = new PartNumber { ModelId = product.ModelId, Code = "PART-ABC" };
+        Context.PartNumbers.Add(partNumber);
+        Context.SaveChanges();
+
+        var phone = Context.Phones.Single();
+        phone.ProductNavigation.ColorId = color.Id;
+        phone.PartNumberId = partNumber.Id;
+        Context.SaveChanges();
+
+        var name = await _service.SearchSelectableProductsAsync(TransactionDirection.Buy, "model-");
+        var identifier = await _service.SearchSelectableProductsAsync(TransactionDirection.Buy, phone.IMEI1[..6]);
+        var colorResult = await _service.SearchSelectableProductsAsync(TransactionDirection.Buy, "midnight blue");
+        var partResult = await _service.SearchSelectableProductsAsync(TransactionDirection.Buy, "part-abc");
+
+        Assert.Single(name);
+        Assert.Single(identifier);
+        Assert.Single(colorResult);
+        Assert.Single(partResult);
+    }
+
+    [Fact]
+    public async Task SearchSelectableProductsAsync_returns_first_results_for_empty_query_and_honors_take()
+    {
+        var product1 = TestDataHelpers.CreateProduct(Context);
+        var product2 = TestDataHelpers.CreateProduct(Context);
+        Context.Phones.Add(new Phone { ProductId = product1.Id, IMEI1 = TestDataHelpers.GenerateImei() });
+        Context.Phones.Add(new Phone { ProductId = product2.Id, IMEI1 = TestDataHelpers.GenerateImei() });
+        Context.SaveChanges();
+
+        var all = await _service.SearchSelectableProductsAsync(TransactionDirection.Buy, null);
+        var limited = await _service.SearchSelectableProductsAsync(TransactionDirection.Buy, " ", 1);
+
+        Assert.Equal(2, all.Count);
+        Assert.Single(limited);
+        Assert.Equal(all[0].EntityId, limited[0].EntityId);
+    }
+
+    [Fact]
     public async Task GetSelectableProductsAsync_returns_unsold_phones_and_apple_ids_ordered_by_name()
     {
         var product = TestDataHelpers.CreateProduct(Context);

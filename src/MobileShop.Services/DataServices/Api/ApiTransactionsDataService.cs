@@ -32,6 +32,11 @@ public class ApiTransactionsDataService : ITransactionsDataService
         => throw new NotImplementedException("ApiTransactionsDataService is not implemented yet.");
 
     /// <inheritdoc />
+    public Task<IReadOnlyList<ProductListItemViewModel>> SearchSelectableProductsAsync(
+        TransactionDirection direction, string? q, int take = 25)
+        => throw new NotImplementedException("ApiTransactionsDataService is not implemented yet.");
+
+    /// <inheritdoc />
     public Task<ServiceResult> RecordBuyAsync(MobileShop.Models.ViewModels.Web.BindModels.BuyInputModel input)
         => throw new NotImplementedException("ApiTransactionsDataService is not implemented yet.");
 

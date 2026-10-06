@@ -184,6 +184,34 @@ public class TransactionsDataService(
     }
 
     /// <inheritdoc />
+    public async Task<IReadOnlyList<ProductListItemViewModel>> SearchSelectableProductsAsync(
+        TransactionDirection direction,
+        string? q,
+        int take = 25)
+    {
+        var normalizedQuery = q?.Trim();
+        var limit = Math.Clamp(take, 1, 500);
+        var selectable = await GetSelectableProductsAsync(direction);
+
+        if (string.IsNullOrEmpty(normalizedQuery))
+            return selectable.Take(limit).ToList();
+
+        return selectable
+            .Where(row =>
+                Contains(row.Name, normalizedQuery) ||
+                Contains(row.Type, normalizedQuery) ||
+                Contains(row.Identifier, normalizedQuery) ||
+                Contains(row.Color, normalizedQuery) ||
+                Contains(row.PartNumberLabel, normalizedQuery))
+            .Take(limit)
+            .ToList();
+    }
+
+    private static bool Contains(string? value, string query) =>
+        !string.IsNullOrEmpty(value) &&
+        value.Contains(query, StringComparison.OrdinalIgnoreCase);
+
+    /// <inheritdoc />
     public async Task<ServiceResult> RecordBuyAsync(BuyInputModel input)
     {
         if (input.Price < 0 || input.Price > MoneyLimits.MaxRials)

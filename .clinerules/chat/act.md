@@ -1,14 +1,14 @@
-# Stage Y — Step 3 Act Summary
+# Stage Z — Step 1 Act Summary
 
 ## Scope
-Implemented the shared searchable person picker and create-person modal on Record Buy and Record Sell.
+Implemented selectable-product search in the Transactions data-service layer.
 
 ## Changes
-- Added shared `_PersonPicker.cshtml` markup for customer/seller role-specific comboboxes and Bootstrap create modals.
-- Added shared `person-picker.js` for debounced server search, selection, AJAX creation, antiforgery token submission, and post-create selection.
-- Added `OnGetSearchSellersAsync` and `OnGetSearchCustomersAsync` Razor Page handlers backed by `IPeopleDataService`.
-- Wired both transaction pages to the shared picker and script while leaving product-picker behavior unchanged.
-- Customer modal includes national ID; seller modal includes entity type and no national ID.
+- Added the selectable-product search contract to the Transactions data service.
+- DAL search reuses the existing direction-aware selectable-product projection, then matches case-insensitively against name, type, identifier, color, and part number.
+- Empty/null/whitespace queries return the first selectable products up to the requested limit.
+- Added the required API data-service NIE stub.
+- Added DAL tests covering Buy/Sell eligibility, query matching, empty-query behavior, and the take limit.
 
 ## Verification
 - Local dotnet build/test was not run because GitHub Actions is the CI gate.
@@ -16,8 +16,7 @@ Implemented the shared searchable person picker and create-person modal on Recor
 - Action: pending.
 
 ## Limitations
-- Existing GET party lists remain as the initial progressive-enhancement results; server search is the primary path.
-- The shared modal uses the existing Bootstrap runtime; no new dependency was added.
+- Search filters the existing selectable-product projection in memory; this preserves the established Buy/Sell eligibility rules without introducing a second product-query path.
 
 ## Friction noted
 - None.

@@ -38,6 +38,12 @@ public interface ITransactionsDataService
     /// <param name="direction">The transaction direction.</param>
     Task<IReadOnlyList<ProductListItemViewModel>> GetSelectableProductsAsync(TransactionDirection direction);
 
+    /// <summary>Searches products selectable for a transaction direction.</summary>
+    /// <param name="direction">The transaction direction.</param>
+    /// <param name="q">The optional case-insensitive search query.</param>
+    /// <param name="take">The maximum number of results to return.</param>
+    Task<IReadOnlyList<ProductListItemViewModel>> SearchSelectableProductsAsync(TransactionDirection direction, string? q, int take = 25);
+
     /// <summary>Records a purchase transaction.</summary>
     /// <param name="input">The purchase input.</param>
     Task<ServiceResult> RecordBuyAsync(MobileShop.Models.ViewModels.Web.BindModels.BuyInputModel input);
