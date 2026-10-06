@@ -13,6 +13,11 @@ public static class ProductCreateRegistry
             ["tablet"] = new("tablet", "Tablet", "_ProductCreateTabletForm", "CreateTablet"),
             ["smartwatch"] = new("smartwatch", "Smart Watch", "_ProductCreateSmartWatchForm", "CreateSmartWatch"),
             ["laptop"] = new("laptop", "Laptop", "_ProductCreateLaptopForm", "CreateLaptop"),
+            ["cable"] = new("cable", "Cable", "_ProductCreateCableForm", "CreateCable"),
+            ["charger"] = new("charger", "Charger", "_ProductCreateChargerForm", "CreateCharger"),
+            ["powerbank"] = new("powerbank", "Power Bank", "_ProductCreatePowerBankForm", "CreatePowerBank"),
+            ["portablestorage"] = new("portablestorage", "Portable Storage", "_ProductCreatePortableStorageForm", "CreatePortableStorage"),
+            ["case"] = new("case", "Case", "_ProductCreateCaseForm", "CreateCase"),
         };
 
     public static bool TryGet(string? key, out ProductCreateDefinition definition)
