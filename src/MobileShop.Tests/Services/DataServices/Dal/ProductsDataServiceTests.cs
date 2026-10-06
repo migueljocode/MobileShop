@@ -1926,4 +1926,90 @@ public class ProductsDataServiceTests : RepoTestBase
         Assert.NotNull(details); Assert.Equal("Core Ultra 7", details!.Cpu); Assert.Equal("RTX 4060", details.Gpu); Assert.Equal(16m, details.DisplaySize); Assert.Equal("Business", details.Notes);
     }
 
+    [Fact]
+    public async Task Accessory_creation_creates_bulk_rows_with_unique_barcodes_and_finished_price()
+    {
+        var manufacturer = new Manufacturer { Name = "Accessory Co" };
+        var phoneManufacturer = new Manufacturer { Name = "Phone Co" };
+        Context.Manufacturers.AddRange(manufacturer, phoneManufacturer);
+        var categories = new[]
+        {
+            new Category { Name = "Cable" }, new Category { Name = "Charger" }, new Category { Name = "PowerBank" },
+            new Category { Name = "PortableStorage" }, new Category { Name = "Case" }, new Category { Name = "Phone" }
+        };
+        Context.Categories.AddRange(categories);
+        Context.SaveChanges();
+        var cableModel = new Model { ManufacturerId = manufacturer.Id, CategoryId = categories[0].Id, Name = "C-C Cable" };
+        var chargerModel = new Model { ManufacturerId = manufacturer.Id, CategoryId = categories[1].Id, Name = "65W Charger" };
+        var powerBankModel = new Model { ManufacturerId = manufacturer.Id, CategoryId = categories[2].Id, Name = "20K Power Bank" };
+        var storageModel = new Model { ManufacturerId = manufacturer.Id, CategoryId = categories[3].Id, Name = "USB SSD" };
+        var phoneModel = new Model { ManufacturerId = phoneManufacturer.Id, CategoryId = categories[5].Id, Name = "Phone X" };
+        Context.Models.AddRange(cableModel, chargerModel, powerBankModel, storageModel, phoneModel);
+        var capacity = new StorageCapacity { Gb = 512 };
+        Context.StorageCapacities.Add(capacity);
+        Context.SaveChanges();
+
+        var cable = await _service.CreateCablesAsync(new CreateCableInputModel { ManufacturerId = manufacturer.Id, ModelId = cableModel.Id, Connector1 = CableConnector.UsbC, Connector2 = CableConnector.UsbC, Length = 1.5m, Price = 1000, ProfitPercent = 10, Count = 2 });
+        var charger = await _service.CreateChargersAsync(new CreateChargerInputModel { ManufacturerId = manufacturer.Id, ModelId = chargerModel.Id, Wattage = 65, Pd = true, PortCount = 2, Price = 2000, ProfitAmount = 500, Count = 2 });
+        var powerBank = await _service.CreatePowerBanksAsync(new CreatePowerBankInputModel { ManufacturerId = manufacturer.Id, ModelId = powerBankModel.Id, CapacityMah = 20000, MaxWattage = 30, PortCount = 2, Pd = true, Price = 3000, Count = 2 });
+        var storage = await _service.CreatePortableStoragesAsync(new CreatePortableStorageInputModel { ManufacturerId = manufacturer.Id, ModelId = storageModel.Id, StorageKind = StorageKind.Ssd, StorageCapacityId = capacity.Id, Speed = 1000, Price = 4000, Count = 2 });
+        var @case = await _service.CreateCasesAsync(new CreateCaseInputModel { ManufacturerId = manufacturer.Id, CompatibleManufacturerId = phoneManufacturer.Id, CompatibleModelIds = [phoneModel.Id], Price = 5000, ProfitPercent = 10, Count = 2 });
+
+        Assert.True(cable.Succeeded);
+        Assert.True(charger.Succeeded);
+        Assert.True(powerBank.Succeeded);
+        Assert.True(storage.Succeeded);
+        Assert.True(@case.Succeeded);
+        Assert.Equal(10, Context.Products.Count());
+        Assert.Equal(10, Context.Transactions.Count(t => t.Direction == TransactionDirection.Buy));
+        Assert.Equal(10, Context.Products.Select(p => p.Barcode).Distinct().Count());
+        Assert.All(Context.Products, product => Assert.True(product.Price >= 1000));
+        Assert.Equal(2, Context.CaseModelFits.Count());
+    }
+
+    [Fact]
+    public async Task GetInventoryRowsAsync_and_GetDetailsAsync_include_accessory_types_and_specs()
+    {
+        var manufacturer = new Manufacturer { Name = "Accessory Co" };
+        var phoneManufacturer = new Manufacturer { Name = "Phone Co" };
+        Context.Manufacturers.AddRange(manufacturer, phoneManufacturer);
+        var categories = new[]
+        {
+            new Category { Name = "Cable" }, new Category { Name = "Charger" }, new Category { Name = "PowerBank" },
+            new Category { Name = "PortableStorage" }, new Category { Name = "Case" }, new Category { Name = "Phone" }
+        };
+        Context.Categories.AddRange(categories);
+        Context.SaveChanges();
+        var cableModel = new Model { ManufacturerId = manufacturer.Id, CategoryId = categories[0].Id, Name = "Cable" };
+        var chargerModel = new Model { ManufacturerId = manufacturer.Id, CategoryId = categories[1].Id, Name = "Charger" };
+        var powerBankModel = new Model { ManufacturerId = manufacturer.Id, CategoryId = categories[2].Id, Name = "Power Bank" };
+        var storageModel = new Model { ManufacturerId = manufacturer.Id, CategoryId = categories[3].Id, Name = "Storage" };
+        var phoneModel = new Model { ManufacturerId = phoneManufacturer.Id, CategoryId = categories[5].Id, Name = "Phone X" };
+        Context.Models.AddRange(cableModel, chargerModel, powerBankModel, storageModel, phoneModel);
+        var capacity = new StorageCapacity { Gb = 256 };
+        Context.StorageCapacities.Add(capacity);
+        Context.SaveChanges();
+        await _service.CreateCablesAsync(new CreateCableInputModel { ManufacturerId = manufacturer.Id, ModelId = cableModel.Id, Connector1 = CableConnector.UsbC, Connector2 = CableConnector.Hdmi, Length = 2, Price = 100 });
+        await _service.CreateChargersAsync(new CreateChargerInputModel { ManufacturerId = manufacturer.Id, ModelId = chargerModel.Id, Wattage = 45, Pd = true, PortCount = 1, Price = 100 });
+        await _service.CreatePowerBanksAsync(new CreatePowerBankInputModel { ManufacturerId = manufacturer.Id, ModelId = powerBankModel.Id, CapacityMah = 10000, MaxWattage = 20, PortCount = 2, Pd = false, Price = 100 });
+        await _service.CreatePortableStoragesAsync(new CreatePortableStorageInputModel { ManufacturerId = manufacturer.Id, ModelId = storageModel.Id, StorageKind = StorageKind.UsbFlash, StorageCapacityId = capacity.Id, Speed = 200, Price = 100 });
+        var caseResult = await _service.CreateCasesAsync(new CreateCaseInputModel { ManufacturerId = manufacturer.Id, CompatibleManufacturerId = phoneManufacturer.Id, CompatibleModelIds = [phoneModel.Id], Price = 100 });
+        var rows = await _service.GetInventoryRowsAsync();
+        Assert.Contains(rows, row => row.Type == "Cable");
+        Assert.Contains(rows, row => row.Type == "Charger");
+        Assert.Contains(rows, row => row.Type == "Power Bank");
+        Assert.Contains(rows, row => row.Type == "Portable Storage");
+        Assert.Contains(rows, row => row.Type == "Case");
+
+        var cableId = Context.Products.Single(p => p.CableProfile != null).Id;
+        var cableDetails = await _service.GetDetailsAsync(cableId, "cable");
+        Assert.NotNull(cableDetails);
+        Assert.Equal(CableConnector.UsbC, cableDetails!.Connector1);
+        Assert.Equal(2m, cableDetails.CableLength);
+
+        var caseDetails = await _service.GetDetailsAsync(caseResult.EntityId!.Value, "case");
+        Assert.NotNull(caseDetails);
+        Assert.Contains("Phone X", caseDetails!.CompatibleModels);
+    }
+
 }
