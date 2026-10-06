@@ -25,7 +25,7 @@
 
 ## Reviewer Briefing
 - **Step 1 LOW/HIGH:** Bind models, `ProductDetailsViewModel` extension, service contracts, DAL implementations, and DAL unit tests (completed).
-- **Step 2 MEDIUM/HIGH:** Razor create pages (`CreateTablet`, `CreateSmartWatch`, `CreateLaptop`), Details page enhancements, and Products Index filter buttons.
+- **Step 2 MEDIUM/HIGH:** Razor create pages (`CreateTablet`, `CreateSmartWatch`, `CreateLaptop`), Details page enhancements, and Products Index filter buttons (completed).
 - **Step 3 MEDIUM/MEDIUM:** Modal registry entries (`ProductCreateRegistry`), partial form views, and `Buy.cshtml.cs` POST handlers.
 - **Step 4 LOW/HIGH:** Final Stage AA verification: full test suite, 0 warnings, clean diff stat check.
 
@@ -35,26 +35,9 @@
 - Risk: LOW · Confidence: HIGH
 
 ## ~~[x] Step 2 — Dedicated Create pages, Details rendering & Products list integration~~
-- **Files**:
-  - `create`:
-    - `src/MobileShop.Web/Pages/Products/CreateTablet.cshtml` & `.cshtml.cs`
-    - `src/MobileShop.Web/Pages/Products/CreateSmartWatch.cshtml` & `.cshtml.cs`
-    - `src/MobileShop.Web/Pages/Products/CreateLaptop.cshtml` & `.cshtml.cs`
-    - `src/MobileShop.Tests/Web/Pages/Products/CreateDeviceModelTests.cs`
-  - `modify`:
-    - `src/MobileShop.Web/Pages/Products/Index.cshtml`
-    - `src/MobileShop.Web/Pages/Products/Details.cshtml`
-- **Symbols**:
-  - `CreateTabletModel`, `CreateSmartWatchModel`, `CreateLaptopModel`
-  - `IndexModel`, `DetailsModel`
-- **Change**:
-  - Implement the three create pages with cascading manufacturer/model selects, pricing calculator JS, second-hand toggle, and guarantee details.
-  - Update `Index.cshtml` to add type filter buttons ("Tablets", "Smart Watches", "Laptops") and create buttons ("Create tablet", "Create smart watch", "Create laptop").
-  - Update `Details.cshtml` to display laptop specs (CPU, GPU, Screen size) and device notes.
-  - Add Razor Page unit tests covering GET/POST workflows for all three device create pages.
-- **Done when**: Pages render and post correctly, unit tests pass, CI is green, Job B PASS.
-- **Risk**: MEDIUM · **Confidence**: HIGH
-- Completed: CI Action #522 — Success
+- Files: `CreateTablet`, `CreateSmartWatch`, `CreateLaptop` pages created, `Details.cshtml` and `Index.cshtml` updated, `CreateDeviceModelTests.cs` added.
+- Completed: CI Action #523 — Success.
+- Risk: MEDIUM · Confidence: HIGH
 
 ## [ ] Step 3 — Buy modal integration & Product Create Registry
 - **Files**:
