@@ -1,3 +1,5 @@
+using MobileShop.Web.Pages.Shared;
+
 namespace MobileShop.Web.Pages.Transactions;
 
 public class BuyModel(
