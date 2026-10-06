@@ -1,0 +1,17 @@
+@page
+@model MobileShop.Web.Pages.Products.CreatePowerBankModel
+@{ ViewData["Title"] = "Create power bank"; }
+<h1>Create power bank</h1>
+<form method="post" class="row g-3 col-lg-8">
+<div asp-validation-summary="ModelOnly" class="text-danger"></div>
+<div class="col-md-6"><label asp-for="Input.ManufacturerId">Manufacturer</label><select asp-for="Input.ManufacturerId" asp-items="@(new SelectList(Model.Manufacturers, "Id", "Name"))" class="form-select" id="manufacturerSelect"><option value="">-- Select manufacturer --</option></select></div>
+<div class="col-md-6"><label asp-for="Input.ModelId">Model</label><select asp-for="Input.ModelId" asp-items="@(new SelectList(Model.Models, "Id", "Name"))" class="form-select" id="modelSelect"><option value="">-- Select model --</option></select></div>
+<div class="col-md-3"><label asp-for="Input.CapacityMah">Capacity (mAh)</label><input asp-for="Input.CapacityMah" class="form-control" min="0" /></div><div class="col-md-3"><label asp-for="Input.MaxWattage">Max wattage</label><input asp-for="Input.MaxWattage" class="form-control" min="0" /></div><div class="col-md-3"><label asp-for="Input.PortCount">Ports</label><input asp-for="Input.PortCount" class="form-control" min="1" /></div><div class="col-md-3"><div class="form-check mt-4"><input asp-for="Input.Pd" class="form-check-input" /><label asp-for="Input.Pd" class="form-check-label">USB Power Delivery</label></div></div>
+<div class="col-md-3"><label asp-for="Input.Price">Paid price (IRR)</label><input asp-for="Input.Price" class="form-control" data-price inputmode="numeric" step="1" min="0" max="@MobileShop.Models.MoneyLimits.MaxRials" /></div><div class="col-md-3"><label asp-for="Input.ProfitPercent">Profit %</label><input asp-for="Input.ProfitPercent" class="form-control" data-percent /></div><div class="col-md-3"><label asp-for="Input.ProfitAmount">Profit amount (IRR)</label><input asp-for="Input.ProfitAmount" class="form-control" data-amount inputmode="numeric" step="1" min="0" max="@MobileShop.Models.MoneyLimits.MaxRials" /></div><div class="col-md-3"><label>Finished price (IRR)</label><input class="form-control" data-finished-price readonly /></div>
+<div class="col-md-4"><label asp-for="Input.Count">Count</label><input asp-for="Input.Count" class="form-control" min="1" /></div>
+<div class="col-12"><button class="btn btn-primary" type="submit">Save power bank</button><a asp-page="/Products/Index" class="btn btn-outline-secondary ms-2">Back to products</a></div>
+</form>
+@if (!string.IsNullOrWhiteSpace(Model.Message)){<div class="alert alert-danger mt-3">@Model.Message</div>}
+@section Scripts{<partial name="_ValidationScriptsPartial" /><script src="~/js/create-product-pricing.js"></script><script>
+document.addEventListener('DOMContentLoaded',function(){const m=document.getElementById('manufacturerSelect'),s=document.getElementById('modelSelect');m?.addEventListener('change',async function(){s.innerHTML='<option value="">-- Select model --</option>';if(!this.value)return;const r=await fetch('?handler=Models&manufacturerId='+encodeURIComponent(this.value));if(r.ok)(await r.json()).forEach(x=>s.appendChild(new Option(x.name,x.id)))})});
+</script>}

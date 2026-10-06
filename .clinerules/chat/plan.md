@@ -45,7 +45,7 @@
 - Completed: CI Action #551 — Success.
 - Risk: LOW · Confidence: HIGH
 
-## [ ] Step 2 — Dedicated Create pages, Details rendering & Products list integration
+## ~~[x] Step 2 — Dedicated Create pages, Details rendering & Products list integration~~
 - **Files**:
   - `create`:
     - `src/MobileShop.Web/Pages/Products/CreateCable.cshtml` & `.cshtml.cs`
@@ -67,6 +67,7 @@
   - Add unit tests covering GET/POST workflows for all 5 accessory create pages.
 - **Done when**: Pages render and post correctly, unit tests pass, CI is green, Job B PASS.
 - **Risk**: MEDIUM · **Confidence**: HIGH
+- Completed implementation: dedicated create pages for all five accessories, accessory details rendering, Products type filters/create links, and web-page workflow tests.
 
 ## [ ] Step 3 — Buy modal integration & Product Create Registry
 - **Files**:
