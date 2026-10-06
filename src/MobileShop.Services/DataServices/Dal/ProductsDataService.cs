@@ -36,7 +36,7 @@ public class ProductsDataService(
     {
         var rows = new List<ProductListItemViewModel>();
         var normalizedType = type?.Trim().ToLowerInvariant();
-        var showAll = string.IsNullOrEmpty(normalizedType) || normalizedType == "all" || normalizedType is not ("phone" or "appleid" or "glass" or "tablet" or "smartwatch" or "laptop");
+        var showAll = string.IsNullOrEmpty(normalizedType) || normalizedType == "all" || normalizedType is not ("phone" or "appleid" or "glass" or "tablet" or "smartwatch" or "laptop" or "cable" or "charger" or "powerbank" or "portablestorage" or "case");
         var hasPartNumberFilter = partNumberId is > 0;
         if (showAll || normalizedType == "phone")
         {
@@ -99,6 +99,16 @@ public class ProductsDataService(
             rows.AddRange((await products.SelectAllAsync(product => product.SmartWatchProfile != null, product => new ProductListItemViewModel(product.Id, product.Id, "Smart Watch", product.ModelNavigation.ManufacturerNavigation.Name + " " + product.ModelNavigation.Name, "Barcode: " + product.Barcode, product.ColorNavigation == null ? null : product.ColorNavigation.Name, product.Transactions.Any(t => t.Direction == TransactionDirection.Sell), product.SecondHandProfile != null))).OrderBy(row => row.ProductId));
         if (showAll || normalizedType == "laptop")
             rows.AddRange((await products.SelectAllAsync(product => product.LaptopProfile != null, product => new ProductListItemViewModel(product.Id, product.Id, "Laptop", product.ModelNavigation.ManufacturerNavigation.Name + " " + product.ModelNavigation.Name, "Barcode: " + product.Barcode, product.ColorNavigation == null ? null : product.ColorNavigation.Name, product.Transactions.Any(t => t.Direction == TransactionDirection.Sell), product.SecondHandProfile != null))).OrderBy(row => row.ProductId));
+        if (showAll || normalizedType == "cable")
+            rows.AddRange((await products.SelectAllAsync(product => product.CableProfile != null, product => new ProductListItemViewModel(product.Id, product.Id, "Cable", product.ModelNavigation.ManufacturerNavigation.Name + " " + product.ModelNavigation.Name, "Barcode: " + product.Barcode, null, product.Transactions.Any(t => t.Direction == TransactionDirection.Sell), product.SecondHandProfile != null))).OrderBy(row => row.ProductId));
+        if (showAll || normalizedType == "charger")
+            rows.AddRange((await products.SelectAllAsync(product => product.ChargerProfile != null, product => new ProductListItemViewModel(product.Id, product.Id, "Charger", product.ModelNavigation.ManufacturerNavigation.Name + " " + product.ModelNavigation.Name, "Barcode: " + product.Barcode, null, product.Transactions.Any(t => t.Direction == TransactionDirection.Sell), product.SecondHandProfile != null))).OrderBy(row => row.ProductId));
+        if (showAll || normalizedType == "powerbank")
+            rows.AddRange((await products.SelectAllAsync(product => product.PowerBankProfile != null, product => new ProductListItemViewModel(product.Id, product.Id, "Power Bank", product.ModelNavigation.ManufacturerNavigation.Name + " " + product.ModelNavigation.Name, "Barcode: " + product.Barcode, null, product.Transactions.Any(t => t.Direction == TransactionDirection.Sell), product.SecondHandProfile != null))).OrderBy(row => row.ProductId));
+        if (showAll || normalizedType == "portablestorage")
+            rows.AddRange((await products.SelectAllAsync(product => product.PortableStorageProfile != null, product => new ProductListItemViewModel(product.Id, product.Id, "Portable Storage", product.ModelNavigation.ManufacturerNavigation.Name + " " + product.ModelNavigation.Name, "Barcode: " + product.Barcode, null, product.Transactions.Any(t => t.Direction == TransactionDirection.Sell), product.SecondHandProfile != null))).OrderBy(row => row.ProductId));
+        if (showAll || normalizedType == "case")
+            rows.AddRange((await products.SelectAllAsync(product => product.CaseProfile != null, product => new ProductListItemViewModel(product.Id, product.Id, "Case", product.ModelNavigation.ManufacturerNavigation.Name + " " + product.ModelNavigation.Name, "Barcode: " + product.Barcode, null, product.Transactions.Any(t => t.Direction == TransactionDirection.Sell), product.SecondHandProfile != null))).OrderBy(row => row.ProductId));
 
         var filteredRows = availability switch
         {
@@ -210,6 +220,26 @@ public class ProductsDataService(
         else if (string.Equals(type, "laptop", StringComparison.OrdinalIgnoreCase))
         {
             details = await products.SelectAsync(id, product => new ProductDetailsViewModel("Laptop", product.Id, product.ModelNavigation.ManufacturerNavigation.Name, product.ModelNavigation.Name, "Barcode: " + product.Barcode, product.ColorNavigation == null ? null : product.ColorNavigation.Name, product.Transactions.Where(t => t.Direction == TransactionDirection.Sell).OrderByDescending(t => t.Date).Select(t => t.CustomerNavigation.PersonNavigation).Select(person => person.FirstName + " " + person.LastName).FirstOrDefault() ?? "Not sold", product.GuaranteeProfile == null ? "None" : product.GuaranteeProfile.Corporation + " until " + product.GuaranteeProfile.ExpirationDate.ToString("d"), product.SecondHandProfile != null) { Cpu = product.LaptopProfile!.Cpu, Gpu = product.LaptopProfile.Gpu, DisplaySize = product.LaptopProfile.DisplaySize, Notes = product.LaptopProfile.Notes });
+        }
+        else if (string.Equals(type, "cable", StringComparison.OrdinalIgnoreCase))
+        {
+            details = await products.SelectAsync(id, product => new ProductDetailsViewModel("Cable", product.Id, product.ModelNavigation.ManufacturerNavigation.Name, product.ModelNavigation.Name, "Barcode: " + product.Barcode, null, product.Transactions.Where(t => t.Direction == TransactionDirection.Sell).OrderByDescending(t => t.Date).Select(t => t.CustomerNavigation.PersonNavigation).Select(person => person.FirstName + " " + person.LastName).FirstOrDefault() ?? "Not sold", product.GuaranteeProfile == null ? "None" : product.GuaranteeProfile.Corporation + " until " + product.GuaranteeProfile.ExpirationDate.ToString("d"), product.SecondHandProfile != null) { Connector1 = product.CableProfile!.Connector1, Connector2 = product.CableProfile.Connector2, CableLength = product.CableProfile.Length, Notes = product.CableProfile.Notes });
+        }
+        else if (string.Equals(type, "charger", StringComparison.OrdinalIgnoreCase))
+        {
+            details = await products.SelectAsync(id, product => new ProductDetailsViewModel("Charger", product.Id, product.ModelNavigation.ManufacturerNavigation.Name, product.ModelNavigation.Name, "Barcode: " + product.Barcode, null, product.Transactions.Where(t => t.Direction == TransactionDirection.Sell).OrderByDescending(t => t.Date).Select(t => t.CustomerNavigation.PersonNavigation).Select(person => person.FirstName + " " + person.LastName).FirstOrDefault() ?? "Not sold", product.GuaranteeProfile == null ? "None" : product.GuaranteeProfile.Corporation + " until " + product.GuaranteeProfile.ExpirationDate.ToString("d"), product.SecondHandProfile != null) { Wattage = product.ChargerProfile!.Wattage, Pd = product.ChargerProfile.Pd, PortCount = product.ChargerProfile.PortCount, Notes = product.ChargerProfile.Notes });
+        }
+        else if (string.Equals(type, "powerbank", StringComparison.OrdinalIgnoreCase))
+        {
+            details = await products.SelectAsync(id, product => new ProductDetailsViewModel("Power Bank", product.Id, product.ModelNavigation.ManufacturerNavigation.Name, product.ModelNavigation.Name, "Barcode: " + product.Barcode, null, product.Transactions.Where(t => t.Direction == TransactionDirection.Sell).OrderByDescending(t => t.Date).Select(t => t.CustomerNavigation.PersonNavigation).Select(person => person.FirstName + " " + person.LastName).FirstOrDefault() ?? "Not sold", product.GuaranteeProfile == null ? "None" : product.GuaranteeProfile.Corporation + " until " + product.GuaranteeProfile.ExpirationDate.ToString("d"), product.SecondHandProfile != null) { CapacityMah = product.PowerBankProfile!.CapacityMah, MaxWattage = product.PowerBankProfile.MaxWattage, PortCount = product.PowerBankProfile.PortCount, Pd = product.PowerBankProfile.Pd, Notes = product.PowerBankProfile.Notes });
+        }
+        else if (string.Equals(type, "portablestorage", StringComparison.OrdinalIgnoreCase))
+        {
+            details = await products.SelectAsync(id, product => new ProductDetailsViewModel("Portable Storage", product.Id, product.ModelNavigation.ManufacturerNavigation.Name, product.ModelNavigation.Name, "Barcode: " + product.Barcode, null, product.Transactions.Where(t => t.Direction == TransactionDirection.Sell).OrderByDescending(t => t.Date).Select(t => t.CustomerNavigation.PersonNavigation).Select(person => person.FirstName + " " + person.LastName).FirstOrDefault() ?? "Not sold", product.GuaranteeProfile == null ? "None" : product.GuaranteeProfile.Corporation + " until " + product.GuaranteeProfile.ExpirationDate.ToString("d"), product.SecondHandProfile != null) { StorageKind = product.PortableStorageProfile!.Kind, StorageCapacityLabel = product.PortableStorageProfile.StorageCapacityNavigation.Gb + " GB", Speed = product.PortableStorageProfile.Speed, Notes = product.PortableStorageProfile.Notes });
+        }
+        else if (string.Equals(type, "case", StringComparison.OrdinalIgnoreCase))
+        {
+            details = await products.SelectAsync(id, product => new ProductDetailsViewModel("Case", product.Id, product.ModelNavigation.ManufacturerNavigation.Name, product.ModelNavigation.Name, "Barcode: " + product.Barcode, null, product.Transactions.Where(t => t.Direction == TransactionDirection.Sell).OrderByDescending(t => t.Date).Select(t => t.CustomerNavigation.PersonNavigation).Select(person => person.FirstName + " " + person.LastName).FirstOrDefault() ?? "Not sold", product.GuaranteeProfile == null ? "None" : product.GuaranteeProfile.Corporation + " until " + product.GuaranteeProfile.ExpirationDate.ToString("d"), product.SecondHandProfile != null) { CompatibleModels = product.CaseProfile!.ModelFits.Select(fit => fit.ModelNavigation.Name).ToList(), Notes = product.CaseProfile.Notes });
         }
         else
         {
@@ -661,6 +691,100 @@ public class ProductsDataService(
     public async Task<ServiceResult> CreateTabletAsync(CreateTabletInputModel input) => await CreateDeviceAsync(input.ManufacturerId, input.ModelId, "Tablet", input.Price, input.ProfitPercent, input.ProfitAmount, input.IsSecondHand, input.TestPeriodDays, input.SecondHandNotes, input.HasGuarantee, input.GuaranteeCorporation, input.GuaranteeExpiry, input.GuaranteeNotes, new Tablet { Notes = NormalizeNote(input.Notes) });
     public async Task<ServiceResult> CreateSmartWatchAsync(CreateSmartWatchInputModel input) => await CreateDeviceAsync(input.ManufacturerId, input.ModelId, "SmartWatch", input.Price, input.ProfitPercent, input.ProfitAmount, input.IsSecondHand, input.TestPeriodDays, input.SecondHandNotes, input.HasGuarantee, input.GuaranteeCorporation, input.GuaranteeExpiry, input.GuaranteeNotes, new SmartWatch { Notes = NormalizeNote(input.Notes) });
     public async Task<ServiceResult> CreateLaptopAsync(CreateLaptopInputModel input) => await CreateDeviceAsync(input.ManufacturerId, input.ModelId, "Laptop", input.Price, input.ProfitPercent, input.ProfitAmount, input.IsSecondHand, input.TestPeriodDays, input.SecondHandNotes, input.HasGuarantee, input.GuaranteeCorporation, input.GuaranteeExpiry, input.GuaranteeNotes, new Laptop { Cpu = input.Cpu.Trim(), Gpu = input.Gpu.Trim(), DisplaySize = input.DisplaySize, Notes = NormalizeNote(input.Notes) });
+
+    public Task<ServiceResult> CreateCablesAsync(CreateCableInputModel input) =>
+        CreateAccessoryBatchAsync(input.Count, input.Price, input.ProfitPercent, input.ProfitAmount, input.ManufacturerId, input.ModelId, "Cable",
+            product => product.CableProfile = new Cable { Connector1 = input.Connector1, Connector2 = input.Connector2, Length = input.Length });
+
+    public Task<ServiceResult> CreateChargersAsync(CreateChargerInputModel input) =>
+        CreateAccessoryBatchAsync(input.Count, input.Price, input.ProfitPercent, input.ProfitAmount, input.ManufacturerId, input.ModelId, "Charger",
+            product => product.ChargerProfile = new Charger { Wattage = input.Wattage, Pd = input.Pd, PortCount = input.PortCount });
+
+    public Task<ServiceResult> CreatePowerBanksAsync(CreatePowerBankInputModel input) =>
+        CreateAccessoryBatchAsync(input.Count, input.Price, input.ProfitPercent, input.ProfitAmount, input.ManufacturerId, input.ModelId, "PowerBank",
+            product => product.PowerBankProfile = new PowerBank { CapacityMah = input.CapacityMah, MaxWattage = input.MaxWattage, PortCount = input.PortCount, Pd = input.Pd });
+
+    public Task<ServiceResult> CreatePortableStoragesAsync(CreatePortableStorageInputModel input) =>
+        CreateAccessoryBatchAsync(input.Count, input.Price, input.ProfitPercent, input.ProfitAmount, input.ManufacturerId, input.ModelId, "PortableStorage",
+            product => product.PortableStorageProfile = new PortableStorage { Kind = input.StorageKind, StorageCapacityId = input.StorageCapacityId, Speed = input.Speed });
+
+    public async Task<ServiceResult> CreateCasesAsync(CreateCaseInputModel input)
+    {
+        if (input.Count < 1)
+            return new ServiceResult(false, "Count must be at least 1.", nameof(CreateCaseInputModel.Count), null);
+        if (input.Price > MoneyLimits.MaxRials || input.ProfitAmount > MoneyLimits.MaxRials || !TryComputeFinishedPrice(input.Price, input.ProfitPercent, input.ProfitAmount, out var finishedPrice))
+            return new ServiceResult(false, "The price is too large.", nameof(CreateCaseInputModel.Price), null);
+        if (await manufacturers.FindAsync(input.ManufacturerId) is null)
+            return new ServiceResult(false, "Selected manufacturer not found.", nameof(CreateCaseInputModel.ManufacturerId), null);
+        var compatibleManufacturer = await manufacturers.FindAsync(input.CompatibleManufacturerId);
+        if (compatibleManufacturer is null)
+            return new ServiceResult(false, "Selected compatible manufacturer not found.", nameof(CreateCaseInputModel.CompatibleManufacturerId), null);
+        var compatibleModels = new List<Model>();
+        foreach (var modelId in input.CompatibleModelIds.Distinct())
+        {
+            var model = await models.FindAsync(m => m.Id == modelId && m.ManufacturerId == compatibleManufacturer.Id && m.CategoryNavigation.Name == "Phone");
+            if (model is null)
+                return new ServiceResult(false, "One or more selected compatible models were not found.", nameof(CreateCaseInputModel.CompatibleModelIds), null);
+            compatibleModels.Add(model);
+        }
+        if (compatibleModels.Count == 0)
+            return new ServiceResult(false, "Select at least one compatible model.", nameof(CreateCaseInputModel.CompatibleModelIds), null);
+
+        var caseCategory = await categories.FindAsync(c => c.Name == "Case");
+        if (caseCategory is null)
+            return new ServiceResult(false, "The 'Case' category is missing from the catalog seed data.", nameof(CreateCaseInputModel.ManufacturerId), null);
+        var caseModelName = compatibleModels[0].Name + " Case";
+        var caseModel = await models.FindAsync(m => m.ManufacturerId == input.ManufacturerId && m.CategoryId == caseCategory.Id && m.Name == caseModelName);
+        if (caseModel is null)
+        {
+            caseModel = new Model { ManufacturerId = input.ManufacturerId, CategoryId = caseCategory.Id, Name = caseModelName };
+            await models.AddAsync(caseModel, persist: false);
+        }
+
+        var batch = new List<Product>(input.Count);
+        var purchaseTransactions = new List<Transaction>(input.Count);
+        for (var i = 0; i < input.Count; i++)
+        {
+            var product = new Product { ModelId = caseModel.Id, ModelNavigation = caseModel, Barcode = Guid.NewGuid().ToString("N")[..12], Price = finishedPrice };
+            var profile = new Case { ProductNavigation = product };
+            foreach (var compatibleModel in compatibleModels)
+                profile.ModelFits.Add(new CaseModelFit { CaseNavigation = profile, ModelId = compatibleModel.Id, ModelNavigation = compatibleModel });
+            product.CaseProfile = profile;
+            batch.Add(product);
+            purchaseTransactions.Add(new Transaction { ProductNavigation = product, SellerId = ShopSellerId, CustomerId = ShopCustomerId, FinishedPrice = input.Price, Date = DateTime.Today, Direction = TransactionDirection.Buy });
+        }
+        await transactions.AddRangeAsync(purchaseTransactions, persist: false);
+        if (await products.AddRangeAsync(batch) <= 0)
+            return new ServiceResult(false, "The case products could not be saved. Check the details and try again.", null, null);
+        return new ServiceResult(true, null, null, batch[0].Id);
+    }
+
+    private async Task<ServiceResult> CreateAccessoryBatchAsync(int count, long price, decimal? profitPercent, long? profitAmount, int manufacturerId, int modelId, string categoryName, Action<Product> configure)
+    {
+        if (count < 1)
+            return new ServiceResult(false, "Count must be at least 1.", null, null);
+        if (price > MoneyLimits.MaxRials || profitAmount > MoneyLimits.MaxRials || !TryComputeFinishedPrice(price, profitPercent, profitAmount, out var finishedPrice))
+            return new ServiceResult(false, "The price is too large.", null, null);
+        if (await manufacturers.FindAsync(manufacturerId) is null)
+            return new ServiceResult(false, "Selected manufacturer not found.", nameof(manufacturerId), null);
+        var model = await models.FindAsync(m => m.Id == modelId && m.ManufacturerId == manufacturerId && m.CategoryNavigation.Name == categoryName);
+        if (model is null)
+            return new ServiceResult(false, "Selected model not found for this manufacturer.", nameof(modelId), null);
+
+        var batch = new List<Product>(count);
+        var purchaseTransactions = new List<Transaction>(count);
+        for (var i = 0; i < count; i++)
+        {
+            var product = new Product { ModelId = model.Id, ModelNavigation = model, Barcode = Guid.NewGuid().ToString("N")[..12], Price = finishedPrice };
+            configure(product);
+            batch.Add(product);
+            purchaseTransactions.Add(new Transaction { ProductNavigation = product, SellerId = ShopSellerId, CustomerId = ShopCustomerId, FinishedPrice = price, Date = DateTime.Today, Direction = TransactionDirection.Buy });
+        }
+        await transactions.AddRangeAsync(purchaseTransactions, persist: false);
+        if (await products.AddRangeAsync(batch) <= 0)
+            return new ServiceResult(false, "The accessory products could not be saved. Check the details and try again.", null, null);
+        return new ServiceResult(true, null, null, batch[0].Id);
+    }
     private async Task<ServiceResult> CreateDeviceAsync(int manufacturerId, int modelId, string categoryName, long price, decimal? profitPercent, long? profitAmount, bool isSecondHand, int? testPeriodDays, string? secondHandNotes, bool hasGuarantee, string? guaranteeCorporation, DateTime? guaranteeExpiry, string? guaranteeNotes, object profile)
     {
         if (price > MoneyLimits.MaxRials || profitAmount > MoneyLimits.MaxRials || !TryComputeFinishedPrice(price, profitPercent, profitAmount, out var finishedPrice)) return new ServiceResult(false, "The price is too large.", null, null);
