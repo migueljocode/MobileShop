@@ -1,59 +1,125 @@
-# Plan — Stage Z — Searchable product picker + create-product modal
+# Plan — Stage AA — Device product pages (Tablet, Smart watch, Laptop)
 
 ## Requirements
-- Functional (from `to-do.md`)
-  - **Record Buy and Record Sell**: product control becomes a **typeable combobox** in the **same style as the person picker** (search by name / identifier / type / color / part number as available on `ProductListItemViewModel`).
-  - **Suggested price** behavior from today’s `product-picker.js` must still apply after selection.
-  - **"Create product"** on **Buy** (and Sell if practical without breaking sell inventory rules) opens a **modal**: first pick **product type**, then load that type’s create form inside the modal.
-  - First types: **Phone**, **Apple ID**, **Glass**.
-  - **Registry** so later stages (AA/AB) plug in by registering a type → form loader + create handler.
-  - On success: select the new product on the transaction form without leaving the page.
-- Non-functional: CI gate; no schema/migration; no Api host/auth.
-- Constraints: reuse `IProductsDataService.CreatePhoneAsync` / `CreateAppleIdAsync` / `CreateGlassesAsync` and existing input models; keep PageModels thin.
+- **Functional (from `to-do.md`)**:
+  - Implement full support for **Tablet**, **Smart watch**, and **Laptop** across the product stack using the existing database entities (`Tablet`, `SmartWatch`, `Laptop`, `Product`, `DeviceSpec`, `SecondHand`, `Guarantee`).
+  - **Services**: Create, details, inventory list, second-hand list, and selectable transactions list for all three device types.
+  - **Pricing & Rules**: Follow phone/glass rules — integer IRR prices bounded by `MoneyLimits.MaxRials`, optional profit percentage or profit amount, computed finished price, optional guarantee, optional second-hand notes, and barcode generation.
+  - **Create Pages**: Dedicated Razor Pages for each type (`/Products/CreateTablet`, `/Products/CreateSmartWatch`, `/Products/CreateLaptop`).
+  - **List & Details Integration**: Integrated into `/Products/Index` (type filter buttons: Tablets, Smart Watches, Laptops; availability filter: All, Available, Sold) and `/Products/Details` (specifications, guarantee, second-hand status, and transaction history).
+  - **Buy Modal Registry**: Registered in the Stage Z create-product popup (`ProductCreateRegistry`), allowing inline creation on `/Transactions/Buy` for all three device types.
+- **Non-functional**:
+  - CI gate on GitHub Actions; no schema/migration changes; no Api host/auth changes.
+- **Constraints**:
+  - No database migration or entity modifications; `sample-data.json` counts must remain stable (0 seeded tablets/watches/laptops asserted in `SampleDataSeedTests`).
 
 ## Decisions (labelled)
-- **D1 — Search ownership:** `ITransactionsDataService.SearchSelectableProductsAsync(TransactionDirection direction, string? q, int take = 25)` so direction rules stay with the same path as `GetSelectableProductsAsync` (Buy vs Sell eligibility). Implementation may call into Products helpers internally if needed, but the **public** search for the transaction pages is on Transactions.
-- **D2 — Match fields (case-insensitive contains on projected strings):** product **Name**, **Type**, **Identifier**, **Color**, **PartNumberLabel** (skip empty / "N/A"). Empty query → first N selectable products for that direction (same spirit as person search).
-- **D3 — UI:** no new combobox library. Evolve `product-picker.js` (or add `product-picker-search.js` if cleaner) to match person-picker: text search, results list, hidden `Input.ProductId`, debounced GET handler. Keep `data-suggested-price` / finished-price sync.
-- **D4 — Create modal scope (honest):** full Create Phone page has nested manufacturer/model/part-number modals. For Stage Z v1:
-  - Modal embeds **streamlined forms** (same bind models) with dropdowns populated from existing service methods (`GetManufacturersAsync`, `GetModelsAsync`, …).
-  - Nested "Add manufacturer/model/color/part-number" **optional** if cheap (reuse existing Products page handlers/JS); otherwise **require selecting existing catalog rows** and document that full nested create remains on Products pages.
-  - Glass may create a **batch** (`CreateGlassesAsync`); return the **first created product id** (or the id the service already returns) for selection — if service returns only count, extend `ServiceResult.EntityId` consistently.
-- **D5 — Registry:** a small Web-side map (static or DI) of `type key → { form partial or GET handler, POST create handler name }` for `phone` | `appleid` | `glass`. Stages AA/AB only add a registry entry + partial/handler.
-- **D6 — Sell create product:** allowed only if creating inventory that can later be sold is coherent; **default: Create product button on Buy only**; Sell gets searchable picker only. (Owner can overrule in review.)
-- **A1:** CI gate; Action #; no local `dotnet`.
-- **A2:** Api stubs for any new interface members = NIE only.
+- **D1 — Category Names & Model Lookup:** Category names match the entity/schema naming: `"Tablet"`, `"SmartWatch"`, and `"Laptop"`. Models for each device type are linked to their corresponding category.
+- **D2 — Identifiers for Inventory & Picker:** Each device has a unique barcode generated on `Product.Barcode` (`Guid.NewGuid().ToString("N")[..12]`). Display identifier is `"Barcode: " + product.Barcode`.
+- **D3 — Part Numbers:** The `PartNumber` table is linked exclusively to `Phone` entities in the schema; Tablets, Smart Watches, and Laptops report `PartNumberLabel = "N/A"`.
+- **D4 — Laptop Specifications:** The `Laptop` entity includes `Cpu`, `Gpu`, and `DisplaySize`. These are captured in `CreateLaptopInputModel`, persisted to the `Laptop` row, and rendered in `/Products/Details`.
+- **D5 — Selectable for Transactions:** `TransactionsDataService.GetSelectableProductsAsync` and `SearchSelectableProductsAsync` include unsold Tablets, Smart Watches, and Laptops, making them selectable for Buy and Sell operations.
+- **D6 — Registry Keys:** Modal registry keys are `"tablet"`, `"smartwatch"`, and `"laptop"`, rendering streamlined forms in the `/Transactions/Buy` modal.
+- **A1:** CI gate; GitHub Actions run number is required for every step verification.
+- **A2:** Api service stubs (`ApiProductsDataService`) implement new interface members by throwing `NotImplementedException`.
 
 ## Reviewer Briefing
-- **Step 1 LOW/HIGH:** search API + tests against selectable rules (completed).
-- **Step 2 MEDIUM/MEDIUM:** searchable product UI; must not break suggested price (completed).
-- **Step 3 HIGH/MEDIUM:** modal + registry + three create paths (completed).
-- **Step 4 LOW/HIGH:** final Stage Z validation and sign-off (completed).
+- **Step 1 LOW/HIGH:** Bind models, service contracts, DAL implementations, and DAL unit tests. Low risk as it mirrors existing Phone/Glass methods.
+- **Step 2 MEDIUM/HIGH:** Razor create pages (`CreateTablet`, `CreateSmartWatch`, `CreateLaptop`), Details page enhancements, and Products Index filter buttons.
+- **Step 3 MEDIUM/MEDIUM:** Modal registry entries (`ProductCreateRegistry`), partial form views, and `Buy.cshtml.cs` POST handlers.
+- **Step 4 LOW/HIGH:** Final Stage AA verification: full test suite, 0 warnings, clean diff stat check.
 
-## ~~[x] Step 1 — Search selectable products (service)~~
-- Files: `ITransactionsDataService`, Dal `TransactionsDataService`, Api stub if present; tests for direction filter + query match + take/empty.
-- Do not touch Web UI yet.
-- Done when: search works; CI green; Job B PASS.
-- Risk: LOW · Confidence: HIGH
+## [ ] Step 1 — Input models, service contracts, DAL implementations & tests
+- **Files**:
+  - `create`:
+    - `src/MobileShop.Models/ViewModels/Web/BindModels/CreateTabletInputModel.cs`
+    - `src/MobileShop.Models/ViewModels/Web/BindModels/CreateSmartWatchInputModel.cs`
+    - `src/MobileShop.Models/ViewModels/Web/BindModels/CreateLaptopInputModel.cs`
+  - `modify`:
+    - `src/MobileShop.Services/DataServices/Interfaces/IProductsDataService.cs`
+    - `src/MobileShop.Services/DataServices/Dal/ProductsDataService.cs`
+    - `src/MobileShop.Services/DataServices/Dal/TransactionsDataService.cs`
+    - `src/MobileShop.Services/DataServices/Api/ApiProductsDataService.cs`
+    - `src/MobileShop.Tests/Services/DataServices/Dal/ProductsDataServiceTests.cs`
+    - `src/MobileShop.Tests/Services/DataServices/Dal/TransactionsDataServiceTests.cs`
+- **Symbols**:
+  - `CreateTabletInputModel`, `CreateSmartWatchInputModel`, `CreateLaptopInputModel`
+  - `IProductsDataService.CreateTabletAsync`, `CreateSmartWatchAsync`, `CreateLaptopAsync`
+  - `ProductsDataService.GetInventoryRowsAsync`, `GetSecondHandRowsAsync`, `GetDetailsAsync`
+  - `TransactionsDataService.GetSelectableProductsAsync`
+- **Change**:
+  - Add input models with Rial range validation, required manufacturer/model, optional second-hand and guarantee fields, and laptop CPU/GPU/DisplaySize fields.
+  - Implement `CreateTabletAsync`, `CreateSmartWatchAsync`, and `CreateLaptopAsync` in `ProductsDataService`, persisting the `Product` row and associated subtype row (`Tablet`, `SmartWatch`, `Laptop`).
+  - Extend `GetInventoryRowsAsync` to query and return Tablet, SmartWatch, and Laptop rows when filtered or in "all" view.
+  - Extend `GetDetailsAsync` to return device specifications and transaction history for `"tablet"`, `"smartwatch"`, and `"laptop"`.
+  - Extend `TransactionsDataService.GetSelectableProductsAsync` to include unsold tablets, smart watches, and laptops.
+  - Add unit tests verifying creation, inventory listing, and selectable products querying.
+- **Done when**: Build succeeds with 0 warnings, unit tests pass, CI is green, Job B PASS.
+- **Risk**: LOW · **Confidence**: HIGH
 
-## ~~[x] Step 2 — Searchable product picker UI (Buy + Sell)~~
-- Files: `product-picker.js` (or companion), Buy/Sell cshtml, `OnGetSearchProductsAsync` handlers on both pages, optional partial mirroring `_PersonPicker` structure for products.
-- Keep suggested-price display and price autofill.
-- Done when: both pages can search/select products; CI green; Job B PASS.
-- Risk: MEDIUM · Confidence: MEDIUM
+## [ ] Step 2 — Dedicated Create pages, Details rendering & Products list integration
+- **Files**:
+  - `create`:
+    - `src/MobileShop.Web/Pages/Products/CreateTablet.cshtml` & `.cshtml.cs`
+    - `src/MobileShop.Web/Pages/Products/CreateSmartWatch.cshtml` & `.cshtml.cs`
+    - `src/MobileShop.Web/Pages/Products/CreateLaptop.cshtml` & `.cshtml.cs`
+    - `src/MobileShop.Tests/Web/Pages/Products/CreateDeviceModelTests.cs`
+  - `modify`:
+    - `src/MobileShop.Web/Pages/Products/Index.cshtml`
+    - `src/MobileShop.Web/Pages/Products/Details.cshtml`
+- **Symbols**:
+  - `CreateTabletModel`, `CreateSmartWatchModel`, `CreateLaptopModel`
+  - `IndexModel`, `DetailsModel`
+- **Change**:
+  - Implement the three create pages with cascading manufacturer/model selects, pricing calculator JS, second-hand toggle, and guarantee details.
+  - Update `Index.cshtml` to add type filter buttons ("Tablets", "Smart Watches", "Laptops") and create buttons ("Create tablet", "Create smart watch", "Create laptop").
+  - Update `Details.cshtml` to display laptop specs (CPU, GPU, Screen size) and device notes.
+  - Add Razor Page unit tests covering GET/POST workflows for all three device create pages.
+- **Done when**: Pages render and post correctly, unit tests pass, CI is green, Job B PASS.
+- **Risk**: MEDIUM · **Confidence**: HIGH
 
-## ~~[x] Step 3 — Create-product modal + registry (Phone, Apple ID, Glass)~~
-- Files: shared modal shell + registry; GET form fragment handlers; POST create handlers calling `IProductsDataService`; slim partials or reused field markup for the three types.
-- Ensure antiforgery + independent validation (same lesson as Stage Y: no `Input` ModelState pollution; prefer `Validator.TryValidateObject`).
-- Tests: at least one successful create-via-handler returns selectable product id for phone (and glass EntityId policy explicit).
-- Done when: create-in-modal works for the three types; new product selectable; CI green; Job B PASS.
-- Risk: HIGH · Confidence: MEDIUM
+## [ ] Step 3 — Buy modal integration & Product Create Registry
+- **Files**:
+  - `create`:
+    - `src/MobileShop.Web/Pages/Shared/_ProductCreateTabletForm.cshtml`
+    - `src/MobileShop.Web/Pages/Shared/_ProductCreateSmartWatchForm.cshtml`
+    - `src/MobileShop.Web/Pages/Shared/_ProductCreateLaptopForm.cshtml`
+  - `modify`:
+    - `src/MobileShop.Web/Pages/Shared/ProductCreateRegistry.cs`
+    - `src/MobileShop.Web/Pages/Transactions/Buy.cshtml.cs`
+    - `src/MobileShop.Web/wwwroot/js/product-create-modal.js`
+    - `src/MobileShop.Tests/Web/Pages/Transactions/BuyModelTests.cs`
+- **Symbols**:
+  - `ProductCreateRegistry`
+  - `BuyModel.OnGetCreateProductFormAsync`, `OnPostCreateTabletAsync`, `OnPostCreateSmartWatchAsync`, `OnPostCreateLaptopAsync`
+- **Change**:
+  - Register `"tablet"`, `"smartwatch"`, and `"laptop"` in `ProductCreateRegistry`.
+  - Add modal partial forms for Tablet, Smart Watch, and Laptop.
+  - Implement form loaders and POST create handlers in `Buy.cshtml.cs`, returning `{ productId, type, label, suggestedPrice }`.
+  - Add client-side modal registry entries in `product-create-modal.js`.
+  - Add unit tests in `BuyModelTests.cs` verifying modal creation for each device type.
+- **Done when**: Devices can be created from the Buy modal and auto-selected, CI is green, Job B PASS.
+- **Risk**: MEDIUM · **Confidence**: MEDIUM
 
-## ~~[x] Step 4 — Final Stage Z validation~~
-- Full CI green; scope check; tick Stage Z in `to-do.md`.
-- Risk: LOW · Confidence: HIGH
+## [ ] Step 4 — Final Stage AA validation & sign-off
+- **Files**:
+  - `modify`:
+    - `.clinerules/chat/act.md`
+    - `.clinerules/chat/audit.md`
+    - `.clinerules/chat/plan.md`
+    - `.clinerules/to-do.md` (Reviewer only)
+- **Change**:
+  - Full CI test suite run: zero warnings, zero failed tests, production smoke passes.
+  - Scope verification: confirm no schema, migration, entity, or authentication modifications.
+  - Reviewer signs off Stage AA in `.clinerules/to-do.md`.
+- **Done when**: Full CI run is green, Global Definition of Done is satisfied, Stage AA is checked off.
+- **Risk**: LOW · **Confidence**: HIGH
 
 ## Global Definition of Done
-- [x] Buy/Sell product fields are searchable comboboxes with suggested price intact.
-- [x] Buy can create Phone / Apple ID / Glass via modal + registry; new product selected in-page.
-- [x] No schema change; CI green (Actions #506, #507, #508, #509).
+- Tablets, Smart Watches, and Laptops can be created, viewed in details, and listed on `/Products/Index` with working availability filters.
+- Tablets, Smart Watches, and Laptops can be created directly from the `/Transactions/Buy` modal and are immediately selectable on transaction forms.
+- Suggested price and integer Rial constraints are enforced.
+- Zero schema or migration changes; 100% CI pass rate with 0 build warnings.
+
+## Execution notes
+One step → one commit → green Action → STOP for Job B. Do not edit `to-do.md`, `plan.md`, or `audit.md` during execution. Do not run local `dotnet`.
