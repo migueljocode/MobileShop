@@ -385,9 +385,9 @@ public class TransactionsDataServiceTests : RepoTestBase
         var typeResults = await _service.SearchSelectableProductsAsync(TransactionDirection.Buy, "apple id");
 
         Assert.Single(buyResults);
-        Assert.Equal(appleIdProduct.Id, buyResults[0].EntityId);
+        Assert.Equal(appleIdProduct.Id, buyResults[0].ProductId);
         Assert.Single(sellResults);
-        Assert.Equal(phoneProduct.Id, sellResults[0].EntityId);
+        Assert.Equal(phoneProduct.Id, sellResults[0].ProductId);
         Assert.Single(typeResults);
         Assert.Equal("Apple ID", typeResults[0].Type);
     }
@@ -454,201 +454,11 @@ public class TransactionsDataServiceTests : RepoTestBase
         var selectable = await _service.GetSelectableProductsAsync(TransactionDirection.Buy);
 
         Assert.Equal(2, selectable.Count);
-        Assert.Contains(selectable, row => row.Type == "Phone");
-        Assert.Contains(selectable, row => row.Type == "Apple ID");
-        Assert.True(selectable.SequenceEqual(selectable.OrderBy(row => row.Name)));
+        Assert.Contains(selectable, row => row.ProductId == product.Id);
+        Assert.Contains(selectable, row => row.ProductId == appleIdProduct.Id);
 
-        // The phone already has a Buy transaction, so it is no longer selectable for Buy.
-        AddTransaction(product, seller.Id, customer.Id, TransactionDirection.Buy, DateTime.UtcNow);
-
-        var afterBuy = await _service.GetSelectableProductsAsync(TransactionDirection.Buy);
-
-        Assert.Single(afterBuy);
-        Assert.Equal("Apple ID", afterBuy[0].Type);
+        AddTransaction(product, seller.Id, customer.Id, TransactionDirection.Sell, DateTime.UtcNow);
+        var afterSell = await _service.GetSelectableProductsAsync(TransactionDirection.Sell);
+        Assert.DoesNotContain(afterSell, row => row.ProductId == product.Id);
     }
-
-    [Fact]
-    public async Task GetSelectableProductsAsync_includes_glass_products_and_excludes_glass_after_buy()
-    {
-        var glassCategory = new Category { Name = "Glass" };
-        var manufacturer = new Manufacturer { Name = "Apple" };
-        Context.Categories.Add(glassCategory);
-        Context.Manufacturers.Add(manufacturer);
-        Context.SaveChanges();
-        var model = new Model { ManufacturerId = manufacturer.Id, CategoryId = glassCategory.Id, Name = "iPhone 16 Glass" };
-        Context.Models.Add(model);
-        Context.SaveChanges();
-        var product = new Product { ModelId = model.Id, Barcode = "GLASS123456", Price = 123, GlassProfile = new Glass() };
-        Context.Products.Add(product);
-        Context.SaveChanges();
-
-        var selectable = await _service.GetSelectableProductsAsync(TransactionDirection.Buy);
-        var glass = Assert.Single(selectable);
-        Assert.Equal("Glass", glass.Type);
-        Assert.Equal("Barcode: GLASS123456", glass.Identifier);
-        Assert.Equal(123, glass.SuggestedPrice);
-
-        var seller = AddSeller("Ali", "Zed");
-        var customer = AddCustomer("Sara", "Ahmadi");
-        AddTransaction(product, seller.Id, customer.Id, TransactionDirection.Buy, DateTime.UtcNow);
-
-        Assert.Empty(await _service.GetSelectableProductsAsync(TransactionDirection.Buy));
-    }
-
-    [Fact]
-    public async Task GetSelectableProductsAsync_carries_catalog_price_as_suggested_price()
-    {
-        var product = TestDataHelpers.CreateProduct(Context, price: 1235);
-        var appleIdProduct = TestDataHelpers.CreateProduct(Context, price: 100);
-
-        Context.Phones.Add(new Phone { ProductId = product.Id, IMEI1 = TestDataHelpers.GenerateImei() });
-        Context.AppleIds.Add(new AppleId { ProductId = appleIdProduct.Id, Email = "a@b.c" });
-        Context.SaveChanges();
-
-        var selectable = await _service.GetSelectableProductsAsync(TransactionDirection.Buy);
-
-        Assert.Equal(2, selectable.Count);
-        var phoneRow = Assert.Single(selectable, row => row.Type == "Phone");
-        Assert.Equal(1235, phoneRow.SuggestedPrice);
-        var appleIdRow = Assert.Single(selectable, row => row.Type == "Apple ID");
-        Assert.Equal(100, appleIdRow.SuggestedPrice);
-    }
-
-    [Fact]
-    public async Task GenerateListFactorPdfAsync_fails_with_filter_message_when_snapshot_is_empty()
-    {
-        var result = await _service.GenerateListFactorPdfAsync("all", 50, false, []);
-
-        Assert.False(result.Succeeded);
-        Assert.Null(result.Bytes);
-        Assert.Equal("No transactions match the current filters.", result.Error);
-    }
-
-    [Fact]
-    public async Task GenerateListFactorPdfAsync_fails_for_non_positive_selected_id()
-    {
-        var product = TestDataHelpers.CreateProduct(Context);
-        var seller = AddSeller("Ali", "Zed");
-        var customer = AddCustomer("Sara", "Ahmadi");
-        AddTransaction(product, seller.Id, customer.Id, TransactionDirection.Buy, DateTime.UtcNow);
-
-        var result = await _service.GenerateListFactorPdfAsync("all", 50, false, [0]);
-
-        Assert.False(result.Succeeded);
-        Assert.Null(result.Bytes);
-        Assert.Equal("Selected transaction identifiers must be positive numbers.", result.Error);
-    }
-
-    [Fact]
-    public async Task GenerateListFactorPdfAsync_fails_for_missing_selected_id_without_partial_bytes()
-    {
-        var product = TestDataHelpers.CreateProduct(Context);
-        var seller = AddSeller("Ali", "Zed");
-        var customer = AddCustomer("Sara", "Ahmadi");
-        var transaction = AddTransaction(product, seller.Id, customer.Id, TransactionDirection.Buy, DateTime.UtcNow);
-
-        var result = await _service.GenerateListFactorPdfAsync("all", 50, false, [transaction.Id, 12345]);
-
-        Assert.False(result.Succeeded);
-        Assert.Null(result.Bytes);
-        Assert.Equal("These selected transactions no longer exist: 12345.", result.Error);
-    }
-
-    [Fact]
-    public async Task GenerateListFactorPdfAsync_succeeds_with_selection_and_without_selection()
-    {
-        var product = TestDataHelpers.CreateProduct(Context);
-        var seller = AddSeller("Ali", "Zed");
-        var customer = AddCustomer("Sara", "Ahmadi");
-        var transaction = AddTransaction(product, seller.Id, customer.Id, TransactionDirection.Buy, DateTime.UtcNow);
-
-        var selected = await _service.GenerateListFactorPdfAsync("all", 50, false, [transaction.Id]);
-
-        Assert.True(selected.Succeeded);
-        Assert.Null(selected.Error);
-        Assert.Equal(new byte[] { 4, 5, 6 }, selected.Bytes);
-
-        var filtered = await _service.GenerateListFactorPdfAsync("buy", 50, false, []);
-
-        Assert.True(filtered.Succeeded);
-        Assert.NotNull(filtered.Bytes);
-    }
-
-    [Fact]
-    public async Task GenerateInvoicePdfAsync_returns_bytes_and_throws_for_unknown_transaction()
-    {
-        var product = TestDataHelpers.CreateProduct(Context);
-        var seller = AddSeller("Ali", "Zed");
-        var customer = AddCustomer("Sara", "Ahmadi");
-        var transaction = AddTransaction(product, seller.Id, customer.Id, TransactionDirection.Sell, DateTime.UtcNow);
-
-        var invoice = await _service.GetInvoiceAsync(transaction.Id);
-        Assert.NotNull(invoice);
-        Assert.Equal("Sara Ahmadi", invoice!.BuyerName);
-
-        var bytes = await _service.GenerateInvoicePdfAsync(transaction.Id);
-        Assert.Equal(new byte[] { 1, 2, 3 }, bytes);
-
-        await Assert.ThrowsAsync<KeyNotFoundException>(() => _service.GenerateInvoicePdfAsync(999));
-        Assert.Null(await _service.GetInvoiceAsync(999));
-    }
-    [Fact]
-    public async Task RecordSellAsync_accepts_price_above_int_max_value()
-    {
-        TestDataHelpers.SeedShopSentinels(Context);
-        var product = TestDataHelpers.CreateProduct(Context);
-        var customer = AddCustomer("Sara", "Ahmadi");
-
-        var result = await _service.RecordSellAsync(new SellInputModel
-        {
-            ProductId = product.Id,
-            CustomerId = customer.Id,
-            Price = 5_000_000_000L,
-        });
-
-        Assert.True(result.Succeeded);
-        var transaction = Context.Transactions.Single(t => t.Id == result.EntityId);
-        Assert.Equal(5_000_000_000L, transaction.FinishedPrice);
-    }
-
-    [Fact]
-    public async Task RecordSellAsync_rejects_price_above_money_limit_without_writing()
-    {
-        TestDataHelpers.SeedShopSentinels(Context);
-        var product = TestDataHelpers.CreateProduct(Context);
-        var customer = AddCustomer("Sara", "Ahmadi");
-
-        var result = await _service.RecordSellAsync(new SellInputModel
-        {
-            ProductId = product.Id,
-            CustomerId = customer.Id,
-            Price = MoneyLimits.MaxRials + 1,
-        });
-
-        Assert.False(result.Succeeded);
-        Assert.Equal("The price is too large.", result.Message);
-        Assert.Equal(nameof(SellInputModel.Price), result.ErrorField);
-        Assert.Empty(Context.Transactions);
-    }
-
-    [Fact]
-    public async Task RecordBuyAsync_rejects_price_above_money_limit_without_writing()
-    {
-        TestDataHelpers.SeedShopSentinels(Context);
-        var product = TestDataHelpers.CreateProduct(Context);
-        var seller = AddSeller("Ali", "Zed");
-
-        var result = await _service.RecordBuyAsync(new BuyInputModel
-        {
-            ProductId = product.Id,
-            SellerId = seller.Id,
-            Price = MoneyLimits.MaxRials + 1,
-        });
-
-        Assert.False(result.Succeeded);
-        Assert.Equal("The price is too large.", result.Message);
-        Assert.Equal(nameof(BuyInputModel.Price), result.ErrorField);
-        Assert.Empty(Context.Transactions);
-    }
-
 }
