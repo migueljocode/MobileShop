@@ -1,11 +1,19 @@
-# Audit — Job B: Stage Z Step 1 (repair in flight)
+# Audit — Job B: Stage Z Step 1
 
-**Status:** test fix pushed; **await Action green** before PASS.
+**Verdict: PASS**
 
 **Feature:** `751913b` — `SearchSelectableProductsAsync`  
-**Repair:** `b0128df` — assert `ProductId` (not `EntityId`) in direction/query test  
-**CI:** Action **#496** on the repair commit (in progress at write time)
+**Test fix:** `b0128df` — assert `ProductId` not `EntityId`  
+**CI:** Action **#496 — Success** (repair); **#497 — Success** (follow-up)
+
+| Requirement | Result |
+|-------------|--------|
+| Search respects direction via selectable set | **OK** |
+| Query match Name/Type/Identifier/Color/PartNumber | **OK** |
+| Empty query + take | **OK** |
+| Tests green | **OK** |
+| Web untouched | **OK** |
 
 ## Gate
 
-Reviewer re-checks #496. **Do not start Step 2** until PASS.
+**Step 2 authorized.** Searchable product picker UI on Buy + Sell (suggested price intact).
