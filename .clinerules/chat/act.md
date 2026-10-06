@@ -1,22 +1,21 @@
-# Stage Z — Step 1 Act Summary
+# Stage Z — Step 2 Act Summary
 
 ## Scope
-Implemented selectable-product search in the Transactions data-service layer.
+Implemented the searchable product picker UI for Record Buy and Record Sell.
 
 ## Changes
-- Added the selectable-product search contract to the Transactions data service.
-- DAL search reuses the existing direction-aware selectable-product projection, then matches case-insensitively against name, type, identifier, color, and part number.
-- Empty/null/whitespace queries return the first selectable products up to the requested limit.
-- Added the required API data-service NIE stub.
-- Added DAL tests covering Buy/Sell eligibility, query matching, empty-query behavior, and the take limit.
+- Replaced the transaction product selects with typeable combobox-style controls matching the person picker pattern.
+- Added debounced product search through the new `SearchProducts` page handlers on Buy and Sell, backed by `SearchSelectableProductsAsync` and preserving Buy/Sell eligibility.
+- Preserved suggested-price display and price autofill when a product is selected.
+- Kept the hidden `Input.ProductId` field as the posted transaction product id.
 
 ## Verification
-- Local dotnet build/test was not run because GitHub Actions is the CI gate.
+- GitHub Actions is the CI gate; local dotnet build/test was not run.
 - Implementation commit: pending.
 - Action: pending.
 
 ## Limitations
-- Search filters the existing selectable-product projection in memory; this preserves the established Buy/Sell eligibility rules without introducing a second product-query path.
+- None.
 
 ## Friction noted
 - None.

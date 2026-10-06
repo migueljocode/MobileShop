@@ -31,6 +31,9 @@ public class SellModel(
         return Page();
     }
 
+    public async Task<IActionResult> OnGetSearchProductsAsync(string? q) =>
+        new JsonResult(await dataService.SearchSelectableProductsAsync(TransactionDirection.Sell, q));
+
     public async Task<IActionResult> OnGetSearchCustomersAsync(string? q) =>
         new JsonResult(await peopleDataService.SearchCustomersAsync(q));
 

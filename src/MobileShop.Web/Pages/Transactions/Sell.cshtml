@@ -7,7 +7,13 @@
 <a asp-page="/Transactions/Index" class="btn btn-secondary mb-3">Back</a>
 <form method="post" class="col-md-6">
     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-    <label asp-for="Input.ProductId" class="form-label">Product</label><select asp-for="Input.ProductId" class="form-select" data-product-picker><option value="0">Select product</option><partial name="/Pages/Shared/_ProductPickerOptions.cshtml" model="new ProductPickerViewModel(Model.Products, Model.Input.ProductId)" /></select><span asp-validation-for="Input.ProductId" class="text-danger"></span>
+    <div data-product-picker data-search-handler="SearchProducts">
+        <label for="sell-product-search" class="form-label">Product</label>
+        <input type="hidden" name="Input.ProductId" id="Input_ProductId" value="@Model.Input.ProductId" data-product-value />
+        <input id="sell-product-search" type="text" class="form-control" autocomplete="off" role="combobox" aria-autocomplete="list" aria-controls="product-results" aria-expanded="false" placeholder="Search by name, identifier, type, color or part number" data-product-search />
+        <partial name="/Pages/Shared/_ProductPickerOptions.cshtml" model="new ProductPickerViewModel(Model.Products, Model.Input.ProductId)" />
+    </div>
+    <span asp-validation-for="Input.ProductId" class="text-danger"></span>
     @{
         ViewData["PersonPickerRole"] = "customer";
     }
