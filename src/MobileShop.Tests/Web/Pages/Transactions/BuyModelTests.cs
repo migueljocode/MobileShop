@@ -59,13 +59,15 @@ public class BuyModelTests : RepoTestBase
     public async Task CreateTabletHandler_CreatesAndReturnsSelectableProduct()
     {
         var (manufacturer, model) = await SeedDeviceAsync("Tablet");
+        var created = new ProductListItemViewModel(1, 1, "Tablet", "Acme Tablet X", "Barcode: 123", null, false, false) { SuggestedPrice = 100 };
         _transactions.Setup(service => service.SearchSelectableProductsAsync(TransactionDirection.Buy, null, 500))
-            .ReturnsAsync(() => Context.Products.Where(p => p.TabletProfile != null).Select(p => new ProductListItemViewModel(p.Id, p.Id, "Tablet", "Acme Tablet X", "Barcode: " + p.Barcode, null, false, false) { SuggestedPrice = 100 }).ToList());
+            .ReturnsAsync([created]);
+
         var result = await _model.OnPostCreateTabletAsync(new CreateTabletInputModel { ManufacturerId = manufacturer.Id, ModelId = model.Id, Price = 100 });
         var json = Assert.IsType<JsonResult>(result);
         using var document = System.Text.Json.JsonDocument.Parse(System.Text.Json.JsonSerializer.Serialize(json.Value));
         Assert.Equal("tablet", document.RootElement.GetProperty("type").GetString());
-        Assert.NotEqual(0, document.RootElement.GetProperty("productId").GetInt32());
+        Assert.Equal(1, document.RootElement.GetProperty("productId").GetInt32());
         Assert.NotNull(Context.Products.Single().TabletProfile);
     }
 
@@ -73,12 +75,15 @@ public class BuyModelTests : RepoTestBase
     public async Task CreateSmartWatchHandler_CreatesAndReturnsSelectableProduct()
     {
         var (manufacturer, model) = await SeedDeviceAsync("SmartWatch");
+        var created = new ProductListItemViewModel(1, 1, "Smart Watch", "Acme SmartWatch X", "Barcode: 123", null, false, false) { SuggestedPrice = 100 };
         _transactions.Setup(service => service.SearchSelectableProductsAsync(TransactionDirection.Buy, null, 500))
-            .ReturnsAsync(() => Context.Products.Where(p => p.SmartWatchProfile != null).Select(p => new ProductListItemViewModel(p.Id, p.Id, "Smart Watch", "Acme SmartWatch X", "Barcode: " + p.Barcode, null, false, false) { SuggestedPrice = 100 }).ToList());
+            .ReturnsAsync([created]);
+
         var result = await _model.OnPostCreateSmartWatchAsync(new CreateSmartWatchInputModel { ManufacturerId = manufacturer.Id, ModelId = model.Id, Price = 100 });
         var json = Assert.IsType<JsonResult>(result);
         using var document = System.Text.Json.JsonDocument.Parse(System.Text.Json.JsonSerializer.Serialize(json.Value));
         Assert.Equal("smartwatch", document.RootElement.GetProperty("type").GetString());
+        Assert.Equal(1, document.RootElement.GetProperty("productId").GetInt32());
         Assert.NotNull(Context.Products.Single().SmartWatchProfile);
     }
 
@@ -86,12 +91,15 @@ public class BuyModelTests : RepoTestBase
     public async Task CreateLaptopHandler_CreatesAndReturnsSelectableProduct()
     {
         var (manufacturer, model) = await SeedDeviceAsync("Laptop");
+        var created = new ProductListItemViewModel(1, 1, "Laptop", "Acme Laptop X", "Barcode: 123", null, false, false) { SuggestedPrice = 100 };
         _transactions.Setup(service => service.SearchSelectableProductsAsync(TransactionDirection.Buy, null, 500))
-            .ReturnsAsync(() => Context.Products.Where(p => p.LaptopProfile != null).Select(p => new ProductListItemViewModel(p.Id, p.Id, "Laptop", "Acme Laptop X", "Barcode: " + p.Barcode, null, false, false) { SuggestedPrice = 100 }).ToList());
+            .ReturnsAsync([created]);
+
         var result = await _model.OnPostCreateLaptopAsync(new CreateLaptopInputModel { ManufacturerId = manufacturer.Id, ModelId = model.Id, Price = 100, Cpu = "CPU", Gpu = "GPU", DisplaySize = 15.6m });
         var json = Assert.IsType<JsonResult>(result);
         using var document = System.Text.Json.JsonDocument.Parse(System.Text.Json.JsonSerializer.Serialize(json.Value));
         Assert.Equal("laptop", document.RootElement.GetProperty("type").GetString());
+        Assert.Equal(1, document.RootElement.GetProperty("productId").GetInt32());
         Assert.NotNull(Context.Products.Single().LaptopProfile);
         Assert.Equal("CPU", Context.Products.Single().LaptopProfile!.Cpu);
     }
