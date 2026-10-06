@@ -12,11 +12,16 @@ document.addEventListener('DOMContentLoaded', function () {
         glass: { formHandler: 'CreateProductForm', postHandler: 'CreateGlass' },
         tablet: { formHandler: 'CreateProductForm', postHandler: 'CreateTablet', modelsHandler: 'CreateTabletModels' },
         smartwatch: { formHandler: 'CreateProductForm', postHandler: 'CreateSmartWatch', modelsHandler: 'CreateSmartWatchModels' },
-        laptop: { formHandler: 'CreateProductForm', postHandler: 'CreateLaptop', modelsHandler: 'CreateLaptopModels' }
+        laptop: { formHandler: 'CreateProductForm', postHandler: 'CreateLaptop', modelsHandler: 'CreateLaptopModels' },
+        cable: { formHandler: 'CreateProductForm', postHandler: 'CreateCable', modelsHandler: 'CreateAccessoryModels', category: 'Cable' },
+        charger: { formHandler: 'CreateProductForm', postHandler: 'CreateCharger', modelsHandler: 'CreateAccessoryModels', category: 'Charger' },
+        powerbank: { formHandler: 'CreateProductForm', postHandler: 'CreatePowerBank', modelsHandler: 'CreateAccessoryModels', category: 'PowerBank' },
+        portablestorage: { formHandler: 'CreateProductForm', postHandler: 'CreatePortableStorage', modelsHandler: 'CreateAccessoryModels', category: 'PortableStorage' },
+        case: { formHandler: 'CreateProductForm', postHandler: 'CreateCase', modelsHandler: 'CreateCaseModels' }
     });
     Object.keys(registry).forEach(function (key) {
         if (!typeSelect.querySelector('option[value="' + key + '"]')) {
-            var option = new Option(key === 'smartwatch' ? 'Smart Watch' : key === 'appleid' ? 'Apple ID' : key.charAt(0).toUpperCase() + key.slice(1), key);
+            var option = new Option(key === 'smartwatch' ? 'Smart Watch' : key === 'appleid' ? 'Apple ID' : key === 'powerbank' ? 'Power Bank' : key === 'portablestorage' ? 'Portable Storage' : key.charAt(0).toUpperCase() + key.slice(1), key);
             typeSelect.appendChild(option);
         }
     });
@@ -69,6 +74,41 @@ document.addEventListener('DOMContentLoaded', function () {
                     var response = await fetch(modelUrl, { headers: { Accept: 'application/json' } });
                     if (!response.ok) return;
                     for (var item of await response.json()) deviceModel.appendChild(new Option(item.name, item.id));
+                });
+            }
+        }
+
+        if (registry[type].modelsHandler && (type === 'cable' || type === 'charger' || type === 'powerbank' || type === 'portablestorage')) {
+            var accessoryManufacturer = root.querySelector('[data-accessory-manufacturer]');
+            var accessoryModel = root.querySelector('[data-accessory-model]');
+            if (accessoryManufacturer && accessoryModel) {
+                accessoryManufacturer.addEventListener('change', async function () {
+                    accessoryModel.replaceChildren(new Option('-- Select model --', ''));
+                    if (!accessoryManufacturer.value) return;
+                    var modelUrl = new URL(window.location.href);
+                    modelUrl.searchParams.set('handler', registry[type].modelsHandler);
+                    modelUrl.searchParams.set('manufacturerId', accessoryManufacturer.value);
+                    modelUrl.searchParams.set('category', registry[type].category);
+                    var response = await fetch(modelUrl, { headers: { Accept: 'application/json' } });
+                    if (!response.ok) return;
+                    for (var item of await response.json()) accessoryModel.appendChild(new Option(item.name, item.id));
+                });
+            }
+        }
+
+        if (type === 'case') {
+            var compatibleManufacturer = root.querySelector('[data-case-compatible-manufacturer]');
+            var compatibleModels = root.querySelector('[data-case-compatible-models]');
+            if (compatibleManufacturer && compatibleModels) {
+                compatibleManufacturer.addEventListener('change', async function () {
+                    compatibleModels.replaceChildren();
+                    if (!compatibleManufacturer.value) return;
+                    var modelUrl = new URL(window.location.href);
+                    modelUrl.searchParams.set('handler', registry[type].modelsHandler);
+                    modelUrl.searchParams.set('manufacturerId', compatibleManufacturer.value);
+                    var response = await fetch(modelUrl, { headers: { Accept: 'application/json' } });
+                    if (!response.ok) return;
+                    for (var item of await response.json()) compatibleModels.appendChild(new Option(item.name, item.id));
                 });
             }
         }

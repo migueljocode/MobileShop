@@ -40,6 +40,16 @@ public class BuyModelTests : RepoTestBase
         Assert.Equal("CreateSmartWatch", watch.PostHandler);
         Assert.True(MobileShop.Web.Pages.Shared.ProductCreateRegistry.TryGet("laptop", out var laptop));
         Assert.Equal("laptop", laptop.Key);
+        Assert.True(MobileShop.Web.Pages.Shared.ProductCreateRegistry.TryGet("cable", out var cable));
+        Assert.Equal("CreateCable", cable.PostHandler);
+        Assert.True(MobileShop.Web.Pages.Shared.ProductCreateRegistry.TryGet("charger", out var charger));
+        Assert.Equal("CreateCharger", charger.PostHandler);
+        Assert.True(MobileShop.Web.Pages.Shared.ProductCreateRegistry.TryGet("powerbank", out var powerBank));
+        Assert.Equal("CreatePowerBank", powerBank.PostHandler);
+        Assert.True(MobileShop.Web.Pages.Shared.ProductCreateRegistry.TryGet("portablestorage", out var storage));
+        Assert.Equal("CreatePortableStorage", storage.PostHandler);
+        Assert.True(MobileShop.Web.Pages.Shared.ProductCreateRegistry.TryGet("case", out var caseDefinition));
+        Assert.Equal("_ProductCreateCaseForm", caseDefinition.PartialName);
     }
 
     private async Task<(Manufacturer Manufacturer, Model Model)> SeedDeviceAsync(string categoryName)
@@ -102,6 +112,88 @@ public class BuyModelTests : RepoTestBase
         Assert.Equal(1, document.RootElement.GetProperty("productId").GetInt32());
         Assert.NotNull(Context.Products.Single().LaptopProfile);
         Assert.Equal("CPU", Context.Products.Single().LaptopProfile!.Cpu);
+    }
+
+    [Fact]
+    public async Task CreateCableHandler_CreatesAndReturnsSelectableProduct()
+    {
+        var (manufacturer, model) = await SeedDeviceAsync("Cable");
+        _transactions.Setup(service => service.SearchSelectableProductsAsync(TransactionDirection.Buy, null, 500))
+            .ReturnsAsync([new ProductListItemViewModel(1, 1, "Cable", "Acme Cable X", "Barcode: 123", null, false, false) { SuggestedPrice = 100 }]);
+        var result = await _model.OnPostCreateCableAsync(new CreateCableInputModel { ManufacturerId = manufacturer.Id, ModelId = model.Id, Connector1 = CableConnector.UsbC, Connector2 = CableConnector.Hdmi, Length = 1.5m, Price = 100, Count = 2 });
+        var json = Assert.IsType<JsonResult>(result);
+        using var document = System.Text.Json.JsonDocument.Parse(System.Text.Json.JsonSerializer.Serialize(json.Value));
+        Assert.Equal("cable", document.RootElement.GetProperty("type").GetString());
+        Assert.Equal(2, Context.Products.Count());
+        Assert.NotNull(Context.Products.First().CableProfile);
+    }
+
+    [Fact]
+    public async Task CreateChargerHandler_CreatesAndReturnsSelectableProduct()
+    {
+        var (manufacturer, model) = await SeedDeviceAsync("Charger");
+        _transactions.Setup(service => service.SearchSelectableProductsAsync(TransactionDirection.Buy, null, 500))
+            .ReturnsAsync([new ProductListItemViewModel(1, 1, "Charger", "Acme Charger X", "Barcode: 123", null, false, false) { SuggestedPrice = 100 }]);
+        var result = await _model.OnPostCreateChargerAsync(new CreateChargerInputModel { ManufacturerId = manufacturer.Id, ModelId = model.Id, Wattage = 65, PortCount = 2, Pd = true, Price = 100, Count = 2 });
+        var json = Assert.IsType<JsonResult>(result);
+        using var document = System.Text.Json.JsonDocument.Parse(System.Text.Json.JsonSerializer.Serialize(json.Value));
+        Assert.Equal("charger", document.RootElement.GetProperty("type").GetString());
+        Assert.Equal(2, Context.Products.Count());
+        Assert.True(Context.Products.First().ChargerProfile!.Pd);
+    }
+
+    [Fact]
+    public async Task CreatePowerBankHandler_CreatesAndReturnsSelectableProduct()
+    {
+        var (manufacturer, model) = await SeedDeviceAsync("PowerBank");
+        _transactions.Setup(service => service.SearchSelectableProductsAsync(TransactionDirection.Buy, null, 500))
+            .ReturnsAsync([new ProductListItemViewModel(1, 1, "Power Bank", "Acme PowerBank X", "Barcode: 123", null, false, false) { SuggestedPrice = 100 }]);
+        var result = await _model.OnPostCreatePowerBankAsync(new CreatePowerBankInputModel { ManufacturerId = manufacturer.Id, ModelId = model.Id, CapacityMah = 20000, MaxWattage = 30, PortCount = 2, Pd = true, Price = 100, Count = 2 });
+        var json = Assert.IsType<JsonResult>(result);
+        using var document = System.Text.Json.JsonDocument.Parse(System.Text.Json.JsonSerializer.Serialize(json.Value));
+        Assert.Equal("powerbank", document.RootElement.GetProperty("type").GetString());
+        Assert.Equal(2, Context.Products.Count());
+        Assert.Equal(20000, Context.Products.First().PowerBankProfile!.CapacityMah);
+    }
+
+    [Fact]
+    public async Task CreatePortableStorageHandler_CreatesAndReturnsSelectableProduct()
+    {
+        var (manufacturer, model) = await SeedDeviceAsync("PortableStorage");
+        var capacity = new StorageCapacity { Gb = 128 };
+        Context.StorageCapacities.Add(capacity);
+        await Context.SaveChangesAsync();
+        _transactions.Setup(service => service.SearchSelectableProductsAsync(TransactionDirection.Buy, null, 500))
+            .ReturnsAsync([new ProductListItemViewModel(1, 1, "Portable Storage", "Acme PortableStorage X", "Barcode: 123", null, false, false) { SuggestedPrice = 100 }]);
+        var result = await _model.OnPostCreatePortableStorageAsync(new CreatePortableStorageInputModel { ManufacturerId = manufacturer.Id, ModelId = model.Id, StorageKind = StorageKind.Ssd, StorageCapacityId = capacity.Id, Speed = 1000, Price = 100, Count = 2 });
+        var json = Assert.IsType<JsonResult>(result);
+        using var document = System.Text.Json.JsonDocument.Parse(System.Text.Json.JsonSerializer.Serialize(json.Value));
+        Assert.Equal("portablestorage", document.RootElement.GetProperty("type").GetString());
+        Assert.Equal(2, Context.Products.Count());
+        Assert.Equal(128, Context.Products.First().PortableStorageProfile!.StorageCapacityNavigation.Gb);
+    }
+
+    [Fact]
+    public async Task CreateCaseHandler_CreatesAndReturnsSelectableProduct()
+    {
+        var caseManufacturer = new Manufacturer { Name = "CaseCo" };
+        var phoneManufacturer = new Manufacturer { Name = "PhoneCo" };
+        var phoneCategory = new Category { Name = "Phone" };
+        var caseCategory = new Category { Name = "Case" };
+        Context.Manufacturers.AddRange(caseManufacturer, phoneManufacturer);
+        Context.Categories.AddRange(phoneCategory, caseCategory);
+        await Context.SaveChangesAsync();
+        var phoneModel = new Model { ManufacturerId = phoneManufacturer.Id, CategoryId = phoneCategory.Id, Name = "Phone X" };
+        Context.Models.Add(phoneModel);
+        await Context.SaveChangesAsync();
+        _transactions.Setup(service => service.SearchSelectableProductsAsync(TransactionDirection.Buy, null, 500))
+            .ReturnsAsync([new ProductListItemViewModel(1, 1, "Case", "Phone X Case", "Barcode: 123", null, false, false) { SuggestedPrice = 100 }]);
+        var result = await _model.OnPostCreateCaseAsync(new CreateCaseInputModel { ManufacturerId = caseManufacturer.Id, CompatibleManufacturerId = phoneManufacturer.Id, CompatibleModelIds = [phoneModel.Id], Price = 100, Count = 2 });
+        var json = Assert.IsType<JsonResult>(result);
+        using var document = System.Text.Json.JsonDocument.Parse(System.Text.Json.JsonSerializer.Serialize(json.Value));
+        Assert.Equal("case", document.RootElement.GetProperty("type").GetString());
+        Assert.Equal(2, Context.Products.Count());
+        Assert.NotEmpty(Context.CaseModelFits);
     }
 
     [Fact]

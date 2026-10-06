@@ -69,6 +69,18 @@ public class BuyModel(
                 return await CreateDeviceFormAsync(definition, "SmartWatch", new CreateSmartWatchInputModel());
             case "laptop":
                 return await CreateDeviceFormAsync(definition, "Laptop", new CreateLaptopInputModel());
+            case "cable":
+                return await CreateAccessoryFormAsync(definition, "Cable", new CreateCableInputModel());
+            case "charger":
+                return await CreateAccessoryFormAsync(definition, "Charger", new CreateChargerInputModel());
+            case "powerbank":
+                return await CreateAccessoryFormAsync(definition, "PowerBank", new CreatePowerBankInputModel());
+            case "portablestorage":
+                return await CreateAccessoryFormAsync(definition, "PortableStorage", new CreatePortableStorageInputModel());
+            case "case":
+                ViewData["Manufacturers"] = await productsDataService.GetManufacturersAsync();
+                ViewData["CompatibleModels"] = Array.Empty<DropdownOptionViewModel>();
+                return Partial(definition.PartialName, new CreateCaseInputModel());
 
             default:
                 return new BadRequestResult();
@@ -90,6 +102,25 @@ public class BuyModel(
             return new JsonResult(Array.Empty<object>());
 
         var options = await productsDataService.GetModelsAsync(manufacturerId);
+        return new JsonResult(options.Select(option => new { id = option.Id, name = option.Name }));
+    }
+
+    public async Task<IActionResult> OnGetCreateAccessoryModelsAsync(int manufacturerId, string? category)
+    {
+        if (manufacturerId <= 0 || string.IsNullOrWhiteSpace(category))
+            return new JsonResult(Array.Empty<object>());
+        var allowed = category.Trim();
+        if (allowed is not ("Cable" or "Charger" or "PowerBank" or "PortableStorage"))
+            return new JsonResult(Array.Empty<object>());
+        var options = await productsDataService.GetModelsAsync(manufacturerId, allowed);
+        return new JsonResult(options.Select(option => new { id = option.Id, name = option.Name }));
+    }
+
+    public async Task<IActionResult> OnGetCreateCaseModelsAsync(int manufacturerId)
+    {
+        if (manufacturerId <= 0)
+            return new JsonResult(Array.Empty<object>());
+        var options = await productsDataService.GetModelsAsync(manufacturerId, "Phone");
         return new JsonResult(options.Select(option => new { id = option.Id, name = option.Name }));
     }
 
@@ -157,6 +188,41 @@ public class BuyModel(
         return await FinishProductCreateAsync(result, "laptop");
     }
 
+    public async Task<IActionResult> OnPostCreateCableAsync(CreateCableInputModel input)
+    {
+        ModelState.Clear();
+        if (!TryValidate(input)) return CreateErrorResult("Please correct the cable details.");
+        return await FinishProductCreateAsync(await productsDataService.CreateCablesAsync(input), "cable");
+    }
+
+    public async Task<IActionResult> OnPostCreateChargerAsync(CreateChargerInputModel input)
+    {
+        ModelState.Clear();
+        if (!TryValidate(input)) return CreateErrorResult("Please correct the charger details.");
+        return await FinishProductCreateAsync(await productsDataService.CreateChargersAsync(input), "charger");
+    }
+
+    public async Task<IActionResult> OnPostCreatePowerBankAsync(CreatePowerBankInputModel input)
+    {
+        ModelState.Clear();
+        if (!TryValidate(input)) return CreateErrorResult("Please correct the power bank details.");
+        return await FinishProductCreateAsync(await productsDataService.CreatePowerBanksAsync(input), "powerbank");
+    }
+
+    public async Task<IActionResult> OnPostCreatePortableStorageAsync(CreatePortableStorageInputModel input)
+    {
+        ModelState.Clear();
+        if (!TryValidate(input)) return CreateErrorResult("Please correct the portable storage details.");
+        return await FinishProductCreateAsync(await productsDataService.CreatePortableStoragesAsync(input), "portablestorage");
+    }
+
+    public async Task<IActionResult> OnPostCreateCaseAsync(CreateCaseInputModel input)
+    {
+        ModelState.Clear();
+        if (!TryValidate(input)) return CreateErrorResult("Please correct the case details.");
+        return await FinishProductCreateAsync(await productsDataService.CreateCasesAsync(input), "case");
+    }
+
     public async Task<IActionResult> OnPostCreateSellerAsync(CreateSellerInputModel input)
     {
         ModelState.Clear();
@@ -201,6 +267,14 @@ public class BuyModel(
         ViewData["Manufacturers"] = await productsDataService.GetManufacturersAsync();
         ViewData["Models"] = Array.Empty<DropdownOptionViewModel>();
         ViewData["Corporations"] = await productsDataService.GetGuaranteeCorporationsAsync();
+        ViewData["Category"] = category;
+        return Partial(definition.PartialName, input);
+    }
+
+    private async Task<IActionResult> CreateAccessoryFormAsync<T>(ProductCreateDefinition definition, string category, T input)
+    {
+        ViewData["Manufacturers"] = await productsDataService.GetManufacturersAsync();
+        ViewData["Models"] = Array.Empty<DropdownOptionViewModel>();
         ViewData["Category"] = category;
         return Partial(definition.PartialName, input);
     }
