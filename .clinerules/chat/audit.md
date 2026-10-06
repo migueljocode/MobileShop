@@ -1,19 +1,21 @@
-# Audit — Job B: Stage Z Step 1
+# Audit — Job B: Stage Z Step 2
 
 **Verdict: PASS**
 
-**Feature:** `751913b` — `SearchSelectableProductsAsync`  
-**Test fix:** `b0128df` — assert `ProductId` not `EntityId`  
-**CI:** Action **#496 — Success** (repair); **#497 — Success** (follow-up)
+**Commit:** `a323d62` — searchable product picker UI  
+**CI:** Action **#499 — Success**
 
 | Requirement | Result |
 |-------------|--------|
-| Search respects direction via selectable set | **OK** |
-| Query match Name/Type/Identifier/Color/PartNumber | **OK** |
-| Empty query + take | **OK** |
-| Tests green | **OK** |
-| Web untouched | **OK** |
+| Combobox-style product search on Buy + Sell | **OK** |
+| Handlers use `SearchSelectableProductsAsync` + direction | **OK** |
+| Hidden `Input.ProductId` + `productId` mapping | **OK** |
+| Suggested price display + autofill | **OK** |
+| No create-product modal yet (Step 3) | **OK** |
+
+## Soft notes
+- Initial server-rendered options remain as progressive enhancement.
 
 ## Gate
 
-**Step 2 authorized.** Searchable product picker UI on Buy + Sell (suggested price intact).
+**Step 3 authorized.** Create-product modal + registry (Phone, Apple ID, Glass) on Buy.
