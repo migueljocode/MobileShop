@@ -22,9 +22,6 @@ public class ProductsDataServiceTests : RepoTestBase
         _service = new ProductsDataService(
             new BaseRepo<Phone>(Context),
             new BaseRepo<AppleId>(Context),
-            new BaseRepo<Tablet>(Context),
-            new BaseRepo<SmartWatch>(Context),
-            new BaseRepo<Laptop>(Context),
             new BaseRepo<Manufacturer>(Context),
             new BaseRepo<Model>(Context),
             new BaseRepo<Category>(Context),

@@ -12,9 +12,6 @@ namespace MobileShop.Services.DataServices.Dal;
 public class ProductsDataService(
     IBaseRepo<Phone> phones,
     IBaseRepo<AppleId> appleIds,
-    IBaseRepo<Tablet> tablets,
-    IBaseRepo<SmartWatch> smartWatches,
-    IBaseRepo<Laptop> laptops,
     IBaseRepo<Manufacturer> manufacturers,
     IBaseRepo<Model> models,
     IBaseRepo<Category> categories,
