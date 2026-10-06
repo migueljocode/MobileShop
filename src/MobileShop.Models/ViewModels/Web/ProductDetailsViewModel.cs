@@ -39,4 +39,16 @@ public sealed record ProductDetailsViewModel(
     public string? Gpu { get; init; }
     public decimal? DisplaySize { get; init; }
     public string? Notes { get; init; }
+    public CableConnector? Connector1 { get; init; }
+    public CableConnector? Connector2 { get; init; }
+    public decimal? CableLength { get; init; }
+    public int? Wattage { get; init; }
+    public bool? Pd { get; init; }
+    public int? PortCount { get; init; }
+    public int? CapacityMah { get; init; }
+    public int? MaxWattage { get; init; }
+    public StorageKind? StorageKind { get; init; }
+    public string? StorageCapacityLabel { get; init; }
+    public int? Speed { get; init; }
+    public IReadOnlyList<string> CompatibleModels { get; init; } = [];
 }
