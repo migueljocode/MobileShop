@@ -174,11 +174,4 @@ Whenever an Actor task triggers a workflow:
 
 **Actor:** `act.md`, implementation files, implementation commit
 
-## 10. Current repository context
-
-Stage O is the active unchecked stage in `to-do.md`.
-Current `plan.md` is Stage O.
-Current audit is Job B for Stage O Step 3 after this update.
-Stage O Step 4 is the remaining validation gate.
-
 When the user explicitly authorizes repository documentation updates, update the reviewer/planner-owned docs as required; do not treat that authorization as permission to modify production implementation files.
