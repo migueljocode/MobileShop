@@ -26,7 +26,7 @@
 ## Reviewer Briefing
 - **Step 1 LOW/HIGH:** Bind models, `ProductDetailsViewModel` extension, service contracts, DAL implementations, and DAL unit tests (completed).
 - **Step 2 MEDIUM/HIGH:** Razor create pages (`CreateTablet`, `CreateSmartWatch`, `CreateLaptop`), Details page enhancements, and Products Index filter buttons (completed).
-- **Step 3 MEDIUM/MEDIUM:** Modal registry entries (`ProductCreateRegistry`), partial form views, and `Buy.cshtml.cs` POST handlers.
+- **Step 3 MEDIUM/MEDIUM:** Modal registry entries (`ProductCreateRegistry`), partial form views, and `Buy.cshtml.cs` POST handlers (completed).
 - **Step 4 LOW/HIGH:** Final Stage AA verification: full test suite, 0 warnings, clean diff stat check.
 
 ## ~~[x] Step 1 — Input models, service contracts, DAL implementations & tests~~
@@ -39,28 +39,10 @@
 - Completed: CI Action #523 — Success.
 - Risk: MEDIUM · Confidence: HIGH
 
-## [ ] Step 3 — Buy modal integration & Product Create Registry
-- **Files**:
-  - `create`:
-    - `src/MobileShop.Web/Pages/Shared/_ProductCreateTabletForm.cshtml`
-    - `src/MobileShop.Web/Pages/Shared/_ProductCreateSmartWatchForm.cshtml`
-    - `src/MobileShop.Web/Pages/Shared/_ProductCreateLaptopForm.cshtml`
-  - `modify`:
-    - `src/MobileShop.Web/Pages/Shared/ProductCreateRegistry.cs`
-    - `src/MobileShop.Web/Pages/Transactions/Buy.cshtml.cs`
-    - `src/MobileShop.Web/wwwroot/js/product-create-modal.js`
-    - `src/MobileShop.Tests/Web/Pages/Transactions/BuyModelTests.cs`
-- **Symbols**:
-  - `ProductCreateRegistry`
-  - `BuyModel.OnGetCreateProductFormAsync`, `OnPostCreateTabletAsync`, `OnPostCreateSmartWatchAsync`, `OnPostCreateLaptopAsync`
-- **Change**:
-  - Register `"tablet"`, `"smartwatch"`, and `"laptop"` in `ProductCreateRegistry`.
-  - Add modal partial forms for Tablet, Smart Watch, and Laptop.
-  - Implement form loaders and POST create handlers in `Buy.cshtml.cs`, returning `{ productId, type, label, suggestedPrice }`.
-  - Add client-side modal registry entries in `product-create-modal.js`.
-  - Add unit tests in `BuyModelTests.cs` verifying modal creation for each device type.
-- **Done when**: Devices can be created from the Buy modal and auto-selected, CI is green, Job B PASS.
-- **Risk**: MEDIUM · **Confidence**: MEDIUM
+## ~~[x] Step 3 — Buy modal integration & Product Create Registry~~
+- Files: modal partials created, `ProductCreateRegistry.cs`, `Buy.cshtml.cs`, `product-create-modal.js` updated, `BuyModelTests.cs` extended.
+- Completed: CI Action #529 — Success.
+- Risk: MEDIUM · Confidence: MEDIUM
 
 ## [ ] Step 4 — Final Stage AA validation & sign-off
 - **Files**:
