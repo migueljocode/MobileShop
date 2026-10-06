@@ -12,7 +12,7 @@ public class PersonCreateHandlerTests
         {
             CreateSellerResult = new ServiceResult(true, null, EntityId: 42)
         };
-        var model = new BuyModel(null!, people);
+        var model = new BuyModel(null!, people, null!);
         model.ModelState.AddModelError("Input.ProductId", "The product is required.");
 
         var result = await model.OnPostCreateSellerAsync(new CreateSellerInputModel
