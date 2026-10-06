@@ -83,4 +83,9 @@ public interface IProductsDataService
     Task<ServiceResult> CreateTabletAsync(CreateTabletInputModel input);
     Task<ServiceResult> CreateSmartWatchAsync(CreateSmartWatchInputModel input);
     Task<ServiceResult> CreateLaptopAsync(CreateLaptopInputModel input);
+    Task<ServiceResult> CreateCablesAsync(CreateCableInputModel input);
+    Task<ServiceResult> CreateChargersAsync(CreateChargerInputModel input);
+    Task<ServiceResult> CreatePowerBanksAsync(CreatePowerBankInputModel input);
+    Task<ServiceResult> CreatePortableStoragesAsync(CreatePortableStorageInputModel input);
+    Task<ServiceResult> CreateCasesAsync(CreateCaseInputModel input);
 }
