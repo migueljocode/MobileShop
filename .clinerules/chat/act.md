@@ -1,19 +1,18 @@
-# Stage Z — Step 3 Act Summary
+# Stage Z — Step 4 Act Summary
 
 ## Scope
-Repaired the seller error-response regression identified by Reviewer Job B.
+Final validation and scope check for Stage Z (Searchable product picker + create-product modal).
 
-## Changes
-- Restored the seller modal's `DropdownCreateResult` error contract through a dedicated `CreateSellerErrorResult`.
-- Kept `CreateErrorResult` returning `{ error = message }` for the new product-create modal.
+## Work completed
+- Verified clean scope across Stage Z: 21 files modified/added (Transactions search service, product picker JS/CSS/markup, create-product registry and modals for Phone, Apple ID, and Glass, and unit tests).
+- Confirmed zero schema, entity model, migration, or authentication changes.
+- All 4 planned steps are complete and verified.
 
 ## Verification
-- GitHub Actions is the CI gate; local dotnet build/test was not run.
-- Repair commit: c13d4153454443c2e63ce8bd2b20e2b47acb9030
-- Action: pending.
-
-## Problems
-- Action #504/#505 failed because seller creation errors no longer returned `DropdownCreateResult`.
+- CI Action #506 — Success (repair commit `c13d415`)
+- CI Action #507 — Success (`badf255`)
+- CI Action #508 — Success (`a398379`)
+- CI Action #509 — Success (`6cd0cca`)
 
 ## Status
-STOPPED — awaiting GitHub Action result.
+Step 4 complete. Stage Z ready for sign-off.
