@@ -28,7 +28,7 @@
 - **Step 1 LOW/HIGH:** search API + tests against selectable rules (completed).
 - **Step 2 MEDIUM/MEDIUM:** searchable product UI; must not break suggested price (completed).
 - **Step 3 HIGH/MEDIUM:** modal + registry + three create paths (completed).
-- **Step 4 LOW/HIGH:** final Stage Z validation and sign-off.
+- **Step 4 LOW/HIGH:** final Stage Z validation and sign-off (completed).
 
 ## ~~[x] Step 1 — Search selectable products (service)~~
 - Files: `ITransactionsDataService`, Dal `TransactionsDataService`, Api stub if present; tests for direction filter + query match + take/empty.
@@ -49,14 +49,11 @@
 - Done when: create-in-modal works for the three types; new product selectable; CI green; Job B PASS.
 - Risk: HIGH · Confidence: MEDIUM
 
-## [ ] Step 4 — Final Stage Z validation
+## ~~[x] Step 4 — Final Stage Z validation~~
 - Full CI green; scope check; tick Stage Z in `to-do.md`.
 - Risk: LOW · Confidence: HIGH
 
 ## Global Definition of Done
-- Buy/Sell product fields are searchable comboboxes with suggested price intact.
-- Buy can create Phone / Apple ID / Glass via modal + registry; new product selected in-page.
-- No schema change; CI green.
-
-## Execution notes
-One step → one commit → green Action → STOP for Job B. Do not edit plan/audit/todo. Do not run local `dotnet`.
+- [x] Buy/Sell product fields are searchable comboboxes with suggested price intact.
+- [x] Buy can create Phone / Apple ID / Glass via modal + registry; new product selected in-page.
+- [x] No schema change; CI green (Actions #506, #507, #508, #509).
