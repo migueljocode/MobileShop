@@ -1,8 +1,7 @@
-# Actor Report — Stage AA Step 1
+# Actor Report — Stage AA Step 1 Repair
 
-- Commit: 6f58f22981850c5ed56f1874aece1a5b7d411f23 — feat(products): add tablet smart watch and laptop services
-- Verification: GitHub Actions -> unavailable; commit is not pushed, so no matching human-visible Action run exists.
-- Limitations: Create pages, Details rendering, Products Index filters/buttons, and Buy modal registry remain for Steps 2–3.
-- Friction noted: None.
-- Problems: None.
-- Status: COMPLETE
+- Commit: pending — fix(products): use Product repository for device profiles
+- Verification: GitHub Actions pending after push.
+- Repair: Replaced all undeclared Tablet/SmartWatch/Laptop repository references in ProductsDataService with the injected Product repository, including inventory, second-hand, details, and device creation persistence.
+- Scope: ProductsDataService.cs only, plus this Actor report.
+- Status: REPAIR COMPLETE — awaiting CI
