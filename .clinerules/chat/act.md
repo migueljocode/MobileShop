@@ -1,25 +1,19 @@
 # Stage Z — Step 3 Act Summary
 
 ## Scope
-Repairing the Stage Z Step 3 CI failure by supplying the new IProductsDataService constructor dependency in existing BuyModel tests.
+Repaired the seller error-response regression identified by Reviewer Job B.
 
 ## Changes
-- Updated RecordModelTests BuyModel constructions to pass null! for the unused product service.
-- Updated PersonCreateHandlerTests BuyModel construction to pass null! for the unused product service.
+- Restored the seller modal's `DropdownCreateResult` error contract through a dedicated `CreateSellerErrorResult`.
+- Kept `CreateErrorResult` returning `{ error = message }` for the new product-create modal.
 
 ## Verification
 - GitHub Actions is the CI gate; local dotnet build/test was not run.
-- Commit: this repair commit.
+- Repair commit: c13d4153454443c2e63ce8bd2b20e2b47acb9030
 - Action: pending.
 
-## Limitations
-- None.
-
-## Friction noted
-- Job B identified stale BuyModel constructor call sites after the Step 3 dependency was added.
-
 ## Problems
-- Previous Step 3 Action #501 failed at build because these existing tests still used the two-parameter BuyModel constructor.
+- Action #504/#505 failed because seller creation errors no longer returned `DropdownCreateResult`.
 
 ## Status
 STOPPED — awaiting GitHub Action result.
