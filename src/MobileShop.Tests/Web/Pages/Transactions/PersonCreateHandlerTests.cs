@@ -64,7 +64,7 @@ public class PersonCreateHandlerTests
         {
             CreateSellerResult = new ServiceResult(false, "Duplicate seller.")
         };
-        var model = new BuyModel(null!, people);
+        var model = new BuyModel(null!, people, null!);
 
         var result = await model.OnPostCreateSellerAsync(new CreateSellerInputModel
         {
