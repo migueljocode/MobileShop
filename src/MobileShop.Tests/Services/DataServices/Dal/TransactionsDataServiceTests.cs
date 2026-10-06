@@ -469,4 +469,26 @@ public class TransactionsDataServiceTests : RepoTestBase
         var rows = await _service.GetSelectableProductsAsync(TransactionDirection.Buy); Assert.Contains(rows, r => r.Type == "Tablet"); Assert.Contains(rows, r => r.Type == "Smart Watch"); Assert.Contains(rows, r => r.Type == "Laptop");
     }
 
+    [Fact]
+    public async Task GetSelectableProductsAsync_returns_accessory_profiles()
+    {
+        var manufacturer = new Manufacturer { Name = "Accessory Co" };
+        var category = new Category { Name = "Cable" };
+        Context.Manufacturers.Add(manufacturer);
+        Context.Categories.Add(category);
+        Context.SaveChanges();
+        var model = new Model { ManufacturerId = manufacturer.Id, CategoryId = category.Id, Name = "USB-C Cable" };
+        Context.Models.Add(model);
+        Context.SaveChanges();
+        var product = new Product { ModelId = model.Id, Barcode = "CABLE01", Price = 1000, CableProfile = new Cable { Connector1 = CableConnector.UsbC, Connector2 = CableConnector.UsbC, Length = 1 } };
+        Context.Products.Add(product);
+        Context.SaveChanges();
+
+        var rows = await _service.GetSelectableProductsAsync(TransactionDirection.Buy);
+
+        var row = Assert.Single(rows, r => r.ProductId == product.Id);
+        Assert.Equal("Cable", row.Type);
+        Assert.Equal(1000, row.SuggestedPrice);
+    }
+
 }
