@@ -25,27 +25,24 @@
 - **A2:** Api stubs for any new interface members = NIE only.
 
 ## Reviewer Briefing
-- **Step 1 LOW/HIGH:** search API + tests against selectable rules.
-- **Step 2 MEDIUM/MEDIUM:** searchable product UI; must not break suggested price.
-- **Step 3 HIGH/MEDIUM:** modal + registry + three create paths; largest risk is form complexity and EntityId for glass batch.
-- Person picker is the template for UX contracts (handlers, antiforgery, JSON shape).
+- **Step 1 LOW/HIGH:** search API + tests against selectable rules (completed).
+- **Step 2 MEDIUM/MEDIUM:** searchable product UI; must not break suggested price (completed).
+- **Step 3 HIGH/MEDIUM:** modal + registry + three create paths (completed).
+- **Step 4 LOW/HIGH:** final Stage Z validation and sign-off.
 
 ## ~~[x] Step 1 — Search selectable products (service)~~
-
 - Files: `ITransactionsDataService`, Dal `TransactionsDataService`, Api stub if present; tests for direction filter + query match + take/empty.
 - Do not touch Web UI yet.
 - Done when: search works; CI green; Job B PASS.
 - Risk: LOW · Confidence: HIGH
 
 ## ~~[x] Step 2 — Searchable product picker UI (Buy + Sell)~~
-
 - Files: `product-picker.js` (or companion), Buy/Sell cshtml, `OnGetSearchProductsAsync` handlers on both pages, optional partial mirroring `_PersonPicker` structure for products.
 - Keep suggested-price display and price autofill.
 - Done when: both pages can search/select products; CI green; Job B PASS.
 - Risk: MEDIUM · Confidence: MEDIUM
 
 ## ~~[x] Step 3 — Create-product modal + registry (Phone, Apple ID, Glass)~~
-
 - Files: shared modal shell + registry; GET form fragment handlers; POST create handlers calling `IProductsDataService`; slim partials or reused field markup for the three types.
 - Ensure antiforgery + independent validation (same lesson as Stage Y: no `Input` ModelState pollution; prefer `Validator.TryValidateObject`).
 - Tests: at least one successful create-via-handler returns selectable product id for phone (and glass EntityId policy explicit).
@@ -53,7 +50,6 @@
 - Risk: HIGH · Confidence: MEDIUM
 
 ## [ ] Step 4 — Final Stage Z validation
-
 - Full CI green; scope check; tick Stage Z in `to-do.md`.
 - Risk: LOW · Confidence: HIGH
 
@@ -64,5 +60,3 @@
 
 ## Execution notes
 One step → one commit → green Action → STOP for Job B. Do not edit plan/audit/todo. Do not run local `dotnet`.
-
-**Awaiting Job A** before Act on Step 1.
