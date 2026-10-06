@@ -34,7 +34,7 @@
 - Completed: CI Action #520 — Success.
 - Risk: LOW · Confidence: HIGH
 
-## [ ] Step 2 — Dedicated Create pages, Details rendering & Products list integration
+## ~~[x] Step 2 — Dedicated Create pages, Details rendering & Products list integration~~
 - **Files**:
   - `create`:
     - `src/MobileShop.Web/Pages/Products/CreateTablet.cshtml` & `.cshtml.cs`
@@ -54,6 +54,7 @@
   - Add Razor Page unit tests covering GET/POST workflows for all three device create pages.
 - **Done when**: Pages render and post correctly, unit tests pass, CI is green, Job B PASS.
 - **Risk**: MEDIUM · **Confidence**: HIGH
+- Completed: CI Action #522 — Success
 
 ## [ ] Step 3 — Buy modal integration & Product Create Registry
 - **Files**:

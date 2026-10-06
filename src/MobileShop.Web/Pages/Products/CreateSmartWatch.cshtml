@@ -1,0 +1,24 @@
+@page
+@model MobileShop.Web.Pages.Products.CreateSmartWatchModel
+@{ ViewData["Title"] = "Create smart watch"; }
+<h1>Create smart watch</h1>
+<form method="post" class="row g-3 col-lg-8">
+<div asp-validation-summary="ModelOnly" class="text-danger"></div>
+<div class="col-md-6"><label asp-for="Input.ManufacturerId" class="form-label">Manufacturer</label><select asp-for="Input.ManufacturerId" asp-items="@(new SelectList(Model.Manufacturers, "Id", "Name"))" class="form-select" id="manufacturerSelect"><option value="">-- Select manufacturer --</option></select></div>
+<div class="col-md-6"><label asp-for="Input.ModelId" class="form-label">Model</label><select asp-for="Input.ModelId" asp-items="@(new SelectList(Model.Models, "Id", "Name"))" class="form-select" id="modelSelect"><option value="">-- Select model --</option></select></div>
+
+<div class="col-md-3"><label asp-for="Input.Price" class="form-label">Paid price (IRR)</label><input asp-for="Input.Price" class="form-control" data-price inputmode="numeric" step="1" min="0" max="@MobileShop.Models.MoneyLimits.MaxRials" /></div>
+<div class="col-md-3"><label asp-for="Input.ProfitPercent" class="form-label">Profit %</label><input asp-for="Input.ProfitPercent" class="form-control" data-percent /></div>
+<div class="col-md-3"><label asp-for="Input.ProfitAmount" class="form-label">Profit amount (IRR)</label><input asp-for="Input.ProfitAmount" class="form-control" data-amount inputmode="numeric" step="1" min="0" max="@MobileShop.Models.MoneyLimits.MaxRials" /></div>
+<div class="col-md-3"><label class="form-label">Finished price (IRR)</label><input class="form-control" data-finished-price readonly /></div>
+<div class="col-12"><div class="form-check"><input asp-for="Input.IsSecondHand" class="form-check-input" data-second-hand-toggle /><label asp-for="Input.IsSecondHand" class="form-check-label">Second-hand item</label></div></div>
+<div class="col-12" data-second-hand-block style="display:none"><label asp-for="Input.TestPeriodDays">Second-hand test days</label><input asp-for="Input.TestPeriodDays" class="form-control" /><label asp-for="Input.SecondHandNotes">Second-hand notes</label><input asp-for="Input.SecondHandNotes" class="form-control" /></div>
+<div class="col-12"><div class="form-check"><input asp-for="Input.HasGuarantee" class="form-check-input" data-guarantee-toggle /><label asp-for="Input.HasGuarantee" class="form-check-label">Has guarantee</label></div></div>
+<div class="col-12" data-guarantee-block style="display:none"><label asp-for="Input.GuaranteeCorporation">Guarantee corporation</label><select asp-for="Input.GuaranteeCorporation" asp-items="@(new SelectList(Model.Corporations))" class="form-select"><option value="">-- Select corporation --</option></select><label asp-for="Input.GuaranteeExpiry">Guarantee expiry</label><input asp-for="Input.GuaranteeExpiry" class="form-control" type="date" /><label asp-for="Input.GuaranteeNotes">Guarantee notes</label><input asp-for="Input.GuaranteeNotes" class="form-control" /></div>
+<div class="col-12"><label asp-for="Input.Notes">Device notes</label><textarea asp-for="Input.Notes" class="form-control" rows="3"></textarea></div>
+<div class="col-12"><button class="btn btn-primary" type="submit">Save smart watch</button><a asp-page="/Products/Index" class="btn btn-outline-secondary ms-2">Back to products</a></div>
+</form>
+@if (!string.IsNullOrWhiteSpace(Model.Message)){<div class="alert alert-danger mt-3">@Model.Message</div>}
+@section Scripts{<partial name="_ValidationScriptsPartial" /><script src="~/js/create-product-pricing.js"></script><script>
+document.addEventListener('DOMContentLoaded',function(){const m=document.getElementById('manufacturerSelect'),s=document.getElementById('modelSelect'),t=document.querySelector('[data-second-hand-toggle]'),tb=document.querySelector('[data-second-hand-block]'),g=document.querySelector('[data-guarantee-toggle]'),gb=document.querySelector('[data-guarantee-block]');const sync=(a,b)=>{if(a&&b)b.style.display=a.checked?'':'none'};t?.addEventListener('change',()=>sync(t,tb));g?.addEventListener('change',()=>sync(g,gb));sync(t,tb);sync(g,gb);m?.addEventListener('change',async function(){s.innerHTML='<option value="">-- Select model --</option>';if(!this.value)return;const r=await fetch('/Products/CreateSmartWatch?handler=Models&manufacturerId='+encodeURIComponent(this.value));if(r.ok)(await r.json()).forEach(x=>{const o=document.createElement('option');o.value=x.id;o.textContent=x.name;s.appendChild(o)})})});
+</script>}

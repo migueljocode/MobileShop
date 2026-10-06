@@ -1,68 +1,8 @@
 @page
 @model MobileShop.Web.Pages.Products.IndexModel
-@{
-    ViewData["Title"] = "Products";
-}
-
-<h1>Products</h1>
-<div class="d-flex flex-wrap gap-2 align-items-center mb-3">
-    <div class="btn-group" role="group">
-        @* Only the phones view can be narrowed by a part number, so other product links drop it. *@
-        <a class="btn @(Model.Type == "all" ? "btn-primary" : "btn-outline-primary")" asp-route-type="all" asp-route-availability="@Model.AvailabilityRoute">All</a>
-        <a class="btn @(Model.Type == "phone" ? "btn-primary" : "btn-outline-primary")" asp-route-type="phone" asp-route-partNumberId="@Model.PartNumberId" asp-route-availability="@Model.AvailabilityRoute">Phones</a>
-        <a class="btn @(Model.Type == "appleid" ? "btn-primary" : "btn-outline-primary")" asp-route-type="appleid" asp-route-availability="@Model.AvailabilityRoute">Apple IDs</a>
-        <a class="btn @(Model.Type == "glass" ? "btn-primary" : "btn-outline-primary")" asp-route-type="glass" asp-route-availability="@Model.AvailabilityRoute">Glasses</a>
-    </div>
-    <a asp-page="/Products/SecondHand" class="btn btn-outline-warning">Second-hand</a>
-    <a asp-page="/Products/CreatePhone" class="btn btn-success">Create phone</a>
-    <a asp-page="/Products/CreateAppleId" class="btn btn-success">Create Apple ID</a>
-    <a asp-page="/Products/CreateGlass" class="btn btn-success">Create glass</a>
-</div>
-
-<form method="get" class="row g-2 align-items-end mb-3">
-    <input type="hidden" name="type" value="@Model.Type" />
-    <div class="col-auto">
-        <label class="form-label" asp-for="Availability">Availability</label>
-        <select class="form-select" asp-for="Availability" onchange="this.form.submit()">
-            <option value="all">All</option>
-            <option value="available">Available</option>
-            <option value="sold">Sold</option>
-        </select>
-    </div>
-    @if (Model.ShowPartNumberFilter)
-    {
-        <div class="col-auto">
-            <label class="form-label" asp-for="PartNumberId">Part number</label>
-            <select class="form-select" asp-for="PartNumberId" asp-items="Model.PartNumberOptions"
-                    onchange="this.form.submit()"></select>
-        </div>
-    }
-</form>
-
-@if (Model.Products.Count == 0)
-{
-    <p class="text-muted">No products found.</p>
-}
-else
-{
-    <table class="table table-striped">
-        <thead><tr><th>Type</th><th>Product</th><th>Identifier</th><th>Part number</th><th>Color</th><th>Status</th><th></th></tr></thead>
-        <tbody>
-        @foreach (var product in Model.Products)
-        {
-            <tr>
-                <td>@product.Type</td>
-                <td>@product.Name</td>
-                <td>@product.Identifier</td>
-                <td>@product.PartNumberLabel</td>
-                <td>@(string.IsNullOrWhiteSpace(product.Color) ? "N/A" : product.Color)</td>
-                <td>
-                    <span class="badge @(product.IsSold ? "text-bg-secondary" : "text-bg-success")">@(product.IsSold ? "Sold" : "Available")</span>
-                    @if (product.IsSecondHand) { <span class="badge text-bg-warning">Second-hand</span> }
-                </td>
-                <td><a asp-page="/Products/Details" asp-route-id="@product.EntityId" asp-route-type="@product.Type.ToLowerInvariant().Replace(" ", "")">Details</a></td>
-            </tr>
-        }
-        </tbody>
-    </table>
-}
+@{ViewData["Title"]="Products";}
+<h1>Products</h1><div class="d-flex flex-wrap gap-2 align-items-center mb-3"><div class="btn-group" role="group">
+<a class="btn @(Model.Type=="all"?"btn-primary":"btn-outline-primary")" asp-route-type="all" asp-route-availability="@Model.AvailabilityRoute">All</a><a class="btn @(Model.Type=="phone"?"btn-primary":"btn-outline-primary")" asp-route-type="phone" asp-route-partNumberId="@Model.PartNumberId" asp-route-availability="@Model.AvailabilityRoute">Phones</a><a class="btn @(Model.Type=="appleid"?"btn-primary":"btn-outline-primary")" asp-route-type="appleid" asp-route-availability="@Model.AvailabilityRoute">Apple IDs</a><a class="btn @(Model.Type=="glass"?"btn-primary":"btn-outline-primary")" asp-route-type="glass" asp-route-availability="@Model.AvailabilityRoute">Glasses</a><a class="btn @(Model.Type=="tablet"?"btn-primary":"btn-outline-primary")" asp-route-type="tablet" asp-route-availability="@Model.AvailabilityRoute">Tablets</a><a class="btn @(Model.Type=="smartwatch"?"btn-primary":"btn-outline-primary")" asp-route-type="smartwatch" asp-route-availability="@Model.AvailabilityRoute">Smart Watches</a><a class="btn @(Model.Type=="laptop"?"btn-primary":"btn-outline-primary")" asp-route-type="laptop" asp-route-availability="@Model.AvailabilityRoute">Laptops</a></div>
+<a asp-page="/Products/SecondHand" class="btn btn-outline-warning">Second-hand</a><a asp-page="/Products/CreatePhone" class="btn btn-success">Create phone</a><a asp-page="/Products/CreateAppleId" class="btn btn-success">Create Apple ID</a><a asp-page="/Products/CreateGlass" class="btn btn-success">Create glass</a><a asp-page="/Products/CreateTablet" class="btn btn-success">Create tablet</a><a asp-page="/Products/CreateSmartWatch" class="btn btn-success">Create smart watch</a><a asp-page="/Products/CreateLaptop" class="btn btn-success">Create laptop</a></div>
+<form method="get" class="row g-2 align-items-end mb-3"><input type="hidden" name="type" value="@Model.Type" /><div class="col-auto"><label asp-for="Availability">Availability</label><select class="form-select" asp-for="Availability" onchange="this.form.submit()"><option value="all">All</option><option value="available">Available</option><option value="sold">Sold</option></select></div>@if(Model.ShowPartNumberFilter){<div class="col-auto"><label asp-for="PartNumberId">Part number</label><select class="form-select" asp-for="PartNumberId" asp-items="Model.PartNumberOptions" onchange="this.form.submit()"></select></div>}</form>
+@if(Model.Products.Count==0){<p class="text-muted">No products found.</p>}else{<table class="table table-striped"><thead><tr><th>Type</th><th>Product</th><th>Identifier</th><th>Part number</th><th>Color</th><th>Status</th><th></th></tr></thead><tbody>@foreach(var p in Model.Products){<tr><td>@p.Type</td><td>@p.Name</td><td>@p.Identifier</td><td>@p.PartNumberLabel</td><td>@(string.IsNullOrWhiteSpace(p.Color)?"N/A":p.Color)</td><td><span class="badge @(p.IsSold?"text-bg-secondary":"text-bg-success")">@(p.IsSold?"Sold":"Available")</span>@if(p.IsSecondHand){<span class="badge text-bg-warning">Second-hand</span>}</td><td><a asp-page="/Products/Details" asp-route-id="@p.EntityId" asp-route-type="@p.Type.ToLowerInvariant().Replace(" ","")">Details</a></td></tr>}</tbody></table>}

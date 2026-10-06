@@ -1,34 +1,5 @@
 @page
 @using MobileShop.Models.Extensions
 @model MobileShop.Web.Pages.Products.DetailsModel
-@{
-    ViewData["Title"] = "Product details";
-}
-
-@if (Model.Product is not null)
-{
-    <a asp-page="/Products/Index" asp-route-type="@(Model.Product.Type == "Apple ID" ? "appleid" : "phone")" class="btn btn-outline-secondary mb-3">Back to Products</a>
-    <h1>@Model.Product.Manufacturer @Model.Product.Model</h1>
-    <p><strong>Type:</strong> @Model.Product.Type</p>
-    <dl class="row">
-        <dt class="col-sm-3">Identifier</dt><dd class="col-sm-9">@Model.Product.Identifier</dd>
-        <dt class="col-sm-3">Color</dt><dd class="col-sm-9">@(string.IsNullOrWhiteSpace(Model.Product.Color) ? "N/A" : Model.Product.Color)</dd>
-        <dt class="col-sm-3">Owner</dt><dd class="col-sm-9">@Model.Product.OwnerLabel</dd>
-        <dt class="col-sm-3">Second-hand</dt><dd class="col-sm-9">@(Model.Product.IsSecondHand ? "Yes" : "No")</dd>
-        <dt class="col-sm-3">Guarantee</dt><dd class="col-sm-9">@Model.Product.GuaranteeLabel</dd>
-        @if (Model.Product.Type == "Phone")
-        {
-            <dt class="col-sm-3">Part number</dt><dd class="col-sm-9">@Model.Product.PartNumberLabel</dd>
-            <dt class="col-sm-3">Dual SIM</dt><dd class="col-sm-9">@Model.Product.DualSimLabel</dd>
-            <dt class="col-sm-3">eSIM</dt><dd class="col-sm-9">@Model.Product.EsimLabel</dd>
-        }
-    </dl>
-    <h2>Transactions</h2>
-    @if (Model.Transactions.Count == 0) { <p class="text-muted">No transactions.</p> }
-    else
-    {
-        <table class="table"><thead><tr><th>Date</th><th>Direction</th><th>Price (IRR)</th><th>Seller</th><th>Customer</th></tr></thead>
-        <tbody>@foreach (var transaction in Model.Transactions)
-        { <tr><td>@transaction.Date.ToString("yyyy-MM-dd")</td><td>@transaction.Direction</td><td>@transaction.FinishedPrice.ToIrr()</td><td>@transaction.SellerLabel</td><td>@transaction.CustomerLabel</td></tr> }</tbody></table>
-    }
-}
+@{ViewData["Title"]="Product details";var indexType=Model.Product?.Type switch{"Apple ID"=>"appleid","Smart Watch"=>"smartwatch",_=>Model.Product?.Type?.ToLowerInvariant()??"all"};}
+@if(Model.Product is not null){<a asp-page="/Products/Index" asp-route-type="@indexType" class="btn btn-outline-secondary mb-3">Back to Products</a><h1>@Model.Product.Manufacturer @Model.Product.Model</h1><p><strong>Type:</strong> @Model.Product.Type</p><dl class="row"><dt class="col-sm-3">Identifier</dt><dd class="col-sm-9">@Model.Product.Identifier</dd><dt class="col-sm-3">Color</dt><dd class="col-sm-9">@(string.IsNullOrWhiteSpace(Model.Product.Color)?"N/A":Model.Product.Color)</dd><dt class="col-sm-3">Owner</dt><dd class="col-sm-9">@Model.Product.OwnerLabel</dd><dt class="col-sm-3">Second-hand</dt><dd class="col-sm-9">@(Model.Product.IsSecondHand?"Yes":"No")</dd><dt class="col-sm-3">Guarantee</dt><dd class="col-sm-9">@Model.Product.GuaranteeLabel</dd>@if(Model.Product.Type=="Phone"){<dt class="col-sm-3">Part number</dt><dd class="col-sm-9">@Model.Product.PartNumberLabel</dd><dt class="col-sm-3">Dual SIM</dt><dd class="col-sm-9">@Model.Product.DualSimLabel</dd><dt class="col-sm-3">eSIM</dt><dd class="col-sm-9">@Model.Product.EsimLabel</dd>}@if(Model.Product.Type=="Laptop"){<dt class="col-sm-3">CPU</dt><dd class="col-sm-9">@Model.Product.Cpu</dd><dt class="col-sm-3">GPU</dt><dd class="col-sm-9">@Model.Product.Gpu</dd><dt class="col-sm-3">Screen size</dt><dd class="col-sm-9">@(Model.Product.DisplaySize?.ToString("0.##")??"N/A") inches</dd>}@if(Model.Product.Type is "Tablet" or "Smart Watch" or "Laptop"){<dt class="col-sm-3">Device notes</dt><dd class="col-sm-9">@(string.IsNullOrWhiteSpace(Model.Product.Notes)?"N/A":Model.Product.Notes)</dd>}</dl><h2>Transactions</h2>@if(Model.Transactions.Count==0){<p class="text-muted">No transactions.</p>}else{<table class="table"><thead><tr><th>Date</th><th>Direction</th><th>Price (IRR)</th><th>Seller</th><th>Customer</th></tr></thead><tbody>@foreach(var t in Model.Transactions){<tr><td>@t.Date.ToString("yyyy-MM-dd")</td><td>@t.Direction</td><td>@t.FinishedPrice.ToIrr()</td><td>@t.SellerLabel</td><td>@t.CustomerLabel</td></tr>}</tbody></table>}}
