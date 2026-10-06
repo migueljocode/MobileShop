@@ -35,42 +35,15 @@
 - **A2:** Api service stubs implement new interface members with `throw new NotImplementedException();`.
 
 ## Reviewer Briefing
-- **Step 1 LOW/HIGH:** Bind models, `ProductDetailsViewModel` extension, service contracts, DAL implementations, and DAL unit tests.
+- **Step 1 LOW/HIGH:** Bind models, `ProductDetailsViewModel` extension, service contracts, DAL implementations, and DAL unit tests (completed).
 - **Step 2 MEDIUM/HIGH:** Razor create pages (`CreateCable`, `CreateCharger`, `CreatePowerBank`, `CreatePortableStorage`, `CreateCase`), Details page enhancements, and Products Index filter buttons.
 - **Step 3 MEDIUM/MEDIUM:** Modal registry entries (`ProductCreateRegistry`), partial form views, client-side JS registry, and `Buy.cshtml.cs` POST handlers.
 - **Step 4 LOW/HIGH:** Final Stage AB verification: full test suite, 0 warnings, clean diff stat check.
 
-## [ ] Step 1 — Input models, view model extensions, service contracts & DAL implementations
-- **Files**:
-  - `create`:
-    - `src/MobileShop.Models/ViewModels/Web/BindModels/CreateCableInputModel.cs`
-    - `src/MobileShop.Models/ViewModels/Web/BindModels/CreateChargerInputModel.cs`
-    - `src/MobileShop.Models/ViewModels/Web/BindModels/CreatePowerBankInputModel.cs`
-    - `src/MobileShop.Models/ViewModels/Web/BindModels/CreatePortableStorageInputModel.cs`
-    - `src/MobileShop.Models/ViewModels/Web/BindModels/CreateCaseInputModel.cs`
-  - `modify`:
-    - `src/MobileShop.Models/ViewModels/Web/ProductDetailsViewModel.cs`
-    - `src/MobileShop.Services/DataServices/Interfaces/IProductsDataService.cs`
-    - `src/MobileShop.Services/DataServices/Dal/ProductsDataService.cs`
-    - `src/MobileShop.Services/DataServices/Dal/TransactionsDataService.cs`
-    - `src/MobileShop.Services/DataServices/Api/ApiProductsDataService.cs`
-    - `src/MobileShop.Tests/Services/DataServices/Dal/ProductsDataServiceTests.cs`
-    - `src/MobileShop.Tests/Services/DataServices/Dal/TransactionsDataServiceTests.cs`
-- **Symbols**:
-  - `CreateCableInputModel`, `CreateChargerInputModel`, `CreatePowerBankInputModel`, `CreatePortableStorageInputModel`, `CreateCaseInputModel`
-  - `ProductDetailsViewModel` (`Connector1`, `Connector2`, `CableLength`, `Wattage`, `Pd`, `PortCount`, `CapacityMah`, `MaxWattage`, `StorageKind`, `StorageCapacityLabel`, `Speed`, `CompatibleModels`)
-  - `IProductsDataService.CreateCablesAsync`, `CreateChargersAsync`, `CreatePowerBanksAsync`, `CreatePortableStoragesAsync`, `CreateCasesAsync`
-  - `ProductsDataService.GetInventoryRowsAsync`, `GetDetailsAsync`
-  - `TransactionsDataService.GetSelectableProductsAsync`
-- **Change**:
-  - Create input models supporting bulk `Count >= 1`, price, profit calculation, manufacturer/model, and specific entity fields.
-  - Extend `ProductDetailsViewModel` with optional `init` properties for accessory attributes.
-  - Implement bulk creation methods in `ProductsDataService` using `products.AddRangeAsync(...)` and query via `IBaseRepo<Product> products` without modifying constructor signatures.
-  - Extend `GetInventoryRowsAsync` and `GetDetailsAsync` to support the 5 accessory types.
-  - Extend `TransactionsDataService.GetSelectableProductsAsync` to include unsold accessory products.
-  - Add unit tests verifying creation, inventory listing, details projection, and selectable product queries.
-- **Done when**: Build succeeds with 0 warnings, unit tests pass, CI is green, Job B PASS.
-- **Risk**: LOW · **Confidence**: HIGH
+## ~~[x] Step 1 — Input models, view model extensions, service contracts & DAL implementations~~
+- Files: input models created, `ProductDetailsViewModel` extended, `IProductsDataService` + `ProductsDataService` + `TransactionsDataService` updated, unit tests added.
+- Completed: CI Action #551 — Success.
+- Risk: LOW · Confidence: HIGH
 
 ## [ ] Step 2 — Dedicated Create pages, Details rendering & Products list integration
 - **Files**:
