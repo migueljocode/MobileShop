@@ -1,21 +1,24 @@
-# Audit — Job B: Stage Z Step 2
+# Audit — Job B: Stage Z Step 3
 
-**Verdict: PASS**
+**Verdict: FAIL**
 
-**Commit:** `a323d62` — searchable product picker UI  
-**CI:** Action **#499 — Success**
+**Commit:** `b3c23a9` — create-product modal  
+**CI:** Action **#501 — Failure** (build)
 
-| Requirement | Result |
-|-------------|--------|
-| Combobox-style product search on Buy + Sell | **OK** |
-| Handlers use `SearchSelectableProductsAsync` + direction | **OK** |
-| Hidden `Input.ProductId` + `productId` mapping | **OK** |
-| Suggested price display + autofill | **OK** |
-| No create-product modal yet (Step 3) | **OK** |
+## Cause
+`BuyModel` now takes `IProductsDataService` as a third constructor parameter. Existing tests still construct:
 
-## Soft notes
-- Initial server-rendered options remain as progressive enhancement.
+```csharp
+new BuyModel(CreateService(), null!)
+```
+
+**CS7036** in:
+- `RecordModelTests.cs` (multiple sites)
+- `PersonCreateHandlerTests.cs` (Buy constructions)
+
+## Required fix
+Pass `null!` (or a stub) for `productsDataService` wherever `BuyModel` is constructed in tests that do not exercise product create. Any new Step 3 handler test should inject a real/fake `IProductsDataService` as needed.
 
 ## Gate
 
-**Step 3 authorized.** Create-product modal + registry (Phone, Apple ID, Glass) on Buy.
+Step 3 **not** complete. Actor: ctor fix → green Action → STOP for Job B. **Do not start Step 4.**
