@@ -9,7 +9,7 @@ public class CreateAccessoryModelTests : RepoTestBase
 {
     private ProductsDataService Service() => new(
         new BaseRepo<Phone>(Context), new BaseRepo<AppleId>(Context), new BaseRepo<Manufacturer>(Context),
-        new BaseRepo<Model>(Context), new BaseRepo<Category>(Context), new BaseRepo<Color>(Context),
+        new BaseRepo<Model>(Context), new BaseRepo<Category>(Context), new BaseRepo<MobileShop.Models.Entities.Color>(Context),
         new BaseRepo<Guarantee>(Context), new BaseRepo<Transaction>(Context), new BaseRepo<PartNumber>(Context),
         new BaseRepo<Product>(Context), NullLogger<ProductsDataService>.Instance);
 
@@ -28,7 +28,7 @@ public class CreateAccessoryModelTests : RepoTestBase
         var (m, model) = Seed("Cable");
         var page = new CreateCableModel(Service()) { Input = new CreateCableInputModel { ManufacturerId = m.Id, ModelId = model.Id, Connector1 = CableConnector.UsbC, Connector2 = CableConnector.Hdmi, Length = 2, Price = 100, Count = 2 } };
         var result = Assert.IsType<RedirectToPageResult>(await page.OnPostAsync());
-        Assert.Equal("cable", result.RouteValues!["type"]); Assert.Equal(2, Context.Products.Count()); Assert.All(Context.Cables, x => Assert.Equal(2, x.Length));
+        Assert.Equal("cable", result.RouteValues!["type"]); Assert.Equal(2, Context.Products.Count()); Assert.All(Context.Cables, x => Assert.Equal(2m, x.Length));
     }
 
     [Fact] public async Task Charger_Create_Works()
