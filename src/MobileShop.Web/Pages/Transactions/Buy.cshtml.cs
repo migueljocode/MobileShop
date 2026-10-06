@@ -119,11 +119,11 @@ public class BuyModel(
         ModelState.Clear();
         var validationResults = new List<ValidationResult>();
         if (!Validator.TryValidateObject(input, new ValidationContext(input), validationResults, true))
-            return CreateErrorResult("Please correct the seller details.");
+            return CreateSellerErrorResult("Please correct the seller details.");
 
         var result = await peopleDataService.CreateSellerAsync(input);
         if (!result.Succeeded || result.EntityId is null)
-            return CreateErrorResult(result.Message ?? "The seller could not be created.");
+            return CreateSellerErrorResult(result.Message ?? "The seller could not be created.");
 
         var name = $"{input.FirstName.Trim()} {input.LastName.Trim()}".Trim();
         return new JsonResult(new DropdownCreateResult(
@@ -174,6 +174,9 @@ public class BuyModel(
             label += $" — {row.PartNumberLabel}";
         return label;
     }
+
+    private static JsonResult CreateSellerErrorResult(string message) =>
+        new(new DropdownCreateResult(false, null, message, 400)) { StatusCode = 400 };
 
     private static JsonResult CreateErrorResult(string message) =>
         new(new { error = message }) { StatusCode = 400 };
