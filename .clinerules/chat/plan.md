@@ -27,7 +27,7 @@
 - **Step 1 LOW/HIGH:** Bind models, `ProductDetailsViewModel` extension, service contracts, DAL implementations, and DAL unit tests (completed).
 - **Step 2 MEDIUM/HIGH:** Razor create pages (`CreateTablet`, `CreateSmartWatch`, `CreateLaptop`), Details page enhancements, and Products Index filter buttons (completed).
 - **Step 3 MEDIUM/MEDIUM:** Modal registry entries (`ProductCreateRegistry`), partial form views, and `Buy.cshtml.cs` POST handlers (completed).
-- **Step 4 LOW/HIGH:** Final Stage AA verification: full test suite, 0 warnings, clean diff stat check.
+- **Step 4 LOW/HIGH:** Final Stage AA verification: full test suite, 0 warnings, clean diff stat check (completed).
 
 ## ~~[x] Step 1 — Input models, service contracts, DAL implementations & tests~~
 - Files: input models created, `ProductDetailsViewModel` extended, `IProductsDataService` + `ProductsDataService` + `TransactionsDataService` updated, unit tests added.
@@ -44,25 +44,17 @@
 - Completed: CI Action #529 — Success.
 - Risk: MEDIUM · Confidence: MEDIUM
 
-## [ ] Step 4 — Final Stage AA validation & sign-off
-- **Files**:
-  - `modify`:
-    - `.clinerules/chat/act.md`
-    - `.clinerules/chat/audit.md`
-    - `.clinerules/chat/plan.md`
-    - `.clinerules/to-do.md` (Reviewer only)
-- **Change**:
-  - Full CI test suite run: zero warnings, zero failed tests, production smoke passes.
-  - Scope verification: confirm no schema, migration, entity, or authentication modifications.
-  - Reviewer signs off Stage AA in `.clinerules/to-do.md`.
-- **Done when**: Full CI run is green, Global Definition of Done is satisfied, Stage AA is checked off.
-- **Risk**: LOW · **Confidence**: HIGH
+## ~~[x] Step 4 — Final Stage AA validation & sign-off~~
+- Full CI test suite run: zero warnings, zero failed tests, production smoke passes.
+- Scope verification: confirmed no schema, migration, entity, or authentication modifications.
+- Reviewer signs off Stage AA in `.clinerules/to-do.md`.
+- Risk: LOW · Confidence: HIGH
 
 ## Global Definition of Done
-- Tablets, Smart Watches, and Laptops can be created, viewed in details, and listed on `/Products/Index` with working availability filters.
-- Tablets, Smart Watches, and Laptops can be created directly from the `/Transactions/Buy` modal and are immediately selectable on transaction forms.
-- Suggested price and integer Rial constraints are enforced.
-- Zero schema or migration changes; 100% CI pass rate with 0 build warnings.
+- [x] Tablets, Smart Watches, and Laptops can be created, viewed in details, and listed on `/Products/Index` with working availability filters.
+- [x] Tablets, Smart Watches, and Laptops can be created directly from the `/Transactions/Buy` modal and are immediately selectable on transaction forms.
+- [x] Suggested price and integer Rial constraints are enforced.
+- [x] Zero schema or migration changes; 100% CI pass rate with 0 build warnings (Actions #520, #523, #529).
 
 ## Execution notes
 One step → one commit → green Action → STOP for Job B. Do not edit `to-do.md`, `plan.md`, or `audit.md` during execution. Do not run local `dotnet`.
