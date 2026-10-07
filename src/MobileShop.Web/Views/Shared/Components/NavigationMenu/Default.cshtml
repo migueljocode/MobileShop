@@ -1,0 +1,89 @@
+@model MobileShop.Web.ViewModels.NavViewModel
+
+<svg class="navigation-icon-definitions" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <symbol id="nav-icon-home" viewBox="0 0 24 24"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z" /></symbol>
+    <symbol id="nav-icon-products" viewBox="0 0 24 24"><rect x="3" y="3" width="8" height="8" rx="2" /><rect x="13" y="3" width="8" height="8" rx="2" /><rect x="3" y="13" width="8" height="8" rx="2" /><rect x="13" y="13" width="8" height="8" rx="2" /></symbol>
+    <symbol id="nav-icon-transactions" viewBox="0 0 24 24"><path d="M7 7h13l-3-3m3 3-3 3M17 17H4l3 3m-3-3 3-3" /></symbol>
+    <symbol id="nav-icon-people" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5" /><path d="M2.5 20v-1.5a6.5 6.5 0 0 1 13 0V20zM16 5a3.5 3.5 0 0 1 0 6.8m2 2a5.5 5.5 0 0 1 3.5 5.1V20h-3" /></symbol>
+    <symbol id="nav-icon-reports" viewBox="0 0 24 24"><path d="M4 20V12m5 8V5m5 15v-6m5 6V8M2 21h20" /></symbol>
+    <symbol id="nav-icon-account" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4" /><path d="M4 21a8 8 0 0 1 16 0" /></symbol>
+    <symbol id="nav-subicon-home" viewBox="0 0 24 24"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z" /></symbol>
+    <symbol id="nav-subicon-grid" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="3" /><path d="M4 10h16M10 4v16" /></symbol>
+    <symbol id="nav-subicon-reuse" viewBox="0 0 24 24"><path d="m7 7 3-3 3 3M10 4v7a4 4 0 0 0 4 4h5M17 17l-3 3-3-3m3 3v-4a4 4 0 0 0-4-4H5" /></symbol>
+    <symbol id="nav-subicon-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" /></symbol>
+    <symbol id="nav-subicon-arrow-down" viewBox="0 0 24 24"><path d="M12 4v15m-6-6 6 6 6-6" /></symbol>
+    <symbol id="nav-subicon-arrow-up" viewBox="0 0 24 24"><path d="M12 20V5m-6 6 6-6 6 6" /></symbol>
+    <symbol id="nav-subicon-people" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5" /><path d="M2.5 20v-1.5a6.5 6.5 0 0 1 13 0V20zM16 5a3.5 3.5 0 0 1 0 6.8m2 2a5.5 5.5 0 0 1 3.5 5.1V20h-3" /></symbol>
+    <symbol id="nav-subicon-person" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4" /><path d="M4 21a8 8 0 0 1 16 0" /></symbol>
+    <symbol id="nav-subicon-chart" viewBox="0 0 24 24"><path d="M4 20V12m5 8V5m5 15v-6m5 6V8M2 21h20" /></symbol>
+    <symbol id="nav-subicon-exit" viewBox="0 0 24 24"><path d="M10 4H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h5m4-4 4-4-4-4m4 4H9" /></symbol>
+    <symbol id="nav-subicon-enter" viewBox="0 0 24 24"><path d="M14 4h5a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-5m-4-4-4-4 4-4m-4 4h12" /></symbol>
+</svg>
+
+<div class="floating-navigation is-initializing" data-floating-navigation>
+    <div class="navigation-dock" data-navigation-dock>
+        <div class="navigation-flyout" data-navigation-flyout aria-hidden="true" inert>
+            <div class="navigation-flyout__content">
+                @foreach (var item in Model.Items)
+                {
+                    var panelId = $"navigation-panel-{item.Id}";
+                    <section id="@panelId"
+                             class="navigation-panel"
+                             data-navigation-panel="@item.Id"
+                             aria-labelledby="navigation-heading-@item.Id"
+                             hidden>
+                        <div class="navigation-panel__heading">
+                            <div>
+                                <p class="navigation-panel__eyebrow">Navigate to</p>
+                                <h2 id="navigation-heading-@item.Id">@item.Title</h2>
+                            </div>
+                            <span class="navigation-panel__count">@item.SubItems.Count.ToString("00")</span>
+                        </div>
+                        <div class="navigation-panel__links">
+                            @foreach (var subItem in item.SubItems)
+                            {
+                                <a class="navigation-link @(subItem.IsActive ? "is-current" : string.Empty)"
+                                   href="@subItem.Url"
+                                   data-navigation-link
+                                   aria-current="@(subItem.IsActive ? "page" : null)">
+                                    <span class="navigation-link__icon" aria-hidden="true">
+                                        <svg viewBox="0 0 24 24"><use href="#@subItem.IconCssClass"></use></svg>
+                                    </span>
+                                    <span class="navigation-link__copy">
+                                        <span class="navigation-link__title">@subItem.Title</span>
+                                        <span class="navigation-link__description">@subItem.Description</span>
+                                    </span>
+                                    @if (!string.IsNullOrWhiteSpace(subItem.BadgeText))
+                                    {
+                                        <span class="navigation-link__badge">@subItem.BadgeText</span>
+                                    }
+                                    <span class="navigation-link__arrow" aria-hidden="true">↗</span>
+                                </a>
+                            }
+                        </div>
+                    </section>
+                }
+            </div>
+        </div>
+
+        <nav class="navigation-dock__tabs" aria-label="Primary navigation">
+            @foreach (var item in Model.Items)
+            {
+                var panelId = $"navigation-panel-{item.Id}";
+                <a class="navigation-tab @(item.IsActive ? "is-current" : string.Empty)"
+                   href="@item.Url"
+                   data-navigation-trigger="@item.Id"
+                   aria-controls="@panelId"
+                   aria-expanded="false"
+                   aria-current="@(item.IsActive ? "page" : null)"
+                   title="@item.Title">
+                    <svg class="navigation-tab__icon @item.IconCssClass" viewBox="0 0 24 24" aria-hidden="true">
+                        <use href="#@item.IconCssClass"></use>
+                    </svg>
+                    <span class="navigation-tab__label">@item.Title</span>
+                    <span class="navigation-tab__indicator" aria-hidden="true"></span>
+                </a>
+            }
+        </nav>
+    </div>
+</div>
