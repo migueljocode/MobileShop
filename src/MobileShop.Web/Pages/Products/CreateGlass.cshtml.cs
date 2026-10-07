@@ -27,7 +27,7 @@ public class CreateGlassModel(IProductsDataService dataService) : PageModel
 
     public async Task<IActionResult> OnGetModelsAsync(int manufacturerId)
     {
-        var options = manufacturerId > 0 ? await dataService.GetModelsAsync(manufacturerId) : [];
+        var options = manufacturerId > 0 ? await dataService.GetModelsAsync(manufacturerId, "Phone") : [];
         return new JsonResult(options.Select(o => new { o.Id, o.Name }));
     }
 
@@ -60,7 +60,7 @@ public class CreateGlassModel(IProductsDataService dataService) : PageModel
     {
         Manufacturers = await dataService.GetManufacturersAsync();
         CompatibleModels = Input.CompatibleManufacturerId > 0
-            ? await dataService.GetModelsAsync(Input.CompatibleManufacturerId)
+            ? await dataService.GetModelsAsync(Input.CompatibleManufacturerId, "Phone")
             : [];
     }
 }

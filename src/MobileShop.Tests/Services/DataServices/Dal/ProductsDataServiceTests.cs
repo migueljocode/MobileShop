@@ -30,6 +30,7 @@ public class ProductsDataServiceTests : RepoTestBase
             new BaseRepo<Transaction>(Context),
             new BaseRepo<PartNumber>(Context),
             new BaseRepo<Product>(Context),
+            new BaseRepo<StorageCapacity>(Context),
             NullLogger<ProductsDataService>.Instance);
     }
 
@@ -144,6 +145,42 @@ public class ProductsDataServiceTests : RepoTestBase
         Assert.Equal($"IMEI: {phone.IMEI1}", phoneRow.Identifier);
         var appleRow = Assert.Single(rows, r => r.Type == "Apple ID");
         Assert.Equal("stock@example.com", appleRow.Identifier);
+        Assert.Equal("N/A", appleRow.Name);
+    }
+
+    [Fact]
+    public async Task GetInventoryRowsAsync_apple_id_row_shows_customer_name_when_sold_and_na_when_unsold()
+    {
+        SeedCatalog(out _, out _);
+        var unsoldProduct = TestDataHelpers.CreateProduct(Context);
+        var soldProduct = TestDataHelpers.CreateProduct(Context);
+        Context.AppleIds.AddRange(
+            new AppleId { ProductId = unsoldProduct.Id, Email = "unsold@example.com", Password = "secret" },
+            new AppleId { ProductId = soldProduct.Id, Email = "sold@example.com", Password = "secret" });
+
+        var customerPerson = new Person { FirstName = "Niloofar", LastName = "Ahmadi", PhoneNumber = "09120000021" };
+        Context.People.Add(customerPerson);
+        Context.Customers.Add(new Customer { PersonId = customerPerson.Id, NationalId = "1111111111" });
+        Context.SaveChanges();
+
+        Context.Transactions.Add(new Transaction
+        {
+            ProductId = soldProduct.Id,
+            SellerId = 1,
+            CustomerId = Context.Customers.Single(c => c.NationalId == "1111111111").Id,
+            FinishedPrice = 100,
+            Date = DateTime.Today,
+            Direction = TransactionDirection.Sell,
+        });
+        Context.SaveChanges();
+
+        var rows = await _service.GetInventoryRowsAsync("appleid");
+
+        var unsoldRow = Assert.Single(rows, r => r.ProductId == unsoldProduct.Id);
+        Assert.Equal("N/A", unsoldRow.Name);
+
+        var soldRow = Assert.Single(rows, r => r.ProductId == soldProduct.Id);
+        Assert.Equal("Niloofar Ahmadi", soldRow.Name);
     }
 
     [Fact]
@@ -1090,6 +1127,24 @@ public class ProductsDataServiceTests : RepoTestBase
     }
 
     [Fact]
+    public async Task CreateAppleIdAsync_rejects_missing_password()
+    {
+        SeedCatalog(out _, out _);
+        var input = new MobileShop.Models.ViewModels.Web.BindModels.CreateAppleIdInputModel
+        {
+            Price = 200,
+            Email = "missing-password@example.com",
+            Password = "   ",
+        };
+
+        var result = await _service.CreateAppleIdAsync(input);
+
+        Assert.False(result.Succeeded);
+        Assert.Equal(nameof(MobileShop.Models.ViewModels.Web.BindModels.CreateAppleIdInputModel.Password), result.ErrorField);
+        Assert.Empty(Context.AppleIds);
+    }
+
+    [Fact]
     public async Task CreateAppleIdAsync_finished_price_with_percent()
     {
         SeedCatalog(out _, out _);
@@ -1484,19 +1539,22 @@ public class ProductsDataServiceTests : RepoTestBase
         Assert.Equal(nameof(MobileShop.Models.ViewModels.Web.BindModels.CreateAppleIdInputModel.Email), result.ErrorField);
     }
 
-    // ── CreateModelAsync: missing category throws ────────
+    // ── CreateModelAsync: creates a missing category ────────
 
     [Fact]
-    public async Task CreateModelAsync_throws_when_Phone_category_missing()
+    public async Task CreateModelAsync_creates_missing_category()
     {
         var manufacturer = new Manufacturer { Name = "Apple" };
         Context.Manufacturers.Add(manufacturer);
         var appleIdCategory = new Category { Name = "AppleId" };
         Context.Categories.Add(appleIdCategory);
         Context.SaveChanges();
-        // Note: "Phone" category intentionally absent.
 
-        await Assert.ThrowsAsync<InvalidOperationException>(() => _service.CreateModelAsync(1, "Pixel 9"));
+        var result = await _service.CreateModelAsync(manufacturer.Id, "Pixel 9", "SmartWatch");
+
+        Assert.True(result.Succeeded);
+        var model = Context.Models.Single(item => item.Id == result.Option!.Id);
+        Assert.Equal("SmartWatch", Context.Categories.Single(category => category.Id == model.CategoryId).Name);
     }
 
     [Fact]
@@ -1951,7 +2009,7 @@ public class ProductsDataServiceTests : RepoTestBase
 
         var cable = await _service.CreateCablesAsync(new CreateCableInputModel { ManufacturerId = manufacturer.Id, ModelId = cableModel.Id, Connector1 = CableConnector.UsbC, Connector2 = CableConnector.UsbC, Length = 1.5m, Price = 1000, ProfitPercent = 10, Count = 2 });
         var charger = await _service.CreateChargersAsync(new CreateChargerInputModel { ManufacturerId = manufacturer.Id, ModelId = chargerModel.Id, Wattage = 65, Pd = true, PortCount = 2, Price = 2000, ProfitAmount = 500, Count = 2 });
-        var powerBank = await _service.CreatePowerBanksAsync(new CreatePowerBankInputModel { ManufacturerId = manufacturer.Id, ModelId = powerBankModel.Id, CapacityMah = 20000, MaxWattage = 30, PortCount = 2, Pd = true, Price = 3000, Count = 2 });
+        var powerBank = await _service.CreatePowerBanksAsync(new CreatePowerBankInputModel { ManufacturerId = manufacturer.Id, ModelId = powerBankModel.Id, CapacityMah = 20000, MaxWattage = 30, PortCount = 2, PortTypes = [CableConnector.UsbC, CableConnector.UsbA], Pd = true, Price = 3000, Count = 2 });
         var storage = await _service.CreatePortableStoragesAsync(new CreatePortableStorageInputModel { ManufacturerId = manufacturer.Id, ModelId = storageModel.Id, StorageKind = StorageKind.Ssd, StorageCapacityId = capacity.Id, Speed = 1000, Price = 4000, Count = 2 });
         var @case = await _service.CreateCasesAsync(new CreateCaseInputModel { ManufacturerId = manufacturer.Id, CompatibleManufacturerId = phoneManufacturer.Id, CompatibleModelIds = [phoneModel.Id], Price = 5000, ProfitPercent = 10, Count = 2 });
 
@@ -1991,7 +2049,7 @@ public class ProductsDataServiceTests : RepoTestBase
         Context.SaveChanges();
         await _service.CreateCablesAsync(new CreateCableInputModel { ManufacturerId = manufacturer.Id, ModelId = cableModel.Id, Connector1 = CableConnector.UsbC, Connector2 = CableConnector.Hdmi, Length = 2, Price = 100 });
         await _service.CreateChargersAsync(new CreateChargerInputModel { ManufacturerId = manufacturer.Id, ModelId = chargerModel.Id, Wattage = 45, Pd = true, PortCount = 1, Price = 100 });
-        await _service.CreatePowerBanksAsync(new CreatePowerBankInputModel { ManufacturerId = manufacturer.Id, ModelId = powerBankModel.Id, CapacityMah = 10000, MaxWattage = 20, PortCount = 2, Pd = false, Price = 100 });
+        await _service.CreatePowerBanksAsync(new CreatePowerBankInputModel { ManufacturerId = manufacturer.Id, ModelId = powerBankModel.Id, CapacityMah = 10000, MaxWattage = 20, PortCount = 2, PortTypes = [CableConnector.UsbC, CableConnector.Hdmi], Pd = false, Price = 100 });
         await _service.CreatePortableStoragesAsync(new CreatePortableStorageInputModel { ManufacturerId = manufacturer.Id, ModelId = storageModel.Id, StorageKind = StorageKind.UsbFlash, StorageCapacityId = capacity.Id, Speed = 200, Price = 100 });
         var caseResult = await _service.CreateCasesAsync(new CreateCaseInputModel { ManufacturerId = manufacturer.Id, CompatibleManufacturerId = phoneManufacturer.Id, CompatibleModelIds = [phoneModel.Id], Price = 100 });
         var rows = await _service.GetInventoryRowsAsync();
@@ -2010,6 +2068,31 @@ public class ProductsDataServiceTests : RepoTestBase
         var caseDetails = await _service.GetDetailsAsync(caseResult.EntityId!.Value, "case");
         Assert.NotNull(caseDetails);
         Assert.Contains("Phone X", caseDetails!.CompatibleModels);
+
+        var powerBank = Context.Products.Single(product => product.PowerBankProfile != null);
+        var powerBankDetails = await _service.GetDetailsAsync(powerBank.Id, "powerbank");
+        Assert.NotNull(powerBankDetails);
+        Assert.Equal([CableConnector.UsbC, CableConnector.Hdmi], powerBankDetails!.PortTypes);
+    }
+
+    [Fact]
+    public async Task CreatePortableStoragesAsync_rejects_unknown_capacity()
+    {
+        SeedCatalog(out var phoneModel, out _);
+        var manufacturer = await Context.Manufacturers.FindAsync(phoneModel.ManufacturerId);
+
+        var result = await _service.CreatePortableStoragesAsync(new CreatePortableStorageInputModel
+        {
+            ManufacturerId = manufacturer!.Id,
+            ModelId = phoneModel.Id,
+            StorageKind = StorageKind.Ssd,
+            StorageCapacityId = int.MaxValue,
+            Price = 100
+        });
+
+        Assert.False(result.Succeeded);
+        Assert.Equal(nameof(CreatePortableStorageInputModel.StorageCapacityId), result.ErrorField);
+        Assert.Empty(Context.Products);
     }
 
 }

@@ -30,6 +30,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public virtual DbSet<Cable> Cables => Set<Cable>();
     public virtual DbSet<Charger> Chargers => Set<Charger>();
     public virtual DbSet<PowerBank> PowerBanks => Set<PowerBank>();
+    public virtual DbSet<PowerBankPort> PowerBankPorts => Set<PowerBankPort>();
     public virtual DbSet<PortableStorage> PortableStorages => Set<PortableStorage>();
     public virtual DbSet<Case> Cases => Set<Case>();
     public virtual DbSet<Glass> Glasses => Set<Glass>();

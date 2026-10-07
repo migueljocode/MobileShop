@@ -33,7 +33,12 @@ public class ApiTransactionsDataService : ITransactionsDataService
 
     /// <inheritdoc />
     public Task<IReadOnlyList<ProductListItemViewModel>> SearchSelectableProductsAsync(
-        TransactionDirection direction, string? q, int take = 25)
+        TransactionDirection direction,
+        string? q,
+        int take = 25,
+        string? type = null,
+        int? manufacturerId = null,
+        int? modelId = null)
         => throw new NotImplementedException("ApiTransactionsDataService is not implemented yet.");
 
     /// <inheritdoc />

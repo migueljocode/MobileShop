@@ -45,6 +45,7 @@ public sealed record ProductDetailsViewModel(
     public int? Wattage { get; init; }
     public bool? Pd { get; init; }
     public int? PortCount { get; init; }
+    public IReadOnlyList<CableConnector> PortTypes { get; init; } = [];
     public int? CapacityMah { get; init; }
     public int? MaxWattage { get; init; }
     public StorageKind? StorageKind { get; init; }

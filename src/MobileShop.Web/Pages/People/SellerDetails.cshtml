@@ -8,5 +8,5 @@
     <h2>Products sold to shop</h2>
     @if (Model.Products.Count == 0) { <p class="text-muted">No products supplied.</p> }
     else { <ul>@foreach (var product in Model.Products) { <li>@product.Name</li> }</ul> }
-    <a asp-page="/People/Sellers" class="btn btn-secondary mt-3">Back to sellers</a>
+    <a asp-page="/People/Index" asp-route-type="sellers" class="btn btn-secondary mt-3">Back to sellers</a>
 }

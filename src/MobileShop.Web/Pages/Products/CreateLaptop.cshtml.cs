@@ -9,6 +9,31 @@ public class CreateLaptopModel(IProductsDataService dataService) : PageModel
     public IReadOnlyList<string> Corporations { get; private set; } = [];
     public async Task OnGetAsync()=>await PopulateDropdownsAsync();
     public async Task<IActionResult> OnGetModelsAsync(int manufacturerId){var o=manufacturerId>0?await dataService.GetModelsAsync(manufacturerId,"Laptop"):[];return new JsonResult(o.Select(x=>new{x.Id,x.Name}));}
-    public async Task<IActionResult> OnPostAsync(){if(!ModelState.IsValid){await PopulateDropdownsAsync();return Page();}var result=await dataService.CreateLaptopAsync(Input);if(!result.Succeeded){if(result.ErrorField is not null)ModelState.AddModelError(result.ErrorField,result.Message!);else Message=result.Message;await PopulateDropdownsAsync();return Page();}return RedirectToPage("/Products/Details",new{id=result.EntityId,type="laptop"});}
+    public async Task<IActionResult> OnPostCreateManufacturerAsync(string name){var result=await dataService.CreateManufacturerAsync(name);if(!result.Succeeded)return new JsonResult(new { error = result.Error! }) { StatusCode = result.StatusCode };return new JsonResult(new { id = result.Option!.Id, name = result.Option.Name });}
+    public async Task<IActionResult> OnPostCreateModelAsync(int manufacturerId, string name){var result=await dataService.CreateModelAsync(manufacturerId, name, "Laptop");if(!result.Succeeded)return new JsonResult(new { error = result.Error! }) { StatusCode = result.StatusCode };return new JsonResult(new { id = result.Option!.Id, name = result.Option.Name });}
+    public async Task<IActionResult> OnPostAsync()
+    {
+        if (string.IsNullOrWhiteSpace(Input.Gpu))
+            ModelState.Remove("Input.Gpu");
+
+        if (!ModelState.IsValid)
+        {
+            await PopulateDropdownsAsync();
+            return Page();
+        }
+
+        var result = await dataService.CreateLaptopAsync(Input);
+        if (!result.Succeeded)
+        {
+            if (result.ErrorField is not null)
+                ModelState.AddModelError(result.ErrorField, result.Message!);
+            else
+                Message = result.Message;
+            await PopulateDropdownsAsync();
+            return Page();
+        }
+
+        return RedirectToPage("/Products/Details", new { id = result.EntityId, type = "laptop" });
+    }
     private async Task PopulateDropdownsAsync(){Manufacturers=await dataService.GetManufacturersAsync();Models=Input.ManufacturerId>0?await dataService.GetModelsAsync(Input.ManufacturerId,"Laptop"):[];Corporations=await dataService.GetGuaranteeCorporationsAsync();}
 }

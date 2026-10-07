@@ -30,6 +30,7 @@ public class CreateAppleIdModelTests : RepoTestBase
             new BaseRepo<Transaction>(Context),
             new BaseRepo<PartNumber>(Context),
             new BaseRepo<Product>(Context),
+            new BaseRepo<StorageCapacity>(Context),
             NullLogger<ProductsDataService>.Instance);
 
         // the AppleId category and the Apple manufacturer come from the catalog seed data in production
@@ -115,6 +116,21 @@ public class CreateAppleIdModelTests : RepoTestBase
         Assert.IsType<PageResult>(result);
         Assert.Empty(Context.AppleIds.Where(a => a.Email == "invalid@example.com"));
         Assert.Empty(Context.Models.Where(m => m.Name == ImplicitModelName));
+    }
+
+    [Fact]
+    public async Task Missing_password_is_rejected_and_shown_on_password_field()
+    {
+        _model.Input = ValidInput("missing-password@example.com");
+        _model.Input.Password = "   ";
+
+        var result = await _model.OnPostAsync();
+
+        Assert.IsType<PageResult>(result);
+        Assert.Contains(
+            _model.ModelState[$"{nameof(_model.Input)}.{nameof(CreateAppleIdInputModel.Password)}"]!.Errors,
+            error => error.ErrorMessage == "Password is required.");
+        Assert.Empty(Context.AppleIds);
     }
 
     [Fact]

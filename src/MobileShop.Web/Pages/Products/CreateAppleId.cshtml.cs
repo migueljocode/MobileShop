@@ -17,7 +17,7 @@ public class CreateAppleIdModel(
         if (!result.Succeeded)
         {
             if (result.ErrorField is not null)
-                ModelState.AddModelError(result.ErrorField, result.Message!);
+                ModelState.AddModelError($"{nameof(Input)}.{result.ErrorField}", result.Message!);
             else
                 Message = result.Message;
             return Page();

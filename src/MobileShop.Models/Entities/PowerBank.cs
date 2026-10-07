@@ -20,6 +20,8 @@ public class PowerBank : BaseEntity
     /// <summary>Whether the power bank supports USB Power Delivery (PD).</summary>
     public bool Pd { get; set; }
 
+    public virtual ICollection<PowerBankPort> Ports { get; set; } = [];
+
     [StringLength(500, ErrorMessage = "{0} cannot exceed {1} characters.")]
     public string? Notes { get; set; }
 }

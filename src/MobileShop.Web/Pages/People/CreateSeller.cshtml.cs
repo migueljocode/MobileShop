@@ -19,7 +19,7 @@ public class CreateSellerModel(IPeopleDataService dataService) : PageModel
             return Page();
         }
 
-        return RedirectToPage("/People/Sellers");
+        return RedirectToPage("/People/Index", new { type = "sellers" });
     }
 
 }

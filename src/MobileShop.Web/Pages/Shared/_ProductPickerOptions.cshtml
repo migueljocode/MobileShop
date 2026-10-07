@@ -2,7 +2,7 @@
 @model MobileShop.Models.ViewModels.Web.ProductPickerViewModel
 @* Shared searchable product-picker results for the transaction forms. *@
 <div class="form-text mt-1">Suggested price (IRR): <span data-suggested-price-display>—</span></div>
-<div id="product-results" class="list-group mt-1" role="listbox" data-product-results>
+<div id="product-results" class="list-group mt-1 d-none" role="listbox" data-product-results>
 @foreach (var product in Model.Products)
 {
     var label = $"{product.Type}: {product.Name} — {product.Identifier}" +
@@ -14,6 +14,11 @@
             role="option"
             data-product-option
             data-product-id="@product.ProductId"
+            data-product-type="@product.Type"
+            data-manufacturer-id="@product.ManufacturerId"
+            data-manufacturer-name="@product.ManufacturerName"
+            data-model-id="@product.ModelId"
+            data-model-name="@product.ModelName"
             data-suggested-price="@price"
             data-selected="@(product.ProductId == Model.SelectedProductId ? "true" : "false")">@label</button>
 }

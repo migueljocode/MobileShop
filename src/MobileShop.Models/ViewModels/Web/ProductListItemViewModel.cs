@@ -23,4 +23,9 @@ public sealed record ProductListItemViewModel(
     /// Kept out of the positional parameters so existing constructions stay source-compatible.
     /// </summary>
     public long? SuggestedPrice { get; init; }
+
+    public int? ManufacturerId { get; init; }
+    public string? ManufacturerName { get; init; }
+    public int? ModelId { get; init; }
+    public string? ModelName { get; init; }
 }

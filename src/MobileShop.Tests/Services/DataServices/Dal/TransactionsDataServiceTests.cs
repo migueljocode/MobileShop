@@ -440,6 +440,50 @@ public class TransactionsDataServiceTests : RepoTestBase
     }
 
     [Fact]
+    public async Task SearchSelectableProductsAsync_filters_by_type_manufacturer_and_model()
+    {
+        var manufacturerA = new Manufacturer { Name = "Acme" };
+        var manufacturerB = new Manufacturer { Name = "Other" };
+        var phoneCategory = new Category { Name = "Phone" };
+        Context.Manufacturers.AddRange(manufacturerA, manufacturerB);
+        Context.Categories.Add(phoneCategory);
+        Context.SaveChanges();
+
+        var modelA1 = new Model { ManufacturerId = manufacturerA.Id, CategoryId = phoneCategory.Id, Name = "Model A1" };
+        var modelA2 = new Model { ManufacturerId = manufacturerA.Id, CategoryId = phoneCategory.Id, Name = "Model A2" };
+        var modelB = new Model { ManufacturerId = manufacturerB.Id, CategoryId = phoneCategory.Id, Name = "Model B" };
+        Context.Models.AddRange(modelA1, modelA2, modelB);
+        Context.SaveChanges();
+
+        var products = new[]
+        {
+            new Product { ModelId = modelA1.Id, Barcode = "PHONE-A1", Price = 100 },
+            new Product { ModelId = modelA2.Id, Barcode = "PHONE-A2", Price = 200 },
+            new Product { ModelId = modelB.Id, Barcode = "PHONE-B", Price = 300 },
+        };
+        Context.Products.AddRange(products);
+        Context.SaveChanges();
+        Context.Phones.AddRange(
+            new Phone { ProductId = products[0].Id, IMEI1 = TestDataHelpers.GenerateImei() },
+            new Phone { ProductId = products[1].Id, IMEI1 = TestDataHelpers.GenerateImei() },
+            new Phone { ProductId = products[2].Id, IMEI1 = TestDataHelpers.GenerateImei() });
+        Context.SaveChanges();
+
+        var manufacturerRows = await _service.SearchSelectableProductsAsync(
+            TransactionDirection.Buy, null, type: "Phone", manufacturerId: manufacturerA.Id);
+        var modelRows = await _service.SearchSelectableProductsAsync(
+            TransactionDirection.Buy, null, type: "Phone", manufacturerId: manufacturerA.Id, modelId: modelA2.Id);
+
+        Assert.Equal(2, manufacturerRows.Count);
+        var selected = Assert.Single(modelRows);
+        Assert.Equal(products[1].Id, selected.ProductId);
+        Assert.Equal(manufacturerA.Id, selected.ManufacturerId);
+        Assert.Equal("Acme", selected.ManufacturerName);
+        Assert.Equal(modelA2.Id, selected.ModelId);
+        Assert.Equal("Model A2", selected.ModelName);
+    }
+
+    [Fact]
     public async Task GetSelectableProductsAsync_returns_unsold_phones_and_apple_ids_ordered_by_name()
     {
         var product = TestDataHelpers.CreateProduct(Context);

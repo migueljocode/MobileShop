@@ -34,8 +34,13 @@ public class BuyModel(
         return Page();
     }
 
-    public async Task<IActionResult> OnGetSearchProductsAsync(string? q) =>
-        new JsonResult(await dataService.SearchSelectableProductsAsync(TransactionDirection.Buy, q));
+    public async Task<IActionResult> OnGetSearchProductsAsync(
+        string? q,
+        string? type = null,
+        int? manufacturerId = null,
+        int? modelId = null) =>
+        new JsonResult(await dataService.SearchSelectableProductsAsync(
+            TransactionDirection.Buy, q, type: type, manufacturerId: manufacturerId, modelId: modelId));
 
     public async Task<IActionResult> OnGetSearchSellersAsync(string? q) =>
         new JsonResult(await peopleDataService.SearchSellersAsync(q));

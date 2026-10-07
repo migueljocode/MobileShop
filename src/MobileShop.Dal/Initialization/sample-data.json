@@ -162,6 +162,14 @@
     {
       "id": 7,
       "name": "PowerBank"
+    },
+    {
+      "id": 8,
+      "name": "SmartWatch"
+    },
+    {
+      "id": 9,
+      "name": "Laptop"
     }
   ],
   "colors": [

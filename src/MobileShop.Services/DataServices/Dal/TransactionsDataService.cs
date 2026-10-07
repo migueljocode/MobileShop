@@ -144,6 +144,10 @@ public class TransactionsDataService(
             {
                 PartNumberLabel = phone.PartNumberNavigation == null ? "N/A" : phone.PartNumberNavigation.Code,
                 SuggestedPrice = phone.ProductNavigation.Price,
+                ManufacturerId = phone.ProductNavigation.ModelNavigation.ManufacturerId,
+                ManufacturerName = phone.ProductNavigation.ModelNavigation.ManufacturerNavigation.Name,
+                ModelId = phone.ProductNavigation.ModelId,
+                ModelName = phone.ProductNavigation.ModelNavigation.Name,
             });
 
         var glassRows = await products.SelectAllAsync(
@@ -159,16 +163,20 @@ public class TransactionsDataService(
                 product.SecondHandProfile != null)
             {
                 SuggestedPrice = product.Price,
+                ManufacturerId = product.ModelNavigation.ManufacturerId,
+                ManufacturerName = product.ModelNavigation.ManufacturerNavigation.Name,
+                ModelId = product.ModelId,
+                ModelName = product.ModelNavigation.Name,
             });
 
-        var tabletRows = await products.SelectAllAsync(product => product.TabletProfile != null && product.Transactions.All(transaction => transaction.Direction != direction), product => new ProductListItemViewModel(product.Id, product.Id, "Tablet", product.ModelNavigation.ManufacturerNavigation.Name + " " + product.ModelNavigation.Name, "Barcode: " + product.Barcode, product.ColorNavigation == null ? null : product.ColorNavigation.Name, product.Transactions.Any(t => t.Direction == TransactionDirection.Sell), product.SecondHandProfile != null) { SuggestedPrice = product.Price });
-        var smartWatchRows = await products.SelectAllAsync(product => product.SmartWatchProfile != null && product.Transactions.All(transaction => transaction.Direction != direction), product => new ProductListItemViewModel(product.Id, product.Id, "Smart Watch", product.ModelNavigation.ManufacturerNavigation.Name + " " + product.ModelNavigation.Name, "Barcode: " + product.Barcode, product.ColorNavigation == null ? null : product.ColorNavigation.Name, product.Transactions.Any(t => t.Direction == TransactionDirection.Sell), product.SecondHandProfile != null) { SuggestedPrice = product.Price });
-        var laptopRows = await products.SelectAllAsync(product => product.LaptopProfile != null && product.Transactions.All(transaction => transaction.Direction != direction), product => new ProductListItemViewModel(product.Id, product.Id, "Laptop", product.ModelNavigation.ManufacturerNavigation.Name + " " + product.ModelNavigation.Name, "Barcode: " + product.Barcode, product.ColorNavigation == null ? null : product.ColorNavigation.Name, product.Transactions.Any(t => t.Direction == TransactionDirection.Sell), product.SecondHandProfile != null) { SuggestedPrice = product.Price });
-        var cableRows = await products.SelectAllAsync(product => product.CableProfile != null && product.Transactions.All(transaction => transaction.Direction != direction), product => new ProductListItemViewModel(product.Id, product.Id, "Cable", product.ModelNavigation.ManufacturerNavigation.Name + " " + product.ModelNavigation.Name, "Barcode: " + product.Barcode, null, product.Transactions.Any(t => t.Direction == TransactionDirection.Sell), product.SecondHandProfile != null) { SuggestedPrice = product.Price });
-        var chargerRows = await products.SelectAllAsync(product => product.ChargerProfile != null && product.Transactions.All(transaction => transaction.Direction != direction), product => new ProductListItemViewModel(product.Id, product.Id, "Charger", product.ModelNavigation.ManufacturerNavigation.Name + " " + product.ModelNavigation.Name, "Barcode: " + product.Barcode, null, product.Transactions.Any(t => t.Direction == TransactionDirection.Sell), product.SecondHandProfile != null) { SuggestedPrice = product.Price });
-        var powerBankRows = await products.SelectAllAsync(product => product.PowerBankProfile != null && product.Transactions.All(transaction => transaction.Direction != direction), product => new ProductListItemViewModel(product.Id, product.Id, "Power Bank", product.ModelNavigation.ManufacturerNavigation.Name + " " + product.ModelNavigation.Name, "Barcode: " + product.Barcode, null, product.Transactions.Any(t => t.Direction == TransactionDirection.Sell), product.SecondHandProfile != null) { SuggestedPrice = product.Price });
-        var portableStorageRows = await products.SelectAllAsync(product => product.PortableStorageProfile != null && product.Transactions.All(transaction => transaction.Direction != direction), product => new ProductListItemViewModel(product.Id, product.Id, "Portable Storage", product.ModelNavigation.ManufacturerNavigation.Name + " " + product.ModelNavigation.Name, "Barcode: " + product.Barcode, null, product.Transactions.Any(t => t.Direction == TransactionDirection.Sell), product.SecondHandProfile != null) { SuggestedPrice = product.Price });
-        var caseRows = await products.SelectAllAsync(product => product.CaseProfile != null && product.Transactions.All(transaction => transaction.Direction != direction), product => new ProductListItemViewModel(product.Id, product.Id, "Case", product.ModelNavigation.ManufacturerNavigation.Name + " " + product.ModelNavigation.Name, "Barcode: " + product.Barcode, null, product.Transactions.Any(t => t.Direction == TransactionDirection.Sell), product.SecondHandProfile != null) { SuggestedPrice = product.Price });
+        var tabletRows = await products.SelectAllAsync(product => product.TabletProfile != null && product.Transactions.All(transaction => transaction.Direction != direction), product => new ProductListItemViewModel(product.Id, product.Id, "Tablet", product.ModelNavigation.ManufacturerNavigation.Name + " " + product.ModelNavigation.Name, "Barcode: " + product.Barcode, product.ColorNavigation == null ? null : product.ColorNavigation.Name, product.Transactions.Any(t => t.Direction == TransactionDirection.Sell), product.SecondHandProfile != null) { SuggestedPrice = product.Price, ManufacturerId = product.ModelNavigation.ManufacturerId, ManufacturerName = product.ModelNavigation.ManufacturerNavigation.Name, ModelId = product.ModelId, ModelName = product.ModelNavigation.Name });
+        var smartWatchRows = await products.SelectAllAsync(product => product.SmartWatchProfile != null && product.Transactions.All(transaction => transaction.Direction != direction), product => new ProductListItemViewModel(product.Id, product.Id, "Smart Watch", product.ModelNavigation.ManufacturerNavigation.Name + " " + product.ModelNavigation.Name, "Barcode: " + product.Barcode, product.ColorNavigation == null ? null : product.ColorNavigation.Name, product.Transactions.Any(t => t.Direction == TransactionDirection.Sell), product.SecondHandProfile != null) { SuggestedPrice = product.Price, ManufacturerId = product.ModelNavigation.ManufacturerId, ManufacturerName = product.ModelNavigation.ManufacturerNavigation.Name, ModelId = product.ModelId, ModelName = product.ModelNavigation.Name });
+        var laptopRows = await products.SelectAllAsync(product => product.LaptopProfile != null && product.Transactions.All(transaction => transaction.Direction != direction), product => new ProductListItemViewModel(product.Id, product.Id, "Laptop", product.ModelNavigation.ManufacturerNavigation.Name + " " + product.ModelNavigation.Name, "Barcode: " + product.Barcode, product.ColorNavigation == null ? null : product.ColorNavigation.Name, product.Transactions.Any(t => t.Direction == TransactionDirection.Sell), product.SecondHandProfile != null) { SuggestedPrice = product.Price, ManufacturerId = product.ModelNavigation.ManufacturerId, ManufacturerName = product.ModelNavigation.ManufacturerNavigation.Name, ModelId = product.ModelId, ModelName = product.ModelNavigation.Name });
+        var cableRows = await products.SelectAllAsync(product => product.CableProfile != null && product.Transactions.All(transaction => transaction.Direction != direction), product => new ProductListItemViewModel(product.Id, product.Id, "Cable", product.ModelNavigation.ManufacturerNavigation.Name + " " + product.ModelNavigation.Name, "Barcode: " + product.Barcode, null, product.Transactions.Any(t => t.Direction == TransactionDirection.Sell), product.SecondHandProfile != null) { SuggestedPrice = product.Price, ManufacturerId = product.ModelNavigation.ManufacturerId, ManufacturerName = product.ModelNavigation.ManufacturerNavigation.Name, ModelId = product.ModelId, ModelName = product.ModelNavigation.Name });
+        var chargerRows = await products.SelectAllAsync(product => product.ChargerProfile != null && product.Transactions.All(transaction => transaction.Direction != direction), product => new ProductListItemViewModel(product.Id, product.Id, "Charger", product.ModelNavigation.ManufacturerNavigation.Name + " " + product.ModelNavigation.Name, "Barcode: " + product.Barcode, null, product.Transactions.Any(t => t.Direction == TransactionDirection.Sell), product.SecondHandProfile != null) { SuggestedPrice = product.Price, ManufacturerId = product.ModelNavigation.ManufacturerId, ManufacturerName = product.ModelNavigation.ManufacturerNavigation.Name, ModelId = product.ModelId, ModelName = product.ModelNavigation.Name });
+        var powerBankRows = await products.SelectAllAsync(product => product.PowerBankProfile != null && product.Transactions.All(transaction => transaction.Direction != direction), product => new ProductListItemViewModel(product.Id, product.Id, "Power Bank", product.ModelNavigation.ManufacturerNavigation.Name + " " + product.ModelNavigation.Name, "Barcode: " + product.Barcode, null, product.Transactions.Any(t => t.Direction == TransactionDirection.Sell), product.SecondHandProfile != null) { SuggestedPrice = product.Price, ManufacturerId = product.ModelNavigation.ManufacturerId, ManufacturerName = product.ModelNavigation.ManufacturerNavigation.Name, ModelId = product.ModelId, ModelName = product.ModelNavigation.Name });
+        var portableStorageRows = await products.SelectAllAsync(product => product.PortableStorageProfile != null && product.Transactions.All(transaction => transaction.Direction != direction), product => new ProductListItemViewModel(product.Id, product.Id, "Portable Storage", product.ModelNavigation.ManufacturerNavigation.Name + " " + product.ModelNavigation.Name, "Barcode: " + product.Barcode, null, product.Transactions.Any(t => t.Direction == TransactionDirection.Sell), product.SecondHandProfile != null) { SuggestedPrice = product.Price, ManufacturerId = product.ModelNavigation.ManufacturerId, ManufacturerName = product.ModelNavigation.ManufacturerNavigation.Name, ModelId = product.ModelId, ModelName = product.ModelNavigation.Name });
+        var caseRows = await products.SelectAllAsync(product => product.CaseProfile != null && product.Transactions.All(transaction => transaction.Direction != direction), product => new ProductListItemViewModel(product.Id, product.Id, "Case", product.ModelNavigation.ManufacturerNavigation.Name + " " + product.ModelNavigation.Name, "Barcode: " + product.Barcode, null, product.Transactions.Any(t => t.Direction == TransactionDirection.Sell), product.SecondHandProfile != null) { SuggestedPrice = product.Price, ManufacturerId = product.ModelNavigation.ManufacturerId, ManufacturerName = product.ModelNavigation.ManufacturerNavigation.Name, ModelId = product.ModelId, ModelName = product.ModelNavigation.Name });
 
         var appleIdRows = await appleIds.SelectAllAsync(
             appleId => appleId.ProductNavigation.Transactions.All(transaction => transaction.Direction != direction),
@@ -183,6 +191,10 @@ public class TransactionsDataService(
                 appleId.ProductNavigation.SecondHandProfile != null)
             {
                 SuggestedPrice = appleId.ProductNavigation.Price,
+                ManufacturerId = appleId.ProductNavigation.ModelNavigation.ManufacturerId,
+                ManufacturerName = appleId.ProductNavigation.ModelNavigation.ManufacturerNavigation.Name,
+                ModelId = appleId.ProductNavigation.ModelId,
+                ModelName = appleId.ProductNavigation.ModelNavigation.Name,
             });
 
         return phoneRows
@@ -204,16 +216,27 @@ public class TransactionsDataService(
     public async Task<IReadOnlyList<ProductListItemViewModel>> SearchSelectableProductsAsync(
         TransactionDirection direction,
         string? q,
-        int take = 25)
+        int take = 25,
+        string? type = null,
+        int? manufacturerId = null,
+        int? modelId = null)
     {
         var normalizedQuery = q?.Trim();
         var limit = Math.Clamp(take, 1, 500);
         var selectable = await GetSelectableProductsAsync(direction);
+        var filtered = selectable.AsEnumerable();
+
+        if (!string.IsNullOrWhiteSpace(type))
+            filtered = filtered.Where(row => string.Equals(row.Type, type.Trim(), StringComparison.OrdinalIgnoreCase));
+        if (manufacturerId is > 0)
+            filtered = filtered.Where(row => row.ManufacturerId == manufacturerId);
+        if (modelId is > 0)
+            filtered = filtered.Where(row => row.ModelId == modelId);
 
         if (string.IsNullOrEmpty(normalizedQuery))
-            return selectable.Take(limit).ToList();
+            return filtered.Take(limit).ToList();
 
-        return selectable
+        return filtered
             .Where(row =>
                 Contains(row.Name, normalizedQuery) ||
                 Contains(row.Type, normalizedQuery) ||

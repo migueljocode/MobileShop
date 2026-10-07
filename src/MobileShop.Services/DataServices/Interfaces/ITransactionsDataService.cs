@@ -42,7 +42,13 @@ public interface ITransactionsDataService
     /// <param name="direction">The transaction direction.</param>
     /// <param name="q">The optional case-insensitive search query.</param>
     /// <param name="take">The maximum number of results to return.</param>
-    Task<IReadOnlyList<ProductListItemViewModel>> SearchSelectableProductsAsync(TransactionDirection direction, string? q, int take = 25);
+    Task<IReadOnlyList<ProductListItemViewModel>> SearchSelectableProductsAsync(
+        TransactionDirection direction,
+        string? q,
+        int take = 25,
+        string? type = null,
+        int? manufacturerId = null,
+        int? modelId = null);
 
     /// <summary>Records a purchase transaction.</summary>
     /// <param name="input">The purchase input.</param>

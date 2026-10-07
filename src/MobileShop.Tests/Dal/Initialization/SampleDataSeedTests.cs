@@ -55,7 +55,9 @@ public class SampleDataSeedTests : IDisposable
         Assert.Equal(4, context.Customers.Count());
         Assert.Equal(1, context.Users.Count());
         Assert.Equal(6, context.Manufacturers.Count());
-        Assert.Equal(7, context.Categories.Count());
+        Assert.Equal(9, context.Categories.Count());
+        Assert.Contains(context.Categories, category => category.Name == "SmartWatch");
+        Assert.Contains(context.Categories, category => category.Name == "Laptop");
         Assert.Equal(6, context.Colors.Count());
         Assert.Equal(4, context.StorageCapacities.Count());
         Assert.Equal(16, context.Models.Count());

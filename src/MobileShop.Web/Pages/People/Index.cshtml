@@ -1,0 +1,76 @@
+@page
+@model MobileShop.Web.Pages.People.PeopleIndexModel
+@{ ViewData["Title"] = "People"; }
+<h1>People</h1>
+
+<form method="get" class="row g-3 align-items-end mb-3">
+    <fieldset class="col-12">
+        <legend class="fs-6">Show</legend>
+        <div class="d-flex flex-wrap gap-3">
+            <div class="form-check">
+                <input class="form-check-input" type="radio" name="type" id="peopleAll" value="all" checked="@(Model.Type == "all")" onchange="this.form.submit()" />
+                <label class="form-check-label" for="peopleAll">All</label>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="radio" name="type" id="peopleCustomers" value="customers" checked="@(Model.Type == "customers")" onchange="this.form.submit()" />
+                <label class="form-check-label" for="peopleCustomers">Customers</label>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="radio" name="type" id="peopleSellers" value="sellers" checked="@(Model.Type == "sellers")" onchange="this.form.submit()" />
+                <label class="form-check-label" for="peopleSellers">Sellers</label>
+            </div>
+        </div>
+    </fieldset>
+    <div class="col-auto">
+        <label for="sortBy" class="form-label">Sort by</label>
+        <select class="form-select" id="sortBy" name="sortBy" onchange="this.form.submit()">
+            <option value="name" selected="@(Model.SortBy == "Name")">Name</option>
+            <option value="phone" selected="@(Model.SortBy == "Phone")">Phone</option>
+            <option value="count" selected="@(Model.SortBy == "Count")">@Model.ActivityColumnLabel</option>
+        </select>
+    </div>
+    <div class="col-auto">
+        <label for="ascending" class="form-label">Direction</label>
+        <select class="form-select" id="ascending" name="ascending" onchange="this.form.submit()">
+            <option value="true" selected="@Model.Ascending">Ascending</option>
+            <option value="false" selected="@(!Model.Ascending)">Descending</option>
+        </select>
+    </div>
+    <div class="col-auto">
+        @if (Model.ShowAddCustomer)
+        {
+            <a asp-page="/People/CreateCustomer" class="btn btn-success">Add customer</a>
+        }
+        else if (Model.ShowAddSeller)
+        {
+            <a asp-page="/People/CreateSeller" class="btn btn-success">Add seller</a>
+        }
+    </div>
+</form>
+
+@if (Model.People.Count == 0)
+{
+    <p class="text-muted">No people found.</p>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr><th>Role</th><th>Name</th><th>Phone</th><th>National ID</th><th>Seller type</th><th>@Model.ActivityColumnLabel</th><th></th></tr>
+        </thead>
+        <tbody>
+            @foreach (var person in Model.People)
+            {
+                <tr>
+                    <td>@person.Role</td>
+                    <td>@person.Name</td>
+                    <td>@person.PhoneNumber</td>
+                    <td>@(person.NationalId ?? "N/A")</td>
+                    <td>@(person.EntityType ?? "N/A")</td>
+                    <td>@person.ActivityCount</td>
+                    <td><a asp-page="@person.DetailsPage" asp-route-id="@person.Id">Details</a></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

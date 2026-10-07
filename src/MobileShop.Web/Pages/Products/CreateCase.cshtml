@@ -4,14 +4,222 @@
 <h1>Create case</h1>
 <form method="post" class="row g-3 col-lg-8">
 <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-<div class="col-md-6"><label asp-for="Input.ManufacturerId">Case manufacturer</label><select asp-for="Input.ManufacturerId" asp-items="@(new SelectList(Model.Manufacturers, "Id", "Name"))" class="form-select"><option value="">-- Select manufacturer --</option></select></div>
-<div class="col-md-6"><label asp-for="Input.CompatibleManufacturerId">Compatible phone manufacturer</label><select asp-for="Input.CompatibleManufacturerId" asp-items="@(new SelectList(Model.Manufacturers, "Id", "Name"))" class="form-select" id="compatibleManufacturerSelect"><option value="">-- Select manufacturer --</option></select></div>
-<div class="col-12"><label asp-for="Input.CompatibleModelIds">Compatible phone models</label><select asp-for="Input.CompatibleModelIds" asp-items="@(new SelectList(Model.CompatibleModels, "Id", "Name"))" class="form-select" id="compatibleModelSelect" multiple></select><span class="form-text">Select one or more compatible phone models.</span></div>
+<div class="col-md-6"><label asp-for="Input.ManufacturerId">Case manufacturer</label><div class="input-group"><select asp-for="Input.ManufacturerId" asp-items="@(new SelectList(Model.Manufacturers, "Id", "Name"))" class="form-select" id="caseManufacturerSelect"><option value="">-- Select manufacturer --</option></select><button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#addCaseManufacturerModal">Add New</button></div></div>
+<div class="col-md-6"><label asp-for="Input.CompatibleManufacturerId">Compatible phone manufacturer</label><div class="input-group"><select asp-for="Input.CompatibleManufacturerId" asp-items="@(new SelectList(Model.Manufacturers, "Id", "Name"))" class="form-select" id="compatibleManufacturerSelect"><option value="">-- Select manufacturer --</option></select><button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#addCompatibleManufacturerModal">Add New</button></div></div>
+<div class="col-12"><label asp-for="Input.CompatibleModelIds" class="form-label">Compatible phone models</label><div class="border rounded p-2" id="compatibleModelList" style="max-height: 180px; overflow-y: auto;">@if (Model.CompatibleModels.Count == 0){<div class="text-muted">Select a phone manufacturer first.</div>}else{foreach (var compatibleModel in Model.CompatibleModels){if (Model.Input.CompatibleModelIds.Contains(compatibleModel.Id)){<div class="form-check"><input class="form-check-input" type="checkbox" name="Input.CompatibleModelIds" value="@compatibleModel.Id" id="compatibleModel_@compatibleModel.Id" checked /><label class="form-check-label" for="compatibleModel_@compatibleModel.Id">@compatibleModel.Name</label></div>}else{<div class="form-check"><input class="form-check-input" type="checkbox" name="Input.CompatibleModelIds" value="@compatibleModel.Id" id="compatibleModel_@compatibleModel.Id" /><label class="form-check-label" for="compatibleModel_@compatibleModel.Id">@compatibleModel.Name</label></div>}}}</div><div class="mt-2"><button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#addCompatibleModelModal">Add New</button></div><span class="form-text">Select one or more compatible phone models.</span></div>
+<div class="col-12"><label asp-for="Input.Notes">Notes</label><textarea asp-for="Input.Notes" class="form-control" rows="3"></textarea></div>
 <div class="col-md-3"><label asp-for="Input.Price">Paid price (IRR)</label><input asp-for="Input.Price" class="form-control" data-price inputmode="numeric" step="1" min="0" max="@MobileShop.Models.MoneyLimits.MaxRials" /></div><div class="col-md-3"><label asp-for="Input.ProfitPercent">Profit %</label><input asp-for="Input.ProfitPercent" class="form-control" data-percent /></div><div class="col-md-3"><label asp-for="Input.ProfitAmount">Profit amount (IRR)</label><input asp-for="Input.ProfitAmount" class="form-control" data-amount inputmode="numeric" step="1" min="0" max="@MobileShop.Models.MoneyLimits.MaxRials" /></div><div class="col-md-3"><label>Finished price (IRR)</label><input class="form-control" data-finished-price readonly /></div>
 <div class="col-md-4"><label asp-for="Input.Count">Count</label><input asp-for="Input.Count" class="form-control" min="1" /></div>
 <div class="col-12"><button class="btn btn-primary" type="submit">Save case</button><a asp-page="/Products/Index" class="btn btn-outline-secondary ms-2">Back to products</a></div>
 </form>
 @if (!string.IsNullOrWhiteSpace(Model.Message)){<div class="alert alert-danger mt-3">@Model.Message</div>}
-@section Scripts{<partial name="_ValidationScriptsPartial" /><script src="~/js/create-product-pricing.js"></script><script>
-document.addEventListener('DOMContentLoaded',function(){const m=document.getElementById('compatibleManufacturerSelect'),s=document.getElementById('compatibleModelSelect');m?.addEventListener('change',async function(){s.innerHTML='';if(!this.value)return;const r=await fetch('?handler=CompatibleModels&manufacturerId='+encodeURIComponent(this.value));if(r.ok)(await r.json()).forEach(x=>s.appendChild(new Option(x.name,x.id)))})});
-</script>}
+<div class="modal fade" id="addCaseManufacturerModal" tabindex="-1" aria-hidden="true"><div class="modal-dialog"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">Add Case Manufacturer</h5><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div><div class="modal-body"><label for="newCaseManufacturerName" class="form-label">Name</label><input type="text" class="form-control" id="newCaseManufacturerName" required /></div><div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button><button type="button" class="btn btn-primary" id="saveCaseManufacturerBtn">Save</button></div></div></div></div>
+<div class="modal fade" id="addCompatibleManufacturerModal" tabindex="-1" aria-hidden="true"><div class="modal-dialog"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">Add Compatible Phone Manufacturer</h5><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div><div class="modal-body"><label for="newCompatibleManufacturerName" class="form-label">Name</label><input type="text" class="form-control" id="newCompatibleManufacturerName" required /></div><div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button><button type="button" class="btn btn-primary" id="saveCompatibleManufacturerBtn">Save</button></div></div></div></div>
+<div class="modal fade" id="addCompatibleModelModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header"><h5 class="modal-title">Add Compatible Model</h5><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div>
+            <div class="modal-body">
+                <div id="compatibleModelModalError" class="alert alert-danger d-none" role="alert"></div>
+                <label for="compatibleModelManufacturerSelect" class="form-label">Manufacturer</label>
+                <select class="form-select" id="compatibleModelManufacturerSelect"><option value="">-- Select manufacturer --</option></select>
+                <label for="compatibleModelSelectInModal" class="form-label mt-3">Model</label>
+                <select class="form-select" id="compatibleModelSelectInModal" disabled><option value="">-- Select manufacturer first --</option></select>
+            </div>
+            <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button><button type="button" class="btn btn-primary" id="saveCompatibleModelBtn">Save</button></div>
+        </div>
+    </div>
+</div>
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script src="~/js/create-product-pricing.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const caseManufacturer = document.getElementById('caseManufacturerSelect');
+            const compatibleManufacturer = document.getElementById('compatibleManufacturerSelect');
+            const modal = document.getElementById('addCompatibleModelModal');
+            const modalManufacturer = document.getElementById('compatibleModelManufacturerSelect');
+            const modalModel = document.getElementById('compatibleModelSelectInModal');
+            const modalError = document.getElementById('compatibleModelModalError');
+            const compatibleList = document.getElementById('compatibleModelList');
+            const antiforgeryToken = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+
+            const selectedModelIds = () => Array.from(
+                compatibleList.querySelectorAll('input[name="Input.CompatibleModelIds"]:checked')
+            ).map(input => Number(input.value));
+
+            const addModelToCompatibleList = (model) => {
+                let checkbox = compatibleList.querySelector(`input[name="Input.CompatibleModelIds"][value="${model.id}"]`);
+                if (!checkbox) {
+                    const row = document.createElement('div');
+                    row.className = 'form-check';
+                    checkbox = document.createElement('input');
+                    checkbox.className = 'form-check-input';
+                    checkbox.type = 'checkbox';
+                    checkbox.name = 'Input.CompatibleModelIds';
+                    checkbox.value = model.id;
+                    checkbox.id = `compatibleModel_${model.id}`;
+                    const label = document.createElement('label');
+                    label.className = 'form-check-label';
+                    label.htmlFor = checkbox.id;
+                    label.textContent = model.name;
+                    row.append(checkbox, label);
+                    compatibleList.replaceChildren(...Array.from(compatibleList.children).filter(child => child.classList.contains('form-check')), row);
+                }
+                checkbox.checked = true;
+            };
+
+            const loadModels = async (manufacturerId, select, placeholder) => {
+                select.replaceChildren(new Option(placeholder, ''));
+                select.disabled = true;
+                if (!manufacturerId) return [];
+
+                const response = await fetch(`?handler=CompatibleModels&manufacturerId=${encodeURIComponent(manufacturerId)}`);
+                if (!response.ok) throw new Error('Could not load models for this manufacturer.');
+
+                const models = await response.json();
+                models.forEach(model => select.appendChild(new Option(model.name, model.id)));
+                select.disabled = false;
+                return models;
+            };
+
+            const loadCompatibleModels = async () => {
+                const selectedIds = selectedModelIds();
+                if (!compatibleManufacturer.value) {
+                    compatibleList.innerHTML = '<div class="text-muted">Select a phone manufacturer first.</div>';
+                    return;
+                }
+
+                try {
+                    const response = await fetch(`?handler=CompatibleModels&manufacturerId=${encodeURIComponent(compatibleManufacturer.value)}`);
+                    if (!response.ok) throw new Error('Could not load compatible phone models.');
+                    const models = await response.json();
+                    compatibleList.replaceChildren();
+                    if (!models.length) {
+                        compatibleList.innerHTML = '<div class="text-muted">No models found for this manufacturer.</div>';
+                        return;
+                    }
+                    models.forEach(model => {
+                        const row = document.createElement('div');
+                        row.className = 'form-check';
+                        const checkbox = document.createElement('input');
+                        checkbox.className = 'form-check-input';
+                        checkbox.type = 'checkbox';
+                        checkbox.name = 'Input.CompatibleModelIds';
+                        checkbox.value = model.id;
+                        checkbox.id = `compatibleModel_${model.id}`;
+                        checkbox.checked = selectedIds.includes(Number(model.id));
+                        const label = document.createElement('label');
+                        label.className = 'form-check-label';
+                        label.htmlFor = checkbox.id;
+                        label.textContent = model.name;
+                        row.append(checkbox, label);
+                        compatibleList.appendChild(row);
+                    });
+                } catch (error) {
+                    compatibleList.innerHTML = `<div class="text-danger">${error.message}</div>`;
+                }
+            };
+
+            const syncModalManufacturers = () => {
+                const currentValue = compatibleManufacturer.value;
+                modalManufacturer.replaceChildren(new Option('-- Select manufacturer --', ''));
+                Array.from(compatibleManufacturer.options)
+                    .filter(option => option.value)
+                    .forEach(option => modalManufacturer.appendChild(new Option(option.text, option.value)));
+                modalManufacturer.value = currentValue;
+                modalModel.replaceChildren(new Option('-- Select manufacturer first --', ''));
+                modalModel.disabled = true;
+                modalError.classList.add('d-none');
+            };
+
+            const postHandler = async (handler, values) => {
+                const response = await fetch(`?handler=${handler}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+                        ...(antiforgeryToken ? { RequestVerificationToken: antiforgeryToken } : {})
+                    },
+                    body: new URLSearchParams(values)
+                });
+                const result = await response.json();
+                if (!response.ok) throw new Error(result.error || 'The request could not be completed.');
+                return result;
+            };
+
+            compatibleManufacturer.addEventListener('change', () => {
+                syncModalManufacturers();
+                loadCompatibleModels();
+            });
+
+            modal.addEventListener('show.bs.modal', async () => {
+                syncModalManufacturers();
+                try {
+                    await loadModels(modalManufacturer.value, modalModel, '-- Select model --');
+                } catch (error) {
+                    modalError.textContent = error.message;
+                    modalError.classList.remove('d-none');
+                }
+            });
+
+            modalManufacturer.addEventListener('change', async () => {
+                try {
+                    await loadModels(modalManufacturer.value, modalModel, '-- Select model --');
+                    modalError.classList.add('d-none');
+                } catch (error) {
+                    modalError.textContent = error.message;
+                    modalError.classList.remove('d-none');
+                }
+            });
+
+            document.getElementById('saveCompatibleModelBtn').addEventListener('click', async () => {
+                const manufacturerId = modalManufacturer.value;
+                const selectedModelId = modalModel.value;
+                modalError.classList.add('d-none');
+
+                if (!manufacturerId || !selectedModelId) {
+                    modalError.textContent = 'Select a manufacturer and model.';
+                    modalError.classList.remove('d-none');
+                    return;
+                }
+
+                try {
+                    const model = { id: selectedModelId, name: modalModel.selectedOptions[0].text };
+                    compatibleManufacturer.value = manufacturerId;
+                    addModelToCompatibleList(model);
+                    bootstrap.Modal.getOrCreateInstance(modal).hide();
+                    await loadCompatibleModels();
+                } catch (error) {
+                    modalError.textContent = error.message;
+                    modalError.classList.remove('d-none');
+                }
+            });
+
+            const saveManufacturer = async (inputId, targetSelect, handler, modalId) => {
+                const name = document.getElementById(inputId).value.trim();
+                if (!name) return;
+                try {
+                    const result = await postHandler(handler, { name });
+                    targetSelect.appendChild(new Option(result.name, result.id, true, true));
+                    if (targetSelect === caseManufacturer) {
+                        compatibleManufacturer.appendChild(new Option(result.name, result.id));
+                    }
+                    bootstrap.Modal.getOrCreateInstance(document.getElementById(modalId)).hide();
+                    document.getElementById(inputId).value = '';
+                    syncModalManufacturers();
+                    if (targetSelect === compatibleManufacturer) await loadCompatibleModels();
+                } catch (error) {
+                    window.alert(error.message);
+                }
+            };
+
+            document.getElementById('saveCaseManufacturerBtn').addEventListener('click', () =>
+                saveManufacturer('newCaseManufacturerName', caseManufacturer, 'CreateManufacturer', 'addCaseManufacturerModal'));
+            document.getElementById('saveCompatibleManufacturerBtn').addEventListener('click', () =>
+                saveManufacturer('newCompatibleManufacturerName', compatibleManufacturer, 'CreateCompatibleManufacturer', 'addCompatibleManufacturerModal'));
+
+            syncModalManufacturers();
+            loadCompatibleModels();
+        });
+    </script>
+}

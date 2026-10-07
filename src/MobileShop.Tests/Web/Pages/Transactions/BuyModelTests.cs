@@ -26,6 +26,7 @@ public class BuyModelTests : RepoTestBase
             new BaseRepo<Transaction>(Context),
             new BaseRepo<PartNumber>(Context),
             new BaseRepo<Product>(Context),
+            new BaseRepo<StorageCapacity>(Context),
             NullLogger<ProductsDataService>.Instance);
 
         _model = new BuyModel(_transactions.Object, _people.Object, products);
@@ -48,6 +49,19 @@ public class BuyModelTests : RepoTestBase
         Assert.Equal("CreatePowerBank", powerBank.PostHandler);
         Assert.True(MobileShop.Web.Pages.Shared.ProductCreateRegistry.TryGet("portablestorage", out var storage));
         Assert.Equal("CreatePortableStorage", storage.PostHandler);
+    }
+
+    [Fact]
+    public async Task SearchProductsHandler_ForwardsProductFilters()
+    {
+        _transactions.Setup(service => service.SearchSelectableProductsAsync(
+                TransactionDirection.Buy, "tablet", 25, "Tablet", 10, 20))
+            .ReturnsAsync(Array.Empty<ProductListItemViewModel>());
+
+        Assert.IsType<JsonResult>(await _model.OnGetSearchProductsAsync("tablet", "Tablet", 10, 20));
+
+        _transactions.Verify(service => service.SearchSelectableProductsAsync(
+            TransactionDirection.Buy, "tablet", 25, "Tablet", 10, 20), Times.Once);
         Assert.True(MobileShop.Web.Pages.Shared.ProductCreateRegistry.TryGet("case", out var caseDefinition));
         Assert.Equal("_ProductCreateCaseForm", caseDefinition.PartialName);
     }
@@ -148,7 +162,7 @@ public class BuyModelTests : RepoTestBase
         var (manufacturer, model) = await SeedDeviceAsync("PowerBank");
         _transactions.Setup(service => service.SearchSelectableProductsAsync(TransactionDirection.Buy, null, 500))
             .ReturnsAsync([new ProductListItemViewModel(1, 1, "Power Bank", "Acme PowerBank X", "Barcode: 123", null, false, false) { SuggestedPrice = 100 }]);
-        var result = await _model.OnPostCreatePowerBankAsync(new CreatePowerBankInputModel { ManufacturerId = manufacturer.Id, ModelId = model.Id, CapacityMah = 20000, MaxWattage = 30, PortCount = 2, Pd = true, Price = 100, Count = 2 });
+        var result = await _model.OnPostCreatePowerBankAsync(new CreatePowerBankInputModel { ManufacturerId = manufacturer.Id, ModelId = model.Id, CapacityMah = 20000, MaxWattage = 30, PortCount = 2, PortTypes = [CableConnector.UsbC, CableConnector.UsbA], Pd = true, Price = 100, Count = 2 });
         var json = Assert.IsType<JsonResult>(result);
         using var document = System.Text.Json.JsonDocument.Parse(System.Text.Json.JsonSerializer.Serialize(json.Value));
         Assert.Equal("powerbank", document.RootElement.GetProperty("type").GetString());

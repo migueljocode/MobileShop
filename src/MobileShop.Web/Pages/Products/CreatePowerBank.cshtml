@@ -3,15 +3,147 @@
 @{ ViewData["Title"] = "Create power bank"; }
 <h1>Create power bank</h1>
 <form method="post" class="row g-3 col-lg-8">
-<div asp-validation-summary="ModelOnly" class="text-danger"></div>
-<div class="col-md-6"><label asp-for="Input.ManufacturerId">Manufacturer</label><select asp-for="Input.ManufacturerId" asp-items="@(new SelectList(Model.Manufacturers, "Id", "Name"))" class="form-select" id="manufacturerSelect"><option value="">-- Select manufacturer --</option></select></div>
-<div class="col-md-6"><label asp-for="Input.ModelId">Model</label><select asp-for="Input.ModelId" asp-items="@(new SelectList(Model.Models, "Id", "Name"))" class="form-select" id="modelSelect"><option value="">-- Select model --</option></select></div>
+<div asp-validation-summary="All" class="text-danger"></div>
+<div class="col-md-6"><label asp-for="Input.ManufacturerId">Manufacturer</label><div class="input-group"><select asp-for="Input.ManufacturerId" asp-items="@(new SelectList(Model.Manufacturers, "Id", "Name"))" class="form-select" id="manufacturerSelect"><option value="">-- Select manufacturer --</option></select><button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#addManufacturerModal">Add New</button></div></div>
+<div class="col-md-6"><label asp-for="Input.ModelId">Model</label><div class="input-group"><select asp-for="Input.ModelId" asp-items="@(new SelectList(Model.Models, "Id", "Name"))" class="form-select" id="modelSelect"><option value="">-- Select model --</option></select><button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#addModelModal">Add New</button></div></div>
 <div class="col-md-3"><label asp-for="Input.CapacityMah">Capacity (mAh)</label><input asp-for="Input.CapacityMah" class="form-control" min="0" /></div><div class="col-md-3"><label asp-for="Input.MaxWattage">Max wattage</label><input asp-for="Input.MaxWattage" class="form-control" min="0" /></div><div class="col-md-3"><label asp-for="Input.PortCount">Ports</label><input asp-for="Input.PortCount" class="form-control" min="1" /></div><div class="col-md-3"><div class="form-check mt-4"><input asp-for="Input.Pd" class="form-check-input" /><label asp-for="Input.Pd" class="form-check-label">USB Power Delivery</label></div></div>
+<div id="portTypeFields" class="col-12 row g-3" data-selected-types="@string.Join(",", Model.Input.PortTypes.Select(type => (int)type))"></div>
 <div class="col-md-3"><label asp-for="Input.Price">Paid price (IRR)</label><input asp-for="Input.Price" class="form-control" data-price inputmode="numeric" step="1" min="0" max="@MobileShop.Models.MoneyLimits.MaxRials" /></div><div class="col-md-3"><label asp-for="Input.ProfitPercent">Profit %</label><input asp-for="Input.ProfitPercent" class="form-control" data-percent /></div><div class="col-md-3"><label asp-for="Input.ProfitAmount">Profit amount (IRR)</label><input asp-for="Input.ProfitAmount" class="form-control" data-amount inputmode="numeric" step="1" min="0" max="@MobileShop.Models.MoneyLimits.MaxRials" /></div><div class="col-md-3"><label>Finished price (IRR)</label><input class="form-control" data-finished-price readonly /></div>
 <div class="col-md-4"><label asp-for="Input.Count">Count</label><input asp-for="Input.Count" class="form-control" min="1" /></div>
 <div class="col-12"><button class="btn btn-primary" type="submit">Save power bank</button><a asp-page="/Products/Index" class="btn btn-outline-secondary ms-2">Back to products</a></div>
 </form>
 @if (!string.IsNullOrWhiteSpace(Model.Message)){<div class="alert alert-danger mt-3">@Model.Message</div>}
-@section Scripts{<partial name="_ValidationScriptsPartial" /><script src="~/js/create-product-pricing.js"></script><script>
-document.addEventListener('DOMContentLoaded',function(){const m=document.getElementById('manufacturerSelect'),s=document.getElementById('modelSelect');m?.addEventListener('change',async function(){s.innerHTML='<option value="">-- Select model --</option>';if(!this.value)return;const r=await fetch('?handler=Models&manufacturerId='+encodeURIComponent(this.value));if(r.ok)(await r.json()).forEach(x=>s.appendChild(new Option(x.name,x.id)))})});
-</script>}
+<div class="modal fade" id="addManufacturerModal" tabindex="-1" aria-hidden="true"><div class="modal-dialog"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">Add Manufacturer</h5><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div><div class="modal-body"><div id="manufacturerModalError" class="alert alert-danger d-none" role="alert"></div><label for="newManufacturerName" class="form-label">Name</label><input type="text" class="form-control" id="newManufacturerName" required /></div><div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button><button type="button" class="btn btn-primary" id="saveManufacturerBtn">Save</button></div></div></div></div>
+<div class="modal fade" id="addModelModal" tabindex="-1" aria-hidden="true"><div class="modal-dialog"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">Add Model</h5><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div><div class="modal-body"><div id="modelModalError" class="alert alert-danger d-none" role="alert"></div><label for="newModelName" class="form-label">Name</label><input type="text" class="form-control" id="newModelName" required /></div><div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button><button type="button" class="btn btn-primary" id="saveModelBtn">Save</button></div></div></div></div>
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script src="~/js/create-product-pricing.js"></script>
+    <template id="portTypeSelectTemplate">
+        <select class="form-select" name="Input.PortTypes">
+            <option value="">-- Select connector --</option>
+            @foreach (var option in Html.GetEnumSelectList<MobileShop.Models.Enums.CableConnector>())
+            {
+                <option value="@option.Value">@option.Text</option>
+            }
+        </select>
+    </template>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const portCount = document.getElementById('Input_PortCount');
+            const portTypeFields = document.getElementById('portTypeFields');
+            const portTypeTemplate = document.getElementById('portTypeSelectTemplate');
+            const initialPortTypes = portTypeFields.dataset.selectedTypes.split(',').filter(value => value !== '');
+
+            const renderPortTypes = (selectedTypes) => {
+                const count = Number.parseInt(portCount.value, 10);
+                portTypeFields.replaceChildren();
+                if (!Number.isInteger(count) || count < 1) return;
+
+                for (let index = 0; index < count; index++) {
+                    const field = document.createElement('div');
+                    field.className = 'col-md-6';
+                    const label = document.createElement('label');
+                    label.className = 'form-label';
+                    label.htmlFor = `portType${index + 1}`;
+                    label.textContent = `Port ${index + 1} connector type`;
+                    const select = portTypeTemplate.content.firstElementChild.cloneNode(true);
+                    select.id = label.htmlFor;
+                    if (selectedTypes[index] !== undefined) select.value = selectedTypes[index];
+                    field.append(label, select);
+                    portTypeFields.appendChild(field);
+                }
+            };
+
+            portCount.addEventListener('input', () => {
+                renderPortTypes(Array.from(portTypeFields.querySelectorAll('select'), select => select.value));
+            });
+            renderPortTypes(initialPortTypes);
+
+            const manufacturer = document.getElementById('manufacturerSelect');
+            const model = document.getElementById('modelSelect');
+            const manufacturerError = document.getElementById('manufacturerModalError');
+            const modelError = document.getElementById('modelModalError');
+            const antiforgeryToken = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+
+            const postHandler = async (handler, values) => {
+                if (!antiforgeryToken) throw new Error('The security token is missing. Refresh the page and try again.');
+                const response = await fetch(`?handler=${handler}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+                        RequestVerificationToken: antiforgeryToken
+                    },
+                    body: new URLSearchParams({ ...values, __RequestVerificationToken: antiforgeryToken })
+                });
+                if (!(response.headers.get('content-type') || '').includes('application/json')) {
+                    throw new Error(`The server returned an unexpected response (HTTP ${response.status}). Refresh the page and try again.`);
+                }
+                const result = await response.json();
+                if (!response.ok) throw new Error(result.error || 'The request could not be completed.');
+                return result;
+            };
+
+            const loadModels = async () => {
+                model.replaceChildren(new Option('-- Select model --', ''));
+                if (!manufacturer.value) return;
+                const response = await fetch(`?handler=Models&manufacturerId=${encodeURIComponent(manufacturer.value)}`);
+                if (!response.ok) throw new Error('Could not load models for this manufacturer.');
+                const models = await response.json();
+                models.forEach(item => model.appendChild(new Option(item.name, item.id)));
+            };
+
+            manufacturer.addEventListener('change', async () => {
+                try {
+                    await loadModels();
+                    modelError.classList.add('d-none');
+                } catch (error) {
+                    modelError.textContent = error.message;
+                    modelError.classList.remove('d-none');
+                }
+            });
+
+            document.getElementById('saveManufacturerBtn').addEventListener('click', async () => {
+                const nameInput = document.getElementById('newManufacturerName');
+                const name = nameInput.value.trim();
+                manufacturerError.classList.add('d-none');
+                if (!name) {
+                    manufacturerError.textContent = 'Enter a manufacturer name.';
+                    manufacturerError.classList.remove('d-none');
+                    return;
+                }
+                try {
+                    const result = await postHandler('CreateManufacturer', { name });
+                    manufacturer.appendChild(new Option(result.name, result.id, true, true));
+                    manufacturer.value = result.id;
+                    bootstrap.Modal.getOrCreateInstance(document.getElementById('addManufacturerModal')).hide();
+                    nameInput.value = '';
+                    await loadModels();
+                } catch (error) {
+                    manufacturerError.textContent = error.message;
+                    manufacturerError.classList.remove('d-none');
+                }
+            });
+
+            document.getElementById('saveModelBtn').addEventListener('click', async () => {
+                const nameInput = document.getElementById('newModelName');
+                const name = nameInput.value.trim();
+                modelError.classList.add('d-none');
+                if (!manufacturer.value || !name) {
+                    modelError.textContent = !manufacturer.value ? 'Select a manufacturer first.' : 'Enter a model name.';
+                    modelError.classList.remove('d-none');
+                    return;
+                }
+                try {
+                    const result = await postHandler('CreateModel', { manufacturerId: manufacturer.value, name });
+                    model.appendChild(new Option(result.name, result.id, true, true));
+                    model.value = result.id;
+                    bootstrap.Modal.getOrCreateInstance(document.getElementById('addModelModal')).hide();
+                    nameInput.value = '';
+                } catch (error) {
+                    modelError.textContent = error.message;
+                    modelError.classList.remove('d-none');
+                }
+            });
+        });
+    </script>
+}

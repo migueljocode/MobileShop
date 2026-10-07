@@ -27,6 +27,10 @@ public class ApiProductsDataService : IProductsDataService
         => throw new NotImplementedException("ApiProductsDataService is not implemented yet.");
 
     /// <inheritdoc />
+    public Task<IReadOnlyList<DropdownOptionViewModel>> GetStorageCapacitiesAsync()
+        => throw new NotImplementedException("ApiProductsDataService is not implemented yet.");
+
+    /// <inheritdoc />
     public Task<IReadOnlyList<string>> GetGuaranteeCorporationsAsync()
         => throw new NotImplementedException("ApiProductsDataService is not implemented yet.");
 
@@ -35,11 +39,15 @@ public class ApiProductsDataService : IProductsDataService
         => throw new NotImplementedException("ApiProductsDataService is not implemented yet.");
 
     /// <inheritdoc />
-    public Task<DropdownCreateResult> CreateModelAsync(int manufacturerId, string name)
+    public Task<DropdownCreateResult> CreateModelAsync(int manufacturerId, string name, string categoryName = "Phone")
         => throw new NotImplementedException("ApiProductsDataService is not implemented yet.");
 
     /// <inheritdoc />
     public Task<DropdownCreateResult> CreateColorAsync(string name)
+        => throw new NotImplementedException("ApiProductsDataService is not implemented yet.");
+
+    /// <inheritdoc />
+    public Task<DropdownCreateResult> CreateStorageCapacityAsync(int gb)
         => throw new NotImplementedException("ApiProductsDataService is not implemented yet.");
 
     /// <inheritdoc />
@@ -51,7 +59,7 @@ public class ApiProductsDataService : IProductsDataService
         => throw new NotImplementedException("ApiProductsDataService is not implemented yet.");
 
     /// <inheritdoc />
-    public Task<DropdownCreateResult> CreatePartNumberAsync(int modelId, string code, bool supportsDualSim, bool supportsEsim)
+    public Task<DropdownCreateResult> CreatePartNumberAsync(int modelId, string code, bool supportsDualSim = false, bool supportsEsim = false)
         => throw new NotImplementedException("ApiProductsDataService is not implemented yet.");
 
     /// <inheritdoc />

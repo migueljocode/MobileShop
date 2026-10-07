@@ -27,6 +27,7 @@ public class CreatePhoneModelTests : RepoTestBase
             new BaseRepo<Transaction>(Context),
             new BaseRepo<PartNumber>(Context),
             new BaseRepo<Product>(Context),
+            new BaseRepo<StorageCapacity>(Context),
             NullLogger<ProductsDataService>.Instance);
 
         // seed catalog data that would exist in production seed
@@ -120,13 +121,13 @@ public class CreatePhoneModelTests : RepoTestBase
     {
         var (model, _) = SeedModelsWithPartNumbers();
 
-        var result = await _model.OnPostCreatePartNumberAsync(model.Id, "NEWCODE", supportsDualSim: true, supportsEsim: false);
+        var result = await _model.OnPostCreatePartNumberAsync(model.Id, "NEWCODE-1", supportsDualSim: true, supportsEsim: false);
 
         var jsonResult = Assert.IsType<JsonResult>(result);
-        Assert.NotNull(Context.PartNumbers.FirstOrDefault(pn => pn.Code == "NEWCODE" && pn.ModelId == model.Id));
+        Assert.NotNull(Context.PartNumbers.FirstOrDefault(pn => pn.Code == "NEWCODE-1" && pn.ModelId == model.Id));
         var json = System.Text.Json.JsonSerializer.Serialize(jsonResult.Value);
         using var doc = System.Text.Json.JsonDocument.Parse(json);
-        Assert.Equal("NEWCODE", doc.RootElement.GetProperty("name").GetString());
+        Assert.Equal("NEWCODE-1", doc.RootElement.GetProperty("name").GetString());
     }
 
 

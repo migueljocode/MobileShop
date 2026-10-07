@@ -22,9 +22,12 @@
 
     <div class="col-md-6">
         <label asp-for="Input.CompatibleModelId" class="form-label">Compatible model</label>
-        <select asp-for="Input.CompatibleModelId" asp-items="@(new SelectList(Model.CompatibleModels, "Id", "Name"))" class="form-select" id="compatibleModelSelect">
-            <option value="">-- Select model --</option>
-        </select>
+        <div class="input-group">
+            <select asp-for="Input.CompatibleModelId" asp-items="@(new SelectList(Model.CompatibleModels, "Id", "Name"))" class="form-select" id="compatibleModelSelect">
+                <option value="">-- Select model --</option>
+            </select>
+            <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#addCompatibleModelModal">Add New</button>
+        </div>
         <span asp-validation-for="Input.CompatibleModelId" class="text-danger"></span>
     </div>
 
@@ -104,7 +107,12 @@
 <div class="modal fade" id="addCompatibleModelModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog"><div class="modal-content">
         <div class="modal-header"><h5 class="modal-title">Add Compatible Model</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
-        <div class="modal-body"><label for="newCompatibleModelName" class="form-label">Name</label><input type="text" class="form-control" id="newCompatibleModelName" required /></div>
+        <div class="modal-body">
+            <div id="compatibleModelError" class="alert alert-danger d-none" role="alert"></div>
+            <p class="form-text">This model will be added under the selected compatible phone manufacturer.</p>
+            <label for="newCompatibleModelName" class="form-label">Model name</label>
+            <input type="text" class="form-control" id="newCompatibleModelName" required />
+        </div>
         <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button><button type="button" class="btn btn-primary" id="saveCompatibleModelBtn">Save</button></div>
     </div></div>
 </div>
@@ -117,13 +125,16 @@
             const compatibleManufacturer = document.getElementById('compatibleManufacturerSelect');
             const compatibleModel = document.getElementById('compatibleModelSelect');
             const glassManufacturer = document.getElementById('glassManufacturerSelect');
+            const modelName = document.getElementById('newCompatibleModelName');
+            const modelError = document.getElementById('compatibleModelError');
+            const antiforgeryToken = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
             if (!compatibleManufacturer || !compatibleModel || !glassManufacturer) return;
 
             async function loadCompatibleModels() {
                 compatibleModel.innerHTML = '<option value="">-- Select compatible model --</option>';
                 if (!compatibleManufacturer.value) return;
                 const response = await fetch('?handler=Models&manufacturerId=' + encodeURIComponent(compatibleManufacturer.value));
-                if (!response.ok) return;
+                if (!response.ok) throw new Error('Could not load compatible phone models.');
                 const models = await response.json();
                 for (const item of models) {
                     const option = document.createElement('option');
@@ -137,46 +148,72 @@
             async function createManufacturer(name, select, modalId) {
                 const response = await fetch('?handler=CreateManufacturer', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ name })
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+                        ...(antiforgeryToken ? { RequestVerificationToken: antiforgeryToken } : {})
+                    },
+                    body: new URLSearchParams({ name })
                 });
-                if (!response.ok) return;
                 const result = await response.json();
+                if (!response.ok) throw new Error(result.error || 'Could not create the manufacturer.');
                 const option = new Option(result.name, result.id, true, true);
                 select.appendChild(option);
                 if (select === compatibleManufacturer) await loadCompatibleModels();
-                bootstrap.Modal.getInstance(document.getElementById(modalId)).hide();
+                bootstrap.Modal.getOrCreateInstance(document.getElementById(modalId)).hide();
             }
 
             document.getElementById('saveCompatibleManufacturerBtn').addEventListener('click', async function () {
                 const name = document.getElementById('newCompatibleManufacturerName').value.trim();
                 if (!name) return;
-                await createManufacturer(name, compatibleManufacturer, 'addCompatibleManufacturerModal');
-                document.getElementById('newCompatibleManufacturerName').value = '';
+                try {
+                    await createManufacturer(name, compatibleManufacturer, 'addCompatibleManufacturerModal');
+                    document.getElementById('newCompatibleManufacturerName').value = '';
+                } catch (error) {
+                    window.alert(error.message);
+                }
             });
 
             document.getElementById('saveGlassManufacturerBtn').addEventListener('click', async function () {
                 const name = document.getElementById('newGlassManufacturerName').value.trim();
                 if (!name) return;
-                await createManufacturer(name, glassManufacturer, 'addGlassManufacturerModal');
-                document.getElementById('newGlassManufacturerName').value = '';
+                try {
+                    await createManufacturer(name, glassManufacturer, 'addGlassManufacturerModal');
+                    document.getElementById('newGlassManufacturerName').value = '';
+                } catch (error) {
+                    window.alert(error.message);
+                }
             });
 
             document.getElementById('saveCompatibleModelBtn').addEventListener('click', async function () {
-                const name = document.getElementById('newCompatibleModelName').value.trim();
+                const name = modelName.value.trim();
                 const manufacturerId = compatibleManufacturer.value;
-                if (!name || !manufacturerId) return;
-                const response = await fetch('?handler=CreateModel&manufacturerId=' + encodeURIComponent(manufacturerId), {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ name })
-                });
-                if (!response.ok) return;
-                const result = await response.json();
-                const option = new Option(result.name, result.id, true, true);
-                compatibleModel.appendChild(option);
-                bootstrap.Modal.getInstance(document.getElementById('addCompatibleModelModal')).hide();
-                document.getElementById('newCompatibleModelName').value = '';
+                modelError.classList.add('d-none');
+                if (!manufacturerId || !name) {
+                    modelError.textContent = !manufacturerId
+                        ? 'Select a compatible phone manufacturer first.'
+                        : 'Enter a model name.';
+                    modelError.classList.remove('d-none');
+                    return;
+                }
+
+                try {
+                    const response = await fetch('?handler=CreateModel', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+                            ...(antiforgeryToken ? { RequestVerificationToken: antiforgeryToken } : {})
+                        },
+                        body: new URLSearchParams({ manufacturerId, name })
+                    });
+                    const result = await response.json();
+                    if (!response.ok) throw new Error(result.error || 'Could not create the model.');
+                    compatibleModel.appendChild(new Option(result.name, result.id, true, true));
+                    bootstrap.Modal.getOrCreateInstance(document.getElementById('addCompatibleModelModal')).hide();
+                    modelName.value = '';
+                } catch (error) {
+                    modelError.textContent = error.message;
+                    modelError.classList.remove('d-none');
+                }
             });
         });
     </script>

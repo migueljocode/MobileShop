@@ -33,6 +33,9 @@ public interface IProductsDataService
     /// <summary>Gets all color dropdown options.</summary>
     Task<IReadOnlyList<DropdownOptionViewModel>> GetColorsAsync();
 
+    /// <summary>Gets the storage-capacity dropdown options.</summary>
+    Task<IReadOnlyList<DropdownOptionViewModel>> GetStorageCapacitiesAsync();
+
     /// <summary>Gets all distinct guarantee corporation names.</summary>
     Task<IReadOnlyList<string>> GetGuaranteeCorporationsAsync();
 
@@ -43,11 +46,15 @@ public interface IProductsDataService
     /// <summary>Creates a model and returns its dropdown option.</summary>
     /// <param name="manufacturerId">The owning manufacturer identifier.</param>
     /// <param name="name">The model name.</param>
-    Task<DropdownCreateResult> CreateModelAsync(int manufacturerId, string name);
+    Task<DropdownCreateResult> CreateModelAsync(int manufacturerId, string name, string categoryName = "Phone");
 
     /// <summary>Creates a color and returns its dropdown option.</summary>
     /// <param name="name">The color name.</param>
     Task<DropdownCreateResult> CreateColorAsync(string name);
+
+    /// <summary>Creates a storage-capacity option and returns its dropdown choice.</summary>
+    /// <param name="gb">The capacity in gigabytes.</param>
+    Task<DropdownCreateResult> CreateStorageCapacityAsync(int gb);
 
     /// <summary>Gets the part-number dropdown options for a model.</summary>
     /// <param name="modelId">
@@ -65,9 +72,9 @@ public interface IProductsDataService
     /// <summary>Creates a part number for a model and returns its dropdown option.</summary>
     /// <param name="modelId">The owning model identifier.</param>
     /// <param name="code">The part-number code.</param>
-    /// <param name="supportsDualSim">Whether the part number supports dual SIM.</param>
-    /// <param name="supportsEsim">Whether the part number supports eSIM.</param>
-    Task<DropdownCreateResult> CreatePartNumberAsync(int modelId, string code, bool supportsDualSim, bool supportsEsim);
+    /// <param name="supportsDualSim">Legacy flag retained for compatibility; the active phone-level SIM capability is set when creating a phone.</param>
+    /// <param name="supportsEsim">Legacy flag retained for compatibility; the active phone-level SIM capability is set when creating a phone.</param>
+    Task<DropdownCreateResult> CreatePartNumberAsync(int modelId, string code, bool supportsDualSim = false, bool supportsEsim = false);
 
     /// <summary>Creates a phone from the submitted input.</summary>
     /// <param name="input">The phone input.</param>

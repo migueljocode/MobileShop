@@ -4,8 +4,8 @@
 <h1>Create smart watch</h1>
 <form method="post" class="row g-3 col-lg-8">
 <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-<div class="col-md-6"><label asp-for="Input.ManufacturerId" class="form-label">Manufacturer</label><select asp-for="Input.ManufacturerId" asp-items="@(new SelectList(Model.Manufacturers, "Id", "Name"))" class="form-select" id="manufacturerSelect"><option value="">-- Select manufacturer --</option></select></div>
-<div class="col-md-6"><label asp-for="Input.ModelId" class="form-label">Model</label><select asp-for="Input.ModelId" asp-items="@(new SelectList(Model.Models, "Id", "Name"))" class="form-select" id="modelSelect"><option value="">-- Select model --</option></select></div>
+<div class="col-md-6"><label asp-for="Input.ManufacturerId" class="form-label">Manufacturer</label><div class="input-group"><select asp-for="Input.ManufacturerId" asp-items="@(new SelectList(Model.Manufacturers, "Id", "Name"))" class="form-select" id="manufacturerSelect"><option value="">-- Select manufacturer --</option></select><button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#addManufacturerModal">Add New</button></div></div>
+<div class="col-md-6"><label asp-for="Input.ModelId" class="form-label">Model</label><div class="input-group"><select asp-for="Input.ModelId" asp-items="@(new SelectList(Model.Models, "Id", "Name"))" class="form-select" id="modelSelect"><option value="">-- Select model --</option></select><button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#addModelModal">Add New</button></div></div>
 
 <div class="col-md-3"><label asp-for="Input.Price" class="form-label">Paid price (IRR)</label><input asp-for="Input.Price" class="form-control" data-price inputmode="numeric" step="1" min="0" max="@MobileShop.Models.MoneyLimits.MaxRials" /></div>
 <div class="col-md-3"><label asp-for="Input.ProfitPercent" class="form-label">Profit %</label><input asp-for="Input.ProfitPercent" class="form-control" data-percent /></div>
@@ -19,6 +19,112 @@
 <div class="col-12"><button class="btn btn-primary" type="submit">Save smart watch</button><a asp-page="/Products/Index" class="btn btn-outline-secondary ms-2">Back to products</a></div>
 </form>
 @if (!string.IsNullOrWhiteSpace(Model.Message)){<div class="alert alert-danger mt-3">@Model.Message</div>}
-@section Scripts{<partial name="_ValidationScriptsPartial" /><script src="~/js/create-product-pricing.js"></script><script>
-document.addEventListener('DOMContentLoaded',function(){const m=document.getElementById('manufacturerSelect'),s=document.getElementById('modelSelect'),t=document.querySelector('[data-second-hand-toggle]'),tb=document.querySelector('[data-second-hand-block]'),g=document.querySelector('[data-guarantee-toggle]'),gb=document.querySelector('[data-guarantee-block]');const sync=(a,b)=>{if(a&&b)b.style.display=a.checked?'':'none'};t?.addEventListener('change',()=>sync(t,tb));g?.addEventListener('change',()=>sync(g,gb));sync(t,tb);sync(g,gb);m?.addEventListener('change',async function(){s.innerHTML='<option value="">-- Select model --</option>';if(!this.value)return;const r=await fetch('/Products/CreateSmartWatch?handler=Models&manufacturerId='+encodeURIComponent(this.value));if(r.ok)(await r.json()).forEach(x=>{const o=document.createElement('option');o.value=x.id;o.textContent=x.name;s.appendChild(o)})})});
-</script>}
+<div class="modal fade" id="addManufacturerModal" tabindex="-1" aria-hidden="true"><div class="modal-dialog"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">Add Manufacturer</h5><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div><div class="modal-body"><div id="manufacturerModalError" class="alert alert-danger d-none" role="alert"></div><label for="newManufacturerName" class="form-label">Name</label><input type="text" class="form-control" id="newManufacturerName" required /></div><div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button><button type="button" class="btn btn-primary" id="saveManufacturerBtn">Save</button></div></div></div></div>
+<div class="modal fade" id="addModelModal" tabindex="-1" aria-hidden="true"><div class="modal-dialog"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">Add Model</h5><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div><div class="modal-body"><div id="modelModalError" class="alert alert-danger d-none" role="alert"></div><label for="newModelName" class="form-label">Name</label><input type="text" class="form-control" id="newModelName" required /></div><div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button><button type="button" class="btn btn-primary" id="saveModelBtn">Save</button></div></div></div></div>
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script src="~/js/create-product-pricing.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const manufacturer = document.getElementById('manufacturerSelect');
+            const model = document.getElementById('modelSelect');
+            const manufacturerError = document.getElementById('manufacturerModalError');
+            const modelError = document.getElementById('modelModalError');
+            const antiforgeryToken = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+            const secondHandToggle = document.querySelector('[data-second-hand-toggle]');
+            const secondHandBlock = document.querySelector('[data-second-hand-block]');
+            const guaranteeToggle = document.querySelector('[data-guarantee-toggle]');
+            const guaranteeBlock = document.querySelector('[data-guarantee-block]');
+
+            const syncBlock = (toggle, block) => {
+                if (toggle && block) block.style.display = toggle.checked ? '' : 'none';
+            };
+            secondHandToggle?.addEventListener('change', () => syncBlock(secondHandToggle, secondHandBlock));
+            guaranteeToggle?.addEventListener('change', () => syncBlock(guaranteeToggle, guaranteeBlock));
+            syncBlock(secondHandToggle, secondHandBlock);
+            syncBlock(guaranteeToggle, guaranteeBlock);
+
+            const postHandler = async (handler, values) => {
+                if (!antiforgeryToken) {
+                    throw new Error('The security token is missing. Refresh the page and try again.');
+                }
+                const response = await fetch(`/Products/CreateSmartWatch?handler=${handler}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+                        RequestVerificationToken: antiforgeryToken
+                    },
+                    body: new URLSearchParams({ ...values, __RequestVerificationToken: antiforgeryToken })
+                });
+                const contentType = response.headers.get('content-type') || '';
+                if (!contentType.includes('application/json')) {
+                    throw new Error(`The server returned an unexpected response (HTTP ${response.status}). Refresh the page and try again.`);
+                }
+                const result = await response.json();
+                if (!response.ok) throw new Error(result.error || 'The request could not be completed.');
+                return result;
+            };
+
+            const loadModels = async () => {
+                model.replaceChildren(new Option('-- Select model --', ''));
+                if (!manufacturer.value) return;
+                const response = await fetch(`/Products/CreateSmartWatch?handler=Models&manufacturerId=${encodeURIComponent(manufacturer.value)}`);
+                if (!response.ok) throw new Error('Could not load models for this manufacturer.');
+                const models = await response.json();
+                models.forEach(item => model.appendChild(new Option(item.name, item.id)));
+            };
+
+            manufacturer.addEventListener('change', async () => {
+                try {
+                    await loadModels();
+                } catch (error) {
+                    modelError.textContent = error.message;
+                    modelError.classList.remove('d-none');
+                }
+            });
+
+            document.getElementById('saveManufacturerBtn').addEventListener('click', async () => {
+                const nameInput = document.getElementById('newManufacturerName');
+                const name = nameInput.value.trim();
+                manufacturerError.classList.add('d-none');
+                if (!name) {
+                    manufacturerError.textContent = 'Enter a manufacturer name.';
+                    manufacturerError.classList.remove('d-none');
+                    return;
+                }
+                try {
+                    const result = await postHandler('CreateManufacturer', { name });
+                    manufacturer.appendChild(new Option(result.name, result.id, true, true));
+                    manufacturer.value = result.id;
+                    bootstrap.Modal.getOrCreateInstance(document.getElementById('addManufacturerModal')).hide();
+                    nameInput.value = '';
+                    await loadModels();
+                } catch (error) {
+                    manufacturerError.textContent = error.message;
+                    manufacturerError.classList.remove('d-none');
+                }
+            });
+
+            document.getElementById('saveModelBtn').addEventListener('click', async () => {
+                const nameInput = document.getElementById('newModelName');
+                const name = nameInput.value.trim();
+                modelError.classList.add('d-none');
+                if (!manufacturer.value || !name) {
+                    modelError.textContent = !manufacturer.value ? 'Select a manufacturer first.' : 'Enter a model name.';
+                    modelError.classList.remove('d-none');
+                    return;
+                }
+                try {
+                    const result = await postHandler('CreateModel', { manufacturerId: manufacturer.value, name });
+                    model.appendChild(new Option(result.name, result.id, true, true));
+                    model.value = result.id;
+                    bootstrap.Modal.getOrCreateInstance(document.getElementById('addModelModal')).hide();
+                    nameInput.value = '';
+                } catch (error) {
+                    modelError.textContent = error.message;
+                    modelError.classList.remove('d-none');
+                }
+            });
+        });
+    </script>
+}

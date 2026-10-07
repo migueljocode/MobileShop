@@ -121,7 +121,8 @@ public class CreateCustomerModelTests : RepoTestBase
         var result = await _model.OnPostAsync();
 
         var redirect = Assert.IsType<RedirectToPageResult>(result);
-        Assert.Equal("/People/Customers", redirect.PageName);
+        Assert.Equal("/People/Index", redirect.PageName);
+        Assert.Equal("customers", redirect.RouteValues!["type"]);
         Assert.Null(_model.Message);
         Assert.Single(Context.Customers);
     }
@@ -168,7 +169,8 @@ public class CreateSellerModelTests : RepoTestBase
         var result = await _model.OnPostAsync();
 
         var redirect = Assert.IsType<RedirectToPageResult>(result);
-        Assert.Equal("/People/Sellers", redirect.PageName);
+        Assert.Equal("/People/Index", redirect.PageName);
+        Assert.Equal("sellers", redirect.RouteValues!["type"]);
         Assert.Null(_model.Message);
         Assert.Single(Context.Sellers);
     }

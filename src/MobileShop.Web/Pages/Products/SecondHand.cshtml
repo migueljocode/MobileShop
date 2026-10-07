@@ -10,6 +10,8 @@
     <a asp-page="/Products/Index" class="btn btn-outline-secondary">Back to products</a>
 </div>
 
+<p class="text-muted">Total items: <strong>@Model.Products.Count</strong></p>
+
 @if (Model.Products.Count == 0)
 {
     <p class="text-muted">No second-hand items are currently listed.</p>

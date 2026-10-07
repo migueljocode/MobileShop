@@ -13,6 +13,10 @@ public class IndexModelTests
                 It.IsAny<int?>(),
                 It.IsAny<string?>()))
             .ReturnsAsync(Array.Empty<ProductListItemViewModel>());
+        service.Setup(s => s.GetManufacturersAsync())
+            .ReturnsAsync(Array.Empty<DropdownOptionViewModel>());
+        service.Setup(s => s.GetModelsAsync(It.IsAny<int>(), It.IsAny<string>()))
+            .ReturnsAsync(Array.Empty<DropdownOptionViewModel>());
 
         return (service, new IndexModel(service.Object));
     }
@@ -76,5 +80,26 @@ public class IndexModelTests
         Assert.Equal(42, model.PartNumberId);
         Assert.Equal("sold", model.Availability);
         service.Verify(s => s.GetInventoryRowsAsync("phone", 42, "sold"), Times.Once);
+    }
+
+    [Fact]
+    public async Task AppleIdNameColumnIsCustomerAndCanBeSortedInEitherDirection()
+    {
+        var (service, model) = CreateModel();
+        service.Setup(s => s.GetInventoryRowsAsync("appleid", null, null))
+            .ReturnsAsync(new[]
+            {
+                new ProductListItemViewModel(1, 1, "Apple ID", "Zoe Customer", "z@example.com", null, true, false),
+                new ProductListItemViewModel(2, 2, "Apple ID", "Amy Customer", "a@example.com", null, true, false),
+            });
+
+        await model.OnGetAsync(type: "appleid", sortBy: "name");
+
+        Assert.Equal("Customer", model.NameColumnLabel);
+        Assert.Equal(["Amy Customer", "Zoe Customer"], model.Products.Select(product => product.Name));
+
+        await model.OnGetAsync(type: "appleid", sortBy: "name", sortDirection: "desc");
+
+        Assert.Equal(["Zoe Customer", "Amy Customer"], model.Products.Select(product => product.Name));
     }
 }

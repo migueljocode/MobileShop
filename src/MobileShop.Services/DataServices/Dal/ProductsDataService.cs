@@ -1,3 +1,4 @@
+using System.Text.RegularExpressions;
 using MobileShop.Services.DataServices.Shared;
 
 namespace MobileShop.Services.DataServices.Dal;
@@ -20,6 +21,7 @@ public class ProductsDataService(
     IBaseRepo<Transaction> transactions,
     IBaseRepo<PartNumber> partNumbers,
     IBaseRepo<Product> products,
+    IBaseRepo<StorageCapacity> storageCapacities,
     ILogger<ProductsDataService> logger)
     : IProductsDataService
 {
@@ -69,7 +71,11 @@ public class ProductsDataService(
                     appleId.Id,
                     appleId.ProductId,
                     "Apple ID",
-                    appleId.ProductNavigation.ModelNavigation.ManufacturerNavigation.Name + " " + appleId.ProductNavigation.ModelNavigation.Name,
+                    appleId.ProductNavigation.Transactions
+                        .Where(t => t.Direction == TransactionDirection.Sell)
+                        .OrderByDescending(t => t.Date)
+                        .Select(t => t.CustomerNavigation.PersonNavigation == null ? null : t.CustomerNavigation.PersonNavigation.FirstName + " " + t.CustomerNavigation.PersonNavigation.LastName)
+                        .FirstOrDefault() ?? "N/A",
                     appleId.Email,
                     null,
                     appleId.ProductNavigation.Transactions.Any(t => t.Direction == TransactionDirection.Sell),
@@ -231,7 +237,7 @@ public class ProductsDataService(
         }
         else if (string.Equals(type, "powerbank", StringComparison.OrdinalIgnoreCase))
         {
-            details = await products.SelectAsync(id, product => new ProductDetailsViewModel("Power Bank", product.Id, product.ModelNavigation.ManufacturerNavigation.Name, product.ModelNavigation.Name, "Barcode: " + product.Barcode, null, product.Transactions.Where(t => t.Direction == TransactionDirection.Sell).OrderByDescending(t => t.Date).Select(t => t.CustomerNavigation.PersonNavigation).Select(person => person.FirstName + " " + person.LastName).FirstOrDefault() ?? "Not sold", product.GuaranteeProfile == null ? "None" : product.GuaranteeProfile.Corporation + " until " + product.GuaranteeProfile.ExpirationDate.ToString("d"), product.SecondHandProfile != null) { CapacityMah = product.PowerBankProfile!.CapacityMah, MaxWattage = product.PowerBankProfile.MaxWattage, PortCount = product.PowerBankProfile.PortCount, Pd = product.PowerBankProfile.Pd, Notes = product.PowerBankProfile.Notes });
+            details = await products.SelectAsync(id, product => new ProductDetailsViewModel("Power Bank", product.Id, product.ModelNavigation.ManufacturerNavigation.Name, product.ModelNavigation.Name, "Barcode: " + product.Barcode, null, product.Transactions.Where(t => t.Direction == TransactionDirection.Sell).OrderByDescending(t => t.Date).Select(t => t.CustomerNavigation.PersonNavigation).Select(person => person.FirstName + " " + person.LastName).FirstOrDefault() ?? "Not sold", product.GuaranteeProfile == null ? "None" : product.GuaranteeProfile.Corporation + " until " + product.GuaranteeProfile.ExpirationDate.ToString("d"), product.SecondHandProfile != null) { CapacityMah = product.PowerBankProfile!.CapacityMah, MaxWattage = product.PowerBankProfile.MaxWattage, PortCount = product.PowerBankProfile.PortCount, PortTypes = product.PowerBankProfile.Ports.OrderBy(port => port.PortNumber).Select(port => port.Connector).ToList(), Pd = product.PowerBankProfile.Pd, Notes = product.PowerBankProfile.Notes });
         }
         else if (string.Equals(type, "portablestorage", StringComparison.OrdinalIgnoreCase))
         {
@@ -265,11 +271,15 @@ public class ProductsDataService(
                         : phone.ProductNavigation.GuaranteeProfile.Corporation + " until " + phone.ProductNavigation.GuaranteeProfile.ExpirationDate.ToString("d"),
                     phone.ProductNavigation.SecondHandProfile != null)
                 {
-                    // A phone without a part number keeps the "N/A" defaults, so a missing part number
-                    // is never rendered as a false capability.
+                    // A phone stores the active SIM capability itself so each unit can differ even when
+                    // the same part number is shared across multiple physical devices.
                     PartNumberLabel = phone.PartNumberNavigation == null ? "N/A" : phone.PartNumberNavigation.Code,
-                    DualSimLabel = phone.PartNumberNavigation == null ? "N/A" : phone.PartNumberNavigation.SupportsDualSim ? "Yes" : "No",
-                    EsimLabel = phone.PartNumberNavigation == null ? "N/A" : phone.PartNumberNavigation.SupportsEsim ? "Yes" : "No",
+                    DualSimLabel = phone.SupportsDualSim == null
+                        ? (phone.PartNumberNavigation == null ? "N/A" : (phone.PartNumberNavigation.SupportsDualSim ? "Yes" : "No"))
+                        : (phone.SupportsDualSim.Value ? "Yes" : "No"),
+                    EsimLabel = phone.SupportsEsim == null
+                        ? (phone.PartNumberNavigation == null ? "N/A" : (phone.PartNumberNavigation.SupportsEsim ? "Yes" : "No"))
+                        : (phone.SupportsEsim.Value ? "Yes" : "No"),
                 });
         }
 
@@ -300,6 +310,14 @@ public class ProductsDataService(
     /// <inheritdoc />
     public async Task<IReadOnlyList<DropdownOptionViewModel>> GetColorsAsync()
         => (await colors.FindAllAsync()).Select(c => new DropdownOptionViewModel(c.Id, c.Name)).ToList().AsReadOnly();
+
+    /// <inheritdoc />
+    public async Task<IReadOnlyList<DropdownOptionViewModel>> GetStorageCapacitiesAsync()
+        => (await storageCapacities.FindAllAsync())
+            .OrderBy(c => c.Gb)
+            .Select(c => new DropdownOptionViewModel(c.Id, $"{c.Gb} GB"))
+            .ToList()
+            .AsReadOnly();
 
     /// <inheritdoc />
     public async Task<IReadOnlyList<DropdownOptionViewModel>> GetPartNumbersAsync(int? modelId = null)
@@ -360,7 +378,7 @@ public class ProductsDataService(
     }
 
     /// <inheritdoc />
-    public async Task<DropdownCreateResult> CreateModelAsync(int manufacturerId, string name)
+    public async Task<DropdownCreateResult> CreateModelAsync(int manufacturerId, string name, string categoryName = "Phone")
     {
         if (string.IsNullOrWhiteSpace(name))
             return new DropdownCreateResult(false, null, "Name is required.", 400);
@@ -369,8 +387,13 @@ public class ProductsDataService(
         if (manufacturer is null)
             return new DropdownCreateResult(false, null, "Manufacturer not found.", 404);
 
-        var category = await categories.FindAsync(c => c.Name == "Phone")
-            ?? throw new InvalidOperationException("The 'Phone' category is missing from the catalog seed data.");
+        var category = await categories.FindAsync(c => c.Name == categoryName);
+        if (category is null)
+        {
+            category = new Category { Name = categoryName };
+            if (await categories.AddAsync(category) <= 0)
+                return new DropdownCreateResult(false, null, $"The '{categoryName}' category could not be saved.", 500);
+        }
 
         var trimmed = name.Trim();
         var existing = await models.FindAsync(m =>
@@ -408,7 +431,26 @@ public class ProductsDataService(
     }
 
     /// <inheritdoc />
-    public async Task<DropdownCreateResult> CreatePartNumberAsync(int modelId, string code, bool supportsDualSim, bool supportsEsim)
+    public async Task<DropdownCreateResult> CreateStorageCapacityAsync(int gb)
+    {
+        if (gb <= 0)
+            return new DropdownCreateResult(false, null, "Storage capacity must be greater than zero.", 400);
+
+        var existing = await storageCapacities.FindAsync(c => c.Gb == gb);
+        if (existing is not null)
+            return new DropdownCreateResult(true, new DropdownOptionViewModel(existing.Id, $"{existing.Gb} GB"), null, 200);
+
+        var capacity = new StorageCapacity { Gb = gb };
+        var added = await storageCapacities.AddAsync(capacity) > 0;
+        if (!added)
+            return new DropdownCreateResult(false, null, "The storage capacity could not be saved.", 400);
+
+        Logger.LogInformation("Added StorageCapacity Id={Id} for {Gb} GB", capacity.Id, capacity.Gb);
+        return new DropdownCreateResult(true, new DropdownOptionViewModel(capacity.Id, $"{capacity.Gb} GB"), null, 200);
+    }
+
+    /// <inheritdoc />
+    public async Task<DropdownCreateResult> CreatePartNumberAsync(int modelId, string code, bool supportsDualSim = false, bool supportsEsim = false)
     {
         if (string.IsNullOrWhiteSpace(code))
             return new DropdownCreateResult(false, null, "Code is required.", 400);
@@ -418,6 +460,9 @@ public class ProductsDataService(
             return new DropdownCreateResult(false, null, "Model not found.", 404);
 
         var trimmed = code.Trim();
+        if (!Regex.IsMatch(trimmed, @"^(?=.*[A-Za-z])(?=.*[\d/._-])[A-Za-z0-9/._-]{3,64}$"))
+            return new DropdownCreateResult(false, null, "Use a realistic part number such as CH/ZAA, LL/A, MQ0K3LL/A, or SM-S921B.", 400);
+
         var existing = await partNumbers.FindAsync(pn => pn.ModelId == modelId && pn.Code == trimmed);
         if (existing is not null)
             return new DropdownCreateResult(true, new DropdownOptionViewModel(existing.Id, existing.Code), null, 200);
@@ -427,7 +472,7 @@ public class ProductsDataService(
             ModelId = modelId,
             Code = trimmed,
             SupportsDualSim = supportsDualSim,
-            SupportsEsim = supportsEsim
+            SupportsEsim = supportsEsim,
         };
         var added = await partNumbers.AddAsync(partNumber) > 0;
         if (!added)
@@ -509,6 +554,8 @@ public class ProductsDataService(
         {
             IMEI1 = imei1,
             IMEI2 = string.IsNullOrWhiteSpace(input.IMEI2) ? null : input.IMEI2.Trim(),
+            SupportsDualSim = input.SupportsDualSim,
+            SupportsEsim = input.SupportsEsim,
             OwnershipTransferred = false,
             PartNumberNavigation = partNumber,
             ProductNavigation = product,
@@ -646,6 +693,10 @@ public class ProductsDataService(
         if (await appleIds.AnyAsync(x => x.Email.ToLower() == email.ToLower()))
             return new ServiceResult(false, "This Apple ID email already exists.", nameof(CreateAppleIdInputModel.Email), null);
 
+        var password = input.Password.Trim();
+        if (string.IsNullOrWhiteSpace(password))
+            return new ServiceResult(false, "Password is required.", nameof(CreateAppleIdInputModel.Password), null);
+
         var manufacturer = await manufacturers.FindAsync(m => m.Name == "Apple")
             ?? new Manufacturer { Name = "Apple" };
 
@@ -671,7 +722,7 @@ public class ProductsDataService(
         var appleId = new AppleId
         {
             Email = email,
-            Password = input.Password.Trim(),
+            Password = password,
             Notes = string.IsNullOrWhiteSpace(input.Notes) ? null : input.Notes.Trim(),
             ProductNavigation = product,
         };
@@ -690,7 +741,13 @@ public class ProductsDataService(
 
     public async Task<ServiceResult> CreateTabletAsync(CreateTabletInputModel input) => await CreateDeviceAsync(input.ManufacturerId, input.ModelId, "Tablet", input.Price, input.ProfitPercent, input.ProfitAmount, input.IsSecondHand, input.TestPeriodDays, input.SecondHandNotes, input.HasGuarantee, input.GuaranteeCorporation, input.GuaranteeExpiry, input.GuaranteeNotes, new Tablet { Notes = NormalizeNote(input.Notes) });
     public async Task<ServiceResult> CreateSmartWatchAsync(CreateSmartWatchInputModel input) => await CreateDeviceAsync(input.ManufacturerId, input.ModelId, "SmartWatch", input.Price, input.ProfitPercent, input.ProfitAmount, input.IsSecondHand, input.TestPeriodDays, input.SecondHandNotes, input.HasGuarantee, input.GuaranteeCorporation, input.GuaranteeExpiry, input.GuaranteeNotes, new SmartWatch { Notes = NormalizeNote(input.Notes) });
-    public async Task<ServiceResult> CreateLaptopAsync(CreateLaptopInputModel input) => await CreateDeviceAsync(input.ManufacturerId, input.ModelId, "Laptop", input.Price, input.ProfitPercent, input.ProfitAmount, input.IsSecondHand, input.TestPeriodDays, input.SecondHandNotes, input.HasGuarantee, input.GuaranteeCorporation, input.GuaranteeExpiry, input.GuaranteeNotes, new Laptop { Cpu = input.Cpu.Trim(), Gpu = input.Gpu.Trim(), DisplaySize = input.DisplaySize, Notes = NormalizeNote(input.Notes) });
+    public async Task<ServiceResult> CreateLaptopAsync(CreateLaptopInputModel input)
+    {
+        if (input.DisplaySize <= 0)
+            return new ServiceResult(false, "Display size must be greater than 0.", null, null);
+
+        return await CreateDeviceAsync(input.ManufacturerId, input.ModelId, "Laptop", input.Price, input.ProfitPercent, input.ProfitAmount, input.IsSecondHand, input.TestPeriodDays, input.SecondHandNotes, input.HasGuarantee, input.GuaranteeCorporation, input.GuaranteeExpiry, input.GuaranteeNotes, new Laptop { Cpu = input.Cpu.Trim(), Gpu = input.Gpu?.Trim() ?? string.Empty, DisplaySize = input.DisplaySize, Notes = NormalizeNote(input.Notes) });
+    }
 
     public Task<ServiceResult> CreateCablesAsync(CreateCableInputModel input) =>
         CreateAccessoryBatchAsync(input.Count, input.Price, input.ProfitPercent, input.ProfitAmount, input.ManufacturerId, input.ModelId, "Cable",
@@ -700,13 +757,40 @@ public class ProductsDataService(
         CreateAccessoryBatchAsync(input.Count, input.Price, input.ProfitPercent, input.ProfitAmount, input.ManufacturerId, input.ModelId, "Charger",
             product => product.ChargerProfile = new Charger { Wattage = input.Wattage, Pd = input.Pd, PortCount = input.PortCount });
 
-    public Task<ServiceResult> CreatePowerBanksAsync(CreatePowerBankInputModel input) =>
-        CreateAccessoryBatchAsync(input.Count, input.Price, input.ProfitPercent, input.ProfitAmount, input.ManufacturerId, input.ModelId, "PowerBank",
-            product => product.PowerBankProfile = new PowerBank { CapacityMah = input.CapacityMah, MaxWattage = input.MaxWattage, PortCount = input.PortCount, Pd = input.Pd });
+    public Task<ServiceResult> CreatePowerBanksAsync(CreatePowerBankInputModel input)
+    {
+        if (input.PortCount < 1)
+            return Task.FromResult(new ServiceResult(false, "Port count must be at least 1.", nameof(CreatePowerBankInputModel.PortCount), null));
+        if (input.PortTypes is null || input.PortTypes.Count != input.PortCount)
+            return Task.FromResult(new ServiceResult(false, "Select a connector type for every port.", nameof(CreatePowerBankInputModel.PortTypes), null));
+        if (input.PortTypes.Any(type => !Enum.IsDefined(type)))
+            return Task.FromResult(new ServiceResult(false, "Select a valid connector type for every port.", nameof(CreatePowerBankInputModel.PortTypes), null));
 
-    public Task<ServiceResult> CreatePortableStoragesAsync(CreatePortableStorageInputModel input) =>
-        CreateAccessoryBatchAsync(input.Count, input.Price, input.ProfitPercent, input.ProfitAmount, input.ManufacturerId, input.ModelId, "PortableStorage",
+        return CreateAccessoryBatchAsync(input.Count, input.Price, input.ProfitPercent, input.ProfitAmount, input.ManufacturerId, input.ModelId, "PowerBank",
+            product => product.PowerBankProfile = new PowerBank
+            {
+                CapacityMah = input.CapacityMah,
+                MaxWattage = input.MaxWattage,
+                PortCount = input.PortCount,
+                Pd = input.Pd,
+                Ports = input.PortTypes.Select((connector, index) => new PowerBankPort
+                {
+                    PortNumber = index + 1,
+                    Connector = connector
+                }).ToList()
+            });
+    }
+
+    public async Task<ServiceResult> CreatePortableStoragesAsync(CreatePortableStorageInputModel input)
+    {
+        if (!Enum.IsDefined(input.StorageKind))
+            return new ServiceResult(false, "Select a valid storage kind.", nameof(CreatePortableStorageInputModel.StorageKind), null);
+        if (await storageCapacities.FindAsync(capacity => capacity.Id == input.StorageCapacityId) is null)
+            return new ServiceResult(false, "Select a valid storage capacity.", nameof(CreatePortableStorageInputModel.StorageCapacityId), null);
+
+        return await CreateAccessoryBatchAsync(input.Count, input.Price, input.ProfitPercent, input.ProfitAmount, input.ManufacturerId, input.ModelId, "PortableStorage",
             product => product.PortableStorageProfile = new PortableStorage { Kind = input.StorageKind, StorageCapacityId = input.StorageCapacityId, Speed = input.Speed });
+    }
 
     public async Task<ServiceResult> CreateCasesAsync(CreateCaseInputModel input)
     {
@@ -746,7 +830,7 @@ public class ProductsDataService(
         for (var i = 0; i < input.Count; i++)
         {
             var product = new Product { ModelId = caseModel.Id, ModelNavigation = caseModel, Barcode = Guid.NewGuid().ToString("N")[..12], Price = finishedPrice };
-            var profile = new Case { ProductNavigation = product };
+            var profile = new Case { ProductNavigation = product, Notes = NormalizeNote(input.Notes) };
             foreach (var compatibleModel in compatibleModels)
                 profile.ModelFits.Add(new CaseModelFit { CaseNavigation = profile, ModelId = compatibleModel.Id, ModelNavigation = compatibleModel });
             product.CaseProfile = profile;
