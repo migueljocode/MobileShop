@@ -41,6 +41,10 @@ public class ProfitLossTests
             It.IsAny<DateTime?>(), It.IsAny<DateTime?>()))
             .ReturnsAsync([]);
 
+        serviceMock.Setup(s => s.GetProfitLossTrendAsync(
+            It.IsAny<DateTime?>(), It.IsAny<DateTime?>(), It.IsAny<ProfitLossInterval>()))
+            .ReturnsAsync([]);
+
         serviceMock.Setup(s => s.GetProfitLossTotalAsync(
             It.IsAny<DateTime?>(), It.IsAny<DateTime?>()))
             .ReturnsAsync(0);
@@ -64,6 +68,32 @@ public class ProfitLossTests
         Assert.Equal(today, model.EffectiveFrom);
         Assert.Equal(today, model.EffectiveTo);
         Assert.Null(model.EmptyDatabaseNote);
+    }
+
+    [Theory]
+    [InlineData(AutomaticPreset.Today, ProfitLossInterval.Hour)]
+    [InlineData(AutomaticPreset.Week, ProfitLossInterval.Day)]
+    [InlineData(AutomaticPreset.Month, ProfitLossInterval.Week)]
+    [InlineData(AutomaticPreset.Year, ProfitLossInterval.Month)]
+    [InlineData(AutomaticPreset.All, ProfitLossInterval.Month)]
+    public async Task Automatic_preset_selects_matching_profit_chart_interval(
+        AutomaticPreset preset,
+        ProfitLossInterval expectedInterval)
+    {
+        var mock = new Mock<IReportsDataService>();
+        SetupProfitLossMocks(mock);
+        var model = CreateModel(mock);
+
+        model.Mode = DateRangeMode.Automatic;
+        model.Preset = preset;
+
+        await model.OnGetAsync();
+
+        Assert.Equal(expectedInterval, model.TrendInterval);
+        mock.Verify(service => service.GetProfitLossTrendAsync(
+            It.IsAny<DateTime?>(),
+            It.IsAny<DateTime?>(),
+            expectedInterval), Times.Once);
     }
 
     [Fact]

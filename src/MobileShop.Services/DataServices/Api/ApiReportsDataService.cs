@@ -7,6 +7,10 @@ public class ApiReportsDataService : IReportsDataService
         => throw new NotImplementedException("ApiReportsDataService is not implemented yet.");
 
     /// <inheritdoc />
+    public Task<IReadOnlyList<ProfitLossTrendPoint>> GetProfitLossTrendAsync(DateTime? from, DateTime? to, ProfitLossInterval interval)
+        => throw new NotImplementedException("ApiReportsDataService is not implemented yet.");
+
+    /// <inheritdoc />
     public Task<long> GetProfitLossTotalAsync(DateTime? from, DateTime? to)
         => throw new NotImplementedException("ApiReportsDataService is not implemented yet.");
 

@@ -4,13 +4,15 @@ document.addEventListener('DOMContentLoaded', function () {
 
     var flyout = navigation.querySelector('[data-navigation-flyout]');
     var dock = navigation.querySelector('[data-navigation-dock]');
+    var tabs = navigation.querySelector('.navigation-dock__tabs');
     var triggers = Array.from(navigation.querySelectorAll('[data-navigation-trigger]'));
     var panels = Array.from(navigation.querySelectorAll('[data-navigation-panel]'));
-    if (!flyout || !dock || triggers.length === 0) return;
+    if (!flyout || !dock || !tabs || triggers.length === 0) return;
 
     var openedId = null;
     var closeTimer;
     var closeCleanupTimer;
+    var gapCloseTimer;
     var closeDelay = 220;
     var suppressFocusOpen = false;
     var suppressInitialHover = navigation.matches(':hover');
@@ -57,7 +59,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 var animationTimer = window.setTimeout(function () {
                     panel.classList.remove('is-entering');
                     panelAnimationTimers.delete(panel);
-                }, 650);
+                }, 720);
                 panelAnimationTimers.set(panel, animationTimer);
             });
         });
@@ -76,13 +78,11 @@ document.addEventListener('DOMContentLoaded', function () {
         window.clearTimeout(closeCleanupTimer);
         flyout.inert = false;
         flyout.classList.remove('is-closing');
-        var wasClosed = openedId === null;
         openedId = id;
         navigation.classList.add('is-engaged');
         setExpanded(id);
         showPanel(id);
         flyout.setAttribute('aria-hidden', 'false');
-        if (wasClosed) dock.classList.add('is-opening');
         flyout.classList.add('is-open');
     }
 
@@ -116,7 +116,6 @@ document.addEventListener('DOMContentLoaded', function () {
         flyout.inert = true;
         flyout.classList.add('is-closing');
         flyout.classList.remove('is-open');
-        dock.classList.remove('is-opening');
         window.clearTimeout(closeCleanupTimer);
         closeCleanupTimer = window.setTimeout(function () {
             finishClose();
@@ -148,8 +147,23 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
+    tabs.addEventListener('pointermove', function (event) {
+        if (event.pointerType !== 'mouse' || openedId === null) return;
+        if (event.target.closest('[data-navigation-trigger]')) {
+            window.clearTimeout(gapCloseTimer);
+            return;
+        }
+
+        window.clearTimeout(gapCloseTimer);
+        gapCloseTimer = window.setTimeout(function () {
+            if (!tabs.matches(':hover') || flyout.matches(':hover')) return;
+            close();
+        }, 100);
+    });
+
     flyout.addEventListener('mouseenter', function () {
         window.clearTimeout(closeTimer);
+        window.clearTimeout(gapCloseTimer);
     });
     function finishClose() {
         if (openedId !== null) return;
@@ -165,11 +179,6 @@ document.addEventListener('DOMContentLoaded', function () {
         if (event.target === flyout && event.propertyName === 'max-height' && openedId === null)
             finishClose();
     });
-    dock.addEventListener('animationend', function (event) {
-        if (event.target === dock && event.animationName === 'navigation-shell-open')
-            dock.classList.remove('is-opening');
-    });
-
     navigation.addEventListener('pointerenter', function () {
         window.clearTimeout(closeTimer);
     });

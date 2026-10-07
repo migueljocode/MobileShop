@@ -8,6 +8,12 @@ public interface IReportsDataService
     /// <param name="to">The inclusive end date.</param>
     Task<IReadOnlyList<ProfitLossRowViewModel>> GetProfitLossRowsAsync(DateTime? from, DateTime? to);
 
+    /// <summary>Gets profit or loss values grouped by the requested interval.</summary>
+    /// <param name="from">The inclusive start date.</param>
+    /// <param name="to">The inclusive end date.</param>
+    /// <param name="interval">The time interval used to group values.</param>
+    Task<IReadOnlyList<ProfitLossTrendPoint>> GetProfitLossTrendAsync(DateTime? from, DateTime? to, ProfitLossInterval interval);
+
     /// <summary>Gets the total profit or loss within an optional date range.</summary>
     /// <param name="from">The inclusive start date.</param>
     /// <param name="to">The inclusive end date.</param>

@@ -92,6 +92,94 @@ public class ReportsDataServiceTests : RepoTestBase
     }
 
     [Fact]
+    public async Task GetProfitLossTrendAsync_groups_transaction_net_by_month_and_date_range()
+    {
+        var seller = AddSeller();
+        var customer = AddCustomer();
+        var product = TestDataHelpers.CreateProduct(Context);
+
+        AddTransaction(product, seller.Id, customer.Id, TransactionDirection.Buy, new DateTime(2024, 3, 3), 300);
+        AddTransaction(product, seller.Id, customer.Id, TransactionDirection.Sell, new DateTime(2024, 3, 8), 500);
+        AddTransaction(product, seller.Id, customer.Id, TransactionDirection.Buy, new DateTime(2024, 4, 2), 100);
+        AddTransaction(product, seller.Id, customer.Id, TransactionDirection.Sell, new DateTime(2024, 4, 12), 250);
+
+        var rows = await _service.GetProfitLossTrendAsync(
+            new DateTime(2024, 3, 1),
+            new DateTime(2024, 4, 30),
+            ProfitLossInterval.Month);
+
+        Assert.Collection(rows,
+            march =>
+            {
+                Assert.Equal(new DateTime(2024, 3, 1), march.PeriodStart);
+                Assert.Equal(200, march.Profit);
+            },
+            april =>
+            {
+                Assert.Equal(new DateTime(2024, 4, 1), april.PeriodStart);
+                Assert.Equal(150, april.Profit);
+            });
+        Assert.Equal(350, rows.Sum(point => point.Profit));
+        Assert.Equal(350, await _service.GetProfitLossTotalAsync(
+            new DateTime(2024, 3, 1),
+            new DateTime(2024, 4, 30)));
+    }
+
+    [Fact]
+    public async Task GetProfitLossTrendAsync_groups_transactions_by_day_and_hour()
+    {
+        var seller = AddSeller();
+        var customer = AddCustomer();
+        var product = TestDataHelpers.CreateProduct(Context);
+        var firstHour = new DateTime(2024, 3, 5, 9, 15, 0);
+        var secondHour = new DateTime(2024, 3, 5, 10, 45, 0);
+
+        AddTransaction(product, seller.Id, customer.Id, TransactionDirection.Sell, firstHour, 100);
+        AddTransaction(product, seller.Id, customer.Id, TransactionDirection.Buy, secondHour, 40);
+
+        var hourlyRows = await _service.GetProfitLossTrendAsync(
+            firstHour.Date,
+            firstHour.Date,
+            ProfitLossInterval.Hour);
+        var dailyRows = await _service.GetProfitLossTrendAsync(
+            firstHour.Date,
+            firstHour.Date,
+            ProfitLossInterval.Day);
+
+        Assert.Collection(hourlyRows,
+            hour =>
+            {
+                Assert.Equal(new DateTime(2024, 3, 5, 9, 0, 0), hour.PeriodStart);
+                Assert.Equal(100, hour.Profit);
+            },
+            hour =>
+            {
+                Assert.Equal(new DateTime(2024, 3, 5, 10, 0, 0), hour.PeriodStart);
+                Assert.Equal(-40, hour.Profit);
+            });
+        var day = Assert.Single(dailyRows);
+        Assert.Equal(new DateTime(2024, 3, 5), day.PeriodStart);
+        Assert.Equal(60, day.Profit);
+    }
+
+    [Fact]
+    public async Task GetProfitLossTrendAsync_groups_week_by_monday()
+    {
+        var seller = AddSeller();
+        var customer = AddCustomer();
+        var product = TestDataHelpers.CreateProduct(Context);
+        AddTransaction(product, seller.Id, customer.Id, TransactionDirection.Sell, new DateTime(2024, 3, 6), 100);
+
+        var row = Assert.Single(await _service.GetProfitLossTrendAsync(
+            new DateTime(2024, 3, 1),
+            new DateTime(2024, 3, 31),
+            ProfitLossInterval.Week));
+
+        Assert.Equal(new DateTime(2024, 3, 4), row.PeriodStart);
+        Assert.Equal(100, row.Profit);
+    }
+
+    [Fact]
     public async Task GetProfitLossRowsAsync_uses_glass_paid_price_from_inventory_buy_when_sold()
     {
         var seller = AddSeller();

@@ -17,6 +17,8 @@ public class ProfitLossModel(
     public string? EmptyDatabaseNote { get; private set; }
 
     public IReadOnlyList<ProfitLossRowViewModel> Rows { get; private set; } = [];
+    public IReadOnlyList<ProfitLossTrendPoint> TrendPoints { get; private set; } = [];
+    public ProfitLossInterval TrendInterval { get; private set; }
     public long TotalProfit { get; private set; }
 
     // Distribution
@@ -64,9 +66,35 @@ public class ProfitLossModel(
         await ResolveBoundsAsync();
 
         Rows = await dataService.GetProfitLossRowsAsync(EffectiveFrom, EffectiveTo);
+        TrendInterval = ResolveTrendInterval();
+        TrendPoints = await dataService.GetProfitLossTrendAsync(EffectiveFrom, EffectiveTo, TrendInterval) ?? [];
         TotalProfit = await dataService.GetProfitLossTotalAsync(EffectiveFrom, EffectiveTo);
 
         // Distribution
         DistributionRows = await dataService.GetDistributionRowsAsync(TotalProfit);
+    }
+
+    private ProfitLossInterval ResolveTrendInterval()
+    {
+        if (Mode == DateRangeMode.Automatic)
+        {
+            return Preset switch
+            {
+                AutomaticPreset.Today => ProfitLossInterval.Hour,
+                AutomaticPreset.Week => ProfitLossInterval.Day,
+                AutomaticPreset.Month => ProfitLossInterval.Week,
+                AutomaticPreset.Year or AutomaticPreset.All => ProfitLossInterval.Month,
+                _ => ProfitLossInterval.Month
+            };
+        }
+
+        var rangeDays = (EffectiveTo.Date - EffectiveFrom.Date).TotalDays;
+        return rangeDays switch
+        {
+            <= 1 => ProfitLossInterval.Hour,
+            <= 14 => ProfitLossInterval.Day,
+            <= 62 => ProfitLossInterval.Week,
+            _ => ProfitLossInterval.Month
+        };
     }
 }

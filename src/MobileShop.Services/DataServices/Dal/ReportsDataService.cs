@@ -53,6 +53,70 @@ public class ReportsDataService(
     }
 
     /// <inheritdoc />
+    public async Task<IReadOnlyList<ProfitLossTrendPoint>> GetProfitLossTrendAsync(
+        DateTime? from,
+        DateTime? to,
+        ProfitLossInterval interval)
+    {
+        var transactionsInRange = await transactions
+            .SelectAllAsync(transaction => new
+            {
+                transaction.ProductId,
+                transaction.Date,
+                transaction.Direction,
+                transaction.FinishedPrice,
+                ProductPrice = transaction.ProductNavigation.Price,
+                IsGlass = transaction.ProductNavigation.GlassProfile != null
+            })
+            .ConfigureAwait(false);
+
+        var filtered = transactionsInRange
+            .Where(transaction => (!from.HasValue || transaction.Date.Date >= from.Value.Date) &&
+                                  (!to.HasValue || transaction.Date.Date <= to.Value.Date))
+            .ToList();
+
+        var intervalProfit = filtered
+            .GroupBy(transaction => GetPeriodStart(transaction.Date, interval))
+            .ToDictionary(
+                period => period.Key,
+                period => period.Sum(transaction => transaction.Direction == TransactionDirection.Sell
+                    ? transaction.FinishedPrice
+                    : -transaction.FinishedPrice));
+
+        foreach (var productTransactions in filtered.GroupBy(transaction => transaction.ProductId))
+        {
+            var productTransactionsInOrder = productTransactions.OrderBy(transaction => transaction.Date).ToList();
+            var first = productTransactionsInOrder[0];
+            if (!first.IsGlass || productTransactionsInOrder.Any(transaction => transaction.Direction == TransactionDirection.Buy))
+                continue;
+
+            var period = GetPeriodStart(first.Date, interval);
+            intervalProfit[period] -= first.ProductPrice;
+        }
+
+        return intervalProfit
+            .OrderBy(period => period.Key)
+            .Select(period => new ProfitLossTrendPoint(period.Key, period.Value))
+            .ToList();
+    }
+
+    private static DateTime GetPeriodStart(DateTime date, ProfitLossInterval interval)
+        => interval switch
+        {
+            ProfitLossInterval.Month => new DateTime(date.Year, date.Month, 1),
+            ProfitLossInterval.Week => StartOfWeek(date),
+            ProfitLossInterval.Day => date.Date,
+            ProfitLossInterval.Hour => new DateTime(date.Year, date.Month, date.Day, date.Hour, 0, 0, date.Kind),
+            _ => throw new ArgumentOutOfRangeException(nameof(interval), interval, "Unsupported profit/loss interval.")
+        };
+
+    private static DateTime StartOfWeek(DateTime date)
+    {
+        var daysSinceMonday = ((int)date.DayOfWeek + 6) % 7;
+        return date.Date.AddDays(-daysSinceMonday);
+    }
+
+    /// <inheritdoc />
     public async Task<long> GetProfitLossTotalAsync(DateTime? from, DateTime? to)
         => (await GetProfitLossRowsAsync(from, to)).Sum(row => row.Profit);
 
