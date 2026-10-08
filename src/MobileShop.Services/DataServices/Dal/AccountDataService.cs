@@ -3,6 +3,7 @@ namespace MobileShop.Services.DataServices.Dal;
 /// <summary>Provides the account and credential operations for the Account area.</summary>
 public class AccountDataService(
     IBaseRepo<User> users,
+    IBaseRepo<Person> people,
     IPasswordHasher passwordHasher,
     ILogger<AccountDataService> logger)
     : IAccountDataService
@@ -25,14 +26,37 @@ public class AccountDataService(
     /// <inheritdoc />
     public void EnsureAdminUser()
     {
-        var admin = users.Find(UsernameEquals(DefaultAdminUsername))
-            ?? throw new InvalidOperationException(
-                $"The default admin account '{DefaultAdminUsername}' was not found - seed the sample data first.");
+        var admin = users.Find(UsernameEquals(DefaultAdminUsername));
+        if (admin is null)
+        {
+            if (users.Any())
+                return;
 
-        admin.PasswordHash = passwordHasher.Hash(DefaultAdminPassword);
-        users.Update(admin);
+            var person = people.FindAll().FirstOrDefault() ?? new Person
+            {
+                FirstName = "Shop",
+                LastName = "Administrator",
+                PhoneNumber = "0000000000"
+            };
+            if (person.Id == 0)
+                people.Add(person);
 
-        Logger.LogInformation("Ensured the default admin account '{Username}'", DefaultAdminUsername);
+            admin = new User
+            {
+                Username = DefaultAdminUsername,
+                PasswordHash = passwordHasher.Hash(DefaultAdminPassword),
+                PersonId = person.Id
+            };
+            users.Add(admin);
+            Logger.LogInformation("Created the initial admin account '{Username}'", DefaultAdminUsername);
+            return;
+        }
+
+        if (admin.PasswordHash == "REPLACE_WITH_REAL_HASH")
+        {
+            admin.PasswordHash = passwordHasher.Hash(DefaultAdminPassword);
+            users.Update(admin);
+        }
     }
 
     /// <inheritdoc />
@@ -82,5 +106,37 @@ public class AccountDataService(
             Logger.LogWarning("Password change failed for user '{Username}'", username);
 
         return updated;
+    }
+
+    /// <inheritdoc />
+    public async Task<ServiceResult> ChangeCredentialsAsync(
+        string username,
+        string currentPassword,
+        string newUsername,
+        string? newPassword)
+    {
+        var user = await users.FindAsync(UsernameEquals(username));
+        if (user is null || !passwordHasher.Verify(user.PasswordHash, currentPassword))
+            return new ServiceResult(false, "Invalid current password.");
+
+        if (string.IsNullOrWhiteSpace(newUsername))
+            return new ServiceResult(false, "Username is required.", "NewUsername");
+        var normalizedUsername = newUsername.Trim();
+        if (normalizedUsername.Length > 50)
+            return new ServiceResult(false, "Username cannot exceed 50 characters.", "NewUsername");
+
+        var existing = await users.FindAsync(UsernameEquals(normalizedUsername));
+        if (existing is not null && existing.Id != user.Id)
+            return new ServiceResult(false, "That username is already in use.", "NewUsername");
+
+        user.Username = normalizedUsername;
+        if (!string.IsNullOrWhiteSpace(newPassword))
+            user.PasswordHash = passwordHasher.Hash(newPassword);
+
+        if (await users.UpdateAsync(user) <= 0)
+            return new ServiceResult(false, "The profile changes could not be saved.");
+
+        Logger.LogInformation("Updated credentials for user '{Username}'", user.Username);
+        return new ServiceResult(true, "Profile updated successfully.");
     }
 }

@@ -1,5 +1,7 @@
 namespace MobileShop.Web.Extensions;
 
+using Microsoft.AspNetCore.Authentication.Cookies;
+
 /// <summary>
 /// Configures the MobileShop Razor Pages host.
 /// </summary>
@@ -13,7 +15,24 @@ public static class WebApplicationBuilderExtensions
         QuestPdfSetup.UseCommunityLicense();
         QuestPdfSetup.RegisterFonts();
         builder.ConfigureSerilog();
-        builder.Services.AddRazorPages();
+        builder.Services.AddRazorPages(options =>
+        {
+            options.Conventions.AuthorizeFolder("/");
+            options.Conventions.AllowAnonymousToPage("/Account/Login");
+        });
+        builder.Services
+            .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+            .AddCookie(options =>
+            {
+                options.LoginPath = "/Account/Login";
+                options.AccessDeniedPath = "/Account/Login";
+                options.Cookie.Name = "MobileShop.Auth";
+                options.Cookie.HttpOnly = true;
+                options.Cookie.SameSite = SameSiteMode.Lax;
+                options.SlidingExpiration = true;
+                options.ExpireTimeSpan = TimeSpan.FromHours(8);
+            });
+        builder.Services.AddAuthorization();
         builder.Services.AddMobileShop(builder.Configuration);
         return builder;
     }
@@ -58,7 +77,7 @@ public static class WebApplicationBuilderExtensions
     }
 
     /// <summary>
-    /// Configures the web request pipeline without enabling authentication.
+    /// Configures the authenticated web request pipeline.
     /// </summary>
     public static WebApplication ConfigureApp(this WebApplication app)
     {
@@ -66,9 +85,6 @@ public static class WebApplicationBuilderExtensions
         {
             DatabaseInitializer.InitializeForDevelopment(app.Services);
 
-            // Dev-only: the freshly seeded sample data ships a placeholder hash, so the admin account gets a real one.
-            using var scope = app.Services.CreateScope();
-            scope.ServiceProvider.GetRequiredService<IAccountDataService>().EnsureAdminUser();
         }
         else
         {
@@ -77,7 +93,12 @@ public static class WebApplicationBuilderExtensions
             DatabaseMigrator.EnsureCurrent(context);
         }
 
+        using (var scope = app.Services.CreateScope())
+            scope.ServiceProvider.GetRequiredService<IAccountDataService>().EnsureAdminUser();
+
         app.UseRouting();
+        app.UseAuthentication();
+        app.UseAuthorization();
         app.MapStaticAssets();
         app.MapRazorPages().WithStaticAssets();
         return app;

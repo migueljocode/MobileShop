@@ -250,6 +250,48 @@ a:hover {
   box-shadow: 0 0 0 0.2rem rgba(115, 136, 255, 0.15), 0 0 1.15rem rgba(115, 136, 255, 0.14);
 }
 
+.password-visibility-toggle {
+  display: grid;
+  min-width: 3rem;
+  place-items: center;
+  border-color: var(--app-edge-strong);
+  color: var(--app-muted);
+  background: rgba(5, 10, 19, 0.48);
+}
+
+.password-visibility-toggle:hover {
+  border-color: rgba(174, 189, 255, 0.55);
+  color: var(--app-ink);
+  background: rgba(115, 136, 255, 0.14);
+}
+
+.password-visibility-toggle:focus-visible {
+  z-index: 5;
+  box-shadow: 0 0 0 0.2rem rgba(115, 136, 255, 0.3);
+}
+
+.password-visibility-toggle svg {
+  width: 1.2rem;
+  height: 1.2rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.7;
+}
+
+.password-visibility-toggle .password-eye-open {
+  display: none;
+}
+
+.password-visibility-toggle.is-visible .password-eye-closed {
+  display: none;
+}
+
+.password-visibility-toggle.is-visible .password-eye-open {
+  display: inline;
+}
+
 .account-login-submit {
   display: flex;
   min-height: 3.05rem;

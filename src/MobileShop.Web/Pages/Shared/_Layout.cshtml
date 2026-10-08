@@ -24,7 +24,10 @@
         </div>
     </footer>
 
-    @await Component.InvokeAsync("NavigationMenu")
+    @if (User.Identity?.IsAuthenticated == true)
+    {
+        @await Component.InvokeAsync("NavigationMenu")
+    }
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>

@@ -1,19 +1,25 @@
 namespace MobileShop.Web.Pages.Account;
 
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+
 public class ProfileModel(IAccountDataService dataService) : PageModel
 {
+    [BindProperty]
+    [Required]
+    [StringLength(50)]
+    public string? NewUsername { get; set; }
+
     [BindProperty]
     [Required]
     public string? CurrentPassword { get; set; }
 
     [BindProperty]
-    [Required]
     [StringLength(100, MinimumLength = 6, ErrorMessage = "New password must be at least 6 characters.")]
     public string? NewPassword { get; set; }
 
     [BindProperty]
-    [Required]
-    [StringLength(100, MinimumLength = 6, ErrorMessage = "Confirm password must be at least 6 characters.")]
     [Compare(nameof(NewPassword), ErrorMessage = "New passwords do not match.")]
     public string? ConfirmPassword { get; set; }
 
@@ -21,43 +27,45 @@ public class ProfileModel(IAccountDataService dataService) : PageModel
 
     public string? Username { get; set; }
 
-    public async Task OnGetAsync()
-        => Username = await dataService.GetAdminUsernameAsync();
+    public void OnGet()
+    {
+        Username = User.Identity?.Name;
+        NewUsername = Username;
+    }
 
     public async Task<IActionResult> OnPostAsync()
     {
+        Username = User.Identity?.Name;
         if (!ModelState.IsValid)
         {
             return Page();
         }
 
-        // The service owns the admin username; "admin" is only a last-resort fallback so a
-// missing seed surfaces as a normal failed validation rather than a null dereference.
-        var adminUsername = await dataService.GetAdminUsernameAsync() ?? "admin";
-
-        var credsOk = await dataService.ValidateCredentialsAsync(adminUsername, CurrentPassword ?? string.Empty);
-        if (!credsOk)
+        if (string.IsNullOrWhiteSpace(Username))
         {
-            ModelState.AddModelError(string.Empty, "Invalid current password.");
+            return Challenge();
+        }
+
+        var result = await dataService.ChangeCredentialsAsync(
+            Username, CurrentPassword!, NewUsername!, NewPassword);
+        if (!result.Succeeded)
+        {
+            ModelState.AddModelError(result.ErrorField ?? string.Empty, result.Message ?? "The profile changes could not be saved.");
             return Page();
         }
 
-        if (NewPassword != ConfirmPassword)
+        Username = NewUsername!.Trim();
+        var claims = new[]
         {
-            ModelState.AddModelError(string.Empty, "New passwords do not match.");
-            return Page();
-        }
+            new Claim(ClaimTypes.NameIdentifier, Username),
+            new Claim(ClaimTypes.Name, Username)
+        };
+        await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme,
+            new ClaimsPrincipal(new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme)));
 
-        var ok = await dataService.ChangePasswordAsync(adminUsername, NewPassword!);
-        if (!ok)
-        {
-            ModelState.AddModelError(string.Empty, "Failed to change password.");
-            return Page();
-        }
-
-        Username = adminUsername;
-        Message = "Password changed successfully.";
+        Message = result.Message;
         ModelState.Clear();
+        NewUsername = Username;
         CurrentPassword = null;
         NewPassword = null;
         ConfirmPassword = null;

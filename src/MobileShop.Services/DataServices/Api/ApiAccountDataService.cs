@@ -17,4 +17,7 @@ public class ApiAccountDataService : IAccountDataService
     /// <inheritdoc />
     public Task<bool> ChangePasswordAsync(string username, string plainNewPassword)
         => throw new NotImplementedException("ApiAccountDataService is not implemented yet.");
+
+    public Task<ServiceResult> ChangeCredentialsAsync(string username, string currentPassword, string newUsername, string? newPassword)
+        => throw new NotImplementedException("ApiAccountDataService is not implemented yet.");
 }

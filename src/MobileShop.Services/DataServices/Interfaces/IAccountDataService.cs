@@ -18,4 +18,11 @@ public interface IAccountDataService
     /// <param name="username">The username.</param>
     /// <param name="plainNewPassword">The new plain-text password.</param>
     Task<bool> ChangePasswordAsync(string username, string plainNewPassword);
+
+    /// <summary>Validates the current password and updates the username and optional password together.</summary>
+    Task<ServiceResult> ChangeCredentialsAsync(
+        string username,
+        string currentPassword,
+        string newUsername,
+        string? newPassword);
 }

@@ -10,8 +10,6 @@ public sealed class NavigationMenuViewComponent : ViewComponent
         var currentPage = routeData["page"]?.ToString();
         var currentController = routeData["controller"]?.ToString();
         var currentAction = routeData["action"]?.ToString();
-        var isAuthenticated = User.Identity?.IsAuthenticated == true;
-
         var items = new List<NavItem>
         {
             CreateItem("dashboard", "Dashboard", "nav-icon-home", "/Index", "/Index",
@@ -47,18 +45,11 @@ public sealed class NavigationMenuViewComponent : ViewComponent
                 [
                     Link("Profit & loss", "Review the shop's financial performance.", "/Reports/ProfitLoss", "nav-subicon-chart")
                 ]),
-            CreateItem("account", isAuthenticated ? "Account" : "Sign in", "nav-icon-account", "/Account",
-                isAuthenticated ? "/Account/Profile" : "/Account/Login",
-                isAuthenticated
-                    ?
-                    [
-                        Link("Profile", "Manage your account profile.", "/Account/Profile", "nav-subicon-person"),
-                        Link("Sign out", "End your current session.", "/Account/Logout", "nav-subicon-exit")
-                    ]
-                    :
-                    [
-                        Link("Sign in", "Access your shop account.", "/Account/Login", "nav-subicon-enter")
-                    ])
+            CreateItem("account", "Profile", "nav-icon-account", "/Account", "/Account/Profile",
+                [
+                    Link("Profile", "Manage your account profile.", "/Account/Profile", "nav-subicon-person"),
+                    Link("Sign out", "End your current session.", "/Account/Logout", "nav-subicon-exit")
+                ])
         };
 
         items = items

@@ -1,5 +1,9 @@
 namespace MobileShop.Web.Pages.Account;
 
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+
 public class LoginModel(IAccountDataService dataService) : PageModel
 {
     [BindProperty]
@@ -11,12 +15,17 @@ public class LoginModel(IAccountDataService dataService) : PageModel
     public string? ReturnUrl { get; set; }
     public string? Message { get; private set; }
 
-    public void OnGet(string? returnUrl = null)
-        => ReturnUrl = returnUrl ?? Url.Content("~/");
+    public IActionResult OnGet(string? returnUrl = null)
+    {
+        ReturnUrl = returnUrl;
+        if (User.Identity?.IsAuthenticated == true)
+            return LocalRedirect(Url.Content("~/"));
+        return Page();
+    }
 
     public async Task<IActionResult> OnPostAsync(string? returnUrl = null)
     {
-        ReturnUrl = returnUrl ?? Url.Content("~/");
+        ReturnUrl = Url.IsLocalUrl(returnUrl) ? returnUrl : Url.Content("~/");
         if (!ModelState.IsValid)
         {
             return Page();
@@ -28,8 +37,17 @@ public class LoginModel(IAccountDataService dataService) : PageModel
             return Page();
         }
 
-        Message = "Credentials validated. Authentication is not enabled in this stage.";
-        ModelState.Clear();
-        return Page();
+        var claims = new[]
+        {
+            new Claim(ClaimTypes.NameIdentifier, Username!),
+            new Claim(ClaimTypes.Name, Username!)
+        };
+        var principal = new ClaimsPrincipal(new ClaimsIdentity(
+            claims,
+            CookieAuthenticationDefaults.AuthenticationScheme));
+        await HttpContext.SignInAsync(
+            CookieAuthenticationDefaults.AuthenticationScheme, principal);
+
+        return LocalRedirect(ReturnUrl!);
     }
 }
