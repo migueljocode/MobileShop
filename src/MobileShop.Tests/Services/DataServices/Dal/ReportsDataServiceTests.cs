@@ -381,12 +381,26 @@ public class ReportsDataServiceTests : RepoTestBase
     }
 
     [Fact]
-    public async Task GetDistributionRowsAsync_throws_when_required_employee_missing()
+    public async Task GetDistributionRowsAsync_reports_unlinked_fixed_split_when_employee_missing()
     {
         AddEmployee("Anis", "Sahabi");
 
-        await Assert.ThrowsAsync<InvalidOperationException>(
-            () => _service.GetDistributionRowsAsync(100));
+        var rows = await _service.GetDistributionRowsAsync(100);
+
+        Assert.Equal(3, rows.Count);
+        Assert.Equal(0, rows.Single(row => row.EmployeeName == "Mikaeeil Jorjany").EmployeeId);
+        Assert.Equal(0, rows.Single(row => row.EmployeeName == "Shop").EmployeeId);
+    }
+
+    [Fact]
+    public async Task GetDistributionRowsAsync_returns_fixed_split_when_database_has_no_employees()
+    {
+        var rows = await _service.GetDistributionRowsAsync(0);
+
+        Assert.Equal(3, rows.Count);
+        Assert.All(rows, row => Assert.Equal(0, row.EmployeeId));
+        Assert.All(rows, row => Assert.Equal(0, row.CalculatedAmount));
+        Assert.All(rows, row => Assert.True(row.IsLossPeriod));
     }
 
     [Fact]
@@ -409,13 +423,15 @@ public class ReportsDataServiceTests : RepoTestBase
     }
 
     [Fact]
-    public async Task GetDistributionRowsAsync_ignores_inactive_required_employees()
+    public async Task GetDistributionRowsAsync_reports_unlinked_row_for_inactive_employee()
     {
         AddEmployee("Mikaeeil", "Jorjany", isActive: false);
         AddEmployee("Anis", "Sahabi");
 
-        await Assert.ThrowsAsync<InvalidOperationException>(
-            () => _service.GetDistributionRowsAsync(100));
+        var rows = await _service.GetDistributionRowsAsync(100);
+
+        Assert.Equal(0, rows.Single(row => row.EmployeeName == "Mikaeeil Jorjany").EmployeeId);
+        Assert.NotEqual(0, rows.Single(row => row.EmployeeName == "Anis Sahabi").EmployeeId);
     }
     [Fact]
     public async Task GetProfitLossRowsAsync_handles_large_rial_profit_exactly()

@@ -26,7 +26,8 @@ public class DistributionSettings
 
 /// <summary>
 /// Calculates profit distribution for a given period using the fixed three-row distribution:
-/// Mikaeeil Jorjany (40%), Anis Sahabi (50%), Shop (10%).
+/// Mikaeeil Jorjany (40%), Anis Sahabi (50%), Shop (10%). If a named employee is not present as
+/// an active employee, that row is still reported with an employee ID of zero.
 /// </summary>
 public static class DistributionCalculator
 {
@@ -35,12 +36,11 @@ public static class DistributionCalculator
     /// Mikaeeil Jorjany (40%), Anis Sahabi (50%), Shop (10%).
     /// </summary>
     /// <param name="totalProfit">Total profit (positive) or loss (negative/zero) for the period.</param>
-    /// <param name="employees">All employees (active and inactive). Must contain exactly one active
-    /// employee named "Mikaeeil Jorjany" and exactly one active employee named "Anis Sahabi".
-    /// Inactive matches do not satisfy the requirement.</param>
+    /// <param name="employees">All employees (active and inactive). Active matches supply employee
+    /// IDs; missing active matches are reported with an ID of zero.</param>
     /// <param name="settings">Distribution settings (retained for API compatibility; not used by fixed distribution).</param>
     /// <returns>Exactly three distribution rows: Mikaeeil (40%), Anis (50%), Shop (10%).</returns>
-    /// <exception cref="InvalidOperationException">Thrown if required employees are missing, duplicated, or inactive.</exception>
+    /// <exception cref="InvalidOperationException">Thrown if a required employee has duplicate active records.</exception>
     public static List<DistributionRow> Calculate(
         long totalProfit,
         IEnumerable<Employee> employees,
@@ -57,15 +57,13 @@ public static class DistributionCalculator
             .Where(e => e.IsActive && e.PersonNavigation != null && $"{e.PersonNavigation.FirstName} {e.PersonNavigation.LastName}" == "Anis Sahabi")
             .ToList();
 
-        if (mikaeeil.Count == 0)
-            throw new InvalidOperationException("Required active employee 'Mikaeeil Jorjany' not found.");
         if (mikaeeil.Count > 1)
             throw new InvalidOperationException("Duplicate active employees named 'Mikaeeil Jorjany' found.");
-        if (anis.Count == 0)
-            throw new InvalidOperationException("Required active employee 'Anis Sahabi' not found.");
         if (anis.Count > 1)
             throw new InvalidOperationException("Duplicate active employees named 'Anis Sahabi' found.");
 
+        var mikaeeilId = mikaeeil.SingleOrDefault()?.Id ?? 0;
+        var anisId = anis.SingleOrDefault()?.Id ?? 0;
         var rows = new List<DistributionRow>();
 
         if (totalProfit <= 0)
@@ -74,7 +72,7 @@ public static class DistributionCalculator
             // Shares still display as 40/50/10
             rows.Add(new DistributionRow
             {
-                EmployeeId = mikaeeil[0].Id,
+                EmployeeId = mikaeeilId,
                 EmployeeName = "Mikaeeil Jorjany",
                 SharePercent = 40,
                 CalculatedAmount = 0,
@@ -82,7 +80,7 @@ public static class DistributionCalculator
             });
             rows.Add(new DistributionRow
             {
-                EmployeeId = anis[0].Id,
+                EmployeeId = anisId,
                 EmployeeName = "Anis Sahabi",
                 SharePercent = 50,
                 CalculatedAmount = 0,
@@ -107,7 +105,7 @@ public static class DistributionCalculator
 
         rows.Add(new DistributionRow
         {
-            EmployeeId = mikaeeil[0].Id,
+            EmployeeId = mikaeeilId,
             EmployeeName = "Mikaeeil Jorjany",
             SharePercent = 40,
             CalculatedAmount = mikaeeilAmount,
@@ -115,7 +113,7 @@ public static class DistributionCalculator
         });
         rows.Add(new DistributionRow
         {
-            EmployeeId = anis[0].Id,
+            EmployeeId = anisId,
             EmployeeName = "Anis Sahabi",
             SharePercent = 50,
             CalculatedAmount = anisAmount,

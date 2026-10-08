@@ -187,6 +187,7 @@ public class ReportsDataService(
             .Select(employee => new Employee
             {
                 Id = employee.Id,
+                IsActive = true,
                 PersonNavigation = new Person
                 {
                     FirstName = employee.FirstName,

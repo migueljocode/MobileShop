@@ -133,10 +133,10 @@ public class DistributionCalculatorTests
         Assert.Equal(loss, rows.Sum(r => r.CalculatedAmount));
     }
 
-    // ── Validation: missing required employees ─────────────────
+    // ── Missing employee records ───────────────────────────────
 
     [Fact]
-    public void MissingMikaeeil_ThrowsExplicitException()
+    public void MissingMikaeeil_UsesUnlinkedDistributionRow()
     {
         // Only Anis present — Mikaeeil missing entirely
         var employees = CreateValidEmployees(
@@ -144,13 +144,14 @@ public class DistributionCalculatorTests
             (3, "Ali", "Rezaei", 30, true)
         );
 
-        var ex = Assert.Throws<InvalidOperationException>(() =>
-            DistributionCalculator.Calculate(1000, employees, _settings));
-        Assert.Contains("Mikaeeil Jorjany", ex.Message);
+        var rows = DistributionCalculator.Calculate(1000, employees, _settings);
+
+        Assert.Equal(0, rows.Single(row => row.EmployeeName == "Mikaeeil Jorjany").EmployeeId);
+        Assert.Equal(2, rows.Single(row => row.EmployeeName == "Anis Sahabi").EmployeeId);
     }
 
     [Fact]
-    public void MissingAnis_ThrowsExplicitException()
+    public void MissingAnis_UsesUnlinkedDistributionRow()
     {
         // Only Mikaeeil present — Anis missing entirely
         var employees = CreateValidEmployees(
@@ -158,37 +159,50 @@ public class DistributionCalculatorTests
             (3, "Ali", "Rezaei", 30, true)
         );
 
-        var ex = Assert.Throws<InvalidOperationException>(() =>
-            DistributionCalculator.Calculate(1000, employees, _settings));
-        Assert.Contains("Anis Sahabi", ex.Message);
+        var rows = DistributionCalculator.Calculate(1000, employees, _settings);
+
+        Assert.Equal(1, rows.Single(row => row.EmployeeName == "Mikaeeil Jorjany").EmployeeId);
+        Assert.Equal(0, rows.Single(row => row.EmployeeName == "Anis Sahabi").EmployeeId);
     }
 
-    // ── Validation: inactive matches do not satisfy requirement ─
+    // ── Inactive employee records ──────────────────────────────
 
     [Fact]
-    public void InactiveMikaeeil_DoesNotSatisfyRequirement()
+    public void InactiveMikaeeil_UsesUnlinkedDistributionRow()
     {
         var employees = CreateValidEmployees(
             (1, "Mikaeeil", "Jorjany", 40, false), // inactive
             (2, "Anis", "Sahabi", 50, true)
         );
 
-        var ex = Assert.Throws<InvalidOperationException>(() =>
-            DistributionCalculator.Calculate(1000, employees, _settings));
-        Assert.Contains("Mikaeeil Jorjany", ex.Message);
+        var rows = DistributionCalculator.Calculate(1000, employees, _settings);
+
+        Assert.Equal(0, rows.Single(row => row.EmployeeName == "Mikaeeil Jorjany").EmployeeId);
+        Assert.Equal(2, rows.Single(row => row.EmployeeName == "Anis Sahabi").EmployeeId);
     }
 
     [Fact]
-    public void InactiveAnis_DoesNotSatisfyRequirement()
+    public void InactiveAnis_UsesUnlinkedDistributionRow()
     {
         var employees = CreateValidEmployees(
             (1, "Mikaeeil", "Jorjany", 40, true),
             (2, "Anis", "Sahabi", 50, false) // inactive
         );
 
-        var ex = Assert.Throws<InvalidOperationException>(() =>
-            DistributionCalculator.Calculate(1000, employees, _settings));
-        Assert.Contains("Anis Sahabi", ex.Message);
+        var rows = DistributionCalculator.Calculate(1000, employees, _settings);
+
+        Assert.Equal(1, rows.Single(row => row.EmployeeName == "Mikaeeil Jorjany").EmployeeId);
+        Assert.Equal(0, rows.Single(row => row.EmployeeName == "Anis Sahabi").EmployeeId);
+    }
+
+    [Fact]
+    public void NoEmployees_StillReturnsFixedDistribution()
+    {
+        var rows = DistributionCalculator.Calculate(0, [], _settings);
+
+        Assert.Equal(3, rows.Count);
+        Assert.All(rows, row => Assert.Equal(0, row.EmployeeId));
+        Assert.All(rows, row => Assert.Equal(0, row.CalculatedAmount));
     }
 
     // ── Validation: duplicates ─────────────────────────────────

@@ -40,18 +40,4 @@
     <Content Update="appsettings.Development.json" CopyToPublishDirectory="Never" />
   </ItemGroup>
 
-  <Target Name="InitializeStandalonePublishDatabase"
-          AfterTargets="Publish"
-          Condition="'$(RuntimeIdentifier)' != '' and !Exists('$(PublishDir)MobileShop.db')">
-    <PropertyGroup>
-      <PublishDatabaseBootstrapDirectory>$(MSBuildProjectDirectory)/obj/$(Configuration)/$(TargetFramework)/publish-db-bootstrap</PublishDatabaseBootstrapDirectory>
-    </PropertyGroup>
-    <MakeDir Directories="$(PublishDatabaseBootstrapDirectory)" />
-    <Exec Command="dotnet run --project &quot;$(MSBuildProjectFullPath)&quot; --configuration $(Configuration) --no-launch-profile -- --migrate-database"
-          EnvironmentVariables="MOBILESHOP_DATA_DIRECTORY=$(PublishDatabaseBootstrapDirectory)" />
-    <Copy SourceFiles="$(PublishDatabaseBootstrapDirectory)/MobileShop.db"
-          DestinationFiles="$(PublishDir)MobileShop.db" />
-    <RemoveDir Directories="$(PublishDatabaseBootstrapDirectory)" />
-  </Target>
-
 </Project>
