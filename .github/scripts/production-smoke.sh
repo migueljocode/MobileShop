@@ -16,6 +16,8 @@ DEV_LOG="$SMOKE_DIR/development.log"
 PROD_GUARD_LOG="$SMOKE_DIR/production-guard.log"
 MIGRATE_LOG="$SMOKE_DIR/migrate.log"
 PROD_LOG="$SMOKE_DIR/production.log"
+COOKIE_JAR="$SMOKE_DIR/production-cookies.txt"
+LOGIN_PAGE="$SMOKE_DIR/login.html"
 
 mkdir -p "$SMOKE_DIR"
 rm -f "$DB" "$DB"-wal "$DB"-shm
@@ -133,7 +135,8 @@ if [[ "${#BACKUPS[@]}" -ne 1 || ! -f "${BACKUPS[0]}" ]]; then
 fi
 
 HISTORY_COUNT="$(sqlite3 "$DB" 'SELECT COUNT(*) FROM __EFMigrationsHistory;')"
-[[ "$HISTORY_COUNT" == "7" ]]
+EXPECTED_MIGRATION_COUNT="$(find "$ROOT/src/MobileShop.Dal/Migrations" -maxdepth 1 -type f -name '[0-9]*_*.cs' ! -name '*.Designer.cs' | wc -l | tr -d '[:space:]')"
+[[ "$HISTORY_COUNT" == "$EXPECTED_MIGRATION_COUNT" ]]
 
 fingerprint "$SMOKE_DIR/fingerprint-after-migrate.txt"
 diff -u "$SMOKE_DIR/fingerprint-before.txt" "$SMOKE_DIR/fingerprint-after-migrate.txt"
@@ -141,29 +144,67 @@ diff -u "$SMOKE_DIR/fingerprint-before.txt" "$SMOKE_DIR/fingerprint-after-migrat
 start_app "Production" "$PROD_LOG"
 wait_for_home "http://127.0.0.1:5099/" "$PROD_LOG"
 
+curl --silent --show-error --fail --max-time 10 \
+  --cookie-jar "$COOKIE_JAR" \
+  "http://127.0.0.1:5099/Account/Login" \
+  --output "$LOGIN_PAGE"
+ANTIFORGERY_TOKEN="$(python3 - "$LOGIN_PAGE" <<'PY'
+from html.parser import HTMLParser
+import sys
+
+class TokenParser(HTMLParser):
+    token = None
+
+    def handle_starttag(self, tag, attrs):
+        attributes = dict(attrs)
+        if tag == "input" and attributes.get("name") == "__RequestVerificationToken":
+            self.token = attributes.get("value")
+
+parser = TokenParser()
+with open(sys.argv[1], encoding="utf-8") as page:
+    parser.feed(page.read())
+if not parser.token:
+    raise SystemExit("Login page did not contain an antiforgery token.")
+print(parser.token)
+PY
+)"
+LOGIN_STATUS="$(curl --silent --show-error --max-time 10 \
+  --cookie "$COOKIE_JAR" \
+  --cookie-jar "$COOKIE_JAR" \
+  --output /dev/null \
+  --write-out '%{http_code}' \
+  --data-urlencode "__RequestVerificationToken=$ANTIFORGERY_TOKEN" \
+  --data-urlencode 'Username=admin' \
+  --data-urlencode 'Password=Admin@123' \
+  "http://127.0.0.1:5099/Account/Login")"
+if [[ "$LOGIN_STATUS" != "302" ]]; then
+  echo "The initial admin account could not sign in (HTTP $LOGIN_STATUS)." >&2
+  exit 1
+fi
+
 for route in / /Products /Products/SecondHand /Transactions /People/Customers /People/Sellers /Reports/ProfitLoss; do
-  curl --silent --show-error --fail --max-time 10 -o /dev/null "http://127.0.0.1:5099$route"
+  curl --silent --show-error --fail --max-time 10 --cookie "$COOKIE_JAR" -o /dev/null "http://127.0.0.1:5099$route"
 done
 
 for route in / /Transactions /Reports/ProfitLoss; do
-  curl --silent --show-error --fail --max-time 10 "http://127.0.0.1:5099$route" | grep -F "IRR" >/dev/null
+  curl --silent --show-error --fail --max-time 10 --cookie "$COOKIE_JAR" "http://127.0.0.1:5099$route" | grep -F "IRR" >/dev/null
 done
 
-SOLD_PRODUCTS="$(curl --silent --show-error --fail --max-time 10 "http://127.0.0.1:5099/Products?availability=sold")"
+SOLD_PRODUCTS="$(curl --silent --show-error --fail --max-time 10 --cookie "$COOKIE_JAR" "http://127.0.0.1:5099/Products?availability=sold")"
 grep -F 'text-bg-secondary">Sold' <<<"$SOLD_PRODUCTS" >/dev/null
 if grep -F 'text-bg-success">Available' <<<"$SOLD_PRODUCTS" >/dev/null; then
   echo "Sold availability filter rendered an Available badge." >&2
   exit 1
 fi
 
-AVAILABLE_PRODUCTS="$(curl --silent --show-error --fail --max-time 10 "http://127.0.0.1:5099/Products?availability=available")"
+AVAILABLE_PRODUCTS="$(curl --silent --show-error --fail --max-time 10 --cookie "$COOKIE_JAR" "http://127.0.0.1:5099/Products?availability=available")"
 grep -F 'text-bg-success">Available' <<<"$AVAILABLE_PRODUCTS" >/dev/null
 if grep -F 'text-bg-secondary">Sold' <<<"$AVAILABLE_PRODUCTS" >/dev/null; then
   echo "Available availability filter rendered a Sold badge." >&2
   exit 1
 fi
 
-curl --silent --show-error --fail --max-time 10 -o /dev/null "http://127.0.0.1:5099/Products?type=phone&availability=sold"
+curl --silent --show-error --fail --max-time 10 --cookie "$COOKIE_JAR" -o /dev/null "http://127.0.0.1:5099/Products?type=phone&availability=sold"
 
 stop_app
 if grep -Eq "\[ERR\]|\[FTL\]|fail:|crit:|Unhandled exception" "$PROD_LOG"; then

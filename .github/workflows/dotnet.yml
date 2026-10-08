@@ -36,7 +36,7 @@ jobs:
         shell: pwsh
         run: ./src/MobileShop.Scripts/tests/test-powershell.ps1
       - name: Upload factor PDF inspection artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: factor-pdf-inspection
           path: TestResults/FactorPdfInspection/
@@ -51,7 +51,7 @@ jobs:
           bash .github/scripts/production-smoke.sh
       - name: Upload Production smoke artifacts
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: production-smoke
           path: |
