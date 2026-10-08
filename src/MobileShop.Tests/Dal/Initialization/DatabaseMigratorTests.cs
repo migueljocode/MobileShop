@@ -122,16 +122,31 @@ public sealed class DatabaseMigratorTests : IDisposable
     }
 
     [Fact]
-    public void Ensure_current_refuses_a_missing_database()
+    public void Ensure_current_creates_a_missing_database()
     {
         var databaseFile = DatabaseFile();
         using var context = CreateContext(databaseFile);
 
-        var exception = Assert.Throws<InvalidOperationException>(
-            () => DatabaseMigrator.EnsureCurrent(context));
+        var created = DatabaseMigrator.EnsureCurrent(context);
 
-        Assert.Contains("--migrate-database", exception.Message, StringComparison.Ordinal);
-        Assert.False(File.Exists(databaseFile));
+        Assert.True(created);
+        Assert.True(File.Exists(databaseFile));
+        Assert.Equal(CurrentMigrationCount(context), Scalar<long>(context, "SELECT COUNT(*) FROM \"__EFMigrationsHistory\""));
+        Assert.Empty(BackupFiles());
+    }
+
+    [Fact]
+    public void Ensure_current_migrates_an_existing_empty_database_file()
+    {
+        var databaseFile = DatabaseFile();
+        File.WriteAllBytes(databaseFile, Array.Empty<byte>());
+        using var context = CreateContext(databaseFile);
+
+        var created = DatabaseMigrator.EnsureCurrent(context);
+
+        Assert.True(created);
+        Assert.Equal(CurrentMigrationCount(context), Scalar<long>(context, "SELECT COUNT(*) FROM \"__EFMigrationsHistory\""));
+        Assert.Empty(BackupFiles());
     }
 
     [Fact]
@@ -146,6 +161,9 @@ public sealed class DatabaseMigratorTests : IDisposable
             () => DatabaseMigrator.EnsureCurrent(context));
 
         Assert.Contains("--migrate-database", exception.Message, StringComparison.Ordinal);
+        Assert.Equal(
+            0L,
+            Scalar<long>(context, "SELECT COUNT(*) FROM sqlite_master WHERE name = '__EFMigrationsHistory'"));
     }
 
     [Fact]
@@ -170,8 +188,9 @@ public sealed class DatabaseMigratorTests : IDisposable
 
         DatabaseMigrator.Migrate(context, databaseFile, NullLogger.Instance);
 
-        DatabaseMigrator.EnsureCurrent(context);
+        var created = DatabaseMigrator.EnsureCurrent(context);
 
+        Assert.False(created);
         Assert.Empty(BackupFiles());
         Assert.Empty(context.Database.GetPendingMigrations());
     }

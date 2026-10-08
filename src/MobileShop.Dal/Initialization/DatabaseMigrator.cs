@@ -12,7 +12,7 @@ public enum DatabaseMigrationStatus
 public sealed record DatabaseMigrationResult(DatabaseMigrationStatus Status, string? BackupPath);
 
 /// <summary>
-/// Performs the only supported production schema changes and checks production databases without mutating them.
+/// Safely provisions first-run production databases and checks existing databases before startup.
 /// </summary>
 public static class DatabaseMigrator
 {
@@ -75,24 +75,48 @@ public static class DatabaseMigrator
     }
 
     /// <summary>
-    /// Read-only production guard. It never creates, migrates, baselines, or otherwise writes the database.
+    /// Creates a missing or empty first-run database; otherwise verifies a production schema without upgrading it.
     /// </summary>
-    public static void EnsureCurrent(AppDbContext context)
+    /// <returns><see langword="true"/> if the database was newly initialized.</returns>
+    public static bool EnsureCurrent(AppDbContext context)
     {
         var databaseFile = context.Database.GetDbConnection().DataSource;
-        if (string.IsNullOrWhiteSpace(databaseFile) || !File.Exists(databaseFile))
+        if (string.IsNullOrWhiteSpace(databaseFile))
         {
             throw new InvalidOperationException(CurrentMigrationMessage);
+        }
+
+        if (!File.Exists(databaseFile))
+        {
+            context.Database.Migrate();
+            return true;
         }
 
         var historyExists = context.Database
             .SqlQueryRaw<int>("SELECT COUNT(*) AS Value FROM sqlite_master WHERE type = 'table' AND name = '__EFMigrationsHistory'")
             .Single() > 0;
 
-        if (!historyExists || context.Database.GetPendingMigrations().Any())
+        if (!historyExists)
+        {
+            var tableCount = context.Database
+                .SqlQueryRaw<int>("SELECT COUNT(*) AS Value FROM sqlite_master WHERE type = 'table' AND name NOT LIKE 'sqlite_%'")
+                .Single();
+
+            if (tableCount == 0)
+            {
+                context.Database.Migrate();
+                return true;
+            }
+
+            throw new InvalidOperationException(CurrentMigrationMessage);
+        }
+
+        if (context.Database.GetPendingMigrations().Any())
         {
             throw new InvalidOperationException(CurrentMigrationMessage);
         }
+
+        return false;
     }
 
     private static string CreateVerifiedBackup(string databaseFile)

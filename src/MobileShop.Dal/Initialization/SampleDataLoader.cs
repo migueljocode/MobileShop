@@ -89,16 +89,7 @@ internal static class SampleDataLoader
     {
         var outputPath = Path.Combine(AppContext.BaseDirectory, RelativePath);
         if (File.Exists(outputPath))
-        {
             return outputPath;
-        }
-
-        var assemblyPath = Path.GetDirectoryName(typeof(SampleDataLoader).Assembly.Location);
-        var assemblyRelativePath = assemblyPath is null ? null : Path.Combine(assemblyPath, RelativePath);
-        if (assemblyRelativePath is not null && File.Exists(assemblyRelativePath))
-        {
-            return assemblyRelativePath;
-        }
 
         throw new FileNotFoundException($"Sample data file '{RelativePath}' was not copied to the application output.", outputPath);
     }

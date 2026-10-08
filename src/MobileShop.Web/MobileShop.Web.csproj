@@ -1,9 +1,15 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
   <ItemGroup>
-    <ProjectReference Include="..\MobileShop.Models\MobileShop.Models.csproj" />
-    <ProjectReference Include="..\MobileShop.Dal\MobileShop.Dal.csproj" />
-    <ProjectReference Include="..\MobileShop.Services\MobileShop.Services.csproj" />
+    <ProjectReference Include="..\MobileShop.Models\MobileShop.Models.csproj">
+      <AdditionalProperties Condition="'$(RuntimeIdentifier)' != ''">DebugSymbols=false;DebugType=None</AdditionalProperties>
+    </ProjectReference>
+    <ProjectReference Include="..\MobileShop.Dal\MobileShop.Dal.csproj">
+      <AdditionalProperties Condition="'$(RuntimeIdentifier)' != ''">DebugSymbols=false;DebugType=None</AdditionalProperties>
+    </ProjectReference>
+    <ProjectReference Include="..\MobileShop.Services\MobileShop.Services.csproj">
+      <AdditionalProperties Condition="'$(RuntimeIdentifier)' != ''">DebugSymbols=false;DebugType=None</AdditionalProperties>
+    </ProjectReference>
   </ItemGroup>
 
   <ItemGroup>
@@ -18,5 +24,34 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
+
+  <PropertyGroup Condition="'$(RuntimeIdentifier)' != ''">
+    <SelfContained>true</SelfContained>
+    <PublishSingleFile>true</PublishSingleFile>
+    <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+    <DebugType>None</DebugType>
+    <DebugSymbols>false</DebugSymbols>
+    <CopyOutputSymbolsToPublishDirectory>false</CopyOutputSymbolsToPublishDirectory>
+    <PublishDir>$(MSBuildThisFileDirectory)..\..\Publishes\$(RuntimeIdentifier)\</PublishDir>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(RuntimeIdentifier)' != ''">
+    <Content Update="appsettings.Development.json" CopyToPublishDirectory="Never" />
+  </ItemGroup>
+
+  <Target Name="InitializeStandalonePublishDatabase"
+          AfterTargets="Publish"
+          Condition="'$(RuntimeIdentifier)' != '' and !Exists('$(PublishDir)MobileShop.db')">
+    <PropertyGroup>
+      <PublishDatabaseBootstrapDirectory>$(MSBuildProjectDirectory)/obj/$(Configuration)/$(TargetFramework)/publish-db-bootstrap</PublishDatabaseBootstrapDirectory>
+    </PropertyGroup>
+    <MakeDir Directories="$(PublishDatabaseBootstrapDirectory)" />
+    <Exec Command="dotnet run --project &quot;$(MSBuildProjectFullPath)&quot; --configuration $(Configuration) --no-launch-profile -- --migrate-database"
+          EnvironmentVariables="MOBILESHOP_DATA_DIRECTORY=$(PublishDatabaseBootstrapDirectory)" />
+    <Copy SourceFiles="$(PublishDatabaseBootstrapDirectory)/MobileShop.db"
+          DestinationFiles="$(PublishDir)MobileShop.db" />
+    <RemoveDir Directories="$(PublishDatabaseBootstrapDirectory)" />
+  </Target>
 
 </Project>

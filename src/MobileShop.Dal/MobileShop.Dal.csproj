@@ -13,7 +13,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="Initialization\sample-data.json" CopyToOutputDirectory="PreserveNewest" />
+    <None Update="Initialization\sample-data.json"
+          CopyToOutputDirectory="PreserveNewest"
+          CopyToPublishDirectory="Never" />
   </ItemGroup>
 
   <PropertyGroup>

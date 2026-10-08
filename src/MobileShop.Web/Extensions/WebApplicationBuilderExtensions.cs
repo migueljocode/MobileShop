@@ -50,6 +50,8 @@ public static class WebApplicationBuilderExtensions
             using var scope = app.Services.CreateScope();
             var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
             var result = DatabaseMigrator.Migrate(context, SolutionPaths.DatabaseFile, app.Logger);
+            if (result.Status == DatabaseMigrationStatus.Created)
+                scope.ServiceProvider.GetRequiredService<IAccountDataService>().EnsureAdminUser();
 
             Console.WriteLine(result.Status switch
             {
@@ -82,17 +84,16 @@ public static class WebApplicationBuilderExtensions
         if (app.Environment.IsDevelopment())
         {
             DatabaseInitializer.InitializeForDevelopment(app.Services);
-
+            using var scope = app.Services.CreateScope();
+            scope.ServiceProvider.GetRequiredService<IAccountDataService>().EnsureAdminUser();
         }
         else
         {
             using var scope = app.Services.CreateScope();
             var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-            DatabaseMigrator.EnsureCurrent(context);
+            if (DatabaseMigrator.EnsureCurrent(context))
+                scope.ServiceProvider.GetRequiredService<IAccountDataService>().EnsureAdminUser();
         }
-
-        using (var scope = app.Services.CreateScope())
-            scope.ServiceProvider.GetRequiredService<IAccountDataService>().EnsureAdminUser();
 
         app.UseRouting();
         app.UseAuthentication();
