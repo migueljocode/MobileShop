@@ -3,6 +3,8 @@ namespace MobileShop.Models.ViewModels.Web.BindModels;
 /// <summary>Input submitted when creating one or more screen-protector products.</summary>
 public sealed class CreateGlassInputModel
 {
+    [Range(1, int.MaxValue, ErrorMessage = "Select a seller.")]
+    public int SellerId { get; set; }
     [Required]
     public int CompatibleManufacturerId { get; set; }
 

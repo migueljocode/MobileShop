@@ -19,6 +19,9 @@ public class CreatePhoneModelTests : RepoTestBase
         var dataService = new ProductsDataService(
             new BaseRepo<Phone>(Context),
             new BaseRepo<AppleId>(Context),
+            new BaseRepo<Seller>(Context),
+            new BaseRepo<Customer>(Context),
+            new BaseRepo<Person>(Context),
             new BaseRepo<Manufacturer>(Context),
             new BaseRepo<Model>(Context),
             new BaseRepo<Category>(Context),
@@ -31,6 +34,8 @@ public class CreatePhoneModelTests : RepoTestBase
             NullLogger<ProductsDataService>.Instance);
 
         // seed catalog data that would exist in production seed
+        TestDataHelpers.SeedShopSentinels(Context);
+        TestDataHelpers.SeedAnisCustomer(Context);
         Context.Categories.Add(new Category { Name = "Phone" });
         Context.Manufacturers.AddRange(
             new Manufacturer { Name = "Apple" },
@@ -42,6 +47,7 @@ public class CreatePhoneModelTests : RepoTestBase
 
     private static CreatePhoneInputModel ValidInput(int manufacturerId, int modelId) => new()
     {
+        SellerId = 1,
         ManufacturerId = manufacturerId,
         ModelId = modelId,
         Price = 1500000,
@@ -56,6 +62,22 @@ public class CreatePhoneModelTests : RepoTestBase
         Assert.Equal(2, _model.Manufacturers.Count());
         Assert.Contains(_model.Manufacturers, m => m.Name == "Apple");
         Assert.Contains(_model.Manufacturers, m => m.Name == "Samsung");
+    }
+
+    [Fact]
+    public async Task OnPostAsync_rejects_an_unknown_seller()
+    {
+        var apple = Context.Manufacturers.First(m => m.Name == "Apple");
+        var phoneCategory = Context.Categories.First(c => c.Name == "Phone");
+        var model = new Model { ManufacturerId = apple.Id, CategoryId = phoneCategory.Id, Name = "iPhone 16" };
+        Context.Models.Add(model);
+        Context.SaveChanges();
+        _model.Input = ValidInput(apple.Id, model.Id);
+        _model.Input.SellerId = 0;
+
+        Assert.IsType<PageResult>(await _model.OnPostAsync());
+        Assert.Empty(Context.Phones);
+        Assert.Contains(_model.ModelState["SellerId"]!.Errors, error => error.ErrorMessage == "Selected seller not found.");
     }
 
     [Fact]
@@ -124,7 +146,9 @@ public class CreatePhoneModelTests : RepoTestBase
         var result = await _model.OnPostCreatePartNumberAsync(model.Id, "NEWCODE-1", supportsDualSim: true, supportsEsim: false);
 
         var jsonResult = Assert.IsType<JsonResult>(result);
-        Assert.NotNull(Context.PartNumbers.FirstOrDefault(pn => pn.Code == "NEWCODE-1" && pn.ModelId == model.Id));
+        var partNumber = Assert.Single(Context.PartNumbers.Where(pn => pn.Code == "NEWCODE-1" && pn.ModelId == model.Id));
+        Assert.True(partNumber.SupportsDualSim);
+        Assert.False(partNumber.SupportsEsim);
         var json = System.Text.Json.JsonSerializer.Serialize(jsonResult.Value);
         using var doc = System.Text.Json.JsonDocument.Parse(json);
         Assert.Equal("NEWCODE-1", doc.RootElement.GetProperty("name").GetString());

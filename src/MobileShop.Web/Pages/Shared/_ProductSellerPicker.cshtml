@@ -1,0 +1,6 @@
+@using MobileShop.Models.ViewModels.Web
+@{
+    ViewData["PersonPickerRole"] = "seller";
+    ViewData["PersonPickerEndpoint"] = Url.Page("/Products/PersonPicker");
+}
+<partial name="/Pages/Shared/_PersonPicker.cshtml" model="Array.Empty<PartyOptionViewModel>()" view-data="ViewData" />

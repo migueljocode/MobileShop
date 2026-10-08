@@ -85,4 +85,30 @@ internal static class TestDataHelpers
         context.SaveChanges();
     }
 
+    internal static void SeedAnisCustomer(AppDbContext context)
+    {
+        var anis = context.People.FirstOrDefault(person =>
+            person.FirstName == "Anis" && person.LastName == "Sahabi");
+        if (anis is null)
+        {
+            anis = new Person
+            {
+                FirstName = "Anis",
+                LastName = "Sahabi",
+                PhoneNumber = "09120000009",
+            };
+            context.People.Add(anis);
+            context.SaveChanges();
+        }
+
+        if (!context.Customers.Any(customer => customer.PersonId == anis.Id))
+        {
+            context.Customers.Add(new Customer
+            {
+                PersonId = anis.Id,
+                NationalId = "0099999999",
+            });
+            context.SaveChanges();
+        }
+    }
 }

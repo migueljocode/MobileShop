@@ -7,7 +7,7 @@ public class ProfitLossModel(
     IReportsDataService dataService) : PageModel
 {
     [BindProperty(SupportsGet = true)] public DateRangeMode Mode { get; set; } = DateRangeMode.Automatic;
-    [BindProperty(SupportsGet = true)] public AutomaticPreset Preset { get; set; } = AutomaticPreset.Month;
+    [BindProperty(SupportsGet = true)] public AutomaticPreset Preset { get; set; } = AutomaticPreset.Today;
 
     [BindProperty(SupportsGet = true)] public DateTime? From { get; set; }
     [BindProperty(SupportsGet = true)] public DateTime? To { get; set; }
@@ -39,7 +39,7 @@ public class ProfitLossModel(
                 AutomaticPreset.Month => (new DateTime(today.Year, today.Month, 1), today),
                 AutomaticPreset.Year => (new DateTime(today.Year, 1, 1), today),
                 AutomaticPreset.All => (earliest ?? today, today),
-                _ => (new DateTime(today.Year, today.Month, 1), today)
+                _ => (today, today)
             };
 
             // Pre-populate the date pickers for initial page load; EffectiveFrom/EffectiveTo
@@ -82,9 +82,10 @@ public class ProfitLossModel(
             {
                 AutomaticPreset.Today => ProfitLossInterval.Hour,
                 AutomaticPreset.Week => ProfitLossInterval.Day,
-                AutomaticPreset.Month => ProfitLossInterval.Week,
-                AutomaticPreset.Year or AutomaticPreset.All => ProfitLossInterval.Month,
-                _ => ProfitLossInterval.Month
+                AutomaticPreset.Month => ProfitLossInterval.Day,
+                AutomaticPreset.Year => ProfitLossInterval.Month,
+                AutomaticPreset.All => ProfitLossInterval.Year,
+                _ => ProfitLossInterval.Hour
             };
         }
 

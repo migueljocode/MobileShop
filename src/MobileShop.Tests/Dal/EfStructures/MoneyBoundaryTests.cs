@@ -70,10 +70,9 @@ public class MoneyBoundaryTests : IDisposable
     {
         var inputs = new object[]
         {
-            new CreatePhoneInputModel { Price = MoneyLimits.MaxRials, ProfitAmount = MoneyLimits.MaxRials, IMEI1 = "123456789012345" },
-            new CreateAppleIdInputModel { Price = MoneyLimits.MaxRials, ProfitAmount = MoneyLimits.MaxRials, Email = "limit@example.com", Password = "password" },
-            new CreateGlassInputModel { CompatibleManufacturerId = 1, CompatibleModelId = 1, GlassManufacturerId = 1, Price = MoneyLimits.MaxRials, ProfitAmount = MoneyLimits.MaxRials },
-            new BuyInputModel { ProductId = 1, SellerId = 1, Price = MoneyLimits.MaxRials },
+            new CreatePhoneInputModel { SellerId = 1, Price = MoneyLimits.MaxRials, ProfitAmount = MoneyLimits.MaxRials, IMEI1 = "123456789012345" },
+            new CreateAppleIdInputModel { SellerId = 1, Price = MoneyLimits.MaxRials, ProfitAmount = MoneyLimits.MaxRials, Email = "limit@example.com", Password = "password" },
+            new CreateGlassInputModel { SellerId = 1, CompatibleManufacturerId = 1, CompatibleModelId = 1, GlassManufacturerId = 1, Price = MoneyLimits.MaxRials, ProfitAmount = MoneyLimits.MaxRials },
             new SellInputModel { ProductId = 1, CustomerId = 1, Price = MoneyLimits.MaxRials }
         };
 
@@ -81,10 +80,9 @@ public class MoneyBoundaryTests : IDisposable
 
         var overLimit = new object[]
         {
-            new CreatePhoneInputModel { Price = MoneyLimits.MaxRials + 1, ProfitAmount = MoneyLimits.MaxRials + 1, IMEI1 = "123456789012345" },
-            new CreateAppleIdInputModel { Price = MoneyLimits.MaxRials + 1, ProfitAmount = MoneyLimits.MaxRials + 1, Email = "limit@example.com", Password = "password" },
-            new CreateGlassInputModel { CompatibleManufacturerId = 1, CompatibleModelId = 1, GlassManufacturerId = 1, Price = MoneyLimits.MaxRials + 1, ProfitAmount = MoneyLimits.MaxRials + 1 },
-            new BuyInputModel { ProductId = 1, SellerId = 1, Price = MoneyLimits.MaxRials + 1 },
+            new CreatePhoneInputModel { SellerId = 1, Price = MoneyLimits.MaxRials + 1, ProfitAmount = MoneyLimits.MaxRials + 1, IMEI1 = "123456789012345" },
+            new CreateAppleIdInputModel { SellerId = 1, Price = MoneyLimits.MaxRials + 1, ProfitAmount = MoneyLimits.MaxRials + 1, Email = "limit@example.com", Password = "password" },
+            new CreateGlassInputModel { SellerId = 1, CompatibleManufacturerId = 1, CompatibleModelId = 1, GlassManufacturerId = 1, Price = MoneyLimits.MaxRials + 1, ProfitAmount = MoneyLimits.MaxRials + 1 },
             new SellInputModel { ProductId = 1, CustomerId = 1, Price = MoneyLimits.MaxRials + 1 }
         };
 

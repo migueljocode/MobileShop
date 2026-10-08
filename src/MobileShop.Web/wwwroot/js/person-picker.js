@@ -10,6 +10,7 @@ document.addEventListener('DOMContentLoaded', function () {
         var saveButton = picker.querySelector('[data-person-save]');
         var searchHandler = picker.getAttribute('data-search-handler');
         var createHandler = picker.getAttribute('data-create-handler');
+        var endpoint = picker.getAttribute('data-person-endpoint') || window.location.href;
         if (!searchInput || !valueInput || !results || !createButton || !modal || !modalError || !saveButton) return;
 
         var modalInstance = bootstrap.Modal.getOrCreateInstance(modal);
@@ -42,7 +43,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         async function search(query) {
-            var url = new URL(window.location.href);
+            var url = new URL(endpoint, window.location.origin);
             url.searchParams.set('handler', searchHandler);
             if (query) url.searchParams.set('q', query);
             else url.searchParams.delete('q');
@@ -89,7 +90,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 var token = document.querySelector('input[name="__RequestVerificationToken"]');
                 if (token) data.append('__RequestVerificationToken', token.value);
 
-                var url = new URL(window.location.href);
+                var url = new URL(endpoint, window.location.origin);
                 url.searchParams.set('handler', createHandler);
                 var response = await fetch(url, { method: 'POST', body: data, headers: { Accept: 'application/json' } });
                 var result = await response.json();

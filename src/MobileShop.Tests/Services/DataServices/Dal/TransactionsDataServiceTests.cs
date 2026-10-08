@@ -182,6 +182,27 @@ public class TransactionsDataServiceTests : RepoTestBase
     }
 
     [Fact]
+    public async Task GetListAsync_filters_by_customer_and_inclusive_date_range()
+    {
+        var product1 = TestDataHelpers.CreateProduct(Context);
+        var product2 = TestDataHelpers.CreateProduct(Context);
+        var seller = AddSeller("Ali", "Seller");
+        var customer1 = AddCustomer("Sara", "Customer");
+        var customer2 = AddCustomer("Zara", "Customer");
+        var from = new DateTime(2026, 5, 1);
+        var to = new DateTime(2026, 5, 31);
+        var matching = AddTransaction(product1, seller.Id, customer1.Id, TransactionDirection.Sell, from.AddDays(1));
+        AddTransaction(product2, seller.Id, customer2.Id, TransactionDirection.Sell, from.AddDays(2));
+        AddTransaction(product2, seller.Id, customer1.Id, TransactionDirection.Sell, to.AddDays(1));
+
+        var rows = await _service.GetListAsync("all", 50, false, customerId: customer1.Id, fromDate: from, toDate: to);
+
+        var row = Assert.Single(rows);
+        Assert.Equal(matching.Id, row.Id);
+        Assert.Equal(customer1.Id, row.CustomerId);
+    }
+
+    [Fact]
     public async Task GetListAsync_unknown_sort_falls_back_to_date()
     {
         var product1 = TestDataHelpers.CreateProduct(Context);
@@ -263,44 +284,12 @@ public class TransactionsDataServiceTests : RepoTestBase
     }
 
     [Fact]
-    public async Task RecordBuyAsync_persists_with_shop_customer_and_rejects_duplicate_buy()
-    {
-        TestDataHelpers.SeedShopSentinels(Context);
-        var product = TestDataHelpers.CreateProduct(Context);
-        var seller = AddSeller("Ali", "Zed");
-
-        var result = await _service.RecordBuyAsync(new BuyInputModel
-        {
-            ProductId = product.Id,
-            SellerId = seller.Id,
-            Price = 250,
-        });
-
-        Assert.True(result.Succeeded);
-        Assert.NotNull(result.EntityId);
-        var transaction = Context.Transactions.Single(t => t.Id == result.EntityId);
-        Assert.Equal(TransactionDirection.Buy, transaction.Direction);
-        Assert.Equal(seller.Id, transaction.SellerId);
-        Assert.Equal(1, transaction.CustomerId);
-        Assert.Equal(250, transaction.FinishedPrice);
-
-        var duplicate = await _service.RecordBuyAsync(new BuyInputModel
-        {
-            ProductId = product.Id,
-            SellerId = seller.Id,
-            Price = 300,
-        });
-
-        Assert.False(duplicate.Succeeded);
-        Assert.Equal("The buy could not be recorded. Check the product and price.", duplicate.Message);
-    }
-
-    [Fact]
     public async Task RecordSellAsync_persists_with_shop_seller_and_rejects_duplicate_sell()
     {
         TestDataHelpers.SeedShopSentinels(Context);
         var product = TestDataHelpers.CreateProduct(Context);
         var customer = AddCustomer("Sara", "Ahmadi");
+        var before = DateTime.Now;
 
         var result = await _service.RecordSellAsync(new SellInputModel
         {
@@ -308,12 +297,14 @@ public class TransactionsDataServiceTests : RepoTestBase
             CustomerId = customer.Id,
             Price = 400,
         });
+        var after = DateTime.Now;
 
         Assert.True(result.Succeeded);
         var transaction = Context.Transactions.Single(t => t.Id == result.EntityId);
         Assert.Equal(TransactionDirection.Sell, transaction.Direction);
         Assert.Equal(1, transaction.SellerId);
         Assert.Equal(customer.Id, transaction.CustomerId);
+        Assert.InRange(transaction.Date, before, after);
 
         var duplicate = await _service.RecordSellAsync(new SellInputModel
         {
@@ -341,25 +332,6 @@ public class TransactionsDataServiceTests : RepoTestBase
         });
 
         Assert.False(result.Succeeded);
-        Assert.Empty(Context.Transactions);
-    }
-
-    [Fact]
-    public async Task RecordBuyAsync_rejects_negative_price()
-    {
-        TestDataHelpers.SeedShopSentinels(Context);
-        var product = TestDataHelpers.CreateProduct(Context);
-        var seller = AddSeller("Ali", "Zed");
-
-        var result = await _service.RecordBuyAsync(new BuyInputModel
-        {
-            ProductId = product.Id,
-            SellerId = seller.Id,
-            Price = -1,
-        });
-
-        Assert.False(result.Succeeded);
-        Assert.Equal("The buy could not be recorded. Check the product and price.", result.Message);
         Assert.Empty(Context.Transactions);
     }
 
@@ -533,6 +505,19 @@ public class TransactionsDataServiceTests : RepoTestBase
         var row = Assert.Single(rows, r => r.ProductId == product.Id);
         Assert.Equal("Cable", row.Type);
         Assert.Equal(1000, row.SuggestedPrice);
+    }
+
+    [Fact]
+    public async Task GetSelectableProductsAsync_uses_stored_finished_price_as_sell_suggestion()
+    {
+        var product = TestDataHelpers.CreateProduct(Context, 1_250);
+        Context.Phones.Add(new Phone { ProductId = product.Id, IMEI1 = TestDataHelpers.GenerateImei() });
+        Context.SaveChanges();
+
+        var rows = await _service.GetSelectableProductsAsync(TransactionDirection.Sell);
+
+        var row = Assert.Single(rows, item => item.ProductId == product.Id);
+        Assert.Equal(1_250, row.SuggestedPrice);
     }
 
 }

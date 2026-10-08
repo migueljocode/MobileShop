@@ -3,7 +3,14 @@ namespace MobileShop.Services.DataServices.Api;
 public class ApiTransactionsDataService : ITransactionsDataService
 {
     /// <inheritdoc />
-    public Task<IReadOnlyList<TransactionListItemViewModel>> GetListAsync(string? direction, int take, bool ascending, string? sortBy = null)
+    public Task<IReadOnlyList<TransactionListItemViewModel>> GetListAsync(
+        string? direction,
+        int take,
+        bool ascending,
+        string? sortBy = null,
+        int? customerId = null,
+        DateTime? fromDate = null,
+        DateTime? toDate = null)
         => throw new NotImplementedException("ApiTransactionsDataService is not implemented yet.");
 
     /// <inheritdoc />
@@ -16,7 +23,14 @@ public class ApiTransactionsDataService : ITransactionsDataService
 
     /// <inheritdoc />
     public Task<FactorPdfResult> GenerateListFactorPdfAsync(
-        string? direction, int take, bool ascending, IReadOnlyList<int> selectedIds, string? sortBy = null)
+        string? direction,
+        int take,
+        bool ascending,
+        IReadOnlyList<int> selectedIds,
+        string? sortBy = null,
+        int? customerId = null,
+        DateTime? fromDate = null,
+        DateTime? toDate = null)
         => throw new NotImplementedException("ApiTransactionsDataService is not implemented yet.");
 
     /// <inheritdoc />
@@ -39,10 +53,6 @@ public class ApiTransactionsDataService : ITransactionsDataService
         string? type = null,
         int? manufacturerId = null,
         int? modelId = null)
-        => throw new NotImplementedException("ApiTransactionsDataService is not implemented yet.");
-
-    /// <inheritdoc />
-    public Task<ServiceResult> RecordBuyAsync(MobileShop.Models.ViewModels.Web.BindModels.BuyInputModel input)
         => throw new NotImplementedException("ApiTransactionsDataService is not implemented yet.");
 
     /// <inheritdoc />

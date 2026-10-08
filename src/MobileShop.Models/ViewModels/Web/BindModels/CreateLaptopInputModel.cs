@@ -2,6 +2,8 @@ namespace MobileShop.Models.ViewModels.Web.BindModels;
 
 public sealed class CreateLaptopInputModel
 {
+    [Range(1, int.MaxValue, ErrorMessage = "Select a seller.")]
+    public int SellerId { get; set; }
     [Range(1, int.MaxValue, ErrorMessage = "Select a manufacturer.")]
     public int ManufacturerId { get; set; }
     [Range(1, int.MaxValue, ErrorMessage = "Select a model.")]

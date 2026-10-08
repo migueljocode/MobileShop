@@ -1,5 +1,8 @@
 namespace MobileShop.Tests.Dal.Initialization;
 
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
+
 public sealed class DatabaseMigratorTests : IDisposable
 {
     private readonly string _directory =
@@ -20,7 +23,7 @@ public sealed class DatabaseMigratorTests : IDisposable
 
         Assert.Equal(DatabaseMigrationStatus.Created, result.Status);
         Assert.Null(result.BackupPath);
-        Assert.Equal(7, Scalar<long>(context, "SELECT COUNT(*) FROM \"__EFMigrationsHistory\""));
+        Assert.Equal(CurrentMigrationCount(context), Scalar<long>(context, "SELECT COUNT(*) FROM \"__EFMigrationsHistory\""));
         Assert.Empty(BackupFiles());
     }
 
@@ -33,7 +36,7 @@ public sealed class DatabaseMigratorTests : IDisposable
         var result = DatabaseMigrator.Migrate(context, databaseFile, NullLogger.Instance);
         Assert.Equal(DatabaseMigrationStatus.Created, result.Status);
         Assert.Null(result.BackupPath);
-        Assert.Equal(7L, Scalar<long>(context, "SELECT COUNT(*) FROM \"__EFMigrationsHistory\""));
+        Assert.Equal(CurrentMigrationCount(context), Scalar<long>(context, "SELECT COUNT(*) FROM \"__EFMigrationsHistory\""));
         Assert.Empty(BackupFiles());
     }
 
@@ -74,7 +77,7 @@ public sealed class DatabaseMigratorTests : IDisposable
         Assert.Equal(
             5L,
             Scalar<long>(backup, "SELECT COUNT(*) FROM \"__EFMigrationsHistory\""));
-        Assert.Equal(7L, Scalar<long>(context, "SELECT COUNT(*) FROM \"__EFMigrationsHistory\""));
+        Assert.Equal(CurrentMigrationCount(context), Scalar<long>(context, "SELECT COUNT(*) FROM \"__EFMigrationsHistory\""));
     }
 
     [Fact]
@@ -92,7 +95,7 @@ public sealed class DatabaseMigratorTests : IDisposable
         Assert.Equal(DatabaseMigrationStatus.Baselined, result.Status);
         Assert.NotNull(result.BackupPath);
         Assert.True(File.Exists(result.BackupPath));
-        Assert.Equal(7L, Scalar<long>(context, "SELECT COUNT(*) FROM \"__EFMigrationsHistory\""));
+        Assert.Equal(CurrentMigrationCount(context), Scalar<long>(context, "SELECT COUNT(*) FROM \"__EFMigrationsHistory\""));
         Assert.Equal(
             "kept",
             Scalar<string>(context, "SELECT \"Notes\" FROM \"People\" WHERE \"FirstName\" = 'Legacy'"));
@@ -180,6 +183,9 @@ public sealed class DatabaseMigratorTests : IDisposable
             .Options;
         return new AppDbContext(options);
     }
+
+    private static long CurrentMigrationCount(AppDbContext context)
+        => context.GetService<IMigrationsAssembly>().Migrations.Count;
 
     private string DatabaseFile()
         => Path.Combine(_directory, "MobileShop.db");

@@ -180,6 +180,34 @@ public class ReportsDataServiceTests : RepoTestBase
     }
 
     [Fact]
+    public async Task GetProfitLossTrendAsync_groups_all_history_by_year()
+    {
+        var seller = AddSeller();
+        var customer = AddCustomer();
+        var product = TestDataHelpers.CreateProduct(Context);
+        AddTransaction(product, seller.Id, customer.Id, TransactionDirection.Buy, new DateTime(2024, 3, 6), 100);
+        AddTransaction(product, seller.Id, customer.Id, TransactionDirection.Sell, new DateTime(2024, 9, 12), 180);
+        AddTransaction(product, seller.Id, customer.Id, TransactionDirection.Sell, new DateTime(2025, 2, 4), 50);
+
+        var rows = await _service.GetProfitLossTrendAsync(
+            new DateTime(2024, 1, 1),
+            new DateTime(2025, 12, 31),
+            ProfitLossInterval.Year);
+
+        Assert.Collection(rows,
+            year2024 =>
+            {
+                Assert.Equal(new DateTime(2024, 1, 1), year2024.PeriodStart);
+                Assert.Equal(80, year2024.Profit);
+            },
+            year2025 =>
+            {
+                Assert.Equal(new DateTime(2025, 1, 1), year2025.PeriodStart);
+                Assert.Equal(50, year2025.Profit);
+            });
+    }
+
+    [Fact]
     public async Task GetProfitLossRowsAsync_uses_glass_paid_price_from_inventory_buy_when_sold()
     {
         var seller = AddSeller();
@@ -224,6 +252,44 @@ public class ReportsDataServiceTests : RepoTestBase
         var row = Assert.Single(rows);
         Assert.Equal(inside.Id, row.ProductId);
         Assert.Equal(100, row.Sold);
+    }
+
+    [Fact]
+    public async Task GetProfitLossRowsAsync_includes_purchase_cost_for_sale_in_range_when_buy_was_earlier()
+    {
+        var seller = AddSeller();
+        var customer = AddCustomer();
+        var product = TestDataHelpers.CreateProduct(Context);
+        AddTransaction(product, seller.Id, customer.Id, TransactionDirection.Buy, new DateTime(2024, 2, 20), 300);
+        AddTransaction(product, seller.Id, customer.Id, TransactionDirection.Sell, new DateTime(2024, 3, 10), 500);
+
+        var rows = await _service.GetProfitLossRowsAsync(
+            new DateTime(2024, 3, 1),
+            new DateTime(2024, 3, 31));
+
+        var row = Assert.Single(rows);
+        Assert.Equal(300, row.Bought);
+        Assert.Equal(500, row.Sold);
+        Assert.Equal(200, row.Profit);
+    }
+
+    [Fact]
+    public async Task GetProfitLossTrendAsync_attributes_prior_purchase_cost_to_sale_period()
+    {
+        var seller = AddSeller();
+        var customer = AddCustomer();
+        var product = TestDataHelpers.CreateProduct(Context);
+        AddTransaction(product, seller.Id, customer.Id, TransactionDirection.Buy, new DateTime(2024, 2, 20), 300);
+        AddTransaction(product, seller.Id, customer.Id, TransactionDirection.Sell, new DateTime(2024, 3, 10), 500);
+
+        var rows = await _service.GetProfitLossTrendAsync(
+            new DateTime(2024, 3, 1),
+            new DateTime(2024, 3, 31),
+            ProfitLossInterval.Day);
+
+        var saleDay = Assert.Single(rows);
+        Assert.Equal(new DateTime(2024, 3, 10), saleDay.PeriodStart);
+        Assert.Equal(200, saleDay.Profit);
     }
 
     [Fact]

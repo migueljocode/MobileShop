@@ -3,6 +3,8 @@ namespace MobileShop.Models.ViewModels.Web.BindModels;
 /// <summary>Input submitted when creating a phone product.</summary>
 public sealed class CreatePhoneInputModel
 {
+    [Range(1, int.MaxValue, ErrorMessage = "Select a seller.")]
+    public int SellerId { get; set; }
     [Required]
     public int ManufacturerId { get; set; }
 

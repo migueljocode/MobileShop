@@ -3,6 +3,7 @@
 @{ ViewData["Title"] = "Create portable storage"; }
 <h1>Create portable storage</h1>
 <form method="post" class="row g-3 col-lg-8">
+    <partial name="/Pages/Shared/_ProductSellerPicker.cshtml" />
 <div asp-validation-summary="All" class="text-danger"></div>
 <div class="col-md-6"><label asp-for="Input.ManufacturerId">Manufacturer</label><div class="input-group"><select asp-for="Input.ManufacturerId" asp-items="@(new SelectList(Model.Manufacturers, "Id", "Name"))" class="form-select" id="manufacturerSelect"><option value="">-- Select manufacturer --</option></select><button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#addManufacturerModal">Add New</button></div></div>
 <div class="col-md-6"><label asp-for="Input.ModelId">Model</label><div class="input-group"><select asp-for="Input.ModelId" asp-items="@(new SelectList(Model.Models, "Id", "Name"))" class="form-select" id="modelSelect"><option value="">-- Select model --</option></select><button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#addModelModal">Add New</button></div></div>

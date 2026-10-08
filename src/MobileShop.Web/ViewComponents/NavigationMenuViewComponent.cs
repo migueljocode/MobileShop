@@ -21,14 +21,20 @@ public sealed class NavigationMenuViewComponent : ViewComponent
                     Link("All products", "Browse and manage the inventory.", "/Products/Index", "nav-subicon-grid"),
                     Link("Second-hand", "Review pre-owned stock.", "/Products/SecondHand", "nav-subicon-reuse"),
                     Link("Add a phone", "Register a new phone in stock.", "/Products/CreatePhone", "nav-subicon-plus"),
+                    Link("Add an Apple ID", "Register a new Apple ID in stock.", "/Products/CreateAppleId", "nav-subicon-plus"),
                     Link("Add a glass", "Register a new glass accessory.", "/Products/CreateGlass", "nav-subicon-plus"),
                     Link("Add a case", "Register a new phone case.", "/Products/CreateCase", "nav-subicon-plus"),
-                    Link("Add a tablet", "Register a new tablet.", "/Products/CreateTablet", "nav-subicon-plus")
+                    Link("Add a tablet", "Register a new tablet.", "/Products/CreateTablet", "nav-subicon-plus"),
+                    Link("Add a smart watch", "Register a new smart watch.", "/Products/CreateSmartWatch", "nav-subicon-plus"),
+                    Link("Add a laptop", "Register a new laptop.", "/Products/CreateLaptop", "nav-subicon-plus"),
+                    Link("Add a cable", "Register a new cable accessory.", "/Products/CreateCable", "nav-subicon-plus"),
+                    Link("Add a charger", "Register a new charger.", "/Products/CreateCharger", "nav-subicon-plus"),
+                    Link("Add a power bank", "Register a new power bank.", "/Products/CreatePowerBank", "nav-subicon-plus"),
+                    Link("Add portable storage", "Register portable storage in stock.", "/Products/CreatePortableStorage", "nav-subicon-plus")
                 ]),
             CreateItem("transactions", "Transactions", "nav-icon-transactions", "/Transactions", "/Transactions/Index",
                 [
                     Link("All transactions", "View the purchase and sales history.", "/Transactions/Index", "nav-subicon-grid"),
-                    Link("Record a buy", "Add stock acquired from a seller.", "/Transactions/Buy", "nav-subicon-arrow-down"),
                     Link("Record a sale", "Record an item sold to a customer.", "/Transactions/Sell", "nav-subicon-arrow-up")
                 ]),
             CreateItem("people", "People", "nav-icon-people", "/People", "/People/Index",

@@ -10,12 +10,12 @@
     <div data-product-picker data-search-handler="SearchProducts">
         <label for="sell-product-search" class="form-label">Product</label>
         <div class="row g-2 mb-2">
-            <div class="col-md-4"><label for="sell-product-type" class="form-label">Type</label><select id="sell-product-type" class="form-select" data-product-type-filter><option value="">All types</option></select></div>
-            <div class="col-md-4"><label for="sell-product-manufacturer" class="form-label">Manufacturer</label><select id="sell-product-manufacturer" class="form-select" data-product-manufacturer-filter><option value="">All manufacturers</option></select></div>
-            <div class="col-md-4"><label for="sell-product-model" class="form-label">Model</label><select id="sell-product-model" class="form-select" data-product-model-filter disabled><option value="">All models</option></select></div>
+            <div class="col-md-4"><label for="sell-product-type" class="form-label">Type</label><select id="sell-product-type" class="form-select" data-product-type-filter><option value="">Select type</option></select></div>
+            <div class="col-md-4" data-product-manufacturer-container><label for="sell-product-manufacturer" class="form-label">Manufacturer</label><select id="sell-product-manufacturer" class="form-select" data-product-manufacturer-filter disabled><option value="">Select manufacturer</option></select></div>
+            <div class="col-md-4" data-product-model-container><label for="sell-product-model" class="form-label">Model</label><select id="sell-product-model" class="form-select" data-product-model-filter disabled><option value="">Select model</option></select></div>
         </div>
         <input type="hidden" name="Input.ProductId" id="Input_ProductId" value="@Model.Input.ProductId" data-product-value />
-        <input id="sell-product-search" type="text" class="form-control" autocomplete="off" role="combobox" aria-autocomplete="list" aria-controls="product-results" aria-expanded="false" placeholder="Search by name, identifier, color or part number" data-product-search />
+        <input id="sell-product-search" type="text" class="form-control" autocomplete="off" role="combobox" aria-autocomplete="list" aria-controls="product-results" aria-expanded="false" placeholder="Select product type and details first" data-product-search disabled />
         <partial name="/Pages/Shared/_ProductPickerOptions.cshtml" model="new ProductPickerViewModel(Model.Products, Model.Input.ProductId)" />
     </div>
     <span asp-validation-for="Input.ProductId" class="text-danger"></span>
@@ -24,7 +24,8 @@
     }
     <partial name="/Pages/Shared/_PersonPicker.cshtml" model="Model.Customers" view-data="ViewData" />
     <label asp-for="Input.Price" class="form-label mt-2"></label><input asp-for="Input.Price" class="form-control" data-finished-price-input inputmode="numeric" step="1" min="0" max="@MobileShop.Models.MoneyLimits.MaxRials" /><span asp-validation-for="Input.Price" class="text-danger"></span>
-    <label asp-for="Input.Date" class="form-label mt-2"></label><input asp-for="Input.Date" type="date" class="form-control" /><button class="btn btn-primary mt-3">Record sell</button>
+    <label asp-for="Input.Date" class="form-label mt-2"></label><input asp-for="Input.Date" type="datetime-local" asp-format="{0:yyyy-MM-ddTHH:mm:ss}" step="1" class="form-control" />
+    <button type="submit" class="btn btn-primary mt-3">Record sell</button>
 </form>
 @if (Model.Message is not null) { <div class="alert alert-success mt-3">@Model.Message</div> }
-@section Scripts { <partial name="_ValidationScriptsPartial" /><script src="~/js/product-picker.js"></script><script src="~/js/person-picker.js"></script> }
+@section Scripts { <partial name="_ValidationScriptsPartial" /><script src="~/js/product-picker.js"></script> }

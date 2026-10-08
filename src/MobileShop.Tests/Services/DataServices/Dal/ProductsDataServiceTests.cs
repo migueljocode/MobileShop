@@ -19,9 +19,13 @@ public class ProductsDataServiceTests : RepoTestBase
     public ProductsDataServiceTests()
     {
         TestDataHelpers.SeedShopSentinels(Context);
+        TestDataHelpers.SeedAnisCustomer(Context);
         _service = new ProductsDataService(
             new BaseRepo<Phone>(Context),
             new BaseRepo<AppleId>(Context),
+            new BaseRepo<Seller>(Context),
+            new BaseRepo<Customer>(Context),
+            new BaseRepo<Person>(Context),
             new BaseRepo<Manufacturer>(Context),
             new BaseRepo<Model>(Context),
             new BaseRepo<Category>(Context),
@@ -742,7 +746,7 @@ public class ProductsDataServiceTests : RepoTestBase
         product.ModelId = appleIdModel.Id;
         product = Context.Products.First(p => p.Id == product.Id);
         Context.Products.Update(product);
-        var appleId = new AppleId { ProductId = product.Id, Email = "detail@example.com", Password = "secret" };
+        var appleId = new AppleId { ProductId = product.Id, Email = "detail@example.com", Password = "secret", Notes = "Recovery info stored separately" };
         Context.AppleIds.Add(appleId);
         Context.SaveChanges();
 
@@ -751,6 +755,8 @@ public class ProductsDataServiceTests : RepoTestBase
         Assert.NotNull(details);
         Assert.Equal("Apple ID", details!.Type);
         Assert.Equal("Email: detail@example.com", details.Identifier);
+        Assert.Equal("secret", details.AppleIdPassword);
+        Assert.Equal("Recovery info stored separately", details.Notes);
     }
 
     [Fact]
@@ -1029,6 +1035,7 @@ public class ProductsDataServiceTests : RepoTestBase
 
     private static MobileShop.Models.ViewModels.Web.BindModels.CreatePhoneInputModel PhonePricing(int paid, decimal? percent, int? amount) => new()
     {
+        SellerId = 1,
         ManufacturerId = 1,
         ModelId = 0, // set by caller after catalog seeding
         Price = paid,
@@ -1050,6 +1057,9 @@ public class ProductsDataServiceTests : RepoTestBase
         var phone = await Context.Phones.FirstAsync(p => p.IMEI1 == input.IMEI1);
         var product = await Context.Products.FirstAsync(p => p.Id == phone.ProductId);
         Assert.Equal(1100, product.Price);
+        var purchase = Assert.Single(Context.Transactions.Where(transaction => transaction.ProductId == product.Id));
+        Assert.Equal(TransactionDirection.Buy, purchase.Direction);
+        Assert.Equal(1000, purchase.FinishedPrice);
     }
 
     [Fact]
@@ -1132,6 +1142,7 @@ public class ProductsDataServiceTests : RepoTestBase
         SeedCatalog(out _, out _);
         var input = new MobileShop.Models.ViewModels.Web.BindModels.CreateAppleIdInputModel
         {
+            SellerId = 1,
             Price = 200,
             Email = "missing-password@example.com",
             Password = "   ",
@@ -1150,6 +1161,7 @@ public class ProductsDataServiceTests : RepoTestBase
         SeedCatalog(out _, out _);
         var input = new MobileShop.Models.ViewModels.Web.BindModels.CreateAppleIdInputModel
         {
+            SellerId = 1,
             Price = 200,
             ProfitPercent = 50,
             Email = "pricing-percent@example.com",
@@ -1170,6 +1182,7 @@ public class ProductsDataServiceTests : RepoTestBase
         SeedCatalog(out _, out _);
         var input = new MobileShop.Models.ViewModels.Web.BindModels.CreateAppleIdInputModel
         {
+            SellerId = 1,
             Price = 200,
             ProfitAmount = 40,
             Email = "pricing-amount@example.com",
@@ -1196,6 +1209,7 @@ public class ProductsDataServiceTests : RepoTestBase
 
         var input = new MobileShop.Models.ViewModels.Web.BindModels.CreatePhoneInputModel
         {
+            SellerId = 1,
             ManufacturerId = 1,
             ModelId = phoneModel.Id,
             Price = 999,
@@ -1217,6 +1231,7 @@ public class ProductsDataServiceTests : RepoTestBase
 
         var input = new MobileShop.Models.ViewModels.Web.BindModels.CreatePhoneInputModel
         {
+            SellerId = 1,
             ManufacturerId = 1,
             ModelId = phoneModel.Id,
             Price = 999,
@@ -1245,6 +1260,7 @@ public class ProductsDataServiceTests : RepoTestBase
 
         var input = new MobileShop.Models.ViewModels.Web.BindModels.CreatePhoneInputModel
         {
+            SellerId = 1,
             ManufacturerId = 1,
             ModelId = phoneModel.Id,
             Price = 999,
@@ -1271,6 +1287,7 @@ public class ProductsDataServiceTests : RepoTestBase
 
         var input = new MobileShop.Models.ViewModels.Web.BindModels.CreatePhoneInputModel
         {
+            SellerId = 1,
             ManufacturerId = 1,
             ModelId = phoneModel.Id,
             Price = 999,
@@ -1284,6 +1301,37 @@ public class ProductsDataServiceTests : RepoTestBase
         Assert.NotNull(result.EntityId);
         var phone = await Context.Phones.FirstAsync(p => p.IMEI1 == input.IMEI1);
         Assert.Equal(result.EntityId, phone.Id);
+        var purchase = Assert.Single(Context.Transactions.Where(transaction => transaction.ProductId == phone.ProductId));
+        Assert.Equal(TransactionDirection.Buy, purchase.Direction);
+        Assert.Equal(1, purchase.SellerId);
+        var anisPersonId = Context.People.Single(person =>
+            person.FirstName == "Anis" && person.LastName == "Sahabi").Id;
+        Assert.Equal(Context.Customers.Single(customer => customer.PersonId == anisPersonId).Id, purchase.CustomerId);
+    }
+
+    [Fact]
+    public async Task CreatePhoneAsync_registers_Anis_as_customer_when_missing()
+    {
+        SeedCatalog(out var phoneModel, out _);
+        var anis = Context.People.Single(person =>
+            person.FirstName == "Anis" && person.LastName == "Sahabi");
+        Context.Customers.RemoveRange(Context.Customers.Where(customer => customer.PersonId == anis.Id));
+        Context.SaveChanges();
+
+        var result = await _service.CreatePhoneAsync(new CreatePhoneInputModel
+        {
+            SellerId = 1,
+            ManufacturerId = phoneModel.ManufacturerId,
+            ModelId = phoneModel.Id,
+            Price = 100,
+            IMEI1 = TestDataHelpers.GenerateImei(),
+        });
+
+        Assert.True(result.Succeeded);
+        var anisCustomer = Assert.Single(Context.Customers.Where(customer => customer.PersonId == anis.Id));
+        Assert.Equal("0099999999", anisCustomer.NationalId);
+        var transaction = Assert.Single(Context.Transactions);
+        Assert.Equal(anisCustomer.Id, transaction.CustomerId);
     }
 
     [Fact]
@@ -1314,6 +1362,7 @@ public class ProductsDataServiceTests : RepoTestBase
         SeedCatalog(out var phoneModel, out _);
         var input = new MobileShop.Models.ViewModels.Web.BindModels.CreatePhoneInputModel
         {
+            SellerId = 1,
             ManufacturerId = 1,
             ModelId = phoneModel.Id,
             Price = 500,
@@ -1340,8 +1389,15 @@ public class ProductsDataServiceTests : RepoTestBase
     public async Task CreateGlassesAsync_creates_exact_count_with_shared_price_distinct_barcodes_and_fits()
     {
         SeedCatalog(out var phoneModel, out _);
+        var supplierPerson = new Person { FirstName = "Supplier", LastName = "Two", PhoneNumber = "09120000010" };
+        Context.People.Add(supplierPerson);
+        Context.SaveChanges();
+        var supplier = new Seller { PersonId = supplierPerson.Id, EntityType = SellerEntityType.Real };
+        Context.Sellers.Add(supplier);
+        Context.SaveChanges();
         var input = new MobileShop.Models.ViewModels.Web.BindModels.CreateGlassInputModel
         {
+            SellerId = supplier.Id,
             CompatibleManufacturerId = 1, CompatibleModelId = phoneModel.Id, GlassManufacturerId = 1, Price = 100, ProfitPercent = 25, Count = 3
         };
 
@@ -1356,7 +1412,16 @@ public class ProductsDataServiceTests : RepoTestBase
         var purchases = await Context.Transactions.Where(t => t.Direction == TransactionDirection.Buy).ToListAsync();
         Assert.Equal(3, purchases.Count);
         Assert.All(purchases, t => Assert.Equal(100, t.FinishedPrice));
-        Assert.All(purchases, t => Assert.Equal(DateTime.Today, t.Date));
+        Assert.All(purchases, t =>
+        {
+            Assert.Equal(DateTime.Today, t.Date.Date);
+            Assert.NotEqual(TimeSpan.Zero, t.Date.TimeOfDay);
+        });
+        Assert.All(purchases, t => Assert.Equal(supplier.Id, t.SellerId));
+        var anisPersonId = Context.People.Single(person =>
+            person.FirstName == "Anis" && person.LastName == "Sahabi").Id;
+        var anisCustomerId = Context.Customers.Single(customer => customer.PersonId == anisPersonId).Id;
+        Assert.All(purchases, t => Assert.Equal(anisCustomerId, t.CustomerId));
         Assert.All(products, p => Assert.Equal(glassModel.Id, p.ModelId));
         Assert.Equal(3, products.Select(p => p.Barcode).Distinct().Count());
         Assert.All(products, p => Assert.Equal(12, p.Barcode.Length));
@@ -1372,6 +1437,7 @@ public class ProductsDataServiceTests : RepoTestBase
 
         var result = await _service.CreateGlassesAsync(new MobileShop.Models.ViewModels.Web.BindModels.CreateGlassInputModel
         {
+            SellerId = 1,
             CompatibleManufacturerId = 1,
             CompatibleModelId = phoneModel.Id,
             GlassManufacturerId = 1,
@@ -1385,7 +1451,8 @@ public class ProductsDataServiceTests : RepoTestBase
         Assert.Equal(30, product.Price);
         var purchase = Assert.Single(await Context.Transactions.Where(t => t.Direction == TransactionDirection.Buy).ToListAsync());
         Assert.Equal(10, purchase.FinishedPrice);
-        Assert.Equal(DateTime.Today, purchase.Date);
+        Assert.Equal(DateTime.Today, purchase.Date.Date);
+        Assert.NotEqual(TimeSpan.Zero, purchase.Date.TimeOfDay);
     }
 
     [Fact]
@@ -1394,6 +1461,7 @@ public class ProductsDataServiceTests : RepoTestBase
         SeedCatalog(out var phoneModel, out _);
         var result = await _service.CreateGlassesAsync(new MobileShop.Models.ViewModels.Web.BindModels.CreateGlassInputModel
         {
+            SellerId = 1,
             CompatibleManufacturerId = 1, CompatibleModelId = phoneModel.Id, GlassManufacturerId = 1, Price = 100, ProfitPercent = 50, ProfitAmount = 20, Count = 2
         });
 
@@ -1409,6 +1477,7 @@ public class ProductsDataServiceTests : RepoTestBase
 
         var one = await _service.CreateGlassesAsync(new MobileShop.Models.ViewModels.Web.BindModels.CreateGlassInputModel
         {
+            SellerId = 1,
             CompatibleManufacturerId = 1, CompatibleModelId = phoneModel.Id, GlassManufacturerId = 1, Price = 10, Count = 1
         });
         Assert.True(one.Succeeded);
@@ -1416,6 +1485,7 @@ public class ProductsDataServiceTests : RepoTestBase
 
         var fiveHundredAndOne = await _service.CreateGlassesAsync(new MobileShop.Models.ViewModels.Web.BindModels.CreateGlassInputModel
         {
+            SellerId = 1,
             CompatibleManufacturerId = 1, CompatibleModelId = phoneModel.Id, GlassManufacturerId = 1, Price = 10, Count = 501
         });
         Assert.True(fiveHundredAndOne.Succeeded);
@@ -1501,6 +1571,7 @@ public class ProductsDataServiceTests : RepoTestBase
         SeedCatalog(out _, out var appleIdModel);
         var input = new MobileShop.Models.ViewModels.Web.BindModels.CreateAppleIdInputModel
         {
+            SellerId = 1,
             Price = 99,
             Email = "new@example.com",
             Password = "secret123",
@@ -1515,6 +1586,12 @@ public class ProductsDataServiceTests : RepoTestBase
         Assert.Equal("new@example.com", appleId.Email);
         Assert.Equal("secret123", appleId.Password);
         Assert.Equal("note", appleId.Notes);
+        var purchase = Assert.Single(Context.Transactions.Where(transaction => transaction.ProductId == appleId.ProductId));
+        Assert.Equal(TransactionDirection.Buy, purchase.Direction);
+        Assert.Equal(1, purchase.SellerId);
+        var anisPersonId = Context.People.Single(person =>
+            person.FirstName == "Anis" && person.LastName == "Sahabi").Id;
+        Assert.Equal(Context.Customers.Single(customer => customer.PersonId == anisPersonId).Id, purchase.CustomerId);
     }
 
     [Fact]
@@ -1528,6 +1605,7 @@ public class ProductsDataServiceTests : RepoTestBase
 
         var input = new MobileShop.Models.ViewModels.Web.BindModels.CreateAppleIdInputModel
         {
+            SellerId = 1,
             Price = 99,
             Email = "dupe@example.com",
             Password = "secret123",
@@ -1569,6 +1647,7 @@ public class ProductsDataServiceTests : RepoTestBase
 
         var input = new MobileShop.Models.ViewModels.Web.BindModels.CreateAppleIdInputModel
         {
+            SellerId = 1,
             Price = 99,
             Email = "new@example.com",
             Password = "secret123",
@@ -1653,12 +1732,14 @@ public class ProductsDataServiceTests : RepoTestBase
         SeedCatalog(out _, out _);
         var input1 = new MobileShop.Models.ViewModels.Web.BindModels.CreateAppleIdInputModel
         {
+            SellerId = 1,
             Price = 99,
             Email = "first@example.com",
             Password = "secret123",
         };
         var input2 = new MobileShop.Models.ViewModels.Web.BindModels.CreateAppleIdInputModel
         {
+            SellerId = 1,
             Price = 99,
             Email = "second@example.com",
             Password = "secret456",
@@ -1704,6 +1785,7 @@ public class ProductsDataServiceTests : RepoTestBase
         SeedCatalog(out var phoneModel, out _);
         var input = new MobileShop.Models.ViewModels.Web.BindModels.CreatePhoneInputModel
         {
+            SellerId = 1,
             ManufacturerId = 1,
             ModelId = phoneModel.Id,
             Price = 999,
@@ -1823,6 +1905,7 @@ public class ProductsDataServiceTests : RepoTestBase
 
         var result = await _service.CreatePhoneAsync(new CreatePhoneInputModel
         {
+            SellerId = 1,
             ModelId = phoneModel.Id,
             ManufacturerId = phoneModel.ManufacturerId,
             Price = 2_000_000_000L,
@@ -1946,6 +2029,7 @@ public class ProductsDataServiceTests : RepoTestBase
 
         var result = await _service.CreateGlassesAsync(new MobileShop.Models.ViewModels.Web.BindModels.CreateGlassInputModel
         {
+            SellerId = 1,
             CompatibleManufacturerId = 1,
             CompatibleModelId = phoneModel.Id,
             GlassManufacturerId = 1,
@@ -1965,9 +2049,62 @@ public class ProductsDataServiceTests : RepoTestBase
     {
         var manufacturer = new Manufacturer { Name = "Samsung" }; var category = new Category { Name = "Tablet" }; Context.Manufacturers.Add(manufacturer); Context.Categories.Add(category); Context.SaveChanges();
         var model = new Model { ManufacturerId = manufacturer.Id, CategoryId = category.Id, Name = "Tab S10" }; Context.Models.Add(model); Context.SaveChanges();
-        var result = await _service.CreateTabletAsync(new CreateTabletInputModel { ManufacturerId = manufacturer.Id, ModelId = model.Id, Price = 1_000_000, ProfitPercent = 10, IsSecondHand = true, SecondHandNotes = "Minor wear", HasGuarantee = true, GuaranteeCorporation = "Samsung" });
+        var result = await _service.CreateTabletAsync(new CreateTabletInputModel { SellerId = 1, ManufacturerId = manufacturer.Id, ModelId = model.Id, Price = 1_000_000, ProfitPercent = 10, IsSecondHand = true, SecondHandNotes = "Minor wear", HasGuarantee = true, GuaranteeCorporation = "Samsung" });
         Assert.True(result.Succeeded); var tablet = await Context.Tablets.Include(x => x.ProductNavigation).SingleAsync(); Assert.Equal(result.EntityId, tablet.ProductId); Assert.Equal(1_100_000, tablet.ProductNavigation.Price); Assert.Equal("Minor wear", tablet.ProductNavigation.SecondHandProfile!.Notes); Assert.Equal("Samsung", tablet.ProductNavigation.GuaranteeProfile!.Corporation);
     }
+
+    [Fact]
+    public async Task CreateDeviceAsync_records_one_buy_transaction_for_each_created_device()
+    {
+        var manufacturer = new Manufacturer { Name = "Samsung" };
+        var categories = new[]
+        {
+            new Category { Name = "Tablet" },
+            new Category { Name = "SmartWatch" },
+            new Category { Name = "Laptop" },
+        };
+        Context.Manufacturers.Add(manufacturer);
+        Context.Categories.AddRange(categories);
+        Context.SaveChanges();
+
+        var models = categories.Select(category => new Model
+        {
+            ManufacturerId = manufacturer.Id,
+            CategoryId = category.Id,
+            Name = $"{category.Name} model",
+        }).ToArray();
+        Context.Models.AddRange(models);
+        Context.SaveChanges();
+
+        await _service.CreateTabletAsync(new CreateTabletInputModel
+        {
+            SellerId = 1,
+            ManufacturerId = manufacturer.Id, ModelId = models[0].Id, Price = 1000,
+        });
+        await _service.CreateSmartWatchAsync(new CreateSmartWatchInputModel
+        {
+            SellerId = 1,
+            ManufacturerId = manufacturer.Id, ModelId = models[1].Id, Price = 2000,
+        });
+        await _service.CreateLaptopAsync(new CreateLaptopInputModel
+        {
+            SellerId = 1,
+            ManufacturerId = manufacturer.Id, ModelId = models[2].Id, Price = 3000,
+            Cpu = "Core i5", Gpu = "Integrated", DisplaySize = 15.6m,
+        });
+
+        var purchases = await Context.Transactions.OrderBy(transaction => transaction.ProductId).ToListAsync();
+        Assert.Equal(3, purchases.Count);
+        Assert.All(purchases, transaction => Assert.Equal(TransactionDirection.Buy, transaction.Direction));
+        Assert.All(purchases, transaction => Assert.Equal(1, transaction.SellerId));
+        var anisPersonId = Context.People.Single(person =>
+            person.FirstName == "Anis" && person.LastName == "Sahabi").Id;
+        var anisCustomerId = Context.Customers.Single(customer => customer.PersonId == anisPersonId).Id;
+        Assert.All(purchases, transaction => Assert.Equal(anisCustomerId, transaction.CustomerId));
+        Assert.Equal([1000, 2000, 3000], purchases.Select(transaction => transaction.FinishedPrice));
+        Assert.Equal(3, purchases.Select(transaction => transaction.ProductId).Distinct().Count());
+    }
+
     [Fact]
     public async Task GetInventoryRowsAsync_includes_new_device_types()
     {
@@ -2007,11 +2144,11 @@ public class ProductsDataServiceTests : RepoTestBase
         Context.StorageCapacities.Add(capacity);
         Context.SaveChanges();
 
-        var cable = await _service.CreateCablesAsync(new CreateCableInputModel { ManufacturerId = manufacturer.Id, ModelId = cableModel.Id, Connector1 = CableConnector.UsbC, Connector2 = CableConnector.UsbC, Length = 1.5m, Price = 1000, ProfitPercent = 10, Count = 2 });
-        var charger = await _service.CreateChargersAsync(new CreateChargerInputModel { ManufacturerId = manufacturer.Id, ModelId = chargerModel.Id, Wattage = 65, Pd = true, PortCount = 2, Price = 2000, ProfitAmount = 500, Count = 2 });
-        var powerBank = await _service.CreatePowerBanksAsync(new CreatePowerBankInputModel { ManufacturerId = manufacturer.Id, ModelId = powerBankModel.Id, CapacityMah = 20000, MaxWattage = 30, PortCount = 2, PortTypes = [CableConnector.UsbC, CableConnector.UsbA], Pd = true, Price = 3000, Count = 2 });
-        var storage = await _service.CreatePortableStoragesAsync(new CreatePortableStorageInputModel { ManufacturerId = manufacturer.Id, ModelId = storageModel.Id, StorageKind = StorageKind.Ssd, StorageCapacityId = capacity.Id, Speed = 1000, Price = 4000, Count = 2 });
-        var @case = await _service.CreateCasesAsync(new CreateCaseInputModel { ManufacturerId = manufacturer.Id, CompatibleManufacturerId = phoneManufacturer.Id, CompatibleModelIds = [phoneModel.Id], Price = 5000, ProfitPercent = 10, Count = 2 });
+        var cable = await _service.CreateCablesAsync(new CreateCableInputModel { SellerId = 1, ManufacturerId = manufacturer.Id, ModelId = cableModel.Id, Connector1 = CableConnector.UsbC, Connector2 = CableConnector.UsbC, Length = 1.5m, Price = 1000, ProfitPercent = 10, Count = 2 });
+        var charger = await _service.CreateChargersAsync(new CreateChargerInputModel { SellerId = 1, ManufacturerId = manufacturer.Id, ModelId = chargerModel.Id, Wattage = 65, Pd = true, PortCount = 2, Price = 2000, ProfitAmount = 500, Count = 2 });
+        var powerBank = await _service.CreatePowerBanksAsync(new CreatePowerBankInputModel { SellerId = 1, ManufacturerId = manufacturer.Id, ModelId = powerBankModel.Id, CapacityMah = 20000, MaxWattage = 30, PortCount = 2, PortTypes = [CableConnector.UsbC, CableConnector.UsbA], Pd = true, Price = 3000, Count = 2 });
+        var storage = await _service.CreatePortableStoragesAsync(new CreatePortableStorageInputModel { SellerId = 1, ManufacturerId = manufacturer.Id, ModelId = storageModel.Id, StorageKind = StorageKind.Ssd, StorageCapacityId = capacity.Id, Speed = 1000, Price = 4000, Count = 2 });
+        var @case = await _service.CreateCasesAsync(new CreateCaseInputModel { SellerId = 1, ManufacturerId = manufacturer.Id, CompatibleManufacturerId = phoneManufacturer.Id, CompatibleModelIds = [phoneModel.Id], Price = 5000, ProfitPercent = 10, Count = 2 });
 
         Assert.True(cable.Succeeded);
         Assert.True(charger.Succeeded);
@@ -2021,6 +2158,11 @@ public class ProductsDataServiceTests : RepoTestBase
         Assert.Equal(10, Context.Products.Count());
         Assert.Equal(10, Context.Transactions.Count(t => t.Direction == TransactionDirection.Buy));
         Assert.Equal(10, Context.Products.Select(p => p.Barcode).Distinct().Count());
+        Assert.All(Context.Transactions, transaction => Assert.Equal(1, transaction.SellerId));
+        var anisPersonId = Context.People.Single(person =>
+            person.FirstName == "Anis" && person.LastName == "Sahabi").Id;
+        var anisCustomerId = Context.Customers.Single(customer => customer.PersonId == anisPersonId).Id;
+        Assert.All(Context.Transactions, transaction => Assert.Equal(anisCustomerId, transaction.CustomerId));
         Assert.All(Context.Products, product => Assert.True(product.Price >= 1000));
         Assert.Equal(2, Context.CaseModelFits.Count());
     }
@@ -2047,11 +2189,11 @@ public class ProductsDataServiceTests : RepoTestBase
         var capacity = new StorageCapacity { Gb = 256 };
         Context.StorageCapacities.Add(capacity);
         Context.SaveChanges();
-        await _service.CreateCablesAsync(new CreateCableInputModel { ManufacturerId = manufacturer.Id, ModelId = cableModel.Id, Connector1 = CableConnector.UsbC, Connector2 = CableConnector.Hdmi, Length = 2, Price = 100 });
-        await _service.CreateChargersAsync(new CreateChargerInputModel { ManufacturerId = manufacturer.Id, ModelId = chargerModel.Id, Wattage = 45, Pd = true, PortCount = 1, Price = 100 });
-        await _service.CreatePowerBanksAsync(new CreatePowerBankInputModel { ManufacturerId = manufacturer.Id, ModelId = powerBankModel.Id, CapacityMah = 10000, MaxWattage = 20, PortCount = 2, PortTypes = [CableConnector.UsbC, CableConnector.Hdmi], Pd = false, Price = 100 });
-        await _service.CreatePortableStoragesAsync(new CreatePortableStorageInputModel { ManufacturerId = manufacturer.Id, ModelId = storageModel.Id, StorageKind = StorageKind.UsbFlash, StorageCapacityId = capacity.Id, Speed = 200, Price = 100 });
-        var caseResult = await _service.CreateCasesAsync(new CreateCaseInputModel { ManufacturerId = manufacturer.Id, CompatibleManufacturerId = phoneManufacturer.Id, CompatibleModelIds = [phoneModel.Id], Price = 100 });
+        await _service.CreateCablesAsync(new CreateCableInputModel { SellerId = 1, ManufacturerId = manufacturer.Id, ModelId = cableModel.Id, Connector1 = CableConnector.UsbC, Connector2 = CableConnector.Hdmi, Length = 2, Price = 100 });
+        await _service.CreateChargersAsync(new CreateChargerInputModel { SellerId = 1, ManufacturerId = manufacturer.Id, ModelId = chargerModel.Id, Wattage = 45, Pd = true, PortCount = 1, Price = 100 });
+        await _service.CreatePowerBanksAsync(new CreatePowerBankInputModel { SellerId = 1, ManufacturerId = manufacturer.Id, ModelId = powerBankModel.Id, CapacityMah = 10000, MaxWattage = 20, PortCount = 2, PortTypes = [CableConnector.UsbC, CableConnector.Hdmi], Pd = false, Price = 100 });
+        await _service.CreatePortableStoragesAsync(new CreatePortableStorageInputModel { SellerId = 1, ManufacturerId = manufacturer.Id, ModelId = storageModel.Id, StorageKind = StorageKind.UsbFlash, StorageCapacityId = capacity.Id, Speed = 200, Price = 100 });
+        var caseResult = await _service.CreateCasesAsync(new CreateCaseInputModel { SellerId = 1, ManufacturerId = manufacturer.Id, CompatibleManufacturerId = phoneManufacturer.Id, CompatibleModelIds = [phoneModel.Id], Price = 100 });
         var rows = await _service.GetInventoryRowsAsync();
         Assert.Contains(rows, row => row.Type == "Cable");
         Assert.Contains(rows, row => row.Type == "Charger");

@@ -3,6 +3,7 @@
 @{ ViewData["Title"] = "Create tablet"; }
 <h1>Create tablet</h1>
 <form method="post" class="row g-3 col-lg-8">
+    <partial name="/Pages/Shared/_ProductSellerPicker.cshtml" />
 <div asp-validation-summary="All" class="text-danger"></div>
 <div class="col-md-6">
     <label asp-for="Input.ManufacturerId" class="form-label">Manufacturer</label>

@@ -2,6 +2,8 @@ namespace MobileShop.Models.ViewModels.Web.BindModels;
 
 public sealed class CreateSmartWatchInputModel
 {
+    [Range(1, int.MaxValue, ErrorMessage = "Select a seller.")]
+    public int SellerId { get; set; }
     [Required] public int ManufacturerId { get; set; }
     [Required] public int ModelId { get; set; }
     [Range(0, MoneyLimits.MaxRials)] public long Price { get; set; }

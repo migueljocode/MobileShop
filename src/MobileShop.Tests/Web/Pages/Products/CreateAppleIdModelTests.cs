@@ -19,9 +19,14 @@ public class CreateAppleIdModelTests : RepoTestBase
 
     public CreateAppleIdModelTests()
     {
+        TestDataHelpers.SeedShopSentinels(Context);
+        TestDataHelpers.SeedAnisCustomer(Context);
         var dataService = new ProductsDataService(
             new BaseRepo<Phone>(Context),
             new BaseRepo<AppleId>(Context),
+            new BaseRepo<Seller>(Context),
+            new BaseRepo<Customer>(Context),
+            new BaseRepo<Person>(Context),
             new BaseRepo<Manufacturer>(Context),
             new BaseRepo<Model>(Context),
             new BaseRepo<Category>(Context),
@@ -42,6 +47,7 @@ public class CreateAppleIdModelTests : RepoTestBase
 
     private static CreateAppleIdInputModel ValidInput(string email) => new()
     {
+        SellerId = 1,
         Price = 1500000,
         Email = email,
         Password = "plaintext-pass",
@@ -100,7 +106,7 @@ public class CreateAppleIdModelTests : RepoTestBase
         Assert.IsType<PageResult>(result);
         Assert.False(_model.ModelState.IsValid);
         Assert.Contains(
-            _model.ModelState[nameof(CreateAppleIdInputModel.Email)]!.Errors,
+            _model.ModelState[$"{nameof(_model.Input)}.{nameof(CreateAppleIdInputModel.Email)}"]!.Errors,
             error => error.ErrorMessage == "This Apple ID email already exists.");
         Assert.Equal(appleIdsBefore, Context.AppleIds.Count());
     }

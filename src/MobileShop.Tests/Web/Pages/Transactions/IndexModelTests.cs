@@ -16,6 +16,7 @@ public class IndexModelTests : RepoTestBase
     private readonly Transaction _tx1;
     private readonly Transaction _tx2;
     private readonly Transaction _tx3;
+    private readonly Customer _customer;
 
     /// <summary>Thin PDF double so the factor path is exercised without QuestPDF rendering.</summary>
     private sealed class FakePdfGenerator : IPdfGenerator
@@ -39,9 +40,9 @@ public class IndexModelTests : RepoTestBase
         Context.SaveChanges();
 
         var seller = new Seller { PersonId = sellerPerson.Id, EntityType = SellerEntityType.Real };
-        var customer = new Customer { PersonId = customerPerson.Id, NationalId = "1234567890" };
+        _customer = new Customer { PersonId = customerPerson.Id, NationalId = "1234567890" };
         Context.Sellers.Add(seller);
-        Context.Customers.Add(customer);
+        Context.Customers.Add(_customer);
         Context.SaveChanges();
 
         var p1 = TestDataHelpers.CreateProduct(Context, 100);
@@ -61,7 +62,7 @@ public class IndexModelTests : RepoTestBase
         {
             ProductId = p2.Id,
             SellerId = 1,
-            CustomerId = customer.Id,
+            CustomerId = _customer.Id,
             FinishedPrice = 220,
             Date = new DateTime(2026, 1, 2, 0, 0, 0, DateTimeKind.Utc),
             Direction = TransactionDirection.Sell
@@ -174,5 +175,37 @@ public class IndexModelTests : RepoTestBase
         Assert.Equal("asc", _model.Order);
         Assert.NotNull(_pdfGenerator.LastFactor);
         Assert.Equal([_tx1.Id], _pdfGenerator.LastFactor!.Rows.Select(row => row.TransactionId));
+    }
+
+    [Fact]
+    public async Task OnGet_filters_by_customer_and_automatic_today_date_range()
+    {
+        var product = TestDataHelpers.CreateProduct(Context, 400);
+        var todayTransaction = new Transaction
+        {
+            ProductId = product.Id,
+            SellerId = 1,
+            CustomerId = _customer.Id,
+            FinishedPrice = 350,
+            Date = DateTime.Today.AddHours(12),
+            Direction = TransactionDirection.Sell,
+        };
+        Context.Transactions.Add(todayTransaction);
+        Context.SaveChanges();
+
+        await _model.OnGetAsync(customerId: _customer.Id, dateRange: "today");
+
+        Assert.Equal(_customer.Id, _model.CustomerId);
+        Assert.Equal("today", _model.DateRange);
+        Assert.Equal([todayTransaction.Id], _model.Transactions.Select(transaction => transaction.Id));
+    }
+
+    [Fact]
+    public async Task OnGet_all_date_range_preserves_transactions_outside_current_year()
+    {
+        await _model.OnGetAsync(dateRange: "all");
+
+        Assert.Equal("all", _model.DateRange);
+        Assert.Equal(3, _model.Transactions.Count);
     }
 }

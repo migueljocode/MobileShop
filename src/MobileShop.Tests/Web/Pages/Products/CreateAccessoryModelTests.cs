@@ -8,8 +8,15 @@ namespace MobileShop.Tests.Web.Pages.Products;
 
 public class CreateAccessoryModelTests : RepoTestBase
 {
+    public CreateAccessoryModelTests()
+    {
+        TestDataHelpers.SeedShopSentinels(Context);
+        TestDataHelpers.SeedAnisCustomer(Context);
+    }
+
     private ProductsDataService Service() => new(
-        new BaseRepo<Phone>(Context), new BaseRepo<AppleId>(Context), new BaseRepo<Manufacturer>(Context),
+        new BaseRepo<Phone>(Context), new BaseRepo<AppleId>(Context), new BaseRepo<Seller>(Context),
+        new BaseRepo<Customer>(Context), new BaseRepo<Person>(Context), new BaseRepo<Manufacturer>(Context),
         new BaseRepo<Model>(Context), new BaseRepo<Category>(Context), new BaseRepo<MobileShop.Models.Entities.Color>(Context),
         new BaseRepo<Guarantee>(Context), new BaseRepo<Transaction>(Context), new BaseRepo<PartNumber>(Context),
         new BaseRepo<Product>(Context), new BaseRepo<StorageCapacity>(Context), NullLogger<ProductsDataService>.Instance);
@@ -27,7 +34,7 @@ public class CreateAccessoryModelTests : RepoTestBase
     [Fact] public async Task Cable_Create_Works()
     {
         var (m, model) = Seed("Cable");
-        var page = new CreateCableModel(Service()) { Input = new CreateCableInputModel { ManufacturerId = m.Id, ModelId = model.Id, Connector1 = CableConnector.UsbC, Connector2 = CableConnector.Hdmi, Length = 2, Price = 100, Count = 2 } };
+        var page = new CreateCableModel(Service()) { Input = new CreateCableInputModel { SellerId = 1, ManufacturerId = m.Id, ModelId = model.Id, Connector1 = CableConnector.UsbC, Connector2 = CableConnector.Hdmi, Length = 2, Price = 100, Count = 2 } };
         var result = Assert.IsType<RedirectToPageResult>(await page.OnPostAsync());
         Assert.Equal("cable", result.RouteValues!["type"]); Assert.Equal(2, Context.Products.Count()); Assert.All(Context.Cables, x => Assert.Equal(2m, x.Length));
     }
@@ -35,7 +42,7 @@ public class CreateAccessoryModelTests : RepoTestBase
     [Fact] public async Task Charger_Create_Works()
     {
         var (m, model) = Seed("Charger");
-        var page = new CreateChargerModel(Service()) { Input = new CreateChargerInputModel { ManufacturerId = m.Id, ModelId = model.Id, Wattage = 65, Pd = true, PortCount = 2, Price = 100, Count = 2 } };
+        var page = new CreateChargerModel(Service()) { Input = new CreateChargerInputModel { SellerId = 1, ManufacturerId = m.Id, ModelId = model.Id, Wattage = 65, Pd = true, PortCount = 2, Price = 100, Count = 2 } };
         Assert.IsType<RedirectToPageResult>(await page.OnPostAsync());
         Assert.Equal(2, Context.Chargers.Count()); Assert.All(Context.Chargers, x => Assert.Equal(65, x.Wattage));
     }
@@ -43,7 +50,7 @@ public class CreateAccessoryModelTests : RepoTestBase
     [Fact] public async Task PowerBank_Create_Works()
     {
         var (m, model) = Seed("PowerBank");
-        var page = new CreatePowerBankModel(Service()) { Input = new CreatePowerBankInputModel { ManufacturerId = m.Id, ModelId = model.Id, CapacityMah = 20000, MaxWattage = 30, PortCount = 2, PortTypes = [CableConnector.UsbC, CableConnector.UsbA], Pd = true, Price = 100, Count = 2 } };
+        var page = new CreatePowerBankModel(Service()) { Input = new CreatePowerBankInputModel { SellerId = 1, ManufacturerId = m.Id, ModelId = model.Id, CapacityMah = 20000, MaxWattage = 30, PortCount = 2, PortTypes = [CableConnector.UsbC, CableConnector.UsbA], Pd = true, Price = 100, Count = 2 } };
         Assert.IsType<RedirectToPageResult>(await page.OnPostAsync());
         Assert.Equal(2, Context.PowerBanks.Count()); Assert.All(Context.PowerBanks, x => Assert.Equal(20000, x.CapacityMah));
         Assert.All(Context.PowerBanks, x => Assert.Equal([CableConnector.UsbC, CableConnector.UsbA], x.Ports.OrderBy(port => port.PortNumber).Select(port => port.Connector).ToArray()));
@@ -63,7 +70,7 @@ public class CreateAccessoryModelTests : RepoTestBase
     {
         var (m, model) = Seed("PortableStorage");
         var capacity = new StorageCapacity { Gb = 256 }; Context.StorageCapacities.Add(capacity); Context.SaveChanges();
-        var page = new CreatePortableStorageModel(Service()) { Input = new CreatePortableStorageInputModel { ManufacturerId = m.Id, ModelId = model.Id, StorageKind = StorageKind.Ssd, StorageCapacityId = capacity.Id, Speed = 1000, Price = 100, Count = 2 } };
+        var page = new CreatePortableStorageModel(Service()) { Input = new CreatePortableStorageInputModel { SellerId = 1, ManufacturerId = m.Id, ModelId = model.Id, StorageKind = StorageKind.Ssd, StorageCapacityId = capacity.Id, Speed = 1000, Price = 100, Count = 2 } };
         Assert.IsType<RedirectToPageResult>(await page.OnPostAsync());
         Assert.Equal(2, Context.PortableStorages.Count()); Assert.All(Context.PortableStorages, x => Assert.Equal(capacity.Id, x.StorageCapacityId));
     }
@@ -99,7 +106,7 @@ public class CreateAccessoryModelTests : RepoTestBase
         Context.Manufacturers.Add(phoneManufacturer); Context.Categories.Add(phoneCategory); Context.SaveChanges();
         var phoneModel = new Model { ManufacturerId = phoneManufacturer.Id, CategoryId = phoneCategory.Id, Name = "Phone X" };
         Context.Models.Add(phoneModel); Context.SaveChanges();
-        var page = new CreateCaseModel(Service()) { Input = new CreateCaseInputModel { ManufacturerId = caseManufacturer.Id, CompatibleManufacturerId = phoneManufacturer.Id, CompatibleModelIds = [phoneModel.Id], Price = 100, Count = 2 } };
+        var page = new CreateCaseModel(Service()) { Input = new CreateCaseInputModel { SellerId = 1, ManufacturerId = caseManufacturer.Id, CompatibleManufacturerId = phoneManufacturer.Id, CompatibleModelIds = [phoneModel.Id], Price = 100, Count = 2 } };
         Assert.IsType<RedirectToPageResult>(await page.OnPostAsync());
         Assert.Equal(2, Context.Cases.Count()); Assert.All(Context.CaseModelFits, x => Assert.Equal(phoneModel.Id, x.ModelId));
     }

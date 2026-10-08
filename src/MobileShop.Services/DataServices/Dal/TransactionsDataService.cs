@@ -16,7 +16,6 @@ public class TransactionsDataService(
     // Shop sentinel records (Person/Seller/Customer Id = 1 in sample data).
     // TODO: move to configuration when the shop entity is configurable.
     private const int ShopSellerId = 1;
-    private const int ShopCustomerId = 1;
 
     /// <summary>Gets the structured logger for this transactions service.</summary>
     protected ILogger<TransactionsDataService> Logger { get; } = logger;
@@ -26,9 +25,18 @@ public class TransactionsDataService(
         string? direction,
         int take,
         bool ascending,
-        string? sortBy = null)
+        string? sortBy = null,
+        int? customerId = null,
+        DateTime? fromDate = null,
+        DateTime? toDate = null)
     {
         var query = await SelectListRowsAsync(direction);
+        if (customerId is > 0)
+            query = query.Where(transaction => transaction.CustomerId == customerId);
+        if (fromDate.HasValue)
+            query = query.Where(transaction => transaction.Date.Date >= fromDate.Value.Date);
+        if (toDate.HasValue)
+            query = query.Where(transaction => transaction.Date.Date <= toDate.Value.Date);
 
         var normalizedSortBy = sortBy?.Trim().ToLowerInvariant();
         var ordered = normalizedSortBy switch
@@ -69,7 +77,10 @@ public class TransactionsDataService(
                 : transaction.SellerNavigation.PersonNavigation.FirstName + " " + transaction.SellerNavigation.PersonNavigation.LastName,
             transaction.CustomerNavigation.PersonNavigation == null
                 ? "Shop"
-                : transaction.CustomerNavigation.PersonNavigation.FirstName + " " + transaction.CustomerNavigation.PersonNavigation.LastName);
+                : transaction.CustomerNavigation.PersonNavigation.FirstName + " " + transaction.CustomerNavigation.PersonNavigation.LastName)
+        {
+            CustomerId = transaction.CustomerId,
+        };
 
         if (string.Equals(direction, "buy", StringComparison.OrdinalIgnoreCase))
             return await transactions.SelectAllAsync(t => t.Direction == TransactionDirection.Buy, selector);
@@ -252,48 +263,6 @@ public class TransactionsDataService(
         value.Contains(query, StringComparison.OrdinalIgnoreCase);
 
     /// <inheritdoc />
-    public async Task<ServiceResult> RecordBuyAsync(BuyInputModel input)
-    {
-        if (input.Price < 0 || input.Price > MoneyLimits.MaxRials)
-        {
-            Logger.LogWarning("RecordBuy rejected: invalid price {Price}", input.Price);
-            return new ServiceResult(false, input.Price > MoneyLimits.MaxRials ? "The price is too large." : "The buy could not be recorded. Check the product and price.", nameof(BuyInputModel.Price), null);
-        }
-
-        var existingBuy = (await transactions.FindAllAsync(transaction => transaction.ProductId == input.ProductId))
-            .Any(transaction => transaction.Direction == TransactionDirection.Buy);
-
-        if (existingBuy)
-        {
-            Logger.LogWarning(
-                "RecordBuy rejected: product Id={ProductId} already has a Buy transaction",
-                input.ProductId);
-            return new ServiceResult(false, "The buy could not be recorded. Check the product and price.", null, null);
-        }
-
-        var transaction = new Transaction
-        {
-            ProductId = input.ProductId,
-            SellerId = input.SellerId,
-            CustomerId = ShopCustomerId,
-            FinishedPrice = input.Price,
-            Date = input.Date ?? DateTime.Today,
-            Direction = TransactionDirection.Buy
-        };
-
-        if (await transactions.AddAsync(transaction) <= 0)
-        {
-            Logger.LogWarning("Failed to record Buy: ProductId={ProductId}", input.ProductId);
-            return new ServiceResult(false, "The buy could not be recorded. Check the product and price.", null, null);
-        }
-
-        Logger.LogInformation(
-            "Recorded Buy: ProductId={ProductId}, SellerId={SellerId}, Price={Price}",
-            input.ProductId, input.SellerId, input.Price);
-        return new ServiceResult(true, null, null, transaction.Id);
-    }
-
-    /// <inheritdoc />
     public async Task<ServiceResult> RecordSellAsync(SellInputModel input)
     {
         if (input.Price < 0 || input.Price > MoneyLimits.MaxRials)
@@ -319,7 +288,7 @@ public class TransactionsDataService(
             SellerId = ShopSellerId,
             CustomerId = input.CustomerId,
             FinishedPrice = input.Price,
-            Date = input.Date ?? DateTime.Today,
+            Date = input.Date ?? DateTime.Now,
             Direction = TransactionDirection.Sell
         };
 
@@ -395,10 +364,13 @@ public class TransactionsDataService(
         int take,
         bool ascending,
         IReadOnlyList<int> selectedIds,
-        string? sortBy = null)
+        string? sortBy = null,
+        int? customerId = null,
+        DateTime? fromDate = null,
+        DateTime? toDate = null)
     {
         // The factor always works from one list snapshot - the same read the list page shows.
-        var snapshot = await GetListAsync(direction, take, ascending, sortBy);
+        var snapshot = await GetListAsync(direction, take, ascending, sortBy, customerId, fromDate, toDate);
 
         IReadOnlyList<TransactionFactorRowViewModel> rows;
 

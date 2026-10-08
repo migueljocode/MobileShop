@@ -118,5 +118,22 @@ public static class SampleDataInitializer
         {
             SeedData(context);
         }
+
+        EnsureAnisCustomer(context);
+    }
+
+    private static void EnsureAnisCustomer(AppDbContext context)
+    {
+        var anis = context.People.FirstOrDefault(person =>
+            person.FirstName == "Anis" && person.LastName == "Sahabi");
+        if (anis is null || context.Customers.Any(customer => customer.PersonId == anis.Id))
+            return;
+
+        context.Customers.Add(new Customer
+        {
+            PersonId = anis.Id,
+            NationalId = "0099999999",
+        });
+        context.SaveChanges();
     }
 }

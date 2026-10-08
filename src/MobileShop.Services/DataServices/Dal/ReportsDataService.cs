@@ -32,21 +32,32 @@ public class ReportsDataService(
         var filtered = all
             .Where(transaction => (!from.HasValue || transaction.Date.Date >= from.Value.Date) &&
                                   (!to.HasValue || transaction.Date.Date <= to.Value.Date));
+        var historyByProduct = all
+            .GroupBy(transaction => transaction.ProductId)
+            .ToDictionary(group => group.Key, group => group.ToList());
 
         return filtered
             .GroupBy(transaction => transaction.ProductId)
             .Select(group =>
             {
                 var first = group.First();
+                var hasSaleInRange = group.Any(transaction => transaction.Direction == TransactionDirection.Sell);
+                var purchaseHistory = historyByProduct[group.Key]
+                    .Where(transaction => transaction.Direction == TransactionDirection.Buy)
+                    .ToList();
+                var bought = hasSaleInRange
+                    ? purchaseHistory.Count > 0
+                        ? purchaseHistory.Sum(transaction => transaction.FinishedPrice)
+                        : first.IsGlass ? first.ProductPrice : 0
+                    : group.Any(transaction => transaction.Direction == TransactionDirection.Buy)
+                        ? group.Where(transaction => transaction.Direction == TransactionDirection.Buy).Sum(transaction => transaction.FinishedPrice)
+                        : first.IsGlass ? first.ProductPrice : 0;
+
                 return new ProfitLossRowViewModel(
                     group.Key,
                     first.ProductLabel,
-                    group.Any(t => t.Direction == TransactionDirection.Buy)
-                        ? group.Where(t => t.Direction == TransactionDirection.Buy).Sum(t => t.FinishedPrice)
-                        : first.IsGlass
-                            ? first.ProductPrice
-                            : 0,
-                    group.Where(t => t.Direction == TransactionDirection.Sell).Sum(t => t.FinishedPrice));
+                    bought,
+                    group.Where(transaction => transaction.Direction == TransactionDirection.Sell).Sum(transaction => transaction.FinishedPrice));
             })
             .OrderBy(row => row.ProductId)
             .ToList();
@@ -74,6 +85,9 @@ public class ReportsDataService(
             .Where(transaction => (!from.HasValue || transaction.Date.Date >= from.Value.Date) &&
                                   (!to.HasValue || transaction.Date.Date <= to.Value.Date))
             .ToList();
+        var historyByProduct = transactionsInRange
+            .GroupBy(transaction => transaction.ProductId)
+            .ToDictionary(group => group.Key, group => group.ToList());
 
         var intervalProfit = filtered
             .GroupBy(transaction => GetPeriodStart(transaction.Date, interval))
@@ -87,7 +101,30 @@ public class ReportsDataService(
         {
             var productTransactionsInOrder = productTransactions.OrderBy(transaction => transaction.Date).ToList();
             var first = productTransactionsInOrder[0];
-            if (!first.IsGlass || productTransactionsInOrder.Any(transaction => transaction.Direction == TransactionDirection.Buy))
+            var productHistory = historyByProduct[productTransactions.Key];
+            var buys = productHistory.Where(transaction => transaction.Direction == TransactionDirection.Buy).ToList();
+            var salesInRange = productTransactionsInOrder
+                .Where(transaction => transaction.Direction == TransactionDirection.Sell)
+                .ToList();
+
+            if (salesInRange.Count > 0)
+            {
+                var hasBuyInRange = productTransactionsInOrder.Any(transaction => transaction.Direction == TransactionDirection.Buy);
+                if (!hasBuyInRange)
+                {
+                    var acquisitionCost = buys.Count > 0
+                        ? buys.Sum(transaction => transaction.FinishedPrice)
+                        : first.IsGlass ? first.ProductPrice : 0;
+                    if (acquisitionCost != 0)
+                    {
+                        var salePeriod = GetPeriodStart(salesInRange[0].Date, interval);
+                        intervalProfit[salePeriod] -= acquisitionCost;
+                    }
+                }
+                continue;
+            }
+
+            if (!first.IsGlass || buys.Count > 0)
                 continue;
 
             var period = GetPeriodStart(first.Date, interval);
@@ -103,6 +140,7 @@ public class ReportsDataService(
     private static DateTime GetPeriodStart(DateTime date, ProfitLossInterval interval)
         => interval switch
         {
+            ProfitLossInterval.Year => new DateTime(date.Year, 1, 1),
             ProfitLossInterval.Month => new DateTime(date.Year, date.Month, 1),
             ProfitLossInterval.Week => StartOfWeek(date),
             ProfitLossInterval.Day => date.Date,

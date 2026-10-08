@@ -8,7 +8,14 @@ public interface ITransactionsDataService
     /// <param name="take">The maximum number of rows to return.</param>
     /// <param name="ascending">Whether to sort ascending.</param>
     /// <param name="sortBy">The transaction column to sort by.</param>
-    Task<IReadOnlyList<TransactionListItemViewModel>> GetListAsync(string? direction, int take, bool ascending, string? sortBy = null);
+    Task<IReadOnlyList<TransactionListItemViewModel>> GetListAsync(
+        string? direction,
+        int take,
+        bool ascending,
+        string? sortBy = null,
+        int? customerId = null,
+        DateTime? fromDate = null,
+        DateTime? toDate = null);
 
     /// <summary>Gets transaction details.</summary>
     /// <param name="id">The transaction identifier.</param>
@@ -26,7 +33,14 @@ public interface ITransactionsDataService
     /// <param name="sortBy">The transaction column to sort by.</param>
     /// <param name="selectedIds">The explicitly selected transaction identifiers; when empty the filtered list is used.</param>
     Task<FactorPdfResult> GenerateListFactorPdfAsync(
-        string? direction, int take, bool ascending, IReadOnlyList<int> selectedIds, string? sortBy = null);
+        string? direction,
+        int take,
+        bool ascending,
+        IReadOnlyList<int> selectedIds,
+        string? sortBy = null,
+        int? customerId = null,
+        DateTime? fromDate = null,
+        DateTime? toDate = null);
 
     /// <summary>Gets seller party options.</summary>
     Task<IReadOnlyList<PartyOptionViewModel>> GetSellersAsync();
@@ -49,10 +63,6 @@ public interface ITransactionsDataService
         string? type = null,
         int? manufacturerId = null,
         int? modelId = null);
-
-    /// <summary>Records a purchase transaction.</summary>
-    /// <param name="input">The purchase input.</param>
-    Task<ServiceResult> RecordBuyAsync(MobileShop.Models.ViewModels.Web.BindModels.BuyInputModel input);
 
     /// <summary>Records a sale transaction.</summary>
     /// <param name="input">The sale input.</param>

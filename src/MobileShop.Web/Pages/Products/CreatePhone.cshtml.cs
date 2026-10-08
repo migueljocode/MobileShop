@@ -33,15 +33,16 @@ public class CreatePhoneModel(
     }
 
     /// <summary>Creates a part number for the selected model and returns it for immediate selection.</summary>
-    public Task<IActionResult> OnPostCreatePartNumberAsync(int modelId, string code, bool supportsDualSim, bool supportsEsim)
-        => OnPostCreatePartNumberAsync(modelId, code);
-
-    public async Task<IActionResult> OnPostCreatePartNumberAsync(int modelId, string code)
+    public async Task<IActionResult> OnPostCreatePartNumberAsync(
+        int modelId,
+        string code,
+        bool supportsDualSim = false,
+        bool supportsEsim = false)
     {
         if (modelId <= 0)
             return new JsonResult(new { error = "Select a model first." }) { StatusCode = 400 };
 
-        var result = await dataService.CreatePartNumberAsync(modelId, code);
+        var result = await dataService.CreatePartNumberAsync(modelId, code, supportsDualSim, supportsEsim);
         if (!result.Succeeded)
             return new JsonResult(new { error = result.Error! }) { StatusCode = result.StatusCode };
 

@@ -52,7 +52,11 @@ public class SampleDataSeedTests : IDisposable
         // Assert: every collection the loader consumes lands with the expected record count.
         Assert.Equal(9, context.People.Count());
         Assert.Equal(3, context.Sellers.Count());
-        Assert.Equal(4, context.Customers.Count());
+        Assert.Equal(5, context.Customers.Count());
+        Assert.Contains(context.Customers.Include(customer => customer.PersonNavigation),
+            customer => customer.PersonNavigation.FirstName == "Anis" &&
+                        customer.PersonNavigation.LastName == "Sahabi" &&
+                        customer.NationalId == "0099999999");
         Assert.Equal(1, context.Users.Count());
         Assert.Equal(6, context.Manufacturers.Count());
         Assert.Equal(9, context.Categories.Count());

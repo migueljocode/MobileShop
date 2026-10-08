@@ -13,6 +13,9 @@ namespace MobileShop.Services.DataServices.Dal;
 public class ProductsDataService(
     IBaseRepo<Phone> phones,
     IBaseRepo<AppleId> appleIds,
+    IBaseRepo<Seller> sellers,
+    IBaseRepo<Customer> customers,
+    IBaseRepo<Person> people,
     IBaseRepo<Manufacturer> manufacturers,
     IBaseRepo<Model> models,
     IBaseRepo<Category> categories,
@@ -25,11 +28,8 @@ public class ProductsDataService(
     ILogger<ProductsDataService> logger)
     : IProductsDataService
 {
-    // Glass creation represents stock intake, so its paid cost is recorded as a Buy leg.
-    // The seeded shop sentinel is used because the Create Glass form intentionally has no seller field.
+    // Product creation represents stock intake, so its paid cost is recorded as a Buy leg.
     private const string PhoneCategoryName = "Phone";
-    private const int ShopSellerId = 1;
-    private const int ShopCustomerId = 1;
         /// <summary>Gets the structured logger for this products service.</summary>
     protected ILogger<ProductsDataService> Logger { get; } = logger;
 
@@ -213,7 +213,11 @@ public class ProductsDataService(
                     appleId.ProductNavigation.GuaranteeProfile == null
                         ? "None"
                         : appleId.ProductNavigation.GuaranteeProfile.Corporation + " until " + appleId.ProductNavigation.GuaranteeProfile.ExpirationDate,
-                    appleId.ProductNavigation.SecondHandProfile != null));
+                    appleId.ProductNavigation.SecondHandProfile != null)
+                {
+                    AppleIdPassword = appleId.Password,
+                    Notes = appleId.Notes,
+                });
         }
         else if (string.Equals(type, "tablet", StringComparison.OrdinalIgnoreCase))
         {
@@ -529,6 +533,10 @@ public class ProductsDataService(
                 return new ServiceResult(false, "The selected part number does not belong to the selected model.", nameof(CreatePhoneInputModel.PartNumberId), null);
         }
 
+        var purchaseParties = await ResolvePurchasePartiesAsync(input.SellerId);
+        if (purchaseParties.Failure is not null)
+            return purchaseParties.Failure;
+
         var product = new Product
         {
             ModelId = model.Id,
@@ -560,6 +568,16 @@ public class ProductsDataService(
             PartNumberNavigation = partNumber,
             ProductNavigation = product,
         };
+
+        await transactions.AddAsync(new Transaction
+        {
+            ProductNavigation = product,
+            SellerId = purchaseParties.SellerId,
+            CustomerId = purchaseParties.CustomerId,
+            FinishedPrice = input.Price,
+            Date = DateTime.Now,
+            Direction = TransactionDirection.Buy,
+        }, persist: false);
 
         var result = await phones.AddAsync(phone) > 0;
         if (!result)
@@ -607,6 +625,10 @@ public class ProductsDataService(
         var glassCategory = await categories.FindAsync(c => c.Name == "Glass");
         if (glassCategory is null)
             return new ServiceResult(false, "The 'Glass' category is missing from the catalog seed data.", nameof(CreateGlassInputModel.GlassManufacturerId), null);
+
+        var purchaseParties = await ResolvePurchasePartiesAsync(input.SellerId);
+        if (purchaseParties.Failure is not null)
+            return purchaseParties.Failure;
 
         var glassModelName = compatibleModel.Name + " Glass";
         var glassModel = await models.FindAsync(m =>
@@ -656,10 +678,10 @@ public class ProductsDataService(
         var purchaseTransactions = batch.Select(product => new Transaction
         {
             ProductNavigation = product,
-            SellerId = ShopSellerId,
-            CustomerId = ShopCustomerId,
+            SellerId = purchaseParties.SellerId,
+            CustomerId = purchaseParties.CustomerId,
             FinishedPrice = input.Price,
-            Date = DateTime.Today,
+            Date = DateTime.Now,
             Direction = TransactionDirection.Buy,
         }).ToList();
 
@@ -697,6 +719,10 @@ public class ProductsDataService(
         if (string.IsNullOrWhiteSpace(password))
             return new ServiceResult(false, "Password is required.", nameof(CreateAppleIdInputModel.Password), null);
 
+        var purchaseParties = await ResolvePurchasePartiesAsync(input.SellerId);
+        if (purchaseParties.Failure is not null)
+            return purchaseParties.Failure;
+
         var manufacturer = await manufacturers.FindAsync(m => m.Name == "Apple")
             ?? new Manufacturer { Name = "Apple" };
 
@@ -727,6 +753,16 @@ public class ProductsDataService(
             ProductNavigation = product,
         };
 
+        await transactions.AddAsync(new Transaction
+        {
+            ProductNavigation = product,
+            SellerId = purchaseParties.SellerId,
+            CustomerId = purchaseParties.CustomerId,
+            FinishedPrice = input.Price,
+            Date = DateTime.Now,
+            Direction = TransactionDirection.Buy,
+        }, persist: false);
+
         var result = await appleIds.AddAsync(appleId) > 0;
         if (!result)
         {
@@ -739,22 +775,22 @@ public class ProductsDataService(
     }
 
 
-    public async Task<ServiceResult> CreateTabletAsync(CreateTabletInputModel input) => await CreateDeviceAsync(input.ManufacturerId, input.ModelId, "Tablet", input.Price, input.ProfitPercent, input.ProfitAmount, input.IsSecondHand, input.TestPeriodDays, input.SecondHandNotes, input.HasGuarantee, input.GuaranteeCorporation, input.GuaranteeExpiry, input.GuaranteeNotes, new Tablet { Notes = NormalizeNote(input.Notes) });
-    public async Task<ServiceResult> CreateSmartWatchAsync(CreateSmartWatchInputModel input) => await CreateDeviceAsync(input.ManufacturerId, input.ModelId, "SmartWatch", input.Price, input.ProfitPercent, input.ProfitAmount, input.IsSecondHand, input.TestPeriodDays, input.SecondHandNotes, input.HasGuarantee, input.GuaranteeCorporation, input.GuaranteeExpiry, input.GuaranteeNotes, new SmartWatch { Notes = NormalizeNote(input.Notes) });
+    public async Task<ServiceResult> CreateTabletAsync(CreateTabletInputModel input) => await CreateDeviceAsync(input.SellerId, input.ManufacturerId, input.ModelId, "Tablet", input.Price, input.ProfitPercent, input.ProfitAmount, input.IsSecondHand, input.TestPeriodDays, input.SecondHandNotes, input.HasGuarantee, input.GuaranteeCorporation, input.GuaranteeExpiry, input.GuaranteeNotes, new Tablet { Notes = NormalizeNote(input.Notes) });
+    public async Task<ServiceResult> CreateSmartWatchAsync(CreateSmartWatchInputModel input) => await CreateDeviceAsync(input.SellerId, input.ManufacturerId, input.ModelId, "SmartWatch", input.Price, input.ProfitPercent, input.ProfitAmount, input.IsSecondHand, input.TestPeriodDays, input.SecondHandNotes, input.HasGuarantee, input.GuaranteeCorporation, input.GuaranteeExpiry, input.GuaranteeNotes, new SmartWatch { Notes = NormalizeNote(input.Notes) });
     public async Task<ServiceResult> CreateLaptopAsync(CreateLaptopInputModel input)
     {
         if (input.DisplaySize <= 0)
             return new ServiceResult(false, "Display size must be greater than 0.", null, null);
 
-        return await CreateDeviceAsync(input.ManufacturerId, input.ModelId, "Laptop", input.Price, input.ProfitPercent, input.ProfitAmount, input.IsSecondHand, input.TestPeriodDays, input.SecondHandNotes, input.HasGuarantee, input.GuaranteeCorporation, input.GuaranteeExpiry, input.GuaranteeNotes, new Laptop { Cpu = input.Cpu.Trim(), Gpu = input.Gpu?.Trim() ?? string.Empty, DisplaySize = input.DisplaySize, Notes = NormalizeNote(input.Notes) });
+        return await CreateDeviceAsync(input.SellerId, input.ManufacturerId, input.ModelId, "Laptop", input.Price, input.ProfitPercent, input.ProfitAmount, input.IsSecondHand, input.TestPeriodDays, input.SecondHandNotes, input.HasGuarantee, input.GuaranteeCorporation, input.GuaranteeExpiry, input.GuaranteeNotes, new Laptop { Cpu = input.Cpu.Trim(), Gpu = input.Gpu?.Trim() ?? string.Empty, DisplaySize = input.DisplaySize, Notes = NormalizeNote(input.Notes) });
     }
 
     public Task<ServiceResult> CreateCablesAsync(CreateCableInputModel input) =>
-        CreateAccessoryBatchAsync(input.Count, input.Price, input.ProfitPercent, input.ProfitAmount, input.ManufacturerId, input.ModelId, "Cable",
+        CreateAccessoryBatchAsync(input.SellerId, input.Count, input.Price, input.ProfitPercent, input.ProfitAmount, input.ManufacturerId, input.ModelId, "Cable",
             product => product.CableProfile = new Cable { Connector1 = input.Connector1, Connector2 = input.Connector2, Length = input.Length });
 
     public Task<ServiceResult> CreateChargersAsync(CreateChargerInputModel input) =>
-        CreateAccessoryBatchAsync(input.Count, input.Price, input.ProfitPercent, input.ProfitAmount, input.ManufacturerId, input.ModelId, "Charger",
+        CreateAccessoryBatchAsync(input.SellerId, input.Count, input.Price, input.ProfitPercent, input.ProfitAmount, input.ManufacturerId, input.ModelId, "Charger",
             product => product.ChargerProfile = new Charger { Wattage = input.Wattage, Pd = input.Pd, PortCount = input.PortCount });
 
     public Task<ServiceResult> CreatePowerBanksAsync(CreatePowerBankInputModel input)
@@ -766,7 +802,7 @@ public class ProductsDataService(
         if (input.PortTypes.Any(type => !Enum.IsDefined(type)))
             return Task.FromResult(new ServiceResult(false, "Select a valid connector type for every port.", nameof(CreatePowerBankInputModel.PortTypes), null));
 
-        return CreateAccessoryBatchAsync(input.Count, input.Price, input.ProfitPercent, input.ProfitAmount, input.ManufacturerId, input.ModelId, "PowerBank",
+        return CreateAccessoryBatchAsync(input.SellerId, input.Count, input.Price, input.ProfitPercent, input.ProfitAmount, input.ManufacturerId, input.ModelId, "PowerBank",
             product => product.PowerBankProfile = new PowerBank
             {
                 CapacityMah = input.CapacityMah,
@@ -788,7 +824,7 @@ public class ProductsDataService(
         if (await storageCapacities.FindAsync(capacity => capacity.Id == input.StorageCapacityId) is null)
             return new ServiceResult(false, "Select a valid storage capacity.", nameof(CreatePortableStorageInputModel.StorageCapacityId), null);
 
-        return await CreateAccessoryBatchAsync(input.Count, input.Price, input.ProfitPercent, input.ProfitAmount, input.ManufacturerId, input.ModelId, "PortableStorage",
+        return await CreateAccessoryBatchAsync(input.SellerId, input.Count, input.Price, input.ProfitPercent, input.ProfitAmount, input.ManufacturerId, input.ModelId, "PortableStorage",
             product => product.PortableStorageProfile = new PortableStorage { Kind = input.StorageKind, StorageCapacityId = input.StorageCapacityId, Speed = input.Speed });
     }
 
@@ -814,6 +850,10 @@ public class ProductsDataService(
         if (compatibleModels.Count == 0)
             return new ServiceResult(false, "Select at least one compatible model.", nameof(CreateCaseInputModel.CompatibleModelIds), null);
 
+        var purchaseParties = await ResolvePurchasePartiesAsync(input.SellerId);
+        if (purchaseParties.Failure is not null)
+            return purchaseParties.Failure;
+
         var caseCategory = await categories.FindAsync(c => c.Name == "Case");
         if (caseCategory is null)
             return new ServiceResult(false, "The 'Case' category is missing from the catalog seed data.", nameof(CreateCaseInputModel.ManufacturerId), null);
@@ -835,7 +875,7 @@ public class ProductsDataService(
                 profile.ModelFits.Add(new CaseModelFit { CaseNavigation = profile, ModelId = compatibleModel.Id, ModelNavigation = compatibleModel });
             product.CaseProfile = profile;
             batch.Add(product);
-            purchaseTransactions.Add(new Transaction { ProductNavigation = product, SellerId = ShopSellerId, CustomerId = ShopCustomerId, FinishedPrice = input.Price, Date = DateTime.Today, Direction = TransactionDirection.Buy });
+            purchaseTransactions.Add(new Transaction { ProductNavigation = product, SellerId = purchaseParties.SellerId, CustomerId = purchaseParties.CustomerId, FinishedPrice = input.Price, Date = DateTime.Now, Direction = TransactionDirection.Buy });
         }
         await transactions.AddRangeAsync(purchaseTransactions, persist: false);
         if (await products.AddRangeAsync(batch) <= 0)
@@ -843,7 +883,7 @@ public class ProductsDataService(
         return new ServiceResult(true, null, null, batch[0].Id);
     }
 
-    private async Task<ServiceResult> CreateAccessoryBatchAsync(int count, long price, decimal? profitPercent, long? profitAmount, int manufacturerId, int modelId, string categoryName, Action<Product> configure)
+    private async Task<ServiceResult> CreateAccessoryBatchAsync(int sellerId, int count, long price, decimal? profitPercent, long? profitAmount, int manufacturerId, int modelId, string categoryName, Action<Product> configure)
     {
         if (count < 1)
             return new ServiceResult(false, "Count must be at least 1.", null, null);
@@ -855,6 +895,10 @@ public class ProductsDataService(
         if (model is null)
             return new ServiceResult(false, "Selected model not found for this manufacturer.", nameof(modelId), null);
 
+        var purchaseParties = await ResolvePurchasePartiesAsync(sellerId);
+        if (purchaseParties.Failure is not null)
+            return purchaseParties.Failure;
+
         var batch = new List<Product>(count);
         var purchaseTransactions = new List<Transaction>(count);
         for (var i = 0; i < count; i++)
@@ -862,26 +906,65 @@ public class ProductsDataService(
             var product = new Product { ModelId = model.Id, ModelNavigation = model, Barcode = Guid.NewGuid().ToString("N")[..12], Price = finishedPrice };
             configure(product);
             batch.Add(product);
-            purchaseTransactions.Add(new Transaction { ProductNavigation = product, SellerId = ShopSellerId, CustomerId = ShopCustomerId, FinishedPrice = price, Date = DateTime.Today, Direction = TransactionDirection.Buy });
+            purchaseTransactions.Add(new Transaction { ProductNavigation = product, SellerId = purchaseParties.SellerId, CustomerId = purchaseParties.CustomerId, FinishedPrice = price, Date = DateTime.Now, Direction = TransactionDirection.Buy });
         }
         await transactions.AddRangeAsync(purchaseTransactions, persist: false);
         if (await products.AddRangeAsync(batch) <= 0)
             return new ServiceResult(false, "The accessory products could not be saved. Check the details and try again.", null, null);
         return new ServiceResult(true, null, null, batch[0].Id);
     }
-    private async Task<ServiceResult> CreateDeviceAsync(int manufacturerId, int modelId, string categoryName, long price, decimal? profitPercent, long? profitAmount, bool isSecondHand, int? testPeriodDays, string? secondHandNotes, bool hasGuarantee, string? guaranteeCorporation, DateTime? guaranteeExpiry, string? guaranteeNotes, object profile)
+    private async Task<ServiceResult> CreateDeviceAsync(int sellerId, int manufacturerId, int modelId, string categoryName, long price, decimal? profitPercent, long? profitAmount, bool isSecondHand, int? testPeriodDays, string? secondHandNotes, bool hasGuarantee, string? guaranteeCorporation, DateTime? guaranteeExpiry, string? guaranteeNotes, object profile)
     {
         if (price > MoneyLimits.MaxRials || profitAmount > MoneyLimits.MaxRials || !TryComputeFinishedPrice(price, profitPercent, profitAmount, out var finishedPrice)) return new ServiceResult(false, "The price is too large.", null, null);
         if (await manufacturers.FindAsync(manufacturerId) is null) return new ServiceResult(false, "Selected manufacturer not found.", nameof(manufacturerId), null);
         var model = await models.FindAsync(m => m.Id == modelId && m.ManufacturerId == manufacturerId && m.CategoryNavigation.Name == categoryName);
         if (model is null) return new ServiceResult(false, "Selected model not found for this manufacturer.", nameof(modelId), null);
+        var purchaseParties = await ResolvePurchasePartiesAsync(sellerId);
+        if (purchaseParties.Failure is not null) return purchaseParties.Failure;
         var product = new Product { ModelId = model.Id, Barcode = Guid.NewGuid().ToString("N")[..12], Price = finishedPrice, SecondHandProfile = isSecondHand ? new SecondHand { TestPeriodDays = testPeriodDays ?? 30, UsedDurationDays = 0, Notes = NormalizeNote(secondHandNotes) } : null, GuaranteeProfile = hasGuarantee ? new Guarantee { StartDate = DateTime.Today, ExpirationDate = guaranteeExpiry ?? DateTime.Today.AddYears(1), Corporation = string.IsNullOrWhiteSpace(guaranteeCorporation) ? "Shop Warranty" : guaranteeCorporation.Trim(), Notes = NormalizeNote(guaranteeNotes) } : null };
         switch (profile) { case Tablet x: product.TabletProfile = x; break; case SmartWatch x: product.SmartWatchProfile = x; break; case Laptop x: product.LaptopProfile = x; break; default: throw new ArgumentException("Unsupported device profile.", nameof(profile)); }
+        await transactions.AddAsync(new Transaction
+        {
+            ProductNavigation = product,
+            SellerId = purchaseParties.SellerId,
+            CustomerId = purchaseParties.CustomerId,
+            FinishedPrice = price,
+            Date = DateTime.Now,
+            Direction = TransactionDirection.Buy,
+        }, persist: false);
         var saved = await products.AddAsync(product) > 0;
         if (!saved) return new ServiceResult(false, "The product could not be saved. Check the details and try again.", null, null);
         var productId = product.Id;
         return new ServiceResult(true, null, null, productId);
     }
+
+    private async Task<PurchasePartyResolution> ResolvePurchasePartiesAsync(int sellerId)
+    {
+        if (await sellers.FindAsync(sellerId) is null)
+            return new PurchasePartyResolution(0, 0,
+                new ServiceResult(false, "Selected seller not found.", "SellerId", null));
+
+        var anis = await customers.FindAsync(customer =>
+            customer.PersonNavigation.FirstName == "Anis" &&
+            customer.PersonNavigation.LastName == "Sahabi");
+        if (anis is null)
+        {
+            var anisPerson = await people.FindAsync(person =>
+                person.FirstName == "Anis" && person.LastName == "Sahabi");
+            if (anisPerson is null)
+                return new PurchasePartyResolution(0, 0,
+                    new ServiceResult(false, "Anis Sahabi must be registered as a person before creating products.", null, null));
+
+            anis = new Customer { PersonId = anisPerson.Id, NationalId = "0099999999" };
+            if (await customers.AddAsync(anis) <= 0)
+                return new PurchasePartyResolution(0, 0,
+                    new ServiceResult(false, "Anis Sahabi could not be registered as a customer.", null, null));
+        }
+
+        return new PurchasePartyResolution(sellerId, anis.Id, null);
+    }
+
+    private sealed record PurchasePartyResolution(int SellerId, int CustomerId, ServiceResult? Failure);
 
     private async Task<Model> AddModelAsync(int manufacturerId, int categoryId, string name)
     {

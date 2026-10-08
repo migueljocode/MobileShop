@@ -7,4 +7,7 @@ public sealed record TransactionListItemViewModel(
     string ProductLabel,
     long FinishedPrice,
     string SellerLabel,
-    string CustomerLabel);
+    string CustomerLabel)
+{
+    public int CustomerId { get; init; }
+}

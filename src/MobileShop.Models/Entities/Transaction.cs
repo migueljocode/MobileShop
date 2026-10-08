@@ -7,7 +7,7 @@ public class Transaction : BaseEntity
     [Range(typeof(DateTime), "2000-01-01", "2100-01-01", ErrorMessage = "{0} must be between {1} and {2}.")]
     public DateTime Date { get; set; }
 
-    // both are always set - for a purchase leg customerId is the shop itself, for a sale leg sellerId is the shop itself
+    // Both parties are required. For a purchase, the seller supplies the product and the customer is the buyer.
     public int SellerId { get; set; }
     public virtual Seller SellerNavigation { get; set; } = null!;
 

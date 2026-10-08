@@ -65,8 +65,6 @@ body::before {
     0 1.5rem 4rem rgba(2, 6, 14, 0.24),
     0 0 2rem rgba(93, 116, 255, 0.065),
     inset 0 1px 0 rgba(235, 241, 255, 0.08);
-  -webkit-backdrop-filter: blur(24px) saturate(145%);
-  backdrop-filter: blur(24px) saturate(145%);
 }
 
 h1,
@@ -516,100 +514,10 @@ a:hover {
   font-size: 0.73rem;
 }
 
-.profit-chart-scroll {
-  overflow-x: auto;
-  overscroll-behavior-inline: contain;
-}
-
-.profit-chart {
-  display: block;
+.profit-chart-canvas {
+  position: relative;
   width: 100%;
-  min-width: 620px;
-  overflow: visible;
-}
-
-.profit-chart-gridline {
-  stroke: rgba(194, 207, 245, 0.1);
-  stroke-width: 1;
-  vector-effect: non-scaling-stroke;
-}
-
-.profit-chart-zero {
-  stroke: rgba(207, 217, 255, 0.34);
-  stroke-dasharray: 5 6;
-  stroke-width: 1.2;
-  vector-effect: non-scaling-stroke;
-}
-
-.profit-chart-axis {
-  stroke: rgba(194, 207, 245, 0.28);
-  stroke-width: 1;
-  vector-effect: non-scaling-stroke;
-}
-
-.profit-chart-axis-label {
-  display: block;
-  overflow: hidden;
-  color: #929fb8;
-  font-family: var(--bs-body-font-family);
-  font-size: 10px;
-  line-height: 18px;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.profit-chart-month-label {
-  fill: #bac5db;
-  font-family: var(--bs-body-font-family);
-  font-size: 11px;
-}
-
-.profit-chart-y-axis-title,
-.profit-chart-x-axis-title {
-  fill: #aebbd5;
-  font-family: var(--bs-body-font-family);
-  font-size: 10px;
-  font-weight: 650;
-  letter-spacing: 0.035em;
-}
-
-.profit-chart-area {
-  fill: url("#profit-chart-area");
-  opacity: 0;
-  animation: profit-chart-area-in 900ms 300ms ease-out forwards;
-}
-
-.profit-chart-line {
-  fill: none;
-  stroke: #a8b7ff;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  stroke-width: 3;
-  vector-effect: non-scaling-stroke;
-  filter: drop-shadow(0 0 5px rgba(129, 151, 255, 0.52));
-  stroke-dasharray: 1;
-  stroke-dashoffset: 1;
-  animation: profit-chart-line-in 1.45s cubic-bezier(0.22, 1, 0.36, 1) 80ms forwards;
-}
-
-.profit-chart-point {
-  fill: #dce3ff;
-  stroke: #7187ff;
-  stroke-width: 2;
-  vector-effect: non-scaling-stroke;
-  filter: drop-shadow(0 0 5px rgba(129, 151, 255, 0.7));
-  transition: r 160ms ease, fill 160ms ease;
-  opacity: 0;
-  transform: scale(0.4);
-  transform-box: fill-box;
-  transform-origin: center;
-  animation: profit-chart-point-in 360ms cubic-bezier(0.22, 1.5, 0.45, 1) forwards;
-  animation-delay: var(--point-delay, 300ms);
-}
-
-.profit-chart-point:hover {
-  r: 6;
-  fill: #fff;
+  height: 360px;
 }
 
 .profit-chart-legend {
@@ -635,18 +543,6 @@ a:hover {
   place-items: center;
   color: var(--app-muted);
   font-size: 0.92rem;
-}
-
-@keyframes profit-chart-line-in {
-  to { stroke-dashoffset: 0; }
-}
-
-@keyframes profit-chart-area-in {
-  to { opacity: 1; }
-}
-
-@keyframes profit-chart-point-in {
-  to { opacity: 1; transform: scale(1); }
 }
 
 .btn:focus-visible,
@@ -682,9 +578,31 @@ label {
   background-color: rgba(5, 10, 19, 0.42);
 }
 
+.form-control[data-finished-price] {
+  color: var(--app-ink);
+  background-color: rgba(5, 10, 19, 0.62);
+  opacity: 1;
+}
+
 .form-control::placeholder {
   color: #8995ac;
   opacity: 1;
+}
+
+.form-control:disabled,
+.form-control[readonly] {
+  border-color: rgba(208, 220, 255, 0.12);
+  color: #aeb9ce;
+  background-color: rgba(20, 27, 41, 0.82);
+  opacity: 1;
+  -webkit-text-fill-color: #aeb9ce;
+  cursor: not-allowed;
+}
+
+.form-control:disabled::placeholder {
+  color: #aeb9ce;
+  opacity: 1;
+  -webkit-text-fill-color: #aeb9ce;
 }
 
 .form-control:focus,
@@ -693,6 +611,14 @@ label {
   color: #fff;
   background-color: rgba(8, 13, 24, 0.76);
   box-shadow: 0 0 0 0.22rem rgba(115, 136, 255, 0.16);
+}
+
+.form-select:disabled {
+  border-color: rgba(208, 220, 255, 0.12);
+  color: #aeb9ce;
+  background-color: rgba(20, 27, 41, 0.82);
+  opacity: 1;
+  cursor: not-allowed;
 }
 
 .form-select option {
@@ -836,6 +762,27 @@ legend {
   box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.3);
   -webkit-backdrop-filter: blur(24px) saturate(150%);
   backdrop-filter: blur(24px) saturate(150%);
+}
+
+.product-picker-results .list-group-item,
+.product-picker-results .list-group-item-action {
+  border-color: rgba(208, 220, 255, 0.16);
+  color: #e0e6f4;
+  background-color: #151d2c;
+}
+
+.product-picker-results .list-group-item-action:hover,
+.product-picker-results .list-group-item-action:focus {
+  color: #fff;
+  background-color: #27334a;
+}
+
+.modal {
+  z-index: 1060;
+}
+
+.modal-backdrop {
+  z-index: 1050;
 }
 
 .modal-header,

@@ -10,15 +10,16 @@
     var resultsId = pickerId + "-results";
     var searchHandler = isCustomer ? "SearchCustomers" : "SearchSellers";
     var createHandler = isCustomer ? "CreateCustomer" : "CreateSeller";
+    var endpoint = ViewData["PersonPickerEndpoint"]?.ToString();
     var modalId = role + "-create-person-modal";
     var modalLabelId = modalId + "-label";
 }
-<div class="mb-3" data-person-picker data-person-role="@role" data-search-handler="@searchHandler" data-create-handler="@createHandler">
+<div class="mb-3" data-person-picker data-person-role="@role" data-search-handler="@searchHandler" data-create-handler="@createHandler" data-person-endpoint="@endpoint">
     <div class="d-flex align-items-center justify-content-between">
         <label for="@pickerId" class="form-label mt-2 mb-1">@label</label>
         <button type="button" class="btn btn-link btn-sm px-0" data-person-create aria-controls="@modalId">Create new</button>
     </div>
-    <input type="hidden" name="@fieldName" id="@fieldId" value="0" data-person-value />
+    <input type="hidden" name="@fieldName" id="@fieldId" value="@(ViewData.ModelState[$"{fieldName}"]?.AttemptedValue ?? "0")" data-person-value />
     <input id="@pickerId" type="text" class="form-control" autocomplete="off" role="combobox" aria-autocomplete="list" aria-controls="@resultsId" aria-expanded="false" placeholder="Search by name@(isCustomer ? ", phone or national code" : " or phone")" data-person-search />
     <div id="@resultsId" class="list-group mt-1 d-none" role="listbox" data-person-results>
         @foreach (var person in Model)
@@ -27,6 +28,8 @@
         }
     </div>
     <span class="text-danger" data-person-error></span>
+    @Html.ValidationMessage(fieldName, string.Empty, new { @class = "text-danger" })
+    @Html.ValidationMessage(isCustomer ? "CustomerId" : "SellerId", string.Empty, new { @class = "text-danger" })
 
     <div class="modal fade" id="@modalId" tabindex="-1" aria-labelledby="@modalLabelId" aria-hidden="true" data-person-modal>
         <div class="modal-dialog">

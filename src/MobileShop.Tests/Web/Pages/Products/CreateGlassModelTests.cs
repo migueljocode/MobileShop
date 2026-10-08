@@ -14,6 +14,9 @@ public class CreateGlassModelTests : RepoTestBase
         var dataService = new ProductsDataService(
             new BaseRepo<Phone>(Context),
             new BaseRepo<AppleId>(Context),
+            new BaseRepo<Seller>(Context),
+            new BaseRepo<Customer>(Context),
+            new BaseRepo<Person>(Context),
             new BaseRepo<Manufacturer>(Context),
             new BaseRepo<Model>(Context),
             new BaseRepo<Category>(Context),
@@ -26,6 +29,7 @@ public class CreateGlassModelTests : RepoTestBase
             NullLogger<ProductsDataService>.Instance);
 
         TestDataHelpers.SeedShopSentinels(Context);
+        TestDataHelpers.SeedAnisCustomer(Context);
                 Context.Categories.AddRange(new Category { Name = "Phone" }, new Category { Name = "Glass" });
         Context.Manufacturers.AddRange(new Manufacturer { Name = "Apple" }, new Manufacturer { Name = "Samsung" });
         Context.SaveChanges();
@@ -44,6 +48,7 @@ public class CreateGlassModelTests : RepoTestBase
 
     private static CreateGlassInputModel ValidInput(int compatibleManufacturerId, int compatibleModelId, int glassManufacturerId) => new()
     {
+        SellerId = 1,
         CompatibleManufacturerId = compatibleManufacturerId,
         CompatibleModelId = compatibleModelId,
         GlassManufacturerId = glassManufacturerId,
@@ -95,7 +100,8 @@ public class CreateGlassModelTests : RepoTestBase
         Assert.All(Context.Transactions.Where(t => t.Direction == TransactionDirection.Buy), t =>
         {
             Assert.Equal(100, t.FinishedPrice);
-            Assert.Equal(DateTime.Today, t.Date);
+            Assert.Equal(DateTime.Today, t.Date.Date);
+            Assert.NotEqual(TimeSpan.Zero, t.Date.TimeOfDay);
         });
         Assert.All(Context.Glasses, glass => Assert.Equal(model.Id, glass.ModelFits.Single().ModelId));
         var glassCategoryId = Context.Categories.Single(c => c.Name == "Glass").Id;

@@ -9,7 +9,7 @@ namespace MobileShop.Tests.Web.Pages.Reports;
 /// <summary>
 /// Verifies the Profit/Loss page model date-range resolution:
 /// - All four automatic presets compute exact bounds.
-/// - Default mode/preset is Automatic/Month.
+/// - Default mode/preset is Automatic/Today.
 /// - Manual mode defaults missing From/To independently.
 /// - Supplied manual dates are preserved.
 /// - Empty database triggers a user-facing note and falls back to today.
@@ -30,6 +30,15 @@ public class ProfitLossTests
             });
 
         return new ProfitLossModel(serviceMock.Object);
+    }
+
+    [Fact]
+    public void Default_preset_is_today()
+    {
+        var mock = new Mock<IReportsDataService>();
+        var model = CreateModel(mock);
+
+        Assert.Equal(AutomaticPreset.Today, model.Preset);
     }
 
     private static void SetupProfitLossMocks(Mock<IReportsDataService> serviceMock)
@@ -73,9 +82,9 @@ public class ProfitLossTests
     [Theory]
     [InlineData(AutomaticPreset.Today, ProfitLossInterval.Hour)]
     [InlineData(AutomaticPreset.Week, ProfitLossInterval.Day)]
-    [InlineData(AutomaticPreset.Month, ProfitLossInterval.Week)]
+    [InlineData(AutomaticPreset.Month, ProfitLossInterval.Day)]
     [InlineData(AutomaticPreset.Year, ProfitLossInterval.Month)]
-    [InlineData(AutomaticPreset.All, ProfitLossInterval.Month)]
+    [InlineData(AutomaticPreset.All, ProfitLossInterval.Year)]
     public async Task Automatic_preset_selects_matching_profit_chart_interval(
         AutomaticPreset preset,
         ProfitLossInterval expectedInterval)
@@ -193,7 +202,7 @@ public class ProfitLossTests
     }
 
     [Fact]
-    public async Task Default_mode_is_Automatic_and_preset_is_Month()
+    public async Task Default_mode_is_Automatic_and_preset_is_Today()
     {
         var mock = new Mock<IReportsDataService>();
         SetupProfitLossMocks(mock);
@@ -202,10 +211,10 @@ public class ProfitLossTests
         await model.OnGetAsync();
 
         Assert.Equal(DateRangeMode.Automatic, model.Mode);
-        Assert.Equal(AutomaticPreset.Month, model.Preset);
+        Assert.Equal(AutomaticPreset.Today, model.Preset);
 
         var today = DateTime.Today;
-        Assert.Equal(new DateTime(today.Year, today.Month, 1), model.EffectiveFrom);
+        Assert.Equal(today, model.EffectiveFrom);
         Assert.Equal(today, model.EffectiveTo);
     }
 

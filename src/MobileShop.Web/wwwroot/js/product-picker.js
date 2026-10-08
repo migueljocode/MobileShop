@@ -8,6 +8,8 @@ document.addEventListener('DOMContentLoaded', function () {
         var typeFilter = picker.querySelector('[data-product-type-filter]');
         var manufacturerFilter = picker.querySelector('[data-product-manufacturer-filter]');
         var modelFilter = picker.querySelector('[data-product-model-filter]');
+        var manufacturerContainer = picker.querySelector('[data-product-manufacturer-container]');
+        var modelContainer = picker.querySelector('[data-product-model-container]');
         var priceInput = document.querySelector('[data-finished-price-input]');
         var suggestedDisplay = picker.querySelector('[data-suggested-price-display]');
         var searchHandler = picker.getAttribute('data-search-handler');
@@ -24,6 +26,22 @@ document.addEventListener('DOMContentLoaded', function () {
             };
         });
         var selectedSuggestedPrice = '';
+        var latestSearchId = 0;
+
+        function filtersAreReady() {
+            if (!typeFilter || !typeFilter.value) return false;
+            if (typeFilter.value.trim().toLowerCase() === 'apple id') return true;
+            return Boolean(manufacturerFilter && manufacturerFilter.value
+                && modelFilter && modelFilter.value);
+        }
+
+        function optionMatchesFilters(option) {
+            if (!filtersAreReady()) return false;
+            if (option.type !== typeFilter.value) return false;
+            if (typeFilter.value.trim().toLowerCase() === 'apple id') return true;
+            return option.manufacturerId === manufacturerFilter.value
+                && option.modelId === modelFilter.value;
+        }
 
         function clearSuggestedPrice() {
             if (selectedSuggestedPrice && priceInput.value === selectedSuggestedPrice) priceInput.value = '';
@@ -50,13 +68,14 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
             });
 
-            manufacturerFilter.replaceChildren(new Option('All manufacturers', ''));
+            manufacturerFilter.replaceChildren(new Option('Select manufacturer', ''));
             Array.from(manufacturers.entries())
                 .sort(function (left, right) { return left[1].localeCompare(right[1]); })
                 .forEach(function (manufacturer) {
                     manufacturerFilter.appendChild(new Option(manufacturer[1], manufacturer[0]));
                 });
             if (manufacturers.has(selectedManufacturer)) manufacturerFilter.value = selectedManufacturer;
+            manufacturerFilter.disabled = !typeFilter || !typeFilter.value;
         }
 
         function populateModels() {
@@ -70,7 +89,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
             });
 
-            modelFilter.replaceChildren(new Option('All models', ''));
+            modelFilter.replaceChildren(new Option('Select model', ''));
             Array.from(models.entries())
                 .sort(function (left, right) { return left[1].localeCompare(right[1]); })
                 .forEach(function (model) {
@@ -79,10 +98,24 @@ document.addEventListener('DOMContentLoaded', function () {
             modelFilter.disabled = !manufacturerFilter || !manufacturerFilter.value;
         }
 
+        function updateSearchAvailability() {
+            if (!typeFilter) return;
+            var isAppleId = typeFilter.value.trim().toLowerCase() === 'apple id';
+            if (manufacturerContainer) manufacturerContainer.classList.toggle('d-none', isAppleId);
+            if (modelContainer) modelContainer.classList.toggle('d-none', isAppleId);
+
+            var filtersReady = filtersAreReady();
+            searchInput.disabled = !filtersReady;
+            searchInput.placeholder = filtersReady
+                ? 'Search by name, identifier, color or part number'
+                : isAppleId ? 'Search Apple IDs by name or email' : 'Select type, manufacturer and model first';
+        }
+
         function clearSelection() {
             valueInput.value = '0';
             searchInput.value = '';
             clearSuggestedPrice();
+            latestSearchId++;
             results.classList.add('d-none');
             searchInput.setAttribute('aria-expanded', 'false');
         }
@@ -100,12 +133,18 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         function setSelection(option) {
+            if (!optionMatchesFilters(option)) {
+                clearSelection();
+                return;
+            }
             valueInput.value = String(option.productId);
             searchInput.value = option.label;
             results.classList.add('d-none');
             searchInput.setAttribute('aria-expanded', 'false');
 
-            var suggested = option.suggestedPrice == null ? '' : String(option.suggestedPrice);
+            clearSuggestedPrice();
+            var price = option.suggestedPrice ?? option.SuggestedPrice;
+            var suggested = price == null || !Number.isFinite(Number(price)) ? '' : String(price);
             selectedSuggestedPrice = suggested;
             if (suggestedDisplay) suggestedDisplay.textContent = formatPrice(suggested);
             if (suggested) priceInput.value = suggested;
@@ -132,6 +171,18 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         async function search(query) {
+            if (!filtersAreReady()) {
+                results.replaceChildren();
+                results.classList.add('d-none');
+                searchInput.setAttribute('aria-expanded', 'false');
+                return;
+            }
+            var searchId = ++latestSearchId;
+            var selectedFilters = {
+                type: typeFilter.value,
+                manufacturerId: manufacturerFilter ? manufacturerFilter.value : '',
+                modelId: modelFilter ? modelFilter.value : ''
+            };
             var url = new URL(window.location.href);
             url.searchParams.set('handler', searchHandler);
             if (query) url.searchParams.set('q', query);
@@ -147,16 +198,24 @@ document.addEventListener('DOMContentLoaded', function () {
             if (!response.ok) throw new Error('Search failed.');
 
             var products = await response.json();
+            if (searchId !== latestSearchId || !filtersAreReady()
+                || selectedFilters.type !== typeFilter.value
+                || selectedFilters.manufacturerId !== (manufacturerFilter ? manufacturerFilter.value : '')
+                || selectedFilters.modelId !== (modelFilter ? modelFilter.value : '')) return;
+
             renderResults(products.map(function (product) {
                 var label = product.type + ': ' + product.name + ' — ' + product.identifier;
                 if (product.color) label += ' — ' + product.color;
                 if (product.partNumberLabel && product.partNumberLabel !== 'N/A') label += ' — ' + product.partNumberLabel;
                 return {
-                    productId: product.productId,
+                    productId: product.productId ?? product.ProductId,
                     label: label,
-                    suggestedPrice: product.suggestedPrice
+                    suggestedPrice: product.suggestedPrice ?? product.SuggestedPrice,
+                    type: product.type ?? product.Type,
+                    manufacturerId: String(product.manufacturerId ?? product.ManufacturerId ?? ''),
+                    modelId: String(product.modelId ?? product.ModelId ?? '')
                 };
-            }));
+            }).filter(optionMatchesFilters));
         }
 
         searchInput.addEventListener('input', function () {
@@ -187,14 +246,20 @@ document.addEventListener('DOMContentLoaded', function () {
                 modelFilter.value = '';
                 populateManufacturers();
                 populateModels();
+                updateSearchAvailability();
                 refreshFilteredResults();
             });
             manufacturerFilter.addEventListener('change', function () {
                 modelFilter.value = '';
                 populateModels();
+                updateSearchAvailability();
                 refreshFilteredResults();
             });
-            modelFilter.addEventListener('change', refreshFilteredResults);
+            modelFilter.addEventListener('change', function () {
+                updateSearchAvailability();
+                refreshFilteredResults();
+            });
+            updateSearchAvailability();
         }
 
         picker.querySelectorAll('[data-product-option]').forEach(function (button) {
@@ -202,7 +267,10 @@ document.addEventListener('DOMContentLoaded', function () {
                 setSelection({
                     productId: button.dataset.productId,
                     label: button.textContent,
-                    suggestedPrice: button.dataset.suggestedPrice || ''
+                    suggestedPrice: button.dataset.suggestedPrice || '',
+                    type: button.dataset.productType || '',
+                    manufacturerId: button.dataset.manufacturerId || '',
+                    modelId: button.dataset.modelId || ''
                 });
             });
         });
@@ -212,7 +280,10 @@ document.addEventListener('DOMContentLoaded', function () {
             setSelection({
                 productId: selected.dataset.productId,
                 label: selected.textContent,
-                suggestedPrice: selected.dataset.suggestedPrice || ''
+                suggestedPrice: selected.dataset.suggestedPrice || '',
+                type: selected.dataset.productType || '',
+                manufacturerId: selected.dataset.manufacturerId || '',
+                modelId: selected.dataset.modelId || ''
             });
         }
     });

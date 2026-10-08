@@ -4,16 +4,37 @@
 @model MobileShop.Web.Pages.Reports.ProfitLossModel
 @{
     ViewData["Title"] = "Profit and loss";
-    const decimal chartWidth = 960m;
-    const decimal chartHeight = 320m;
-    const decimal chartLeft = 84m;
-    const decimal chartRight = 24m;
-    const decimal chartTop = 24m;
-    const decimal chartBottom = 48m;
-    var plotWidth = chartWidth - chartLeft - chartRight;
-    var plotHeight = chartHeight - chartTop - chartBottom;
+    var chartFrom = Model.EffectiveFrom;
+    var chartTo = Model.EffectiveTo;
+    if (Model.Mode == DateRangeMode.Automatic)
+    {
+        switch (Model.Preset)
+        {
+            case AutomaticPreset.Today:
+                chartFrom = Model.EffectiveTo.Date;
+                chartTo = chartFrom.AddDays(1).AddTicks(-1);
+                break;
+            case AutomaticPreset.Week:
+                chartFrom = Model.EffectiveFrom.Date;
+                chartTo = chartFrom.AddDays(7).AddTicks(-1);
+                break;
+            case AutomaticPreset.Month:
+                chartFrom = new DateTime(Model.EffectiveFrom.Year, Model.EffectiveFrom.Month, 1);
+                chartTo = chartFrom.AddMonths(1).AddTicks(-1);
+                break;
+            case AutomaticPreset.Year:
+                chartFrom = new DateTime(Model.EffectiveFrom.Year, 1, 1);
+                chartTo = chartFrom.AddYears(1).AddTicks(-1);
+                break;
+            case AutomaticPreset.All:
+                chartFrom = new DateTime(Model.EffectiveFrom.Year, 1, 1);
+                chartTo = new DateTime(Model.EffectiveTo.Year, 12, 31, 23, 59, 59);
+                break;
+        }
+    }
     DateTime GetPeriodStart(DateTime date, ProfitLossInterval interval) => interval switch
     {
+        ProfitLossInterval.Year => new DateTime(date.Year, 1, 1),
         ProfitLossInterval.Month => new DateTime(date.Year, date.Month, 1),
         ProfitLossInterval.Week => date.Date.AddDays(-(((int)date.DayOfWeek + 6) % 7)),
         ProfitLossInterval.Day => date.Date,
@@ -22,6 +43,7 @@
     };
     DateTime AddPeriod(DateTime period, ProfitLossInterval interval) => interval switch
     {
+        ProfitLossInterval.Year => period.AddYears(1),
         ProfitLossInterval.Month => period.AddMonths(1),
         ProfitLossInterval.Week => period.AddDays(7),
         ProfitLossInterval.Day => period.AddDays(1),
@@ -29,10 +51,8 @@
         _ => period.AddDays(1)
     };
     var trendValues = Model.TrendPoints.ToDictionary(row => row.PeriodStart, row => row.Profit);
-    var firstPeriod = GetPeriodStart(Model.EffectiveFrom, Model.TrendInterval);
-    var chartEnd = Model.TrendInterval == ProfitLossInterval.Hour
-        ? Model.EffectiveTo.Date.AddDays(1).AddTicks(-1)
-        : Model.EffectiveTo;
+    var firstPeriod = GetPeriodStart(chartFrom, Model.TrendInterval);
+    var chartEnd = chartTo;
     var lastPeriod = GetPeriodStart(chartEnd, Model.TrendInterval);
     if (lastPeriod < firstPeriod) lastPeriod = firstPeriod;
     var trendPoints = new List<(DateTime Period, long Profit)>();
@@ -40,46 +60,43 @@
     {
         trendPoints.Add((period, trendValues.GetValueOrDefault(period)));
     }
-    var trendPointsCount = trendPoints.Count;
-    var chartPoints = trendPoints.Select((point, index) => new
+    var showMonthlyWeeks = Model.Mode == DateRangeMode.Automatic && Model.Preset == AutomaticPreset.Month;
+    var chartPoints = showMonthlyWeeks
+        ? Enumerable.Range(0, 4)
+            .Select(week => (
+                Label: $"Week {week + 1}",
+                Profit: trendPoints
+                    .Where(point => point.Period.Month == chartFrom.Month && point.Period.Year == chartFrom.Year
+                        && (point.Period.Day - 1) / 7 == week)
+                    .Sum(point => point.Profit)))
+            .ToList()
+        : trendPoints.Select(point => (Label: FormatPeriod(point.Period), point.Profit)).ToList();
+    var chartIntervalLabel = showMonthlyWeeks ? "Week" : Model.TrendInterval switch
     {
-        point.Period,
-        point.Profit,
-        X = trendPointsCount == 1
-            ? chartLeft + plotWidth / 2m
-            : chartLeft + index * plotWidth / (trendPointsCount - 1),
-        Y = 0m
-    }).ToList();
-    var minimumProfit = Math.Min(0m, trendPoints.Count == 0 ? 0m : trendPoints.Min(point => (decimal)point.Profit));
-    var maximumProfit = Math.Max(0m, trendPoints.Count == 0 ? 0m : trendPoints.Max(point => (decimal)point.Profit));
-    if (maximumProfit == minimumProfit)
-    {
-        minimumProfit = -1m;
-        maximumProfit = 1m;
-    }
-    var profitRange = maximumProfit - minimumProfit;
-    var points = chartPoints.Select(point => new
-    {
-        point.Period,
-        point.Profit,
-        point.X,
-        Y = chartTop + (maximumProfit - point.Profit) / profitRange * plotHeight
-    }).ToList();
-    var coordinateFormat = CultureInfo.InvariantCulture;
-    var linePoints = string.Join(" ", points.Select(point =>
-        $"{point.X.ToString("0.##", coordinateFormat)},{point.Y.ToString("0.##", coordinateFormat)}"));
-    var zeroLineY = chartTop + maximumProfit / profitRange * plotHeight;
-    var chartLabelStep = Math.Max(1, (int)Math.Ceiling(points.Count / 6m));
-    var chartHeading = Model.TrendInterval switch
+        ProfitLossInterval.Hour => "Hour of day",
+        ProfitLossInterval.Day => "Day",
+        ProfitLossInterval.Month => "Month",
+        ProfitLossInterval.Year => "Year",
+        _ => "Week"
+    };
+    var currentIndex = showMonthlyWeeks
+        ? (DateTime.Now.Day - 1) / 7
+        : trendPoints.FindIndex(point => point.Period == GetPeriodStart(DateTime.Now, Model.TrendInterval));
+    var chartLabels = System.Text.Json.JsonSerializer.Serialize(chartPoints.Select(point => point.Label));
+    var chartTickLabels = chartLabels;
+    var chartValues = System.Text.Json.JsonSerializer.Serialize(chartPoints.Select(point => point.Profit));
+    var chartHeading = showMonthlyWeeks ? "Weekly profit & loss" : Model.TrendInterval switch
     {
         ProfitLossInterval.Month => "Monthly profit & loss",
         ProfitLossInterval.Week => "Weekly profit & loss",
         ProfitLossInterval.Day => "Daily profit & loss",
         ProfitLossInterval.Hour => "Hourly profit & loss",
+        ProfitLossInterval.Year => "Yearly profit & loss",
         _ => "Profit & loss"
     };
     string FormatPeriod(DateTime period) => Model.TrendInterval switch
     {
+        ProfitLossInterval.Year => period.ToString("yyyy"),
         ProfitLossInterval.Month => period.ToString("MMM yy"),
         ProfitLossInterval.Week => $"Week of {period:M/d}",
         ProfitLossInterval.Day => period.ToString("MMM d"),
@@ -179,63 +196,19 @@
             <div class="profit-chart-heading">
                 <div>
                     <h2 id="profit-chart-title">@chartHeading</h2>
-                    <p>Net result by @Model.TrendInterval.ToString().ToLowerInvariant() across the selected date range</p>
+                    <p>Net result by @(showMonthlyWeeks ? "week" : Model.TrendInterval.ToString().ToLowerInvariant()) across the selected date range</p>
                 </div>
                 <span class="profit-chart-range">@Model.EffectiveFrom.ToString("MMM d, yyyy") – @Model.EffectiveTo.ToString("MMM d, yyyy")</span>
             </div>
-            <div class="profit-chart-scroll">
-                    <svg class="profit-chart" viewBox="0 0 960 320" role="img" aria-labelledby="profit-chart-title profit-chart-description" preserveAspectRatio="xMidYMid meet">
-                        <desc id="profit-chart-description">A @Model.TrendInterval.ToString().ToLowerInvariant() line chart showing net profit or loss in IRR. Empty intervals are shown at zero.</desc>
-                        <defs>
-                            <linearGradient id="profit-chart-area" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="0%" stop-color="#91a3ff" stop-opacity="0.25" />
-                                <stop offset="100%" stop-color="#91a3ff" stop-opacity="0.015" />
-                            </linearGradient>
-                            <filter id="profit-chart-glow" x="-30%" y="-30%" width="160%" height="160%">
-                                <feGaussianBlur stdDeviation="3" result="glow" />
-                                <feMerge><feMergeNode in="glow" /><feMergeNode in="SourceGraphic" /></feMerge>
-                            </filter>
-                        </defs>
-                        @for (var gridline = 1; gridline <= 2; gridline++)
-                        {
-                            var fraction = gridline / 3m;
-                            var y = chartTop + fraction * plotHeight;
-                            var value = maximumProfit - fraction * (maximumProfit - minimumProfit);
-                            <line class="profit-chart-gridline" x1="@chartLeft.ToString(coordinateFormat)" y1="@y.ToString(coordinateFormat)" x2="@(chartWidth - chartRight).ToString(coordinateFormat)" y2="@y.ToString(coordinateFormat)" />
-                            <foreignObject x="0" y="@(y - 8).ToString(coordinateFormat)" width="@(chartLeft - 12).ToString(coordinateFormat)" height="18">
-                                <span xmlns="http://www.w3.org/1999/xhtml" class="profit-chart-axis-label">@((long)value).ToGroupedDigits()</span>
-                            </foreignObject>
-                        }
-                        <line class="profit-chart-axis" x1="@chartLeft.ToString(coordinateFormat)" y1="@chartTop.ToString(coordinateFormat)" x2="@chartLeft.ToString(coordinateFormat)" y2="@(chartTop + plotHeight).ToString(coordinateFormat)" />
-                        <line class="profit-chart-axis" x1="@chartLeft.ToString(coordinateFormat)" y1="@(chartTop + plotHeight).ToString(coordinateFormat)" x2="@(chartWidth - chartRight).ToString(coordinateFormat)" y2="@(chartTop + plotHeight).ToString(coordinateFormat)" />
-                        <text class="profit-chart-y-axis-title" transform="translate(18 170) rotate(-90)">Net profit / loss (IRR)</text>
-                        <line class="profit-chart-zero" x1="@chartLeft.ToString(coordinateFormat)" y1="@zeroLineY.ToString(coordinateFormat)" x2="@(chartWidth - chartRight).ToString(coordinateFormat)" y2="@zeroLineY.ToString(coordinateFormat)" />
-                        @if (points.Count > 1)
-                        {
-                            var areaPoints = $"{points[0].X.ToString("0.##", coordinateFormat)},{zeroLineY.ToString("0.##", coordinateFormat)} {linePoints} {points[^1].X.ToString("0.##", coordinateFormat)},{zeroLineY.ToString("0.##", coordinateFormat)}";
-                            <polygon class="profit-chart-area" points="@areaPoints" />
-                            <polyline class="profit-chart-line" pathLength="1" points="@linePoints" />
-                        }
-                        else if (points.Count == 1)
-                        {
-                            <line class="profit-chart-line" pathLength="1" x1="@chartLeft.ToString(coordinateFormat)" y1="@zeroLineY.ToString(coordinateFormat)" x2="@(chartWidth - chartRight).ToString(coordinateFormat)" y2="@zeroLineY.ToString(coordinateFormat)" />
-                        }
-                        @for (var index = 0; index < points.Count; index++)
-                        {
-                            var point = points[index];
-                            <circle class="profit-chart-point" style="--point-delay: @(Math.Min(index, 30) * 20)ms" cx="@point.X.ToString("0.##", coordinateFormat)" cy="@point.Y.ToString("0.##", coordinateFormat)" r="4">
-                                <title>@FormatPeriod(point.Period): @point.Profit.ToIrr()</title>
-                            </circle>
-                            @if (index % chartLabelStep == 0 || index == points.Count - 1)
-                            {
-                                <g>
-                                    <text class="profit-chart-month-label" x="@point.X.ToString("0.##", coordinateFormat)" y="@(chartHeight - 25).ToString(coordinateFormat)" text-anchor="middle">@FormatPeriod(point.Period)</text>
-                                </g>
-                            }
-                        }
-                        <text class="profit-chart-x-axis-title" x="@((chartLeft + plotWidth / 2m).ToString(coordinateFormat))" y="@(chartHeight - 5).ToString(coordinateFormat)" text-anchor="middle">@Model.TrendInterval</text>
-                    </svg>
-                </div>
+            <div class="profit-chart-canvas">
+                <canvas id="profitLossChart"
+                        data-labels="@chartLabels"
+                        data-tick-labels="@chartTickLabels"
+                        data-values="@chartValues"
+                        data-current-index="@currentIndex"
+                        data-interval-label="@chartIntervalLabel"
+                        aria-label="Profit and loss by @Model.TrendInterval.ToString().ToLowerInvariant()"></canvas>
+            </div>
                 <div class="profit-chart-legend"><span aria-hidden="true"></span> Net profit / loss</div>
         </section>
         <table class="table table-striped"><thead><tr><th>Product</th><th>Bought (IRR)</th><th>Sold (IRR)</th><th>Profit / loss (IRR)</th><th>By percent</th></tr></thead><tbody>
@@ -246,6 +219,11 @@
 }
 </tbody></table>
     </div>
+
+    @section Scripts {
+        <script src="~/lib/chart.js/chart.umd.min.js" asp-append-version="true"></script>
+        <script src="~/js/profit-loss-chart.js" asp-append-version="true"></script>
+    }
 
     <div class="tab-pane fade" id="distribution" role="tabpanel">
         <p class="lead">Total profit (IRR): <strong><span class="@(Model.TotalProfit >= 0 ? "text-success" : "text-danger")">@(Model.TotalProfit > 0 ? "+" : "")@Model.TotalProfit.ToGroupedDigits()</span></strong></p>
