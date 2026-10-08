@@ -6,15 +6,15 @@ public class MoneyExtensionsTests
     public void ToGroupedDigits_formats_whole_rials_with_invariant_grouping()
     {
         Assert.Equal("0", 0L.ToGroupedDigits());
-        Assert.Equal("1,234,567", 1_234_567L.ToGroupedDigits());
-        Assert.Equal("4,500,000,000", 4_500_000_000L.ToGroupedDigits());
-        Assert.Equal("-1,500", (-1_500L).ToGroupedDigits());
+        Assert.Equal("1 234 567", 1_234_567L.ToGroupedDigits());
+        Assert.Equal("4 500 000 000", 4_500_000_000L.ToGroupedDigits());
+        Assert.Equal("-1 500", (-1_500L).ToGroupedDigits());
     }
 
     [Fact]
-    public void ToIrr_appends_the_IRR_unit()
+    public void ToIrr_appends_the_toman_unit()
     {
-        Assert.Equal("1,234,567 IRR", 1_234_567L.ToIrr());
+        Assert.Equal("1 234 567 Toman", 1_234_567L.ToIrr());
     }
 
     [Fact]

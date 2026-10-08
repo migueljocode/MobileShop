@@ -9,7 +9,7 @@ public sealed class SellInputModel
     [Range(1, int.MaxValue, ErrorMessage = "The customer should be selected.")]
     public int CustomerId { get; set; }
 
-    [Display(Name = "Finished price (IRR)")]
+    [Display(Name = "Finished price (Toman)")]
     [Range(0, MoneyLimits.MaxRials)]
     public long Price { get; set; }
 

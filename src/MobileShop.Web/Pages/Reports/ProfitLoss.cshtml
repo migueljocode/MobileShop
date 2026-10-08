@@ -83,6 +83,8 @@
     var chartLabels = System.Text.Json.JsonSerializer.Serialize(chartPoints.Select(point => point.Label));
     var chartTickLabels = chartLabels;
     var chartValues = System.Text.Json.JsonSerializer.Serialize(chartPoints.Select(point => point.Profit));
+    var chartLabelsJson = chartLabels;
+    var chartValuesJson = chartValues;
     var chartHeading = showMonthlyWeeks ? "Weekly profit & loss" : Model.TrendInterval switch
     {
         ProfitLossInterval.Month => "Monthly profit & loss",
@@ -189,7 +191,7 @@
 
 <div class="tab-content" id="profitLossTabsContent">
     <div class="tab-pane fade show active" id="profit" role="tabpanel">
-        <p class="lead">Total profit (IRR): <strong><span class="@(Model.TotalProfit >= 0 ? "text-success" : "text-danger")">@(Model.TotalProfit > 0 ? "+" : "")@Model.TotalProfit.ToIrr()</span></strong></p>
+        <p class="lead">Total profit (Toman): <strong><span class="@(Model.TotalProfit >= 0 ? "text-success" : "text-danger")">@(Model.TotalProfit > 0 ? "+" : "")@Model.TotalProfit.ToToman()</span></strong></p>
         <section class="profit-chart-card" aria-labelledby="profit-chart-title">
             <div class="profit-chart-heading">
                 <div>
@@ -200,20 +202,20 @@
             </div>
             <div class="profit-chart-canvas">
                 <canvas id="profitLossChart"
-                        data-labels="@chartLabels"
-                        data-tick-labels="@chartTickLabels"
-                        data-values="@chartValues"
+                        data-labels='@Html.Raw(chartLabelsJson)'
+                        data-tick-labels='@Html.Raw(chartTickLabels)'
+                        data-values='@Html.Raw(chartValuesJson)'
                         data-current-index="@currentIndex"
                         data-interval-label="@chartIntervalLabel"
                         aria-label="Profit and loss by @Model.TrendInterval.ToString().ToLowerInvariant()"></canvas>
             </div>
                 <div class="profit-chart-legend"><span aria-hidden="true"></span> Net profit / loss</div>
         </section>
-        <table class="table table-striped"><thead><tr><th>Product</th><th>Bought (IRR)</th><th>Sold (IRR)</th><th>Profit / loss (IRR)</th><th>By percent</th></tr></thead><tbody>
+        <table class="table table-striped"><thead><tr><th>Product</th><th>Bought (Toman)</th><th>Sold (Toman)</th><th>Profit / loss (Toman)</th><th>By percent</th></tr></thead><tbody>
 @foreach (var row in Model.Rows)
 {
     var profitClass = row.Profit >= 0 ? "text-success" : "text-danger";
-    <tr><td>@row.ProductLabel</td><td>@row.Bought.ToIrr()</td><td>@row.Sold.ToIrr()</td><td class="@profitClass">@row.Profit.ToIrr()</td><td class="@profitClass">@row.ProfitPercent.ToString("F2")%</td></tr>
+    <tr><td>@row.ProductLabel</td><td>@row.Bought.ToToman()</td><td>@row.Sold.ToToman()</td><td class="@profitClass">@row.Profit.ToToman()</td><td class="@profitClass">@row.ProfitPercent.ToString("F2")%</td></tr>
 }
 </tbody></table>
     </div>
@@ -224,14 +226,14 @@
     }
 
     <div class="tab-pane fade" id="distribution" role="tabpanel">
-        <p class="lead">Total profit (IRR): <strong><span class="@(Model.TotalProfit >= 0 ? "text-success" : "text-danger")">@(Model.TotalProfit > 0 ? "+" : "")@Model.TotalProfit.ToGroupedDigits()</span></strong></p>
-        <table class="table table-striped"><thead><tr><th>Employee</th><th>Share %</th><th>Amount (IRR)</th></tr></thead><tbody>
+        <p class="lead">Total profit (Toman): <strong><span class="@(Model.TotalProfit >= 0 ? "text-success" : "text-danger")">@(Model.TotalProfit > 0 ? "+" : "")@Model.TotalProfit.ToToman()</span></strong></p>
+        <table class="table table-striped"><thead><tr><th>Employee</th><th>Share %</th><th>Amount (Toman)</th></tr></thead><tbody>
 @foreach (var row in Model.DistributionRows)
 {
     <tr class="@(row.IsLossPeriod ? "table-danger" : "")">
         <td>@row.EmployeeName</td>
         <td>@row.SharePercent%</td>
-        <td>@row.CalculatedAmount.ToGroupedDigits()</td>
+        <td>@row.CalculatedAmount.ToToman()</td>
     </tr>
 }
 </tbody></table>

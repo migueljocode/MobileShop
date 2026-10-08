@@ -54,6 +54,10 @@ node_modules/
 bower_components/
 *.min.js
 *.min.css
+# Chart.js is bundled locally for the Profit/Loss report and must ship with the app.
+!src/MobileShop.Web/wwwroot/lib/
+!src/MobileShop.Web/wwwroot/lib/chart.js/
+!src/MobileShop.Web/wwwroot/lib/chart.js/chart.umd.min.js
 **/PublishProfiles/*.pubxml.user
 *.pfx
 

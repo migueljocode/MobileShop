@@ -28,7 +28,10 @@ document.addEventListener('DOMContentLoaded', function () {
         var latestSearchId = 0;
 
         function clearSuggestedPrice() {
-            if (selectedSuggestedPrice && priceInput.value === selectedSuggestedPrice) priceInput.value = '';
+            if (selectedSuggestedPrice &&
+                window.parseMoneyInput(priceInput.value) === Number(selectedSuggestedPrice)) {
+                priceInput.value = '';
+            }
             selectedSuggestedPrice = '';
         }
 
@@ -131,7 +134,10 @@ document.addEventListener('DOMContentLoaded', function () {
             var price = option.suggestedPrice ?? option.SuggestedPrice;
             var suggested = price == null || !Number.isFinite(Number(price)) ? '' : String(price);
             selectedSuggestedPrice = suggested;
-            if (suggested) priceInput.value = suggested;
+            if (suggested) {
+                priceInput.value = suggested;
+                window.formatMoneyInput(priceInput);
+            }
         }
 
         document.addEventListener('product-created', function (event) {
