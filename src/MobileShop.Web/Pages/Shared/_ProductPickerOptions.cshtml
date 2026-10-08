@@ -1,11 +1,12 @@
 @model MobileShop.Models.ViewModels.Web.ProductPickerViewModel
 @* Shared searchable product-picker results for the transaction forms. *@
-<div class="form-text mt-1">Suggested price (IRR): <span data-suggested-price-display>—</span></div>
 <div id="product-results" class="list-group mt-1 d-none product-picker-results" role="listbox" data-product-results>
 @foreach (var product in Model.Products)
 {
-    var label = $"{product.Type}: {product.Name} — {product.Identifier}" +
-        (string.IsNullOrWhiteSpace(product.Color) ? string.Empty : $" — {product.Color}") +
+    var label = string.IsNullOrWhiteSpace(product.Name)
+        ? $"{product.Type}: {product.Identifier}"
+        : $"{product.Type}: {product.Name} — {product.Identifier}";
+    label += (string.IsNullOrWhiteSpace(product.Color) ? string.Empty : $" — {product.Color}") +
         (product.PartNumberLabel == "N/A" ? string.Empty : $" — {product.PartNumberLabel}");
     var price = product.SuggestedPrice?.ToString(CultureInfo.InvariantCulture) ?? string.Empty;
     <button type="button"

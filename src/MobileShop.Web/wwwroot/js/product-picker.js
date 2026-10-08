@@ -11,7 +11,6 @@ document.addEventListener('DOMContentLoaded', function () {
         var manufacturerContainer = picker.querySelector('[data-product-manufacturer-container]');
         var modelContainer = picker.querySelector('[data-product-model-container]');
         var priceInput = document.querySelector('[data-finished-price-input]');
-        var suggestedDisplay = picker.querySelector('[data-suggested-price-display]');
         var searchHandler = picker.getAttribute('data-search-handler');
         if (!searchInput || !valueInput || !results || !priceInput || !searchHandler) return;
 
@@ -28,25 +27,9 @@ document.addEventListener('DOMContentLoaded', function () {
         var selectedSuggestedPrice = '';
         var latestSearchId = 0;
 
-        function filtersAreReady() {
-            if (!typeFilter || !typeFilter.value) return false;
-            if (typeFilter.value.trim().toLowerCase() === 'apple id') return true;
-            return Boolean(manufacturerFilter && manufacturerFilter.value
-                && modelFilter && modelFilter.value);
-        }
-
-        function optionMatchesFilters(option) {
-            if (!filtersAreReady()) return false;
-            if (option.type !== typeFilter.value) return false;
-            if (typeFilter.value.trim().toLowerCase() === 'apple id') return true;
-            return option.manufacturerId === manufacturerFilter.value
-                && option.modelId === modelFilter.value;
-        }
-
         function clearSuggestedPrice() {
             if (selectedSuggestedPrice && priceInput.value === selectedSuggestedPrice) priceInput.value = '';
             selectedSuggestedPrice = '';
-            if (suggestedDisplay) suggestedDisplay.textContent = '—';
         }
 
         function filteredCatalog() {
@@ -99,16 +82,14 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         function updateSearchAvailability() {
-            if (!typeFilter) return;
-            var isAppleId = typeFilter.value.trim().toLowerCase() === 'apple id';
+            var isAppleId = typeFilter && typeFilter.value.trim().toLowerCase() === 'apple id';
             if (manufacturerContainer) manufacturerContainer.classList.toggle('d-none', isAppleId);
             if (modelContainer) modelContainer.classList.toggle('d-none', isAppleId);
 
-            var filtersReady = filtersAreReady();
-            searchInput.disabled = !filtersReady;
-            searchInput.placeholder = filtersReady
-                ? 'Search by name, identifier, color or part number'
-                : isAppleId ? 'Search Apple IDs by name or email' : 'Select type, manufacturer and model first';
+            searchInput.disabled = false;
+            searchInput.placeholder = isAppleId
+                ? 'Search Apple IDs by name or email'
+                : 'Search by name, identifier, color or part number';
         }
 
         function clearSelection() {
@@ -128,14 +109,18 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         }
 
-        function formatPrice(value) {
-            return value ? Number(value).toLocaleString('en-US') + ' IRR' : '—';
-        }
-
         function setSelection(option) {
-            if (!optionMatchesFilters(option)) {
-                clearSelection();
-                return;
+            if (typeFilter) {
+                typeFilter.value = option.type || '';
+                if (manufacturerFilter) {
+                    populateManufacturers();
+                    manufacturerFilter.value = option.manufacturerId || '';
+                }
+                if (modelFilter) {
+                    populateModels();
+                    modelFilter.value = option.modelId || '';
+                }
+                updateSearchAvailability();
             }
             valueInput.value = String(option.productId);
             searchInput.value = option.label;
@@ -146,7 +131,6 @@ document.addEventListener('DOMContentLoaded', function () {
             var price = option.suggestedPrice ?? option.SuggestedPrice;
             var suggested = price == null || !Number.isFinite(Number(price)) ? '' : String(price);
             selectedSuggestedPrice = suggested;
-            if (suggestedDisplay) suggestedDisplay.textContent = formatPrice(suggested);
             if (suggested) priceInput.value = suggested;
         }
 
@@ -166,17 +150,12 @@ document.addEventListener('DOMContentLoaded', function () {
                 button.addEventListener('click', function () { setSelection(option); });
                 results.appendChild(button);
             });
-            results.classList.toggle('d-none', options.length === 0);
-            searchInput.setAttribute('aria-expanded', options.length > 0 ? 'true' : 'false');
+            var showResults = options.length > 0 && document.activeElement === searchInput;
+            results.classList.toggle('d-none', !showResults);
+            searchInput.setAttribute('aria-expanded', showResults ? 'true' : 'false');
         }
 
         async function search(query) {
-            if (!filtersAreReady()) {
-                results.replaceChildren();
-                results.classList.add('d-none');
-                searchInput.setAttribute('aria-expanded', 'false');
-                return;
-            }
             var searchId = ++latestSearchId;
             var selectedFilters = {
                 type: typeFilter.value,
@@ -198,7 +177,7 @@ document.addEventListener('DOMContentLoaded', function () {
             if (!response.ok) throw new Error('Search failed.');
 
             var products = await response.json();
-            if (searchId !== latestSearchId || !filtersAreReady()
+            if (searchId !== latestSearchId
                 || selectedFilters.type !== typeFilter.value
                 || selectedFilters.manufacturerId !== (manufacturerFilter ? manufacturerFilter.value : '')
                 || selectedFilters.modelId !== (modelFilter ? modelFilter.value : '')) return;
@@ -215,7 +194,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     manufacturerId: String(product.manufacturerId ?? product.ManufacturerId ?? ''),
                     modelId: String(product.modelId ?? product.ModelId ?? '')
                 };
-            }).filter(optionMatchesFilters));
+            }));
         }
 
         searchInput.addEventListener('input', function () {
@@ -231,7 +210,21 @@ document.addEventListener('DOMContentLoaded', function () {
         });
 
         searchInput.addEventListener('focus', function () {
-            if (!searchInput.value.trim()) search('').catch(function () { });
+            search(searchInput.value.trim()).catch(function () {
+                results.replaceChildren();
+                results.classList.add('d-none');
+            });
+        });
+
+        searchInput.addEventListener('blur', function () {
+            setTimeout(function () {
+                results.classList.add('d-none');
+                searchInput.setAttribute('aria-expanded', 'false');
+            }, 150);
+        });
+
+        results.addEventListener('mousedown', function (event) {
+            event.preventDefault();
         });
 
         if (typeFilter && manufacturerFilter && modelFilter) {

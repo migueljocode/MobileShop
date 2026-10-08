@@ -2,7 +2,7 @@
 @model MobileShop.Web.Pages.Products.CreateTabletModel
 @{ ViewData["Title"] = "Create tablet"; }
 <h1>Create tablet</h1>
-<form method="post" class="row g-3 col-lg-8">
+<form id="productCreateForm" method="post" class="row g-3 col-lg-8 mx-auto">
     <partial name="/Pages/Shared/_ProductSellerPicker.cshtml" />
 <div asp-validation-summary="All" class="text-danger"></div>
 <div class="col-md-6">
@@ -29,8 +29,8 @@
 <div class="col-12"><div class="form-check"><input asp-for="Input.HasGuarantee" class="form-check-input" data-guarantee-toggle /><label asp-for="Input.HasGuarantee" class="form-check-label">Has guarantee</label></div></div>
 <div class="col-12" data-guarantee-block style="display:none"><label asp-for="Input.GuaranteeCorporation">Guarantee corporation</label><select asp-for="Input.GuaranteeCorporation" asp-items="@(new SelectList(Model.Corporations))" class="form-select"><option value="">-- Select corporation --</option></select><label asp-for="Input.GuaranteeExpiry">Guarantee expiry</label><input asp-for="Input.GuaranteeExpiry" class="form-control" type="date" /><label asp-for="Input.GuaranteeNotes">Guarantee notes</label><input asp-for="Input.GuaranteeNotes" class="form-control" /></div>
 <div class="col-12"><label asp-for="Input.Notes">Device notes</label><textarea asp-for="Input.Notes" class="form-control" rows="3"></textarea></div>
-<div class="col-12"><button class="btn btn-primary" type="submit">Save tablet</button><a asp-page="/Products/Index" class="btn btn-outline-secondary ms-2">Back to products</a></div>
 </form>
+<div class="d-flex flex-wrap gap-2 mt-3"><button class="btn btn-primary" type="submit" form="productCreateForm">Save tablet</button><a asp-page="/Products/Index" class="btn btn-outline-secondary">Back to products</a></div>
 @if (!string.IsNullOrWhiteSpace(Model.Message)){<div class="alert alert-danger mt-3">@Model.Message</div>}
 
 <div class="modal fade" id="addManufacturerModal" tabindex="-1" aria-hidden="true">

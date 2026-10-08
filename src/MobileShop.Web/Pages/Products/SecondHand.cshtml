@@ -6,10 +6,6 @@
 
 <h1>Second-hand items</h1>
 
-<div class="mb-3">
-    <a asp-page="/Products/Index" class="btn btn-outline-secondary">Back to products</a>
-</div>
-
 <p class="text-muted">Total items: <strong>@Model.Products.Count</strong></p>
 
 @if (Model.Products.Count == 0)
@@ -47,3 +43,5 @@ else
         </tbody>
     </table>
 }
+
+<a asp-page="/Products/Index" class="btn btn-outline-secondary mt-3">Back to products</a>

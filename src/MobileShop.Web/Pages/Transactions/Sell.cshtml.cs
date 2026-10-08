@@ -28,7 +28,7 @@ public class SellModel(
             return Page();
         }
         ModelState.Clear();
-        Input = new();
+        Input = new() { Date = DateTime.Now };
         if (saveAndAddAnother)
         {
             SuccessMessage = "Sale recorded successfully. Ready for the next sale.";

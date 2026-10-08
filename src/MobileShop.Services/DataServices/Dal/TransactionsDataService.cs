@@ -195,7 +195,7 @@ public class TransactionsDataService(
                 appleId.Id,
                 appleId.ProductId,
                 "Apple ID",
-                appleId.ProductNavigation.ModelNavigation.ManufacturerNavigation.Name + " " + appleId.ProductNavigation.ModelNavigation.Name,
+                string.Empty,
                 appleId.Email,
                 null,
                 appleId.ProductNavigation.Transactions.Any(t => t.Direction == TransactionDirection.Sell),

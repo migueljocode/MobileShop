@@ -15,6 +15,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         var modalInstance = bootstrap.Modal.getOrCreateInstance(modal);
         var timer;
+        var isFocused = false;
 
         function setSelection(id, label) {
             valueInput.value = String(id);
@@ -38,8 +39,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 });
                 results.appendChild(button);
             });
-            results.classList.toggle('d-none', options.length === 0);
-            searchInput.setAttribute('aria-expanded', options.length > 0 ? 'true' : 'false');
+            var isVisible = isFocused && options.length > 0;
+            results.classList.toggle('d-none', !isVisible);
+            searchInput.setAttribute('aria-expanded', isVisible ? 'true' : 'false');
         }
 
         async function search(query) {
@@ -59,13 +61,29 @@ document.addEventListener('DOMContentLoaded', function () {
                 search(searchInput.value.trim()).catch(function () {
                     results.replaceChildren();
                     results.classList.add('d-none');
+                    searchInput.setAttribute('aria-expanded', 'false');
                 });
             }, 200);
         });
 
         searchInput.addEventListener('focus', function () {
-            if (!searchInput.value.trim()) {
-                search('').catch(function () { });
+            isFocused = true;
+            search(searchInput.value.trim()).catch(function () {
+                results.replaceChildren();
+                results.classList.add('d-none');
+                searchInput.setAttribute('aria-expanded', 'false');
+            });
+        });
+
+        searchInput.addEventListener('blur', function () {
+            isFocused = false;
+            results.classList.add('d-none');
+            searchInput.setAttribute('aria-expanded', 'false');
+        });
+
+        results.addEventListener('mousedown', function (event) {
+            if (event.target.closest('[data-person-id]')) {
+                event.preventDefault();
             }
         });
 
