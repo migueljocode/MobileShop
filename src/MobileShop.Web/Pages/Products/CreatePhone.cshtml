@@ -33,7 +33,7 @@
     </div>
 
     <div class="col-md-3">
-        <label asp-for="Input.Price" class="form-label">Paid price (IRR)</label>
+        <label asp-for="Input.Price" class="form-label">Paid price (Toman)</label>
         <input asp-for="Input.Price" class="form-control" data-price inputmode="numeric" step="1" min="0" max="@MobileShop.Models.Settings.MoneyLimits.MaxRials" />
         <span asp-validation-for="Input.Price" class="text-danger"></span>
     </div>
@@ -48,16 +48,16 @@
     </div>
 
     <div class="col-md-3">
-        <label asp-for="Input.ProfitAmount" class="form-label">Profit amount (IRR)</label>
+        <label asp-for="Input.ProfitAmount" class="form-label">Profit amount (Toman)</label>
         <div class="input-group">
-            <span class="input-group-text">IRR</span>
+            <span class="input-group-text">Toman</span>
             <input asp-for="Input.ProfitAmount" class="form-control" data-amount inputmode="numeric" step="1" min="0" max="@MobileShop.Models.Settings.MoneyLimits.MaxRials" />
         </div>
         <span asp-validation-for="Input.ProfitAmount" class="text-danger"></span>
     </div>
 
     <div class="col-md-3">
-        <label class="form-label">Finished price (IRR)</label>
+        <label class="form-label">Finished price (Toman)</label>
         <input type="text" class="form-control" data-finished-price readonly aria-readonly="true"
                tabindex="-1" />
         <span class="form-text text-muted">Server-stored price (paid + profit).</span>

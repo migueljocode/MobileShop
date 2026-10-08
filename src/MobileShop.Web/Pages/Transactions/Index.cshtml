@@ -88,7 +88,7 @@
                         </th>
                         <th scope="col" aria-sort="@(Model.Sort == "price" ? (Model.Order == "asc" ? "ascending" : "descending") : "none")">
                             <a href="@Url.Page("/Transactions/Index", new { direction = Model.Direction, customerId = Model.CustomerId, dateRange = Model.DateRange, take = Model.Take, sort = "price", order = Model.Sort == "price" && Model.Order == "desc" ? "asc" : "desc" })">
-                                Price (IRR)
+                                Price (Toman)
                                 @if (Model.Sort == "price")
                                 {
                                     <span aria-hidden="true">@(Model.Order == "asc" ? "↑" : "↓")</span>

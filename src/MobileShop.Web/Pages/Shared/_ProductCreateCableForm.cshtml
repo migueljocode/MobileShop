@@ -10,7 +10,7 @@
     <div class="col-md-3"><label class="form-label">Connector 2</label><select name="input.Connector2" class="form-select">@foreach (var option in Html.GetEnumSelectList<MobileShop.Models.Enums.CableConnector>()) { <option value="@option.Value">@option.Text</option> }</select></div>
     <div class="col-md-3"><label class="form-label">Length</label><input name="input.Length" class="form-control" type="number" step="0.01" min="0" value="@Model.Length" /></div>
     <div class="col-md-3"><label class="form-label">Count</label><input name="input.Count" class="form-control" type="number" min="1" value="@Model.Count" /></div>
-    <div class="col-md-4"><label class="form-label">Paid price (IRR)</label><input name="input.Price" class="form-control" inputmode="numeric" min="0" max="@MobileShop.Models.Settings.MoneyLimits.MaxRials" value="@Model.Price" /></div>
+    <div class="col-md-4"><label class="form-label">Paid price (Toman)</label><input name="input.Price" class="form-control" inputmode="numeric" min="0" max="@MobileShop.Models.Settings.MoneyLimits.MaxRials" value="@Model.Price" /></div>
     <div class="col-md-4"><label class="form-label">Profit %</label><input name="input.ProfitPercent" class="form-control" type="number" step="0.01" min="0" value="@Model.ProfitPercent" /></div>
-    <div class="col-md-4"><label class="form-label">Profit amount (IRR)</label><input name="input.ProfitAmount" class="form-control" inputmode="numeric" min="0" max="@MobileShop.Models.Settings.MoneyLimits.MaxRials" value="@Model.ProfitAmount" /></div>
+    <div class="col-md-4"><label class="form-label">Profit amount (Toman)</label><input name="input.ProfitAmount" class="form-control" inputmode="numeric" min="0" max="@MobileShop.Models.Settings.MoneyLimits.MaxRials" value="@Model.ProfitAmount" /></div>
 </div>

@@ -331,7 +331,7 @@ public sealed class QuestPdfGenerator(IOptions<PdfSettings> options) : IPdfGener
         if (!string.IsNullOrWhiteSpace(p.ProductInformation))
             column.Item().PaddingTop(8).Text(p.ProductInformation);
 
-        column.Item().Text($"Price: {p.FinishedPrice.ToGroupedDigits()} IRR");
+        column.Item().Text($"Price: {p.FinishedPrice.ToGroupedDigits()} Toman");
         column.Item().Text($"Count: {p.ProductCount}");
 
         if (!string.IsNullOrWhiteSpace(p.OwnershipStatus))

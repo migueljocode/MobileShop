@@ -62,7 +62,7 @@ else
                     <span class="badge @(transaction.Direction == TransactionDirection.Buy ? "text-bg-primary" : "text-bg-dark")">
                         @transaction.Direction
                     </span>
-                        <p class="card-text mt-2 mb-0">Finished price (IRR): @transaction.FinishedPrice.ToIrr()</p>
+                        <p class="card-text mt-2 mb-0">Finished price (Toman): @transaction.FinishedPrice.ToIrr()</p>
                         <p class="card-text mb-0">@transaction.PartyLabel</p>
                     </div>
                 </div>

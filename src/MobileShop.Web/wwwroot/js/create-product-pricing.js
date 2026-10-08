@@ -8,7 +8,7 @@
 // Hooks:
 //   [data-price]           paid price input (binds to Input.Price)
 //   [data-percent]         profit % input (binds to Input.ProfitPercent)
-//   [data-amount]          profit IRR input (binds to Input.ProfitAmount)
+//   [data-amount]          profit Toman input (binds to Input.ProfitAmount)
 //   [data-finished-price]  read-only finished price display element (not posted)
 document.addEventListener('DOMContentLoaded', function () {
     const priceEl = document.querySelector('[data-price]');
@@ -18,8 +18,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
     if (!priceEl || !percentEl || !amountEl) return;
 
+    function parseMoney(input) {
+        return window.parseMoneyInput(input.value);
+    }
+
     function updateFromPercent() {
-        const price = parseFloat(priceEl.value);
+        const price = parseMoney(priceEl);
         const percent = parseFloat(percentEl.value);
         if (isNaN(price) || price === 0 || isNaN(percent)) {
             amountEl.value = '';
@@ -27,12 +31,13 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
         amountEl.value = Math.floor(price * percent / 100).toString();
+        window.formatMoneyInput(amountEl);
         updateFinished();
     }
 
     function updateFromAmount() {
-        const price = parseFloat(priceEl.value);
-        const amount = parseFloat(amountEl.value);
+        const price = parseMoney(priceEl);
+        const amount = parseMoney(amountEl);
         if (isNaN(price) || price === 0 || isNaN(amount)) {
             percentEl.value = '';
             updateFinished();
@@ -46,8 +51,8 @@ document.addEventListener('DOMContentLoaded', function () {
     function updateFinished() {
         if (!finishedEl) return;
 
-        const price = parseFloat(priceEl.value);
-        const amount = parseFloat(amountEl.value);
+        const price = parseMoney(priceEl);
+        const amount = parseMoney(amountEl);
         const percent = parseFloat(percentEl.value);
 
         let finished;
@@ -65,6 +70,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const text = Math.floor(finished).toString();
         if ('value' in finishedEl) {
             finishedEl.value = text;
+            window.formatMoneyInput(finishedEl);
         } else {
             finishedEl.textContent = text;
         }
@@ -73,7 +79,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // When paid price changes, re-link percent/amount then refresh finished (same live feel as profit fields).
     function onPaidPriceInput() {
         const percent = parseFloat(percentEl.value);
-        const amount = parseFloat(amountEl.value);
+        const amount = parseMoney(amountEl);
         if (!isNaN(percent)) {
             updateFromPercent();
         } else if (!isNaN(amount)) {
