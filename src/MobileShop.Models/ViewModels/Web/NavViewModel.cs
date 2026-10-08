@@ -1,4 +1,4 @@
-namespace MobileShop.Web.ViewModels;
+namespace MobileShop.Models.ViewModels.Web;
 
 public sealed class NavViewModel
 {

@@ -1,5 +1,3 @@
-using MobileShop.Web.ViewModels;
-
 namespace MobileShop.Web.ViewComponents;
 
 public sealed class NavigationMenuViewComponent : ViewComponent

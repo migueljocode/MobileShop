@@ -13,6 +13,7 @@ global using QuestPDF.Infrastructure;
 global using static QuestPDF.Fluent.Document;
 global using System.Linq.Expressions;
 global using MobileShop.Models;
+global using MobileShop.Models.Settings;
 global using MobileShop.Models.Entities.Base;
 global using MobileShop.Models.Entities;
 global using MobileShop.Dal.EfStructures;

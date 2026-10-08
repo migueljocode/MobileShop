@@ -1,4 +1,4 @@
-namespace MobileShop.Models;
+namespace MobileShop.Models.Settings;
 
 /// <summary>Central limit for whole-IRR money values accepted by the application.</summary>
 public static class MoneyLimits

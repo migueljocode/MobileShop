@@ -277,14 +277,14 @@ public class SampleDataSeedTests : IDisposable
         Assert.All(context.Products, product =>
         {
             Assert.True(product.Price >= 1_000_000);
-            Assert.True(product.Price <= MobileShop.Models.MoneyLimits.MaxRials);
+            Assert.True(product.Price <= MobileShop.Models.Settings.MoneyLimits.MaxRials);
             Assert.Equal(0, product.Price % 10);
         });
 
         Assert.All(context.Transactions, transaction =>
         {
             Assert.True(transaction.FinishedPrice >= 1_000_000);
-            Assert.True(transaction.FinishedPrice <= MobileShop.Models.MoneyLimits.MaxRials);
+            Assert.True(transaction.FinishedPrice <= MobileShop.Models.Settings.MoneyLimits.MaxRials);
             Assert.Equal(0, transaction.FinishedPrice % 10);
         });
     }

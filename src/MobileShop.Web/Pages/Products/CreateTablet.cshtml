@@ -20,9 +20,9 @@
     </div>
 </div>
 
-<div class="col-md-3"><label asp-for="Input.Price" class="form-label">Paid price (IRR)</label><input asp-for="Input.Price" class="form-control" data-price inputmode="numeric" step="1" min="0" max="@MobileShop.Models.MoneyLimits.MaxRials" /></div>
+<div class="col-md-3"><label asp-for="Input.Price" class="form-label">Paid price (IRR)</label><input asp-for="Input.Price" class="form-control" data-price inputmode="numeric" step="1" min="0" max="@MobileShop.Models.Settings.MoneyLimits.MaxRials" /></div>
 <div class="col-md-3"><label asp-for="Input.ProfitPercent" class="form-label">Profit %</label><input asp-for="Input.ProfitPercent" class="form-control" data-percent /></div>
-<div class="col-md-3"><label asp-for="Input.ProfitAmount" class="form-label">Profit amount (IRR)</label><input asp-for="Input.ProfitAmount" class="form-control" data-amount inputmode="numeric" step="1" min="0" max="@MobileShop.Models.MoneyLimits.MaxRials" /></div>
+<div class="col-md-3"><label asp-for="Input.ProfitAmount" class="form-label">Profit amount (IRR)</label><input asp-for="Input.ProfitAmount" class="form-control" data-amount inputmode="numeric" step="1" min="0" max="@MobileShop.Models.Settings.MoneyLimits.MaxRials" /></div>
 <div class="col-md-3"><label class="form-label">Finished price (IRR)</label><input class="form-control" data-finished-price readonly /></div>
 <div class="col-12"><div class="form-check"><input asp-for="Input.IsSecondHand" class="form-check-input" data-second-hand-toggle /><label asp-for="Input.IsSecondHand" class="form-check-label">Second-hand item</label></div></div>
 <div class="col-12" data-second-hand-block style="display:none"><label asp-for="Input.TestPeriodDays">Second-hand test days</label><input asp-for="Input.TestPeriodDays" class="form-control" /><label asp-for="Input.SecondHandNotes">Second-hand notes</label><input asp-for="Input.SecondHandNotes" class="form-control" /></div>

@@ -1,7 +1,5 @@
 namespace MobileShop.Web.Extensions;
 
-using Microsoft.AspNetCore.Authentication.Cookies;
-
 /// <summary>
 /// Configures the MobileShop Razor Pages host.
 /// </summary>

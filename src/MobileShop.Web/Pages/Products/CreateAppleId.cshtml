@@ -12,7 +12,7 @@
 
     <div class="col-md-3">
         <label asp-for="Input.Price" class="form-label">Paid price (IRR)</label>
-        <input asp-for="Input.Price" class="form-control" data-price inputmode="numeric" step="1" min="0" max="@MobileShop.Models.MoneyLimits.MaxRials" />
+        <input asp-for="Input.Price" class="form-control" data-price inputmode="numeric" step="1" min="0" max="@MobileShop.Models.Settings.MoneyLimits.MaxRials" />
         <span asp-validation-for="Input.Price" class="text-danger"></span>
     </div>
 
@@ -29,7 +29,7 @@
         <label asp-for="Input.ProfitAmount" class="form-label">Profit amount (IRR)</label>
         <div class="input-group">
             <span class="input-group-text">IRR</span>
-            <input asp-for="Input.ProfitAmount" class="form-control" data-amount inputmode="numeric" step="1" min="0" max="@MobileShop.Models.MoneyLimits.MaxRials" />
+            <input asp-for="Input.ProfitAmount" class="form-control" data-amount inputmode="numeric" step="1" min="0" max="@MobileShop.Models.Settings.MoneyLimits.MaxRials" />
         </div>
         <span asp-validation-for="Input.ProfitAmount" class="text-danger"></span>
     </div>

@@ -4,6 +4,7 @@ global using MobileShop.Models.Enums;
 global using MobileShop.Models.ViewModels.Web;
 global using MobileShop.Models.ViewModels.Web.BindModels;
 global using MobileShop.Models.Entities;
+global using MobileShop.Models.Settings;
 
 global using Microsoft.EntityFrameworkCore;
 global using Microsoft.EntityFrameworkCore.Metadata.Builders;

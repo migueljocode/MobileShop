@@ -23,7 +23,7 @@
         ViewData["PersonPickerRole"] = "customer";
     }
     <partial name="/Pages/Shared/_PersonPicker.cshtml" model="Model.Customers" view-data="ViewData" />
-    <label asp-for="Input.Price" class="form-label mt-2"></label><input asp-for="Input.Price" class="form-control" data-finished-price-input inputmode="numeric" step="1" min="0" max="@MobileShop.Models.MoneyLimits.MaxRials" /><span asp-validation-for="Input.Price" class="text-danger"></span>
+    <label asp-for="Input.Price" class="form-label mt-2"></label><input asp-for="Input.Price" class="form-control" data-finished-price-input inputmode="numeric" step="1" min="0" max="@MobileShop.Models.Settings.MoneyLimits.MaxRials" /><span asp-validation-for="Input.Price" class="text-danger"></span>
     <label asp-for="Input.Date" class="form-label mt-2"></label><input asp-for="Input.Date" type="datetime-local" asp-format="{0:yyyy-MM-ddTHH:mm:ss}" step="1" class="form-control" />
     <button type="submit" class="btn btn-primary mt-3">Record sell</button>
 </form>

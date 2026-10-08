@@ -1,9 +1,5 @@
 namespace MobileShop.Web.Pages.Account;
 
-using System.Security.Claims;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
-
 public class LoginModel(IAccountDataService dataService) : PageModel
 {
     [BindProperty]
