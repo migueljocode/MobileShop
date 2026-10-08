@@ -36,6 +36,8 @@ public class CreateAppleIdModelTests : RepoTestBase
             new BaseRepo<PartNumber>(Context),
             new BaseRepo<Product>(Context),
             new BaseRepo<StorageCapacity>(Context),
+            new BaseRepo<Cpu>(Context),
+            new BaseRepo<Gpu>(Context),
             NullLogger<ProductsDataService>.Instance);
 
         // the AppleId category and the Apple manufacturer come from the catalog seed data in production

@@ -37,7 +37,8 @@ public class MigrationChainTests : IDisposable
                 "20261001161450_AddPartNumber",
                 "20261002060000_UseIntegerRialMoney",
                 "20261004090000_WidenMoneyToLong",
-                "20261006215821_AddPowerBankPortsAndPhoneSimSupport"
+                "20261006215821_AddPowerBankPortsAndPhoneSimSupport",
+                "20261008023227_AddCpuGpuLookups"
             },
             migrations);
     }
@@ -94,6 +95,29 @@ public class MigrationChainTests : IDisposable
 
         Assert.Contains(constraints, sql => sql.Contains("CK_Products_Price_NonNegative", StringComparison.Ordinal));
         Assert.Contains(constraints, sql => sql.Contains("CK_Transactions_FinishedPrice_NonNegative", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public void Cpu_and_gpu_names_are_preserved_when_laptop_catalog_is_migrated()
+    {
+        _context.GetService<IMigrator>().Migrate("20261006215821_AddPowerBankPortsAndPhoneSimSupport");
+        _context.Database.ExecuteSqlRaw("""
+            INSERT INTO Manufacturers (Id, Name, IsDeleted) VALUES (1, 'Test', 0);
+            INSERT INTO Categories (Id, Name, IsDeleted) VALUES (1, 'Laptop', 0);
+            INSERT INTO Models (Id, ManufacturerId, CategoryId, Name, IsDeleted) VALUES (1, 1, 1, 'Test Laptop', 0);
+            INSERT INTO Products (Id, Price, ModelId, Barcode, IsDeleted) VALUES (1, 100, 1, 'laptop001', 0);
+            INSERT INTO Laptops (Id, Cpu, Gpu, DisplaySize, Notes, ProductId, IsDeleted)
+                VALUES (1, 'Core i7', 'RTX 4070', 16, NULL, 1, 0);
+            """);
+
+        _context.Database.Migrate();
+
+        var laptop = _context.Laptops
+            .Include(item => item.CpuNavigation)
+            .Include(item => item.GpuNavigation)
+            .Single();
+        Assert.Equal("Core i7", laptop.CpuNavigation.Name);
+        Assert.Equal("RTX 4070", laptop.GpuNavigation!.Name);
     }
 
     public void Dispose()

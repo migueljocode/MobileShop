@@ -31,6 +31,8 @@ public class CreatePhoneModelTests : RepoTestBase
             new BaseRepo<PartNumber>(Context),
             new BaseRepo<Product>(Context),
             new BaseRepo<StorageCapacity>(Context),
+            new BaseRepo<Cpu>(Context),
+            new BaseRepo<Gpu>(Context),
             NullLogger<ProductsDataService>.Instance);
 
         // seed catalog data that would exist in production seed

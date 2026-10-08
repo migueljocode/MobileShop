@@ -19,7 +19,8 @@ public class CreateAccessoryModelTests : RepoTestBase
         new BaseRepo<Customer>(Context), new BaseRepo<Person>(Context), new BaseRepo<Manufacturer>(Context),
         new BaseRepo<Model>(Context), new BaseRepo<Category>(Context), new BaseRepo<MobileShop.Models.Entities.Color>(Context),
         new BaseRepo<Guarantee>(Context), new BaseRepo<Transaction>(Context), new BaseRepo<PartNumber>(Context),
-        new BaseRepo<Product>(Context), new BaseRepo<StorageCapacity>(Context), NullLogger<ProductsDataService>.Instance);
+        new BaseRepo<Product>(Context), new BaseRepo<StorageCapacity>(Context), new BaseRepo<Cpu>(Context),
+        new BaseRepo<Gpu>(Context), NullLogger<ProductsDataService>.Instance);
 
     private (Manufacturer manufacturer, Model model) Seed(string categoryName)
     {

@@ -35,6 +35,8 @@ public interface IProductsDataService
 
     /// <summary>Gets the storage-capacity dropdown options.</summary>
     Task<IReadOnlyList<DropdownOptionViewModel>> GetStorageCapacitiesAsync();
+    Task<IReadOnlyList<DropdownOptionViewModel>> GetCpusAsync();
+    Task<IReadOnlyList<DropdownOptionViewModel>> GetGpusAsync();
 
     /// <summary>Gets all distinct guarantee corporation names.</summary>
     Task<IReadOnlyList<string>> GetGuaranteeCorporationsAsync();
@@ -55,6 +57,8 @@ public interface IProductsDataService
     /// <summary>Creates a storage-capacity option and returns its dropdown choice.</summary>
     /// <param name="gb">The capacity in gigabytes.</param>
     Task<DropdownCreateResult> CreateStorageCapacityAsync(int gb);
+    Task<DropdownCreateResult> CreateCpuAsync(string name);
+    Task<DropdownCreateResult> CreateGpuAsync(string name);
 
     /// <summary>Gets the part-number dropdown options for a model.</summary>
     /// <param name="modelId">

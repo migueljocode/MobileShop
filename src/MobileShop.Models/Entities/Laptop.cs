@@ -6,13 +6,11 @@ public class Laptop : BaseEntity
     public int ProductId { get; set; }
     public virtual Product ProductNavigation { get; set; } = null!;
 
-    [Required(ErrorMessage = "{0} is required.")]
-    [StringLength(100, ErrorMessage = "{0} cannot exceed {1} characters.")]
-    public string Cpu { get; set; } = string.Empty;
+    public int CpuId { get; set; }
+    public virtual Cpu CpuNavigation { get; set; } = null!;
 
-    [Required(ErrorMessage = "{0} is required.")]
-    [StringLength(100, ErrorMessage = "{0} cannot exceed {1} characters.")]
-    public string Gpu { get; set; } = string.Empty;
+    public int? GpuId { get; set; }
+    public virtual Gpu? GpuNavigation { get; set; }
 
     /// <summary>Screen size in inches.</summary>
     [Range(0, double.MaxValue, ErrorMessage = "{0} cannot be negative.")]

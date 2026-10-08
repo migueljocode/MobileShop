@@ -19,7 +19,9 @@ public sealed class CreateLaptopInputModel
     [DataType(DataType.Date)] public DateTime? GuaranteeExpiry { get; set; }
     [StringLength(500)] public string? GuaranteeNotes { get; set; }
     [StringLength(500)] public string? Notes { get; set; }
-    [Required, StringLength(100)] public string Cpu { get; set; } = string.Empty;
-    [StringLength(100)] public string? Gpu { get; set; }
+    [Range(1, int.MaxValue, ErrorMessage = "Select a CPU.")]
+    public int CpuId { get; set; }
+    [Range(1, int.MaxValue, ErrorMessage = "Select a GPU.")]
+    public int? GpuId { get; set; }
     [Range(0.1, double.MaxValue, ErrorMessage = "Display size must be greater than 0.")] public decimal DisplaySize { get; set; }
 }

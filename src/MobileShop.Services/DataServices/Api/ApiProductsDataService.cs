@@ -30,6 +30,12 @@ public class ApiProductsDataService : IProductsDataService
     public Task<IReadOnlyList<DropdownOptionViewModel>> GetStorageCapacitiesAsync()
         => throw new NotImplementedException("ApiProductsDataService is not implemented yet.");
 
+    public Task<IReadOnlyList<DropdownOptionViewModel>> GetCpusAsync()
+        => throw new NotImplementedException("ApiProductsDataService is not implemented yet.");
+
+    public Task<IReadOnlyList<DropdownOptionViewModel>> GetGpusAsync()
+        => throw new NotImplementedException("ApiProductsDataService is not implemented yet.");
+
     /// <inheritdoc />
     public Task<IReadOnlyList<string>> GetGuaranteeCorporationsAsync()
         => throw new NotImplementedException("ApiProductsDataService is not implemented yet.");
@@ -48,6 +54,12 @@ public class ApiProductsDataService : IProductsDataService
 
     /// <inheritdoc />
     public Task<DropdownCreateResult> CreateStorageCapacityAsync(int gb)
+        => throw new NotImplementedException("ApiProductsDataService is not implemented yet.");
+
+    public Task<DropdownCreateResult> CreateCpuAsync(string name)
+        => throw new NotImplementedException("ApiProductsDataService is not implemented yet.");
+
+    public Task<DropdownCreateResult> CreateGpuAsync(string name)
         => throw new NotImplementedException("ApiProductsDataService is not implemented yet.");
 
     /// <inheritdoc />

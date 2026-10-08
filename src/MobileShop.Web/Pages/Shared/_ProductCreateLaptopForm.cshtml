@@ -2,12 +2,14 @@
 @{
     var manufacturers = (IReadOnlyList<MobileShop.Models.ViewModels.Web.DropdownOptionViewModel>)ViewData["Manufacturers"]!;
     var models = (IReadOnlyList<MobileShop.Models.ViewModels.Web.DropdownOptionViewModel>)ViewData["Models"]!;
+    var cpus = ViewData["Cpus"] as IReadOnlyList<MobileShop.Models.ViewModels.Web.DropdownOptionViewModel> ?? [];
+    var gpus = ViewData["Gpus"] as IReadOnlyList<MobileShop.Models.ViewModels.Web.DropdownOptionViewModel> ?? [];
     var corporations = (IReadOnlyList<string>)ViewData["Corporations"]!;
 }
 <div class="row g-3" data-create-product-type="laptop">
     <div class="col-md-6"><label class="form-label">Manufacturer</label><select name="input.ManufacturerId" class="form-select" data-device-manufacturer><option value="">-- Select manufacturer --</option>@foreach (var option in manufacturers) { <option value="@option.Id">@option.Name</option> }</select></div>
     <div class="col-md-6"><label class="form-label">Model</label><select name="input.ModelId" class="form-select" data-device-model><option value="">-- Select model --</option>@foreach (var option in models) { <option value="@option.Id">@option.Name</option> }</select></div>
-    <div class="col-md-4"><label class="form-label">CPU</label><input name="input.Cpu" class="form-control" maxlength="100" value="@Model.Cpu" /></div><div class="col-md-4"><label class="form-label">GPU</label><input name="input.Gpu" class="form-control" maxlength="100" value="@Model.Gpu" /></div><div class="col-md-4"><label class="form-label">Display size (inches)</label><input name="input.DisplaySize" class="form-control" type="number" step="0.1" min="0" value="@Model.DisplaySize" /></div>
+    <div class="col-md-4"><label class="form-label">CPU</label><select name="input.CpuId" class="form-select"><option value="">-- Select CPU --</option>@foreach (var option in cpus) { <option value="@option.Id">@option.Name</option> }</select></div><div class="col-md-4"><label class="form-label">GPU (optional)</label><select name="input.GpuId" class="form-select"><option value="">-- Select GPU --</option>@foreach (var option in gpus) { <option value="@option.Id">@option.Name</option> }</select></div><div class="col-md-4"><label class="form-label">Display size (inches)</label><input name="input.DisplaySize" class="form-control" type="number" step="0.1" min="0" value="@Model.DisplaySize" /></div>
     <div class="col-md-4"><label class="form-label">Paid price (IRR)</label><input name="input.Price" class="form-control" inputmode="numeric" min="0" max="@MobileShop.Models.MoneyLimits.MaxRials" value="@Model.Price" /></div>
     <div class="col-md-4"><label class="form-label">Profit %</label><input name="input.ProfitPercent" class="form-control" type="number" step="0.01" min="0" max="100" value="@Model.ProfitPercent" /></div>
     <div class="col-md-4"><label class="form-label">Profit amount (IRR)</label><input name="input.ProfitAmount" class="form-control" inputmode="numeric" min="0" max="@MobileShop.Models.MoneyLimits.MaxRials" value="@Model.ProfitAmount" /></div>

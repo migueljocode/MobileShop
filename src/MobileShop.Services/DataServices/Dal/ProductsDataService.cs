@@ -5,7 +5,7 @@ namespace MobileShop.Services.DataServices.Dal;
 
 /// <summary>Provides the catalog and creation operations for the Products area.</summary>
 /// <remarks>
-/// The nine repositories cover both product types plus the shared catalog entities and transactions. There is no
+/// The repositories cover product types, shared catalog entities (including CPU/GPU lookups), and transactions. There is no
 /// <see cref="Product"/> repo because each create path builds the product row inline and it is persisted by
 /// cascade through the phone or Apple-ID insert, and no <see cref="SecondHand"/> repo (the second-hand profile is
 /// a <see cref="Product"/> navigation, not a separate write).
@@ -25,6 +25,8 @@ public class ProductsDataService(
     IBaseRepo<PartNumber> partNumbers,
     IBaseRepo<Product> products,
     IBaseRepo<StorageCapacity> storageCapacities,
+    IBaseRepo<Cpu> cpus,
+    IBaseRepo<Gpu> gpus,
     ILogger<ProductsDataService> logger)
     : IProductsDataService
 {
@@ -229,7 +231,7 @@ public class ProductsDataService(
         }
         else if (string.Equals(type, "laptop", StringComparison.OrdinalIgnoreCase))
         {
-            details = await products.SelectAsync(id, product => new ProductDetailsViewModel("Laptop", product.Id, product.ModelNavigation.ManufacturerNavigation.Name, product.ModelNavigation.Name, "Barcode: " + product.Barcode, product.ColorNavigation == null ? null : product.ColorNavigation.Name, product.Transactions.Where(t => t.Direction == TransactionDirection.Sell).OrderByDescending(t => t.Date).Select(t => t.CustomerNavigation.PersonNavigation).Select(person => person.FirstName + " " + person.LastName).FirstOrDefault() ?? "Not sold", product.GuaranteeProfile == null ? "None" : product.GuaranteeProfile.Corporation + " until " + product.GuaranteeProfile.ExpirationDate.ToString("d"), product.SecondHandProfile != null) { Cpu = product.LaptopProfile!.Cpu, Gpu = product.LaptopProfile.Gpu, DisplaySize = product.LaptopProfile.DisplaySize, Notes = product.LaptopProfile.Notes });
+            details = await products.SelectAsync(id, product => new ProductDetailsViewModel("Laptop", product.Id, product.ModelNavigation.ManufacturerNavigation.Name, product.ModelNavigation.Name, "Barcode: " + product.Barcode, product.ColorNavigation == null ? null : product.ColorNavigation.Name, product.Transactions.Where(t => t.Direction == TransactionDirection.Sell).OrderByDescending(t => t.Date).Select(t => t.CustomerNavigation.PersonNavigation).Select(person => person.FirstName + " " + person.LastName).FirstOrDefault() ?? "Not sold", product.GuaranteeProfile == null ? "None" : product.GuaranteeProfile.Corporation + " until " + product.GuaranteeProfile.ExpirationDate.ToString("d"), product.SecondHandProfile != null) { Cpu = product.LaptopProfile!.CpuNavigation.Name, Gpu = product.LaptopProfile.GpuNavigation == null ? null : product.LaptopProfile.GpuNavigation.Name, DisplaySize = product.LaptopProfile.DisplaySize, Notes = product.LaptopProfile.Notes });
         }
         else if (string.Equals(type, "cable", StringComparison.OrdinalIgnoreCase))
         {
@@ -320,6 +322,22 @@ public class ProductsDataService(
         => (await storageCapacities.FindAllAsync())
             .OrderBy(c => c.Gb)
             .Select(c => new DropdownOptionViewModel(c.Id, $"{c.Gb} GB"))
+            .ToList()
+            .AsReadOnly();
+
+    /// <inheritdoc />
+    public async Task<IReadOnlyList<DropdownOptionViewModel>> GetCpusAsync()
+        => (await cpus.FindAllAsync())
+            .OrderBy(cpu => cpu.Name)
+            .Select(cpu => new DropdownOptionViewModel(cpu.Id, cpu.Name))
+            .ToList()
+            .AsReadOnly();
+
+    /// <inheritdoc />
+    public async Task<IReadOnlyList<DropdownOptionViewModel>> GetGpusAsync()
+        => (await gpus.FindAllAsync())
+            .OrderBy(gpu => gpu.Name)
+            .Select(gpu => new DropdownOptionViewModel(gpu.Id, gpu.Name))
             .ToList()
             .AsReadOnly();
 
@@ -451,6 +469,45 @@ public class ProductsDataService(
 
         Logger.LogInformation("Added StorageCapacity Id={Id} for {Gb} GB", capacity.Id, capacity.Gb);
         return new DropdownCreateResult(true, new DropdownOptionViewModel(capacity.Id, $"{capacity.Gb} GB"), null, 200);
+    }
+
+    /// <inheritdoc />
+    public Task<DropdownCreateResult> CreateCpuAsync(string name)
+        => CreateNamedLookupAsync(name, cpus, "CPU", () => new Cpu(), (cpu, value) => cpu.Name = value, cpu => cpu.Name);
+
+    /// <inheritdoc />
+    public Task<DropdownCreateResult> CreateGpuAsync(string name)
+        => CreateNamedLookupAsync(name, gpus, "GPU", () => new Gpu(), (gpu, value) => gpu.Name = value, gpu => gpu.Name);
+
+    private async Task<DropdownCreateResult> CreateNamedLookupAsync<TEntity>(
+        string name,
+        IBaseRepo<TEntity> repository,
+        string label,
+        Func<TEntity> create,
+        Action<TEntity, string> setName,
+        Func<TEntity, string> getName)
+        where TEntity : BaseEntity
+    {
+        var trimmed = name?.Trim();
+        if (string.IsNullOrWhiteSpace(trimmed))
+            return new DropdownCreateResult(false, null, $"{label} name is required.", 400);
+        if (trimmed.Length > 100)
+            return new DropdownCreateResult(false, null, $"{label} name cannot exceed 100 characters.", 400);
+
+        var existing = (await repository.FindAllAsync())
+            .FirstOrDefault(entity => string.Equals(getName(entity), trimmed, StringComparison.OrdinalIgnoreCase));
+        if (existing is not null)
+            return new DropdownCreateResult(true, new DropdownOptionViewModel(existing.Id, getName(existing)), null, 200);
+
+        var entity = create();
+        setName(entity, trimmed);
+
+        if (await repository.AddAsync(entity) <= 0)
+            return new DropdownCreateResult(false, null, $"The {label} could not be saved.", 400);
+
+        Logger.LogInformation("Added {LookupType} Id={Id}", label, entity.Id);
+        return new DropdownCreateResult(true,
+            new DropdownOptionViewModel(entity.Id, trimmed), null, 200);
     }
 
     /// <inheritdoc />
@@ -782,7 +839,7 @@ public class ProductsDataService(
         if (input.DisplaySize <= 0)
             return new ServiceResult(false, "Display size must be greater than 0.", null, null);
 
-        return await CreateDeviceAsync(input.SellerId, input.ManufacturerId, input.ModelId, "Laptop", input.Price, input.ProfitPercent, input.ProfitAmount, input.IsSecondHand, input.TestPeriodDays, input.SecondHandNotes, input.HasGuarantee, input.GuaranteeCorporation, input.GuaranteeExpiry, input.GuaranteeNotes, new Laptop { Cpu = input.Cpu.Trim(), Gpu = input.Gpu?.Trim() ?? string.Empty, DisplaySize = input.DisplaySize, Notes = NormalizeNote(input.Notes) });
+        return await CreateDeviceAsync(input.SellerId, input.ManufacturerId, input.ModelId, "Laptop", input.Price, input.ProfitPercent, input.ProfitAmount, input.IsSecondHand, input.TestPeriodDays, input.SecondHandNotes, input.HasGuarantee, input.GuaranteeCorporation, input.GuaranteeExpiry, input.GuaranteeNotes, new Laptop { CpuId = input.CpuId, GpuId = input.GpuId, DisplaySize = input.DisplaySize, Notes = NormalizeNote(input.Notes) });
     }
 
     public Task<ServiceResult> CreateCablesAsync(CreateCableInputModel input) =>

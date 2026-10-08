@@ -20,6 +20,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public virtual DbSet<Category> Categories => Set<Category>();
     public virtual DbSet<Color> Colors => Set<Color>();
     public virtual DbSet<StorageCapacity> StorageCapacities => Set<StorageCapacity>();
+    public virtual DbSet<Cpu> Cpus => Set<Cpu>();
+    public virtual DbSet<Gpu> Gpus => Set<Gpu>();
 
     // product profiles (all 1:1 with Product)
     public virtual DbSet<DeviceSpec> DeviceSpecs => Set<DeviceSpec>();

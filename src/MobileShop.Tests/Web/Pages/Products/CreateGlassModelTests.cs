@@ -26,6 +26,8 @@ public class CreateGlassModelTests : RepoTestBase
             new BaseRepo<PartNumber>(Context),
             new BaseRepo<Product>(Context),
             new BaseRepo<StorageCapacity>(Context),
+            new BaseRepo<Cpu>(Context),
+            new BaseRepo<Gpu>(Context),
             NullLogger<ProductsDataService>.Instance);
 
         TestDataHelpers.SeedShopSentinels(Context);

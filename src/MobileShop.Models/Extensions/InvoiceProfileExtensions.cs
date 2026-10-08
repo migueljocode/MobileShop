@@ -37,8 +37,9 @@ public static class InvoiceProfileExtensions
 
     public static IEnumerable<(string Label, string Value)> GetInvoiceExtras(this Laptop laptop)
     {
-        yield return ("CPU", laptop.Cpu);
-        yield return ("GPU", laptop.Gpu);
+        yield return ("CPU", laptop.CpuNavigation.Name);
+        if (laptop.GpuNavigation is not null)
+            yield return ("GPU", laptop.GpuNavigation.Name);
         yield return ("Display", $"{laptop.DisplaySize} inches");
         if (!string.IsNullOrWhiteSpace(laptop.Notes))
             yield return ("Notes", laptop.Notes);

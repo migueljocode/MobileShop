@@ -35,6 +35,8 @@ public class ProductsDataServiceTests : RepoTestBase
             new BaseRepo<PartNumber>(Context),
             new BaseRepo<Product>(Context),
             new BaseRepo<StorageCapacity>(Context),
+            new BaseRepo<Cpu>(Context),
+            new BaseRepo<Gpu>(Context),
             NullLogger<ProductsDataService>.Instance);
     }
 
@@ -1029,6 +1031,36 @@ public class ProductsDataServiceTests : RepoTestBase
         Assert.False(result.Succeeded);
         Assert.Equal(400, result.StatusCode);
         Assert.Equal("Name is required.", result.Error);
+    }
+
+    [Fact]
+    public async Task Cpu_and_gpu_lookup_creation_trims_names_and_reuses_existing_options()
+    {
+        var cpu = await _service.CreateCpuAsync(" Core i7 ");
+        var duplicateCpu = await _service.CreateCpuAsync("core i7");
+        var gpu = await _service.CreateGpuAsync(" RTX 4070 ");
+
+        Assert.True(cpu.Succeeded);
+        Assert.Equal("Core i7", cpu.Option!.Name);
+        Assert.Equal(cpu.Option.Id, duplicateCpu.Option!.Id);
+        Assert.True(gpu.Succeeded);
+        Assert.Equal("RTX 4070", gpu.Option!.Name);
+        Assert.Single(Context.Cpus);
+        Assert.Single(Context.Gpus);
+    }
+
+    [Fact]
+    public async Task Cpu_and_gpu_lookup_creation_rejects_blank_names()
+    {
+        var cpu = await _service.CreateCpuAsync(" ");
+        var gpu = await _service.CreateGpuAsync("");
+
+        Assert.False(cpu.Succeeded);
+        Assert.Equal(400, cpu.StatusCode);
+        Assert.False(gpu.Succeeded);
+        Assert.Equal(400, gpu.StatusCode);
+        Assert.Empty(Context.Cpus);
+        Assert.Empty(Context.Gpus);
     }
 
     // ── Stage N Step 1: finished price + notes ────────────────
@@ -2086,11 +2118,13 @@ public class ProductsDataServiceTests : RepoTestBase
             SellerId = 1,
             ManufacturerId = manufacturer.Id, ModelId = models[1].Id, Price = 2000,
         });
+        var cpu = await _service.CreateCpuAsync("Core i5");
+        var gpu = await _service.CreateGpuAsync("Integrated");
         await _service.CreateLaptopAsync(new CreateLaptopInputModel
         {
             SellerId = 1,
             ManufacturerId = manufacturer.Id, ModelId = models[2].Id, Price = 3000,
-            Cpu = "Core i5", Gpu = "Integrated", DisplaySize = 15.6m,
+            CpuId = cpu.Option!.Id, GpuId = gpu.Option!.Id, DisplaySize = 15.6m,
         });
 
         var purchases = await Context.Transactions.OrderBy(transaction => transaction.ProductId).ToListAsync();
@@ -2110,14 +2144,15 @@ public class ProductsDataServiceTests : RepoTestBase
     {
         var manufacturer = new Manufacturer { Name = "Test" }; Context.Manufacturers.Add(manufacturer); var categories = new[] { new Category { Name = "Tablet" }, new Category { Name = "SmartWatch" }, new Category { Name = "Laptop" } }; Context.Categories.AddRange(categories); Context.SaveChanges();
         var models = categories.Select((c, i) => new Model { ManufacturerId = manufacturer.Id, CategoryId = c.Id, Name = $"Device {i}" }).ToArray(); Context.Models.AddRange(models); Context.SaveChanges();
-        Context.Tablets.Add(new Tablet { ProductNavigation = new Product { ModelId = models[0].Id, Barcode = "TAB001", Price = 1 } }); Context.SmartWatches.Add(new SmartWatch { ProductNavigation = new Product { ModelId = models[1].Id, Barcode = "WATCH001", Price = 2 } }); Context.Laptops.Add(new Laptop { ProductNavigation = new Product { ModelId = models[2].Id, Barcode = "LAP001", Price = 3 }, Cpu = "CPU", Gpu = "GPU", DisplaySize = 15.6m }); Context.SaveChanges();
+        var cpu = new Cpu { Name = "CPU" }; var gpu = new Gpu { Name = "GPU" }; Context.Cpus.Add(cpu); Context.Gpus.Add(gpu); Context.SaveChanges();
+        Context.Tablets.Add(new Tablet { ProductNavigation = new Product { ModelId = models[0].Id, Barcode = "TAB001", Price = 1 } }); Context.SmartWatches.Add(new SmartWatch { ProductNavigation = new Product { ModelId = models[1].Id, Barcode = "WATCH001", Price = 2 } }); Context.Laptops.Add(new Laptop { ProductNavigation = new Product { ModelId = models[2].Id, Barcode = "LAP001", Price = 3 }, CpuId = cpu.Id, GpuId = gpu.Id, DisplaySize = 15.6m }); Context.SaveChanges();
         var rows = await _service.GetInventoryRowsAsync(); Assert.Contains(rows, r => r.Type == "Tablet"); Assert.Contains(rows, r => r.Type == "Smart Watch"); Assert.Contains(rows, r => r.Type == "Laptop");
     }
     [Fact]
     public async Task GetDetailsAsync_projects_laptop_specifications_and_notes()
     {
-        var manufacturer = new Manufacturer { Name = "Lenovo" }; var category = new Category { Name = "Laptop" }; Context.Manufacturers.Add(manufacturer); Context.Categories.Add(category); Context.SaveChanges(); var model = new Model { ManufacturerId = manufacturer.Id, CategoryId = category.Id, Name = "ThinkPad" }; Context.Models.Add(model); Context.SaveChanges();
-        var laptop = new Laptop { Cpu = "Core Ultra 7", Gpu = "RTX 4060", DisplaySize = 16m, Notes = "Business", ProductNavigation = new Product { ModelId = model.Id, Barcode = "LAPDETAIL", Price = 10 } }; Context.Laptops.Add(laptop); Context.SaveChanges(); var details = await _service.GetDetailsAsync(laptop.Id, "laptop");
+        var manufacturer = new Manufacturer { Name = "Lenovo" }; var category = new Category { Name = "Laptop" }; var cpu = new Cpu { Name = "Core Ultra 7" }; var gpu = new Gpu { Name = "RTX 4060" }; Context.Manufacturers.Add(manufacturer); Context.Categories.Add(category); Context.Cpus.Add(cpu); Context.Gpus.Add(gpu); Context.SaveChanges(); var model = new Model { ManufacturerId = manufacturer.Id, CategoryId = category.Id, Name = "ThinkPad" }; Context.Models.Add(model); Context.SaveChanges();
+        var laptop = new Laptop { CpuId = cpu.Id, GpuId = gpu.Id, DisplaySize = 16m, Notes = "Business", ProductNavigation = new Product { ModelId = model.Id, Barcode = "LAPDETAIL", Price = 10 } }; Context.Laptops.Add(laptop); Context.SaveChanges(); var details = await _service.GetDetailsAsync(laptop.Id, "laptop");
         Assert.NotNull(details); Assert.Equal("Core Ultra 7", details!.Cpu); Assert.Equal("RTX 4060", details.Gpu); Assert.Equal(16m, details.DisplaySize); Assert.Equal("Business", details.Notes);
     }
 

@@ -1,0 +1,254 @@
+erDiagram
+    PERSON ||--o| SELLER : "seller profile"
+    PERSON ||--o| CUSTOMER : "customer profile"
+    PERSON ||--o| USER : "user profile"
+    PERSON ||--o| EMPLOYEE : "employee profile"
+
+    SELLER ||--o{ TRANSACTION : "supplies"
+    CUSTOMER ||--o{ TRANSACTION : "buys"
+    PRODUCT ||--o{ TRANSACTION : "has transactions"
+
+    MANUFACTURER ||--o{ MODEL : "makes"
+    CATEGORY ||--o{ MODEL : "classifies"
+    MODEL ||--o{ PRODUCT : "identifies"
+    COLOR o|--o{ PRODUCT : "colors"
+
+    PRODUCT ||--o| APPLE_ID : "profile"
+    PRODUCT ||--o| APPLE_INFO : "profile"
+    PRODUCT ||--o| PHONE : "profile"
+    PRODUCT ||--o| DEVICE_SPEC : "profile"
+    PRODUCT ||--o| GUARANTEE : "profile"
+    PRODUCT ||--o| SECOND_HAND : "profile"
+    PRODUCT ||--o| TABLET : "profile"
+    PRODUCT ||--o| SMART_WATCH : "profile"
+    PRODUCT ||--o| LAPTOP : "profile"
+    PRODUCT ||--o| CABLE : "profile"
+    PRODUCT ||--o| CHARGER : "profile"
+    PRODUCT ||--o| POWER_BANK : "profile"
+    PRODUCT ||--o| PORTABLE_STORAGE : "profile"
+    PRODUCT ||--o| CASE : "profile"
+    PRODUCT ||--o| GLASS : "profile"
+
+    STORAGE_CAPACITY ||--o{ DEVICE_SPEC : "capacity"
+    STORAGE_CAPACITY ||--o{ PORTABLE_STORAGE : "capacity"
+    CPU ||--o{ LAPTOP : "processor"
+    GPU o|--o{ LAPTOP : "graphics"
+    PART_NUMBER o|--o{ PHONE : "part number"
+    POWER_BANK ||--o{ POWER_BANK_PORT : "ports"
+
+    CASE ||--o{ CASE_MODEL_FIT : "compatible models"
+    MODEL ||--o{ CASE_MODEL_FIT : "case compatibility"
+    GLASS ||--o{ GLASS_MODEL_FIT : "compatible models"
+    MODEL ||--o{ GLASS_MODEL_FIT : "glass compatibility"
+
+    PERSON {
+        int Id PK
+        string FirstName
+        string LastName
+        string PhoneNumber
+        string Notes
+    }
+    SELLER {
+        int Id PK
+        int PersonId FK
+        int EntityType "enum"
+    }
+    CUSTOMER {
+        int Id PK
+        int PersonId FK
+        string NationalId
+    }
+    USER {
+        int Id PK
+        int PersonId FK
+        string Username
+        string PasswordHash
+    }
+    EMPLOYEE {
+        int Id PK
+        int PersonId FK
+        datetime HireDate
+        int SharePercent
+        boolean IsActive
+        string Notes
+    }
+    TRANSACTION {
+        int Id PK
+        datetime Date
+        int SellerId FK
+        int CustomerId FK
+        int ProductId FK
+        long FinishedPrice
+        int Direction "enum"
+    }
+    MANUFACTURER {
+        int Id PK
+        string Name
+    }
+    CATEGORY {
+        int Id PK
+        string Name
+    }
+    MODEL {
+        int Id PK
+        int ManufacturerId FK
+        int CategoryId FK
+        string Name
+        string ModelNumber
+    }
+    COLOR {
+        int Id PK
+        string Name
+    }
+    STORAGE_CAPACITY {
+        int Id PK
+        int Gb
+    }
+    CPU {
+        int Id PK
+        string Name
+    }
+    GPU {
+        int Id PK
+        string Name
+    }
+    PART_NUMBER {
+        int Id PK
+        int ModelId FK
+        string Code
+        boolean SupportsDualSim
+        boolean SupportsEsim
+    }
+    PRODUCT {
+        int Id PK
+        int ModelId FK
+        int ColorId FK "nullable"
+        string Barcode
+        long Price
+    }
+    APPLE_ID {
+        int Id PK
+        int ProductId FK
+        string Email
+        string Password
+        string Notes
+    }
+    APPLE_INFO {
+        int Id PK
+        int ProductId FK
+        int BatteryHealth
+        int ChargeCycle
+        string Notes
+    }
+    PHONE {
+        int Id PK
+        int ProductId FK
+        int PartNumberId FK "nullable"
+        string IMEI1
+        string IMEI2
+        boolean OwnershipTransferred
+        boolean SupportsDualSim "nullable"
+        boolean SupportsEsim "nullable"
+        string Notes
+    }
+    DEVICE_SPEC {
+        int Id PK
+        int ProductId FK
+        int StorageCapacityId FK
+        int Ram
+        int ChargeSpeed
+    }
+    GUARANTEE {
+        int Id PK
+        int ProductId FK
+        datetime StartDate
+        datetime ExpirationDate
+        string Corporation
+        string Notes
+    }
+    SECOND_HAND {
+        int Id PK
+        int ProductId FK
+        int TestPeriodDays "nullable"
+        int UsedDurationDays "nullable"
+        string Notes
+    }
+    TABLET {
+        int Id PK
+        int ProductId FK
+        string Notes
+    }
+    SMART_WATCH {
+        int Id PK
+        int ProductId FK
+        string Notes
+    }
+    LAPTOP {
+        int Id PK
+        int ProductId FK
+        int CpuId FK
+        int GpuId FK "nullable"
+        decimal DisplaySize
+        string Notes
+    }
+    CABLE {
+        int Id PK
+        int ProductId FK
+        int Connector1 "enum"
+        int Connector2 "enum"
+        decimal Length
+        string Notes
+    }
+    CHARGER {
+        int Id PK
+        int ProductId FK
+        int Wattage
+        boolean Pd
+        int PortCount
+        string Notes
+    }
+    POWER_BANK {
+        int Id PK
+        int ProductId FK
+        int CapacityMah
+        int MaxWattage
+        int PortCount
+        boolean Pd
+        string Notes
+    }
+    POWER_BANK_PORT {
+        int Id PK
+        int PowerBankId FK
+        int PortNumber
+        int Connector "enum"
+    }
+    PORTABLE_STORAGE {
+        int Id PK
+        int ProductId FK
+        int StorageCapacityId FK
+        int Kind "enum"
+        int Speed "nullable"
+        string Notes
+    }
+    CASE {
+        int Id PK
+        int ProductId FK
+        string Notes
+    }
+    GLASS {
+        int Id PK
+        int ProductId FK
+        string Notes
+    }
+    CASE_MODEL_FIT {
+        int Id PK
+        int CaseId FK
+        int ModelId FK
+    }
+    GLASS_MODEL_FIT {
+        int Id PK
+        int GlassId FK
+        int ModelId FK
+    }
+
+%% All tables also contain the inherited IsDeleted boolean and nullable TimeStamp BLOB columns.
