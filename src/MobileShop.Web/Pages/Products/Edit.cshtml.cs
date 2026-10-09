@@ -47,6 +47,21 @@ public class EditModel(
 
     public async Task<IActionResult> OnPostAsync()
     {
+        // Empty optional IMEI fields bind as "" and would fail a strict 15-digit regex.
+        if (string.IsNullOrWhiteSpace(Product.IMEI1))
+            Product.IMEI1 = null;
+        if (string.IsNullOrWhiteSpace(Product.IMEI2))
+            Product.IMEI2 = null;
+        ModelState.Remove("Product.IMEI1");
+        ModelState.Remove("Product.IMEI2");
+        if (string.Equals(Product.Type, "Phone", StringComparison.OrdinalIgnoreCase))
+        {
+            if (Product.IMEI1 is null || Product.IMEI1.Length != 15)
+                ModelState.AddModelError("Product.IMEI1", "IMEI must be exactly 15 digits.");
+            if (Product.IMEI2 is not null && Product.IMEI2.Length != 15)
+                ModelState.AddModelError("Product.IMEI2", "IMEI must be exactly 15 digits.");
+        }
+
         if (!ModelState.IsValid)
         {
             await PopulateDropdownsAsync(Product.Type);
