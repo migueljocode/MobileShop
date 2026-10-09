@@ -1136,7 +1136,7 @@ public class ProductsDataService(
         return new ServiceResult(true, "Product updated successfully.", null, input.ProductId);
     }
 
-public Task<Product?> GetProductForEditAsync(int id) => products.FindWithIncludesAsync(id, EditIncludes);
+    public Task<Product?> GetProductForEditAsync(int id) => products.FindWithIncludesAsync(id, EditIncludes);
 
     private async Task<ServiceResult> CreateAccessoryBatchAsync(int sellerId, int count, long price, decimal? profitPercent, long? profitAmount, int manufacturerId, int modelId, string categoryName, Action<Product> configure)
     {
