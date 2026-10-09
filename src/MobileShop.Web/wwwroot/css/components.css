@@ -1,0 +1,210 @@
+/* Step 2.3 — shared component classes. Colours come from tokens.css custom
+   properties only. Unused by pages until Stage 3. */
+
+.page-head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: end;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 0.75rem;
+}
+
+.page-head__title {
+  margin: 0;
+}
+
+.page-head__sub {
+  margin: 0;
+  color: var(--ink-muted);
+  font-size: var(--fs-sm);
+}
+
+.page-head__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: end;
+  margin-bottom: 1rem;
+}
+
+.toolbar .form-label {
+  font-size: var(--fs-sm);
+  color: var(--ink-muted);
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.data-table th {
+  font-size: var(--fs-sm);
+  font-weight: 500;
+  color: var(--ink-muted);
+  text-align: start;
+  border-bottom: 1px solid var(--line-strong);
+  padding: 0.65rem 0.75rem;
+}
+
+.data-table td {
+  padding: 0.65rem 0.75rem;
+  border-bottom: 1px solid var(--line);
+  vertical-align: middle;
+}
+
+.data-table tbody tr {
+  transition: background-color 150ms ease;
+}
+
+.data-table tbody tr:hover {
+  background-color: var(--panel-raised);
+}
+
+.data-table td.num,
+.data-table th.num {
+  text-align: end;
+}
+
+.num {
+  font-variant-numeric: tabular-nums;
+}
+
+td.num,
+th.num {
+  text-align: end;
+}
+
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+  gap: 0.75rem;
+}
+
+.stat {
+  background-color: var(--panel-raised);
+  border: 1px solid var(--line);
+  border-radius: var(--r-panel);
+  padding: 1rem;
+}
+
+.stat__value {
+  font-size: var(--fs-h2);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.stat__label {
+  color: var(--ink-muted);
+  font-size: var(--fs-sm);
+}
+
+.form-section {
+  background-color: var(--panel-raised);
+  border: 1px solid var(--line);
+  border-radius: var(--r-panel);
+  padding: 1rem 1.25rem;
+  margin-bottom: 1rem;
+}
+
+.form-section__title {
+  font-size: var(--fs-lg);
+  font-weight: 700;
+  margin-bottom: 0.75rem;
+}
+
+.action-bar {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+  border-top: 1px solid var(--line);
+  padding-top: 1rem;
+  margin-top: 1.25rem;
+}
+
+.status-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.15rem 0.6rem;
+  border-radius: var(--r-control);
+  font-size: var(--fs-sm);
+  font-weight: 500;
+}
+
+.status-chip--available {
+  background-color: color-mix(in srgb, var(--accent) 16%, transparent);
+  color: var(--accent);
+}
+
+.status-chip--sold {
+  background-color: color-mix(in srgb, var(--ink-muted) 16%, transparent);
+  color: var(--ink-muted);
+}
+
+.status-chip--used {
+  background-color: color-mix(in srgb, var(--warn) 16%, transparent);
+  color: var(--warn);
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 2.5rem 1rem;
+  border: 1px dashed var(--line-strong);
+  border-radius: var(--r-panel);
+}
+
+.empty-state__title {
+  font-size: var(--fs-lg);
+  margin: 0;
+}
+
+.empty-state__hint {
+  color: var(--ink-muted);
+  margin: 0;
+}
+
+.skip-link {
+  position: absolute;
+  left: -10000px;
+  top: auto;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+.skip-link:focus {
+  position: fixed;
+  top: 0.75rem;
+  left: 0.75rem;
+  width: auto;
+  height: auto;
+  overflow: visible;
+  background: var(--accent);
+  color: var(--accent-ink);
+  border-radius: var(--r-control);
+  padding: 0.5rem 0.75rem;
+  z-index: 1060;
+}
+
+.loading-line {
+  color: var(--ink-muted);
+  font-size: var(--fs-sm);
+  padding: 0.5rem 0.75rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .data-table tbody tr {
+    transition: none;
+  }
+}

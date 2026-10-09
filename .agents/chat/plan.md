@@ -78,7 +78,7 @@ Type: one family system (SF Pro Rounded for Latin, Vazirmatn picks up Persian gl
 # STAGE 2 — UI/UX design system foundation
 (Files under `src/MobileShop.Web/wwwroot/css`, `_Layout.cshtml` link tags, `navigation-menu.css`. No page markup yet.)
 
-## [ ] Step 2.1 — Tokens, fonts, alias layer
+## ~~[x] Step 2.1 — Tokens, fonts, alias layer~~
 - Files: create: `wwwroot/css/tokens.css`; modify: `Pages/Shared/_Layout.cshtml` (one `<link>`), `wwwroot/css/app-theme.css` (`:root` block only), `wwwroot/css/site.css` (font stack line only); inspect: `navigation-menu.css`; do not touch: JS, other cshtml.
 - Symbols: CSS custom properties from "Design direction"; `@font-face` for Vazirmatn.
 - Current -> Desired: no token file; Vazirmatn unused; `--bs-body-font-family` is SF Pro Rounded only. Desired: `tokens.css` holds every token above plus `@font-face` blocks for Vazirmatn 400 / 500 / 700 (`font-display: swap`, urls `../fonts/vazirmatn-regular.woff2`, `-medium`, `-bold`); `site.css` sets `--bs-body-font-family: var(--font-body)`.
@@ -90,7 +90,7 @@ Type: one family system (SF Pro Rounded for Latin, Vazirmatn picks up Persian gl
 - Risk: LOW
 - Confidence: MEDIUM (visual result not CI-verified)
 
-## [ ] Step 2.2 — Page surface and typography
+## ~~[x] Step 2.2 — Page surface and typography~~
 - Files: modify: `wwwroot/css/app-theme.css` (selectors: `body`, `body::before`, `.container`, `.container > main[role="main"]`, `h1`-`h6`, `.lead`, `a`, `.card`, `.card:hover`, `.card-title`, `.footer`); do not touch: other selectors.
 - Current -> Desired: body radial gradients + fixed grid overlay, glowing 1.5rem-radius main panel, cards with hover lift and glow. Desired: `body` = flat `var(--ground)`, no gradient, delete the `body::before` grid; main panel = `var(--panel)`, `1px solid var(--line)`, `var(--r-panel)`, no box-shadow, keep the existing `clamp()` padding; `.card` = `var(--panel)`, `1px solid var(--line)`, `var(--r-panel)`, no shadow, **delete** hover transform/shadow/glow rules; headings use the type scale (`h1` `--fs-h1` 700, `h2` `--fs-h2` 700, letter-spacing `-0.01em`), no gradient text; links `var(--accent)` with underline offset kept, hover `var(--ink)`; footer = top hairline, `var(--ink-muted)`.
 - Edge cases: delete rules, don't comment them out; keep the `prefers-reduced-motion` block.
@@ -99,7 +99,7 @@ Type: one family system (SF Pro Rounded for Latin, Vazirmatn picks up Persian gl
 - Risk: LOW
 - Confidence: MEDIUM
 
-## [ ] Step 2.3 — Component classes (new file, unused until Stage 3)
+## ~~[x] Step 2.3 — Component classes (new file, unused until Stage 3)~~
 - Files: create: `wwwroot/css/components.css`; modify: `_Layout.cshtml` (one `<link>` after `app-theme.css`).
 - Symbols & spec (all colours from tokens only; all transitions ≤ 150 ms and wrapped so `prefers-reduced-motion` disables them):
   - `.page-head`: flex, wrap, `justify-content: space-between`, `align-items: end`, gap `1rem`, margin-bottom `1.25rem`, bottom hairline `--line` + padding-bottom `.75rem`. `.page-head__title` (h1 reset margin), `.page-head__sub` (`--ink-muted`, `--fs-sm`), `.page-head__actions` (flex, wrap, gap `.5rem`).
@@ -119,7 +119,7 @@ Type: one family system (SF Pro Rounded for Latin, Vazirmatn picks up Persian gl
 - Risk: LOW
 - Confidence: HIGH
 
-## [ ] Step 2.4 — Bootstrap component overrides
+## ~~[x] Step 2.4 — Bootstrap component overrides~~
 - Files: modify: `wwwroot/css/app-theme.css` (selectors present today: `.btn`, `.btn-primary`, `.btn-success`, `.btn-secondary`, `.btn-danger`, `.btn-warning`, `.btn-info`, `.btn-dark`, all `.btn-outline-*`, `.form-control`, `.form-select`, `.form-label`, `.form-check-input`, `.input-group-text`, `.form-text`, `.table`, `.badge`, `.alert*`, `.list-group-item`, `.nav-tabs`, `.progress`, `.field-validation-error`, `.validation-summary-errors`, `.text-danger`).
 - Desired: `.btn` radius `--r-control`, weight 500, no shadow; `.btn-primary` and `.btn-success` = `--accent` bg + `--accent-ink` text, hover `color-mix(in srgb, var(--accent) 88%, white)`; `.btn-outline-primary` = transparent, `--line-strong` border, `--ink` text, hover border `--accent`; `.btn-danger` = `--danger` + `--danger-ink`; `.btn-warning` = `--warn` + `--warn-ink`; other `.btn-outline-*` map to `--line-strong` border and `--ink` text; `.btn-secondary/-info/-dark` = `--panel-raised` bg, `--line-strong` border, `--ink`. Inputs: `.form-control`, `.form-select`: bg `--ground`, 1px `--line-strong`, `--r-control`, text `--ink`, placeholder `--ink-muted`; `:focus` → border `--accent` + `--focus-ring` (replace the white/blue `box-shadow` in `site.css` `.btn:focus ...` rule too — that file edit is allowed here, one rule). `.form-label` `--fs-sm` `--ink-muted`. `.table`: `--bs-table-bg: transparent`, `--bs-table-striped-bg: transparent`, `--bs-table-hover-bg: var(--panel-raised)`, borders `--line`. `.badge` and `.text-bg-success/-secondary/-warning/-info/-primary/-danger`: tinted style like `.status-chip` (accent / ink-muted / warn / accent / accent / danger). `.alert-*`: `--panel-raised` background, 1px border in the semantic colour, text `--ink`. `.field-validation-error`, `.text-danger`: `--danger`.
 - Edge cases: keep every selector's specificity as is; edit declarations, don't reorder rules.
@@ -128,7 +128,7 @@ Type: one family system (SF Pro Rounded for Latin, Vazirmatn picks up Persian gl
 - Risk: LOW
 - Confidence: MEDIUM
 
-## [ ] Step 2.5 — Overlays, date picker, navigation dock
+## ~~[x] Step 2.5 — Overlays, date picker, navigation dock~~
 - Files: modify: `wwwroot/css/app-theme.css` (`.modal*`, `.dropdown-menu`, `.dropdown-item`, `.popover`, `.jalali-picker-*`, `.password-visibility-toggle`), `wwwroot/css/navigation-menu.css`; do not touch: any JS, dock geometry (width/height/position/z-index/transform values).
 - Desired: replace hard-coded colours/glows with tokens only. `.modal-content`, `.popover`, `.dropdown-menu`, `.jalali-picker-panel` = `--panel-raised`, `1px --line-strong`, `--r-overlay`, a single shadow `0 1rem 2rem rgb(0 0 0 / .45)`; backdrop `rgb(0 0 0 / .6)`; picker day hover = `--panel`; selected day = `--accent` / `--accent-ink`; nav dock surface `--panel-raised`, border `--line-strong`; active nav item uses `--accent` (indicator + icon), inactive `--ink-muted`; remove radial-gradient/glow layers.
 - Verify: CI green. `grep -n "rgba(115, 136, 255\|#7388ff\|#aebdff\|radial-gradient" wwwroot/css/navigation-menu.css wwwroot/css/app-theme.css` → none outside `.account-login-*` and `.profit-chart-*`. `git diff` shows no change to lines containing `position`, `width`, `height`, `z-index`, `transform`, `inset` in `navigation-menu.css`.
@@ -136,7 +136,7 @@ Type: one family system (SF Pro Rounded for Latin, Vazirmatn picks up Persian gl
 - Risk: LOW
 - Confidence: MEDIUM
 
-## [ ] Step 2.6 — Stage 2 validation
+## ~~[x] Step 2.6 — Stage 2 validation~~
 - Files: none modified. Record the CI run. Manual check (user): open Dashboard, Products, one Create page, Transactions/Sell, People, Profit/Loss at 1280 px — all readable, nothing broken, nav dock opens.
 - Risk: LOW. Confidence: HIGH.
 
