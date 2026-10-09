@@ -37,7 +37,7 @@ public class CreateAccessoryModelTests : RepoTestBase
         var (m, model) = Seed("Cable");
         var page = new CreateCableModel(Service()) { Input = new CreateCableInputModel { SellerId = 1, ManufacturerId = m.Id, ModelId = model.Id, Connector1 = CableConnector.UsbC, Connector2 = CableConnector.Hdmi, Length = 2, Price = 100, Count = 2 } };
         var result = Assert.IsType<RedirectToPageResult>(await page.OnPostAsync());
-        Assert.Equal("cable", result.RouteValues!["type"]); Assert.Equal(2, Context.Products.Count()); Assert.All(Context.Cables, x => Assert.Equal(2m, x.Length));
+        Assert.Null(result.PageName); Assert.Equal("Cable created successfully.", page.SuccessMessage); Assert.Equal(2, Context.Products.Count()); Assert.All(Context.Cables, x => Assert.Equal(2m, x.Length));
     }
 
     [Fact] public async Task Charger_Create_Works()

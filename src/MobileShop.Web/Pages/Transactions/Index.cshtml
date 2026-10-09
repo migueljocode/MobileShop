@@ -124,7 +124,7 @@
                                 <input class="form-check-input" type="checkbox" name="selectedIds" value="@transaction.Id"
                                        checked="@Model.SelectedIds.Contains(transaction.Id)" />
                             </td>
-                            <td>@transaction.Date.ToString("yyyy-MM-dd HH:mm")</td>
+                            <td>@transaction.Date.ToJalaliDateTimeString()</td>
                             <td>@transaction.Direction</td>
                             <td>@transaction.ProductLabel</td>
                             <td>@transaction.FinishedPrice.ToIrr()</td>

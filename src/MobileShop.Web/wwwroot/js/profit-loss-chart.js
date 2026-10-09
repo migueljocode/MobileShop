@@ -25,6 +25,7 @@ document.addEventListener('DOMContentLoaded', function () {
     var labels = parseJsonDataset('labels', []);
     var tickLabels = parseJsonDataset('tickLabels', []);
     var values = parseJsonDataset('values', []);
+    console.log('Chart data:', { labels, tickLabels, values });
     var currentIndex = Number.parseInt(canvas.dataset.currentIndex || '-1', 10);
     var numberFormat = new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 });
     var currentGuides = {
@@ -56,16 +57,24 @@ document.addEventListener('DOMContentLoaded', function () {
 
             var valueLabel = formatToman(values[currentIndex]);
             context.font = '600 11px system-ui, sans-serif';
-            context.textAlign = 'right';
+            context.textAlign = 'left';
             context.textBaseline = 'bottom';
             context.fillStyle = '#6ae0be';
-            context.fillText(valueLabel, area.left - 8, point.y - 4);
+            // Position label above the intersection point, offset to the right
+            var labelX = point.x + 12;
+            var labelY = point.y - 8;
+            // Ensure label stays within chart bounds
+            if (labelX + context.measureText(valueLabel).width > area.right - 4) {
+                labelX = point.x - context.measureText(valueLabel).width - 12;
+                context.textAlign = 'right';
+            }
+            context.fillText(valueLabel, labelX, labelY);
             context.restore();
         }
     };
 
     try {
-        new Chart(canvas, {
+        window.profitLossChart = new Chart(canvas, {
             type: 'line',
             data: {
                 labels: labels,
@@ -127,7 +136,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         border: { color: 'rgba(194, 207, 245, 0.28)' }
                     },
                     y: {
-                        beginAtZero: true,
+                        beginAtZero: false,
                         grid: { color: 'rgba(194, 207, 245, 0.12)' },
                         ticks: {
                             color: '#929fb8',

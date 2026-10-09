@@ -3,6 +3,7 @@ public class CreatePortableStorageModel(IProductsDataService dataService) : Page
 {
     [BindProperty] public CreatePortableStorageInputModel Input { get; set; } = new();
     public string? Message { get; private set; }
+    [TempData] public string? SuccessMessage { get; set; }
     public IReadOnlyList<DropdownOptionViewModel> Manufacturers { get; private set; } = [];
     public IReadOnlyList<DropdownOptionViewModel> Models { get; private set; } = [];
     public IReadOnlyList<DropdownOptionViewModel> StorageCapacities { get; private set; } = [];
@@ -11,6 +12,6 @@ public class CreatePortableStorageModel(IProductsDataService dataService) : Page
     public async Task<IActionResult> OnPostCreateManufacturerAsync(string name){var result=await dataService.CreateManufacturerAsync(name);if(!result.Succeeded)return new JsonResult(new { error = result.Error! }) { StatusCode = result.StatusCode };return new JsonResult(new { id = result.Option!.Id, name = result.Option.Name });}
     public async Task<IActionResult> OnPostCreateModelAsync(int manufacturerId, string name){var result=await dataService.CreateModelAsync(manufacturerId, name, "PortableStorage");if(!result.Succeeded)return new JsonResult(new { error = result.Error! }) { StatusCode = result.StatusCode };return new JsonResult(new { id = result.Option!.Id, name = result.Option.Name });}
     public async Task<IActionResult> OnPostCreateStorageCapacityAsync(int gb){var result=await dataService.CreateStorageCapacityAsync(gb);if(!result.Succeeded)return new JsonResult(new { error = result.Error! }) { StatusCode = result.StatusCode };return new JsonResult(new { id = result.Option!.Id, name = result.Option.Name });}
-    public async Task<IActionResult> OnPostAsync(){if(!ModelState.IsValid){await PopulateAsync();return Page();}var r=await dataService.CreatePortableStoragesAsync(Input);if(!r.Succeeded){if(r.ErrorField is not null)ModelState.AddModelError(r.ErrorField,r.Message!);else Message=r.Message;await PopulateAsync();return Page();}return RedirectToPage("/Products/Details",new{id=r.EntityId,type="portablestorage"});}
+    public async Task<IActionResult> OnPostAsync(){if(!ModelState.IsValid){await PopulateAsync();return Page();}var r=await dataService.CreatePortableStoragesAsync(Input);if(!r.Succeeded){if(r.ErrorField is not null)ModelState.AddModelError(r.ErrorField,r.Message!);else Message=r.Message;await PopulateAsync();return Page();}SuccessMessage="Portable storage created successfully.";return RedirectToPage();}
     private async Task PopulateAsync(){Manufacturers=await dataService.GetManufacturersAsync();Models=Input.ManufacturerId>0?await dataService.GetModelsAsync(Input.ManufacturerId,"PortableStorage"):[];StorageCapacities=await dataService.GetStorageCapacitiesAsync();}
 }

@@ -4,6 +4,7 @@ public class CreateLaptopModel(IProductsDataService dataService) : PageModel
 {
     [BindProperty] public CreateLaptopInputModel Input { get; set; } = new();
     public string? Message { get; private set; }
+    [TempData] public string? SuccessMessage { get; set; }
     public IReadOnlyList<DropdownOptionViewModel> Manufacturers { get; private set; } = [];
     public IReadOnlyList<DropdownOptionViewModel> Models { get; private set; } = [];
     public IReadOnlyList<DropdownOptionViewModel> Cpus { get; private set; } = [];
@@ -46,7 +47,8 @@ public class CreateLaptopModel(IProductsDataService dataService) : PageModel
             return Page();
         }
 
-        return RedirectToPage("/Products/Details", new { id = result.EntityId, type = "laptop" });
+        SuccessMessage = "Laptop created successfully.";
+        return RedirectToPage();
     }
     private async Task PopulateDropdownsAsync()
     {

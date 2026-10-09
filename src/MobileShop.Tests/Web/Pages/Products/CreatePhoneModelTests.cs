@@ -243,9 +243,8 @@ public class CreatePhoneModelTests : RepoTestBase
         var result = await _model.OnPostAsync();
 
         var redirect = Assert.IsType<RedirectToPageResult>(result);
-        Assert.Equal("/Products/Details", redirect.PageName);
-        Assert.Equal("phone", redirect.RouteValues!["type"]);
-        Assert.NotNull(redirect.RouteValues!["id"]);
+        Assert.Null(redirect.PageName);
+        Assert.Equal("Phone created successfully.", _model.SuccessMessage);
         Assert.NotNull(Context.Phones.FirstOrDefault(p => p.IMEI1 == "123456789012345"));
     }
 

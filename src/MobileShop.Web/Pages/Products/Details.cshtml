@@ -133,7 +133,7 @@
                 @foreach (var transaction in Model.Transactions)
                 {
                     <tr>
-                        <td>@transaction.Date.ToString("yyyy-MM-dd")</td>
+                        <td>@transaction.Date.ToJalaliDateString()</td>
                         <td>@transaction.Direction</td>
                         <td>@transaction.FinishedPrice.ToIrr()</td>
                         <td>@transaction.SellerLabel</td>

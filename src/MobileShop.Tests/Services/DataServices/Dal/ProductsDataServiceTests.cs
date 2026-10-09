@@ -1951,7 +1951,7 @@ public class ProductsDataServiceTests : RepoTestBase
     }
 
     [Fact]
-    public async Task CreatePhoneAsync_rejects_price_above_money_limit_without_writing()
+    public async Task CreatePhoneAsync_accepts_long_max_price()
     {
         SeedCatalog(out var phoneModel, out _);
 
@@ -1959,33 +1959,30 @@ public class ProductsDataServiceTests : RepoTestBase
         {
             ModelId = phoneModel.Id,
             ManufacturerId = phoneModel.ManufacturerId,
-            Price = MoneyLimits.MaxRials + 1,
+            SellerId = 1,
+            Price = long.MaxValue,
             IMEI1 = TestDataHelpers.GenerateImei()
         });
 
-        Assert.False(result.Succeeded);
-        Assert.Equal("The price is too large.", result.Message);
-        Assert.Equal(nameof(CreatePhoneInputModel.Price), result.ErrorField);
-        Assert.Empty(Context.Products);
+        Assert.True(result.Succeeded);
+        Assert.Equal(long.MaxValue, Context.Products.Single().Price);
     }
 
     [Fact]
-    public async Task CreateAppleIdAsync_rejects_price_above_money_limit_without_writing()
+    public async Task CreateAppleIdAsync_accepts_long_max_price()
     {
         SeedCatalog(out _, out _);
 
         var result = await _service.CreateAppleIdAsync(new MobileShop.Models.ViewModels.Web.BindModels.CreateAppleIdInputModel
         {
-            Price = MoneyLimits.MaxRials + 1,
+            SellerId = 1,
+            Price = long.MaxValue,
             Email = "limit@example.com",
             Password = "password",
         });
 
-        Assert.False(result.Succeeded);
-        Assert.Equal("The price is too large.", result.Message);
-        Assert.Equal(nameof(MobileShop.Models.ViewModels.Web.BindModels.CreateAppleIdInputModel.Price), result.ErrorField);
-        Assert.Empty(Context.Products);
-        Assert.Empty(Context.AppleIds);
+        Assert.True(result.Succeeded);
+        Assert.Equal(long.MaxValue, Context.Products.Single().Price);
     }
 
     [Fact]

@@ -90,7 +90,7 @@ public class ReportsDataService(
             .ToDictionary(group => group.Key, group => group.ToList());
 
         var intervalProfit = filtered
-            .GroupBy(transaction => GetPeriodStart(transaction.Date, interval))
+            .GroupBy(transaction => transaction.Date.ToJalaliPeriodStart(interval))
             .ToDictionary(
                 period => period.Key,
                 period => period.Sum(transaction => transaction.Direction == TransactionDirection.Sell
@@ -117,7 +117,7 @@ public class ReportsDataService(
                         : first.IsGlass ? first.ProductPrice : 0;
                     if (acquisitionCost != 0)
                     {
-                        var salePeriod = GetPeriodStart(salesInRange[0].Date, interval);
+                        var salePeriod = salesInRange[0].Date.ToJalaliPeriodStart(interval);
                         intervalProfit[salePeriod] -= acquisitionCost;
                     }
                 }
@@ -127,7 +127,7 @@ public class ReportsDataService(
             if (!first.IsGlass || buys.Count > 0)
                 continue;
 
-            var period = GetPeriodStart(first.Date, interval);
+            var period = first.Date.ToJalaliPeriodStart(interval);
             intervalProfit[period] -= first.ProductPrice;
         }
 
@@ -135,23 +135,6 @@ public class ReportsDataService(
             .OrderBy(period => period.Key)
             .Select(period => new ProfitLossTrendPoint(period.Key, period.Value))
             .ToList();
-    }
-
-    private static DateTime GetPeriodStart(DateTime date, ProfitLossInterval interval)
-        => interval switch
-        {
-            ProfitLossInterval.Year => new DateTime(date.Year, 1, 1),
-            ProfitLossInterval.Month => new DateTime(date.Year, date.Month, 1),
-            ProfitLossInterval.Week => StartOfWeek(date),
-            ProfitLossInterval.Day => date.Date,
-            ProfitLossInterval.Hour => new DateTime(date.Year, date.Month, date.Day, date.Hour, 0, 0, date.Kind),
-            _ => throw new ArgumentOutOfRangeException(nameof(interval), interval, "Unsupported profit/loss interval.")
-        };
-
-    private static DateTime StartOfWeek(DateTime date)
-    {
-        var daysSinceMonday = ((int)date.DayOfWeek + 6) % 7;
-        return date.Date.AddDays(-daysSinceMonday);
     }
 
     /// <inheritdoc />

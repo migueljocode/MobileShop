@@ -84,9 +84,11 @@
     <a asp-page="/Products/Index" class="btn btn-outline-secondary">Back to products</a>
 </div>
 
+<partial name="/Pages/Shared/_ProductCreateSuccess.cshtml" model="Model.SuccessMessage" />
+
 @if (!string.IsNullOrWhiteSpace(Model.Message))
 {
-    <div class="alert alert-success mt-3" role="status">@Model.Message</div>
+    <div class="alert alert-danger mt-3">@Model.Message</div>
 }
 
 <div class="modal fade" id="addGlassManufacturerModal" tabindex="-1" aria-hidden="true">

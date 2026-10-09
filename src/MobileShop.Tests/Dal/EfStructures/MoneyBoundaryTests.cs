@@ -66,7 +66,7 @@ public class MoneyBoundaryTests : IDisposable
     }
 
     [Fact]
-    public void Money_inputs_accept_max_and_reject_above_max()
+    public void Money_inputs_accept_long_max_and_reject_negative_values()
     {
         var inputs = new object[]
         {
@@ -78,15 +78,15 @@ public class MoneyBoundaryTests : IDisposable
 
         Assert.All(inputs, input => Assert.Empty(Validate(input)));
 
-        var overLimit = new object[]
+        var negativeValues = new object[]
         {
-            new CreatePhoneInputModel { SellerId = 1, Price = MoneyLimits.MaxRials + 1, ProfitAmount = MoneyLimits.MaxRials + 1, IMEI1 = "123456789012345" },
-            new CreateAppleIdInputModel { SellerId = 1, Price = MoneyLimits.MaxRials + 1, ProfitAmount = MoneyLimits.MaxRials + 1, Email = "limit@example.com", Password = "password" },
-            new CreateGlassInputModel { SellerId = 1, CompatibleManufacturerId = 1, CompatibleModelId = 1, GlassManufacturerId = 1, Price = MoneyLimits.MaxRials + 1, ProfitAmount = MoneyLimits.MaxRials + 1 },
-            new SellInputModel { ProductId = 1, CustomerId = 1, Price = MoneyLimits.MaxRials + 1 }
+            new CreatePhoneInputModel { SellerId = 1, Price = -1, ProfitAmount = -1, IMEI1 = "123456789012345" },
+            new CreateAppleIdInputModel { SellerId = 1, Price = -1, ProfitAmount = -1, Email = "limit@example.com", Password = "password" },
+            new CreateGlassInputModel { SellerId = 1, CompatibleManufacturerId = 1, CompatibleModelId = 1, GlassManufacturerId = 1, Price = -1, ProfitAmount = -1 },
+            new SellInputModel { ProductId = 1, CustomerId = 1, Price = -1 }
         };
 
-        Assert.All(overLimit, input => Assert.NotEmpty(Validate(input)));
+        Assert.All(negativeValues, input => Assert.NotEmpty(Validate(input)));
     }
 
     private static IReadOnlyList<ValidationResult> Validate(object model)

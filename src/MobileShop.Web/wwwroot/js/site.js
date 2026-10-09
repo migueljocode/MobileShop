@@ -12,9 +12,6 @@ window.formatMoneyInput = function (input) {
         input.type = 'text';
         input.inputMode = 'numeric';
     }
-
-    input.removeAttribute('data-val-number');
-    input.removeAttribute('data-val-range');
     const caret = input.selectionStart;
     const digitsBeforeCaret = caret === null ? null : input.value.slice(0, caret).replace(/\D/g, '').length;
     const digits = input.value.replace(/\D/g, '');
@@ -34,9 +31,20 @@ window.formatMoneyInput = function (input) {
     }
 };
 
+const moneyInputSelector =
+    '[data-price], [data-amount], [data-finished-price-input], input[inputmode="numeric"][name*="Price"], input[inputmode="numeric"][name*="ProfitAmount"]';
+
+if (typeof $ !== 'undefined' && $.validator) {
+    $.validator.setDefaults({
+        normalizer: function (value) {
+            return this.matches(moneyInputSelector) ? value.replace(/\s/g, '') : value;
+        }
+    });
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     const moneyInputs = document.querySelectorAll(
-        '[data-price], [data-amount], [data-finished-price], [data-finished-price-input], input[inputmode="numeric"][name*="Price"], input[inputmode="numeric"][name*="ProfitAmount"]'
+        `${moneyInputSelector}, [data-finished-price]`
     );
 
     moneyInputs.forEach(input => {
@@ -45,28 +53,6 @@ document.addEventListener('DOMContentLoaded', () => {
         window.formatMoneyInput(input);
         input.addEventListener('input', () => window.formatMoneyInput(input));
     });
-
-    // Add custom jQuery unobtrusive validator for money inputs that parses the formatted value
-    if (typeof $ !== 'undefined' && $.validator) {
-        $.validator.addMethod('money-range', function (value, element) {
-            const numericValue = window.parseMoneyInput(value);
-            if (isNaN(numericValue)) return false;
-            
-            const min = Number($(element).attr('min') || 0);
-            const max = Number($(element).attr('max') || Infinity);
-            
-            return numericValue >= min && numericValue <= max;
-        }, 'Please enter a value greater than or equal to {0}.');
-
-        $.validator.unobtrusive.adapters.add('range', ['min', 'max'], function (options) {
-            const element = options.element;
-            if ($(element).attr('inputmode') === 'numeric' || 
-                $(element).is('[data-price], [data-amount], [data-finished-price], [data-finished-price-input]')) {
-                options.rules['money-range'] = true;
-                delete options.rules['range'];
-            }
-        });
-    }
 
     document.addEventListener('submit', event => {
         moneyInputs.forEach(input => {

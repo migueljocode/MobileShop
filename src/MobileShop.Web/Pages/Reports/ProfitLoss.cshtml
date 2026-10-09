@@ -30,31 +30,14 @@
                 break;
         }
     }
-    DateTime GetPeriodStart(DateTime date, ProfitLossInterval interval) => interval switch
-    {
-        ProfitLossInterval.Year => new DateTime(date.Year, 1, 1),
-        ProfitLossInterval.Month => new DateTime(date.Year, date.Month, 1),
-        ProfitLossInterval.Week => date.Date.AddDays(-(((int)date.DayOfWeek + 6) % 7)),
-        ProfitLossInterval.Day => date.Date,
-        ProfitLossInterval.Hour => new DateTime(date.Year, date.Month, date.Day, date.Hour, 0, 0),
-        _ => date.Date
-    };
-    DateTime AddPeriod(DateTime period, ProfitLossInterval interval) => interval switch
-    {
-        ProfitLossInterval.Year => period.AddYears(1),
-        ProfitLossInterval.Month => period.AddMonths(1),
-        ProfitLossInterval.Week => period.AddDays(7),
-        ProfitLossInterval.Day => period.AddDays(1),
-        ProfitLossInterval.Hour => period.AddHours(1),
-        _ => period.AddDays(1)
-    };
+    // Use Jalali period calculations to match the service layer
     var trendValues = Model.TrendPoints.ToDictionary(row => row.PeriodStart, row => row.Profit);
-    var firstPeriod = GetPeriodStart(chartFrom, Model.TrendInterval);
+    var firstPeriod = chartFrom.ToJalaliPeriodStart(Model.TrendInterval);
     var chartEnd = chartTo;
-    var lastPeriod = GetPeriodStart(chartEnd, Model.TrendInterval);
+    var lastPeriod = chartEnd.ToJalaliPeriodStart(Model.TrendInterval);
     if (lastPeriod < firstPeriod) lastPeriod = firstPeriod;
     var trendPoints = new List<(DateTime Period, long Profit)>();
-    for (var period = firstPeriod; period <= lastPeriod; period = AddPeriod(period, Model.TrendInterval))
+    for (var period = firstPeriod; period <= lastPeriod; period = period.NextJalaliPeriod(Model.TrendInterval))
     {
         trendPoints.Add((period, trendValues.GetValueOrDefault(period)));
     }
@@ -79,7 +62,7 @@
     };
     var currentIndex = showMonthlyWeeks
         ? (DateTime.Now.Day - 1) / 7
-        : trendPoints.FindIndex(point => point.Period == GetPeriodStart(DateTime.Now, Model.TrendInterval));
+        : trendPoints.FindIndex(point => point.Period == DateTime.Now.ToJalaliPeriodStart(Model.TrendInterval));
     var chartLabels = System.Text.Json.JsonSerializer.Serialize(chartPoints.Select(point => point.Label));
     var chartTickLabels = chartLabels;
     var chartValues = System.Text.Json.JsonSerializer.Serialize(chartPoints.Select(point => point.Profit));
@@ -96,12 +79,12 @@
     };
     string FormatPeriod(DateTime period) => Model.TrendInterval switch
     {
-        ProfitLossInterval.Year => period.ToString("yyyy"),
-        ProfitLossInterval.Month => period.ToString("MMM yy"),
-        ProfitLossInterval.Week => $"Week of {period:M/d}",
-        ProfitLossInterval.Day => period.ToString("MMM d"),
-        ProfitLossInterval.Hour => period.ToString("h tt"),
-        _ => period.ToString("MMM d")
+        ProfitLossInterval.Year => period.ToJalaliYearString(),
+        ProfitLossInterval.Month => period.ToJalaliYearMonthString(),
+        ProfitLossInterval.Week => $"Week of {period.ToJalaliDateString()}",
+        ProfitLossInterval.Day => period.ToJalaliDateString(),
+        ProfitLossInterval.Hour => $"{period.ToJalaliDateString()} {period:HH:mm}",
+        _ => period.ToJalaliDateString()
     };
 }
 <h1>Profit and loss</h1>
@@ -131,8 +114,8 @@
     </div>
 
     <div id="manual-controls" class="@(Model.Mode == DateRangeMode.Manual ? "" : "d-none") row g-2">
-        <div class="col-md-3"><label class="form-label" asp-for="From">From</label><input type="date" id="From" name="From" class="form-control" value="@(Model.From?.ToString("yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture))" /></div>
-        <div class="col-md-3"><label class="form-label" asp-for="To">To</label><input type="date" id="To" name="To" class="form-control" value="@(Model.To?.ToString("yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture))" /></div>
+        <div class="col-md-3"><label class="form-label" asp-for="From">From</label><input type="text" id="From" name="From" class="form-control" data-jalali-date placeholder="1405/01/01" value="@(Model.From?.ToJalaliDateString())" /></div>
+        <div class="col-md-3"><label class="form-label" asp-for="To">To</label><input type="text" id="To" name="To" class="form-control" data-jalali-date placeholder="1405/12/29" value="@(Model.To?.ToJalaliDateString())" /></div>
     </div>
 
     @if (Model.EmptyDatabaseNote is not null)
@@ -198,7 +181,7 @@
                     <h2 id="profit-chart-title">@chartHeading</h2>
                     <p>Net result by @(showMonthlyWeeks ? "week" : Model.TrendInterval.ToString().ToLowerInvariant()) across the selected date range</p>
                 </div>
-                <span class="profit-chart-range">@Model.EffectiveFrom.ToString("MMM d, yyyy") – @Model.EffectiveTo.ToString("MMM d, yyyy")</span>
+                <span class="profit-chart-range">@Model.EffectiveFrom.ToJalaliDateString() – @Model.EffectiveTo.ToJalaliDateString()</span>
             </div>
             <div class="profit-chart-canvas">
                 <canvas id="profitLossChart"
@@ -220,11 +203,6 @@
 </tbody></table>
     </div>
 
-    @section Scripts {
-        <script src="~/lib/chart.js/chart.umd.min.js" asp-append-version="true"></script>
-        <script src="~/js/profit-loss-chart.js" asp-append-version="true"></script>
-    }
-
     <div class="tab-pane fade" id="distribution" role="tabpanel">
         <p class="lead">Total profit (Toman): <strong><span class="@(Model.TotalProfit >= 0 ? "text-success" : "text-danger")">@(Model.TotalProfit > 0 ? "+" : "")@Model.TotalProfit.ToToman()</span></strong></p>
         <table class="table table-striped"><thead><tr><th>Employee</th><th>Share %</th><th>Amount (Toman)</th></tr></thead><tbody>
@@ -239,3 +217,8 @@
 </tbody></table>
     </div>
 </div>
+
+@section Scripts {
+    <script src="~/lib/chart.js/chart.umd.min.js" asp-append-version="true"></script>
+    <script src="~/js/profit-loss-chart.js" asp-append-version="true"></script>
+}

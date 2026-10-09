@@ -4,6 +4,7 @@ public class CreateGlassModel(IProductsDataService dataService) : PageModel
 {
     [BindProperty] public CreateGlassInputModel Input { get; set; } = new();
     public string? Message { get; private set; }
+    [TempData] public string? SuccessMessage { get; set; }
     public IReadOnlyList<DropdownOptionViewModel> Manufacturers { get; private set; } = [];
     public IReadOnlyList<DropdownOptionViewModel> CompatibleModels { get; private set; } = [];
 
@@ -51,9 +52,8 @@ public class CreateGlassModel(IProductsDataService dataService) : PageModel
             return Page();
         }
 
-        Message = $"Created {Input.Count} glass product(s) successfully.";
-        await PopulateDropdownsAsync();
-        return Page();
+        SuccessMessage = $"Created {Input.Count} glass product(s) successfully.";
+        return RedirectToPage();
     }
 
     private async Task PopulateDropdownsAsync()

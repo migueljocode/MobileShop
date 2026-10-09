@@ -31,10 +31,10 @@
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    @await RenderSectionAsync("Scripts", required: false)
     <script src="~/js/site.js" asp-append-version="true"></script>
     <script src="~/js/navigation-menu.js" asp-append-version="true"></script>
     <script src="~/js/person-picker.js" asp-append-version="true"></script>
-
-    @await RenderSectionAsync("Scripts", required: false)
+    <script src="~/js/jalali-datepicker.js" asp-append-version="true"></script>
 </body>
 </html>

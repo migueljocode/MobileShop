@@ -336,6 +336,59 @@ public class TransactionsDataServiceTests : RepoTestBase
     }
 
     [Fact]
+    public async Task RecordSellAsync_rejects_a_future_sale_date()
+    {
+        TestDataHelpers.SeedShopSentinels(Context);
+        var product = TestDataHelpers.CreateProduct(Context);
+        var customer = AddCustomer("Sara", "Ahmadi");
+
+        var result = await _service.RecordSellAsync(new SellInputModel
+        {
+            ProductId = product.Id,
+            CustomerId = customer.Id,
+            Price = 115_000,
+            Date = DateTime.Today.AddMonths(1),
+        });
+
+        Assert.False(result.Succeeded);
+        Assert.Equal("The sale date cannot be in the future.", result.Message);
+        Assert.Equal(nameof(SellInputModel.Date), result.ErrorField);
+        Assert.Empty(Context.Transactions);
+    }
+
+    [Fact]
+    public async Task RecordSellAsync_accepts_today_and_backdated_sale_dates()
+    {
+        TestDataHelpers.SeedShopSentinels(Context);
+        var todaysProduct = TestDataHelpers.CreateProduct(Context);
+        var earlierProduct = TestDataHelpers.CreateProduct(Context);
+        var customer = AddCustomer("Sara", "Ahmadi");
+
+        var todayResult = await _service.RecordSellAsync(new SellInputModel
+        {
+            ProductId = todaysProduct.Id,
+            CustomerId = customer.Id,
+            Price = 115_000,
+            Date = DateTime.Today.AddHours(23),
+        });
+        var earlierResult = await _service.RecordSellAsync(new SellInputModel
+        {
+            ProductId = earlierProduct.Id,
+            CustomerId = customer.Id,
+            Price = 100_000,
+            Date = DateTime.Today.AddDays(-3),
+        });
+
+        Assert.True(todayResult.Succeeded);
+        Assert.True(earlierResult.Succeeded);
+        Assert.Equal(2, Context.Transactions.Count());
+        Assert.Equal(DateTime.Today.AddHours(23),
+            Context.Transactions.Single(t => t.Id == todayResult.EntityId).Date);
+        Assert.Equal(DateTime.Today.AddDays(-3),
+            Context.Transactions.Single(t => t.Id == earlierResult.EntityId).Date);
+    }
+
+    [Fact]
     public async Task SearchSelectableProductsAsync_filters_by_direction_and_query()
     {
         var phoneProduct = TestDataHelpers.CreateProduct(Context);

@@ -1,4 +1,6 @@
 
+using Moq;
+
 namespace MobileShop.Tests.Services.DataServices.Dal;
 
 public class ReportsDataServiceTests : RepoTestBase
@@ -230,6 +232,43 @@ public class ReportsDataServiceTests : RepoTestBase
         Assert.Equal(20, row.Sold);
         Assert.Equal(10, row.Profit);
         Assert.Equal(100, row.ProfitPercent);
+    }
+
+    [Fact]
+    public async Task GetProfitLossRowsAsync_includes_glass_sale_recorded_through_transactions_service()
+    {
+        var seller = AddSeller();
+        var customer = AddCustomer();
+        var product = TestDataHelpers.CreateProduct(Context, 115_000);
+        Context.Glasses.Add(new Glass { ProductId = product.Id });
+        Context.SaveChanges();
+        AddTransaction(product, seller.Id, customer.Id, TransactionDirection.Buy, DateTime.Now, 100_000);
+
+        var transactionsService = new TransactionsDataService(
+            new BaseRepo<Transaction>(Context),
+            new BaseRepo<Seller>(Context),
+            new BaseRepo<Customer>(Context),
+            new BaseRepo<Phone>(Context),
+            new BaseRepo<AppleId>(Context),
+            new BaseRepo<Product>(Context),
+            Context,
+            Mock.Of<IPdfGenerator>(),
+            NullLogger<TransactionsDataService>.Instance);
+        var sale = await transactionsService.RecordSellAsync(new SellInputModel
+        {
+            ProductId = product.Id,
+            CustomerId = customer.Id,
+            Price = 115_000,
+            Date = DateTime.Now,
+        });
+
+        Assert.True(sale.Succeeded);
+        var rows = await _service.GetProfitLossRowsAsync(DateTime.Today, DateTime.Today);
+
+        var row = Assert.Single(rows);
+        Assert.Equal(100_000, row.Bought);
+        Assert.Equal(115_000, row.Sold);
+        Assert.Equal(15_000, row.Profit);
     }
 
     [Fact]

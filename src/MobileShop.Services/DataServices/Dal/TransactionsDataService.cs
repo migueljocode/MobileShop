@@ -271,6 +271,14 @@ public class TransactionsDataService(
             return new ServiceResult(false, input.Price > MoneyLimits.MaxRials ? "The price is too large." : "The sale could not be recorded. Check the product and price.", nameof(SellInputModel.Price), null);
         }
 
+        // A sale dated after today is always a data-entry mistake, and the Reports page can never
+        // surface it (every preset ends at today), so the sale would silently disappear.
+        if (input.Date is { } saleDate && saleDate.Date > DateTime.Today)
+        {
+            Logger.LogWarning("RecordSell rejected: sale date {Date} is in the future", saleDate);
+            return new ServiceResult(false, "The sale date cannot be in the future.", nameof(SellInputModel.Date), null);
+        }
+
         var alreadySold = (await transactions.FindAllAsync(transaction => transaction.ProductId == input.ProductId))
             .Any(transaction => transaction.Direction == TransactionDirection.Sell);
 

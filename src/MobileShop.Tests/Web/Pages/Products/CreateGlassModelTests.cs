@@ -95,8 +95,8 @@ public class CreateGlassModelTests : RepoTestBase
         var (manufacturer, model) = SeedModel();
         _model.Input = ValidInput(manufacturer.Id, model.Id, Context.Manufacturers.First(m => m.Name == "Samsung").Id);
         var result = await _model.OnPostAsync();
-        Assert.IsType<PageResult>(result);
-        Assert.Equal("Created 3 glass product(s) successfully.", _model.Message);
+        Assert.Null(Assert.IsType<RedirectToPageResult>(result).PageName);
+        Assert.Equal("Created 3 glass product(s) successfully.", _model.SuccessMessage);
         Assert.Equal(3, Context.Products.Count());
         Assert.Equal(3, Context.Transactions.Count(t => t.Direction == TransactionDirection.Buy));
         Assert.All(Context.Transactions.Where(t => t.Direction == TransactionDirection.Buy), t =>
@@ -109,12 +109,6 @@ public class CreateGlassModelTests : RepoTestBase
         var glassCategoryId = Context.Categories.Single(c => c.Name == "Glass").Id;
         Assert.All(Context.Products, product => Assert.Equal(glassCategoryId, Context.Models.Single(m => m.Id == product.ModelId).CategoryId));
 
-        var secondResult = await _model.OnPostAsync();
-        Assert.IsType<PageResult>(secondResult);
-        Assert.Equal("Created 3 glass product(s) successfully.", _model.Message);
-        Assert.Equal(2, _model.Manufacturers.Count);
-        Assert.Single(_model.CompatibleModels);
-        Assert.Equal(6, Context.Products.Count());
     }
 
     [Fact]
@@ -128,8 +122,9 @@ public class CreateGlassModelTests : RepoTestBase
 
         var result = await _model.OnPostAsync();
 
-        Assert.IsType<PageResult>(result);
+        Assert.IsType<RedirectToPageResult>(result);
         Assert.True(_model.ModelState.IsValid);
+        Assert.Equal("Created 3 glass product(s) successfully.", _model.SuccessMessage);
         Assert.All(Context.Products, product => Assert.Equal(30, product.Price));
         Assert.All(Context.Transactions.Where(t => t.Direction == TransactionDirection.Buy), t => Assert.Equal(10, t.FinishedPrice));
     }

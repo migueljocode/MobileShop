@@ -5,6 +5,7 @@ public class CreateAppleIdModel(
 {
     [BindProperty] public CreateAppleIdInputModel Input { get; set; } = new();
     public string? Message { get; private set; }
+    [TempData] public string? SuccessMessage { get; set; }
 
     public async Task<IActionResult> OnPostAsync()
     {
@@ -23,6 +24,7 @@ public class CreateAppleIdModel(
             return Page();
         }
 
-        return RedirectToPage("/Products/Details", new { id = result.EntityId, type = "appleid" });
+        SuccessMessage = "Apple ID created successfully.";
+        return RedirectToPage();
     }
 }

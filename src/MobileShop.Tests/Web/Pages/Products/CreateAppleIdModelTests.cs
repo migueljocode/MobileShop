@@ -75,7 +75,8 @@ public class CreateAppleIdModelTests : RepoTestBase
         var result = await _model.OnPostAsync();
 
         var redirect = Assert.IsType<RedirectToPageResult>(result);
-        Assert.Equal("/Products/Details", redirect.PageName);
+        Assert.Null(redirect.PageName);
+        Assert.Equal("Apple ID created successfully.", _model.SuccessMessage);
 
         var appleId = Context.AppleIds.Single(a => a.Email == "new.appleid@example.com");
         Assert.Equal("plaintext-pass", appleId.Password);

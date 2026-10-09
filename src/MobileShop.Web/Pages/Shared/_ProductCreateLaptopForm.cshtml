@@ -18,7 +18,7 @@
     <div class="col-md-6"><label class="form-label">Second-hand notes</label><input name="input.SecondHandNotes" class="form-control" maxlength="500" /></div>
     <div class="col-12"><div class="form-check"><input name="input.HasGuarantee" value="true" type="checkbox" class="form-check-input" /><label class="form-check-label">Has guarantee</label></div></div>
     <div class="col-md-6"><label class="form-label">Guarantee corporation</label><select name="input.GuaranteeCorporation" class="form-select"><option value="">Shop Warranty</option>@foreach (var corporation in corporations) { <option value="@corporation">@corporation</option> }</select></div>
-    <div class="col-md-6"><label class="form-label">Guarantee expiry</label><input name="input.GuaranteeExpiry" class="form-control" type="date" /></div>
+    <div class="col-md-6"><label class="form-label">Guarantee expiry</label><input name="input.GuaranteeExpiry" class="form-control" type="text" data-jalali-date placeholder="1405/12/29" /></div>
     <div class="col-12"><label class="form-label">Guarantee notes</label><input name="input.GuaranteeNotes" class="form-control" maxlength="500" /></div>
     <div class="col-12"><label class="form-label">Device notes</label><textarea name="input.Notes" class="form-control" rows="2" maxlength="500">@Model.Notes</textarea></div>
 </div>

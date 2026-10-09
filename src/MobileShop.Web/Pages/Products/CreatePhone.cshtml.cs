@@ -5,6 +5,7 @@ public class CreatePhoneModel(
 {
     [BindProperty] public CreatePhoneInputModel Input { get; set; } = new();
     public string? Message { get; private set; }
+    [TempData] public string? SuccessMessage { get; set; }
     public IReadOnlyList<DropdownOptionViewModel> Manufacturers { get; private set; } = [];
     public IReadOnlyList<DropdownOptionViewModel> Models { get; private set; } = [];
     public IReadOnlyList<DropdownOptionViewModel> Colors { get; private set; } = [];
@@ -86,7 +87,8 @@ public class CreatePhoneModel(
             return Page();
         }
 
-        return RedirectToPage("/Products/Details", new { id = result.EntityId, type = "phone" });
+        SuccessMessage = "Phone created successfully.";
+        return RedirectToPage();
     }
 
     public async Task<IActionResult> OnPostCreateColorAsync(string name)

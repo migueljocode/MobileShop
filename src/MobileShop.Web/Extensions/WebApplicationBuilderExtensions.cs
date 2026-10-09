@@ -1,3 +1,5 @@
+using MobileShop.Web.Infrastructure;
+
 namespace MobileShop.Web.Extensions;
 
 /// <summary>
@@ -17,7 +19,8 @@ public static class WebApplicationBuilderExtensions
         {
             options.Conventions.AuthorizeFolder("/");
             options.Conventions.AllowAnonymousToPage("/Account/Login");
-        });
+        })
+        .AddMvcOptions(options => options.ModelBinderProviders.Insert(0, new JalaliDateTimeModelBinderProvider()));
         builder.Services
             .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
             .AddCookie(options =>
