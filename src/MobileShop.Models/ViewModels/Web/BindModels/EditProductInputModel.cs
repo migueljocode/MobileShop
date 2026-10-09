@@ -53,10 +53,11 @@ public sealed class EditProductInputModel
     public string? SecondHandNotes { get; set; }
 
     // Phone-specific
-    [RegularExpression(@"^[0-9]{15}$", ErrorMessage = "IMEI must be exactly 15 digits.")]
+    // Empty is allowed so optional IMEI2 (and blank IMEI1 on non-phone posts) does not block save.
+    [RegularExpression(@"^$|^[0-9]{15}$", ErrorMessage = "IMEI must be exactly 15 digits.")]
     public string? IMEI1 { get; set; }
 
-    [RegularExpression(@"^[0-9]{15}$", ErrorMessage = "IMEI must be exactly 15 digits.")]
+    [RegularExpression(@"^$|^[0-9]{15}$", ErrorMessage = "IMEI must be exactly 15 digits.")]
     public string? IMEI2 { get; set; }
 
     public int? PartNumberId { get; set; }
