@@ -1,0 +1,8 @@
+@model (string Title, string? Hint)
+<div class="empty-state" role="status">
+    <p class="empty-state__title">@Model.Title</p>
+    @if (Model.Hint is not null)
+    {
+        <p class="empty-state__hint">@Model.Hint</p>
+    }
+</div>

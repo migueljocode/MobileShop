@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - MobileShop.Web</title>
+    <title>@ViewData["Title"] - MobileShop</title>
     <script type="importmap"></script>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/tokens.css" asp-append-version="true" />
@@ -14,15 +14,16 @@
     <link rel="stylesheet" href="~/MobileShop.Web.styles.css" asp-append-version="true" />
 </head>
 <body class="has-floating-navigation">
+    <a class="skip-link" href="#main">Skip to content</a>
     <div class="container">
-        <main role="main" class="mt-3 pb-3">
+        <main id="main" role="main" class="mt-3 pb-3">
             @RenderBody()
         </main>
     </div>
 
     <footer class="border-top footer text-muted">
         <div class="container">
-            &copy; 2026 - MobileShop.Web - <a asp-area="" asp-page="/Privacy">Privacy</a>
+            &copy; 2026 MobileShop - <a asp-area="" asp-page="/Privacy">Privacy</a>
         </div>
     </footer>
 

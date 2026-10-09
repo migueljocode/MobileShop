@@ -121,34 +121,14 @@ a:hover {
   width: min(100%, 29rem);
   padding: clamp(1.6rem, 5vw, 2.8rem);
   overflow: hidden;
-  border: 1px solid rgba(190, 204, 241, 0.2);
-  border-radius: 1.5rem;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-panel);
   text-align: center;
-  background:
-    radial-gradient(ellipse at 50% 0%, rgba(115, 136, 255, 0.14), transparent 55%),
-    linear-gradient(145deg, rgba(255, 255, 255, 0.075), rgba(255, 255, 255, 0.012) 58%),
-    rgba(12, 18, 30, 0.76);
-  box-shadow:
-    0 1.5rem 4rem rgba(2, 6, 14, 0.3),
-    0 0 2rem rgba(93, 116, 255, 0.11),
-    inset 0 1px 0 rgba(235, 241, 255, 0.12);
+  color: var(--ink);
+  background: var(--panel);
+  box-shadow: none;
   -webkit-backdrop-filter: blur(28px) saturate(155%);
   backdrop-filter: blur(28px) saturate(155%);
-}
-
-.account-login-card::before {
-  position: absolute;
-  z-index: -1;
-  top: -7rem;
-  left: 50%;
-  width: 18rem;
-  height: 14rem;
-  border-radius: 50%;
-  background: rgba(103, 126, 255, 0.13);
-  content: "";
-  filter: blur(4rem);
-  transform: translateX(-50%);
-  pointer-events: none;
 }
 
 .account-login-mark {
@@ -157,11 +137,11 @@ a:hover {
   height: 3.5rem;
   margin: 0 auto 1.25rem;
   place-items: center;
-  border: 1px solid rgba(185, 198, 255, 0.36);
-  border-radius: 1.15rem;
-  color: #dce3ff;
-  background: linear-gradient(145deg, rgba(115, 136, 255, 0.34), rgba(90, 110, 199, 0.12));
-  box-shadow: 0 0 1.5rem rgba(115, 136, 255, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-panel);
+  color: var(--accent);
+  background: var(--panel-raised);
+  box-shadow: none;
 }
 
 .account-login-mark svg {
@@ -175,7 +155,7 @@ a:hover {
 
 .account-login-eyebrow {
   margin-bottom: 0.45rem;
-  color: #b8c6ff;
+  color: var(--ink-muted);
   font-size: 0.74rem;
   font-weight: 700;
   letter-spacing: 0.13em;
@@ -189,7 +169,7 @@ a:hover {
 
 .account-login-description {
   margin-bottom: 1.8rem;
-  color: var(--app-muted);
+  color: var(--ink-muted);
   font-size: 0.94rem;
 }
 
@@ -207,11 +187,12 @@ a:hover {
 .account-login-field .form-control {
   min-height: 3.05rem;
   padding-inline: 0.95rem;
-  background-color: rgba(5, 10, 19, 0.48);
+  background-color: var(--ground);
 }
 
 .account-login-field .form-control:focus {
-  box-shadow: 0 0 0 0.2rem rgba(115, 136, 255, 0.15), 0 0 1.15rem rgba(115, 136, 255, 0.14);
+  border-color: var(--accent);
+  box-shadow: var(--focus-ring);
 }
 
 .password-visibility-toggle {
@@ -263,12 +244,12 @@ a:hover {
   justify-content: center;
   gap: 0.6rem;
   margin-top: 0.3rem;
-  border-radius: 0.85rem;
-  box-shadow: 0 0.45rem 1.1rem rgba(72, 94, 217, 0.28), 0 0 1rem rgba(115, 136, 255, 0.14);
+  border-radius: var(--r-control);
+  box-shadow: none;
 }
 
 .account-login-submit:hover {
-  box-shadow: 0 0.55rem 1.35rem rgba(72, 94, 217, 0.36), 0 0 1.25rem rgba(115, 136, 255, 0.22);
+  box-shadow: none;
 }
 
 .account-login-submit svg {
@@ -291,10 +272,10 @@ a:hover {
 
 .account-login-validation.validation-summary-errors {
   padding: 0.75rem 0.9rem;
-  border: 1px solid rgba(236, 127, 148, 0.28);
-  border-radius: 0.75rem;
-  color: #ffadb8;
-  background: rgba(154, 54, 74, 0.16);
+  border: 1px solid var(--danger);
+  border-radius: var(--r-control);
+  color: var(--danger);
+  background: color-mix(in srgb, var(--danger) 16%, transparent);
   font-size: 0.88rem;
 }
 
@@ -505,12 +486,11 @@ a:hover {
   margin: 1.4rem 0 1.8rem;
   padding: clamp(1rem, 2vw, 1.5rem);
   overflow: hidden;
-  border: 1px solid rgba(190, 204, 241, 0.15);
-  border-radius: 1.2rem;
-  background:
-    radial-gradient(ellipse at 50% -20%, rgba(115, 136, 255, 0.11), transparent 62%),
-    rgba(9, 15, 26, 0.42);
-  box-shadow: inset 0 1px 0 rgba(235, 241, 255, 0.055), 0 0.7rem 1.8rem rgba(2, 6, 14, 0.12);
+  border: 1px solid var(--line);
+  border-radius: var(--r-panel);
+  color: var(--ink);
+  background: var(--panel);
+  box-shadow: none;
 }
 
 .profit-chart-heading {
@@ -528,17 +508,17 @@ a:hover {
 
 .profit-chart-heading p {
   margin: 0;
-  color: var(--app-muted);
+  color: var(--ink-muted);
   font-size: 0.85rem;
 }
 
 .profit-chart-range {
   flex: 0 0 auto;
   padding: 0.35rem 0.65rem;
-  border: 1px solid var(--app-edge);
+  border: 1px solid var(--line);
   border-radius: 999px;
-  color: #c4cde1;
-  background: rgba(255, 255, 255, 0.035);
+  color: var(--ink-muted);
+  background: var(--panel-raised);
   font-size: 0.73rem;
 }
 
@@ -553,7 +533,7 @@ a:hover {
   align-items: center;
   gap: 0.5rem;
   margin: 0.2rem 0 0 0.45rem;
-  color: #b8c4dd;
+  color: var(--ink-muted);
   font-size: 0.78rem;
 }
 
@@ -561,15 +541,15 @@ a:hover {
   width: 1.1rem;
   height: 0.18rem;
   border-radius: 999px;
-  background: #a8b7ff;
-  box-shadow: 0 0 0.55rem rgba(129, 151, 255, 0.55);
+  background: var(--accent);
+  box-shadow: none;
 }
 
 .profit-chart-empty {
   display: grid;
   min-height: 12rem;
   place-items: center;
-  color: var(--app-muted);
+  color: var(--ink-muted);
   font-size: 0.92rem;
 }
 

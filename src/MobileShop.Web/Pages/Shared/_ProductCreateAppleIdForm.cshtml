@@ -1,9 +1,19 @@
 @model MobileShop.Models.ViewModels.Web.BindModels.CreateAppleIdInputModel
 <div class="row g-3" data-create-product-type="appleid">
-    <div class="col-md-4"><label class="form-label">Paid price (Toman)</label><input name="input.Price" class="form-control" inputmode="numeric" min="0" value="@Model.Price" /></div>
-    <div class="col-md-4"><label class="form-label">Profit %</label><input name="input.ProfitPercent" class="form-control" type="number" step="0.01" min="0" value="@Model.ProfitPercent" /></div>
-    <div class="col-md-4"><label class="form-label">Profit amount (Toman)</label><input name="input.ProfitAmount" class="form-control" inputmode="numeric" min="0" value="@Model.ProfitAmount" /></div>
-    <div class="col-12"><label class="form-label">Email</label><input name="input.Email" class="form-control" type="email" value="@Model.Email" autocomplete="off" /></div>
-    <div class="col-12"><label class="form-label">Password</label><input name="input.Password" class="form-control" type="password" value="@Model.Password" autocomplete="off" /></div>
-    <div class="col-12"><label class="form-label">Notes</label><textarea name="input.Notes" class="form-control" rows="3">@Model.Notes</textarea></div>
+    <div class="form-section col-12">
+        <h2 class="form-section__title">Pricing</h2>
+        <div class="row g-3">
+            <div class="col-md-4"><label class="form-label">Paid price (Toman)</label><input name="input.Price" class="form-control" inputmode="numeric" min="0" value="@Model.Price" /></div>
+            <div class="col-md-4"><label class="form-label">Profit %</label><input name="input.ProfitPercent" class="form-control" type="number" step="0.01" min="0" value="@Model.ProfitPercent" /></div>
+            <div class="col-md-4"><label class="form-label">Profit amount (Toman)</label><input name="input.ProfitAmount" class="form-control" inputmode="numeric" min="0" value="@Model.ProfitAmount" /></div>
+        </div>
+    </div>
+    <div class="form-section col-12">
+        <h2 class="form-section__title">Apple ID details</h2>
+        <div class="row g-3">
+            <div class="col-12"><label class="form-label">Email</label><input name="input.Email" class="form-control" type="email" value="@Model.Email" autocomplete="off" /></div>
+            <div class="col-12"><label class="form-label">Password</label><input name="input.Password" class="form-control" type="password" value="@Model.Password" autocomplete="off" /></div>
+            <div class="col-12"><label class="form-label">Notes</label><textarea name="input.Notes" class="form-control" rows="3">@Model.Notes</textarea></div>
+        </div>
+    </div>
 </div>

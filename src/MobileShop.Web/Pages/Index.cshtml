@@ -4,43 +4,24 @@
     ViewData["Title"] = "Dashboard";
 }
 
-<div class="text-center">
-    <h1 class="display-4">MobileShop</h1>
-    <p class="lead">Inventory &amp; sales dashboard</p>
-</div>
+<div class="page-head"><div><h1 class="page-head__title">Dashboard</h1><p class="page-head__sub">Inventory and sales</p></div></div>
 
-<div class="row mb-4 g-3">
-    <div class="col-md-3">
-        <div class="card text-bg-success h-100">
-            <div class="card-body text-center">
-                <h2 class="card-title">@Model.Stock.PhonesInStock</h2>
-                <p class="card-text">Phones in stock</p>
-            </div>
-        </div>
+<div class="stat-grid">
+    <div class="stat">
+        <div class="stat__value num">@Model.Stock.PhonesInStock</div>
+        <div class="stat__label">Phones in stock</div>
     </div>
-    <div class="col-md-3">
-        <div class="card text-bg-warning h-100">
-            <div class="card-body text-center">
-                <h2 class="card-title">@Model.Stock.PhonesSecondHand</h2>
-                <p class="card-text">Second-hand phones</p>
-            </div>
-        </div>
+    <div class="stat">
+        <div class="stat__value num">@Model.Stock.PhonesSecondHand</div>
+        <div class="stat__label">Second-hand phones</div>
     </div>
-    <div class="col-md-3">
-        <div class="card text-bg-info h-100">
-            <div class="card-body text-center">
-                <h2 class="card-title">@Model.Stock.PhonesSecondHandAvailable</h2>
-                <p class="card-text">Second-hand available</p>
-            </div>
-        </div>
+    <div class="stat">
+        <div class="stat__value num">@Model.Stock.PhonesSecondHandAvailable</div>
+        <div class="stat__label">Second-hand available</div>
     </div>
-    <div class="col-md-3">
-        <div class="card text-bg-primary h-100">
-            <div class="card-body text-center">
-                <h2 class="card-title">@Model.Stock.AppleIdsInStock</h2>
-                <p class="card-text">Apple IDs in stock</p>
-            </div>
-        </div>
+    <div class="stat">
+        <div class="stat__value num">@Model.Stock.AppleIdsInStock</div>
+        <div class="stat__label">Apple IDs in stock</div>
     </div>
 </div>
 

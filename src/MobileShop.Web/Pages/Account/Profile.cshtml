@@ -4,17 +4,19 @@
     ViewData["Title"] = "Profile";
 }
 
+<div class="page-head"><div><h1 class="page-head__title">Profile</h1><p class="page-head__sub" dir="auto">@Model.Username</p></div></div>
+
 <div class="row justify-content-center">
     <div class="col-md-6">
-        <div class="card shadow-sm">
-            <div class="card-body">
-                <h1 class="card-title h4 mb-3">Profile</h1>
-                <hr class="mb-4">
+        <section class="form-section" aria-label="Account details">
+            <h2 class="form-section__title">Account details</h2>
                 <dl class="row">
                     <dt class="col-sm-3 text-nowrap">Username</dt>
-                    <dd class="col-sm-9 text-break">@Model.Username</dd>
+                    <dd class="col-sm-9 text-break" dir="auto">@Model.Username</dd>
                 </dl>
-                <hr class="my-4">
+        </section>
+        <section class="form-section" aria-label="Change username or password">
+            <h2 class="form-section__title">Change username or password</h2>
                 <form method="post" asp-antiforgery="true">
                     <div asp-validation-summary="All" class="text-danger"></div>
                     <div class="mb-3">
@@ -86,14 +88,15 @@
                         </div>
                         <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
                     </div>
-                    <button type="submit" class="btn btn-primary w-100">Save changes</button>
+                    <div class="action-bar">
+                        <button type="submit" class="btn btn-primary">Save changes</button>
+                    </div>
                 </form>
                 @if (!string.IsNullOrWhiteSpace(Model.Message))
                 {
-                    <div class="alert alert-info mt-3">@Model.Message</div>
+                    <div class="alert alert-info mt-3" role="status">@Model.Message</div>
                 }
-            </div>
-        </div>
+        </section>
     </div>
 </div>
 

@@ -3,17 +3,39 @@
 @{
     ViewData["Title"] = "Transaction details";
 }
-<h1>Transaction details</h1>
+<div class="page-head">
+    <div>
+        <h1 class="page-head__title">Transaction details</h1>
+    </div>
+    <div class="page-head__actions">
+        @if (Model.Transaction is not null)
+        {
+            <a asp-page="/Transactions/Details" asp-page-handler="Factor" asp-route-id="@Model.Id" class="btn btn-outline-secondary" target="_blank" rel="noopener">Factor</a>
+        }
+        <a asp-page="/Transactions/Index" class="btn btn-outline-primary">Back to transactions</a>
+    </div>
+</div>
 @if (Model.Transaction is not null)
 {
-    <dl class="row">
-        <dt class="col-sm-3">Direction</dt><dd class="col-sm-9">@Model.Transaction.Direction</dd>
-        <dt class="col-sm-3">Date</dt><dd class="col-sm-9">@Model.Transaction.Date.ToJalaliDateTimeString()</dd>
-        <dt class="col-sm-3">Product</dt><dd class="col-sm-9">@Model.Transaction.ProductLabel</dd>
-        <dt class="col-sm-3">Finished price (Toman)</dt><dd class="col-sm-9">@Model.Transaction.FinishedPrice.ToIrr()</dd>
-        <dt class="col-sm-3">Seller</dt><dd class="col-sm-9">@Model.Transaction.SellerLabel</dd>
-        <dt class="col-sm-3">Customer</dt><dd class="col-sm-9">@Model.Transaction.CustomerLabel</dd>
-    </dl>
-    <a asp-page="/Transactions/Details" asp-page-handler="Factor" asp-route-id="@Model.Id" class="btn btn-outline-secondary" target="_blank" rel="noopener">Factor</a>
-    <a asp-page="/Transactions/Index" class="btn btn-outline-primary ms-2">Back to transactions</a>
+    <div class="form-section">
+        <h2 class="form-section__title">Parties</h2>
+        <dl class="row">
+            <dt class="col-sm-4 text-muted">Seller</dt><dd class="col-sm-8">@Model.Transaction.SellerLabel</dd>
+            <dt class="col-sm-4 text-muted">Customer</dt><dd class="col-sm-8">@Model.Transaction.CustomerLabel</dd>
+        </dl>
+    </div>
+    <div class="form-section">
+        <h2 class="form-section__title">Items</h2>
+        <dl class="row">
+            <dt class="col-sm-4 text-muted">Product</dt><dd class="col-sm-8">@Model.Transaction.ProductLabel</dd>
+            <dt class="col-sm-4 text-muted">Direction</dt><dd class="col-sm-8">@Model.Transaction.Direction</dd>
+            <dt class="col-sm-4 text-muted">Date</dt><dd class="col-sm-8">@Model.Transaction.Date.ToJalaliDateTimeString()</dd>
+        </dl>
+    </div>
+    <div class="form-section">
+        <h2 class="form-section__title">Totals</h2>
+        <dl class="row">
+            <dt class="col-sm-4 text-muted">Finished price (Toman)</dt><dd class="col-sm-8 num">@Model.Transaction.FinishedPrice.ToIrr()</dd>
+        </dl>
+    </div>
 }

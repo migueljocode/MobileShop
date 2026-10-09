@@ -4,11 +4,8 @@
     ViewData["Title"] = "Sign out";
 }
 
-<div class="text-center">
-    <h1 class="h4">Sign out</h1>
-    <p>You are about to sign out. Continue?</p>
-    <form method="post" asp-antiforgery="true">
-        <button type="submit" class="btn btn-danger">Sign out</button>
-        <a class="btn btn-link" asp-page="/Index">Cancel</a>
-    </form>
-</div>
+<div class="page-head"><div><h1 class="page-head__title">Sign out</h1><p class="page-head__sub">You are about to sign out. Continue?</p></div></div>
+<form method="post" asp-antiforgery="true">
+    <button type="submit" class="btn btn-danger">Sign out</button>
+    <a class="btn btn-link" asp-page="/Index">Cancel</a>
+</form>

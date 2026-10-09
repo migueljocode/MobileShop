@@ -4,25 +4,23 @@
     ViewData["Title"] = "Second-hand";
 }
 
-<h1>Second-hand items</h1>
-
-<p class="text-muted">Total items: <strong>@Model.Products.Count</strong></p>
+<div class="page-head"><div><h1 class="page-head__title">Second-hand items</h1><p class="page-head__sub">Total items: @Model.Products.Count</p></div><div class="page-head__actions"><a asp-page="/Products/Index" class="btn btn-outline-secondary">Back to products</a></div></div>
 
 @if (Model.Products.Count == 0)
 {
-    <p class="text-muted">No second-hand items are currently listed.</p>
+    <partial name="_EmptyState" model='("No second-hand items are currently listed", "Add a second-hand product to see it here.")' />
 }
 else
 {
-    <table class="table table-striped">
+    <table class="data-table">
         <thead>
             <tr>
-                <th>Type</th>
-                <th>Product</th>
-                <th>Identifier</th>
-                <th>Color</th>
-                <th>Status</th>
-                <th></th>
+                <th scope="col">Type</th>
+                <th scope="col">Product</th>
+                <th scope="col">Identifier</th>
+                <th scope="col">Color</th>
+                <th scope="col">Status</th>
+                <th scope="col"><span class="visually-hidden">Actions</span></th>
             </tr>
         </thead>
         <tbody>
@@ -30,12 +28,12 @@ else
             {
                 <tr>
                     <td>@product.Type</td>
-                    <td>@product.Name</td>
-                    <td>@product.Identifier</td>
-                    <td>@(string.IsNullOrWhiteSpace(product.Color) ? "N/A" : product.Color)</td>
+                    <td dir="auto">@product.Name</td>
+                    <td dir="auto" class="num">@product.Identifier</td>
+                    <td dir="auto">@(string.IsNullOrWhiteSpace(product.Color) ? "N/A" : product.Color)</td>
                     <td>
-                        <span class="badge @(product.IsSold ? "text-bg-secondary" : "text-bg-success")">@(product.IsSold ? "Sold" : "Available")</span>
-                        <span class="badge text-bg-warning ms-1">Second-hand</span>
+                        <span class="status-chip status-chip--@(product.IsSold ? "sold" : "available")">@(product.IsSold ? "Sold" : "Available")</span>
+                        <span class="status-chip status-chip--used ms-1">Second-hand</span>
                     </td>
                     <td><a asp-page="/Products/Details" asp-route-id="@product.EntityId" asp-route-type="@product.Type.ToLowerInvariant().Replace(" ", "")">Details</a></td>
                 </tr>
@@ -43,5 +41,3 @@ else
         </tbody>
     </table>
 }
-
-<a asp-page="/Products/Index" class="btn btn-outline-secondary mt-3">Back to products</a>

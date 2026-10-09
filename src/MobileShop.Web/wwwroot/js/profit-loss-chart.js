@@ -22,6 +22,38 @@ document.addEventListener('DOMContentLoaded', function () {
         return new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 }).format(value).replace(/,/g, ' ') + ' Toman';
     }
 
+    function token(name, fallback) {
+        var value = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+        return value || fallback;
+    }
+
+    // Design tokens: income = accent, expense = danger, net = ink, grid/axis = ink-muted.
+    var accent = token('--accent', 'rgb(54, 197, 176)');
+    var danger = token('--danger', 'rgb(240, 112, 122)');
+    var ink = token('--ink', 'rgb(236, 240, 244)');
+    var inkMuted = token('--ink-muted', 'rgb(147, 163, 179)');
+    void danger;
+
+    function translucent(color, alpha) {
+        var c = (color || '').trim();
+        if (c.charAt(0) === '#' && c.length === 7) {
+            var r = parseInt(c.slice(1, 3), 16);
+            var g = parseInt(c.slice(3, 5), 16);
+            var b = parseInt(c.slice(5, 7), 16);
+            return 'rgb' + 'a(' + r + ', ' + g + ', ' + b + ', ' + alpha + ')';
+        }
+        if (c.indexOf('rgb(') === 0) {
+            return 'rgb' + 'a(' + c.slice(4, -1) + ', ' + alpha + ')';
+        }
+        return c;
+    }
+
+    var lineColor = accent;
+    var fillColor = translucent(accent, 0.12);
+    var pointFill = ink;
+    var gridColor = translucent(inkMuted, 0.12);
+    var axisColor = translucent(inkMuted, 0.28);
+
     var labels = parseJsonDataset('labels', []);
     var tickLabels = parseJsonDataset('tickLabels', []);
     var values = parseJsonDataset('values', []);
@@ -39,7 +71,7 @@ document.addEventListener('DOMContentLoaded', function () {
             var area = chart.chartArea;
             var context = chart.ctx;
             context.save();
-            context.strokeStyle = '#6ae0be';
+            context.strokeStyle = lineColor;
             context.lineWidth = 1.5;
             context.setLineDash([5, 4]);
             context.beginPath();
@@ -59,7 +91,7 @@ document.addEventListener('DOMContentLoaded', function () {
             context.font = '600 11px system-ui, sans-serif';
             context.textAlign = 'left';
             context.textBaseline = 'bottom';
-            context.fillStyle = '#6ae0be';
+            context.fillStyle = lineColor;
             // Position label above the intersection point, offset to the right
             var labelX = point.x + 12;
             var labelY = point.y - 8;
@@ -81,15 +113,15 @@ document.addEventListener('DOMContentLoaded', function () {
                 datasets: [{
                     label: 'Net profit / loss',
                     data: values,
-                    borderColor: '#a8b7ff',
-                    backgroundColor: 'rgba(145, 163, 255, 0.12)',
+                    borderColor: lineColor,
+                    backgroundColor: fillColor,
                     borderWidth: 3,
                     pointRadius: function (context) {
                         return context.dataIndex === currentIndex ? 5 : 3.5;
                     },
                     pointHoverRadius: 7,
-                    pointBackgroundColor: '#dce3ff',
-                    pointBorderColor: '#7187ff',
+                    pointBackgroundColor: pointFill,
+                    pointBorderColor: lineColor,
                     pointBorderWidth: 2,
                     tension: 0.2,
                     fill: 'origin'
@@ -120,7 +152,7 @@ document.addEventListener('DOMContentLoaded', function () {
                             autoSkip: false,
                             maxRotation: labels.length > 14 ? 45 : 0,
                             minRotation: 0,
-                            color: '#bac5db',
+                            color: inkMuted,
                             font: { size: labels.length > 14 ? 9 : 11 },
                             callback: function (value, index) {
                                 return tickLabels[index] || this.getLabelForValue(value);
@@ -129,26 +161,26 @@ document.addEventListener('DOMContentLoaded', function () {
                         title: {
                             display: true,
                             text: canvas.dataset.intervalLabel,
-                            color: '#aebbd5',
+                            color: inkMuted,
                             font: { size: 11, weight: '600' },
                             padding: { top: 14 }
                         },
-                        border: { color: 'rgba(194, 207, 245, 0.28)' }
+                        border: { color: axisColor }
                     },
                     y: {
                         beginAtZero: false,
-                        grid: { color: 'rgba(194, 207, 245, 0.12)' },
+                        grid: { color: gridColor },
                         ticks: {
-                            color: '#929fb8',
+                            color: inkMuted,
                             callback: function (value) { return numberFormat.format(value).replace(/,/g, ' '); }
                         },
                         title: {
                             display: true,
                             text: 'Net profit / loss (Toman)',
-                            color: '#aebbd5',
+                            color: inkMuted,
                             font: { size: 11, weight: '600' }
                         },
-                        border: { color: 'rgba(194, 207, 245, 0.28)' }
+                        border: { color: axisColor }
                     }
                 }
             }

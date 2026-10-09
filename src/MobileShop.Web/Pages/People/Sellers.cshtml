@@ -1,8 +1,15 @@
 @page
 @model MobileShop.Web.Pages.People.SellersModel
 @{ ViewData["Title"] = "Sellers"; }
-<h1>Sellers</h1>
-<table class="table table-striped"><thead><tr>
+<div class="page-head">
+    <div>
+        <h1 class="page-head__title">Sellers</h1>
+    </div>
+    <div class="page-head__actions">
+        <a asp-page="/People/CreateSeller" class="btn btn-success">Add seller</a>
+    </div>
+</div>
+<table class="data-table"><thead><tr>
     <th><a asp-route-sortBy="Name" asp-route-ascending="@(Model.SortBy == "Name" && Model.Ascending ? "false" : "true")">Name</a></th>
     <th><a asp-route-sortBy="Phone" asp-route-ascending="@(Model.SortBy == "Phone" && Model.Ascending ? "false" : "true")">Phone</a></th>
     <th>Type</th>
@@ -10,9 +17,8 @@
     <th></th>
 </tr></thead><tbody>
 @foreach (var seller in Model.Sellers)
-{ <tr><td>@seller.Name</td><td>@seller.PhoneNumber</td><td>@seller.EntityType</td><td>@seller.SoldCount</td><td><a asp-page="/People/SellerDetails" asp-route-id="@seller.Id">Details</a></td></tr> }
+{ <tr><td dir="auto">@seller.Name</td><td dir="auto" class="num">@seller.PhoneNumber</td><td>@seller.EntityType</td><td>@seller.SoldCount</td><td><a asp-page="/People/SellerDetails" asp-route-id="@seller.Id">Details</a></td></tr> }
 </tbody></table>
-<div class="d-flex flex-wrap gap-2 mt-3">
-    <a asp-page="/People/CreateSeller" class="btn btn-success">Add seller</a>
+<div class="action-bar">
     <a asp-page="/People/Index" class="btn btn-outline-secondary">Back to people</a>
 </div>

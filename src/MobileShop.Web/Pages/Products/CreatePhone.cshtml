@@ -4,171 +4,200 @@
     ViewData["Title"] = "Create phone";
 }
 
-<h1>Create phone</h1>
+<div class="page-head">
+    <div>
+        <h1 class="page-head__title">Create phone</h1>
+    </div>
+</div>
 
 <form id="productCreateForm" method="post" class="row g-3 col-lg-7 mx-auto">
     <partial name="/Pages/Shared/_ProductSellerPicker.cshtml" />
     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
-    <div class="col-md-6">
-        <label asp-for="Input.ManufacturerId" class="form-label">Manufacturer</label>
-        <div class="input-group">
-            <select asp-for="Input.ManufacturerId" asp-items="@(new SelectList(Model.Manufacturers, "Id", "Name"))" class="form-select" id="manufacturerSelect">
-                <option value="">-- Select manufacturer --</option>
-            </select>
-            <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#addManufacturerModal">Add New</button>
-        </div>
-        <span asp-validation-for="Input.ManufacturerId" class="text-danger"></span>
-    </div>
-
-    <div class="col-md-6">
-        <label asp-for="Input.ModelId" class="form-label">Model</label>
-        <div class="input-group">
-            <select asp-for="Input.ModelId" asp-items="@(new SelectList(Model.Models, "Id", "Name"))" class="form-select" id="modelSelect">
-                <option value="">-- Select model --</option>
-            </select>
-            <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#addModelModal" id="addModelBtn">Add New</button>
-        </div>
-        <span asp-validation-for="Input.ModelId" class="text-danger"></span>
-    </div>
-
-    <div class="col-md-3">
-        <label asp-for="Input.Price" class="form-label">Paid price (Toman)</label>
-        <input asp-for="Input.Price" class="form-control" data-price inputmode="numeric" step="1" min="0" max="@MobileShop.Models.Settings.MoneyLimits.MaxRials" />
-        <span asp-validation-for="Input.Price" class="text-danger"></span>
-    </div>
-
-    <div class="col-md-3">
-        <label asp-for="Input.ProfitPercent" class="form-label">Profit %</label>
-        <div class="input-group">
-            <input asp-for="Input.ProfitPercent" class="form-control" data-percent />
-            <span class="input-group-text">%</span>
-        </div>
-        <span asp-validation-for="Input.ProfitPercent" class="text-danger"></span>
-    </div>
-
-    <div class="col-md-3">
-        <label asp-for="Input.ProfitAmount" class="form-label">Profit amount (Toman)</label>
-        <div class="input-group">
-            <span class="input-group-text">Toman</span>
-            <input asp-for="Input.ProfitAmount" class="form-control" data-amount inputmode="numeric" step="1" min="0" max="@MobileShop.Models.Settings.MoneyLimits.MaxRials" />
-        </div>
-        <span asp-validation-for="Input.ProfitAmount" class="text-danger"></span>
-    </div>
-
-    <div class="col-md-3">
-        <label class="form-label">Finished price (Toman)</label>
-        <input type="text" class="form-control" data-finished-price readonly aria-readonly="true"
-               tabindex="-1" />
-        <span class="form-text text-muted">Server-stored price (paid + profit).</span>
-    </div>
-
-    <div class="col-md-6">
-        <label asp-for="Input.ColorId" class="form-label"></label>
-        <div class="input-group">
-            <select asp-for="Input.ColorId" asp-items="@(new SelectList(Model.Colors, "Id", "Name"))" class="form-select" id="colorSelect">
-                <option value="">-- Select color --</option>
-            </select>
-            <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#addColorModal" id="addColorBtn">Add New</button>
-        </div>
-        <span asp-validation-for="Input.ColorId" class="text-danger"></span>
-    </div>
-
-    <div class="col-md-6">
-        <label asp-for="Input.PartNumberId" class="form-label">Part number</label>
-        <div class="input-group">
-            <select asp-for="Input.PartNumberId" asp-items="@(new SelectList(Model.PartNumbers, "Id", "Name"))" class="form-select" id="partNumberSelect">
-                <option value="">-- Select part number --</option>
-            </select>
-            <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#addPartNumberModal">Add New</button>
-        </div>
-        <span asp-validation-for="Input.PartNumberId" class="text-danger"></span>
-    </div>
-
-    <div class="col-md-6">
-        <label asp-for="Input.IMEI1" class="form-label"></label>
-        <input asp-for="Input.IMEI1" class="form-control" />
-        <span asp-validation-for="Input.IMEI1" class="text-danger"></span>
-    </div>
-
-    <div class="col-md-6">
-        <label asp-for="Input.IMEI2" class="form-label"></label>
-        <input asp-for="Input.IMEI2" class="form-control" />
-        <span asp-validation-for="Input.IMEI2" class="text-danger"></span>
-    </div>
-
-    <div class="col-md-3">
-        <div class="form-check mt-4">
-            <input asp-for="Input.SupportsDualSim" class="form-check-input" />
-            <label asp-for="Input.SupportsDualSim" class="form-check-label">Dual SIM</label>
-        </div>
-    </div>
-
-    <div class="col-md-3">
-        <div class="form-check mt-4">
-            <input asp-for="Input.SupportsEsim" class="form-check-input" />
-            <label asp-for="Input.SupportsEsim" class="form-check-label">eSIM</label>
-        </div>
-    </div>
-
-    <div class="col-12">
-        <div class="form-check">
-            <input asp-for="Input.IsSecondHand" class="form-check-input" data-second-hand-toggle />
-            <label asp-for="Input.IsSecondHand" class="form-check-label">Second-hand item</label>
-        </div>
-    </div>
-
-    <div class="col-12" data-second-hand-block style="display:none;">
+    <div class="form-section col-12">
+        <h2 class="form-section__title">Product</h2>
         <div class="row g-3">
             <div class="col-md-6">
-                <label asp-for="Input.TestPeriodDays" class="form-label">Second-hand test days</label>
-                <input asp-for="Input.TestPeriodDays" class="form-control" />
-                <span asp-validation-for="Input.TestPeriodDays" class="text-danger"></span>
-            </div>
-            <div class="col-md-6">
-                <label asp-for="Input.SecondHandNotes" class="form-label">Second-hand notes</label>
-                <input asp-for="Input.SecondHandNotes" class="form-control" />
-                <span asp-validation-for="Input.SecondHandNotes" class="text-danger"></span>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-12">
-        <div class="form-check">
-            <input asp-for="Input.HasGuarantee" class="form-check-input" data-guarantee-toggle />
-            <label asp-for="Input.HasGuarantee" class="form-check-label">Has guarantee</label>
-        </div>
-    </div>
-
-    <div class="col-12" data-guarantee-block style="display:none;">
-        <div class="row g-3">
-            <div class="col-md-6">
-                <label asp-for="Input.GuaranteeCorporation" class="form-label">Guarantee corporation</label>
+                <label asp-for="Input.ManufacturerId" class="form-label">Manufacturer</label>
                 <div class="input-group">
-                    <select asp-for="Input.GuaranteeCorporation" asp-items="@(new SelectList(Model.Corporations))" class="form-select" id="corporationSelect">
-                        <option value="">-- Select corporation --</option>
+                    <select asp-for="Input.ManufacturerId" asp-items="@(new SelectList(Model.Manufacturers, "Id", "Name"))" class="form-select" id="manufacturerSelect">
+                        <option value="">-- Select manufacturer --</option>
                     </select>
-                    <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#addCorporationModal">Add New</button>
+                    <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#addManufacturerModal">Add New</button>
                 </div>
-                <span asp-validation-for="Input.GuaranteeCorporation" class="text-danger"></span>
+                <span asp-validation-for="Input.ManufacturerId" class="text-danger"></span>
             </div>
+
             <div class="col-md-6">
-                <label asp-for="Input.GuaranteeExpiry" class="form-label">Guarantee expiry</label>
-                <input asp-for="Input.GuaranteeExpiry" class="form-control" />
-                <span asp-validation-for="Input.GuaranteeExpiry" class="text-danger"></span>
+                <label asp-for="Input.ModelId" class="form-label">Model</label>
+                <div class="input-group">
+                    <select asp-for="Input.ModelId" asp-items="@(new SelectList(Model.Models, "Id", "Name"))" class="form-select" id="modelSelect">
+                        <option value="">-- Select model --</option>
+                    </select>
+                    <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#addModelModal" id="addModelBtn">Add New</button>
+                </div>
+                <span asp-validation-for="Input.ModelId" class="text-danger"></span>
             </div>
+        </div>
+    </div>
+
+    <div class="form-section col-12">
+        <h2 class="form-section__title">Pricing</h2>
+        <div class="row g-3">
+            <div class="col-md-3">
+                <label asp-for="Input.Price" class="form-label">Paid price (Toman)</label>
+                <input asp-for="Input.Price" class="form-control" data-price inputmode="numeric" step="1" min="0" max="@MobileShop.Models.Settings.MoneyLimits.MaxRials" />
+                <span asp-validation-for="Input.Price" class="text-danger"></span>
+            </div>
+
+            <div class="col-md-3">
+                <label asp-for="Input.ProfitPercent" class="form-label">Profit %</label>
+                <div class="input-group">
+                    <input asp-for="Input.ProfitPercent" class="form-control" data-percent />
+                    <span class="input-group-text">%</span>
+                </div>
+                <span asp-validation-for="Input.ProfitPercent" class="text-danger"></span>
+            </div>
+
+            <div class="col-md-3">
+                <label asp-for="Input.ProfitAmount" class="form-label">Profit amount (Toman)</label>
+                <div class="input-group">
+                    <span class="input-group-text">Toman</span>
+                    <input asp-for="Input.ProfitAmount" class="form-control" data-amount inputmode="numeric" step="1" min="0" max="@MobileShop.Models.Settings.MoneyLimits.MaxRials" />
+                </div>
+                <span asp-validation-for="Input.ProfitAmount" class="text-danger"></span>
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label">Finished price (Toman)</label>
+                <input type="text" class="form-control" data-finished-price readonly aria-readonly="true"
+                       tabindex="-1" />
+                <span class="form-text text-muted">Server-stored price (paid + profit).</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="form-section col-12">
+        <h2 class="form-section__title">Phone details</h2>
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label asp-for="Input.ColorId" class="form-label"></label>
+                <div class="input-group">
+                    <select asp-for="Input.ColorId" asp-items="@(new SelectList(Model.Colors, "Id", "Name"))" class="form-select" id="colorSelect">
+                        <option value="">-- Select color --</option>
+                    </select>
+                    <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#addColorModal" id="addColorBtn">Add New</button>
+                </div>
+                <span asp-validation-for="Input.ColorId" class="text-danger"></span>
+            </div>
+
+            <div class="col-md-6">
+                <label asp-for="Input.PartNumberId" class="form-label">Part number</label>
+                <div class="input-group">
+                    <select asp-for="Input.PartNumberId" asp-items="@(new SelectList(Model.PartNumbers, "Id", "Name"))" class="form-select" id="partNumberSelect">
+                        <option value="">-- Select part number --</option>
+                    </select>
+                    <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#addPartNumberModal">Add New</button>
+                </div>
+                <span asp-validation-for="Input.PartNumberId" class="text-danger"></span>
+            </div>
+
+            <div class="col-md-6">
+                <label asp-for="Input.IMEI1" class="form-label"></label>
+                <input asp-for="Input.IMEI1" class="form-control" />
+                <span asp-validation-for="Input.IMEI1" class="text-danger"></span>
+            </div>
+
+            <div class="col-md-6">
+                <label asp-for="Input.IMEI2" class="form-label"></label>
+                <input asp-for="Input.IMEI2" class="form-control" />
+                <span asp-validation-for="Input.IMEI2" class="text-danger"></span>
+            </div>
+
+            <div class="col-md-3">
+                <div class="form-check mt-4">
+                    <input asp-for="Input.SupportsDualSim" class="form-check-input" />
+                    <label asp-for="Input.SupportsDualSim" class="form-check-label">Dual SIM</label>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="form-check mt-4">
+                    <input asp-for="Input.SupportsEsim" class="form-check-input" />
+                    <label asp-for="Input.SupportsEsim" class="form-check-label">eSIM</label>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="form-section col-12">
+        <h2 class="form-section__title">Second-hand</h2>
+        <div class="row g-3">
             <div class="col-12">
-                <label asp-for="Input.GuaranteeNotes" class="form-label">Guarantee notes</label>
-                <input asp-for="Input.GuaranteeNotes" class="form-control" />
-                <span asp-validation-for="Input.GuaranteeNotes" class="text-danger"></span>
+                <div class="form-check">
+                    <input asp-for="Input.IsSecondHand" class="form-check-input" data-second-hand-toggle />
+                    <label asp-for="Input.IsSecondHand" class="form-check-label">Second-hand item</label>
+                </div>
+            </div>
+
+            <div class="col-12" data-second-hand-block style="display:none;">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label asp-for="Input.TestPeriodDays" class="form-label">Second-hand test days</label>
+                        <input asp-for="Input.TestPeriodDays" class="form-control" />
+                        <span asp-validation-for="Input.TestPeriodDays" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="Input.SecondHandNotes" class="form-label">Second-hand notes</label>
+                        <input asp-for="Input.SecondHandNotes" class="form-control" />
+                        <span asp-validation-for="Input.SecondHandNotes" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="form-section col-12">
+        <h2 class="form-section__title">Guarantee</h2>
+        <div class="row g-3">
+            <div class="col-12">
+                <div class="form-check">
+                    <input asp-for="Input.HasGuarantee" class="form-check-input" data-guarantee-toggle />
+                    <label asp-for="Input.HasGuarantee" class="form-check-label">Has guarantee</label>
+                </div>
+            </div>
+
+            <div class="col-12" data-guarantee-block style="display:none;">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label asp-for="Input.GuaranteeCorporation" class="form-label">Guarantee corporation</label>
+                        <div class="input-group">
+                            <select asp-for="Input.GuaranteeCorporation" asp-items="@(new SelectList(Model.Corporations))" class="form-select" id="corporationSelect">
+                                <option value="">-- Select corporation --</option>
+                            </select>
+                            <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#addCorporationModal">Add New</button>
+                        </div>
+                        <span asp-validation-for="Input.GuaranteeCorporation" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="Input.GuaranteeExpiry" class="form-label">Guarantee expiry</label>
+                        <input asp-for="Input.GuaranteeExpiry" class="form-control" />
+                        <span asp-validation-for="Input.GuaranteeExpiry" class="text-danger"></span>
+                    </div>
+                    <div class="col-12">
+                        <label asp-for="Input.GuaranteeNotes" class="form-label">Guarantee notes</label>
+                        <input asp-for="Input.GuaranteeNotes" class="form-control" />
+                        <span asp-validation-for="Input.GuaranteeNotes" class="text-danger"></span>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
 </form>
-<div class="d-flex flex-wrap gap-2 mt-3">
+<div class="action-bar">
     <button class="btn btn-primary" type="submit" form="productCreateForm">Save phone</button>
-    <a asp-page="/Products/Index" class="btn btn-outline-secondary">Back to products</a>
+    <a asp-page="/Products/Index" class="btn btn-outline-secondary">Cancel</a>
 </div>
 
 <partial name="/Pages/Shared/_ProductCreateSuccess.cshtml" model="Model.SuccessMessage" />

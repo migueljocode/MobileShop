@@ -1,10 +1,153 @@
 @page
 @model MobileShop.Web.Pages.Products.IndexModel
-@{ViewData["Title"]="Products";}
-<h1>Products</h1><div class="d-flex flex-wrap gap-2 align-items-center mb-3"><div class="btn-group" role="group">
-<a class="btn @(Model.Type=="all"?"btn-primary":"btn-outline-primary")" asp-route-type="all" asp-route-availability="@Model.AvailabilityRoute" asp-route-manufacturerId="@Model.ManufacturerId" asp-route-modelId="@Model.ModelId" asp-route-sortBy="@Model.SortBy" asp-route-sortDirection="@Model.SortDirection">All</a><a class="btn @(Model.Type=="phone"?"btn-primary":"btn-outline-primary")" asp-route-type="phone" asp-route-partNumberId="@Model.PartNumberId" asp-route-availability="@Model.AvailabilityRoute" asp-route-manufacturerId="@Model.ManufacturerId" asp-route-modelId="@Model.ModelId" asp-route-sortBy="@Model.SortBy" asp-route-sortDirection="@Model.SortDirection">Phones</a><a class="btn @(Model.Type=="appleid"?"btn-primary":"btn-outline-primary")" asp-route-type="appleid" asp-route-availability="@Model.AvailabilityRoute" asp-route-manufacturerId="@Model.ManufacturerId" asp-route-modelId="@Model.ModelId" asp-route-sortBy="@Model.SortBy" asp-route-sortDirection="@Model.SortDirection">Apple IDs</a><a class="btn @(Model.Type=="glass"?"btn-primary":"btn-outline-primary")" asp-route-type="glass" asp-route-availability="@Model.AvailabilityRoute" asp-route-manufacturerId="@Model.ManufacturerId" asp-route-modelId="@Model.ModelId" asp-route-sortBy="@Model.SortBy" asp-route-sortDirection="@Model.SortDirection">Glasses</a><a class="btn @(Model.Type=="tablet"?"btn-primary":"btn-outline-primary")" asp-route-type="tablet" asp-route-availability="@Model.AvailabilityRoute" asp-route-manufacturerId="@Model.ManufacturerId" asp-route-modelId="@Model.ModelId" asp-route-sortBy="@Model.SortBy" asp-route-sortDirection="@Model.SortDirection">Tablets</a><a class="btn @(Model.Type=="smartwatch"?"btn-primary":"btn-outline-primary")" asp-route-type="smartwatch" asp-route-availability="@Model.AvailabilityRoute" asp-route-manufacturerId="@Model.ManufacturerId" asp-route-modelId="@Model.ModelId" asp-route-sortBy="@Model.SortBy" asp-route-sortDirection="@Model.SortDirection">Smart Watches</a><a class="btn @(Model.Type=="laptop"?"btn-primary":"btn-outline-primary")" asp-route-type="laptop" asp-route-availability="@Model.AvailabilityRoute" asp-route-manufacturerId="@Model.ManufacturerId" asp-route-modelId="@Model.ModelId" asp-route-sortBy="@Model.SortBy" asp-route-sortDirection="@Model.SortDirection">Laptops</a><a class="btn @(Model.Type=="cable"?"btn-primary":"btn-outline-primary")" asp-route-type="cable" asp-route-availability="@Model.AvailabilityRoute" asp-route-manufacturerId="@Model.ManufacturerId" asp-route-modelId="@Model.ModelId" asp-route-sortBy="@Model.SortBy" asp-route-sortDirection="@Model.SortDirection">Cables</a><a class="btn @(Model.Type=="charger"?"btn-primary":"btn-outline-primary")" asp-route-type="charger" asp-route-availability="@Model.AvailabilityRoute" asp-route-manufacturerId="@Model.ManufacturerId" asp-route-modelId="@Model.ModelId" asp-route-sortBy="@Model.SortBy" asp-route-sortDirection="@Model.SortDirection">Chargers</a><a class="btn @(Model.Type=="powerbank"?"btn-primary":"btn-outline-primary")" asp-route-type="powerbank" asp-route-availability="@Model.AvailabilityRoute" asp-route-manufacturerId="@Model.ManufacturerId" asp-route-modelId="@Model.ModelId" asp-route-sortBy="@Model.SortBy" asp-route-sortDirection="@Model.SortDirection">Power Banks</a><a class="btn @(Model.Type=="portablestorage"?"btn-primary":"btn-outline-primary")" asp-route-type="portablestorage" asp-route-availability="@Model.AvailabilityRoute" asp-route-manufacturerId="@Model.ManufacturerId" asp-route-modelId="@Model.ModelId" asp-route-sortBy="@Model.SortBy" asp-route-sortDirection="@Model.SortDirection">Portable Storages</a><a class="btn @(Model.Type=="case"?"btn-primary":"btn-outline-primary")" asp-route-type="case" asp-route-availability="@Model.AvailabilityRoute" asp-route-manufacturerId="@Model.ManufacturerId" asp-route-modelId="@Model.ModelId" asp-route-sortBy="@Model.SortBy" asp-route-sortDirection="@Model.SortDirection">Cases</a></div>
-<a asp-page="/Products/SecondHand" class="btn btn-outline-warning">Second-hand</a>@switch(Model.Type){case "phone":<a asp-page="/Products/CreatePhone" class="btn btn-success">Create phone</a>break;case "appleid":<a asp-page="/Products/CreateAppleId" class="btn btn-success">Create Apple ID</a>break;case "glass":<a asp-page="/Products/CreateGlass" class="btn btn-success">Create glass</a>break;case "tablet":<a asp-page="/Products/CreateTablet" class="btn btn-success">Create tablet</a>break;case "smartwatch":<a asp-page="/Products/CreateSmartWatch" class="btn btn-success">Create smart watch</a>break;case "laptop":<a asp-page="/Products/CreateLaptop" class="btn btn-success">Create laptop</a>break;case "cable":<a asp-page="/Products/CreateCable" class="btn btn-success">Create cable</a>break;case "charger":<a asp-page="/Products/CreateCharger" class="btn btn-success">Create charger</a>break;case "powerbank":<a asp-page="/Products/CreatePowerBank" class="btn btn-success">Create power bank</a>break;case "portablestorage":<a asp-page="/Products/CreatePortableStorage" class="btn btn-success">Create portable storage</a>break;case "case":<a asp-page="/Products/CreateCase" class="btn btn-success">Create case</a>break;}
+@{
+    ViewData["Title"] = "Products";
+    var tabs = new (string Key, string Label, string? CreatePage, string? CreateLabel)[]
+    {
+        ("all", "All", null, null),
+        ("phone", "Phones", "/Products/CreatePhone", "Create phone"),
+        ("appleid", "Apple IDs", "/Products/CreateAppleId", "Create Apple ID"),
+        ("glass", "Glasses", "/Products/CreateGlass", "Create glass"),
+        ("tablet", "Tablets", "/Products/CreateTablet", "Create tablet"),
+        ("smartwatch", "Smart Watches", "/Products/CreateSmartWatch", "Create smart watch"),
+        ("laptop", "Laptops", "/Products/CreateLaptop", "Create laptop"),
+        ("cable", "Cables", "/Products/CreateCable", "Create cable"),
+        ("charger", "Chargers", "/Products/CreateCharger", "Create charger"),
+        ("powerbank", "Power Banks", "/Products/CreatePowerBank", "Create power bank"),
+        ("portablestorage", "Portable Storages", "/Products/CreatePortableStorage", "Create portable storage"),
+        ("case", "Cases", "/Products/CreateCase", "Create case"),
+    };
+    var create = tabs.FirstOrDefault(t => t.Key == Model.Type);
+}
+<div class="page-head">
+    <div>
+        <h1 class="page-head__title">Products</h1>
+    </div>
+    <div class="page-head__actions">
+        <a asp-page="/Products/SecondHand" class="btn btn-outline-warning">Second-hand</a>
+        @if (create.CreatePage is not null)
+        {
+            <a asp-page="@create.CreatePage" class="btn btn-success">@create.CreateLabel</a>
+        }
+    </div>
 </div>
-<form method="get" class="row g-2 align-items-end mb-3"><input type="hidden" name="type" value="@Model.Type" /><div class="col-auto"><label asp-for="Availability">Availability</label><select class="form-select" asp-for="Availability" onchange="this.form.submit()"><option value="all">All</option><option value="available">Available</option><option value="sold">Sold</option></select></div><div class="col-auto"><label asp-for="ManufacturerId">Manufacturer</label><select class="form-select" asp-for="ManufacturerId" asp-items="Model.ManufacturerOptions" onchange="this.form.submit()"></select></div>@if(Model.ShowModelFilter){<div class="col-auto"><label asp-for="ModelId">Model</label><select class="form-select" asp-for="ModelId" asp-items="Model.ModelOptions" onchange="this.form.submit()"></select></div>}@if(Model.ShowPartNumberFilter){<div class="col-auto"><label asp-for="PartNumberId">Part number</label><select class="form-select" asp-for="PartNumberId" asp-items="Model.PartNumberOptions" onchange="this.form.submit()"></select></div>}<div class="col-auto"><label for="sortBy">Sort by</label><select class="form-select" id="sortBy" name="sortBy" onchange="this.form.submit()"><option value="name" selected="@(Model.SortBy=="name")">@Model.NameColumnLabel</option><option value="type" selected="@(Model.SortBy=="type")">Type</option><option value="identifier" selected="@(Model.SortBy=="identifier")">Identifier</option><option value="color" selected="@(Model.SortBy=="color")">Color</option><option value="status" selected="@(Model.SortBy=="status")">Status</option></select></div><div class="col-auto"><label for="sortDirection">Direction</label><select class="form-select" id="sortDirection" name="sortDirection" onchange="this.form.submit()"><option value="asc" selected="@(Model.SortDirection=="asc")">Ascending</option><option value="desc" selected="@(Model.SortDirection=="desc")">Descending</option></select></div></form>
+<div class="btn-group" role="group">
+    @foreach (var (key, label, _, _) in tabs)
+    {
+        var isActive = Model.Type == key;
+        if (key == "phone")
+        {
+            <a class="btn @(isActive ? "btn-primary" : "btn-outline-primary")"
+               aria-current="@(isActive ? "page" : null)"
+               asp-route-type="@key"
+               asp-route-partNumberId="@Model.PartNumberId"
+               asp-route-availability="@Model.AvailabilityRoute"
+               asp-route-manufacturerId="@Model.ManufacturerId"
+               asp-route-modelId="@Model.ModelId"
+               asp-route-sortBy="@Model.SortBy"
+               asp-route-sortDirection="@Model.SortDirection">@label</a>
+        }
+        else
+        {
+            <a class="btn @(isActive ? "btn-primary" : "btn-outline-primary")"
+               aria-current="@(isActive ? "page" : null)"
+               asp-route-type="@key"
+               asp-route-availability="@Model.AvailabilityRoute"
+               asp-route-manufacturerId="@Model.ManufacturerId"
+               asp-route-modelId="@Model.ModelId"
+               asp-route-sortBy="@Model.SortBy"
+               asp-route-sortDirection="@Model.SortDirection">@label</a>
+        }
+    }
+</div>
+<div class="toolbar">
+    <form method="get" class="row g-2 align-items-end mb-3">
+        <input type="hidden" name="type" value="@Model.Type" />
+        <div class="col-auto">
+            <label class="form-label" asp-for="Availability">Availability</label>
+            <select class="form-select" asp-for="Availability" onchange="this.form.submit()">
+                <option value="all">All</option>
+                <option value="available">Available</option>
+                <option value="sold">Sold</option>
+            </select>
+        </div>
+        <div class="col-auto">
+            <label class="form-label" asp-for="ManufacturerId">Manufacturer</label>
+            <select class="form-select" asp-for="ManufacturerId" asp-items="Model.ManufacturerOptions" onchange="this.form.submit()"></select>
+        </div>
+        @if (Model.ShowModelFilter)
+        {
+            <div class="col-auto">
+                <label class="form-label" asp-for="ModelId">Model</label>
+                <select class="form-select" asp-for="ModelId" asp-items="Model.ModelOptions" onchange="this.form.submit()"></select>
+            </div>
+        }
+        @if (Model.ShowPartNumberFilter)
+        {
+            <div class="col-auto">
+                <label class="form-label" asp-for="PartNumberId">Part number</label>
+                <select class="form-select" asp-for="PartNumberId" asp-items="Model.PartNumberOptions" onchange="this.form.submit()"></select>
+            </div>
+        }
+        <div class="col-auto">
+            <label class="form-label" for="sortBy">Sort by</label>
+            <select class="form-select" id="sortBy" name="sortBy" onchange="this.form.submit()">
+                <option value="name" selected="@(Model.SortBy == "name")">@Model.NameColumnLabel</option>
+                <option value="type" selected="@(Model.SortBy == "type")">Type</option>
+                <option value="identifier" selected="@(Model.SortBy == "identifier")">Identifier</option>
+                <option value="color" selected="@(Model.SortBy == "color")">Color</option>
+                <option value="status" selected="@(Model.SortBy == "status")">Status</option>
+            </select>
+        </div>
+        <div class="col-auto">
+            <label class="form-label" for="sortDirection">Direction</label>
+            <select class="form-select" id="sortDirection" name="sortDirection" onchange="this.form.submit()">
+                <option value="asc" selected="@(Model.SortDirection == "asc")">Ascending</option>
+                <option value="desc" selected="@(Model.SortDirection == "desc")">Descending</option>
+            </select>
+        </div>
+    </form>
+</div>
 <p class="text-muted">Total items: <strong>@Model.Products.Count</strong></p>
-@if(Model.Products.Count==0){<p class="text-muted">No products found.</p>}else{<table class="table table-striped"><thead><tr><th>Type</th><th>@Model.NameColumnLabel</th><th>Identifier</th><th>Part number</th><th>Color</th><th>Status</th><th></th></tr></thead><tbody>@foreach(var p in Model.Products){<tr><td>@p.Type</td><td>@p.Name</td><td>@p.Identifier</td><td>@p.PartNumberLabel</td><td>@(string.IsNullOrWhiteSpace(p.Color)?"N/A":p.Color)</td><td><span class="badge @(p.IsSold?"text-bg-secondary":"text-bg-success")">@(p.IsSold?"Sold":"Available")</span>@if(p.IsSecondHand){<span class="badge text-bg-warning ms-2">Second-hand</span>}</td><td><a asp-page="/Products/Details" asp-route-id="@p.EntityId" asp-route-type="@p.Type.ToLowerInvariant().Replace(" ","")">Details</a></td></tr>}</tbody></table>}
+@if (Model.Products.Count == 0)
+{
+    <partial name="_EmptyState" model='("No products match these filters", "Change a filter or create a product.")' />
+}
+else
+{
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Type</th>
+                <th>@Model.NameColumnLabel</th>
+                <th>Identifier</th>
+                <th>Part number</th>
+                <th>Color</th>
+                <th>Status</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var p in Model.Products)
+            {
+                <tr>
+                    <td>@p.Type</td>
+                    <td dir="auto">@p.Name</td>
+                    <td dir="auto" class="num">@p.Identifier</td>
+                    <td>@p.PartNumberLabel</td>
+                    <td>@(string.IsNullOrWhiteSpace(p.Color) ? "N/A" : p.Color)</td>
+                    <td>
+                        <span class="status-chip status-chip--@(p.IsSold ? "sold" : "available")">@(p.IsSold ? "Sold" : "Available")</span>
+                        @if (p.IsSecondHand)
+                        {
+                            <span class="status-chip status-chip--used">Second-hand</span>
+                        }
+                    </td>
+                    <td>
+                        <a asp-page="/Products/Details" asp-route-id="@p.EntityId" asp-route-type="@p.Type.ToLowerInvariant().Replace(" ", "")">Details</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

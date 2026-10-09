@@ -23,7 +23,7 @@
     <div id="@resultsId" class="list-group mt-1 d-none" role="listbox" data-person-results>
         @foreach (var person in Model)
         {
-            <button type="button" class="list-group-item list-group-item-action" role="option" data-person-id="@person.Id">@person.Label@(string.IsNullOrWhiteSpace(person.TypeLabel) ? string.Empty : $" ({person.TypeLabel})")</button>
+            <button type="button" class="list-group-item list-group-item-action" role="option" dir="auto" data-person-id="@person.Id">@person.Label@(string.IsNullOrWhiteSpace(person.TypeLabel) ? string.Empty : $" ({person.TypeLabel})")</button>
         }
     </div>
     <span class="text-danger" data-person-error></span>

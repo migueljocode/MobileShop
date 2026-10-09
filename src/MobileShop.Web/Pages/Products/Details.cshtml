@@ -14,140 +14,146 @@
 
 @if (Model.Product is not null)
 {
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h1 class="m-0">@Model.Product.Manufacturer @Model.Product.Model</h1>
+    <div class="page-head">
+        <div>
+            <h1 class="page-head__title">@Model.Product.Manufacturer @Model.Product.Model</h1>
+            <p class="page-head__sub">@Model.Product.Type</p>
+        </div>
+        <div class="page-head__actions">
+            <a asp-page="/Products/Edit" asp-route-id="@Model.Product.ProductId" asp-route-type="@Model.Product.Type" class="btn btn-primary">Edit</a>
+            <a asp-page="/Products/Index" asp-route-type="@indexType" class="btn btn-outline-secondary">Back to products</a>
+        </div>
     </div>
-    <p><strong>Type:</strong> @Model.Product.Type</p>
-    <dl class="row">
-        <dt class="col-sm-3">Identifier</dt>
-        <dd class="col-sm-9">@Model.Product.Identifier</dd>
-        @if (Model.Product.Type == "Apple ID")
-        {
-            <dt class="col-sm-3">Password</dt>
-            <dd class="col-sm-9"><code>@Model.Product.AppleIdPassword</code></dd>
-            <dt class="col-sm-3">Notes</dt>
-            <dd class="col-sm-9">@(string.IsNullOrWhiteSpace(Model.Product.Notes) ? "N/A" : Model.Product.Notes)</dd>
-        }
-        <dt class="col-sm-3">Color</dt>
-        <dd class="col-sm-9">@(string.IsNullOrWhiteSpace(Model.Product.Color) ? "N/A" : Model.Product.Color)</dd>
-        <dt class="col-sm-3">Owner</dt>
-        <dd class="col-sm-9">@Model.Product.OwnerLabel</dd>
-        <dt class="col-sm-3">Second-hand</dt>
-        <dd class="col-sm-9">@(Model.Product.IsSecondHand ? "Yes" : "No")</dd>
-        <dt class="col-sm-3">Guarantee</dt>
-        <dd class="col-sm-9">@Model.Product.GuaranteeLabel</dd>
-        @if (Model.Product.Type == "Phone")
-        {
-            <dt class="col-sm-3">Part number</dt>
-            <dd class="col-sm-9">@Model.Product.PartNumberLabel</dd>
-            <dt class="col-sm-3">Dual SIM</dt>
-            <dd class="col-sm-9">@Model.Product.DualSimLabel</dd>
-            <dt class="col-sm-3">eSIM</dt>
-            <dd class="col-sm-9">@Model.Product.EsimLabel</dd>
-        }
-        @if (Model.Product.Type == "Laptop")
-        {
-            <dt class="col-sm-3">CPU</dt>
-            <dd class="col-sm-9">@Model.Product.Cpu</dd>
-            <dt class="col-sm-3">GPU</dt>
-            <dd class="col-sm-9">@Model.Product.Gpu</dd>
-            <dt class="col-sm-3">Screen size</dt>
-            <dd class="col-sm-9">@(Model.Product.DisplaySize?.ToString("0.##") ?? "N/A") inches</dd>
-        }
-        @if (Model.Product.Type is "Tablet" or "Smart Watch" or "Laptop")
-        {
-            <dt class="col-sm-3">Device notes</dt>
-            <dd class="col-sm-9">@(string.IsNullOrWhiteSpace(Model.Product.Notes) ? "N/A" : Model.Product.Notes)</dd>
-        }
-        @if (Model.Product.Type == "Cable")
-        {
-            <dt class="col-sm-3">Connector 1</dt>
-            <dd class="col-sm-9">@Model.Product.Connector1</dd>
-            <dt class="col-sm-3">Connector 2</dt>
-            <dd class="col-sm-9">@Model.Product.Connector2</dd>
-            <dt class="col-sm-3">Length</dt>
-            <dd class="col-sm-9">@Model.Product.CableLength</dd>
-        }
-        @if (Model.Product.Type == "Charger")
-        {
-            <dt class="col-sm-3">Wattage</dt>
-            <dd class="col-sm-9">@Model.Product.Wattage W</dd>
-            <dt class="col-sm-3">PD</dt>
-            <dd class="col-sm-9">@(Model.Product.Pd == true ? "Yes" : "No")</dd>
-            <dt class="col-sm-3">Ports</dt>
-            <dd class="col-sm-9">@Model.Product.PortCount</dd>
-        }
-        @if (Model.Product.Type == "Power Bank")
-        {
-            <dt class="col-sm-3">Capacity</dt>
-            <dd class="col-sm-9">@Model.Product.CapacityMah mAh</dd>
-            <dt class="col-sm-3">Max wattage</dt>
-            <dd class="col-sm-9">@Model.Product.MaxWattage W</dd>
-            <dt class="col-sm-3">PD</dt>
-            <dd class="col-sm-9">@(Model.Product.Pd == true ? "Yes" : "No")</dd>
-            <dt class="col-sm-3">Ports</dt>
-            <dd class="col-sm-9">@Model.Product.PortCount</dd>
-            <dt class="col-sm-3">Port types</dt>
-            <dd class="col-sm-9">@string.Join(", ", Model.Product.PortTypes)</dd>
-        }
-        @if (Model.Product.Type == "Portable Storage")
-        {
-            <dt class="col-sm-3">Storage kind</dt>
-            <dd class="col-sm-9">@Model.Product.StorageKind</dd>
-            <dt class="col-sm-3">Capacity</dt>
-            <dd class="col-sm-9">@Model.Product.StorageCapacityLabel</dd>
-            <dt class="col-sm-3">Speed</dt>
-            <dd class="col-sm-9">@(Model.Product.Speed?.ToString() ?? "N/A") MB/s</dd>
-        }
-        @if (Model.Product.Type == "Case")
-        {
-            <dt class="col-sm-3">Compatible models</dt>
-            <dd class="col-sm-9">
-                @if (Model.Product.CompatibleModels.Count == 0)
-                {
-                    <span>N/A</span>
-                }
-                else
-                {
-                    <ul>
-                        @foreach (var compatibleModel in Model.Product.CompatibleModels)
-                        {
-                            <li>@compatibleModel</li>
-                        }
-                    </ul>
-                }
-            </dd>
-        }
-    </dl>
 
-    <h2>Transactions</h2>
-    @if (Model.Transactions.Count == 0)
-    {
-        <p class="text-muted">No transactions.</p>
-    }
-    else
-    {
-        <table class="table">
-            <thead>
-                <tr><th>Date</th><th>Direction</th><th>Price (Toman)</th><th>Seller</th><th>Customer</th></tr>
-            </thead>
-            <tbody>
-                @foreach (var transaction in Model.Transactions)
-                {
-                    <tr>
-                        <td>@transaction.Date.ToJalaliDateString()</td>
-                        <td>@transaction.Direction</td>
-                        <td>@transaction.FinishedPrice.ToIrr()</td>
-                        <td>@transaction.SellerLabel</td>
-                        <td>@transaction.CustomerLabel</td>
-                    </tr>
-                }
-            </tbody>
-        </table>
-    }
+    <div class="form-section">
+        <dl class="row">
+            <dt class="col-sm-4 text-muted">Identifier</dt>
+            <dd class="col-sm-8 num">@Model.Product.Identifier</dd>
+            @if (Model.Product.Type == "Apple ID")
+            {
+                <dt class="col-sm-4 text-muted">Password</dt>
+                <dd class="col-sm-8"><code>@Model.Product.AppleIdPassword</code></dd>
+                <dt class="col-sm-4 text-muted">Notes</dt>
+                <dd class="col-sm-8">@(string.IsNullOrWhiteSpace(Model.Product.Notes) ? "N/A" : Model.Product.Notes)</dd>
+            }
+            <dt class="col-sm-4 text-muted">Color</dt>
+            <dd class="col-sm-8">@(string.IsNullOrWhiteSpace(Model.Product.Color) ? "N/A" : Model.Product.Color)</dd>
+            <dt class="col-sm-4 text-muted">Owner</dt>
+            <dd class="col-sm-8"><span class="status-chip status-chip--@(Model.Product.OwnerLabel == "Not sold" ? "available" : "sold")">@Model.Product.OwnerLabel</span></dd>
+            <dt class="col-sm-4 text-muted">Second-hand</dt>
+            <dd class="col-sm-8">@(Model.Product.IsSecondHand ? "Yes" : "No")</dd>
+            <dt class="col-sm-4 text-muted">Guarantee</dt>
+            <dd class="col-sm-8">@Model.Product.GuaranteeLabel</dd>
+            @if (Model.Product.Type == "Phone")
+            {
+                <dt class="col-sm-4 text-muted">Part number</dt>
+                <dd class="col-sm-8">@Model.Product.PartNumberLabel</dd>
+                <dt class="col-sm-4 text-muted">Dual SIM</dt>
+                <dd class="col-sm-8">@Model.Product.DualSimLabel</dd>
+                <dt class="col-sm-4 text-muted">eSIM</dt>
+                <dd class="col-sm-8">@Model.Product.EsimLabel</dd>
+            }
+            @if (Model.Product.Type == "Laptop")
+            {
+                <dt class="col-sm-4 text-muted">CPU</dt>
+                <dd class="col-sm-8">@Model.Product.Cpu</dd>
+                <dt class="col-sm-4 text-muted">GPU</dt>
+                <dd class="col-sm-8">@Model.Product.Gpu</dd>
+                <dt class="col-sm-4 text-muted">Screen size</dt>
+                <dd class="col-sm-8">@(Model.Product.DisplaySize?.ToString("0.##") ?? "N/A") inches</dd>
+            }
+            @if (Model.Product.Type is "Tablet" or "Smart Watch" or "Laptop")
+            {
+                <dt class="col-sm-4 text-muted">Device notes</dt>
+                <dd class="col-sm-8">@(string.IsNullOrWhiteSpace(Model.Product.Notes) ? "N/A" : Model.Product.Notes)</dd>
+            }
+            @if (Model.Product.Type == "Cable")
+            {
+                <dt class="col-sm-4 text-muted">Connector 1</dt>
+                <dd class="col-sm-8">@Model.Product.Connector1</dd>
+                <dt class="col-sm-4 text-muted">Connector 2</dt>
+                <dd class="col-sm-8">@Model.Product.Connector2</dd>
+                <dt class="col-sm-4 text-muted">Length</dt>
+                <dd class="col-sm-8">@Model.Product.CableLength</dd>
+            }
+            @if (Model.Product.Type == "Charger")
+            {
+                <dt class="col-sm-4 text-muted">Wattage</dt>
+                <dd class="col-sm-8">@Model.Product.Wattage W</dd>
+                <dt class="col-sm-4 text-muted">PD</dt>
+                <dd class="col-sm-8">@(Model.Product.Pd == true ? "Yes" : "No")</dd>
+                <dt class="col-sm-4 text-muted">Ports</dt>
+                <dd class="col-sm-8">@Model.Product.PortCount</dd>
+            }
+            @if (Model.Product.Type == "Power Bank")
+            {
+                <dt class="col-sm-4 text-muted">Capacity</dt>
+                <dd class="col-sm-8">@Model.Product.CapacityMah mAh</dd>
+                <dt class="col-sm-4 text-muted">Max wattage</dt>
+                <dd class="col-sm-8">@Model.Product.MaxWattage W</dd>
+                <dt class="col-sm-4 text-muted">PD</dt>
+                <dd class="col-sm-8">@(Model.Product.Pd == true ? "Yes" : "No")</dd>
+                <dt class="col-sm-4 text-muted">Ports</dt>
+                <dd class="col-sm-8">@Model.Product.PortCount</dd>
+                <dt class="col-sm-4 text-muted">Port types</dt>
+                <dd class="col-sm-8">@string.Join(", ", Model.Product.PortTypes)</dd>
+            }
+            @if (Model.Product.Type == "Portable Storage")
+            {
+                <dt class="col-sm-4 text-muted">Storage kind</dt>
+                <dd class="col-sm-8">@Model.Product.StorageKind</dd>
+                <dt class="col-sm-4 text-muted">Capacity</dt>
+                <dd class="col-sm-8">@Model.Product.StorageCapacityLabel</dd>
+                <dt class="col-sm-4 text-muted">Speed</dt>
+                <dd class="col-sm-8">@(Model.Product.Speed?.ToString() ?? "N/A") MB/s</dd>
+            }
+            @if (Model.Product.Type == "Case")
+            {
+                <dt class="col-sm-4 text-muted">Compatible models</dt>
+                <dd class="col-sm-8">
+                    @if (Model.Product.CompatibleModels.Count == 0)
+                    {
+                        <span>N/A</span>
+                    }
+                    else
+                    {
+                        <ul>
+                            @foreach (var compatibleModel in Model.Product.CompatibleModels)
+                            {
+                                <li>@compatibleModel</li>
+                            }
+                        </ul>
+                    }
+                </dd>
+            }
+        </dl>
+    </div>
 
-    <div class="d-flex gap-2 mt-3">
-        <a asp-page="/Products/Index" asp-route-type="@indexType" class="btn btn-outline-secondary">Back to products</a>
-        <a asp-page="/Products/Edit" asp-route-id="@Model.Product.ProductId" asp-route-type="@Model.Product.Type" class="btn btn-primary">Edit</a>
+    <div class="form-section">
+        <h2 class="form-section__title">Transactions</h2>
+        @if (Model.Transactions.Count == 0)
+        {
+            <p class="text-muted">No transactions.</p>
+        }
+        else
+        {
+            <table class="table">
+                <thead>
+                    <tr><th>Date</th><th>Direction</th><th>Price (Toman)</th><th>Seller</th><th>Customer</th></tr>
+                </thead>
+                <tbody>
+                    @foreach (var transaction in Model.Transactions)
+                    {
+                        <tr>
+                            <td>@transaction.Date.ToJalaliDateString()</td>
+                            <td>@transaction.Direction</td>
+                            <td class="num">@transaction.FinishedPrice.ToIrr()</td>
+                            <td>@transaction.SellerLabel</td>
+                            <td>@transaction.CustomerLabel</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
     </div>
 }

@@ -144,7 +144,7 @@ Type: one family system (SF Pro Rounded for Latin, Vazirmatn picks up Persian gl
 # STAGE 3 — UI/UX page redesign
 (Razor markup + small JS colour hooks. Each step: inspect the real page first; apply Stage 2 classes; change no behavior.)
 
-## [ ] Step 3.1 — Layout shell and dashboard
+## ~~[x] Step 3.1 — Layout shell and dashboard~~
 - Files: modify: `Pages/Shared/_Layout.cshtml`, `Pages/Index.cshtml`; do not touch: `Index.cshtml.cs`, nav component.
 - Change: `_Layout`: title → `@ViewData["Title"] - MobileShop`; add `<a class="skip-link" href="#main">Skip to content</a>` as first child of `<body>`; `<main id="main" role="main" ...>`; footer reduced to one muted line (`© 2026 MobileShop` + the existing Privacy link). Keep scripts and their order. `Index.cshtml`: replace the centered `display-4` hero and the `text-bg-*` coloured cards with `<div class="page-head"><div><h1 class="page-head__title">Dashboard</h1><p class="page-head__sub">Inventory and sales</p></div></div>` + `<div class="stat-grid">` of `<div class="stat"><div class="stat__value num">@Model.Stock.X</div><div class="stat__label">label</div></div>`. Carry over every existing card with the same binding, label and order.
 - Edge cases: before editing run `grep -c "@Model\." Pages/Index.cshtml` and `grep -c "ToIrr\|ToGroupedDigits" Pages/Index.cshtml` and record both in act.md; after = same counts (money formatting is never re-done in markup).
@@ -152,7 +152,7 @@ Type: one family system (SF Pro Rounded for Latin, Vazirmatn picks up Persian gl
 - Done when: dashboard uses `.stat` grid, skip link present, CI green.
 - Risk: LOW. Confidence: HIGH.
 
-## [ ] Step 3.2 — Products list
+## ~~[x] Step 3.2 — Products list~~
 - Files: modify: `Pages/Products/Index.cshtml` (rewrite markup readable, multi-line); create: `Pages/Shared/_EmptyState.cshtml` (`@model (string Title, string? Hint)`: `<div class="empty-state" role="status"><p class="empty-state__title">@Model.Title</p>@if (Model.Hint is not null){<p class="empty-state__hint">@Model.Hint</p>}</div>`); do not touch: `Index.cshtml.cs`.
 - Change: in `@{ }` declare `var tabs = new (string Key, string Label, string? CreatePage, string? CreateLabel)[] { ("all","All",null,null), ("phone","Phones","/Products/CreatePhone","Create phone"), ("appleid","Apple IDs","/Products/CreateAppleId","Create Apple ID"), ("glass","Glasses","/Products/CreateGlass","Create glass"), ("tablet","Tablets","/Products/CreateTablet","Create tablet"), ("smartwatch","Smart Watches","/Products/CreateSmartWatch","Create smart watch"), ("laptop","Laptops","/Products/CreateLaptop","Create laptop"), ("cable","Cables","/Products/CreateCable","Create cable"), ("charger","Chargers","/Products/CreateCharger","Create charger"), ("powerbank","Power Banks","/Products/CreatePowerBank","Create power bank"), ("portablestorage","Portable Storages","/Products/CreatePortableStorage","Create portable storage"), ("case","Cases","/Products/CreateCase","Create case") };` and render the 12 tab links with one `@foreach (var (key, label, _, _) in tabs)`, keeping each link's `asp-route-type`, `availability`, `manufacturerId`, `modelId`, `sortBy`, `sortDirection` exactly, and `asp-route-partNumberId` **only on the phone tab** as today; active tab = `btn-primary` + `aria-current="page"`, others `btn-outline-primary`. The "Create …" button for the current type comes from the same array (`asp-page="@create"` class `btn btn-success`); Second-hand link stays `btn btn-outline-warning`. Layout: `.page-head` (h1 "Products" + actions = Second-hand link + create button), tab row, `.toolbar` containing the existing filter `<form>` (all selects keep `onchange="this.form.submit()"` — inline handlers are OUT OF SCOPE), total line, then `.data-table` (same 7 columns). Status cell = `<span class="status-chip status-chip--@(p.IsSold ? "sold" : "available")">`, plus `status-chip--used` "Second-hand" when `p.IsSecondHand`. Name and Identifier cells get `dir="auto"`; Identifier also `.num`. Empty → `<partial name="_EmptyState" model='("No products match these filters", "Change a filter or create a product.")' />`.
 - Edge cases: sort/filter links must produce the same URLs as before — compare `asp-route-*` sets per tab.
@@ -161,7 +161,7 @@ Type: one family system (SF Pro Rounded for Latin, Vazirmatn picks up Persian gl
 - Done when: list readable, tabs looped, empty state partial used, CI green.
 - Risk: MEDIUM. Confidence: HIGH.
 
-## [ ] Step 3.3 — Product details and edit
+## ~~[x] Step 3.3 — Product details and edit~~
 - Files: modify: `Pages/Products/Details.cshtml`, `Pages/Products/Edit.cshtml`, `Pages/Shared/_ProductEditForm.cshtml`; do not touch: `Edit.cshtml.cs`, `Details.cshtml.cs`, `jalali-datepicker.js`, `create-product-pricing.js`.
 - Change: Details: `.page-head` (title = product name, sub = type, actions = Edit / Back), one `.form-section` per existing block rendered as a two-column definition list (`<dl class="row">` with `dt.col-sm-4 text-muted`, `dd.col-sm-8`), prices `.num`, availability as `.status-chip`; Apple ID password field displayed exactly as today. Edit + `_ProductEditForm`: wrap existing field groups in `.form-section` with `.form-section__title` (Identity, Pricing, then the profile-specific block per type, Second-hand, Guarantee), group order unchanged; validation summary at top; buttons in a bottom `.action-bar`: primary "Save changes", secondary "Cancel" (link to Details).
 - Edge cases: do not reorder fields inside a group; do not alter `asp-for`, `id`, `name`, `data-*`; keep any `hidden` inputs; keep Jalali date inputs' classes/attributes the picker queries.
@@ -169,7 +169,7 @@ Type: one family system (SF Pro Rounded for Latin, Vazirmatn picks up Persian gl
 - Done when: both pages use sections + action bar, hook counts equal, CI green.
 - Risk: MEDIUM. Confidence: MEDIUM.
 
-## [ ] Step 3.4 — Create forms, batch 1 (Apple ID, Glass, Laptop, Phone, Smart watch, Tablet)
+## ~~[x] Step 3.4 — Create forms, batch 1 (Apple ID, Glass, Laptop, Phone, Smart watch, Tablet)~~
 - Files: modify: `Pages/Shared/_ProductCreate{AppleId,Glass,Laptop,Phone,SmartWatch,Tablet}Form.cshtml` and `Pages/Products/Create{AppleId,Glass,Laptop,Phone,SmartWatch,Tablet}.cshtml`; do not touch: `.cshtml.cs`, JS.
 - Change: same pattern as 3.3 — `.page-head` (title unchanged), field groups in `.form-section` (Product, Pricing, Details, Second-hand/Guarantee where they exist), bottom `.action-bar` with "Create <thing>" (same text as today's button) + "Cancel" link. Pure wrapper/class changes.
 - Edge cases: forms posted by `product-create-modal.js` or priced by `create-product-pricing.js` keep their wrapper ids/classes.
@@ -177,12 +177,12 @@ Type: one family system (SF Pro Rounded for Latin, Vazirmatn picks up Persian gl
 - Done when: six forms restyled, counts equal, CI green.
 - Risk: MEDIUM. Confidence: MEDIUM.
 
-## [ ] Step 3.5 — Create forms, batch 2 (Cable, Case, Charger, Portable storage, Power bank) + success partial
+## ~~[x] Step 3.5 — Create forms, batch 2 (Cable, Case, Charger, Portable storage, Power bank) + success partial~~
 - Files: modify: `Pages/Shared/_ProductCreate{Cable,Case,Charger,PortableStorage,PowerBank}Form.cshtml`, `Pages/Products/Create{Cable,Case,Charger,PortableStorage,PowerBank}.cshtml`; inspect only: `Pages/Shared/_ProductCreateSuccess.cshtml` (5-line `alert alert-success` partial with `role="status"`, no links) — do **not** modify it; it picks up Stage 2's `.alert-success` styling.
 - Change/Edge/Verify/Done: same as Step 3.4. - Depends on: 3.4 (same patterns).
 - Risk: MEDIUM. Confidence: MEDIUM.
 
-## [ ] Step 3.6 — Transactions
+## ~~[x] Step 3.6 — Transactions~~
 - Files: modify: `Pages/Transactions/Index.cshtml`, `Details.cshtml`, `Sell.cshtml`, `Pages/Shared/_ProductPickerOptions.cshtml`, `_ProductSellerPicker.cshtml`; do not touch: `product-picker.js`, `.cshtml.cs`.
 - Change: `.page-head`; list table → `.data-table` (amounts `.num`, right-aligned); details as definition-list sections (Parties, Items, Totals); Sell form in `.form-section`s with a bottom `.action-bar` ("Record sale" — keep today's text); picker partials: result rows use `list-group-item` styling already tokenised in 2.4, add no new selectors.
 - Edge cases: money stays displayed via existing `ToIrr()`/`ToGroupedDigits()` calls — never reformat in markup.
@@ -190,20 +190,20 @@ Type: one family system (SF Pro Rounded for Latin, Vazirmatn picks up Persian gl
 - Done when: pages restyled, counts equal, CI green.
 - Risk: MEDIUM. Confidence: MEDIUM.
 
-## [ ] Step 3.7 — People
+## ~~[x] Step 3.7 — People~~
 - Files: modify: `Pages/People/{Index,Customers,Sellers,CustomerDetails,SellerDetails,CreateCustomer,CreateSeller}.cshtml`, `Pages/Products/PersonPicker.cshtml`, `Pages/Shared/_PersonPicker.cshtml`; do not touch: `person-picker.js`, `.cshtml.cs`.
 - Change: same patterns (`.page-head`, `.data-table`, `.form-section`, `.action-bar`, definition-list details). Names/phones `dir="auto"`; phone numbers also `.num`.
 - Verify: CI green; hook counts equal.
 - Risk: MEDIUM. Confidence: MEDIUM.
 
-## [ ] Step 3.8 — Reports, account, remaining pages
+## ~~[x] Step 3.8 — Reports, account, remaining pages~~
 - Files: modify: `Pages/Reports/ProfitLoss.cshtml`, `wwwroot/js/profit-loss-chart.js`, `Pages/Account/{Login,Logout,Profile}.cshtml`, `Pages/Error.cshtml`, `Pages/Privacy.cshtml`, `Pages/Products/SecondHand.cshtml`; modify CSS: `app-theme.css` selectors `.account-login-*`, `.profit-chart-*` (tokens only).
 - Change: ProfitLoss: `.page-head`, summary numbers as `.stat-grid`, both tables `.data-table`. `profit-loss-chart.js`: replace hard-coded series colours with values read once via `getComputedStyle(document.documentElement).getPropertyValue('--accent' | '--danger' | '--ink' | '--ink-muted')` (income = accent, expense = danger, net = ink, grid/axis = ink-muted); no change to data, scales or options. Login: keep form, restyle through tokens, no new auth UI. SecondHand: same list pattern as 3.2 incl. `_EmptyState`. Error/Privacy: `.page-head` + readable `max-width: 70ch`.
 - Edge cases: chart must still render with `Chart` from `wwwroot/lib/chart.js`; do not touch the lib.
 - Verify: CI green; `grep -n "#[0-9A-Fa-f]\{6\}\|rgba(" wwwroot/js/profit-loss-chart.js` → none; `.account-login-*` / `.profit-chart-*` contain no hex literals except inside `var()` fallbacks.
 - Risk: MEDIUM. Confidence: MEDIUM.
 
-## [ ] Step 3.9 — Stage 3 validation
+## ~~[x] Step 3.9 — Stage 3 validation~~
 - Files: none modified. Record the CI run. Run: `grep -rn "text-bg-\|btn-outline-dark\|display-4" src/MobileShop.Web/Pages src/MobileShop.Web/Views` → list leftovers (allowed only where the page was explicitly out of scope). Manual check (user): every page at 1280 px.
 - Risk: LOW. Confidence: HIGH.
 

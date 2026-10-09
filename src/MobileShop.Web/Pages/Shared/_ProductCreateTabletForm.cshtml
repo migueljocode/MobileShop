@@ -5,18 +5,42 @@
     var corporations = (IReadOnlyList<string>)ViewData["Corporations"]!;
 }
 <div class="row g-3" data-create-product-type="tablet">
-    <div class="col-md-6"><label class="form-label">Manufacturer</label><select name="input.ManufacturerId" class="form-select" data-device-manufacturer><option value="">-- Select manufacturer --</option>@foreach (var option in manufacturers) { <option value="@option.Id">@option.Name</option> }</select></div>
-    <div class="col-md-6"><label class="form-label">Model</label><select name="input.ModelId" class="form-select" data-device-model><option value="">-- Select model --</option>@foreach (var option in models) { <option value="@option.Id">@option.Name</option> }</select></div>
-    
-    <div class="col-md-4"><label class="form-label">Paid price (Toman)</label><input name="input.Price" class="form-control" inputmode="numeric" min="0" max="@MobileShop.Models.Settings.MoneyLimits.MaxRials" value="@Model.Price" /></div>
-    <div class="col-md-4"><label class="form-label">Profit %</label><input name="input.ProfitPercent" class="form-control" type="number" step="0.01" min="0" max="100" value="@Model.ProfitPercent" /></div>
-    <div class="col-md-4"><label class="form-label">Profit amount (Toman)</label><input name="input.ProfitAmount" class="form-control" inputmode="numeric" min="0" max="@MobileShop.Models.Settings.MoneyLimits.MaxRials" value="@Model.ProfitAmount" /></div>
-    <div class="col-12"><div class="form-check"><input name="input.IsSecondHand" value="true" type="checkbox" class="form-check-input" /><label class="form-check-label">Second-hand item</label></div></div>
-    <div class="col-md-6"><label class="form-label">Second-hand test days</label><input name="input.TestPeriodDays" class="form-control" type="number" min="0" /></div>
-    <div class="col-md-6"><label class="form-label">Second-hand notes</label><input name="input.SecondHandNotes" class="form-control" maxlength="500" /></div>
-    <div class="col-12"><div class="form-check"><input name="input.HasGuarantee" value="true" type="checkbox" class="form-check-input" /><label class="form-check-label">Has guarantee</label></div></div>
-    <div class="col-md-6"><label class="form-label">Guarantee corporation</label><select name="input.GuaranteeCorporation" class="form-select"><option value="">Shop Warranty</option>@foreach (var corporation in corporations) { <option value="@corporation">@corporation</option> }</select></div>
-    <div class="col-md-6"><label class="form-label">Guarantee expiry</label><input name="input.GuaranteeExpiry" class="form-control" type="text" data-jalali-date placeholder="1405/12/29" /></div>
-    <div class="col-12"><label class="form-label">Guarantee notes</label><input name="input.GuaranteeNotes" class="form-control" maxlength="500" /></div>
-    <div class="col-12"><label class="form-label">Device notes</label><textarea name="input.Notes" class="form-control" rows="2" maxlength="500">@Model.Notes</textarea></div>
+    <div class="form-section col-12">
+        <h2 class="form-section__title">Product</h2>
+        <div class="row g-3">
+            <div class="col-md-6"><label class="form-label">Manufacturer</label><select name="input.ManufacturerId" class="form-select" data-device-manufacturer><option value="">-- Select manufacturer --</option>@foreach (var option in manufacturers) { <option value="@option.Id">@option.Name</option> }</select></div>
+            <div class="col-md-6"><label class="form-label">Model</label><select name="input.ModelId" class="form-select" data-device-model><option value="">-- Select model --</option>@foreach (var option in models) { <option value="@option.Id">@option.Name</option> }</select></div>
+        </div>
+    </div>
+    <div class="form-section col-12">
+        <h2 class="form-section__title">Pricing</h2>
+        <div class="row g-3">
+            <div class="col-md-4"><label class="form-label">Paid price (Toman)</label><input name="input.Price" class="form-control" inputmode="numeric" min="0" max="@MobileShop.Models.Settings.MoneyLimits.MaxRials" value="@Model.Price" /></div>
+            <div class="col-md-4"><label class="form-label">Profit %</label><input name="input.ProfitPercent" class="form-control" type="number" step="0.01" min="0" max="100" value="@Model.ProfitPercent" /></div>
+            <div class="col-md-4"><label class="form-label">Profit amount (Toman)</label><input name="input.ProfitAmount" class="form-control" inputmode="numeric" min="0" max="@MobileShop.Models.Settings.MoneyLimits.MaxRials" value="@Model.ProfitAmount" /></div>
+        </div>
+    </div>
+    <div class="form-section col-12">
+        <h2 class="form-section__title">Second-hand</h2>
+        <div class="row g-3">
+            <div class="col-12"><div class="form-check"><input name="input.IsSecondHand" value="true" type="checkbox" class="form-check-input" /><label class="form-check-label">Second-hand item</label></div></div>
+            <div class="col-md-6"><label class="form-label">Second-hand test days</label><input name="input.TestPeriodDays" class="form-control" type="number" min="0" /></div>
+            <div class="col-md-6"><label class="form-label">Second-hand notes</label><input name="input.SecondHandNotes" class="form-control" maxlength="500" /></div>
+        </div>
+    </div>
+    <div class="form-section col-12">
+        <h2 class="form-section__title">Guarantee</h2>
+        <div class="row g-3">
+            <div class="col-12"><div class="form-check"><input name="input.HasGuarantee" value="true" type="checkbox" class="form-check-input" /><label class="form-check-label">Has guarantee</label></div></div>
+            <div class="col-md-6"><label class="form-label">Guarantee corporation</label><select name="input.GuaranteeCorporation" class="form-select"><option value="">Shop Warranty</option>@foreach (var corporation in corporations) { <option value="@corporation">@corporation</option> }</select></div>
+            <div class="col-md-6"><label class="form-label">Guarantee expiry</label><input name="input.GuaranteeExpiry" class="form-control" type="text" data-jalali-date placeholder="1405/12/29" /></div>
+            <div class="col-12"><label class="form-label">Guarantee notes</label><input name="input.GuaranteeNotes" class="form-control" maxlength="500" /></div>
+        </div>
+    </div>
+    <div class="form-section col-12">
+        <h2 class="form-section__title">Details</h2>
+        <div class="row g-3">
+            <div class="col-12"><label class="form-label">Device notes</label><textarea name="input.Notes" class="form-control" rows="2" maxlength="500">@Model.Notes</textarea></div>
+        </div>
+    </div>
 </div>

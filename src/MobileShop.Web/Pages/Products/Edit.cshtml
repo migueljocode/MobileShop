@@ -6,8 +6,12 @@
 
 @if (Model.Product is not null)
 {
-    <h1>Edit @Model.Product.Manufacturer @Model.Product.Model</h1>
-    <p class="text-muted">Type: @Model.Product.Type</p>
+    <div class="page-head">
+        <div>
+            <h1 class="page-head__title">Edit @Model.Product.Manufacturer @Model.Product.Model</h1>
+            <p class="page-head__sub">Type: @Model.Product.Type</p>
+        </div>
+    </div>
 
     <form method="post" class="row g-3" id="productEditForm">
         @Html.AntiForgeryToken()
@@ -29,57 +33,69 @@
             <div asp-validation-summary="All" class="text-danger col-12"></div>
         }
 
-        <div class="col-md-6">
-            <label asp-for="Product.Manufacturer" class="form-label">Manufacturer</label>
-            <input asp-for="Product.Manufacturer" class="form-control" readonly />
-        </div>
+        <div class="form-section col-12">
+            <h2 class="form-section__title">Identity</h2>
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label asp-for="Product.Manufacturer" class="form-label">Manufacturer</label>
+                    <input asp-for="Product.Manufacturer" class="form-control" readonly />
+                </div>
 
-        <div class="col-md-6">
-            <label asp-for="Product.Model" class="form-label">Model</label>
-            <input asp-for="Product.Model" class="form-control" readonly />
-        </div>
+                <div class="col-md-6">
+                    <label asp-for="Product.Model" class="form-label">Model</label>
+                    <input asp-for="Product.Model" class="form-control" readonly />
+                </div>
 
-        <div class="col-md-3">
-            <label asp-for="Product.Identifier" class="form-label">Identifier</label>
-            <input asp-for="Product.Identifier" class="form-control" />
-            <span asp-validation-for="Product.Identifier" class="text-danger"></span>
-        </div>
-
-        <div class="col-md-3">
-            <label asp-for="Product.Price" class="form-label">Paid price (Toman)</label>
-            <input asp-for="Product.Price" class="form-control" data-price inputmode="numeric" step="1" min="0" max="@MobileShop.Models.Settings.MoneyLimits.MaxRials" />
-            <span asp-validation-for="Product.Price" class="text-danger"></span>
-        </div>
-
-        <div class="col-md-3">
-            <label asp-for="Product.ProfitPercent" class="form-label">Profit %</label>
-            <div class="input-group">
-                <input asp-for="Product.ProfitPercent" class="form-control" data-percent />
-                <span class="input-group-text">%</span>
+                <div class="col-md-3">
+                    <label asp-for="Product.Identifier" class="form-label">Identifier</label>
+                    <input asp-for="Product.Identifier" class="form-control" />
+                    <span asp-validation-for="Product.Identifier" class="text-danger"></span>
+                </div>
             </div>
-            <span asp-validation-for="Product.ProfitPercent" class="text-danger"></span>
         </div>
 
-        <div class="col-md-3">
-            <label asp-for="Product.ProfitAmount" class="form-label">Profit amount (Toman)</label>
-            <div class="input-group">
-                <span class="input-group-text">Toman</span>
-                <input asp-for="Product.ProfitAmount" class="form-control" data-amount inputmode="numeric" step="1" min="0" max="@MobileShop.Models.Settings.MoneyLimits.MaxRials" />
+        <div class="form-section col-12">
+            <h2 class="form-section__title">Pricing</h2>
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <label asp-for="Product.Price" class="form-label">Paid price (Toman)</label>
+                    <input asp-for="Product.Price" class="form-control" data-price inputmode="numeric" step="1" min="0" max="@MobileShop.Models.Settings.MoneyLimits.MaxRials" />
+                    <span asp-validation-for="Product.Price" class="text-danger"></span>
+                </div>
+
+                <div class="col-md-3">
+                    <label asp-for="Product.ProfitPercent" class="form-label">Profit %</label>
+                    <div class="input-group">
+                        <input asp-for="Product.ProfitPercent" class="form-control" data-percent />
+                        <span class="input-group-text">%</span>
+                    </div>
+                    <span asp-validation-for="Product.ProfitPercent" class="text-danger"></span>
+                </div>
+
+                <div class="col-md-3">
+                    <label asp-for="Product.ProfitAmount" class="form-label">Profit amount (Toman)</label>
+                    <div class="input-group">
+                        <span class="input-group-text">Toman</span>
+                        <input asp-for="Product.ProfitAmount" class="form-control" data-amount inputmode="numeric" step="1" min="0" max="@MobileShop.Models.Settings.MoneyLimits.MaxRials" />
+                    </div>
+                    <span asp-validation-for="Product.ProfitAmount" class="text-danger"></span>
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label">Finished price (Toman)</label>
+                    <input type="text" class="form-control" data-finished-price readonly aria-readonly="true" tabindex="-1" />
+                    <span class="form-text text-muted">Server-stored price (paid + profit).</span>
+                </div>
             </div>
-            <span asp-validation-for="Product.ProfitAmount" class="text-danger"></span>
-        </div>
-
-        <div class="col-md-3">
-            <label class="form-label">Finished price (Toman)</label>
-            <input type="text" class="form-control" data-finished-price readonly aria-readonly="true" tabindex="-1" />
-            <span class="form-text text-muted">Server-stored price (paid + profit).</span>
         </div>
 
         <partial name="/Pages/Shared/_ProductEditForm.cshtml" model="Model" />
 
         <div class="col-12">
-            <button type="submit" class="btn btn-primary">Save changes</button>
-            <a asp-page="/Products/Details" asp-route-id="@Model.Product.ProductId" asp-route-type="@Model.Product.Type" class="btn btn-outline-secondary ms-2">Cancel</a>
+            <div class="action-bar">
+                <button type="submit" class="btn btn-primary">Save changes</button>
+                <a asp-page="/Products/Details" asp-route-id="@Model.Product.ProductId" asp-route-type="@Model.Product.Type" class="btn btn-outline-secondary">Cancel</a>
+            </div>
         </div>
     </form>
 }

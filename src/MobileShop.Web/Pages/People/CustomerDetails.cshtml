@@ -3,10 +3,25 @@
 @{ ViewData["Title"] = "Customer details"; }
 @if (Model.Customer is not null)
 {
-    <h1>@Model.Customer.Name</h1>
-    <p>Phone: @Model.Customer.PhoneNumber · National ID: @Model.Customer.NationalId</p>
-    <h2>Purchased products</h2>
-    @if (Model.Products.Count == 0) { <p class="text-muted">No purchased products.</p> }
-    else { <ul>@foreach (var product in Model.Products) { <li>@product.Name</li> }</ul> }
-    <a asp-page="/People/Index" asp-route-type="customers" class="btn btn-secondary mt-3">Back to customers</a>
+    <div class="page-head">
+        <div>
+            <h1 class="page-head__title" dir="auto">@Model.Customer.Name</h1>
+            <p class="page-head__sub">Customer</p>
+        </div>
+        <div class="page-head__actions">
+            <a asp-page="/People/Index" asp-route-type="customers" class="btn btn-outline-secondary">Back to customers</a>
+        </div>
+    </div>
+    <div class="form-section">
+        <h2 class="form-section__title">Contact</h2>
+        <dl class="row">
+            <dt class="col-sm-4 text-muted">Phone</dt><dd class="col-sm-8 num" dir="auto">@Model.Customer.PhoneNumber</dd>
+            <dt class="col-sm-4 text-muted">National ID</dt><dd class="col-sm-8" dir="auto">@Model.Customer.NationalId</dd>
+        </dl>
+    </div>
+    <div class="form-section">
+        <h2 class="form-section__title">Purchased products</h2>
+        @if (Model.Products.Count == 0) { <p class="text-muted">No purchased products.</p> }
+        else { <ul>@foreach (var product in Model.Products) { <li dir="auto">@product.Name</li> }</ul> }
+    </div>
 }

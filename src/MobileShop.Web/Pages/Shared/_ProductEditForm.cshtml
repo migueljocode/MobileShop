@@ -2,351 +2,446 @@
 
 @if (Model.Product.Type == "Phone")
 {
-    <div class="col-md-6">
-        <label asp-for="Product.ColorId" class="form-label">Color</label>
-        <div class="input-group">
-            <select asp-for="Product.ColorId" asp-items="@(new SelectList(Model.Colors, "Id", "Name"))" class="form-select" id="colorSelect">
-                <option value="">-- Select color --</option>
-            </select>
-            <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#addColorModal" id="addColorBtn">Add New</button>
+    <div class="form-section col-12">
+        <h2 class="form-section__title">Phone details</h2>
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label asp-for="Product.ColorId" class="form-label">Color</label>
+                <div class="input-group">
+                    <select asp-for="Product.ColorId" asp-items="@(new SelectList(Model.Colors, "Id", "Name"))" class="form-select" id="colorSelect">
+                        <option value="">-- Select color --</option>
+                    </select>
+                    <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#addColorModal" id="addColorBtn">Add New</button>
+                </div>
+                <span asp-validation-for="Product.ColorId" class="text-danger"></span>
+            </div>
+
+            <div class="col-md-6">
+                <label asp-for="Product.PartNumberId" class="form-label">Part number</label>
+                <div class="input-group">
+                    <select asp-for="Product.PartNumberId" asp-items="@(new SelectList(Model.PartNumbers, "Id", "Name"))" class="form-select" id="partNumberSelect">
+                        <option value="">-- Select part number --</option>
+                    </select>
+                    <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#addPartNumberModal">Add New</button>
+                </div>
+                <span asp-validation-for="Product.PartNumberId" class="text-danger"></span>
+            </div>
+
+            <div class="col-md-6">
+                <label asp-for="Product.IMEI1" class="form-label">IMEI 1</label>
+                <input asp-for="Product.IMEI1" class="form-control" />
+                <span asp-validation-for="Product.IMEI1" class="text-danger"></span>
+            </div>
+
+            <div class="col-md-6">
+                <label asp-for="Product.IMEI2" class="form-label">IMEI 2</label>
+                <input asp-for="Product.IMEI2" class="form-control" />
+                <span asp-validation-for="Product.IMEI2" class="text-danger"></span>
+            </div>
         </div>
-        <span asp-validation-for="Product.ColorId" class="text-danger"></span>
     </div>
 
-    <div class="col-md-6">
-        <label asp-for="Product.PartNumberId" class="form-label">Part number</label>
-        <div class="input-group">
-            <select asp-for="Product.PartNumberId" asp-items="@(new SelectList(Model.PartNumbers, "Id", "Name"))" class="form-select" id="partNumberSelect">
-                <option value="">-- Select part number --</option>
-            </select>
-            <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#addPartNumberModal">Add New</button>
+    <div class="form-section col-12">
+        <h2 class="form-section__title">Second-hand</h2>
+        <div class="row g-3">
+            <div class="col-md-3">
+                <label asp-for="Product.IsSecondHand" class="form-label">Second-hand</label>
+                <select asp-for="Product.IsSecondHand" class="form-select">
+                    <option value="false">No</option>
+                    <option value="true">Yes</option>
+                </select>
+            </div>
         </div>
-        <span asp-validation-for="Product.PartNumberId" class="text-danger"></span>
     </div>
 
-    <div class="col-md-6">
-        <label asp-for="Product.IMEI1" class="form-label">IMEI 1</label>
-        <input asp-for="Product.IMEI1" class="form-control" />
-        <span asp-validation-for="Product.IMEI1" class="text-danger"></span>
-    </div>
+    <div class="form-section col-12">
+        <h2 class="form-section__title">Guarantee</h2>
+        <div class="row g-3">
+            <div class="col-md-3" data-guarantee-block style="display:none">
+                <label asp-for="Product.GuaranteeCorporation" class="form-label">Guarantee corporation</label>
+                <select asp-for="Product.GuaranteeCorporation" asp-items="@(new SelectList(Model.Corporations))" class="form-select">
+                    <option value="">-- Select corporation --</option>
+                </select>
+                <label asp-for="Product.GuaranteeExpiry" class="form-label mt-2">Guarantee expiry</label>
+                <input asp-for="Product.GuaranteeExpiry" class="form-control" type="text" data-jalali-date placeholder="1405/12/29" value="@(Model.Product.GuaranteeExpiry.HasValue ? Model.Product.GuaranteeExpiry.Value.ToJalaliDateString() : string.Empty)" />
+                <label asp-for="Product.GuaranteeNotes" class="form-label mt-2">Guarantee notes</label>
+                <input asp-for="Product.GuaranteeNotes" class="form-control" />
+            </div>
 
-    <div class="col-md-6">
-        <label asp-for="Product.IMEI2" class="form-label">IMEI 2</label>
-        <input asp-for="Product.IMEI2" class="form-control" />
-        <span asp-validation-for="Product.IMEI2" class="text-danger"></span>
-    </div>
-
-    <div class="col-md-3">
-        <label asp-for="Product.IsSecondHand" class="form-label">Second-hand</label>
-        <select asp-for="Product.IsSecondHand" class="form-select">
-            <option value="false">No</option>
-            <option value="true">Yes</option>
-        </select>
-    </div>
-
-    <div class="col-md-3" data-guarantee-block style="display:none">
-        <label asp-for="Product.GuaranteeCorporation" class="form-label">Guarantee corporation</label>
-        <select asp-for="Product.GuaranteeCorporation" asp-items="@(new SelectList(Model.Corporations))" class="form-select">
-            <option value="">-- Select corporation --</option>
-        </select>
-        <label asp-for="Product.GuaranteeExpiry" class="form-label mt-2">Guarantee expiry</label>
-        <input asp-for="Product.GuaranteeExpiry" class="form-control" type="text" data-jalali-date placeholder="1405/12/29" value="@(Model.Product.GuaranteeExpiry.HasValue ? Model.Product.GuaranteeExpiry.Value.ToJalaliDateString() : string.Empty)" />
-        <label asp-for="Product.GuaranteeNotes" class="form-label mt-2">Guarantee notes</label>
-        <input asp-for="Product.GuaranteeNotes" class="form-control" />
-    </div>
-
-    <div class="col-md-3">
-        <label asp-for="Product.Notes" class="form-label">Notes</label>
-        <textarea asp-for="Product.Notes" class="form-control" rows="3"></textarea>
+            <div class="col-md-3">
+                <label asp-for="Product.Notes" class="form-label">Notes</label>
+                <textarea asp-for="Product.Notes" class="form-control" rows="3"></textarea>
+            </div>
+        </div>
     </div>
 }
 
 @if (Model.Product.Type == "Tablet")
 {
-    <div class="col-md-6">
-        <label asp-for="Product.ColorId" class="form-label">Color</label>
-        <div class="input-group">
-            <select asp-for="Product.ColorId" asp-items="@(new SelectList(Model.Colors, "Id", "Name"))" class="form-select" id="colorSelect">
-                <option value="">-- Select color --</option>
-            </select>
-            <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#addColorModal" id="addColorBtn">Add New</button>
+    <div class="form-section col-12">
+        <h2 class="form-section__title">Tablet details</h2>
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label asp-for="Product.ColorId" class="form-label">Color</label>
+                <div class="input-group">
+                    <select asp-for="Product.ColorId" asp-items="@(new SelectList(Model.Colors, "Id", "Name"))" class="form-select" id="colorSelect">
+                        <option value="">-- Select color --</option>
+                    </select>
+                    <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#addColorModal" id="addColorBtn">Add New</button>
+                </div>
+                <span asp-validation-for="Product.ColorId" class="text-danger"></span>
+            </div>
         </div>
-        <span asp-validation-for="Product.ColorId" class="text-danger"></span>
     </div>
 
-    <div class="col-md-3">
-        <label asp-for="Product.IsSecondHand" class="form-label">Second-hand</label>
-        <select asp-for="Product.IsSecondHand" class="form-select">
-            <option value="false">No</option>
-            <option value="true">Yes</option>
-        </select>
+    <div class="form-section col-12">
+        <h2 class="form-section__title">Second-hand</h2>
+        <div class="row g-3">
+            <div class="col-md-3">
+                <label asp-for="Product.IsSecondHand" class="form-label">Second-hand</label>
+                <select asp-for="Product.IsSecondHand" class="form-select">
+                    <option value="false">No</option>
+                    <option value="true">Yes</option>
+                </select>
+            </div>
+        </div>
     </div>
 
-    <div class="col-md-3" data-guarantee-block style="display:none">
-        <label asp-for="Product.GuaranteeCorporation" class="form-label">Guarantee corporation</label>
-        <select asp-for="Product.GuaranteeCorporation" asp-items="@(new SelectList(Model.Corporations))" class="form-select">
-            <option value="">-- Select corporation --</option>
-        </select>
-        <label asp-for="Product.GuaranteeExpiry" class="form-label mt-2">Guarantee expiry</label>
-        <input asp-for="Product.GuaranteeExpiry" class="form-control" type="text" data-jalali-date placeholder="1405/12/29" value="@(Model.Product.GuaranteeExpiry.HasValue ? Model.Product.GuaranteeExpiry.Value.ToJalaliDateString() : string.Empty)" />
-        <label asp-for="Product.GuaranteeNotes" class="form-label mt-2">Guarantee notes</label>
-        <input asp-for="Product.GuaranteeNotes" class="form-control" />
-    </div>
+    <div class="form-section col-12">
+        <h2 class="form-section__title">Guarantee</h2>
+        <div class="row g-3">
+            <div class="col-md-3" data-guarantee-block style="display:none">
+                <label asp-for="Product.GuaranteeCorporation" class="form-label">Guarantee corporation</label>
+                <select asp-for="Product.GuaranteeCorporation" asp-items="@(new SelectList(Model.Corporations))" class="form-select">
+                    <option value="">-- Select corporation --</option>
+                </select>
+                <label asp-for="Product.GuaranteeExpiry" class="form-label mt-2">Guarantee expiry</label>
+                <input asp-for="Product.GuaranteeExpiry" class="form-control" type="text" data-jalali-date placeholder="1405/12/29" value="@(Model.Product.GuaranteeExpiry.HasValue ? Model.Product.GuaranteeExpiry.Value.ToJalaliDateString() : string.Empty)" />
+                <label asp-for="Product.GuaranteeNotes" class="form-label mt-2">Guarantee notes</label>
+                <input asp-for="Product.GuaranteeNotes" class="form-control" />
+            </div>
 
-    <div class="col-md-12">
-        <label asp-for="Product.Notes" class="form-label">Notes</label>
-        <textarea asp-for="Product.Notes" class="form-control" rows="3"></textarea>
+            <div class="col-md-12">
+                <label asp-for="Product.Notes" class="form-label">Notes</label>
+                <textarea asp-for="Product.Notes" class="form-control" rows="3"></textarea>
+            </div>
+        </div>
     </div>
 }
 
 @if (Model.Product.Type == "Smart Watch")
 {
-    <div class="col-md-6">
-        <label asp-for="Product.ColorId" class="form-label">Color</label>
-        <div class="input-group">
-            <select asp-for="Product.ColorId" asp-items="@(new SelectList(Model.Colors, "Id", "Name"))" class="form-select" id="colorSelect">
-                <option value="">-- Select color --</option>
-            </select>
-            <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#addColorModal" id="addColorBtn">Add New</button>
+    <div class="form-section col-12">
+        <h2 class="form-section__title">Smart Watch details</h2>
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label asp-for="Product.ColorId" class="form-label">Color</label>
+                <div class="input-group">
+                    <select asp-for="Product.ColorId" asp-items="@(new SelectList(Model.Colors, "Id", "Name"))" class="form-select" id="colorSelect">
+                        <option value="">-- Select color --</option>
+                    </select>
+                    <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#addColorModal" id="addColorBtn">Add New</button>
+                </div>
+                <span asp-validation-for="Product.ColorId" class="text-danger"></span>
+            </div>
         </div>
-        <span asp-validation-for="Product.ColorId" class="text-danger"></span>
     </div>
 
-    <div class="col-md-3">
-        <label asp-for="Product.IsSecondHand" class="form-label">Second-hand</label>
-        <select asp-for="Product.IsSecondHand" class="form-select">
-            <option value="false">No</option>
-            <option value="true">Yes</option>
-        </select>
+    <div class="form-section col-12">
+        <h2 class="form-section__title">Second-hand</h2>
+        <div class="row g-3">
+            <div class="col-md-3">
+                <label asp-for="Product.IsSecondHand" class="form-label">Second-hand</label>
+                <select asp-for="Product.IsSecondHand" class="form-select">
+                    <option value="false">No</option>
+                    <option value="true">Yes</option>
+                </select>
+            </div>
+        </div>
     </div>
 
-    <div class="col-md-3" data-guarantee-block style="display:none">
-        <label asp-for="Product.GuaranteeCorporation" class="form-label">Guarantee corporation</label>
-        <select asp-for="Product.GuaranteeCorporation" asp-items="@(new SelectList(Model.Corporations))" class="form-select">
-            <option value="">-- Select corporation --</option>
-        </select>
-        <label asp-for="Product.GuaranteeExpiry" class="form-label mt-2">Guarantee expiry</label>
-        <input asp-for="Product.GuaranteeExpiry" class="form-control" type="text" data-jalali-date placeholder="1405/12/29" value="@(Model.Product.GuaranteeExpiry.HasValue ? Model.Product.GuaranteeExpiry.Value.ToJalaliDateString() : string.Empty)" />
-        <label asp-for="Product.GuaranteeNotes" class="form-label mt-2">Guarantee notes</label>
-        <input asp-for="Product.GuaranteeNotes" class="form-control" />
-    </div>
+    <div class="form-section col-12">
+        <h2 class="form-section__title">Guarantee</h2>
+        <div class="row g-3">
+            <div class="col-md-3" data-guarantee-block style="display:none">
+                <label asp-for="Product.GuaranteeCorporation" class="form-label">Guarantee corporation</label>
+                <select asp-for="Product.GuaranteeCorporation" asp-items="@(new SelectList(Model.Corporations))" class="form-select">
+                    <option value="">-- Select corporation --</option>
+                </select>
+                <label asp-for="Product.GuaranteeExpiry" class="form-label mt-2">Guarantee expiry</label>
+                <input asp-for="Product.GuaranteeExpiry" class="form-control" type="text" data-jalali-date placeholder="1405/12/29" value="@(Model.Product.GuaranteeExpiry.HasValue ? Model.Product.GuaranteeExpiry.Value.ToJalaliDateString() : string.Empty)" />
+                <label asp-for="Product.GuaranteeNotes" class="form-label mt-2">Guarantee notes</label>
+                <input asp-for="Product.GuaranteeNotes" class="form-control" />
+            </div>
 
-    <div class="col-md-12">
-        <label asp-for="Product.Notes" class="form-label">Notes</label>
-        <textarea asp-for="Product.Notes" class="form-control" rows="3"></textarea>
+            <div class="col-md-12">
+                <label asp-for="Product.Notes" class="form-label">Notes</label>
+                <textarea asp-for="Product.Notes" class="form-control" rows="3"></textarea>
+            </div>
+        </div>
     </div>
 }
 
 @if (Model.Product.Type == "Laptop")
 {
-    <div class="col-md-6">
-        <label asp-for="Product.ColorId" class="form-label">Color</label>
-        <div class="input-group">
-            <select asp-for="Product.ColorId" asp-items="@(new SelectList(Model.Colors, "Id", "Name"))" class="form-select" id="colorSelect">
-                <option value="">-- Select color --</option>
-            </select>
-            <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#addColorModal" id="addColorBtn">Add New</button>
+    <div class="form-section col-12">
+        <h2 class="form-section__title">Laptop details</h2>
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label asp-for="Product.ColorId" class="form-label">Color</label>
+                <div class="input-group">
+                    <select asp-for="Product.ColorId" asp-items="@(new SelectList(Model.Colors, "Id", "Name"))" class="form-select" id="colorSelect">
+                        <option value="">-- Select color --</option>
+                    </select>
+                    <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#addColorModal" id="addColorBtn">Add New</button>
+                </div>
+                <span asp-validation-for="Product.ColorId" class="text-danger"></span>
+            </div>
+
+            <div class="col-md-6">
+                <label asp-for="Product.Cpu" class="form-label">CPU</label>
+                <input asp-for="Product.Cpu" class="form-control" />
+            </div>
+
+            <div class="col-md-6">
+                <label asp-for="Product.Gpu" class="form-label">GPU</label>
+                <input asp-for="Product.Gpu" class="form-control" />
+            </div>
+
+            <div class="col-md-3">
+                <label asp-for="Product.DisplaySize" class="form-label">Screen size (inches)</label>
+                <input asp-for="Product.DisplaySize" class="form-control" step="0.1" min="0" />
+            </div>
         </div>
-        <span asp-validation-for="Product.ColorId" class="text-danger"></span>
     </div>
 
-    <div class="col-md-6">
-        <label asp-for="Product.Cpu" class="form-label">CPU</label>
-        <input asp-for="Product.Cpu" class="form-control" />
+    <div class="form-section col-12">
+        <h2 class="form-section__title">Second-hand</h2>
+        <div class="row g-3">
+            <div class="col-md-3">
+                <label asp-for="Product.IsSecondHand" class="form-label">Second-hand</label>
+                <select asp-for="Product.IsSecondHand" class="form-select">
+                    <option value="false">No</option>
+                    <option value="true">Yes</option>
+                </select>
+            </div>
+        </div>
     </div>
 
-    <div class="col-md-6">
-        <label asp-for="Product.Gpu" class="form-label">GPU</label>
-        <input asp-for="Product.Gpu" class="form-control" />
-    </div>
+    <div class="form-section col-12">
+        <h2 class="form-section__title">Guarantee</h2>
+        <div class="row g-3">
+            <div class="col-md-3" data-guarantee-block style="display:none">
+                <label asp-for="Product.GuaranteeCorporation" class="form-label">Guarantee corporation</label>
+                <select asp-for="Product.GuaranteeCorporation" asp-items="@(new SelectList(Model.Corporations))" class="form-select">
+                    <option value="">-- Select corporation --</option>
+                </select>
+                <label asp-for="Product.GuaranteeExpiry" class="form-label mt-2">Guarantee expiry</label>
+                <input asp-for="Product.GuaranteeExpiry" class="form-control" type="text" data-jalali-date placeholder="1405/12/29" value="@(Model.Product.GuaranteeExpiry.HasValue ? Model.Product.GuaranteeExpiry.Value.ToJalaliDateString() : string.Empty)" />
+                <label asp-for="Product.GuaranteeNotes" class="form-label mt-2">Guarantee notes</label>
+                <input asp-for="Product.GuaranteeNotes" class="form-control" />
+            </div>
 
-    <div class="col-md-3">
-        <label asp-for="Product.DisplaySize" class="form-label">Screen size (inches)</label>
-        <input asp-for="Product.DisplaySize" class="form-control" step="0.1" min="0" />
-    </div>
-
-    <div class="col-md-3">
-        <label asp-for="Product.IsSecondHand" class="form-label">Second-hand</label>
-        <select asp-for="Product.IsSecondHand" class="form-select">
-            <option value="false">No</option>
-            <option value="true">Yes</option>
-        </select>
-    </div>
-
-    <div class="col-md-3" data-guarantee-block style="display:none">
-        <label asp-for="Product.GuaranteeCorporation" class="form-label">Guarantee corporation</label>
-        <select asp-for="Product.GuaranteeCorporation" asp-items="@(new SelectList(Model.Corporations))" class="form-select">
-            <option value="">-- Select corporation --</option>
-        </select>
-        <label asp-for="Product.GuaranteeExpiry" class="form-label mt-2">Guarantee expiry</label>
-        <input asp-for="Product.GuaranteeExpiry" class="form-control" type="text" data-jalali-date placeholder="1405/12/29" value="@(Model.Product.GuaranteeExpiry.HasValue ? Model.Product.GuaranteeExpiry.Value.ToJalaliDateString() : string.Empty)" />
-        <label asp-for="Product.GuaranteeNotes" class="form-label mt-2">Guarantee notes</label>
-        <input asp-for="Product.GuaranteeNotes" class="form-control" />
-    </div>
-
-    <div class="col-md-12">
-        <label asp-for="Product.Notes" class="form-label">Notes</label>
-        <textarea asp-for="Product.Notes" class="form-control" rows="3"></textarea>
+            <div class="col-md-12">
+                <label asp-for="Product.Notes" class="form-label">Notes</label>
+                <textarea asp-for="Product.Notes" class="form-control" rows="3"></textarea>
+            </div>
+        </div>
     </div>
 }
 
 @if (Model.Product.Type == "Apple ID")
 {
-    <div class="col-md-6">
-        <label asp-for="Product.AppleIdPassword" class="form-label">Apple ID Password</label>
-        <input asp-for="Product.AppleIdPassword" class="form-control" />
-    </div>
+    <div class="form-section col-12">
+        <h2 class="form-section__title">Apple ID details</h2>
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label asp-for="Product.AppleIdPassword" class="form-label">Apple ID Password</label>
+                <input asp-for="Product.AppleIdPassword" class="form-control" />
+            </div>
 
-    <div class="col-md-12">
-        <label asp-for="Product.Notes" class="form-label">Notes</label>
-        <textarea asp-for="Product.Notes" class="form-control" rows="3"></textarea>
+            <div class="col-md-12">
+                <label asp-for="Product.Notes" class="form-label">Notes</label>
+                <textarea asp-for="Product.Notes" class="form-control" rows="3"></textarea>
+            </div>
+        </div>
     </div>
 }
 
 @if (Model.Product.Type == "Cable")
 {
-    <div class="col-md-6">
-        <label asp-for="Product.Connector1" class="form-label">Connector 1</label>
-        <select asp-for="Product.Connector1" class="form-select">
-            <option value="">-- Select connector --</option>
-        </select>
-    </div>
+    <div class="form-section col-12">
+        <h2 class="form-section__title">Cable details</h2>
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label asp-for="Product.Connector1" class="form-label">Connector 1</label>
+                <select asp-for="Product.Connector1" class="form-select">
+                    <option value="">-- Select connector --</option>
+                </select>
+            </div>
 
-    <div class="col-md-6">
-        <label asp-for="Product.Connector2" class="form-label">Connector 2</label>
-        <select asp-for="Product.Connector2" class="form-select">
-            <option value="">-- Select connector --</option>
-        </select>
-    </div>
+            <div class="col-md-6">
+                <label asp-for="Product.Connector2" class="form-label">Connector 2</label>
+                <select asp-for="Product.Connector2" class="form-select">
+                    <option value="">-- Select connector --</option>
+                </select>
+            </div>
 
-    <div class="col-md-3">
-        <label asp-for="Product.CableLength" class="form-label">Length (meters)</label>
-        <input asp-for="Product.CableLength" class="form-control" step="0.1" min="0" />
-    </div>
+            <div class="col-md-3">
+                <label asp-for="Product.CableLength" class="form-label">Length (meters)</label>
+                <input asp-for="Product.CableLength" class="form-control" step="0.1" min="0" />
+            </div>
 
-    <div class="col-md-12">
-        <label asp-for="Product.Notes" class="form-label">Notes</label>
-        <textarea asp-for="Product.Notes" class="form-control" rows="3"></textarea>
+            <div class="col-md-12">
+                <label asp-for="Product.Notes" class="form-label">Notes</label>
+                <textarea asp-for="Product.Notes" class="form-control" rows="3"></textarea>
+            </div>
+        </div>
     </div>
 }
 
 @if (Model.Product.Type == "Charger")
 {
-    <div class="col-md-3">
-        <label asp-for="Product.Wattage" class="form-label">Wattage (W)</label>
-        <input asp-for="Product.Wattage" class="form-control" min="0" />
-    </div>
+    <div class="form-section col-12">
+        <h2 class="form-section__title">Charger details</h2>
+        <div class="row g-3">
+            <div class="col-md-3">
+                <label asp-for="Product.Wattage" class="form-label">Wattage (W)</label>
+                <input asp-for="Product.Wattage" class="form-control" min="0" />
+            </div>
 
-    <div class="col-md-3">
-        <label asp-for="Product.Pd" class="form-label">PD</label>
-        <select asp-for="Product.Pd" class="form-select">
-            <option value="">-- Select --</option>
-            <option value="true">Yes</option>
-            <option value="false">No</option>
-        </select>
-    </div>
+            <div class="col-md-3">
+                <label asp-for="Product.Pd" class="form-label">PD</label>
+                <select asp-for="Product.Pd" class="form-select">
+                    <option value="">-- Select --</option>
+                    <option value="true">Yes</option>
+                    <option value="false">No</option>
+                </select>
+            </div>
 
-    <div class="col-md-3">
-        <label asp-for="Product.PortCount" class="form-label">Ports</label>
-        <input asp-for="Product.PortCount" class="form-control" min="1" />
-    </div>
+            <div class="col-md-3">
+                <label asp-for="Product.PortCount" class="form-label">Ports</label>
+                <input asp-for="Product.PortCount" class="form-control" min="1" />
+            </div>
 
-    <div class="col-md-12">
-        <label asp-for="Product.Notes" class="form-label">Notes</label>
-        <textarea asp-for="Product.Notes" class="form-control" rows="3"></textarea>
+            <div class="col-md-12">
+                <label asp-for="Product.Notes" class="form-label">Notes</label>
+                <textarea asp-for="Product.Notes" class="form-control" rows="3"></textarea>
+            </div>
+        </div>
     </div>
 }
 
 @if (Model.Product.Type == "Power Bank")
 {
-    <div class="col-md-3">
-        <label asp-for="Product.CapacityMah" class="form-label">Capacity (mAh)</label>
-        <input asp-for="Product.CapacityMah" class="form-control" min="0" />
-    </div>
+    <div class="form-section col-12">
+        <h2 class="form-section__title">Power Bank details</h2>
+        <div class="row g-3">
+            <div class="col-md-3">
+                <label asp-for="Product.CapacityMah" class="form-label">Capacity (mAh)</label>
+                <input asp-for="Product.CapacityMah" class="form-control" min="0" />
+            </div>
 
-    <div class="col-md-3">
-        <label asp-for="Product.MaxWattage" class="form-label">Max wattage (W)</label>
-        <input asp-for="Product.MaxWattage" class="form-control" min="0" />
-    </div>
+            <div class="col-md-3">
+                <label asp-for="Product.MaxWattage" class="form-label">Max wattage (W)</label>
+                <input asp-for="Product.MaxWattage" class="form-control" min="0" />
+            </div>
 
-    <div class="col-md-3">
-        <label asp-for="Product.Pd" class="form-label">PD</label>
-        <select asp-for="Product.Pd" class="form-select">
-            <option value="">-- Select --</option>
-            <option value="true">Yes</option>
-            <option value="false">No</option>
-        </select>
-    </div>
+            <div class="col-md-3">
+                <label asp-for="Product.Pd" class="form-label">PD</label>
+                <select asp-for="Product.Pd" class="form-select">
+                    <option value="">-- Select --</option>
+                    <option value="true">Yes</option>
+                    <option value="false">No</option>
+                </select>
+            </div>
 
-    <div class="col-md-3">
-        <label asp-for="Product.PortCount" class="form-label">Ports</label>
-        <input asp-for="Product.PortCount" class="form-control" min="1" />
-    </div>
+            <div class="col-md-3">
+                <label asp-for="Product.PortCount" class="form-label">Ports</label>
+                <input asp-for="Product.PortCount" class="form-control" min="1" />
+            </div>
 
-    <div class="col-md-6">
-        <label asp-for="Product.PortTypes" class="form-label">Port types</label>
-        <select asp-for="Product.PortTypes" class="form-select" multiple>
-            <option value="">-- Select connectors --</option>
-        </select>
-    </div>
+            <div class="col-md-6">
+                <label asp-for="Product.PortTypes" class="form-label">Port types</label>
+                <select asp-for="Product.PortTypes" class="form-select" multiple>
+                    <option value="">-- Select connectors --</option>
+                </select>
+            </div>
 
-    <div class="col-md-12">
-        <label asp-for="Product.Notes" class="form-label">Notes</label>
-        <textarea asp-for="Product.Notes" class="form-control" rows="3"></textarea>
+            <div class="col-md-12">
+                <label asp-for="Product.Notes" class="form-label">Notes</label>
+                <textarea asp-for="Product.Notes" class="form-control" rows="3"></textarea>
+            </div>
+        </div>
     </div>
 }
 
 @if (Model.Product.Type == "Portable Storage")
 {
-    <div class="col-md-6">
-        <label asp-for="Product.StorageKind" class="form-label">Storage kind</label>
-        <select asp-for="Product.StorageKind" class="form-select">
-            <option value="">-- Select kind --</option>
-        </select>
-    </div>
+    <div class="form-section col-12">
+        <h2 class="form-section__title">Portable Storage details</h2>
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label asp-for="Product.StorageKind" class="form-label">Storage kind</label>
+                <select asp-for="Product.StorageKind" class="form-select">
+                    <option value="">-- Select kind --</option>
+                </select>
+            </div>
 
-    <div class="col-md-6">
-        <label asp-for="Product.StorageCapacityLabel" class="form-label">Capacity</label>
-        <input asp-for="Product.StorageCapacityLabel" class="form-control" />
-    </div>
+            <div class="col-md-6">
+                <label asp-for="Product.StorageCapacityLabel" class="form-label">Capacity</label>
+                <input asp-for="Product.StorageCapacityLabel" class="form-control" />
+            </div>
 
-    <div class="col-md-3">
-        <label asp-for="Product.Speed" class="form-label">Speed (MB/s)</label>
-        <input asp-for="Product.Speed" class="form-control" min="0" />
-    </div>
+            <div class="col-md-3">
+                <label asp-for="Product.Speed" class="form-label">Speed (MB/s)</label>
+                <input asp-for="Product.Speed" class="form-control" min="0" />
+            </div>
 
-    <div class="col-md-12">
-        <label asp-for="Product.Notes" class="form-label">Notes</label>
-        <textarea asp-for="Product.Notes" class="form-control" rows="3"></textarea>
+            <div class="col-md-12">
+                <label asp-for="Product.Notes" class="form-label">Notes</label>
+                <textarea asp-for="Product.Notes" class="form-control" rows="3"></textarea>
+            </div>
+        </div>
     </div>
 }
 
 @if (Model.Product.Type == "Case")
 {
-    <div class="col-md-12">
-        <label asp-for="Product.CompatibleModels" class="form-label">Compatible models</label>
-        <select asp-for="Product.CompatibleModels" class="form-select" multiple>
-            <option value="">-- Select models --</option>
-        </select>
-    </div>
+    <div class="form-section col-12">
+        <h2 class="form-section__title">Case details</h2>
+        <div class="row g-3">
+            <div class="col-md-12">
+                <label asp-for="Product.CompatibleModels" class="form-label">Compatible models</label>
+                <select asp-for="Product.CompatibleModels" class="form-select" multiple>
+                    <option value="">-- Select models --</option>
+                </select>
+            </div>
 
-    <div class="col-md-12">
-        <label asp-for="Product.Notes" class="form-label">Notes</label>
-        <textarea asp-for="Product.Notes" class="form-control" rows="3"></textarea>
+            <div class="col-md-12">
+                <label asp-for="Product.Notes" class="form-label">Notes</label>
+                <textarea asp-for="Product.Notes" class="form-control" rows="3"></textarea>
+            </div>
+        </div>
     </div>
 }
 
 @if (Model.Product.Type == "Glass")
 {
-    <div class="col-md-12">
-        <label asp-for="Product.CompatibleModels" class="form-label">Compatible models</label>
-        <select asp-for="Product.CompatibleModels" class="form-select" multiple>
-            <option value="">-- Select models --</option>
-        </select>
-    </div>
+    <div class="form-section col-12">
+        <h2 class="form-section__title">Glass details</h2>
+        <div class="row g-3">
+            <div class="col-md-12">
+                <label asp-for="Product.CompatibleModels" class="form-label">Compatible models</label>
+                <select asp-for="Product.CompatibleModels" class="form-select" multiple>
+                    <option value="">-- Select models --</option>
+                </select>
+            </div>
 
-    <div class="col-md-12">
-        <label asp-for="Product.Notes" class="form-label">Notes</label>
-        <textarea asp-for="Product.Notes" class="form-control" rows="3"></textarea>
+            <div class="col-md-12">
+                <label asp-for="Product.Notes" class="form-label">Notes</label>
+                <textarea asp-for="Product.Notes" class="form-control" rows="3"></textarea>
+            </div>
+        </div>
     </div>
 }
