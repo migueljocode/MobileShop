@@ -9,7 +9,7 @@ public class Phone : BaseEntity
     [RegularExpression(@"^[0-9]{15}$", ErrorMessage = "{0} must be exactly 15 digits.")]
     public string IMEI1 { get; set; } = string.Empty;
 
-    [RegularExpression(@"^[0-9]{15}$", ErrorMessage = "{0} must be exactly 15 digits.")]
+    [RegularExpression(@"^$|^[0-9]{15}$", ErrorMessage = "{0} must be exactly 15 digits.")]
     public string? IMEI2 { get; set; }
 
     public bool? SupportsDualSim { get; set; }
