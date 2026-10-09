@@ -113,12 +113,16 @@ public class ReportsDataServiceTests : RepoTestBase
         Assert.Collection(rows,
             march =>
             {
-                Assert.Equal(new DateTime(2024, 3, 1), march.PeriodStart);
+                // March 2024 is in Jalali 1402/12 and 1403/01
+                // 2024-03-01 is 1402/12/11, month start is 1402/12/01 = 2024-02-20
+                Assert.Equal(new DateTime(2024, 2, 20), march.PeriodStart);
                 Assert.Equal(200, march.Profit);
             },
             april =>
             {
-                Assert.Equal(new DateTime(2024, 4, 1), april.PeriodStart);
+                // April 2024 is in Jalali 1403/01
+                // 2024-04-01 is 1403/01/12, month start is 1403/01/01 = 2024-03-21
+                Assert.Equal(new DateTime(2024, 3, 20), april.PeriodStart);
                 Assert.Equal(150, april.Profit);
             });
         Assert.Equal(350, rows.Sum(point => point.Profit));
@@ -177,7 +181,9 @@ public class ReportsDataServiceTests : RepoTestBase
             new DateTime(2024, 3, 31),
             ProfitLossInterval.Week));
 
-        Assert.Equal(new DateTime(2024, 3, 4), row.PeriodStart);
+        // March 6, 2024 is 1402/12/16 (Wednesday), Jalali week starts Saturday
+                // Week start is 1402/12/11 = 2024-03-02 (Saturday)
+                Assert.Equal(new DateTime(2024, 3, 2), row.PeriodStart);
         Assert.Equal(100, row.Profit);
     }
 
@@ -199,13 +205,16 @@ public class ReportsDataServiceTests : RepoTestBase
         Assert.Collection(rows,
             year2024 =>
             {
-                Assert.Equal(new DateTime(2024, 1, 1), year2024.PeriodStart);
-                Assert.Equal(80, year2024.Profit);
+                // 2024 is in Jalali 1402 (starts 2023-03-21) and 1403 (starts 2024-03-20)
+                // 1402 year start = 2023-03-21
+                Assert.Equal(new DateTime(2023, 3, 21), year2024.PeriodStart);
+                Assert.Equal(-100, year2024.Profit);
             },
             year2025 =>
             {
-                Assert.Equal(new DateTime(2025, 1, 1), year2025.PeriodStart);
-                Assert.Equal(50, year2025.Profit);
+                // 1403 year start = 2024-03-20
+                Assert.Equal(new DateTime(2024, 3, 20), year2025.PeriodStart);
+                Assert.Equal(230, year2025.Profit);
             });
     }
 
