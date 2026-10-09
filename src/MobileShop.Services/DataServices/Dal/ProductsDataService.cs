@@ -945,6 +945,7 @@ public class ProductsDataService(
         // The same includes as GetProductForEditAsync, tracked, so every profile the
         // type switch below needs is loaded and the changed entity can be saved
         // directly instead of re-attaching a half-loaded graph.
+#pragma warning disable CS8603, CS8602 // Include lambda returns nullable nav; benign
         var product = await products.FindTrackedWithIncludesAsync(
             input.ProductId,
             p => p.ModelNavigation,
@@ -967,6 +968,7 @@ public class ProductsDataService(
             p => p.CaseProfile.ModelFits,
             p => p.GlassProfile,
             p => p.GlassProfile.ModelFits);
+#pragma warning restore CS8603, CS8602
         if (product is null)
             return new ServiceResult(false, "Product not found.", nameof(input.ProductId), null);
 
@@ -1136,6 +1138,7 @@ public class ProductsDataService(
 
 public async Task<Product?> GetProductForEditAsync(int id)
     {
+#pragma warning disable CS8603, CS8602 // Include lambda returns nullable nav; benign
         return await products.FindWithIncludesAsync(
             id,
             p => p.ModelNavigation,
@@ -1158,6 +1161,7 @@ public async Task<Product?> GetProductForEditAsync(int id)
             p => p.CaseProfile.ModelFits,
             p => p.GlassProfile,
             p => p.GlassProfile.ModelFits);
+#pragma warning restore CS8603, CS8602
     }
 
     private async Task<ServiceResult> CreateAccessoryBatchAsync(int sellerId, int count, long price, decimal? profitPercent, long? profitAmount, int manufacturerId, int modelId, string categoryName, Action<Product> configure)
