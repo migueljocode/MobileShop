@@ -1,4 +1,4 @@
 - [x] ~~Stage 1 — Product edit save hardening (shared edit include list, unchanged save succeeds)~~
 - [x] ~~Stage 2 — UI/UX design system foundation (tokens, fonts, surfaces, component classes, overlays)~~
 - [x] ~~Stage 3 — UI/UX page redesign (shell, dashboard, products, forms, transactions, people, reports)~~
-- [ ] Stage 4 — UI/UX accessibility, responsive layout, empty/loading/error states
+- [x] ~~Stage 4 — UI/UX accessibility, responsive layout, empty/loading/error states~~
