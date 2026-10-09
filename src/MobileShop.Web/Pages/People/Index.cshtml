@@ -56,13 +56,14 @@
 
 @if (Model.People.Count == 0)
 {
-    <p class="text-muted">No people found.</p>
+    <partial name="_EmptyState" model='("No people yet", "Add the first customer or seller to get started.")' />
 }
 else
 {
+    <div class="table-responsive">
     <table class="data-table">
         <thead>
-            <tr><th>Role</th><th>Name</th><th>Phone</th><th>National ID</th><th>Seller type</th><th>@Model.ActivityColumnLabel</th><th></th></tr>
+            <tr><th scope="col">Role</th><th scope="col">Name</th><th scope="col">Phone</th><th scope="col">National ID</th><th scope="col">Seller type</th><th scope="col">@Model.ActivityColumnLabel</th><th scope="col"><span class="visually-hidden">Actions</span></th></tr>
         </thead>
         <tbody>
             @foreach (var person in Model.People)
@@ -79,4 +80,5 @@ else
             }
         </tbody>
     </table>
+    </div>
 }

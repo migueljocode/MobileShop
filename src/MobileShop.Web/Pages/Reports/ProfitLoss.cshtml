@@ -121,7 +121,7 @@
     @if (Model.EmptyDatabaseNote is not null)
     {
         <div class="col-12">
-            <p class="text-info mb-0">@Model.EmptyDatabaseNote</p>
+            <partial name="_EmptyState" model="(Model.EmptyDatabaseNote!, (string?)null)" />
         </div>
     }
 </form>
@@ -194,6 +194,7 @@
             </div>
                 <div class="profit-chart-legend"><span aria-hidden="true"></span> Net profit / loss</div>
         </section>
+        <div class="table-responsive">
         <table class="data-table"><thead><tr><th scope="col">Product</th><th scope="col" class="num">Bought (Toman)</th><th scope="col" class="num">Sold (Toman)</th><th scope="col" class="num">Profit / loss (Toman)</th><th scope="col" class="num">By percent</th></tr></thead><tbody>
 @foreach (var row in Model.Rows)
 {
@@ -201,10 +202,12 @@
     <tr><td dir="auto">@row.ProductLabel</td><td class="num">@row.Bought.ToToman()</td><td class="num">@row.Sold.ToToman()</td><td class="num @profitClass">@row.Profit.ToToman()</td><td class="num @profitClass">@row.ProfitPercent.ToString("F2")%</td></tr>
 }
 </tbody></table>
+        </div>
     </div>
 
     <div class="tab-pane fade" id="distribution" role="tabpanel">
         <div class="stat-grid"><div class="stat"><div class="stat__value num"><span class="@(Model.TotalProfit >= 0 ? "text-success" : "text-danger")">@(Model.TotalProfit > 0 ? "+" : "")@Model.TotalProfit.ToToman()</span></div><div class="stat__label">Total profit (Toman)</div></div></div>
+        <div class="table-responsive">
         <table class="data-table"><thead><tr><th scope="col">Employee</th><th scope="col" class="num">Share %</th><th scope="col" class="num">Amount (Toman)</th></tr></thead><tbody>
 @foreach (var row in Model.DistributionRows)
 {
@@ -215,6 +218,7 @@
     </tr>
 }
 </tbody></table>
+        </div>
     </div>
 </div>
 

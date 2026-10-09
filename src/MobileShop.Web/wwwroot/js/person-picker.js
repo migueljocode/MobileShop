@@ -44,14 +44,43 @@ document.addEventListener('DOMContentLoaded', function () {
             searchInput.setAttribute('aria-expanded', isVisible ? 'true' : 'false');
         }
 
+        function showSearchLoading() {
+            results.setAttribute('aria-busy', 'true');
+            var loading = document.createElement('div');
+            loading.className = 'loading-line';
+            loading.textContent = 'Loading…';
+            results.appendChild(loading);
+        }
+
+        function clearSearchLoading() {
+            var loading = results.querySelector('.loading-line');
+            if (loading) loading.remove();
+            results.removeAttribute('aria-busy');
+        }
+
+        function showSearchError() {
+            results.replaceChildren();
+            var errorAlert = document.createElement('div');
+            errorAlert.className = 'alert alert-danger';
+            errorAlert.setAttribute('role', 'alert');
+            errorAlert.textContent = 'Couldn\'t load results. Try again.';
+            results.appendChild(errorAlert);
+            results.classList.remove('d-none');
+        }
+
         async function search(query) {
             var url = new URL(endpoint, window.location.origin);
             url.searchParams.set('handler', searchHandler);
             if (query) url.searchParams.set('q', query);
             else url.searchParams.delete('q');
+            showSearchLoading();
+            try {
             var response = await fetch(url, { headers: { Accept: 'application/json' } });
             if (!response.ok) throw new Error('Search failed.');
             renderResults(await response.json());
+            } finally {
+                clearSearchLoading();
+            }
         }
 
         searchInput.addEventListener('input', function () {
@@ -59,8 +88,7 @@ document.addEventListener('DOMContentLoaded', function () {
             valueInput.value = '0';
             timer = setTimeout(function () {
                 search(searchInput.value.trim()).catch(function () {
-                    results.replaceChildren();
-                    results.classList.add('d-none');
+                    showSearchError();
                     searchInput.setAttribute('aria-expanded', 'false');
                 });
             }, 200);
@@ -69,8 +97,7 @@ document.addEventListener('DOMContentLoaded', function () {
         searchInput.addEventListener('focus', function () {
             isFocused = true;
             search(searchInput.value.trim()).catch(function () {
-                results.replaceChildren();
-                results.classList.add('d-none');
+                showSearchError();
                 searchInput.setAttribute('aria-expanded', 'false');
             });
         });

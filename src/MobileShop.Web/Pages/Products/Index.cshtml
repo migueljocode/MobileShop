@@ -115,16 +115,17 @@
 }
 else
 {
+    <div class="table-responsive">
     <table class="data-table">
         <thead>
             <tr>
-                <th>Type</th>
-                <th>@Model.NameColumnLabel</th>
-                <th>Identifier</th>
-                <th>Part number</th>
-                <th>Color</th>
-                <th>Status</th>
-                <th></th>
+                <th scope="col">Type</th>
+                <th scope="col">@Model.NameColumnLabel</th>
+                <th scope="col">Identifier</th>
+                <th scope="col">Part number</th>
+                <th scope="col">Color</th>
+                <th scope="col">Status</th>
+                <th scope="col"><span class="visually-hidden">Actions</span></th>
             </tr>
         </thead>
         <tbody>
@@ -150,4 +151,5 @@ else
             }
         </tbody>
     </table>
+    </div>
 }

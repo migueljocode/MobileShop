@@ -46,5 +46,6 @@
   --fs-h2: 1.375rem;
   --fs-h1: 1.75rem;
   --focus-ring: 0 0 0 2px var(--ground), 0 0 0 4px var(--accent);
+  --nav-dock-height: 5rem;
   --font-body: 'SF Pro Rounded', 'Vazirmatn', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
 }

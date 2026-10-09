@@ -28,7 +28,7 @@
 <h2>Recent transactions</h2>
 @if (Model.RecentTransactions.Count == 0)
 {
-    <p class="text-muted">No transactions yet.</p>
+    <partial name="_EmptyState" model='("No recent transactions", "Record the first sale to see it here.")' />
 }
 else
 {
@@ -40,7 +40,7 @@ else
                     <div class="card-body">
                         <h5 class="card-title">@transaction.ProductLabel</h5>
                         <p class="card-text mb-1">@transaction.Date.ToJalaliDateTimeString()</p>
-                    <span class="badge @(transaction.Direction == TransactionDirection.Buy ? "text-bg-primary" : "text-bg-dark")">
+                    <span class="status-chip status-chip--@(transaction.Direction == TransactionDirection.Buy ? "available" : "sold")">
                         @transaction.Direction
                     </span>
                         <p class="card-text mt-2 mb-0">Finished price (Toman): @transaction.FinishedPrice.ToIrr()</p>

@@ -9,16 +9,18 @@
         <a asp-page="/People/CreateSeller" class="btn btn-success">Add seller</a>
     </div>
 </div>
+<div class="table-responsive">
 <table class="data-table"><thead><tr>
-    <th><a asp-route-sortBy="Name" asp-route-ascending="@(Model.SortBy == "Name" && Model.Ascending ? "false" : "true")">Name</a></th>
-    <th><a asp-route-sortBy="Phone" asp-route-ascending="@(Model.SortBy == "Phone" && Model.Ascending ? "false" : "true")">Phone</a></th>
-    <th>Type</th>
-    <th><a asp-route-sortBy="Count" asp-route-ascending="@(Model.SortBy == "Count" && Model.Ascending ? "false" : "true")">Sold</a></th>
-    <th></th>
+    <th scope="col"><a asp-route-sortBy="Name" asp-route-ascending="@(Model.SortBy == "Name" && Model.Ascending ? "false" : "true")">Name</a></th>
+    <th scope="col"><a asp-route-sortBy="Phone" asp-route-ascending="@(Model.SortBy == "Phone" && Model.Ascending ? "false" : "true")">Phone</a></th>
+    <th scope="col">Type</th>
+    <th scope="col"><a asp-route-sortBy="Count" asp-route-ascending="@(Model.SortBy == "Count" && Model.Ascending ? "false" : "true")">Sold</a></th>
+    <th scope="col"><span class="visually-hidden">Actions</span></th>
 </tr></thead><tbody>
 @foreach (var seller in Model.Sellers)
 { <tr><td dir="auto">@seller.Name</td><td dir="auto" class="num">@seller.PhoneNumber</td><td>@seller.EntityType</td><td>@seller.SoldCount</td><td><a asp-page="/People/SellerDetails" asp-route-id="@seller.Id">Details</a></td></tr> }
 </tbody></table>
+</div>
 <div class="action-bar">
     <a asp-page="/People/Index" class="btn btn-outline-secondary">Back to people</a>
 </div>

@@ -62,7 +62,7 @@
 
         @if (Model.Transactions.Count == 0)
         {
-            <p class="text-muted">No transactions found.</p>
+            <partial name="_EmptyState" model='("No transactions to show", "Record the first sale from Transactions / Sell.")' />
         }
         else
         {
@@ -70,6 +70,7 @@
                 Tick one or more rows to download a factor for exactly those transactions, or leave every row
                 unticked to use the direction/customer/date/count/sort filters above.
             </p>
+            <div class="table-responsive">
             <table class="data-table">
                 <thead>
                     <tr>
@@ -146,6 +147,7 @@
                     }
                 </tbody>
             </table>
+            </div>
         }
     </form>
 </div>

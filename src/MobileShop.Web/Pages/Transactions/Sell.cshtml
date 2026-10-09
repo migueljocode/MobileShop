@@ -43,5 +43,5 @@
     <button type="submit" form="sellForm" class="btn btn-primary">Record sell</button>
     <a asp-page="/Transactions/Index" class="btn btn-outline-secondary">Back to transactions</a>
 </div>
-@if (Model.Message is not null) { <div class="alert alert-success mt-3">@Model.Message</div> }
+@if (Model.Message is not null) { <div class="alert alert-success mt-3" role="status">@Model.Message</div> }
 @section Scripts { <partial name="_ValidationScriptsPartial" /><script src="~/js/product-picker.js"></script><script src="~/js/jalali-datepicker.js" asp-append-version="true"></script> }

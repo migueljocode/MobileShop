@@ -296,39 +296,6 @@ a:hover {
   overflow-wrap: anywhere;
 }
 
-.card.text-bg-success {
-  border-color: var(--app-edge-strong);
-  color: var(--app-ink) !important;
-  background:
-    linear-gradient(135deg, rgba(255, 255, 255, 0.075), transparent 68%),
-    rgba(37, 151, 116, 0.2) !important;
-}
-
-.card.text-bg-warning {
-  border-color: rgba(229, 186, 101, 0.24);
-  color: var(--app-ink) !important;
-  background:
-    linear-gradient(135deg, rgba(255, 255, 255, 0.075), transparent 68%),
-    rgba(172, 119, 36, 0.21) !important;
-}
-
-.card.text-bg-info {
-  border-color: rgba(112, 192, 218, 0.24);
-  color: var(--app-ink) !important;
-  background:
-    linear-gradient(135deg, rgba(255, 255, 255, 0.075), transparent 68%),
-    rgba(36, 125, 151, 0.21) !important;
-}
-
-.card.text-bg-primary,
-.card.text-bg-dark {
-  border-color: var(--app-edge-strong);
-  color: var(--app-ink) !important;
-  background:
-    linear-gradient(135deg, rgba(255, 255, 255, 0.075), transparent 68%),
-    rgba(var(--bs-primary-rgb), 0.13) !important;
-}
-
 .btn {
   --bs-btn-border-radius: var(--r-control);
   padding: 0.55rem 0.9rem;
@@ -558,8 +525,8 @@ a:hover {
 .form-select:focus-visible,
 .form-check-input:focus-visible,
 a:focus-visible {
-  outline: 3px solid rgba(143, 160, 255, 0.72);
-  outline-offset: 2px;
+  outline: none;
+  box-shadow: var(--focus-ring);
 }
 
 .btn:focus,
@@ -601,17 +568,17 @@ label {
 .form-control:disabled,
 .form-control[readonly] {
   border-color: rgba(208, 220, 255, 0.12);
-  color: #aeb9ce;
+  color: var(--ink-muted);
   background-color: rgba(20, 27, 41, 0.82);
   opacity: 1;
-  -webkit-text-fill-color: #aeb9ce;
+  -webkit-text-fill-color: var(--ink-muted);
   cursor: not-allowed;
 }
 
 .form-control:disabled::placeholder {
-  color: #aeb9ce;
+  color: var(--ink-muted);
   opacity: 1;
-  -webkit-text-fill-color: #aeb9ce;
+  -webkit-text-fill-color: var(--ink-muted);
 }
 
 .form-control:focus,
@@ -624,7 +591,7 @@ label {
 
 .form-select:disabled {
   border-color: rgba(208, 220, 255, 0.12);
-  color: #aeb9ce;
+  color: var(--ink-muted);
   background-color: rgba(20, 27, 41, 0.82);
   opacity: 1;
   cursor: not-allowed;
@@ -632,7 +599,7 @@ label {
 
 .form-select option {
   color: var(--app-ink);
-  background: #151d2c;
+  background: var(--panel);
 }
 
 .form-check-input {
@@ -658,7 +625,7 @@ legend {
   width: auto;
   margin: 0;
   padding: 0 0.3rem;
-  color: #dce3f5;
+  color: var(--ink);
 }
 
 .input-group-text {
@@ -725,36 +692,6 @@ legend {
   font-weight: 500;
   color: var(--ink-muted);
   background-color: color-mix(in srgb, var(--ink-muted) 16%, transparent);
-}
-
-.text-bg-success {
-  color: var(--accent) !important;
-  background-color: color-mix(in srgb, var(--accent) 16%, transparent) !important;
-}
-
-.text-bg-secondary {
-  color: var(--ink-muted) !important;
-  background-color: color-mix(in srgb, var(--ink-muted) 16%, transparent) !important;
-}
-
-.text-bg-warning {
-  color: var(--warn) !important;
-  background-color: color-mix(in srgb, var(--warn) 16%, transparent) !important;
-}
-
-.text-bg-info {
-  color: var(--accent) !important;
-  background-color: color-mix(in srgb, var(--accent) 16%, transparent) !important;
-}
-
-.text-bg-primary {
-  color: var(--accent) !important;
-  background-color: color-mix(in srgb, var(--accent) 16%, transparent) !important;
-}
-
-.text-bg-danger {
-  color: var(--danger) !important;
-  background-color: color-mix(in srgb, var(--danger) 16%, transparent) !important;
 }
 
 .alert {
@@ -876,6 +813,15 @@ legend {
 
   .table > :not(caption) > * > * {
     padding: 0.65rem 0.55rem;
+  }
+}
+
+@media (max-width: 575.98px) {
+  .container > main[role="main"] {
+    padding: 1rem !important;
+    border-left: 0;
+    border-right: 0;
+    border-radius: 0;
   }
 }
 

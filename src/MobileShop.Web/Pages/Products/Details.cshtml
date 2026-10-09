@@ -137,9 +137,10 @@
         }
         else
         {
+            <div class="table-responsive">
             <table class="table">
                 <thead>
-                    <tr><th>Date</th><th>Direction</th><th>Price (Toman)</th><th>Seller</th><th>Customer</th></tr>
+                    <tr><th scope="col">Date</th><th scope="col">Direction</th><th scope="col">Price (Toman)</th><th scope="col">Seller</th><th scope="col">Customer</th></tr>
                 </thead>
                 <tbody>
                     @foreach (var transaction in Model.Transactions)
@@ -154,6 +155,7 @@
                     }
                 </tbody>
             </table>
+            </div>
         }
     </div>
 }

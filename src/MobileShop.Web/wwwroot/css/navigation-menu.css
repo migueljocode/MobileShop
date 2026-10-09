@@ -571,6 +571,7 @@ body.has-floating-navigation {
 
 @media (prefers-reduced-motion: reduce) {
   .navigation-tab,
+  .navigation-tab__icon,
   .navigation-dock,
   .navigation-dock::before,
   .navigation-flyout,
@@ -579,7 +580,9 @@ body.has-floating-navigation {
   .navigation-panel__heading,
   .navigation-panel__links,
   .navigation-panel.is-entering .navigation-panel__heading,
-  .navigation-panel.is-entering .navigation-link {
+  .navigation-panel.is-entering .navigation-link,
+  .navigation-panel.is-closing .navigation-panel__heading,
+  .navigation-panel.is-closing .navigation-link {
     scroll-behavior: auto;
     transition-duration: 0.01ms !important;
     animation-duration: 0.01ms !important;

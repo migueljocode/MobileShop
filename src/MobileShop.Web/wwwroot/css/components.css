@@ -122,11 +122,16 @@ th.num {
 }
 
 .action-bar {
+  position: sticky;
+  bottom: 0;
+  z-index: 10;
   display: flex;
   gap: 0.5rem;
   justify-content: flex-end;
   border-top: 1px solid var(--line);
+  background: var(--panel);
   padding-top: 1rem;
+  padding-bottom: calc(1rem + env(safe-area-inset-bottom));
   margin-top: 1.25rem;
 }
 
@@ -207,4 +212,25 @@ th.num {
   .data-table tbody tr {
     transition: none;
   }
+}
+
+/* Step 4.2 — small-screen stacking; sticky action bar clears the nav dock. */
+@media (max-width: 575.98px) {
+  .toolbar > * {
+    flex: 1 1 100%;
+  }
+
+  .page-head__actions {
+    width: 100%;
+  }
+}
+
+@media (max-width: 767.98px) {
+  body.has-floating-navigation .action-bar {
+    bottom: var(--nav-dock-height, 5rem);
+  }
+}
+
+.has-floating-navigation {
+  padding-bottom: calc(var(--nav-dock-height, 5rem) + 1rem);
 }

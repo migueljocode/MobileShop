@@ -26,7 +26,7 @@
 
 ---
 
-## [ ] Step 4.1 — Focus ring, table semantics, icon-only labels
+## ~~[x] Step 4.1 — Focus ring, table semantics, icon-only labels~~
 - Files: inspect: `src/MobileShop.Web/wwwroot/css/app-theme.css` (lines ~556-570), `Pages/Products/Index.cshtml` (thead ~119-127), `Pages/People/Index.cshtml` (~64-65), `Pages/People/Customers.cshtml` (12-17), `Pages/People/Sellers.cshtml` (12-17), `Pages/Products/Details.cshtml` (~140), `Pages/Products/CreateGlass.cshtml` (115,123,131), `wwwroot/js/navigation-menu.js` (132-203); modify: `app-theme.css` (focus rules only), the 5 table files above + `Details.cshtml`; do not touch: any selector list, dock geometry, `.cshtml.cs`, picker JS (Escape already handled — verify only).
 - Symbols: CSS `:focus-visible` rule; `<th scope="col">` / `scope="row"`; `aria-label` on icon-only `.btn-close`.
 - Current -> Desired: `:focus-visible` uses hard-coded `outline: 3px solid rgba(143,160,255,.72)`; 5 tables use bare `<th>` and bare empty actions `<th></th>`; `Details.cshtml` `<table class="table">` has no scope; 3 `btn-close` in `CreateGlass.cshtml` lack `aria-label="Close"`. Desired: every keyboard focus shows `box-shadow: var(--focus-ring)`; every data table has `scope="col"` (row headers `scope="row"` if any), empty actions header reads `<th scope="col"><span class="visually-hidden">Actions</span></th>`; every icon-only button has an accessible name.
@@ -39,7 +39,7 @@
 - Risk: LOW
 - Confidence: MEDIUM (ring visibility needs human check)
 
-## [ ] Step 4.2 — Responsive tables and small-screen layout
+## ~~[x] Step 4.2 — Responsive tables and small-screen layout~~
 - Files: inspect: `src/MobileShop.Web/wwwroot/css/components.css`, `app-theme.css` (main padding), `navigation-menu.css` (dock sizing, read-only); modify: `components.css` (+ `app-theme.css` main-padding rule only), the 8 `<table class="data-table">` pages (`Products/Index`, `Products/SecondHand`, `Products/Details` only if its table becomes `data-table` — otherwise wrap as-is, `People/Index`, `People/Customers`, `People/Sellers`, `Transactions/Index`, `Reports/ProfitLoss` ×2 tables); do not touch: dock geometry values, `_Layout.cshtml`, any `asp-route-*`/`onchange`/`data-*`.
 - Symbols: `.table-responsive` (Bootstrap), `.toolbar`, `.page-head__actions`, `.action-bar`, `.has-floating-navigation`.
 - Current -> Desired: zero `table-responsive` wrappers; small screens keep desktop padding/radius; `.action-bar` is static. Desired: tables scroll horizontally inside their container on narrow screens; `<576px` main panel padding `1rem`, radius `0`, no side border; `.toolbar` children stack full-width; `.page-head__actions` full width; `.action-bar` sticky above the nav dock without covering content.
@@ -52,7 +52,7 @@
 - Risk: LOW
 - Confidence: MEDIUM (real-device widths need human check)
 
-## [ ] Step 4.3 — Empty, loading, and error states
+## ~~[x] Step 4.3 — Empty, loading, and error states~~
 - Files: inspect: `Pages/People/Index.cshtml:59`, `Pages/Transactions/Index.cshtml:65`, `Pages/Index.cshtml:31`, `Pages/Reports/ProfitLoss.cshtml` (empty branches), `Pages/Shared/_EmptyState.cshtml`, `wwwroot/js/person-picker.js` (~52-121), `product-picker.js` (~109-219), `product-create-modal.js` (~41-167), pages rendering `_ProductCreateSuccess.cshtml` (role check only); modify: the plain-`<p>` empty branches + the 3 JS files; do not touch: request URLs, payloads, selection behavior, `_ProductCreateSuccess.cshtml` (already `role="status"`), any `asp-*`/`data-*`/`id`.
 - Symbols: `_EmptyState` partial `@model (string Title, string? Hint)`; `aria-busy="true"`; `.loading-line`; `.alert.alert-danger` with `role="alert"`.
 - Current -> Desired: People/Index ("No people found."), Transactions/Index ("No transactions found."), dashboard ("No transactions yet.") and any ProfitLoss empty branch render plain `<p class="text-muted">`; picker/modal fetches fail silently or console-only with no busy/loading/error UI. Desired: every empty list uses `_EmptyState` with page-specific copy; every async fetch shows busy + loading + failure states without changing success behavior.
@@ -65,7 +65,7 @@
 - Risk: MEDIUM (fetch-path edits in untested JS; mitigated by diff-only-added-lines review)
 - Confidence: MEDIUM
 
-## [ ] Step 4.4 — Motion, colour, and dashboard-badge audit (carries audit residual)
+## ~~[x] Step 4.4 — Motion, colour, and dashboard-badge audit (carries audit residual)~~
 - Files: inspect + modify: `src/MobileShop.Web/wwwroot/css/app-theme.css`, `components.css`, `navigation-menu.css`, `Pages/Index.cshtml:43`; do not touch: bindings, labels, order, `.cshtml.cs`, JS logic, tokens' hex values.
 - Symbols: `@media (prefers-reduced-motion: reduce)` blocks; `.text-bg-primary` / `.text-bg-dark` badges on `Index.cshtml:43`; `.status-chip` variants.
 - Current -> Desired: residual from audit — dashboard transaction badges still `text-bg-primary`/`text-bg-dark` (Step 3.1 asked for none left on that page); possible transitions/animations outside reduced-motion coverage; possible hex literals outside `tokens.css`. Desired: every animation respects reduced motion; no legacy hard-coded colours; dashboard badges match the design system; any remaining hex outside `tokens.css` is justified with a contrast ratio.
@@ -78,7 +78,7 @@
 - Risk: LOW
 - Confidence: HIGH
 
-## [ ] Step 4.5 — Final validation (whole roadmap)
+## ~~[x] Step 4.5 — Final validation (whole roadmap)~~
 - Files: none modified (evidence recorded in `act.md` only: `Action: #N — Success` + the checklist below). Do not touch production code in this step.
 - Symbols: none (process step).
 - Current -> Desired: Stage 4 steps individually green but no whole-roadmap sign-off. Desired: full CI green on the final commit with run number recorded, plus the manual checklist filled in `act.md` for the Reviewer's sign-off (Reviewer does not re-run anything).

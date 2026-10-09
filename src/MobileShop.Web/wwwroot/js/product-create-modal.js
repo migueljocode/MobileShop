@@ -35,6 +35,12 @@ document.addEventListener('DOMContentLoaded', function () {
     async function loadForm(type) {
         formHost.replaceChildren();
         if (!type || !registry[type]) return;
+        formHost.setAttribute('aria-busy', 'true');
+        var formLoading = document.createElement('div');
+        formLoading.className = 'loading-line';
+        formLoading.textContent = 'Loading…';
+        formHost.appendChild(formLoading);
+        try {
         var url = new URL(window.location.href);
         url.searchParams.set('handler', registry[type].formHandler);
         url.searchParams.set('type', type);
@@ -128,6 +134,19 @@ document.addEventListener('DOMContentLoaded', function () {
                     for (var item of await response.json()) model.appendChild(new Option(item.name, item.id));
                 });
             }
+        }
+        } catch (error) {
+            formHost.replaceChildren();
+            var formError = document.createElement('div');
+            formError.className = 'alert alert-danger';
+            formError.setAttribute('role', 'alert');
+            formError.textContent = 'Couldn\'t load results. Try again.';
+            formHost.appendChild(formError);
+            throw error;
+        } finally {
+            var pendingFormLoading = formHost.querySelector('.loading-line');
+            if (pendingFormLoading) pendingFormLoading.remove();
+            formHost.removeAttribute('aria-busy');
         }
     }
 

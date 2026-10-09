@@ -107,12 +107,12 @@
 
 @if (!string.IsNullOrWhiteSpace(Model.Message))
 {
-    <div class="alert alert-danger mt-3">@Model.Message</div>
+    <div class="alert alert-danger mt-3" role="alert">@Model.Message</div>
 }
 
 <div class="modal fade" id="addGlassManufacturerModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog"><div class="modal-content">
-        <div class="modal-header"><h5 class="modal-title">Add Glass Manufacturer</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+        <div class="modal-header"><h5 class="modal-title">Add Glass Manufacturer</h5><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div>
         <div class="modal-body"><label for="newGlassManufacturerName" class="form-label">Name</label><input type="text" class="form-control" id="newGlassManufacturerName" required /></div>
         <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button><button type="button" class="btn btn-primary" id="saveGlassManufacturerBtn">Save</button></div>
     </div></div>
@@ -120,7 +120,7 @@
 
 <div class="modal fade" id="addCompatibleManufacturerModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog"><div class="modal-content">
-        <div class="modal-header"><h5 class="modal-title">Add Compatible Phone Manufacturer</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+        <div class="modal-header"><h5 class="modal-title">Add Compatible Phone Manufacturer</h5><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div>
         <div class="modal-body"><label for="newCompatibleManufacturerName" class="form-label">Name</label><input type="text" class="form-control" id="newCompatibleManufacturerName" required /></div>
         <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button><button type="button" class="btn btn-primary" id="saveCompatibleManufacturerBtn">Save</button></div>
     </div></div>
@@ -128,7 +128,7 @@
 
 <div class="modal fade" id="addCompatibleModelModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog"><div class="modal-content">
-        <div class="modal-header"><h5 class="modal-title">Add Compatible Model</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+        <div class="modal-header"><h5 class="modal-title">Add Compatible Model</h5><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div>
         <div class="modal-body">
             <div id="compatibleModelError" class="alert alert-danger d-none" role="alert"></div>
             <p class="form-text">This model will be added under the selected compatible phone manufacturer.</p>
