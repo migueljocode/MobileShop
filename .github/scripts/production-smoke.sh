@@ -52,7 +52,7 @@ wait_for_home() {
       tail -n 80 "$log" >&2 || true
       return 1
     fi
-    sleep 1
+    sleep 3
   done
   echo "Application did not become ready within 60 seconds." >&2
   tail -n 80 "$log" >&2 || true
@@ -65,6 +65,8 @@ start_app() {
   APP_PID=""
   ASPNETCORE_ENVIRONMENT="$environment"   ASPNETCORE_URLS="http://127.0.0.1:5099"     dotnet run --no-build --no-launch-profile --project src/MobileShop.Web >"$log" 2>&1 &
   APP_PID=$!
+  # Give the process a moment to bind to the port
+  sleep 0.5
 }
 
 stop_app() {
@@ -109,7 +111,7 @@ if [[ "$GUARD_EXIT" -eq 0 ]]; then
   exit 1
 fi
 # Give the OS a moment to release the port after production guard exits
-sleep 1
+sleep 3
 
 grep -F -- "--migrate-database" "$PROD_GUARD_LOG"
 
@@ -130,7 +132,7 @@ if [[ "$MIGRATE_EXIT" -ne 0 ]]; then
 fi
 grep -F "Legacy database baselined successfully" "$MIGRATE_LOG"
 # Give the OS a moment to release the port after the migrate command exits
-sleep 2
+sleep 5
 
 BACKUPS=( "$DB".*.bak )
 if [[ "${#BACKUPS[@]}" -ne 1 || ! -f "${BACKUPS[0]}" ]]; then
@@ -145,6 +147,14 @@ EXPECTED_MIGRATION_COUNT="$(find "$ROOT/src/MobileShop.Dal/Migrations" -maxdepth
 
 fingerprint "$SMOKE_DIR/fingerprint-after-migrate.txt"
 diff -u "$SMOKE_DIR/fingerprint-before.txt" "$SMOKE_DIR/fingerprint-after-migrate.txt"
+
+# Wait for port to be free
+for _ in {1..30}; do
+  if ! ss -ltn | grep -q ":5099 "; then
+    break
+  fi
+  sleep 0.5
+done
 
 start_app "Production" "$PROD_LOG"
 wait_for_home "http://127.0.0.1:5099/" "$PROD_LOG"
