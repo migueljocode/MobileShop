@@ -1,5 +1,4 @@
 name: .NET CI
-# Stage R runs Bash on Ubuntu and PowerShell on both Ubuntu and Windows.
 
 on:
   push:
@@ -11,41 +10,52 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+
 jobs:
   test:
+    name: Build and test
     runs-on: ubuntu-24.04
-
+    timeout-minutes: 20
+    env:
+      FACTOR_PDF_INSPECTION_DIR: ${{ github.workspace }}/TestResults/FactorPdfInspection
     steps:
       - uses: actions/checkout@v5
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v5
+      - uses: actions/setup-dotnet@v5
         with:
-          dotnet-version: '10.0.x'
-      - name: Restore
-        run: dotnet restore src/MobileShop.slnx --nologo
-      - name: Build
-        run: dotnet build src/MobileShop.slnx --nologo --no-restore
-      - name: Test
-        env:
-          FACTOR_PDF_INSPECTION_DIR: ${{ github.workspace }}/TestResults/FactorPdfInspection
-        run: dotnet test src/MobileShop.slnx --nologo --no-build --no-restore
-      - name: Test Bash log utility
-        shell: bash
-        run: bash src/MobileShop.Scripts/tests/test-bash.sh
-      - name: Test PowerShell log utility
-        shell: pwsh
-        run: ./src/MobileShop.Scripts/tests/test-powershell.ps1
-      - name: Upload factor PDF inspection artifacts
-        uses: actions/upload-artifact@v5
+          dotnet-version: 10.0.x
+      - uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ runner.os }}-${{ hashFiles('**/*.csproj') }}
+          restore-keys: nuget-${{ runner.os }}-
+      - run: dotnet restore src/MobileShop.slnx
+      - run: dotnet build src/MobileShop.slnx --no-restore
+      - run: dotnet test src/MobileShop.slnx --no-build
+      - uses: actions/upload-artifact@v5
+        if: always()
         with:
           name: factor-pdf-inspection
           path: TestResults/FactorPdfInspection/
-          if-no-files-found: error
-  powershell-windows:
-    name: PowerShell log utility (Windows)
-    runs-on: windows-2025
+          if-no-files-found: warn
+
+  scripts:
+    name: Log utility (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, windows-2025]
     steps:
       - uses: actions/checkout@v5
-      - name: Test PowerShell log utility
-        shell: pwsh
+      - if: runner.os == 'Linux'
+        run: bash src/MobileShop.Scripts/tests/test-bash.sh
+      - shell: pwsh
         run: ./src/MobileShop.Scripts/tests/test-powershell.ps1
