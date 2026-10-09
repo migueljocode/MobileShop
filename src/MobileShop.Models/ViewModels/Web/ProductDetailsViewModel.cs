@@ -53,4 +53,23 @@ public sealed record ProductDetailsViewModel(
     public string? StorageCapacityLabel { get; init; }
     public int? Speed { get; init; }
     public IReadOnlyList<string> CompatibleModels { get; init; } = [];
+
+    // Edit-specific properties
+    public int? ColorId { get; init; }
+    public long Price { get; init; }
+    public decimal? ProfitPercent { get; init; }
+    public long? ProfitAmount { get; init; }
+    public string? GuaranteeCorporation { get; init; }
+    public DateTime? GuaranteeExpiry { get; init; }
+    public string? GuaranteeNotes { get; init; }
+    public string? IMEI1 { get; init; }
+    public string? IMEI2 { get; init; }
+    public int? PartNumberId { get; init; }
+    public int? ModelId { get; init; }
+    public int? TestPeriodDays { get; init; }
+    public int? UsedDurationDays { get; init; }
+    public string? SecondHandNotes { get; init; }
+    public bool SupportsDualSim { get; init; }
+    public bool SupportsEsim { get; init; }
+    public int? StorageCapacityId { get; init; }
 }

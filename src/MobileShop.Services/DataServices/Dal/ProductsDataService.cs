@@ -940,6 +940,201 @@ public class ProductsDataService(
         return new ServiceResult(true, null, null, batch[0].Id);
     }
 
+    public async Task<ServiceResult> UpdateProductAsync(EditProductInputModel input)
+    {
+        var product = await products.FindAsync(p => p.Id == input.ProductId);
+        if (product is null)
+            return new ServiceResult(false, "Product not found.", nameof(input.ProductId), null);
+
+        // Update common fields
+        product.ModelId = input.ModelId ?? product.ModelId;
+        product.Price = input.Price > 0 ? input.Price : product.Price;
+        product.Barcode = product.Barcode; // Keep existing barcode
+        product.ColorId = input.ColorId > 0 ? input.ColorId : product.ColorId;
+
+        // Update SecondHand profile
+        if (input.IsSecondHand)
+        {
+            product.SecondHandProfile ??= new SecondHand();
+            product.SecondHandProfile.TestPeriodDays = input.TestPeriodDays ?? 30;
+            product.SecondHandProfile.UsedDurationDays = input.UsedDurationDays ?? 0;
+            product.SecondHandProfile.Notes = NormalizeNote(input.SecondHandNotes);
+        }
+        else
+        {
+            product.SecondHandProfile = null;
+        }
+
+        // Update Guarantee profile
+        if (!string.IsNullOrWhiteSpace(input.GuaranteeCorporation) || input.GuaranteeExpiry.HasValue)
+        {
+            product.GuaranteeProfile ??= new Guarantee();
+            product.GuaranteeProfile.Corporation = string.IsNullOrWhiteSpace(input.GuaranteeCorporation) ? "Shop Warranty" : input.GuaranteeCorporation.Trim();
+            product.GuaranteeProfile.ExpirationDate = input.GuaranteeExpiry ?? DateTime.Today.AddYears(1);
+            product.GuaranteeProfile.Notes = NormalizeNote(input.GuaranteeNotes);
+        }
+        else
+        {
+            product.GuaranteeProfile = null;
+        }
+
+        // Update type-specific fields
+        switch (input.Type)
+        {
+            case "Phone":
+                if (product.PhoneProfile is null) return new ServiceResult(false, "Product is not a phone.", nameof(input.Type), null);
+                product.PhoneProfile.IMEI1 = string.IsNullOrWhiteSpace(input.IMEI1) ? product.PhoneProfile.IMEI1 : input.IMEI1.Trim();
+                product.PhoneProfile.IMEI2 = string.IsNullOrWhiteSpace(input.IMEI2) ? product.PhoneProfile.IMEI2 : input.IMEI2?.Trim();
+                product.PhoneProfile.PartNumberId = input.PartNumberId ?? product.PhoneProfile.PartNumberId;
+                product.PhoneProfile.SupportsDualSim = input.SupportsDualSim;
+                product.PhoneProfile.SupportsEsim = input.SupportsEsim;
+                product.PhoneProfile.Notes = NormalizeNote(input.Notes);
+                break;
+
+            case "Tablet":
+                if (product.TabletProfile is null) return new ServiceResult(false, "Product is not a tablet.", nameof(input.Type), null);
+                product.TabletProfile.Notes = NormalizeNote(input.Notes);
+                break;
+
+            case "Smart Watch":
+                if (product.SmartWatchProfile is null) return new ServiceResult(false, "Product is not a smart watch.", nameof(input.Type), null);
+                product.SmartWatchProfile.Notes = NormalizeNote(input.Notes);
+                break;
+
+            case "Laptop":
+                if (product.LaptopProfile is null) return new ServiceResult(false, "Product is not a laptop.", nameof(input.Type), null);
+                // CpuId and GpuId need to be resolved from names
+                if (!string.IsNullOrWhiteSpace(input.Cpu))
+                {
+                    var cpu = await cpus.FindAsync(c => c.Name == input.Cpu);
+                    if (cpu is not null) product.LaptopProfile.CpuId = cpu.Id;
+                }
+                if (!string.IsNullOrWhiteSpace(input.Gpu))
+                {
+                    var gpu = await gpus.FindAsync(g => g.Name == input.Gpu);
+                    if (gpu is not null) product.LaptopProfile.GpuId = gpu.Id;
+                }
+                product.LaptopProfile.DisplaySize = input.DisplaySize ?? product.LaptopProfile.DisplaySize;
+                product.LaptopProfile.Notes = NormalizeNote(input.Notes);
+                break;
+
+            case "Apple ID":
+                if (product.AppleIdProfile is null) return new ServiceResult(false, "Product is not an Apple ID.", nameof(input.Type), null);
+                product.AppleIdProfile.Password = string.IsNullOrWhiteSpace(input.AppleIdPassword) ? product.AppleIdProfile.Password : input.AppleIdPassword.Trim();
+                product.AppleIdProfile.Notes = NormalizeNote(input.Notes);
+                break;
+
+            case "Cable":
+                if (product.CableProfile is null) return new ServiceResult(false, "Product is not a cable.", nameof(input.Type), null);
+                product.CableProfile.Connector1 = input.Connector1 ?? product.CableProfile.Connector1;
+                product.CableProfile.Connector2 = input.Connector2 ?? product.CableProfile.Connector2;
+                product.CableProfile.Length = input.CableLength ?? product.CableProfile.Length;
+                product.CableProfile.Notes = NormalizeNote(input.Notes);
+                break;
+
+            case "Charger":
+                if (product.ChargerProfile is null) return new ServiceResult(false, "Product is not a charger.", nameof(input.Type), null);
+                product.ChargerProfile.Wattage = input.Wattage ?? product.ChargerProfile.Wattage;
+                product.ChargerProfile.Pd = input.Pd ?? product.ChargerProfile.Pd;
+                product.ChargerProfile.PortCount = input.PortCount ?? product.ChargerProfile.PortCount;
+                product.ChargerProfile.Notes = NormalizeNote(input.Notes);
+                break;
+
+            case "Power Bank":
+                if (product.PowerBankProfile is null) return new ServiceResult(false, "Product is not a power bank.", nameof(input.Type), null);
+                product.PowerBankProfile.CapacityMah = input.CapacityMah ?? product.PowerBankProfile.CapacityMah;
+                product.PowerBankProfile.MaxWattage = input.MaxWattage ?? product.PowerBankProfile.MaxWattage;
+                product.PowerBankProfile.PortCount = input.PortCount ?? product.PowerBankProfile.PortCount;
+                product.PowerBankProfile.Pd = input.Pd ?? product.PowerBankProfile.Pd;
+                product.PowerBankProfile.Ports = input.PortTypes?.Select((connector, index) => new PowerBankPort
+                {
+                    PortNumber = index + 1,
+                    Connector = Enum.Parse<CableConnector>(connector)
+                }).ToList() ?? product.PowerBankProfile.Ports;
+                product.PowerBankProfile.Notes = NormalizeNote(input.Notes);
+                break;
+
+            case "Portable Storage":
+                if (product.PortableStorageProfile is null) return new ServiceResult(false, "Product is not a portable storage.", nameof(input.Type), null);
+                product.PortableStorageProfile.Kind = input.StorageKind ?? product.PortableStorageProfile.Kind;
+                product.PortableStorageProfile.StorageCapacityId = input.StorageCapacityId ?? product.PortableStorageProfile.StorageCapacityId;
+                product.PortableStorageProfile.Speed = input.Speed ?? product.PortableStorageProfile.Speed;
+                product.PortableStorageProfile.Notes = NormalizeNote(input.Notes);
+                break;
+
+            case "Case":
+                if (product.CaseProfile is null) return new ServiceResult(false, "Product is not a case.", nameof(input.Type), null);
+                product.CaseProfile.Notes = NormalizeNote(input.Notes);
+                // Update compatible models
+                if (input.CompatibleModels is not null)
+                {
+                    product.CaseProfile.ModelFits.Clear();
+                    foreach (var modelName in input.CompatibleModels.Distinct())
+                    {
+                        var model = await models.FindAsync(m => m.Name == modelName);
+                        if (model is not null)
+                        {
+                            product.CaseProfile.ModelFits.Add(new CaseModelFit { CaseNavigation = product.CaseProfile, ModelId = model.Id, ModelNavigation = model });
+                        }
+                    }
+                }
+                break;
+
+            case "Glass":
+                if (product.GlassProfile is null) return new ServiceResult(false, "Product is not a glass.", nameof(input.Type), null);
+                product.GlassProfile.Notes = NormalizeNote(input.Notes);
+                // Update compatible models
+                if (input.CompatibleModels is not null)
+                {
+                    product.GlassProfile.ModelFits.Clear();
+                    foreach (var modelName in input.CompatibleModels.Distinct())
+                    {
+                        var model = await models.FindAsync(m => m.Name == modelName);
+                        if (model is not null)
+                        {
+                            product.GlassProfile.ModelFits.Add(new GlassModelFit { GlassNavigation = product.GlassProfile, ModelId = model.Id, ModelNavigation = model });
+                        }
+                    }
+                }
+                break;
+
+            default:
+                return new ServiceResult(false, $"Unsupported product type: {input.Type}", nameof(input.Type), null);
+        }
+
+        var updated = await products.UpdateAsync(product) > 0;
+        if (!updated)
+            return new ServiceResult(false, "The product could not be updated. Check the details and try again.", null, null);
+
+        return new ServiceResult(true, "Product updated successfully.", null, input.ProductId);
+    }
+
+public async Task<Product?> GetProductForEditAsync(int id)
+    {
+        return await products.FindWithIncludesAsync(
+            id,
+            p => p.ModelNavigation,
+            p => p.ModelNavigation.ManufacturerNavigation,
+            p => p.ColorNavigation,
+            p => p.SecondHandProfile,
+            p => p.GuaranteeProfile,
+            p => p.PhoneProfile,
+            p => p.TabletProfile,
+            p => p.SmartWatchProfile,
+            p => p.LaptopProfile,
+            p => p.AppleIdProfile,
+            p => p.CableProfile,
+            p => p.ChargerProfile,
+            p => p.PowerBankProfile,
+            p => p.PowerBankProfile.Ports,
+            p => p.PortableStorageProfile,
+            p => p.PortableStorageProfile.StorageCapacityNavigation,
+            p => p.CaseProfile,
+            p => p.CaseProfile.ModelFits,
+            p => p.GlassProfile,
+            p => p.GlassProfile.ModelFits);
+    }
+
     private async Task<ServiceResult> CreateAccessoryBatchAsync(int sellerId, int count, long price, decimal? profitPercent, long? profitAmount, int manufacturerId, int modelId, string categoryName, Action<Product> configure)
     {
         if (count < 1)

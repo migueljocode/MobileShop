@@ -99,4 +99,12 @@ public interface IProductsDataService
     Task<ServiceResult> CreatePowerBanksAsync(CreatePowerBankInputModel input);
     Task<ServiceResult> CreatePortableStoragesAsync(CreatePortableStorageInputModel input);
     Task<ServiceResult> CreateCasesAsync(CreateCaseInputModel input);
+
+    /// <summary>Updates an existing product.</summary>
+    /// <param name="input">The product input.</param>
+    Task<ServiceResult> UpdateProductAsync(EditProductInputModel input);
+
+    /// <summary>Gets a product entity by ID with all navigation properties loaded for editing.</summary>
+    /// <param name="id">The product identifier.</param>
+    Task<Product?> GetProductForEditAsync(int id);
 }

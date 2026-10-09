@@ -223,10 +223,22 @@ public class BaseRepo<T>(AppDbContext context) : IBaseRepo<T> where T : BaseEnti
         return predicate is null ? query.Count() : query.Count(predicate);
     }
 
-    /// <inheritdoc />
+/// <inheritdoc />
     public virtual async Task<int> CountAsync(Expression<Func<T, bool>>? predicate = null)
     {
-        IQueryable<T> query = Table.AsNoTracking();
+        var query = Table.AsNoTracking();
         return predicate is null ? await query.CountAsync() : await query.CountAsync(predicate);
+    }
+
+    /// <summary>Finds an entity with related entities loaded, excluding soft-deleted entities.</summary>
+    /// <param name="id">The entity identifier.</param>
+    /// <param name="includes">Navigation property paths to eagerly load.</param>
+    /// <returns>The matching entity with includes, or <see langword="null"/> when none exists.</returns>
+    public virtual async Task<T?> FindWithIncludesAsync(int id, params Expression<Func<T, object>>[] includes)
+    {
+        var query = Table.AsNoTracking();
+        foreach (var include in includes)
+            query = query.Include(include);
+        return await query.FirstOrDefaultAsync(e => e.Id == id);
     }
 }
