@@ -2269,4 +2269,50 @@ public class ProductsDataServiceTests : RepoTestBase
         Assert.Empty(Context.Products);
     }
 
+    // ── UpdateProductAsync ───────────────────────────────
+
+    [Fact]
+    public async Task UpdateProductAsync_edits_phone_identifier_imei_and_stores_finished_price()
+    {
+        SeedCatalog(out var phoneModel, out _);
+        var product = TestDataHelpers.CreateProduct(Context);
+        var tracked = Context.Products.First(p => p.Id == product.Id);
+        tracked.ModelId = phoneModel.Id;
+        Context.Products.Update(tracked);
+        Context.Phones.Add(new Phone
+        {
+            ProductId = product.Id,
+            IMEI1 = "345678901234567",
+            OwnershipTransferred = true,
+            SupportsDualSim = true,
+            SupportsEsim = true,
+        });
+        Context.SaveChanges();
+
+        var input = new MobileShop.Models.ViewModels.Web.BindModels.EditProductInputModel
+        {
+            ProductId = product.Id,
+            Type = "Phone",
+            Identifier = "EDITEDBARCODE1",
+            IMEI1 = "456789012345678",
+            Price = 1000,
+            ProfitPercent = 10,
+        };
+
+        var result = await _service.UpdateProductAsync(input);
+
+        Assert.True(result.Succeeded);
+        var updated = await Context.Products
+            .AsNoTracking()
+            .Include(p => p.PhoneProfile)
+            .SingleAsync(p => p.Id == product.Id);
+        Assert.Equal("EDITEDBARCODE1", updated.Barcode);
+        Assert.Equal(1100, updated.Price);
+        Assert.Equal("456789012345678", updated.PhoneProfile!.IMEI1);
+        // The edit form carries no SIM capability checkboxes, so an edit must not
+        // reset the per-unit flags the phone row already stores.
+        Assert.True(updated.PhoneProfile.SupportsDualSim);
+        Assert.True(updated.PhoneProfile.SupportsEsim);
+    }
+
 }

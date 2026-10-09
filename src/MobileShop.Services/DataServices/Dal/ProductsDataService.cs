@@ -942,14 +942,41 @@ public class ProductsDataService(
 
     public async Task<ServiceResult> UpdateProductAsync(EditProductInputModel input)
     {
-        var product = await products.FindAsync(p => p.Id == input.ProductId);
+        // The same includes as GetProductForEditAsync, tracked, so every profile the
+        // type switch below needs is loaded and the changed entity can be saved
+        // directly instead of re-attaching a half-loaded graph.
+        var product = await products.FindTrackedWithIncludesAsync(
+            input.ProductId,
+            p => p.ModelNavigation,
+            p => p.ModelNavigation.ManufacturerNavigation,
+            p => p.ColorNavigation,
+            p => p.SecondHandProfile,
+            p => p.GuaranteeProfile,
+            p => p.PhoneProfile,
+            p => p.TabletProfile,
+            p => p.SmartWatchProfile,
+            p => p.LaptopProfile,
+            p => p.AppleIdProfile,
+            p => p.CableProfile,
+            p => p.ChargerProfile,
+            p => p.PowerBankProfile,
+            p => p.PowerBankProfile.Ports,
+            p => p.PortableStorageProfile,
+            p => p.PortableStorageProfile.StorageCapacityNavigation,
+            p => p.CaseProfile,
+            p => p.CaseProfile.ModelFits,
+            p => p.GlassProfile,
+            p => p.GlassProfile.ModelFits);
         if (product is null)
             return new ServiceResult(false, "Product not found.", nameof(input.ProductId), null);
 
+        if (!TryComputeFinishedPrice(input.Price, input.ProfitPercent, input.ProfitAmount, out var finishedPrice))
+            return new ServiceResult(false, "The price is too large.", nameof(input.Price), null);
+
         // Update common fields
         product.ModelId = input.ModelId ?? product.ModelId;
-        product.Price = input.Price > 0 ? input.Price : product.Price;
-        product.Barcode = product.Barcode; // Keep existing barcode
+        product.Price = finishedPrice;
+        product.Barcode = input.Identifier;
         product.ColorId = input.ColorId > 0 ? input.ColorId : product.ColorId;
 
         // Update SecondHand profile
@@ -986,8 +1013,6 @@ public class ProductsDataService(
                 product.PhoneProfile.IMEI1 = string.IsNullOrWhiteSpace(input.IMEI1) ? product.PhoneProfile.IMEI1 : input.IMEI1.Trim();
                 product.PhoneProfile.IMEI2 = string.IsNullOrWhiteSpace(input.IMEI2) ? product.PhoneProfile.IMEI2 : input.IMEI2?.Trim();
                 product.PhoneProfile.PartNumberId = input.PartNumberId ?? product.PhoneProfile.PartNumberId;
-                product.PhoneProfile.SupportsDualSim = input.SupportsDualSim;
-                product.PhoneProfile.SupportsEsim = input.SupportsEsim;
                 product.PhoneProfile.Notes = NormalizeNote(input.Notes);
                 break;
 
@@ -1102,7 +1127,7 @@ public class ProductsDataService(
                 return new ServiceResult(false, $"Unsupported product type: {input.Type}", nameof(input.Type), null);
         }
 
-        var updated = await products.UpdateAsync(product) > 0;
+        var updated = await products.SaveChangesAsync() > 0;
         if (!updated)
             return new ServiceResult(false, "The product could not be updated. Check the details and try again.", null, null);
 

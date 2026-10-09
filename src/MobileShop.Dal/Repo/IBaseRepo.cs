@@ -188,4 +188,10 @@ public interface IBaseRepo<T> where T : BaseEntity
     /// <param name="includes">Navigation property paths to eagerly load.</param>
     /// <returns>The matching entity with includes, or <see langword="null"/> when none exists.</returns>
     Task<T?> FindWithIncludesAsync(int id, params Expression<Func<T, object>>[] includes);
+
+    /// <summary>Finds a tracked entity with related entities loaded, excluding soft-deleted entities.</summary>
+    /// <param name="id">The entity identifier.</param>
+    /// <param name="includes">Navigation property paths to eagerly load.</param>
+    /// <returns>The matching tracked entity with includes, or <see langword="null"/> when none exists.</returns>
+    Task<T?> FindTrackedWithIncludesAsync(int id, params Expression<Func<T, object>>[] includes);
 }
