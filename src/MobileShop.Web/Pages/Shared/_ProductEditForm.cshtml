@@ -50,7 +50,7 @@
             <option value="">-- Select corporation --</option>
         </select>
         <label asp-for="Product.GuaranteeExpiry" class="form-label mt-2">Guarantee expiry</label>
-        <input asp-for="Product.GuaranteeExpiry" class="form-control" type="text" data-jalali-date placeholder="1405/12/29" />
+        <input asp-for="Product.GuaranteeExpiry" class="form-control" type="text" data-jalali-date placeholder="1405/12/29" value="@(Model.Product.GuaranteeExpiry.HasValue ? Model.Product.GuaranteeExpiry.Value.ToJalaliDateString() : string.Empty)" />
         <label asp-for="Product.GuaranteeNotes" class="form-label mt-2">Guarantee notes</label>
         <input asp-for="Product.GuaranteeNotes" class="form-control" />
     </div>
@@ -88,7 +88,7 @@
             <option value="">-- Select corporation --</option>
         </select>
         <label asp-for="Product.GuaranteeExpiry" class="form-label mt-2">Guarantee expiry</label>
-        <input asp-for="Product.GuaranteeExpiry" class="form-control" type="text" data-jalali-date placeholder="1405/12/29" />
+        <input asp-for="Product.GuaranteeExpiry" class="form-control" type="text" data-jalali-date placeholder="1405/12/29" value="@(Model.Product.GuaranteeExpiry.HasValue ? Model.Product.GuaranteeExpiry.Value.ToJalaliDateString() : string.Empty)" />
         <label asp-for="Product.GuaranteeNotes" class="form-label mt-2">Guarantee notes</label>
         <input asp-for="Product.GuaranteeNotes" class="form-control" />
     </div>
@@ -126,7 +126,7 @@
             <option value="">-- Select corporation --</option>
         </select>
         <label asp-for="Product.GuaranteeExpiry" class="form-label mt-2">Guarantee expiry</label>
-        <input asp-for="Product.GuaranteeExpiry" class="form-control" type="text" data-jalali-date placeholder="1405/12/29" />
+        <input asp-for="Product.GuaranteeExpiry" class="form-control" type="text" data-jalali-date placeholder="1405/12/29" value="@(Model.Product.GuaranteeExpiry.HasValue ? Model.Product.GuaranteeExpiry.Value.ToJalaliDateString() : string.Empty)" />
         <label asp-for="Product.GuaranteeNotes" class="form-label mt-2">Guarantee notes</label>
         <input asp-for="Product.GuaranteeNotes" class="form-control" />
     </div>
@@ -179,7 +179,7 @@
             <option value="">-- Select corporation --</option>
         </select>
         <label asp-for="Product.GuaranteeExpiry" class="form-label mt-2">Guarantee expiry</label>
-        <input asp-for="Product.GuaranteeExpiry" class="form-control" type="text" data-jalali-date placeholder="1405/12/29" />
+        <input asp-for="Product.GuaranteeExpiry" class="form-control" type="text" data-jalali-date placeholder="1405/12/29" value="@(Model.Product.GuaranteeExpiry.HasValue ? Model.Product.GuaranteeExpiry.Value.ToJalaliDateString() : string.Empty)" />
         <label asp-for="Product.GuaranteeNotes" class="form-label mt-2">Guarantee notes</label>
         <input asp-for="Product.GuaranteeNotes" class="form-control" />
     </div>
