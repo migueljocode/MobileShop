@@ -2315,4 +2315,42 @@ public class ProductsDataServiceTests : RepoTestBase
         Assert.True(updated.PhoneProfile.SupportsEsim);
     }
 
+    [Fact]
+    public async Task UpdateProductAsync_succeeds_when_nothing_changed()
+    {
+        SeedCatalog(out var phoneModel, out _);
+        var product = TestDataHelpers.CreateProduct(Context);
+        var tracked = Context.Products.First(p => p.Id == product.Id);
+        tracked.ModelId = phoneModel.Id;
+        Context.Products.Update(tracked);
+        Context.Phones.Add(new Phone
+        {
+            ProductId = product.Id,
+            IMEI1 = "345678901234567",
+            OwnershipTransferred = false,
+        });
+        Context.SaveChanges();
+
+        var input = new MobileShop.Models.ViewModels.Web.BindModels.EditProductInputModel
+        {
+            ProductId = product.Id,
+            Type = "Phone",
+            Identifier = product.Barcode,
+            IMEI1 = "345678901234567",
+            Price = product.Price,
+            ProfitPercent = null,
+            ProfitAmount = null,
+        };
+
+        var result = await _service.UpdateProductAsync(input);
+
+        Assert.True(result.Succeeded);
+        var updated = await Context.Products
+            .AsNoTracking()
+            .Include(p => p.PhoneProfile)
+            .SingleAsync(p => p.Id == product.Id);
+        Assert.Equal(product.Barcode, updated.Barcode);
+        Assert.Equal(product.Price, updated.Price);
+        Assert.Equal("345678901234567", updated.PhoneProfile!.IMEI1);
+    }
 }

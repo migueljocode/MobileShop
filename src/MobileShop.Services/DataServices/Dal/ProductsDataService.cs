@@ -32,7 +32,34 @@ public class ProductsDataService(
 {
     // Product creation represents stock intake, so its paid cost is recorded as a Buy leg.
     private const string PhoneCategoryName = "Phone";
-        /// <summary>Gets the structured logger for this products service.</summary>
+
+#pragma warning disable CS8603, CS8602 // Include lambda returns nullable nav; benign
+    private static readonly Expression<Func<Product, object>>[] EditIncludes =
+    [
+        p => p.ModelNavigation,
+        p => p.ModelNavigation.ManufacturerNavigation,
+        p => p.ColorNavigation,
+        p => p.SecondHandProfile,
+        p => p.GuaranteeProfile,
+        p => p.PhoneProfile,
+        p => p.TabletProfile,
+        p => p.SmartWatchProfile,
+        p => p.LaptopProfile,
+        p => p.AppleIdProfile,
+        p => p.CableProfile,
+        p => p.ChargerProfile,
+        p => p.PowerBankProfile,
+        p => p.PowerBankProfile.Ports,
+        p => p.PortableStorageProfile,
+        p => p.PortableStorageProfile.StorageCapacityNavigation,
+        p => p.CaseProfile,
+        p => p.CaseProfile.ModelFits,
+        p => p.GlassProfile,
+        p => p.GlassProfile.ModelFits
+    ];
+#pragma warning restore CS8603, CS8602
+
+    /// <summary>Gets the structured logger for this products service.</summary>
     protected ILogger<ProductsDataService> Logger { get; } = logger;
 
     /// <inheritdoc />
@@ -942,33 +969,8 @@ public class ProductsDataService(
 
     public async Task<ServiceResult> UpdateProductAsync(EditProductInputModel input)
     {
-        // The same includes as GetProductForEditAsync, tracked, so every profile the
-        // type switch below needs is loaded and the changed entity can be saved
-        // directly instead of re-attaching a half-loaded graph.
-#pragma warning disable CS8603, CS8602 // Include lambda returns nullable nav; benign
-        var product = await products.FindTrackedWithIncludesAsync(
-            input.ProductId,
-            p => p.ModelNavigation,
-            p => p.ModelNavigation.ManufacturerNavigation,
-            p => p.ColorNavigation,
-            p => p.SecondHandProfile,
-            p => p.GuaranteeProfile,
-            p => p.PhoneProfile,
-            p => p.TabletProfile,
-            p => p.SmartWatchProfile,
-            p => p.LaptopProfile,
-            p => p.AppleIdProfile,
-            p => p.CableProfile,
-            p => p.ChargerProfile,
-            p => p.PowerBankProfile,
-            p => p.PowerBankProfile.Ports,
-            p => p.PortableStorageProfile,
-            p => p.PortableStorageProfile.StorageCapacityNavigation,
-            p => p.CaseProfile,
-            p => p.CaseProfile.ModelFits,
-            p => p.GlassProfile,
-            p => p.GlassProfile.ModelFits);
-#pragma warning restore CS8603, CS8602
+        // Tracked, same includes as GetProductForEditAsync
+        var product = await products.FindTrackedWithIncludesAsync(input.ProductId, EditIncludes);
         if (product is null)
             return new ServiceResult(false, "Product not found.", nameof(input.ProductId), null);
 
@@ -1129,40 +1131,12 @@ public class ProductsDataService(
                 return new ServiceResult(false, $"Unsupported product type: {input.Type}", nameof(input.Type), null);
         }
 
-        var updated = await products.SaveChangesAsync() > 0;
-        if (!updated)
-            return new ServiceResult(false, "The product could not be updated. Check the details and try again.", null, null);
+        await products.SaveChangesAsync();
 
         return new ServiceResult(true, "Product updated successfully.", null, input.ProductId);
     }
 
-public async Task<Product?> GetProductForEditAsync(int id)
-    {
-#pragma warning disable CS8603, CS8602 // Include lambda returns nullable nav; benign
-        return await products.FindWithIncludesAsync(
-            id,
-            p => p.ModelNavigation,
-            p => p.ModelNavigation.ManufacturerNavigation,
-            p => p.ColorNavigation,
-            p => p.SecondHandProfile,
-            p => p.GuaranteeProfile,
-            p => p.PhoneProfile,
-            p => p.TabletProfile,
-            p => p.SmartWatchProfile,
-            p => p.LaptopProfile,
-            p => p.AppleIdProfile,
-            p => p.CableProfile,
-            p => p.ChargerProfile,
-            p => p.PowerBankProfile,
-            p => p.PowerBankProfile.Ports,
-            p => p.PortableStorageProfile,
-            p => p.PortableStorageProfile.StorageCapacityNavigation,
-            p => p.CaseProfile,
-            p => p.CaseProfile.ModelFits,
-            p => p.GlassProfile,
-            p => p.GlassProfile.ModelFits);
-#pragma warning restore CS8603, CS8602
-    }
+public Task<Product?> GetProductForEditAsync(int id) => products.FindWithIncludesAsync(id, EditIncludes);
 
     private async Task<ServiceResult> CreateAccessoryBatchAsync(int sellerId, int count, long price, decimal? profitPercent, long? profitAmount, int manufacturerId, int modelId, string categoryName, Action<Product> configure)
     {
