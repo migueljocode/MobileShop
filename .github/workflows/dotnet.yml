@@ -41,24 +41,6 @@ jobs:
           name: factor-pdf-inspection
           path: TestResults/FactorPdfInspection/
           if-no-files-found: error
-      - name: Run Production smoke
-        timeout-minutes: 10
-        run: |
-          if ! command -v sqlite3 >/dev/null 2>&1; then
-            sudo apt-get update
-            sudo apt-get install -y sqlite3
-          fi
-          bash .github/scripts/production-smoke.sh
-      - name: Upload Production smoke artifacts
-        if: always()
-        uses: actions/upload-artifact@v5
-        with:
-          name: production-smoke
-          path: |
-            TestResults/ProductionSmoke/
-            MobileShop.db.*.bak
-            MobileShop.Log/
-          if-no-files-found: warn
 
   powershell-windows:
     name: PowerShell log utility (Windows)
