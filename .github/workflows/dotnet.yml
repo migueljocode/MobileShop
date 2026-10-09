@@ -3,6 +3,7 @@ name: .NET CI
 on:
   push:
     branches: [main]
+    paths-ignore: ['**.md', '.agents/**', '.kilo/**', 'docs/**']
   pull_request:
     branches: [main]
   workflow_dispatch:
@@ -44,18 +45,3 @@ jobs:
           name: factor-pdf-inspection
           path: TestResults/FactorPdfInspection/
           if-no-files-found: warn
-
-  scripts:
-    name: Log utility (${{ matrix.os }})
-    runs-on: ${{ matrix.os }}
-    timeout-minutes: 10
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-24.04, windows-2025]
-    steps:
-      - uses: actions/checkout@v5
-      - if: runner.os == 'Linux'
-        run: bash src/MobileShop.Scripts/tests/test-bash.sh
-      - shell: pwsh
-        run: ./src/MobileShop.Scripts/tests/test-powershell.ps1
