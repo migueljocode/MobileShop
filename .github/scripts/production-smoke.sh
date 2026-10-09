@@ -108,6 +108,9 @@ if [[ "$GUARD_EXIT" -eq 0 ]]; then
   cat "$PROD_GUARD_LOG" >&2
   exit 1
 fi
+# Give the OS a moment to release the port after production guard exits
+sleep 1
+
 grep -F -- "--migrate-database" "$PROD_GUARD_LOG"
 
 set +e
@@ -126,6 +129,8 @@ if [[ "$MIGRATE_EXIT" -ne 0 ]]; then
   exit "$MIGRATE_EXIT"
 fi
 grep -F "Legacy database baselined successfully" "$MIGRATE_LOG"
+# Give the OS a moment to release the port after the migrate command exits
+sleep 2
 
 BACKUPS=( "$DB".*.bak )
 if [[ "${#BACKUPS[@]}" -ne 1 || ! -f "${BACKUPS[0]}" ]]; then
