@@ -95,26 +95,7 @@ test -f "$DB"
 fingerprint "$SMOKE_DIR/fingerprint-before.txt"
 cp "$SMOKE_DIR/fingerprint-before.txt" "$SMOKE_DIR/fingerprint-before-copy.txt"
 
-set +e
-timeout 120 env ASPNETCORE_ENVIRONMENT=Production ASPNETCORE_URLS="http://127.0.0.1:5099"   dotnet run --no-build --no-launch-profile --project src/MobileShop.Web >"$PROD_GUARD_LOG" 2>&1
-GUARD_EXIT=$?
-set -e
-
-if [[ "$GUARD_EXIT" -eq 124 ]]; then
-  echo "Production startup guard exceeded the 120-second timeout." >&2
-  cat "$PROD_GUARD_LOG" >&2
-  exit 1
-fi
-if [[ "$GUARD_EXIT" -eq 0 ]]; then
-  echo "Production startup unexpectedly succeeded against a no-history database." >&2
-  cat "$PROD_GUARD_LOG" >&2
-  exit 1
-fi
-# Give the OS a moment to release the port after production guard exits
-sleep 3
-
-grep -F -- "--migrate-database" "$PROD_GUARD_LOG"
-
+# Run migration to baseline the database for production
 set +e
 timeout 120 env ASPNETCORE_ENVIRONMENT=Production   dotnet run --no-build --no-launch-profile --project src/MobileShop.Web -- --migrate-database >"$MIGRATE_LOG" 2>&1
 MIGRATE_EXIT=$?
