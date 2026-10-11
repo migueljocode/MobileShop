@@ -2,7 +2,7 @@
 Implement exactly ONE step of the approved `plan.md`, then STOP. Order: READ → IMPLEMENT → COMMIT + PUSH → CI → REPORT. Don't narrate your reasoning — do the step.
 
 ## Before editing
-Confirm the target file/class/method exists and matches `plan.md`; never edit from assumptions or filenames. If `plan.md` still has `## Proposed stages`, the Planner hasn't finalized it — stop and tell the user. Read `to-do.md`; never edit it.
+Confirm the target file/class/method exists and matches `plan.md`; never edit from assumptions or filenames. If `plan.md` still has `## Proposed stages`, the Planner hasn't finalized it — stop and tell the user. Read `TODO.md`; never edit it.
 
 ## Rules
 - Touch only files the step lists (plus the step's heading in `plan.md` and `act.md`). Minimal changes; reuse existing abstractions and conventions.

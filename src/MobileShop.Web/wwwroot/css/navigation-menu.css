@@ -10,6 +10,11 @@ body.has-floating-navigation {
 }
 
 .floating-navigation {
+  --nav-dock-radius: 1.9rem;
+  --nav-spring: linear(0, 0.044, 0.149, 0.284, 0.428, 0.565, 0.687, 0.789, 0.871, 0.933, 0.977, 1.007, 1.026, 1.035, 1.038, 1.037, 1.033, 1.028, 1.023, 1.018, 1.013, 1.009, 1.005, 1.003, 1.001, 1);
+  --nav-ease-out: cubic-bezier(0.32, 0.72, 0, 1);
+  --nav-ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --nav-flyout-h: min(clamp(18rem, 38vh, 22rem), calc(100dvh - 12rem));
   position: fixed;
   z-index: 1040;
   isolation: isolate;
@@ -21,6 +26,8 @@ body.has-floating-navigation {
   pointer-events: none;
 }
 
+@supports not (transition-timing-function: linear(0, 1)) { .floating-navigation { --nav-spring: cubic-bezier(0.3, 1.25, 0.5, 1); } }
+
 .navigation-dock {
   box-sizing: border-box;
   position: relative;
@@ -31,50 +38,10 @@ body.has-floating-navigation {
   width: max-content;
   max-width: calc(100vw - 2rem);
   border: 1px solid var(--line-strong);
-  border-radius: 999px;
+  border-radius: var(--nav-dock-radius);
   background: var(--panel-raised);
   box-shadow: 0 1rem 2rem rgb(0 0 0 / .45);
   pointer-events: auto;
-  transform: scale(0.84);
-  transform-origin: center bottom;
-  transition:
-    transform 520ms cubic-bezier(0.34, 1.56, 0.64, 1),
-    border-radius 320ms ease,
-    box-shadow 360ms ease;
-}
-
-.floating-navigation.is-initializing .navigation-dock {
-  animation: none;
-  transition: none;
-}
-
-.floating-navigation.is-initializing:hover .navigation-dock {
-  transform: scale(1);
-  border-radius: 1.45rem;
-}
-
-.floating-navigation.is-initializing:hover .navigation-dock::before {
-  transition: none;
-}
-
-.navigation-dock::before {
-  position: absolute;
-  z-index: -1;
-  inset: 1px;
-  border-radius: inherit;
-  background: transparent;
-  content: "";
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 360ms ease, transform 520ms cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-.floating-navigation:hover .navigation-dock,
-.floating-navigation:focus-within .navigation-dock,
-.floating-navigation.is-engaged .navigation-dock {
-  transform: scale(1);
-  box-shadow: 0 1rem 2rem rgb(0 0 0 / .45);
-  border-radius: 1.45rem;
 }
 
 .navigation-dock__tabs {
@@ -104,21 +71,21 @@ body.has-floating-navigation {
   opacity: 0;
   visibility: hidden;
   transition:
-    max-height 420ms cubic-bezier(0.32, 1.4, 0.64, 1),
-    padding 420ms cubic-bezier(0.32, 1.4, 0.64, 1),
-    opacity 200ms ease,
-    visibility 0s linear 420ms;
+    max-height 280ms var(--nav-ease-in-out),
+    padding 280ms var(--nav-ease-in-out),
+    opacity 180ms ease 40ms,
+    visibility 0s linear 280ms;
 }
 
 .navigation-flyout.is-open {
-  max-height: min(24rem, calc(100dvh - 10rem));
+  max-height: calc(var(--nav-flyout-h) + 2rem);
   padding: 1rem;
   opacity: 1;
   visibility: visible;
   transition:
-    max-height 560ms cubic-bezier(0.32, 1.4, 0.64, 1),
-    padding 560ms cubic-bezier(0.32, 1.4, 0.64, 1),
-    opacity 280ms ease 45ms,
+    max-height 460ms var(--nav-ease-out),
+    padding 460ms var(--nav-ease-out),
+    opacity 220ms ease,
     visibility 0s;
 }
 
@@ -128,23 +95,24 @@ body.has-floating-navigation {
   opacity: 0;
   visibility: hidden;
   transition:
-    max-height 420ms cubic-bezier(0.4, 0, 0.72, -0.38),
-    padding 420ms cubic-bezier(0.4, 0, 0.72, -0.38),
-    opacity 170ms ease 35ms,
-    visibility 0s linear 420ms;
+    max-height 280ms var(--nav-ease-in-out),
+    padding 280ms var(--nav-ease-in-out),
+    opacity 180ms ease 40ms,
+    visibility 0s linear 280ms;
 }
 
 .navigation-flyout__content {
   box-sizing: border-box;
-  height: clamp(18rem, 38vh, 22rem);
-  max-height: calc(100dvh - 12rem);
+  height: var(--nav-flyout-h);
   overflow: hidden;
+  transform: translateY(0.9rem) scale(0.97);
+  transform-origin: center bottom;
+  transition: transform 280ms var(--nav-ease-in-out);
 }
 
-.floating-navigation:hover .navigation-dock::before,
-.floating-navigation:focus-within .navigation-dock::before,
-.floating-navigation.is-engaged .navigation-dock::before {
-  opacity: 0.55;
+.navigation-flyout.is-open .navigation-flyout__content {
+  transform: none;
+  transition: transform 560ms var(--nav-spring);
 }
 
 .navigation-tab {
@@ -167,10 +135,10 @@ body.has-floating-navigation {
   cursor: pointer;
   transform-origin: center;
   transition:
-    color 260ms ease,
-    background-color 320ms ease,
-    box-shadow 380ms ease,
-    transform 500ms cubic-bezier(0.16, 1, 0.3, 1);
+    color 200ms ease,
+    background-color 240ms ease,
+    box-shadow 200ms ease,
+    transform 420ms var(--nav-spring);
 }
 
 .navigation-tab:hover {
@@ -178,38 +146,32 @@ body.has-floating-navigation {
   background: var(--panel);
   color: var(--ink);
   text-decoration: none;
-  transform: translateY(-0.12rem);
 }
 
 .navigation-tab:active {
-  transform: scale(0.96);
+  transform: scale(0.95);
 }
 
 .navigation-tab:focus-visible,
 .navigation-link:focus-visible {
   outline: none;
   box-shadow: var(--focus-ring);
-  outline-offset: 3px;
 }
 
 .navigation-tab.is-current {
   background: var(--accent);
   color: var(--accent-ink);
-  box-shadow: none;
 }
 
 .navigation-tab.is-current:hover {
   background: color-mix(in srgb, var(--accent) 88%, white);
   color: var(--accent-ink);
-  box-shadow: none;
 }
 
 .navigation-tab.is-expanded {
   z-index: 3;
   background: color-mix(in srgb, var(--accent) 25%, transparent);
   color: var(--ink);
-  box-shadow: none;
-  transform: translateY(-0.12rem);
 }
 
 .navigation-tab.is-current.is-expanded {
@@ -233,13 +195,12 @@ body.has-floating-navigation {
   stroke-width: 1.7;
   stroke-linecap: round;
   stroke-linejoin: round;
-  transition: transform 460ms cubic-bezier(0.16, 1, 0.3, 1), filter 300ms ease;
+  transition: transform 560ms var(--nav-spring);
 }
 
 .navigation-tab:hover .navigation-tab__icon,
 .navigation-tab:focus-visible .navigation-tab__icon {
-  filter: none;
-  transform: scale(1.12) rotate(-3deg);
+  transform: scale(1.1);
 }
 
 .navigation-tab__indicator {
@@ -251,16 +212,11 @@ body.has-floating-navigation {
   border-radius: 50%;
   background: transparent;
   transform: translateX(-50%);
+  transition: width 560ms var(--nav-spring), background-color 200ms ease;
 }
 
 .navigation-tab.is-current .navigation-tab__indicator {
   background: var(--accent);
-}
-
-@supports not ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
-  .navigation-dock {
-    background: var(--panel-raised);
-  }
 }
 
 .navigation-panel[hidden] {
@@ -282,7 +238,7 @@ body.has-floating-navigation {
   margin: 0 0 0.55rem;
   padding: 0 0.25rem 0.55rem;
   border-bottom: 1px solid var(--line);
-  transition: opacity 150ms ease, transform 150ms ease;
+  transition: opacity 200ms ease, transform 560ms var(--nav-spring);
 }
 
 .navigation-panel__eyebrow {
@@ -322,10 +278,9 @@ body.has-floating-navigation {
   gap: 0.38rem;
   overflow-x: hidden;
   overflow-y: auto;
-  padding: 0.2rem 0.5rem 0.5rem 0.2rem;
+  padding: 0.3rem 0.5rem 0.5rem 0.3rem;
   scrollbar-color: var(--ink-muted) var(--panel);
   scrollbar-width: thin;
-  transition: opacity 150ms ease, transform 150ms ease;
 }
 
 .navigation-panel__links::-webkit-scrollbar {
@@ -348,58 +303,29 @@ body.has-floating-navigation {
   background: var(--ink);
 }
 
-.navigation-link + .navigation-link {
-  border-top-color: var(--line);
-}
-
 .navigation-panel.is-switching .navigation-panel__heading,
-.navigation-panel.is-switching .navigation-panel__links {
-  transform: translateY(0.55rem) scale(0.985);
+.navigation-panel.is-switching .navigation-link {
   opacity: 0;
+  transform: translateY(0.6rem);
+  transition: none;
 }
 
 .navigation-panel.is-entering .navigation-panel__heading {
-  animation: navigation-panel-heading-in 440ms 35ms cubic-bezier(0.22, 1.55, 0.45, 1) both;
+  transition-delay: 35ms;
 }
 
-.navigation-panel.is-entering .navigation-link {
-  animation: navigation-link-in 440ms cubic-bezier(0.22, 1.55, 0.45, 1) both;
-}
+.navigation-panel.is-entering .navigation-link:nth-child(1) { transition-delay: 0ms, 0ms, 45ms, 45ms; }
+.navigation-panel.is-entering .navigation-link:nth-child(2) { transition-delay: 0ms, 0ms, 82ms, 82ms; }
+.navigation-panel.is-entering .navigation-link:nth-child(3) { transition-delay: 0ms, 0ms, 119ms, 119ms; }
+.navigation-panel.is-entering .navigation-link:nth-child(4) { transition-delay: 0ms, 0ms, 156ms, 156ms; }
+.navigation-panel.is-entering .navigation-link:nth-child(5) { transition-delay: 0ms, 0ms, 193ms, 193ms; }
+.navigation-panel.is-entering .navigation-link:nth-child(6) { transition-delay: 0ms, 0ms, 230ms, 230ms; }
 
-.navigation-panel.is-entering .navigation-link:nth-child(1) { animation-delay: 45ms; }
-.navigation-panel.is-entering .navigation-link:nth-child(2) { animation-delay: 82ms; }
-.navigation-panel.is-entering .navigation-link:nth-child(3) { animation-delay: 119ms; }
-.navigation-panel.is-entering .navigation-link:nth-child(4) { animation-delay: 156ms; }
-.navigation-panel.is-entering .navigation-link:nth-child(5) { animation-delay: 193ms; }
-.navigation-panel.is-entering .navigation-link:nth-child(6) { animation-delay: 230ms; }
-
-.navigation-panel.is-closing .navigation-panel__heading {
-  animation: navigation-panel-heading-out 260ms cubic-bezier(0.55, 0, 0.85, 0.35) both;
-}
-
+.navigation-panel.is-closing .navigation-panel__heading,
 .navigation-panel.is-closing .navigation-link {
-  animation: navigation-link-out 280ms cubic-bezier(0.55, 0, 0.85, 0.35) both;
-  animation-delay: var(--collapse-delay, 50ms);
-}
-
-@keyframes navigation-panel-heading-in {
-  0% { opacity: 0; filter: blur(8px); transform: translateY(0.7rem) scale(0.99) rotateX(-4deg); }
-  72% { opacity: 1; filter: blur(0); transform: translateY(-0.08rem) scale(1.003) rotateX(0.35deg); }
-  100% { opacity: 1; filter: blur(0); transform: translateY(0) scale(1) rotateX(0); }
-}
-
-@keyframes navigation-panel-heading-out {
-  to { opacity: 0; filter: blur(5px); transform: translateY(0.7rem) scale(0.95) rotateX(-4deg); }
-}
-
-@keyframes navigation-link-in {
-  0% { opacity: 0; filter: blur(7px); transform: translateY(0.7rem) scale(0.985) rotateX(-4deg); }
-  68% { opacity: 1; filter: blur(0); transform: translateY(-0.08rem) scale(1.004) rotateX(0.35deg); }
-  100% { opacity: 1; filter: blur(0); transform: translateY(0) scale(1) rotateX(0); }
-}
-
-@keyframes navigation-link-out {
-  to { opacity: 0; filter: blur(5px); transform: translateY(0.8rem) scale(0.9) rotateX(-5deg); }
+  opacity: 0;
+  transform: translateY(0.5rem);
+  transition: opacity 160ms ease, transform 280ms var(--nav-ease-in-out);
 }
 
 .navigation-link {
@@ -414,10 +340,10 @@ body.has-floating-navigation {
   background: var(--panel);
   text-decoration: none;
   transition:
-    background-color 280ms ease,
-    border-color 280ms ease,
-    box-shadow 360ms ease,
-    transform 460ms cubic-bezier(0.16, 1, 0.3, 1);
+    background-color 160ms ease,
+    border-color 160ms ease,
+    opacity 200ms ease,
+    transform 560ms var(--nav-spring);
 }
 
 .navigation-link:hover,
@@ -425,9 +351,9 @@ body.has-floating-navigation {
   border-color: var(--accent);
   background: color-mix(in srgb, var(--accent) 16%, transparent);
   color: var(--ink);
-  box-shadow: none;
-  transform: translateY(-1px);
 }
+
+.navigation-link:active { transform: scale(0.985); }
 
 .navigation-link__icon {
   display: grid;
@@ -496,20 +422,17 @@ body.has-floating-navigation {
 
 @media (max-width: 575.98px) {
   body.has-floating-navigation {
-    padding-bottom: 5.75rem;
+    padding-bottom: calc(max(0.65rem, env(safe-area-inset-bottom, 0px)) + 5.2rem);
   }
 
   .floating-navigation {
+    --nav-dock-radius: 2.05rem;
+    --nav-flyout-h: min(clamp(17rem, 38vh, 20rem), calc(100dvh - 12rem));
     bottom: max(0.65rem, env(safe-area-inset-bottom));
     max-width: calc(100vw - 0.75rem);
   }
 
   .navigation-dock {
-    width: calc(100vw - 0.75rem);
-    max-width: calc(100vw - 0.75rem);
-  }
-
-  .floating-navigation.is-engaged .navigation-dock {
     width: calc(100vw - 0.75rem);
     max-width: calc(100vw - 0.75rem);
   }
@@ -529,14 +452,6 @@ body.has-floating-navigation {
     font-size: 0.61rem;
   }
 
-  .navigation-tab:hover {
-    transform: translateY(-0.06rem);
-  }
-
-  .navigation-tab.is-expanded {
-    transform: translateY(-0.06rem);
-  }
-
   .navigation-tab__icon {
     width: 1.05rem;
     height: 1.05rem;
@@ -548,11 +463,6 @@ body.has-floating-navigation {
 
   .navigation-flyout {
     width: 100%;
-  }
-
-  .navigation-flyout__content {
-    height: clamp(17rem, 38vh, 20rem);
-    max-height: calc(100dvh - 12rem);
   }
 
   .navigation-panel__links {
@@ -572,20 +482,14 @@ body.has-floating-navigation {
 @media (prefers-reduced-motion: reduce) {
   .navigation-tab,
   .navigation-tab__icon,
-  .navigation-dock,
-  .navigation-dock::before,
+  .navigation-tab__indicator,
   .navigation-flyout,
+  .navigation-flyout__content,
   .navigation-dock__tabs,
   .navigation-link,
-  .navigation-panel__heading,
-  .navigation-panel__links,
-  .navigation-panel.is-entering .navigation-panel__heading,
-  .navigation-panel.is-entering .navigation-link,
-  .navigation-panel.is-closing .navigation-panel__heading,
-  .navigation-panel.is-closing .navigation-link {
+  .navigation-panel__heading {
     scroll-behavior: auto;
     transition-duration: 0.01ms !important;
-    animation-duration: 0.01ms !important;
-    animation-delay: 0ms !important;
+    transition-delay: 0ms !important;
   }
 }

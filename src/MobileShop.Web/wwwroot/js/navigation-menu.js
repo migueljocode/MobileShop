@@ -59,7 +59,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 var animationTimer = window.setTimeout(function () {
                     panel.classList.remove('is-entering');
                     panelAnimationTimers.delete(panel);
-                }, 720);
+                }, 800);
                 panelAnimationTimers.set(panel, animationTimer);
             });
         });
@@ -67,10 +67,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function clearPanelCloseState(panel) {
         panel.classList.remove('is-closing');
-        panel.style.removeProperty('--collapse-delay');
-        panel.querySelectorAll('.navigation-link').forEach(function (link) {
-            link.style.removeProperty('--collapse-delay');
-        });
     }
 
     function open(id) {
@@ -107,9 +103,6 @@ document.addEventListener('DOMContentLoaded', function () {
         if (visiblePanel) {
             visiblePanel.classList.remove('is-entering', 'is-switching');
             visiblePanel.classList.add('is-closing');
-            visiblePanel.querySelectorAll('.navigation-link').forEach(function (link, index, links) {
-                link.style.setProperty('--collapse-delay', (35 + (links.length - index - 1) * 32) + 'ms');
-            });
         }
         setExpanded(null);
         flyout.setAttribute('aria-hidden', 'true');
@@ -119,7 +112,7 @@ document.addEventListener('DOMContentLoaded', function () {
         window.clearTimeout(closeCleanupTimer);
         closeCleanupTimer = window.setTimeout(function () {
             finishClose();
-        }, 480);
+        }, 340);
     }
 
     triggers.forEach(function (trigger, index) {

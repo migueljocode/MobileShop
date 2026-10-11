@@ -7,12 +7,12 @@ For humans: no tool loads this file.
 | `.agents/roles/{planner,reviewer,actor}.md` | Per-role rules and templates |
 | `.agents/project.md` | Repository facts and invariants (loaded through `opencode.json` / `kilo.jsonc`) |
 | `.agents/chatbot.md` | Extra rules for chatbots without repo tools |
-| `.agents/to-do.md`, `.agents/chat/*.md` | Pipeline state: roadmap, plan, audit, act report |
+| `.agents/TODO.md`, `.agents/chat/*.md` | Pipeline state: roadmap, plan, audit, act report |
 | `.opencode/agents/`, `.kilo/agents/` | Role pickers — stubs pointing at the role files (keep the folder your tool reads) |
 | `.github/copilot-instructions.md` | Copilot stub |
 
 **opencode / Kilo Code:** pick the `planner`, `reviewer` or `actor` agent and set each agent's model in the tool (order below).
-**Chatbots (ChatGPT, Grok, AI Studio, Claude):** paste the output of `cat AGENTS.md .agents/chatbot.md .agents/roles/<role>.md .agents/project.md` (Git Bash on Windows: add `| clip`), then upload `.agents/to-do.md` and `.agents/chat/*.md`.
+**Chatbots (ChatGPT, Grok, AI Studio, Claude):** paste the output of `cat AGENTS.md .agents/chatbot.md .agents/roles/<role>.md .agents/project.md` (Git Bash on Windows: add `| clip`), then upload `.agents/TODO.md` and `.agents/chat/*.md`.
 **New repo:** copy `AGENTS.md`, `.agents/` (keep `roles/` and `chatbot.md`, rewrite `project.md`, reset the state files), the agent stubs and the two JSON configs.
 
 ## Model order (moved from the old role files)

@@ -18,7 +18,7 @@
 - Edit existing rules and delete dead ones (no commented-out code). No new dependency.
 - Step 5.1 is a user-requested docs change, not an "unrelated rename".
 
-## [ ] Step 5.1 — Rule files obey `TODO.md`
+## ~~[x] Step 5.1 — Rule files obey `TODO.md`~~
 - Files: modify: `AGENTS.md` (2 references), `.agents/README.md` (2), `.agents/chatbot.md` (1), `.agents/roles/planner.md` (7), `.agents/roles/reviewer.md` (4), `.agents/roles/actor.md` (1); do not touch: `.agents/TODO.md`, `.agents/chat/*` (state files; `audit.md` is overwritten by the Reviewer), any other file.
 - Current -> Desired: all 17 references to the pipeline roadmap file read `to-do.md`; the file is now `TODO.md`. Notably `reviewer.md` tells the Reviewer to run `git add .agents/to-do.md && git commit … -- .agents/to-do.md`, which now fails (the old path no longer exists), and on case-sensitive systems a model following the rules would recreate `to-do.md`.
 - Change: in those six files replace every `to-do.md` with `TODO.md` (exact case, `.agents/to-do.md` -> `.agents/TODO.md`, `to-do.md` -> `TODO.md`). Every one of the 17 occurrences is the file name; change nothing else (no rewording, no reflow).
@@ -30,7 +30,7 @@
 - Risk: LOW
 - Confidence: HIGH
 
-## [ ] Step 5.2 — Stable dock shape and size, and clearance for the larger dock
+## ~~[x] Step 5.2 — Stable dock shape and size, and clearance for the larger dock~~
 - Files: modify: `navigation-menu.css`, `components.css`.
 - Edits:
   1. In the `.floating-navigation` rule add `--nav-dock-radius: 1.9rem;`. In the existing mobile (`max-width: 575.98px`) `.floating-navigation` rule add `--nav-dock-radius: 2.05rem;` (measured resting dock heights: 61.3 px desktop = 30.65 px half, 57.5 px mobile = 28.7 px half).
@@ -48,7 +48,7 @@
 - Risk: LOW
 - Confidence: HIGH
 
-## [ ] Step 5.3 — Motion tokens, hover that never moves a hit box, visible focus ring
+## ~~[x] Step 5.3 — Motion tokens, hover that never moves a hit box, visible focus ring~~
 - Files: modify: `navigation-menu.css`.
 - Edits:
   1. In the `.floating-navigation` rule add: `--nav-spring: linear(0, 0.044, 0.149, 0.284, 0.428, 0.565, 0.687, 0.789, 0.871, 0.933, 0.977, 1.007, 1.026, 1.035, 1.038, 1.037, 1.033, 1.028, 1.023, 1.018, 1.013, 1.009, 1.005, 1.003, 1.001, 1);` (damped spring, ratio 0.72, peak overshoot 3.8%), `--nav-ease-out: cubic-bezier(0.32, 0.72, 0, 1);` (iOS standard), `--nav-ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);`. Directly after that rule add `@supports not (transition-timing-function: linear(0, 1)) { .floating-navigation { --nav-spring: cubic-bezier(0.3, 1.25, 0.5, 1); } }`.
@@ -69,7 +69,7 @@
 - Risk: LOW
 - Confidence: HIGH
 
-## [ ] Step 5.4 — Flyout animates to its REAL height
+## ~~[x] Step 5.4 — Flyout animates to its REAL height~~
 - Files: modify: `navigation-menu.css`.
 - Edits:
   1. In the `.floating-navigation` rule add `--nav-flyout-h: min(clamp(18rem, 38vh, 22rem), calc(100dvh - 12rem));`. In the mobile `.floating-navigation` rule add `--nav-flyout-h: min(clamp(17rem, 38vh, 20rem), calc(100dvh - 12rem));`.
@@ -85,7 +85,7 @@
 - Risk: LOW
 - Confidence: HIGH
 
-## [ ] Step 5.5 — Panel content as interruptible transitions; JS; reduced motion
+## ~~[x] Step 5.5 — Panel content as interruptible transitions; JS; reduced motion~~
 - Files: modify: `navigation-menu.css`, `wwwroot/js/navigation-menu.js`.
 - CSS edits:
   1. `.navigation-panel__heading` `transition:` -> `opacity 200ms ease, transform 560ms var(--nav-spring);`.
@@ -109,7 +109,7 @@
 - Risk: LOW
 - Confidence: HIGH
 
-## [ ] Step 5.6 — Profile "Save changes" bar
+## ~~[x] Step 5.6 — Profile "Save changes" bar~~
 - Files: inspect: `Pages/Account/Profile.cshtml`, `wwwroot/css/components.css`; modify: `wwwroot/css/components.css`, `Pages/Account/Profile.cshtml` (whitespace only); do not touch: `Profile.cshtml.cs`, any `asp-*`, `data-password-toggle`.
 - Current -> Desired: `<div class="action-bar">` sits inside `<section class="form-section">`. Measured: `.action-bar` is `position: sticky`, `background: rgb(21, 28, 35)` (`--panel`), `border-top: 1px`; inside the `--panel-raised` card it draws a darker square strip with a short hairline (the "malformed border"), and on phones it sticks above the dock. Desired: inside a card the bar is plain.
 - Edits:

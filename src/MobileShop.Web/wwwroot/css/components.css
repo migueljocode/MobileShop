@@ -135,6 +135,20 @@ th.num {
   margin-top: 1.25rem;
 }
 
+.form-section .action-bar {
+  position: static;
+  border-top: 0;
+  background: transparent;
+  padding: 0;
+  margin-top: 1.25rem;
+}
+
+@media (max-width: 575.98px) {
+  .form-section .action-bar .btn {
+    flex: 1 1 auto;
+  }
+}
+
 .status-chip {
   display: inline-flex;
   align-items: center;
@@ -225,9 +239,15 @@ th.num {
   }
 }
 
-@media (max-width: 767.98px) {
+@media (max-width: 1199.98px) {
   body.has-floating-navigation .action-bar {
-    bottom: var(--nav-dock-height, 5rem);
+    bottom: 5.5rem;
+  }
+}
+
+@media (max-width: 575.98px) {
+  body.has-floating-navigation .action-bar {
+    bottom: calc(max(0.65rem, env(safe-area-inset-bottom, 0px)) + 4.6rem);
   }
 }
 

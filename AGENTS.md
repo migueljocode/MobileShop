@@ -5,13 +5,13 @@
 - Finish by naming who goes next. Never switch agent/mode or start another role's work yourself.
 
 ## Start — fresh session; these files are your only context
-`.agents/to-do.md` → `.agents/chat/plan.md` → `.agents/chat/audit.md` → `.agents/chat/act.md` (Job B only).
+`.agents/TODO.md` → `.agents/chat/plan.md` → `.agents/chat/audit.md` → `.agents/chat/act.md` (Job B only).
 Inspect the real code before acting; never infer architecture from filenames. Read targeted slices, not dumps.
 
 ## State files (in `.agents/`)
 | File | Written by | Notes |
 |---|---|---|
-| `to-do.md` | Planner adds approved stages (unchecked); Reviewer ticks | Checkbox + one-line title per stage; never reorder or rewrite. Done = `- [x] ~~Stage N — title~~` |
+| `TODO.md` | Planner adds approved stages (unchecked); Reviewer ticks | Checkbox + one-line title per stage; never reorder or rewrite. Done = `- [x] ~~Stage N — title~~` |
 | `chat/plan.md` | Planner; Actor strikes its own step heading | Active stage only; overwritten per stage |
 | `chat/audit.md` | Reviewer | One verdict; overwritten each time |
 | `chat/act.md` | Actor | One step report; overwritten each time |
