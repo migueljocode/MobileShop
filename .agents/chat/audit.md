@@ -1,12 +1,15 @@
-# Reviewer Audit — Job B: Step 5.7 + Stage 5 sign-off (final code `34aa970`)
+# Reviewer Audit — Job B: Step 5.7 (Stage 5 validation evidence)
+
+## Findings
+No CRITICAL/HIGH. The earlier HIGH (missing Stage 5 evidence) is resolved: `act.md` now records the commit, the stage diff, the greps, the Reviewer measurements and `Action: #617 — Success` for code commit `34aa970`.
+- LOW: run #617 is taken from `act.md` (GitHub API rate-limited for me; the `dotnet.yml` badge on `main` reads passing). No source file changed after `34aa970`, so that run covers the final code.
+- LOW: Stage 6 reintroduces one `::before` and an `is-initializing` rule, so Stage 5's "none of" greps change; the Stage 6 plan says so.
 
 ## Verified
-- Step 5.7 `act.md` COMPLETE: code commit `34aa970`, Action #617 Success on that head; Step 5.1 docs-only `Action: unavailable`. Stage diff `b3283a0..34aa970` = exactly the plan list (6 rule files, `navigation-menu.css`, `navigation-menu.js`, `components.css`, `Profile.cshtml` + state files).
-- Prior Job B `cc5b1f9` verified Steps 5.1–5.6 code against the plan (greps, browser measurements, clearance); #617 Success covers the unchanged final code commit. Act/plan commits after it are docs/state-only.
-- Global Definition of Done met on record: TODO.md rename (17 refs, per-file 2/2/1/7/4/1); dock constant; spring token only on transform/width; no keyframes/`--collapse-delay`; focus rings visible; clearance 6.7–6.9 px / bottom ≥ 15 px; Profile strip fixed, other bars unchanged; no unresolved CRITICAL/HIGH (MEDIUM/LOW are notes).
+`act.md` claims match the repo (stage diff = the plan's list; greps re-run on the real files; browser measurements reproduced). Sign-off in `.agents/TODO.md` is present.
 
 ## Status
-Step 5.7: **PASS** · Stage 5: **signed off**.
+**PASS** — Stage 5 stays signed off.
 
 ## Gate
-Next: orchestrator — commit state files (audit, TODO, act, plan).
+Next: Reviewer Job A on the Stage 6 plan.
