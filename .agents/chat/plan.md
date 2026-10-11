@@ -123,7 +123,7 @@
 - Risk: LOW
 - Confidence: HIGH
 
-## [ ] Step 5.7 — Stage 5 validation
+## ~~[x] Step 5.7 — Stage 5 validation~~
 - Files: none modified.
 - Change: confirm CI green on the last commit and record `Action: #<run>` per code step in act.md (Step 5.1 is docs-only: `Action: unavailable`); `git diff --stat` over the stage is exactly: the six rule files (Step 5.1), `navigation-menu.css`, `navigation-menu.js`, `components.css`, `Profile.cshtml` (+ `.agents/` state files).
 - Reviewer measurements (headless browser, run by the Reviewer; numbers from the verified prototype, ±3 points):

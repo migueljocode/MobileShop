@@ -1,29 +1,26 @@
-# Actor Report — Stage 4 Final Validation (whole roadmap)
+# Actor Report — Step 5.7 Stage 5 validation
 
 ## Commits
-- Stage 1: `99eaba5` — product edit save hardening
-- Stage 2: `d30c2dc` — design system foundation (merged via `70be25d`)
-- Stage 3: `bbefb51` — page redesign
-- Stage 4: `6b05e9e` — accessibility, responsive, states
-- Fixup (this report): indent `GetProductForEditAsync` + refreshed evidence
+- Code: `34aa970` — `feat(web): iOS-style nav motion without glitches plus dock clearance` (steps 5.1–5.6)
+- Job A: `28e276c` — plan APPROVED
+- Job B (5.1–5.6): `cc5b1f9` — PASS, 5.7 open
 
 ## Verification
-- Action: #612 — Success (S1, head `99eaba5`)
-- Action: #613 — Success (S2, head `70be25d`)
-- Action: #614 — Success (S3, head `bbefb51`)
-- Action: #615 — Success (S4, head `6b05e9e`)
-- Greps (Stage 4, all pass): no bare `<th>`; 9 tables / 9 `.table-responsive`; `aria-busy` 2× in each of 3 JS; no `class="alert` without `role=`; no `text-bg-`/`display-4`; no legacy hex/`radial-gradient`; hex only in `tokens.css`; `btn-close` all labelled; nav Escape+refocus present.
-- Manual check (user): skip-link focus, focus-ring visibility, keyboard path Dashboard → Products → Details → Edit → Save, 360/768/1280 px on all page groups, empty/loading/error seen once each.
+- Action: #617 — Success (code, head `34aa970`)
+- Action: unavailable (Step 5.1 docs-only, `paths-ignore`, no run triggered)
+- Stage diff `b3283a0..34aa970` = exactly the plan list: 6 rule files (Step 5.1), `navigation-menu.css`, `navigation-menu.js`, `components.css`, `Profile.cshtml` (+ `.agents/` state: plan headings, audit).
+- Greps (re-run on tree): `::before` 0; no `scale(0.84)`/`is-initializing`/`@supports` (nav CSS); no `translateY(-0.12rem/-0.06rem/-1px)`/`rotate(`; `linear(` 2 lines; `24rem` none; `max-height` only `0`/`calc(var(--nav-flyout-h) + 2rem)`/`0`; `cubic-bezier` 3 lines; `@keyframes`/`animation` 0; `collapse-delay` 0 (CSS+JS); `git diff -w Profile.cshtml` empty; `asp-` 14/14, `data-password-toggle` 3/3, `Save changes` 1/1.
+- Reviewer browser measurements on the real files (in audit): open 80/95/99/100, close 84/22/3, hover rect fixed, ring on 6 tabs, radius 30.4/28.7 px, clearance 6.7–6.9 px, bottom 15.3 px.
+- Manual check (user): hover edges, dock corners, open/close/switch spring, press-back, keyboard Tab/arrows/Escape, pointer-over-dock reload; 360/768–1024/1280 px sticky Save; Profile 360/768/1280; reduce-motion instant.
 
 ## Limitations
-- Manual visual/keyboard checks are the user's per plan A4; code presence only is verified here.
-- Focus ring uses the existing tokenised selector list, not a global `:where(...)` rule — other elements keep the browser default outline (accepted per audit LOW).
+- Manual visual/keyboard checks are the user's; code + reviewer measurements only are recorded here.
 
 ## Friction noted
 - None.
 
 ## Problems
-- None blocking. Audit HIGH (stale act.md) fixed by this report; audit LOW indent fixed in `ProductsDataService.cs`.
+- None blocking. Audit HIGH (missing Stage 5 evidence) fixed by this report.
 
 ## Status
 COMPLETE
