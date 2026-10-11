@@ -1,16 +1,26 @@
-# Audit — Stage 5 plan v4 (Job A, plan review)
-
-## Scope
-Reviewed `plan.md` Stage 5 v4 (Steps 5.1–5.7) against the repo. All steps Risk LOW / Confidence HIGH: sanity-checked plus verified the load-bearing claims (reference counts, clearance rules, JS timers, selector texts).
+# Reviewer Audit — Job B: Stage 5 Steps 5.1–5.6 (commit 34aa970)
 
 ## Findings
-- Step 5.1 count verified: `to-do.md` occurs exactly 2/2/1/7/4/1 across AGENTS.md, README.md, chatbot.md, planner.md, reviewer.md, actor.md (17 occurrences, 13 lines); `docs(todo)` contains no hyphen so the `grep -rn "to-do" … --exclude-dir=chat` verify is safe. Claimed v3→v4 corrections all present: Step 5.2 edit 5 clearance rules, Step 5.2 edit 4 reduced-motion `::before` deletion with `grep -c "::before" = 0` verify (all 6 `::before` sites are in rules Step 5.2 deletes), Step 5.1 rename.
-- Step 5.2 base rule confirmed (`@media (max-width: 767.98px) … bottom: var(--nav-dock-height, 5rem)` at `components.css:228`; `--nav-dock-height` used only in the padding line after the edit); replacement breakpoints ordered 1199.98px before 575.98px as required. Desktop arithmetic consistent (3.83 + 1.25 = 5.08 rem dock top vs 6.5 rem padding).
-- Step 5.5 JS numbers confirmed in `navigation-menu.js`: `}, 720);` (line 62), `}, 480);` (line 122), `--collapse-delay` set (line 111) and removed (lines 70–72); replacements 800 (560 + 230 + margin) / 340 (280 + 60) consistent. CSS side confirmed: keyframes, per-item `animation-delay` 45–230 ms, `collapse-delay` default (line 382), and the `::before` cubic-bezier at line 69 lives inside the deleted `.navigation-dock::before` rule, so the "exactly 3 cubic-bezier lines" verify is achievable.
-- Steps 5.3/5.4/5.6 selector claims confirmed: `translateY(-0.12rem/-0.06rem/-1px)` + `rotate(` sites, `outline-offset: 3px`, the three tab `box-shadow: none` lines (indicator's preserved per edge case), mobile flyout-content override, and Profile's `.action-bar` nested inside `section.form-section`.
-- LOW: Step 5.6 edge case says "confirm none contains an `action-bar`" for the `<div class="form-section">` pages, but `Sell.cshtml` file-level does contain one (line 42, a sibling after `</form>`, not nested) — read as a nesting check it resolves correctly and the descendant selector leaves it unaffected, but the wording is literally imprecise.
+
+### HIGH — No Stage 5 evidence on record
+- `act.md` still holds the Stage 4 final report (`Status: COMPLETE`); there is no Stage 5 report, no commit list and no `Action: #<run>` for `34aa970`. GitHub API was rate-limited for me; the `dotnet.yml` badge on `main` reads passing, but a run number is not retrievable. Step 5.7 (record evidence) is not done, so Stage 5 cannot be signed off.
+- Fix: the Actor writes the Stage 5 report in `act.md` (commit, `Action: #<run>`, greps run) and finishes Step 5.7.
+
+### MEDIUM / LOW
+- MEDIUM: Steps 5.1–5.6 were done in one `feat` commit mixing docs and code (rule: exactly one step per pass). I verified each step separately against the plan, so there is no impact here; use one commit per step next time.
+- LOW: formatting differs from the plan (`@supports` block and `.navigation-link:active` on one line, tokens in a different order); behaviour is identical.
+
+## Verified (evidence)
+- Files changed = the plan's list exactly (6 rule files, `navigation-menu.css`, `navigation-menu.js`, `components.css`, `Profile.cshtml`, plan headings struck).
+- 5.1: 17 references → `TODO.md` (per file 2 / 2 / 1 / 7 / 4 / 1); no `to-do` left; only name tokens changed.
+- 5.2–5.5: every plan Verify passes on the real files (`::before` 0; no `scale(0.84)`/`is-initializing`; no lift/rotate; `linear(` 2 lines; `max-height` only `0`, `0`, `calc(var(--nav-flyout-h) + 2rem)`; `cubic-bezier` exactly 3 lines; no `@keyframes`/`animation`; no `collapse-delay` in CSS or JS). CSS equals the plan-as-written build apart from token order and formatting; JS equals it exactly.
+- Browser measurements on the real files: open 80 / 95 / 99 / 100% at 25 / 50 / 75 / 90% of 460 ms at 1280×1080, 800, 700 and 360×844, 640; close 84 / 22 / 3%; hovered tab rect fixed; bottom-edge hover 100% of frames; link delay `0s, 0s, 0.082s, 0.082s`; focus ring on all 6 tabs; radius 30.4 px / 28.7 px; link opacity 0 when the flyout hides; rapid switching and re-open during close end clean; no page errors.
+- Clearance: stuck `.action-bar` 6.7–6.9 px above the dock at 360, 500, 768, 800, 1024, 1199 px (also with a 34 px inset) with no vertical overlap on the Save button; mobile page bottom clearance 15.3 px with and without inset.
+- 5.6: `git diff -w Profile.cshtml` empty; `asp-` 14/14, `data-password-toggle` 3/3, "Save changes" 1/1.
+- Not verifiable by me: the manual visual/keyboard checks (user).
 
 ## Status
-APPROVED (one LOW wording note above; no CRITICAL/HIGH).
+Steps 5.1–5.6: **PASS** (CI evidence pending) · Step 5.7: **open** · Stage 5: not signed off.
 
-Next: Actor — execute Step 5.1.
+## Gate
+Next: Actor — Step 5.7 (record evidence in `act.md`), then Reviewer sign-off.
