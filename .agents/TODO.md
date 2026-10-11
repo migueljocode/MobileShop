@@ -1,1 +1,1 @@
-- [ ] Stage 5 — Navigation dock iOS-style motion, dock clearance, Profile save bar fix, TODO.md rename in rules
+- [x] ~~Stage 5 — Navigation dock iOS-style motion, dock clearance, Profile save bar fix, TODO.md rename in rules~~
