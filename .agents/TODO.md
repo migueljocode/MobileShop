@@ -1,1 +1,1 @@
-- [x] ~~Stage 5 — Navigation dock iOS-style motion, dock clearance, Profile save bar fix, TODO.md rename in rules~~
+- [ ] Stage 6 — Navigation dock compact/pop-up behaviour (shrinks when idle or scrolling, springs up on hover) with a frosted-glass look
