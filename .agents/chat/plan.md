@@ -21,7 +21,7 @@ The roadmap file is `.agents/TODO.md`. The Stage 6 line was approved by Reviewer
 - One step per pass and per commit. Edit existing rules, no commented-out code.
 - Keep every class and data attribute the JS uses (`is-engaged`, `is-open`, `is-closing`, `is-expanded`, `is-current`, `is-switching`, `is-entering`, `data-navigation-*`) and all Stage 5 behaviour.
 
-## [ ] Step 6.1 — Frosted-glass dock (CSS only)
+## ~~[x] Step 6.1 — Frosted-glass dock (CSS only)~~
 - Files: modify: `navigation-menu.css`.
 - Symbols: `.floating-navigation` (custom properties), `.navigation-dock`, new `@supports not (backdrop-filter)` and `prefers-reduced-transparency` blocks.
 - Current -> Desired: the dock is an opaque `var(--panel-raised)` panel with a `--line-strong` border. Desired: a translucent, blurred glass panel with solid fallbacks.
@@ -53,7 +53,7 @@ The roadmap file is `.agents/TODO.md`. The Stage 6 line was approved by Reviewer
 - Risk: LOW
 - Confidence: HIGH
 
-## [ ] Step 6.2 — Compact / pop-up motion, hover area and load state (CSS only; inert until Step 6.3)
+## ~~[x] Step 6.2 — Compact / pop-up motion, hover area and load state (CSS only; inert until Step 6.3)~~
 - Files: modify: `navigation-menu.css`.
 - Symbols: `.floating-navigation` (custom properties), `.floating-navigation::before`, `.navigation-dock`, new `.floating-navigation.is-compact .navigation-dock`, `.floating-navigation.is-initializing …`, `.floating-navigation.is-settling .navigation-tab`, the `prefers-reduced-motion` selector list.
 - Current -> Desired: the dock never changes size. Desired: it can render at `--nav-compact-scale` and spring back to full size, its hover area stays the full natural footprint, and it renders compact from the first paint on fine pointers.
@@ -103,7 +103,7 @@ The roadmap file is `.agents/TODO.md`. The Stage 6 line was approved by Reviewer
 - Risk: LOW
 - Confidence: HIGH
 
-## [ ] Step 6.3 — State machine (JS)
+## ~~[x] Step 6.3 — State machine (JS)~~
 - Files: modify: `wwwroot/js/navigation-menu.js`.
 - Symbols: new `wantsCompact`, `applyCompact`, `scheduleCompact`; existing `open`, `finishClose`, the trigger `mouseenter` handler, the `pointerenter`, `pointerleave` and `focusout` handlers; new `focusin`, `pointermove`, `scroll` and `MediaQueryList` listeners; the end of the DOMContentLoaded callback.
 - Current -> Desired: the JS only manages the flyout. Desired: it also decides when the dock is compact (hover, focus, scroll, open flyout), gates tab reactions while the dock expands, and removes `is-initializing` after the first two frames.

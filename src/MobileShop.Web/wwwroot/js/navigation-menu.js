@@ -18,7 +18,45 @@ document.addEventListener('DOMContentLoaded', function () {
     var suppressInitialHover = navigation.matches(':hover');
     var panelAnimationTimers = new WeakMap();
 
-    if (!suppressInitialHover) navigation.classList.remove('is-initializing');
+    var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    var finePointer = window.matchMedia('(hover: hover) and (pointer: fine)');
+    var compactTimer;
+    var scrollTimer;
+    var settleTimer;
+    var scrolling = false;
+    var lastX = 0;
+    var lastY = 0;
+
+    function wantsCompact() {
+        if (reduceMotion.matches || openedId !== null || navigation.classList.contains('is-engaged')) return false;
+        if (navigation.contains(document.activeElement)) return false;
+        if (scrolling) return true;
+        return finePointer.matches && !navigation.matches(':hover');
+    }
+
+    function applyCompact() {
+        var compact = wantsCompact();
+        if (compact === navigation.classList.contains('is-compact')) return;
+        navigation.classList.toggle('is-compact', compact);
+        if (compact) {
+            window.clearTimeout(settleTimer);
+            navigation.classList.remove('is-settling');
+            return;
+        }
+        navigation.classList.add('is-settling');
+        window.clearTimeout(settleTimer);
+        settleTimer = window.setTimeout(function () {
+            navigation.classList.remove('is-settling');
+            var element = document.elementFromPoint(lastX, lastY);
+            var trigger = element && element.closest('[data-navigation-trigger]');
+            if (trigger && navigation.matches(':hover')) open(trigger.dataset.navigationTrigger);
+        }, 190);
+    }
+
+    function scheduleCompact(delay) {
+        window.clearTimeout(compactTimer);
+        compactTimer = window.setTimeout(applyCompact, delay);
+    }
 
     function setExpanded(id) {
         triggers.forEach(function (trigger) {
@@ -76,6 +114,7 @@ document.addEventListener('DOMContentLoaded', function () {
         flyout.classList.remove('is-closing');
         openedId = id;
         navigation.classList.add('is-engaged');
+        applyCompact();
         setExpanded(id);
         showPanel(id);
         flyout.setAttribute('aria-hidden', 'false');
@@ -117,7 +156,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     triggers.forEach(function (trigger, index) {
         trigger.addEventListener('mouseenter', function () {
-            if (suppressInitialHover) return;
+            if (suppressInitialHover || navigation.classList.contains('is-settling')) return;
             var id = trigger.dataset.navigationTrigger;
             open(id);
         });
@@ -166,6 +205,7 @@ document.addEventListener('DOMContentLoaded', function () {
             clearPanelCloseState(panel);
         });
         navigation.classList.remove('is-engaged');
+        scheduleCompact(160);
     }
 
     flyout.addEventListener('transitionend', function (event) {
@@ -174,15 +214,18 @@ document.addEventListener('DOMContentLoaded', function () {
     });
     navigation.addEventListener('pointerenter', function () {
         window.clearTimeout(closeTimer);
+        window.clearTimeout(compactTimer);
+        applyCompact();
     });
     navigation.addEventListener('pointerleave', function (event) {
         if (event.relatedTarget && navigation.contains(event.relatedTarget)) return;
         suppressInitialHover = false;
         navigation.classList.remove('is-initializing');
         scheduleClose();
+        scheduleCompact(160);
     });
     navigation.addEventListener('focusout', function (event) {
-        if (!navigation.contains(event.relatedTarget)) scheduleClose();
+        if (!navigation.contains(event.relatedTarget)) { scheduleClose(); scheduleCompact(160); }
     });
 
     navigation.addEventListener('keydown', function (event) {
@@ -201,8 +244,30 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
+    navigation.addEventListener('focusin', applyCompact);
+    navigation.addEventListener('pointermove', function (event) {
+        lastX = event.clientX;
+        lastY = event.clientY;
+        if (navigation.classList.contains('is-compact')) applyCompact();
+    }, { passive: true });
+    window.addEventListener('scroll', function () {
+        scrolling = true;
+        applyCompact();
+        window.clearTimeout(scrollTimer);
+        scrollTimer = window.setTimeout(function () {
+            scrolling = false;
+            applyCompact();
+        }, 450);
+    }, { passive: true });
+    if (reduceMotion.addEventListener) reduceMotion.addEventListener('change', applyCompact);
     document.addEventListener('pointerdown', function (event) {
         if (openedId !== null && !navigation.contains(event.target)) close();
     });
 
+    applyCompact();
+    window.requestAnimationFrame(function () {
+        window.requestAnimationFrame(function () {
+            navigation.classList.remove('is-initializing');
+        });
+    });
 });
