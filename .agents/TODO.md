@@ -1,1 +1,1 @@
-- [ ] Stage 6 — Navigation dock compact/pop-up behaviour (shrinks when idle or scrolling, springs up on hover) with a frosted-glass look
+- [x] ~~Stage 6 — Navigation dock compact/pop-up behaviour (shrinks when idle or scrolling, springs up on hover) with a frosted-glass look~~
