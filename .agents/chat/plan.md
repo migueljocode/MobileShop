@@ -196,7 +196,7 @@ The roadmap file is `.agents/TODO.md`. The Stage 6 line was approved by Reviewer
 - Risk: MEDIUM
 - Confidence: HIGH
 
-## [ ] Step 6.4 — Stage 6 validation
+## ~~[x] Step 6.4 — Stage 6 validation~~
 - Files: none modified.
 - Change: confirm CI green on the last code commit and record `Action: #<run>` per code step in act.md; record the greps from Steps 6.1-6.3; `git diff --stat` over the stage is exactly `navigation-menu.css` and `navigation-menu.js` (+ `.agents/` state files). Browser measurements are optional (the repo has no browser harness): the Reviewer runs them only when the user asks for a deep check, with the numbers below.
 - Deep-check numbers (headless Chromium with a fine hover-capable pointer, from the verified build):
