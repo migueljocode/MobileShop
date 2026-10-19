@@ -172,7 +172,7 @@ Order rule: accessibility markup first (8.1, 8.2), then the two CSS families (8.
 # Stage 9 — Content surfaces: canvas shell, cards, tables, chips, alerts, empty and loading states
 Order rule: base first (9.1), then `surfaces.css` grows by family (9.2 cards, 9.3 tables, 9.4 chips and alerts, 9.5 tabs and segmented control); 9.6 is gated on the owner. Every step removes the replaced rules in the same commit. Products type "tabs" are plain link buttons (`btn btn-primary` or `btn btn-outline-primary` with `aria-current`) and stay that way; `.nav-tabs` exists only on ProfitLoss.
 
-## [ ] Step 9.1 — `base.css`: merge `site.css` and the base rules, set the type scale
+## ~~[x] Step 9.1 — `base.css`: merge `site.css` and the base rules, set the type scale~~
 - Task: base consolidation · F-09 · Priority P1 · Effort M · Mandatory · Type V.
 - Files: create: `src/MobileShop.Web/wwwroot/css/base.css`; delete: `src/MobileShop.Web/wwwroot/css/site.css`; modify: `src/MobileShop.Web/wwwroot/css/app-theme.css`, `src/MobileShop.Web/wwwroot/css/tokens.css`, `src/MobileShop.Web/Pages/Shared/_Layout.cshtml`.
 - Symbols: block `base-v1` (R27); in app-theme.css four groups: (a) from the first line `:root {` through the rule `.border, .border-top, .border-bottom { … }` (about lines 1-97); (b) the rule `.footer { … }`; (c) the two `@media (max-width: 767.98px)` and `@media (max-width: 575.98px)` blocks that style `.container > main[role="main"]` (the first also holds a `.table` rule that dies with the table migration in 9.3); (d) the `@media (prefers-reduced-motion: reduce)` block that contains `scroll-behavior: auto`. In tokens.css the legacy line `--fs-h1: 1.75rem;`. In the layout the `site.css` link.

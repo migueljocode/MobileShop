@@ -1,0 +1,161 @@
+/* BEGIN base-v1 */
+/* Fonts, document, typography, links, utilities, footer, narrow-screen panel, reduced motion.
+   Replaces site.css and the base rules of app-theme.css. */
+/* SF Pro Rounded, self-hosted (only Regular 400 and Bold 700 exist upstream, there is no italic). */
+@font-face {
+  font-family: 'SF Pro Rounded';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('../fonts/sf-pro-rounded-regular.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'SF Pro Rounded';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('../fonts/sf-pro-rounded-bold.woff2') format('woff2');
+}
+
+:root {
+  color-scheme: dark;
+  --app-ink: var(--ink);
+  --app-muted: var(--ink-muted);
+  --app-accent: var(--accent);
+  --app-accent-strong: var(--accent);
+  --app-surface: var(--panel);
+  --app-surface-raised: var(--panel-raised);
+  --app-edge: var(--line);
+  --app-edge-strong: var(--line-strong);
+  --bs-body-font-family: var(--font-body);
+  --bs-body-bg: var(--ground);
+  --bs-body-color: var(--ink);
+  --bs-secondary-color: var(--ink-muted);
+  --bs-tertiary-color: var(--ink-muted);
+  --bs-border-color: var(--line);
+  --bs-primary: var(--accent);
+  --bs-primary-rgb: 54, 197, 176;
+  --bs-link-color: var(--accent);
+  --bs-link-hover-color: var(--ink);
+}
+
+html {
+  position: relative;
+  min-height: 100%;
+  font-size: 14px;
+  color-scheme: dark;
+  scroll-behavior: smooth;
+}
+
+@media (min-width: 768px) {
+  html {
+    font-size: 16px;
+  }
+}
+
+body {
+  min-height: 100vh;
+  margin-bottom: 0;
+  color: var(--text-1);
+  background: var(--surface-canvas);
+}
+
+.container {
+  max-width: 1320px;
+}
+
+.container > main[role="main"] {
+  min-height: calc(100vh - 10rem);
+  margin-top: clamp(1rem, 3vw, 2.25rem) !important;
+  margin-bottom: 2rem;
+  padding: clamp(1.15rem, 3vw, 2.25rem) !important;
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-xl);
+  background: var(--surface-1);
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  color: var(--text-1);
+  letter-spacing: -0.01em;
+}
+
+h1 {
+  margin-bottom: 1.15rem;
+  font-size: var(--fs-h1);
+  font-weight: var(--fw-strong);
+  line-height: var(--lh-tight);
+  letter-spacing: var(--tracking-tight);
+}
+
+h2 {
+  font-size: var(--fs-h2);
+  font-weight: var(--fw-strong);
+}
+
+a {
+  color: var(--accent);
+  text-underline-offset: 0.18em;
+  transition: color var(--dur-fast) var(--ease-standard);
+}
+
+a:hover {
+  color: var(--text-1);
+}
+
+.text-muted,
+.form-text {
+  color: var(--text-2) !important;
+}
+
+.border,
+.border-top {
+  border-color: var(--hairline) !important;
+}
+
+.footer {
+  position: static;
+  width: auto;
+  margin-top: 1rem;
+  padding-block: 0.8rem;
+  border-top: 1px solid var(--hairline);
+  color: var(--text-2) !important;
+  line-height: 1.5;
+  white-space: normal;
+}
+
+@media (max-width: 767.98px) {
+  .container > main[role="main"] {
+    min-height: 0;
+    border-radius: var(--radius-lg);
+  }
+}
+
+@media (max-width: 575.98px) {
+  .container > main[role="main"] {
+    padding: 1rem !important;
+    border-left: 0;
+    border-right: 0;
+    border-radius: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
+/* END base-v1 */
