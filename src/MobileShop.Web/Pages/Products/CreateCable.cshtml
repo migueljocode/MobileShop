@@ -22,7 +22,7 @@
         <div class="col-md-4"><label asp-for="Input.Price" class="form-label">Paid price (Toman)</label><input asp-for="Input.Price" class="form-control" data-price inputmode="numeric" step="1" min="0" max="@MobileShop.Models.Settings.MoneyLimits.MaxRials" /></div>
         <div class="col-md-4"><label asp-for="Input.ProfitPercent" class="form-label">Profit %</label><input asp-for="Input.ProfitPercent" class="form-control" data-percent /></div>
         <div class="col-md-4"><label asp-for="Input.ProfitAmount" class="form-label">Profit amount (Toman)</label><input asp-for="Input.ProfitAmount" class="form-control" data-amount inputmode="numeric" step="1" min="0" max="@MobileShop.Models.Settings.MoneyLimits.MaxRials" /></div>
-        <div class="col-12"><label class="form-label">Finished price (Toman)</label><input class="form-control" data-finished-price readonly /></div>
+        <div class="col-12"><label class="form-label" for="finished-price">Finished price (Toman)</label><input class="form-control" id="finished-price" data-finished-price readonly /></div>
     </div>
 </div>
 <div class="form-section col-12">

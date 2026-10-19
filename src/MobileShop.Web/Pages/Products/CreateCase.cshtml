@@ -20,7 +20,7 @@
 <div class="form-section col-12">
     <h2 class="form-section__title">Pricing</h2>
     <div class="row g-3">
-        <div class="col-md-3"><label asp-for="Input.Price">Paid price (Toman)</label><input asp-for="Input.Price" class="form-control" data-price inputmode="numeric" step="1" min="0" max="@MobileShop.Models.Settings.MoneyLimits.MaxRials" /></div><div class="col-md-3"><label asp-for="Input.ProfitPercent">Profit %</label><input asp-for="Input.ProfitPercent" class="form-control" data-percent /></div><div class="col-md-3"><label asp-for="Input.ProfitAmount">Profit amount (Toman)</label><input asp-for="Input.ProfitAmount" class="form-control" data-amount inputmode="numeric" step="1" min="0" max="@MobileShop.Models.Settings.MoneyLimits.MaxRials" /></div><div class="col-md-3"><label>Finished price (Toman)</label><input class="form-control" data-finished-price readonly /></div>
+        <div class="col-md-3"><label asp-for="Input.Price">Paid price (Toman)</label><input asp-for="Input.Price" class="form-control" data-price inputmode="numeric" step="1" min="0" max="@MobileShop.Models.Settings.MoneyLimits.MaxRials" /></div><div class="col-md-3"><label asp-for="Input.ProfitPercent">Profit %</label><input asp-for="Input.ProfitPercent" class="form-control" data-percent /></div><div class="col-md-3"><label asp-for="Input.ProfitAmount">Profit amount (Toman)</label><input asp-for="Input.ProfitAmount" class="form-control" data-amount inputmode="numeric" step="1" min="0" max="@MobileShop.Models.Settings.MoneyLimits.MaxRials" /></div><div class="col-md-3"><label for="finished-price">Finished price (Toman)</label><input class="form-control" id="finished-price" data-finished-price readonly /></div>
     </div>
 </div>
 <div class="form-section col-12">
