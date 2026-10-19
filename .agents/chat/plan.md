@@ -69,9 +69,10 @@
 - Risk: MEDIUM (a global attribute: Bootstrap's dark variables apply to every page; the CI cannot see CSS, so the visual change list in Step 7.4 is checked by the owner)
 - Confidence: MEDIUM
 
-## [ ] Step 7.3 — Remove dead rules from site.css
+## [~] Step 7.3 — Remove dead rules from site.css (OUT OF SCOPE)
 - Task: FOUND-003 · Priority P2 · Effort S · Optional hygiene (zero visual effect).
-- Files: modify: `src/MobileShop.Web/wwwroot/css/site.css`; do not touch: `app-theme.css`.
+- Status: OUT OF SCOPE per AGENTS.md minimal-change rule and Reviewer Job A MEDIUM note — unrelated cleanup deferred; site.css untouched in Stage 7.
+- Files: none modified (`site.css` left intact; `app-theme.css` not touched).
 - Symbols: the first rule `.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus { … }` and the last two rules `.form-floating > …::placeholder` and `.form-floating > …:focus::placeholder`.
 - Current -> Desired: the focus-ring rule is duplicated verbatim in `app-theme.css` (same specificity, loaded later, so the site.css copy never decides anything); `.form-floating` has zero uses in the markup (grep below). Desired: both removed; everything else in `site.css` (the two `@font-face`, `:root`, `html` rules, `body` rule) stays.
 - Change: with an exact-text edit tool remove (1) the block `.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {` / `  box-shadow: var(--focus-ring);` / `}` and the blank line after it (so `html {` follows the media query directly); (2) the final two `.form-floating …` rules and the blank lines before them, leaving the `body { margin-bottom: 60px; }` rule as the last rule, then one newline at end of file.
@@ -333,6 +334,8 @@ Budget rule: while `body.modal-open`, `.floating-navigation` and `.action-bar` s
   --accent-strong: color-mix(in srgb, var(--accent) 88%, white);
   --danger-soft: color-mix(in srgb, var(--danger) 16%, transparent);
   --warn-soft: color-mix(in srgb, var(--warn) 16%, transparent);
+  --success-soft: var(--accent-soft);
+  --info-soft: var(--accent-soft);
 
   /* Materials (usage rules: plan R10). */
   --glass-regular-bg: color-mix(in srgb, var(--panel-raised) 78%, transparent);
