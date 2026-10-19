@@ -1,0 +1,92 @@
+/* BEGIN controls-buttons-v1 */
+/* Buttons. Four looks: primary (accent fill), secondary (raised neutral), outline (transparent), danger.
+   Legacy Bootstrap names stay as aliases: primary = btn-primary, btn-success; secondary = btn-secondary, btn-dark;
+   outline = btn-outline-primary, btn-outline-secondary, btn-outline-warning; danger = btn-danger. */
+.btn {
+  --bs-btn-border-radius: var(--radius-md);
+  padding: 0.55rem 0.9rem;
+  font-weight: var(--fw-regular);
+  box-shadow: none;
+  transition:
+    color var(--dur-fast) var(--ease-standard),
+    background-color var(--dur-fast) var(--ease-standard),
+    border-color var(--dur-fast) var(--ease-standard),
+    box-shadow var(--dur-base) var(--ease-standard),
+    transform var(--dur-instant) var(--ease-press);
+}
+
+.btn:active {
+  transform: scale(0.98);
+}
+
+.btn-primary,
+.btn-success,
+.btn-danger,
+.btn-dark {
+  --bs-btn-color: var(--ink);
+  --bs-btn-hover-color: var(--ink);
+  --bs-btn-active-color: var(--ink);
+  background-image: none;
+}
+
+.btn-primary,
+.btn-success {
+  --bs-btn-color: var(--accent-ink);
+  --bs-btn-hover-color: var(--accent-ink);
+  --bs-btn-active-color: var(--accent-ink);
+  --bs-btn-bg: var(--accent);
+  --bs-btn-border-color: var(--accent);
+  --bs-btn-hover-bg: var(--accent-strong);
+  --bs-btn-hover-border-color: var(--accent-strong);
+  --bs-btn-active-bg: var(--accent);
+  --bs-btn-active-border-color: var(--accent);
+}
+
+.btn-danger {
+  --bs-btn-color: var(--danger-ink);
+  --bs-btn-hover-color: var(--danger-ink);
+  --bs-btn-active-color: var(--danger-ink);
+  --bs-btn-bg: var(--danger);
+  --bs-btn-border-color: var(--danger);
+  --bs-btn-hover-bg: color-mix(in srgb, var(--danger) 88%, white);
+  --bs-btn-hover-border-color: color-mix(in srgb, var(--danger) 88%, white);
+  --bs-btn-active-bg: var(--danger);
+  --bs-btn-active-border-color: var(--danger);
+}
+
+.btn-secondary,
+.btn-dark {
+  --bs-btn-bg: var(--surface-2);
+  --bs-btn-border-color: var(--border-control);
+  --bs-btn-hover-bg: var(--surface-3);
+  --bs-btn-hover-border-color: var(--text-2);
+  --bs-btn-active-bg: var(--surface-2);
+  --bs-btn-active-border-color: var(--border-control);
+}
+
+.btn-outline-primary,
+.btn-outline-secondary,
+.btn-outline-warning {
+  --bs-btn-color: var(--ink);
+  --bs-btn-hover-color: var(--ink);
+  --bs-btn-active-color: var(--ink);
+  --bs-btn-bg: transparent;
+  --bs-btn-hover-bg: color-mix(in srgb, var(--ink) 6%, transparent);
+  --bs-btn-active-bg: transparent;
+  --bs-btn-border-color: var(--border-control);
+  --bs-btn-hover-border-color: var(--border-control);
+  --bs-btn-active-border-color: var(--border-control);
+}
+
+.btn-outline-primary:hover,
+.btn-outline-primary:active {
+  --bs-btn-hover-border-color: var(--accent);
+  --bs-btn-active-border-color: var(--accent);
+}
+
+@media (pointer: coarse) {
+  .btn {
+    min-height: var(--size-hit-min);
+  }
+}
+/* END controls-buttons-v1 */

@@ -126,7 +126,7 @@ Order rule: accessibility markup first (8.1, 8.2), then the two CSS families (8.
 - Risk: LOW
 - Confidence: MEDIUM
 
-## [ ] Step 8.3 — Buttons: create `controls.css`
+## ~~[x] Step 8.3 — Buttons: create `controls.css`~~
 - Task: COMP-001 · F-08, F-41 · Priority P1 · Effort M · Mandatory · Type V.
 - Files: create: `src/MobileShop.Web/wwwroot/css/controls.css`; modify: `src/MobileShop.Web/wwwroot/css/app-theme.css`, `src/MobileShop.Web/Pages/Shared/_Layout.cshtml`.
 - Symbols: block `controls-buttons-v1` (R27); in app-theme.css the button variant group is app-theme.css 299-423 (`.btn {` through `.btn-outline-primary:hover, .btn-outline-primary:active { … }`), and the `.btn:focus*` rules live in the 523-635 focus/form group that Step 8.4 deletes; the layout `<link>` for `components.css`.
