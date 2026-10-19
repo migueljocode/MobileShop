@@ -112,7 +112,7 @@ Order rule: accessibility markup first (8.1, 8.2), then the two CSS families (8.
 - Risk: LOW
 - Confidence: HIGH
 
-## [ ] Step 8.2 — Link validation state and messages for assistive tech (`site.js`)
+## ~~[x] Step 8.2 — Link validation state and messages for assistive tech (`site.js`)~~
 - Task: COMP-005 · F-14, F-16 · Priority P1 · Effort M · Mandatory · Type A.
 - Files: modify: `src/MobileShop.Web/wwwroot/js/site.js` only.
 - Symbols: a new function `wireValidationAria` called once on `DOMContentLoaded` in the existing ready block (site.js already holds `parseMoneyInput`, `formatMoneyInput`, the validator normalizer, the password toggle and the Enter-to-submit handler).

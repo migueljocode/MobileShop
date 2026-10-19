@@ -42,6 +42,62 @@ if (typeof $ !== 'undefined' && $.validator) {
     });
 }
 
+// Links validation messages and the invalid state to their controls for assistive tech.
+const wireValidationAria = () => {
+    const messageSelector = '[data-valmsg-for]';
+    const controlSelector = 'input, select, textarea';
+    const errorClass = 'input-validation-error';
+
+    document.querySelectorAll(messageSelector).forEach(message => {
+        message.setAttribute('aria-live', 'polite');
+
+        const target = message.getAttribute('data-valmsg-for');
+        if (!target) return;
+
+        if (!message.id) {
+            message.id = 'val-' + target.toLowerCase().replace(/[^a-z0-9]/g, '-');
+        }
+
+        const control = document.querySelector(`[name="${CSS.escape(target)}"]`);
+        if (!control) return;
+
+        const describedBy = (control.getAttribute('aria-describedby') || '')
+            .split(/\s+/)
+            .filter(token => token.length > 0);
+        if (!describedBy.includes(message.id)) describedBy.push(message.id);
+        control.setAttribute('aria-describedby', describedBy.join(' '));
+    });
+
+    const syncInvalidState = control => {
+        if (control.classList.contains(errorClass)) {
+            control.setAttribute('aria-invalid', 'true');
+        } else {
+            control.removeAttribute('aria-invalid');
+        }
+    };
+
+    const forms = document.querySelectorAll('form');
+    forms.forEach(form => {
+        form.querySelectorAll(controlSelector).forEach(syncInvalidState);
+    });
+
+    const observerCtor = window.MutationObserver;
+    if (typeof observerCtor !== 'function') return;
+
+    const observer = new observerCtor(mutations => {
+        mutations.forEach(mutation => {
+            const target = mutation.target;
+            if (target.nodeType === 1 && target.matches(controlSelector)) {
+                syncInvalidState(target);
+            }
+        });
+    });
+
+    forms.forEach(form => {
+        observer.observe(form, { subtree: true, attributes: true, attributeFilter: ['class'] });
+    });
+};
+
 document.addEventListener('DOMContentLoaded', () => {
     const moneyInputs = document.querySelectorAll(
         `${moneyInputSelector}, [data-finished-price]`
@@ -59,6 +115,8 @@ document.addEventListener('DOMContentLoaded', () => {
             if (input.form === event.target) input.value = input.value.replace(/\s/g, '');
         });
     }, true);
+
+    wireValidationAria();
 });
 
 document.addEventListener('click', event => {
