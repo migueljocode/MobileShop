@@ -140,7 +140,7 @@ Order rule: accessibility markup first (8.1, 8.2), then the two CSS families (8.
 - Risk: MEDIUM (CSS the CI cannot see; every page has buttons)
 - Confidence: MEDIUM
 
-## [ ] Step 8.4 — Fields, checks and focus: append to `controls.css`
+## ~~[x] Step 8.4 — Fields, checks and focus: append to `controls.css`~~
 - Task: COMP-002, COMP-003 · F-11, F-14, F-08 · Priority P1 · Effort M · Mandatory · Type V.
 - Files: modify: `src/MobileShop.Web/wwwroot/css/controls.css`, `src/MobileShop.Web/wwwroot/css/app-theme.css`.
 - Symbols: block `controls-fields-v1` (R27); in app-theme.css the focus and form group (about lines 523-635 before 8.3, shifted afterwards): first rule `.btn:focus-visible,` (the focus-visible group), last rule `.input-group-text { … }`. It contains: the focus-visible and focus rules, `label`/`.form-label`, `.form-control, .form-select, .form-control-plaintext`, `[data-finished-price]`, placeholder, disabled/readonly, `:focus`, `.form-select option`, `.form-check-input` and `:checked`, `fieldset`, `legend`, `.input-group-text`.
