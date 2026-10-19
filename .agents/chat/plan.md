@@ -154,7 +154,7 @@ Order rule: accessibility markup first (8.1, 8.2), then the two CSS families (8.
 - Risk: MEDIUM
 - Confidence: MEDIUM
 
-## [ ] Step 8.5 — Stage 8 validation
+## ~~[x] Step 8.5 — Stage 8 validation~~
 - Task: QA (stage gate) · Mandatory.
 - Files: none modified.
 - Symbols: none.

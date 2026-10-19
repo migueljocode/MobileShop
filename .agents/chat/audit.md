@@ -1,40 +1,32 @@
-# Stage 7 Reviewer Job B verdict
+# Reviewer — Job B — Step 8.5 (Stage 8 validation) + stage sign-off
 
-Job B: PASS
+**Verdict: PASS** — Stage 8 (Steps 8.1–8.4) is complete, CI-green on all four code commits, the stage diff is exactly the planned file set, and the owner's manual check is answered with real browser evidence. The three open defects are **MEDIUM notes** (plan-spec gaps or pre-existing layout), not CRITICAL/HIGH, so none blocks the stage sign-off.
 
-## Checks against .agents/chat/plan.md (Stage 7, Steps 7.1–7.4)
+## CI evidence (re-confirmed independently, not copied from act.md)
+`gh run list --commit <sha> --json runNumber,…` fails in this environment (this gh build has no `runNumber` field → "Unknown JSON field"), so the AGENTS.md-prescribed REST path was used: `gh api repos/migueljocode/MobileShop/actions/runs?head_sha=<full_sha>`.
+- `Action: #623 — Success` — workflow `.NET CI`, head_sha `54c94fd` (Step 8.1), status `completed`, conclusion `success`, `total_count=1`
+- `Action: #624 — Success` — workflow `.NET CI`, head_sha `83b8e03` (Step 8.2), status `completed`, conclusion `success`, `total_count=1`
+- `Action: #625 — Success` — workflow `.NET CI`, head_sha `8ff2f16` (Step 8.3), status `completed`, conclusion `success`, `total_count=1`
+- `Action: #626 — Success` — workflow `.NET CI`, head_sha `9475fcd` (Step 8.4), status `completed`, conclusion `success`, `total_count=1`
+One matching run per SHA; no pending or interrupted run was accepted.
 
-| # | Check | Result | Actual output |
-|---|-------|--------|---------------|
-| 1 | `git diff --stat` — only tokens.css + _Layout.cshtml (plus .agents/ state files); navigation-menu.css/js NOT in diff | PASS | 3 files: `.agents/chat/act.md`, `_Layout.cshtml` (3 +-), `tokens.css` (111 insertions). No `navigation-menu.css` / `navigation-menu.js`. |
-| 2 | `git diff --numstat tokens.css` — 0 deletions (purely additive) | PASS | `111 0 src/MobileShop.Web/wwwroot/css/tokens.css` |
-| 3 | `grep -c "BEGIN tokens-v1"` = 1 and `grep -c "END tokens-v1"` = 1 | PASS | `1` / `1` |
-| 4 | Block has no hex literal `#[0-9A-Fa-f]{3,8}` | PASS | `0` matches inside the `BEGIN`/`END` range |
-| 5 | No duplicate token names (`--name:`) | PASS | `sort \| uniq -d` printed nothing |
-| 6 | `--success-soft` and `--info-soft` present in block (MEDIUM audit fix) | PASS | Both present: `--success-soft: var(--accent-soft);` and `--info-soft: var(--accent-soft);` |
-| 7 | `grep -c 'data-bs-theme="dark"' _Layout.cshtml` = 1 | PASS | `1` |
-| 8 | `grep -c 'name="color-scheme"' _Layout.cshtml` = 1 | PASS | `1` |
-| 9 | BOM preserved: `head -c3 \| od -An -tx1` = ` ef bb bf` | PASS | ` ef bb bf` |
-| 10 | `git diff --numstat _Layout.cshtml` = `2 1` | PASS | `2 1 src/MobileShop.Web/Pages/Shared/_Layout.cshtml` |
-| 11 | site.css NOT changed (Step 7.3 out of scope) | PASS | `site.css` absent from `git diff --name-only` |
-| 12 | navigation-menu.css / navigation-menu.js NOT in diff | PASS | Confirmed absent from `git diff --stat` |
+## Evidence checked
+- **Step 8.5 changed no production file and made no commit**: `git log --oneline 23cb4af..9475fcd` = exactly `9475fcd` (8.4), `8ff2f16` (8.3), `83b8e03` (8.2), `54c94fd` (8.1). `git status --porcelain` = `act.md`, `audit.md`, `plan.md`, `graphify-out/*` only. The plan.md heading `## ~~[x] Step 8.5 — Stage 8 validation~~` is struck; the uncommitted plan.md diff is that one heading.
+- **Stage scope** `git diff --stat 23cb4af..9475fcd` = 18 files: 13 Step 8.1 views (11 Products Create pages + `Products/Edit.cshtml` + `Transactions/Index.cshtml`), `wwwroot/js/site.js`, `wwwroot/css/controls.css` (`A`), `wwwroot/css/app-theme.css`, `Pages/Shared/_Layout.cshtml`, `.agents/chat/plan.md`. Nothing else — no `tokens.css`, `site.css`, `components.css`, `navigation-menu.css`, no `MobileShop.Api` file.
+- **8.1 greps re-run**: `grep -rnE '<label( class="form-label")?>Finished price' …Pages --include=*.cshtml` → no output (exit 1); `for="finished-price"` and `id="finished-price"` = 1 in exactly the 12 expected Products files, 0 in `PersonPicker`/`SecondHand`/`Index`/`Details`; `aria-label="Select transaction` = 1.
+- **8.2 checks re-run**: `node --check site.js` → exit 0; `aria-invalid` = 2, `aria-describedby` = 2, `MutationObserver` = 1.
+- **8.3/8.4 checks re-run**: brace balance `controls.css 29/29`, `app-theme.css 119/119`; `^\.btn`/`^\.btn-primary`/`^\.btn:hover`/`^\.form-control`/`^fieldset` in app-theme.css = 0; `translateY(-1px)` in controls.css = 0; `input-validation-error` in controls.css = 2; `rgba(` in controls.css = 0; `controls.css` link in `_Layout.cshtml` = 1 (order bootstrap → tokens → site → app-theme → components → controls → navigation-menu). The `^\.btn` = 0 (not 4) is correct at end of stage: 8.3's Verify text says the four remaining rules "are the focus group … which Step 8.4 removes".
+- **Spec fidelity**: `controls.css` is **byte-identical** to the plan's R27 `controls-buttons-v1` + `controls-fields-v1` blocks (re-extracted with the plan's own `sed` command → `diff` clean). The Actor implemented the spec exactly.
+- **Owner's manual check**: answered with real browser evidence (headless Firefox 156.0.1 over WebDriver/BiDi, seeded Development app), not deferred. Recorded limitations: no Safari/WebKit, no real coarse pointer or touch input, no spoken screen-reader check, 480px via emulated viewport.
 
-## Cross-check: act.md claims vs actual `git diff`
+## Severity judgement on the open findings
+- **FAIL-1 — `.form-check-input` is 16×16px, not 1.25rem — MEDIUM (note, does not block).** The current plan's spec is the arbiter: R27 `controls-fields-v1` (plan.md:1543-1551) sets only `border-color`/`background-color`/`:checked` on `.form-check-input` — **no `width`/`height`** — so Bootstrap's `width:1em;height:1em` correctly wins, and `controls.css` matches that block exactly. The 1.25rem box is stated only in the Reference (R11 sizing, plan.md:1092; R15 component spec, plan.md:1159 "1.25rem box … REFACTOR (8.1, 8.4)"), never in the executable spec. The gap is in the plan's spec block, not in the Actor's implementation. **Carry forward:** Planner amends R27 `controls-fields-v1` (add `width: 1.25rem; height: 1.25rem;` to `.form-check-input`, keeping the 44px coarse-pointer label row) and schedules it in the next step that owns `controls.css` — no step after 8.4 currently edits that file, so the Planner must place it (Stage 16.1 audit or a new step; Step 16.2 item 8 already covers coarse-pointer touch targets).
+- **FAIL-2 — horizontal overflow on /Products at 480px — MEDIUM (note, does not block); pre-existing, not a Stage 8 regression.** Evidence: (a) `Products/Index.cshtml` is **not** in the stage diff — the `.btn-group` filter row markup (plan.md:531-533) is untouched; (b) the only Stage 8 change to the row's boxes is `.btn` (app-theme.css → controls.css): `padding: 0.55rem 0.9rem` **identical**, `font-weight` 500 → `var(--fw-regular)` (narrower), radius only; (c) the app-theme.css deletions in Stage 8 contain **no** rule that sets the filter row's width, `flex-wrap` or `white-space` (the only removed `width`/`min-width` lines are `fieldset { min-width:0 }` and `legend { width:auto }`, both re-added in controls.css); the row's nowrap comes from Bootstrap's `.btn-group`, untouched. The plan itself, written before Stage 8 ran, records the same defect as current state in Step 13.1: "11 joined buttons in a `btn-group` that cannot wrap, so they overflow narrow screens" (plan.md:532). So the row was already ~816px (≥ today's, since font-weight only shrank) before Stage 8. **Carry forward:** already owned by Step 13.1 (Stage 13) — replace the `.btn-group` with `<nav class="d-flex flex-wrap gap-2 mb-3" aria-label="Product type">`; re-measure scrollWidth at 480px there.
+- **CONCERN-3 — focused invalid field keeps the teal border on /Account/Login — MEDIUM (note, does not block).** Root cause confirmed: `app-theme.css:193 .account-login-field .form-control:focus` (0-3-0) beats `controls.css .form-control.input-validation-error` (0-2-0), so the danger red loses while focused; the unfocused invalid field is correctly `rgb(240,112,122)`, and `aria-invalid="true"`, `aria-describedby` and the `aria-live="polite"` message are all present, so the invalid state is announced. The plan's spec block has no `:focus` invalid rule, and the login group survives in app-theme.css until Step 12.2 — again a plan-spec gap, not an implementation error, and not a functional or announcement break. **Exact fix to carry forward:** in `controls.css` add `.form-control.input-validation-error:focus, .form-select.input-validation-error:focus { border-color: var(--danger); }` (0-3-0; `controls.css` loads after `app-theme.css`, so it wins on order too) — or resolve it in Step 12.2 when the login group is ported to `login.css` (`login-v1`).
+- **CONCERN-4 — Login submit keeps the legacy 8px radius — LOW (note).** By plan: Step 8.3's edge cases keep the login submit's own rule (`app-theme.css:247 .account-login-submit { border-radius: var(--r-control) }`). Naturally resolved when Step 12.2 ports the login group to `login.css`.
+- **CONCERN-5 — no natively `disabled` button exists, so the disabled look is unobservable — LOW (observation, not a defect).** `button[disabled]` count = 0 app-wide; the forced state shows Bootstrap's 0.65 opacity with the teal bg/border kept. Nothing for Stage 8 to fix; note for the Step 16.2 browser pass (disabled/hover/press/focus matrix).
 
-- act.md: `git diff --numstat tokens.css` = `111 0` → actual `111 0` ✓
-- act.md: `git diff --stat` over stage = 2 files, 113 insertions, 1 deletion → actual `git diff --stat` on just the two code files = exactly `2 files changed, 113 insertions(+), 1 deletion(-)` ✓
-- act.md: NO change in `navigation-menu.css` / `navigation-menu.js` → confirmed ✓
-- act.md: all Step 7.1/7.2 greps pass → confirmed ✓
+**Blocking findings: none.** No CRITICAL/HIGH finding was found; the one correction round is not spent.
 
-No discrepancies between act.md and the working-tree diff.
-
-## MEDIUM / LOW notes (non-blocking)
-
-- LOW: `--success-soft` and `--info-soft` both alias `--accent-soft` (intentional per R11: success/info reuse the accent; no new hue). Documented, not a defect.
-- LOW (planning only): the plan's Global Definition of Done mentions site.css dead-rule removal, but Step 7.3 is explicitly OUT OF SCOPE and site.css is untouched — consistent with act.md and AGENTS.md minimal-change rule. No action needed for Stage 7; reconcile at Stage 8 planning if desired.
-
-## Overall
-
-Stage 7 is ready to commit. All CRITICAL/HIGH-equivalent checks PASS; no findings block commit. The Actor's uncommitted changes match the plan exactly.
-
-Next: Actor pushes its step commit (Conventional Commits, `feat:`/`fix:`), then CI is the gate. Reviewer does not push.
+## Stage sign-off (Stage 8)
+Global Definition of Done (plan.md:737) checked against the record: CI green with run numbers recorded in act.md — yes (#623/#624/#625/#626, independently re-confirmed); the greps of the stage recorded — yes (8.1–8.4 greps, brace balance, safety greps, re-run and holding); `git diff --stat` matching the stage's file lists — yes (18 files, exactly as planned); the owner's manual check answered — yes (real headless-Firefox evidence, with its limitations recorded). **Met** → `.agents/TODO.md` Stage 8 line ticked to `- [x] ~~Stage 8 — Core controls: buttons, fields, selects, checks, validation states, label association~~` and committed alone as `docs(todo): complete Stage 8`. No other stage line touched; no push (the orchestrator pushes); `act.md`, `audit.md`, `plan.md` not committed.
