@@ -39,7 +39,7 @@
 - No new dependency, no new file, no hex colour literal added, no `!important` added, no behaviour change. One step per pass and per commit.
 - Preserve each file's existing encoding and line endings (`_Layout.cshtml` has a UTF-8 BOM and LF).
 
-## [ ] Step 7.1 — Add the design-token layer (additive and inert)
+## [x] ~~Step 7.1 — Add the design-token layer (additive and inert)~~
 - Task: FOUND-001 · Priority P0 · Effort S · Mandatory.
 - Files: modify: `src/MobileShop.Web/wwwroot/css/tokens.css`; do not touch: every other file.
 - Symbols: a second `:root` block plus one `@supports not (transition-timing-function: linear(0, 1))` block appended after the existing `:root` block.
@@ -55,7 +55,7 @@
 - Risk: LOW
 - Confidence: HIGH
 
-## [ ] Step 7.2 — Bootstrap dark mode flag and colour-scheme meta
+## [x] ~~Step 7.2 — Bootstrap dark mode flag and colour-scheme meta~~
 - Task: FOUND-002 · Priority P0 (fixes F-12, F-13, F-44) · Effort S · Mandatory.
 - Files: modify: `src/MobileShop.Web/Pages/Shared/_Layout.cshtml`; do not touch: everything else.
 - Symbols: the `<html>` start tag and the `<meta name="viewport" …>` line in `_Layout.cshtml`.
@@ -84,7 +84,7 @@
 - Risk: LOW
 - Confidence: HIGH
 
-## [ ] Step 7.4 — Stage 7 validation
+## [x] ~~Step 7.4 — Stage 7 validation~~
 - Task: FOUND-004 · Mandatory.
 - Files: none modified.
 - Change: confirm CI green on the last code commit and record `Action: #<run>` per code step in act.md; record the greps of Steps 7.1-7.3; `git diff --stat` over the stage is exactly `tokens.css`, `_Layout.cshtml`, `site.css` (+ `.agents/` state files); `git diff --stat` shows NO change in `navigation-menu.css` / `navigation-menu.js`. No browser measurements are required (no harness).
