@@ -194,3 +194,55 @@ th.num {
   }
 }
 /* END surfaces-cards-v1 */
+
+/* BEGIN surfaces-tables-v1 */
+/* One table idiom (material M1 content). Roomier rows and cells (Apple: larger row height and padding). */
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.data-table th {
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--border-control);
+  color: var(--text-2);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-strong);
+  text-align: start;
+}
+
+.data-table th a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.data-table th a:hover,
+.data-table th a:focus-visible {
+  color: var(--text-1);
+}
+
+.data-table td {
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--hairline);
+  vertical-align: middle;
+}
+
+.data-table tbody tr {
+  transition: background-color var(--dur-fast) var(--ease-standard);
+}
+
+.data-table tbody tr:hover {
+  background-color: var(--surface-2);
+}
+
+.data-table td.num,
+.data-table th.num {
+  text-align: end;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .data-table tbody tr {
+    transition: none;
+  }
+}
+/* END surfaces-tables-v1 */

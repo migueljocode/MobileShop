@@ -200,7 +200,7 @@ Order rule: base first (9.1), then `surfaces.css` grows by family (9.2 cards, 9.
 - Risk: MEDIUM
 - Confidence: MEDIUM
 
-## [ ] Step 9.3 — One table idiom
+## ~~[x] Step 9.3 — One table idiom~~
 - Task: COMP-008 · F-31, F-07 · Priority P1 · Effort M · Mandatory · Type V.
 - Files: modify: `src/MobileShop.Web/wwwroot/css/surfaces.css`, `src/MobileShop.Web/wwwroot/css/app-theme.css`, `src/MobileShop.Web/wwwroot/css/components.css`, `src/MobileShop.Web/Pages/Products/Details.cshtml`.
 - Symbols: block `surfaces-tables-v1` (R27); app-theme.css group from `.table {` through `.table-hover > tbody > tr:hover > * { … }` (`.table`, `.table > :not(caption) > * > *`, `.table thead th` with uppercase, `.table thead a`, `.table thead a:hover`, `.table tbody tr`, `.table-striped`, `.table-hover`; find the group by its selector text, not by line number); components.css `.data-table` rules (`.data-table`, `th`, `th a` if present, `td`, `tbody tr`, `tbody tr:hover`, `.data-table td.num, .data-table th.num`) and the `@media (prefers-reduced-motion: reduce)` block that holds `.data-table tbody tr`; Details.cshtml line `<table class="table">` (about line 141).
