@@ -289,7 +289,7 @@ Order rule: the visual family first (10.1), then markup and behaviour (10.2-10.4
 - Risk: MEDIUM
 - Confidence: MEDIUM
 
-## [ ] Step 10.2 — Label every modal (`aria-labelledby` on 24 modals)
+## ~~[x] Step 10.2 — Label every modal (`aria-labelledby` on 24 modals)~~
 - Task: COMP-012 (markup) · F-17 · Priority P1 · Effort M · Mandatory · Type A.
 - Files: modify: the Create pages that own the unlabeled modals: `src/MobileShop.Web/Pages/Products/CreateCable.cshtml` (2), `CreateCase.cshtml` (3), `CreateCharger.cshtml` (2), `CreateGlass.cshtml` (3), `CreateLaptop.cshtml` (4), `CreatePhone.cshtml` (1, the corporation modal), `CreatePortableStorage.cshtml` (3), `CreatePowerBank.cshtml` (2), `CreateSmartWatch.cshtml` (2), `CreateTablet.cshtml` (2).
 - Symbols: every `<div class="modal fade" id="X" …>` without `aria-labelledby`, and the `<h5 class="modal-title">` inside it (list them with `grep -rn 'class="modal fade"' src/MobileShop.Web/Pages --include=*.cshtml | grep -v aria-labelledby`: 24 lines).
