@@ -1,14 +1,14 @@
 # Plan — Stages 7–16 — Liquid Glass UI/UX redesign (all stages)
 
 ## Pipeline note
-- Role: Planner. Planning only: this pass changed no production file. Stages 7-16 are committed, unchecked, in `.agents/TODO.md` (commit `6e913d1`). This revision writes every stage's steps at the owner's request ("write plan with all 7-16 stages at once"), which departs from `planner.md` ("active stage only, overwrite"); the owner's request settles D-01. Reviewer Job A approved Stage 7 and the stage list (`audit.md`: APPROVED). Stage 8 has been reviewed (Job A: APPROVED WITH CORRECTIONS, both HIGH findings folded in), completed and verified; Stage 9 Job A ran and returned APPROVED WITH CORRECTIONS with 2 HIGH findings, both folded in here; Stage 10 Job A ran and returned APPROVED WITH CORRECTIONS and its 3 HIGH findings are folded in here (per-page modal id uniqueness in 10.2, the reduce-transparency owner check moved out of 10.7 to Step 15.1, and the `wireComboboxKeys` definition site pinned to a top-level global in site.js); Stage 11 Job A ran and returned APPROVED WITH CORRECTIONS with 4 HIGH findings, all folded in here (the phone safe-area rule of the dock in 11.4, the bin/obj greps of 11.1 and 11.2, and the Vazirmatn font-asset repair added as Step 15.2); Stage 12 Job A ran and returned APPROVED WITH CORRECTIONS: its 1 HIGH finding (the bin/obj grep of 12.2) is folded in here, together with the carried-forward skip-link fix in 12.2 and the new owner question Q-13; Stages 13-16 and the corrections below have NOT been reviewed yet: Reviewer Job A is needed again.
+- Role: Planner. Planning only: this pass changed no production file. Stages 7-16 are committed, unchecked, in `.agents/TODO.md` (commit `6e913d1`). This revision writes every stage's steps at the owner's request ("write plan with all 7-16 stages at once"), which departs from `planner.md` ("active stage only, overwrite"); the owner's request settles D-01. Reviewer Job A approved Stage 7 and the stage list (`audit.md`: APPROVED). Stage 8 has been reviewed (Job A: APPROVED WITH CORRECTIONS, both HIGH findings folded in), completed and verified; Stage 9 Job A ran and returned APPROVED WITH CORRECTIONS with 2 HIGH findings, both folded in here; Stage 10 Job A ran and returned APPROVED WITH CORRECTIONS and its 3 HIGH findings are folded in here (per-page modal id uniqueness in 10.2, the reduce-transparency owner check moved out of 10.7 to Step 15.1, and the `wireComboboxKeys` definition site pinned to a top-level global in site.js); Stage 11 Job A ran and returned APPROVED WITH CORRECTIONS with 4 HIGH findings, all folded in here (the phone safe-area rule of the dock in 11.4, the bin/obj greps of 11.1 and 11.2, and the Vazirmatn font-asset repair added as Step 15.2); Stage 12 Job A ran and returned APPROVED WITH CORRECTIONS: its 1 HIGH finding (the bin/obj grep of 12.2) is folded in here, together with the carried-forward skip-link fix in 12.2 and the new owner question Q-13; Stage 13 Job A ran: APPROVED, 0 HIGH (its MEDIUM and LOW notes and the two carried-forward fixes are folded in here); Stages 14-16 and the corrections below have NOT been reviewed yet: Reviewer Job A is needed again.
 - Reviewer notes folded in: baseline-capture precondition on Step 7.2 and re-rated risk; CRLF-safe, portable commands in Step 7.1; `--success` and `--info` tokens; Step 7.4 template fields; Stage 8 ordered accessibility-first inside the fixed stage title (D-16); security-sensitive list (R25); end-state CSS file list and budgets (R7); font preload (Step 11.4); only one new partial (D-11); wording fixes (WCAG levels of 3.2.6 and 3.3.7, Chrome 119, button height, plaintext Apple ID `code`).
 - Corrections found while planning Stages 8-16 (please re-verify): (a) the 11 `_ProductCreate*Form` partials, `product-create-modal.js` and `ProductCreateRegistry.cs` are dead code (`grep -rn "product-create-modal" src --include=*.cshtml` finds no include; `grep -rn "ProductCreateRegistry" src` finds only its own file; no markup defines `create-product-modal`), so the live unassociated-label count is 12 (the one read-only "Finished price (Toman)" label on each of the 11 Create pages and on Edit), not 111 (F-15 is LOW, R26); the earlier Reviewer note M1 rested on the old claim. (b) Products type "tabs" are plain link buttons; `.nav-tabs` exists only on ProfitLoss. (c) Picker result lists are in-flow, so they stay opaque instead of glass. (d) F-19 is stronger than first written: `person-picker.js` hides its list on blur and has no key handler, so keyboard users cannot select (confirmed by reading the file), while the date picker has a typed path (F-20 LOW). (e) R24 now quotes the real dock invariants. (f) Page `Scripts` sections render before `site.js` (Step 10.4 accounts for it).
 - Evidence tags in the Reference: [S] source read, [G] grep count, [C] computed by script, [CI] GitHub Actions API, [W] web research, [A] assumption, [U] unverified, needs a browser or device. The committed knowledge graph (`graphify-out`, built at `6f2b88d`) was used to orient on JS functions and `.cshtml` files; it does not cover CSS.
 
 ## Reviewer Briefing
-- Review scope: Stages 8-16 (48 steps in total, Stage 7 already approved with notes folded) plus the corrections listed in the Pipeline note. Check the stage list order and the Stage 8 internal order (D-16).
-- MEDIUM-risk steps (CSS the CI cannot see, or shared JS): 8.3, 8.4, 9.1, 9.2, 9.3, 9.6, 10.1, 10.3, 10.5, 10.6, 11.1, 11.2, 11.3, 11.4, 12.2, 15.1, 15.2, 15.4, 16.1. Every CSS step carries the same mechanical checks (extraction, brace balance, anchor greps) and an owner visual check at the end of its stage; all other steps are LOW.
+- Review scope: Stages 8-16 (49 steps in total, Stage 7 already approved with notes folded) plus the corrections listed in the Pipeline note. Check the stage list order and the Stage 8 internal order (D-16).
+- MEDIUM-risk steps (CSS the CI cannot see, or shared JS): 8.3, 8.4, 9.1, 9.2, 9.3, 9.6, 10.1, 10.3, 10.5, 10.6, 11.1, 11.2, 11.3, 11.4, 12.2, 15.1, 15.2, 15.3, 15.5, 16.1. Every CSS step carries the same mechanical checks (extraction, brace balance, anchor greps) and an owner visual check at the end of its stage; all other steps are LOW.
 - All new CSS comes from the spec blocks in R27: each parses without errors, has balanced braces, uses only defined custom properties and no hex literals; old-versus-new selector coverage was compared and the dropped selectors are listed there. Please spot-check two blocks against the rules they replace (suggest `controls-fields-v1` and `overlays-jalali-v1`).
 - Evidence limits (unchanged): static reading, greps, computed contrast and GitHub Actions data; no .NET SDK, browser or NuGet in the sandbox, so every visual effect is tagged for the owner's manual check.
 - Gated or deferred: Step 9.6 (owner decision Q-04, default skipped); flyout grouping, view transitions, toasts, phone card tables and the double-submit guard have no step. Dead-code removal (R26) is a separate owner decision (Q-12).
@@ -529,14 +529,14 @@ Stages 8-12 restyle these pages through shared classes (`page-head`, `toolbar`, 
 ## [ ] Step 13.1 — Products list: type buttons become a labelled navigation that wraps
 - Task: ROUTE-006 · F-32 (filters), F-27 (part) · Priority P2 · Effort S · Mandatory · Type A.
 - Files: modify: `src/MobileShop.Web/Pages/Products/Index.cshtml` only.
-- Symbols: line 34 `<div class="btn-group" role="group">` and its closing `</div>` on line 62 (around the `@foreach (var (key, label, _, _) in tabs)` loop of 11 type links).
-- Current -> Desired: 11 joined buttons in a `btn-group` that cannot wrap, so they overflow narrow screens, and the group has no accessible name. Desired: `<nav class="d-flex flex-wrap gap-2 mb-3" aria-label="Product type">` … `</nav>`; the links keep `btn btn-primary` or `btn btn-outline-primary` and `aria-current="page"` exactly.
+- Symbols: line 34 `<div class="btn-group" role="group">` and its closing `</div>` on line 62 (around the `@foreach (var (key, label, _, _) in tabs)` loop of 12 type links: All + the 11 product types).
+- Current -> Desired: 12 joined buttons (All + the 11 product types) in a `btn-group` that cannot wrap, so they overflow narrow screens, and the group has no accessible name. Desired: `<nav class="d-flex flex-wrap gap-2 mb-3" aria-label="Product type">` … `</nav>`; the links keep `btn btn-primary` or `btn btn-outline-primary` and `aria-current="page"` exactly.
 - Change: replace the opening tag on line 34 and the matching closing tag on line 62; nothing inside the loop changes.
 - Depends on: Step 8.3 (button system).
 - Edge cases / error handling: the loop body (both branches, with and without `partNumberId`) is untouched; `mb-3` replaces the spacing the joined group never had, so the toolbar below moves down by 1rem (intended); do not convert these links into a segmented control (they are navigation, not radios).
 - Tests: none.
-- Verify: CI green. `grep -c "btn-group" src/MobileShop.Web/Pages/Products/Index.cshtml` = 0; `grep -c 'aria-label="Product type"' …Index.cshtml` = 1; `git diff --stat` = that file, 2 changed lines.
-- Done when: the checks hold, CI green, owner confirms the 11 buttons wrap on a phone and the active one still shows.
+- Verify: CI green. `grep -c "btn-group" src/MobileShop.Web/Pages/Products/Index.cshtml` = 0; `grep -c 'aria-label="Product type"' …Index.cshtml` = 1; `git diff --stat` = `1 file changed, 2 insertions(+), 2 deletions(-)` (the two wrapper lines of `Products/Index.cshtml`).
+- Done when: the checks hold, CI green, owner confirms the 12 buttons (All + the 11 product types) wrap on a phone and the active one still shows.
 - Risk: LOW
 - Confidence: HIGH
 
@@ -546,7 +546,7 @@ Stages 8-12 restyle these pages through shared classes (`page-head`, `toolbar`, 
 - Symbols: none.
 - Current -> Desired: n/a (validation only).
 - Change: confirm CI green on the last code commit and record `Action: #<run>`; record the greps of 13.1; `git diff --stat` over the stage = `Products/Index.cshtml`.
-- Manual check (owner, hard refresh): Products list for phone and two other types (buttons, filters, table, chips, wrapping on a phone); SecondHand; Product Details (sections, the Apple ID password still shown as plain `code`, transactions table); Edit (all sections, finished price, action bar, Tab to the last field); all 11 Create pages (section order, "Add new" modals open with the glass sheet and a visible close X, finished-price field, action bar); Persian text in names renders with the system fallback stack — the Vazirmatn face cannot load before Step 15.2 repairs the tracked font assets, so the fallback is expected here and the repair is scheduled in Stage 15, not a Stage 13 defect; repeat the key ones in Safari and Firefox. Anything else that changed is a defect; list defects in act.md for a fix step.
+- Manual check (owner, hard refresh): Products list for phone and two other types (buttons, filters, table, chips, wrapping on a phone); SecondHand; Product Details (sections, the Apple ID password still shown as plain `code`, transactions table); Edit (all sections, finished price, action bar, Tab to the last field; the Edit page still loads the Jalali date picker a second time — a redundant include that is removed only in Step 16.1, so it is expected here and not a Stage 13 defect); all 11 Create pages (section order, "Add new" modals open with the glass sheet and a visible close X, finished-price field, action bar); Persian text in names renders with the system fallback stack — the Vazirmatn face cannot load before Step 15.2 repairs the tracked font assets, so the fallback is expected here and the repair is scheduled in Stage 15, not a Stage 13 defect; repeat the key ones in Safari and Firefox. Anything else that changed is a defect; list defects in act.md for a fix step.
 - Depends on: Step 13.1.
 - Edge cases / error handling: if any check fails, stop and report; do not fix inside this step.
 - Tests: none.
@@ -567,22 +567,22 @@ Sell and Transactions/Details need no step: they inherit buttons, fields, surfac
 - Depends on: Step 9.3.
 - Edge cases / error handling: plain text, not a live region (the page reloads, so a live region would not announce); use the same collection the table iterates (`Model.Transactions`).
 - Tests: none.
-- Verify: CI green. `grep -c "transactions shown" src/MobileShop.Web/Pages/Transactions/Index.cshtml` = 1; `git diff --stat` = that file, 1 line.
+- Verify: CI green. `grep -c "transactions shown" src/MobileShop.Web/Pages/Transactions/Index.cshtml` = 1; `git diff --stat` = `1 file changed, 1 insertion(+)` (the count line of `Transactions/Index.cshtml`).
 - Done when: the checks hold and CI is green.
 - Risk: LOW
 - Confidence: HIGH
 
-## [ ] Step 14.2 — ProfitLoss: describe the trend chart
-- Task: ROUTE-011 · Priority P2 · Effort S · Mandatory · Type A.
-- Files: modify: `src/MobileShop.Web/Pages/Reports/ProfitLoss.cshtml` only.
-- Symbols: `<canvas id="profitLossChart" … aria-label="Profit and loss by …"></canvas>` (about lines 187-193) inside `<div class="profit-chart-canvas">` (line 186).
-- Current -> Desired: the canvas has an `aria-label` only. Desired: `aria-describedby="profit-chart-desc"` on the canvas and, directly after the closing `</div>` of `.profit-chart-canvas`, `<p id="profit-chart-desc" class="visually-hidden">Line chart of profit and loss over the selected date range. The table below lists profit and loss per product.</p>`.
-- Change: those two additions; keep every existing attribute, the chart script and the table.
+## [ ] Step 14.2 — ProfitLoss: describe the trend chart and make the loss rows legible
+- Task: ROUTE-011 · F-22 (part) · Priority P2 · Effort S · Mandatory · Type A.
+- Files: modify: `src/MobileShop.Web/Pages/Reports/ProfitLoss.cshtml`, `src/MobileShop.Web/wwwroot/css/surfaces.css`.
+- Symbols: (a) `<canvas id="profitLossChart" … aria-label="Profit and loss by …"></canvas>` (about lines 187-193) inside `<div class="profit-chart-canvas">` (line 186); (b) the Distribution row `<tr class="@(row.IsLossPeriod ? "table-danger" : "")">` (line 214) and the `.data-table` family in `surfaces.css`.
+- Current -> Desired: (a) the canvas has an `aria-label` only. Desired: `aria-describedby="profit-chart-desc"` on the canvas and, directly after the closing `</div>` of `.profit-chart-canvas`, `<p id="profit-chart-desc" class="visually-hidden">Line chart of profit and loss over the selected date range. The table below lists profit and loss per product.</p>`. (b) the loss rows of the Distribution table are unreadable: they carry Bootstrap's whole-table variant `table-danger`, which sets `color: #000` on the `<tr>`, and the table has `class="data-table"` and not Bootstrap's `.table`, so the Bootstrap cell rule never applies and the cells inherit black text on the dark surface. Desired: the loss rows carry the repo class `row-danger` and the `.data-table` family in `surfaces.css` paints their cells danger red on a danger tint.
+- Change: (1) the two canvas additions as described; keep every existing attribute, the chart script and the table. (2) In `ProfitLoss.cshtml` line 214 change the row class from `table-danger` to `row-danger`: `<tr class="@(row.IsLossPeriod ? "row-danger" : "")">`; nothing else in the row changes. (3) Append to `surfaces.css` (a blank line, then the rule): `.data-table tbody tr.row-danger td {` / `  color: var(--danger);` / `  background-color: var(--danger-soft);` / `}`. `--danger` (`tokens.css` line 38) and `--danger-soft` (`tokens.css` line 77) already exist, so no hex literal, no new token and no `!important` are needed; the rule is (0,2,3) and outranks `.data-table tbody tr:hover` (0,2,2), so the danger tint survives hover.
 - Depends on: none.
-- Edge cases / error handling: apply it to the trend chart only (`profitLossChart`); if the page has a second chart in the Distribution tab, leave it unchanged; confirm the table described really is on the same tab (`grep -n "data-table" …ProfitLoss.cshtml`).
+- Edge cases / error handling: apply the canvas description to the trend chart only (`profitLossChart`); if the page has a second chart in the Distribution tab, leave it unchanged; confirm the table described really is on the same tab (`grep -n "data-table" …ProfitLoss.cshtml`). The black-on-dark loss rows are a **pre-existing defect** (introduced with commit `648034c`, not a Stage 13/14 regression) that must be closed in this step, before the final audit of Step 16.4; do not keep `table-danger` on the row — Bootstrap's `.table-danger` is a whole-table variant and does nothing useful on a `<tr>`. The new rule goes into `surfaces.css` (the `.data-table` family), not into a R27 block, so no block is edited in place.
 - Tests: none.
-- Verify: CI green. `grep -c 'aria-describedby="profit-chart-desc"' src/MobileShop.Web/Pages/Reports/ProfitLoss.cshtml` = 1; `grep -c 'id="profit-chart-desc"' …` = 1.
-- Done when: the checks hold and CI is green.
+- Verify: CI green. `grep -c 'aria-describedby="profit-chart-desc"' src/MobileShop.Web/Pages/Reports/ProfitLoss.cshtml` = 1; `grep -c 'id="profit-chart-desc"' …` = 1; `grep -c "table-danger" src/MobileShop.Web/Pages/Reports/ProfitLoss.cshtml` = 0; `grep -c "row-danger" …ProfitLoss.cshtml` = 1; `grep -c "^\.data-table tbody tr\.row-danger td" src/MobileShop.Web/wwwroot/css/surfaces.css` = 1; brace balance equal for `surfaces.css`; `git diff --stat` lists exactly two files: `ProfitLoss.cshtml` (the chart description and the row class) and `surfaces.css` (only insertions — the new rule, no deletion).
+- Done when: the checks hold, CI green, owner opens the Distribution tab and sees the loss rows with danger-red text on a danger tint (legible in dark mode), and the screen reader reads the chart description.
 - Risk: LOW
 - Confidence: HIGH
 
@@ -606,7 +606,7 @@ Sell and Transactions/Details need no step: they inherit buttons, fields, surfac
 - Symbols: none.
 - Current -> Desired: n/a (validation only).
 - Change: confirm CI green on the last code commit and record `Action: #<run>` per code step; record the greps of 14.1-14.3; `git diff --stat` over the stage matches the file lists above.
-- Manual check (owner, hard refresh): Transactions list (count line, filters, sort, row checkboxes read by a screen reader), Sell (pickers by keyboard, date picker, action bar), Transaction Details, ProfitLoss (segmented mode, tabs, chart cards, screen reader reads the chart description), `/Error`, `/Privacy`; repeat the key ones in Safari and Firefox. Anything else that changed is a defect.
+- Manual check (owner, hard refresh): Transactions list (count line, filters, sort, row checkboxes read by a screen reader), Sell (pickers by keyboard, date picker, action bar), Transaction Details, ProfitLoss (segmented mode, tabs, chart cards, screen reader reads the chart description, the Distribution loss rows are danger red on a danger tint and legible in dark mode), `/Error`, `/Privacy`; repeat the key ones in Safari and Firefox. Anything else that changed is a defect.
 - Depends on: Steps 14.1-14.3.
 - Edge cases / error handling: if any check fails, stop and report; do not fix inside this step.
 - Tests: none.
@@ -617,7 +617,7 @@ Sell and Transactions/Details need no step: they inherit buttons, fields, surfac
 
 # Stage 15 — Motion and preference modes: motion tokens, press feedback, reduced motion/transparency/contrast, solid-surfaces switch
 Press feedback and token-driven transitions already shipped with each family block (buttons in 8.3, tables and chips in 9.x, overlays in 10.x). This stage adds the preference modes in one place, the modal sheet entrance, the owner switch for solid surfaces, repairs the broken Vazirmatn font assets, and removes the font weight that no rule requests any more.
-Order rule: the motion and preference modes first (15.1), then the Vazirmatn font-asset repair (15.2) — it must run before the Medium face is retired (15.3) and before the stage validation (15.5), because every owner check in this stage looks at Persian text — then the owner switch for solid surfaces (15.4).
+Order rule: the motion and preference modes first (15.1), then the Vazirmatn font-asset repair (15.2) — it must run before the Medium face is retired (15.4) and before the stage validation (15.6), because every owner check in this stage looks at Persian text — then the `login.css` re-extraction for the focused invalid login field (15.3), which touches no font and no motion rule and therefore may run right after the font repair — and finally the owner switch for solid surfaces (15.5).
 
 ## [ ] Step 15.1 — `motion.css`: preference modes and sheet entrance
 - Task: MOTION-002/003/004 · F-41 · Priority P0 · Effort M · Mandatory · Type A.
@@ -629,7 +629,7 @@ Order rule: the motion and preference modes first (15.1), then the Vazirmatn fon
 - Edge cases / error handling: `motion.css` must load after `tokens.css` and after every family file so its `:root` overrides win by order (same specificity); the global reduced-motion rule (0.01 ms) already lives in `base.css` and stays; Bootstrap's `.modal.fade .modal-dialog` default transform is overridden on purpose; no change touches the dock's own state machine.
 - Tests: none.
 - Verify: CI green. Brace balance equal for `motion.css`; `grep -c "html\[data-surfaces=\"solid\"\]" src/MobileShop.Web/wwwroot/css/motion.css` >= 2; `grep -c "prefers-contrast: more" …motion.css` >= 2; `grep -c "forced-colors" …motion.css` = 1; `grep -c "motion.css" src/MobileShop.Web/Pages/Shared/_Layout.cshtml` = 1; `git diff --stat`: `motion.css` new, `_Layout.cshtml` +1.
-- Done when: the checks hold, CI green, owner confirms with the OS "reduce transparency" (or Windows "transparency effects" off) that modals, action bar and login card turn solid — Chrome/Edge on Windows only, since Safari/macOS and Firefox do not ship `prefers-reduced-transparency` (R6) and there the solid surfaces come from the `html[data-surfaces="solid"]` switch of Step 15.4 — with the OS high-contrast setting that borders and text strengthen, and with "reduce motion" that presses and the sheet entrance do not animate.
+- Done when: the checks hold, CI green, owner confirms with the OS "reduce transparency" (or Windows "transparency effects" off) that modals, action bar and login card turn solid — Chrome/Edge on Windows only, since Safari/macOS and Firefox do not ship `prefers-reduced-transparency` (R6) and there the solid surfaces come from the `html[data-surfaces="solid"]` switch of Step 15.5 — with the OS high-contrast setting that borders and text strengthen, and with "reduce motion" that presses and the sheet entrance do not animate.
 - Risk: MEDIUM
 - Confidence: MEDIUM
 
@@ -637,17 +637,31 @@ Order rule: the motion and preference modes first (15.1), then the Vazirmatn fon
 - Task: F-06 (font assets), F-36 · Priority P0 · Effort M · Mandatory · Type V.
 - Files: replace: `src/MobileShop.Web/wwwroot/fonts/vazirmatn-regular.woff2`, `src/MobileShop.Web/wwwroot/fonts/vazirmatn-medium.woff2`, `src/MobileShop.Web/wwwroot/fonts/vazirmatn-bold.woff2`; modify (fallback branch only): `src/MobileShop.Web/wwwroot/css/tokens.css`.
 - Symbols: the three `@font-face` blocks of family Vazirmatn in `src/MobileShop.Web/wwwroot/css/tokens.css` (lines 1-23: weight 400 → `src: url('../fonts/vazirmatn-regular.woff2')`, weight 500 → `../fonts/vazirmatn-medium.woff2`, weight 700 → `../fonts/vazirmatn-bold.woff2`); the three tracked files `src/MobileShop.Web/wwwroot/fonts/vazirmatn-regular.woff2`, `vazirmatn-medium.woff2`, `vazirmatn-bold.woff2`.
-- Current -> Desired: the three tracked `.woff2` files are GitHub HTML documents (about 269 KB each; `file` prints "HTML document"), not fonts: the browser rejects them, `document.fonts` reports Vazirmatn as `unloaded` and every Persian string in the app falls back to a system font, so the brand type stack of R2 ("SF Pro Rounded + Vazirmatn") is broken and about 807 KB of HTML is downloaded on demand. Desired: the three paths hold real Vazirmatn woff2 binaries (weights 400, 500, 700) — or, if the binaries cannot be obtained, the Vazirmatn `@font-face` rules and the files are gone and the app falls back to the token-defined stack (SF Pro Rounded 400/700, then the system stack). Which one applies is decided by the font policy of R11.C and R7: the plan keeps the Vazirmatn family with the weights 400 and 700 (only the unused 500 is retired, in Step 15.3), so the repair — not the removal — is the prescribed end state.
-- Change: (1) Repair branch — get the binaries from the upstream Vazirmatn release (`rastikerdar/vazirmatn`, SIL Open Font License): the webfont files `fonts/webfonts/Vazirmatn-Regular.woff2`, `Vazirmatn-Medium.woff2` and `Vazirmatn-Bold.woff2` of a tagged release, copied over the three existing paths under the existing names (`vazirmatn-regular.woff2`, `vazirmatn-medium.woff2`, `vazirmatn-bold.woff2`); the `@font-face` srcs stay exactly as they are, so no CSS changes in this branch. The files in the repository today are HTML pages and must never be committed again — a `curl` of a GitHub page into `wwwroot/fonts` is how the defect was created. (2) Fallback branch — if the Actor cannot obtain the binaries (no network or no upstream copy at hand), do NOT re-commit the HTML files and do NOT leave a broken `@font-face`: delete the three Vazirmatn `@font-face` blocks from `tokens.css` and `git rm` the three files, so nothing broken is served and `--font-body` falls through to the system Persian face (the family name may stay in the stack: without a `@font-face` and without a local install the browser skips it). Record in act.md that the fallback was taken; Step 15.3 then only confirms that no weight-500 rule remains and that the medium file is gone. (3) In both branches nothing else changes: no font file name, no `@font-face` src, no CSS value, no layout change.
-- Depends on: none (no other step owns the font assets); it must run before Step 15.3.
-- Edge cases / error handling: the three files are tracked in git, so the replacement is a plain content commit of exactly those three paths (`git add` them by name, never `-A`); the weight-500 file is repaired here and deleted again in Step 15.3, which is why the Medium face is repaired first and retired second; the SF Pro Rounded files and their `@font-face` rules in `base.css` are never touched; Vazirmatn is not preloaded (Step 11.4 preloads only the Latin faces), so a repaired file is fetched on the first Persian text; if the Actor obtains the upstream variable file `Vazirmatn[wght].woff2` instead of the three static weights, it must be split into static 400/500/700 files or only the 400 and 700 files may be replaced — the `@font-face` weights stay 400, 500 and 700.
+- Current -> Desired: the three tracked `.woff2` files are GitHub HTML documents (about 269 KB each; `file` prints "HTML document"), not fonts: the browser rejects them, `document.fonts` reports Vazirmatn as `unloaded` and every Persian string in the app falls back to a system font, so the brand type stack of R2 ("SF Pro Rounded + Vazirmatn") is broken and about 807 KB of HTML is downloaded on demand. Desired: the three paths hold real Vazirmatn woff2 binaries (weights 400, 500, 700) — or, if the binaries cannot be obtained, the Vazirmatn `@font-face` rules and the files are gone and the app falls back to the token-defined stack (SF Pro Rounded 400/700, then the system stack). Which one applies is decided by the font policy of R11.C and R7: the plan keeps the Vazirmatn family with the weights 400 and 700 (only the unused 500 is retired, in Step 15.4), so the repair — not the removal — is the prescribed end state.
+- Change: (1) Repair branch — get the binaries from the upstream Vazirmatn release (`rastikerdar/vazirmatn`, SIL Open Font License): the webfont files `fonts/webfonts/Vazirmatn-Regular.woff2`, `Vazirmatn-Medium.woff2` and `Vazirmatn-Bold.woff2` of a tagged release, copied over the three existing paths under the existing names (`vazirmatn-regular.woff2`, `vazirmatn-medium.woff2`, `vazirmatn-bold.woff2`); the `@font-face` srcs stay exactly as they are, so no CSS changes in this branch. The files in the repository today are HTML pages and must never be committed again — a `curl` of a GitHub page into `wwwroot/fonts` is how the defect was created. (2) Fallback branch — if the Actor cannot obtain the binaries (no network or no upstream copy at hand), do NOT re-commit the HTML files and do NOT leave a broken `@font-face`: delete the three Vazirmatn `@font-face` blocks from `tokens.css` and `git rm` the three files, so nothing broken is served and `--font-body` falls through to the system Persian face (the family name may stay in the stack: without a `@font-face` and without a local install the browser skips it). Record in act.md that the fallback was taken; Step 15.4 then only confirms that no weight-500 rule remains and that the medium file is gone. (3) In both branches nothing else changes: no font file name, no `@font-face` src, no CSS value, no layout change.
+- Depends on: none (no other step owns the font assets); it must run before Step 15.4.
+- Edge cases / error handling: the three files are tracked in git, so the replacement is a plain content commit of exactly those three paths (`git add` them by name, never `-A`); the weight-500 file is repaired here and deleted again in Step 15.4, which is why the Medium face is repaired first and retired second; the SF Pro Rounded files and their `@font-face` rules in `base.css` are never touched; Vazirmatn is not preloaded (Step 11.4 preloads only the Latin faces), so a repaired file is fetched on the first Persian text; if the Actor obtains the upstream variable file `Vazirmatn[wght].woff2` instead of the three static weights, it must be split into static 400/500/700 files or only the 400 and 700 files may be replaced — the `@font-face` weights stay 400, 500 and 700.
 - Tests: none.
 - Verify: CI green. Repair branch: `file src/MobileShop.Web/wwwroot/fonts/vazirmatn-regular.woff2 src/MobileShop.Web/wwwroot/fonts/vazirmatn-medium.woff2 src/MobileShop.Web/wwwroot/fonts/vazirmatn-bold.woff2` prints "Web Open Font Format" for all three; `head -c 4 src/MobileShop.Web/wwwroot/fonts/vazirmatn-regular.woff2 | od -An -tx1` prints ` 77 4f 46 32` (the `wOF2` signature); `grep -c "fonts/vazirmatn" src/MobileShop.Web/wwwroot/css/tokens.css` = 3. Fallback branch: `git ls-files src/MobileShop.Web/wwwroot/fonts` prints only `sf-pro-rounded-bold.woff2` and `sf-pro-rounded-regular.woff2`; `grep -rn --exclude-dir=bin --exclude-dir=obj "fonts/vazirmatn" src` prints nothing (the `bin`/`obj` manifests are build output and still list the old asset paths). Owner check (browser, hard refresh): a Persian name in the Products list renders in the Vazirmatn face (repair branch) or in the system Persian face with no failed font request in the console (fallback branch).
 - Done when: the checks hold, CI green, and the owner confirms in the browser console that Vazirmatn is no longer reported as `unloaded` (repair branch) and that no font request failed.
 - Risk: MEDIUM (binary assets the CI cannot inspect and the Actor may not be able to fetch them; the fallback branch changes the Persian face)
 - Confidence: MEDIUM
 
-## [ ] Step 15.3 — Retire the unused Vazirmatn Medium face
+## [ ] Step 15.3 — `login.css`: the focused invalid field keeps the danger red
+- Task: F-14 (invalid state) · Priority P1 · Effort S · Mandatory · Type V.
+- Files: replace: `src/MobileShop.Web/wwwroot/css/login.css` only.
+- Symbols: the `login-v1` block in R27 (the whole file is the block); inside it the rule `.account-login-field .form-control:focus` and, right after it, the new rule `.account-login-field .form-control.input-validation-error:focus`; in `src/MobileShop.Web/wwwroot/css/controls.css` the rule `.form-control.input-validation-error` (about line 165).
+- Current -> Desired: a login field that fails validation and is focused shows the accent teal border, because `login.css` `.account-login-field .form-control:focus` (0,3,0) outranks `controls.css` `.form-control.input-validation-error` (0,2,0) and `login.css` is linked after `controls.css`. Desired: the focused invalid field keeps the danger red border (`--danger`), while the focus ring (`--focus-ring`) stays visible; nothing else about the field changes.
+- Change: re-extract the whole file from the amended block — the block IS the file, so the file is replaced by the extraction and never patched by hand: `sed -n '/^\/\* BEGIN login-v1 \*\//,/^\/\* END login-v1 \*\//p' .agents/chat/plan.md | tr -d '\r' > src/MobileShop.Web/wwwroot/css/login.css`. No other file changes, no link change (`login.css` keeps its place before `navigation-menu.css`; `motion.css` is inserted after it by Step 15.1).
+- Depends on: Step 12.2 (the `login-v1` block became `login.css`), Step 15.1 (the `motion.css` link is inserted after `login.css`).
+- Edge cases / error handling: the file is replaced by the extraction, never hand-edited, and the amended R27 block is the single source of truth; the block was amended by the Planner for this step (the Stage 13 Job A correction pass), so the Actor must not edit either the block or the CSS by hand; `--danger` is defined in `tokens.css` (line 38), so no hex literal, no new token and no `!important` are needed; the `--focus-ring` box-shadow of the `:focus` rule stays, so the field is still visibly focused; the new rule is (0,4,0) and outranks the teal rule (0,3,0); apart from the added rule the file is otherwise unchanged (27/27 braces before, 28/28 after).
+- Tests: none.
+- Verify: CI green. `diff <(sed -n '/^\/\* BEGIN login-v1 \*\//,/^\/\* END login-v1 \*\//p' .agents/chat/plan.md | tr -d '\r') src/MobileShop.Web/wwwroot/css/login.css` prints nothing (the file is the block); `grep -c "input-validation-error:focus" src/MobileShop.Web/wwwroot/css/login.css` = 1; `awk '{o+=gsub(/\{/,"{");c+=gsub(/\}/,"}")} END{print o"/"c}' src/MobileShop.Web/wwwroot/css/login.css` prints two equal numbers; `git diff --numstat src/MobileShop.Web/wwwroot/css/login.css` prints 4 added and 0 deleted lines (only the new rule and its blank line); `grep -c "login.css" src/MobileShop.Web/Pages/Shared/_Layout.cshtml` = 1; `git diff --stat` lists `login.css` only.
+- Done when: the checks hold, CI green, owner signs in with a wrong password and focuses the invalid field — the border stays danger red (no teal) and the focus ring is still visible.
+- Risk: MEDIUM
+- Confidence: MEDIUM
+
+## [ ] Step 15.4 — Retire the unused Vazirmatn Medium face
 - Task: COMP-006 (remainder) · F-06, F-36 · Priority P2 · Effort S · Mandatory · Type V.
 - Files: modify: `src/MobileShop.Web/wwwroot/css/tokens.css`; delete: `src/MobileShop.Web/wwwroot/fonts/vazirmatn-medium.woff2`.
 - Symbols: the `@font-face` rule of family Vazirmatn with `font-weight: 500` and `src: url('../fonts/vazirmatn-medium.woff2')` (about lines 10-16).
@@ -661,7 +675,7 @@ Order rule: the motion and preference modes first (15.1), then the Vazirmatn fon
 - Risk: LOW
 - Confidence: HIGH
 
-## [ ] Step 15.4 — Solid-surfaces switch (Profile page, remembered per browser)
+## [ ] Step 15.5 — Solid-surfaces switch (Profile page, remembered per browser)
 - Task: MOTION-005 · F-08 (parity) · Priority P1 · Effort M · Mandatory · Type U.
 - Files: modify: `src/MobileShop.Web/Pages/Shared/_Layout.cshtml`, `src/MobileShop.Web/Pages/Account/Profile.cshtml`, `src/MobileShop.Web/wwwroot/js/site.js`.
 - Symbols: in the layout `<head>` after the `color-scheme` meta; in Profile.cshtml the end of the second `<section class="form-section" aria-label="Change username or password">` (closing `</section>` on line 99, inside `<div class="col-md-6">`); in site.js the ready block.
@@ -675,14 +689,14 @@ Order rule: the motion and preference modes first (15.1), then the Vazirmatn fon
 - Risk: MEDIUM
 - Confidence: MEDIUM
 
-## [ ] Step 15.5 — Stage 15 validation
+## [ ] Step 15.6 — Stage 15 validation
 - Task: QA (stage gate) · Mandatory.
 - Files: none modified.
 - Symbols: none.
 - Current -> Desired: n/a (validation only).
-- Change: confirm CI green on the last code commit and record `Action: #<run>` per code step; record the greps of 15.1-15.4; `git diff --stat` over the stage matches the file lists above.
-- Manual check (owner): the four modes of R12.B, each in at least two browsers: reduced motion, reduced transparency (and the Profile switch), more contrast, forced colors (Windows high contrast); focus rings visible in all of them; nothing unreadable; the dock keeps its Stage 6 behaviour in every mode; Persian text renders in the Vazirmatn face (or, in the fallback branch of Step 15.2, in the system Persian face without a failed font request).
-- Depends on: Steps 15.1-15.4.
+- Change: confirm CI green on the last code commit and record `Action: #<run>` per code step; record the greps of 15.1-15.5; `git diff --stat` over the stage matches the file lists above.
+- Manual check (owner): the four modes of R12.B, each in at least two browsers: reduced motion, reduced transparency (and the Profile switch), more contrast, forced colors (Windows high contrast); focus rings visible in all of them; nothing unreadable; the dock keeps its Stage 6 behaviour in every mode; Persian text renders in the Vazirmatn face (or, in the fallback branch of Step 15.2, in the system Persian face without a failed font request); a wrong password on the Login page keeps the invalid field danger red while it is focused (Step 15.3).
+- Depends on: Steps 15.1-15.5.
 - Edge cases / error handling: if any check fails, stop and report; do not fix inside this step.
 - Tests: none.
 - Verify: the commands above, recorded in act.md.
@@ -750,7 +764,7 @@ The Actor does the mechanical clean-up (16.1) and prepares the evidence sheet; t
 - Confidence: HIGH
 
 ## Global Definition of Done
-- Every stage ends with its own validation step (8.5, 9.7, 10.7, 11.5, 12.5, 13.2, 14.4, 15.5, 16.4; Stage 7 has 7.4): CI green with run numbers recorded in act.md, the greps of the stage recorded, `git diff --stat` matching the stage's file lists, and the owner's manual check answered.
+- Every stage ends with its own validation step (8.5, 9.7, 10.7, 11.5, 12.5, 13.2, 14.4, 15.6, 16.4; Stage 7 has 7.4): CI green with run numbers recorded in act.md, the greps of the stage recorded, `git diff --stat` matching the stage's file lists, and the owner's manual check answered.
 - The whole redesign is done when the Definition of Done in R19 holds and Step 16.4 is signed off.
 
 ---
@@ -900,7 +914,7 @@ Fallback strategy (all required): (1) `@supports not (backdrop-filter: blur(1px)
 
 ## R7 Performance and technical constraints
 - Payload today [G]: app CSS 43 KB (+ Bootstrap 233 KB min), app JS 75 KB (+ jQuery 88 KB, Bootstrap bundle 81 KB, Chart.js 209 KB on ProfitLoss only), fonts about 1.8 MB (`swap`, no preload).
-- Budgets (measure in Step 16.2 against the Stage 7 baseline): LCP <= 2.5 s, INP <= 200 ms, CLS <= 0.1 on a throttled mid-tier mobile profile [A thresholds]; at most 2 concurrent `backdrop-filter` layers in the viewport (dock plus the action bar, or the modal sheet plus the scrim while the dock and action bar are forced solid) and blur radius <= 24px; never animate `backdrop-filter`, `filter` or shadow blur; animate only `transform`, `opacity` and short colour fades; app CSS <= 60 KB uncompressed in exactly 9 files (`tokens.css`, `base.css`, `controls.css`, `surfaces.css`, `overlays.css`, `shell.css`, `login.css`, `motion.css`, `navigation-menu.css`); no new runtime JS library; the two SF Pro Rounded faces are preloaded (Step 11.4) and the unused Vazirmatn Medium file (about 269 KB) is removed (Step 15.3).
+- Budgets (measure in Step 16.2 against the Stage 7 baseline): LCP <= 2.5 s, INP <= 200 ms, CLS <= 0.1 on a throttled mid-tier mobile profile [A thresholds]; at most 2 concurrent `backdrop-filter` layers in the viewport (dock plus the action bar, or the modal sheet plus the scrim while the dock and action bar are forced solid) and blur radius <= 24px; never animate `backdrop-filter`, `filter` or shadow blur; animate only `transform`, `opacity` and short colour fades; app CSS <= 60 KB uncompressed in exactly 9 files (`tokens.css`, `base.css`, `controls.css`, `surfaces.css`, `overlays.css`, `shell.css`, `login.css`, `motion.css`, `navigation-menu.css`); no new runtime JS library; the two SF Pro Rounded faces are preloaded (Step 11.4) and the unused Vazirmatn Medium file (about 269 KB) is removed (Step 15.4).
 - Technical constraints [S]: Bootstrap is plain CSS (no Sass), so tokens live in plain custom properties and Bootstrap is overridden, not recompiled; no bundler (each new CSS file is one more request, acceptable on a local app, each linked with `asp-append-version`); CI cannot see CSS, so every CSS stage ends with an owner manual check; the stage 5/6 dock invariants must keep passing (R24); `backdrop-filter` creates a containing block for fixed children, so overlays are never placed inside a glass parent; page `Scripts` sections render before `site.js`, so any script loaded there that needs a `site.js` helper must wire it on `DOMContentLoaded` (Step 10.4).
 - Debt that affects the redesign: 13 `!important` (11 in `app-theme.css`, 2 in the dock; the planned end state is at most 12); 10 `rgb()/rgba()` literals (9 in `app-theme.css`, 1 in the dock; the planned end state is 0 outside `tokens.css`); 15 lines with literal durations in `app-theme.css`; scoped template CSS (F-45); a dead create-product subsystem (R26). Hex literals: 0 in the five app stylesheets (the scoped template file has 9 lines).
 - Migration pattern (D-05): no big-bang split and no hand-copying. Each CSS step extracts a spec block from R27 with the `sed` command in "Hard constraints", deletes the replaced rules from the old file by anchor, and links the new file immediately before `navigation-menu.css`. `site.css` is replaced by `base.css` (Step 9.1), `components.css` by `surfaces.css` and `shell.css` (Steps 9.2-11.2), `app-theme.css` by `controls.css`, `overlays.css` and `login.css` (Steps 8.3-12.2); the scoped template file disappears in Step 11.1.
@@ -1139,13 +1153,13 @@ Rules: root is 14px below 768px and 16px from 768 (kept); maximum prose line `--
 - Migration: spec blocks plus anchor deletion, as in R7. Legacy Bootstrap class names stay as aliases (`btn-success`, `btn-dark`, `btn-outline-warning`, `card`, `stat`, `form-section` all render through the new families), so Razor edits stay minimal.
 - Review gate for every CSS step: no hex literal outside `tokens.css`, no new `!important` (end state at most 12), no literal duration or easing outside `tokens.css` and the dock (the reduced-motion `0.01ms` in `base.css` excepted), `backdrop-filter` only in `overlays.css`, `shell.css`, `login.css`, `motion.css`, the dock and `tokens.css`, no new z-index number, brace balance equal, the dock invariants of R24 still pass.
 ## R14 Route-by-route step map
-Every route is covered by at least one stage; "inherits" means no markup step is needed because shared classes and behaviour from Stages 8-11 apply. Verification for each route is the owner manual check in its stage's validation step (Steps 8.5, 9.7, 10.7, 11.5, 12.5, 13.2, 14.4, 15.5) and 16.2.
+Every route is covered by at least one stage; "inherits" means no markup step is needed because shared classes and behaviour from Stages 8-11 apply. Verification for each route is the owner manual check in its stage's validation step (Steps 8.5, 9.7, 10.7, 11.5, 12.5, 13.2, 14.4, 15.6) and 16.2.
 | Route (files) | Steps | What changes |
 |---|---|---|
-| Layout, footer, shell (`_Layout.cshtml`) | 7.2, 9.1, 11.1, 11.2, 11.4, 12.2, 15.1, 15.4 | dark flag and meta; base.css; template stylesheet removed (footer in flow, accent link); shell.css (action bar glass, focus clearance); viewport-fit, theme colour, preload; login.css link and the skip-link focus target on `<main>`; motion.css; solid-surfaces script |
-| Account/Login | 8.3, 8.4, 12.1, 12.2, 15.1 | buttons and fields; `_PasswordToggle`; `login.css` glass card over its own gradient; preference modes |
+| Layout, footer, shell (`_Layout.cshtml`) | 7.2, 9.1, 11.1, 11.2, 11.4, 12.2, 15.1, 15.5 | dark flag and meta; base.css; template stylesheet removed (footer in flow, accent link); shell.css (action bar glass, focus clearance); viewport-fit, theme colour, preload; login.css link and the skip-link focus target on `<main>`; motion.css; solid-surfaces script |
+| Account/Login | 8.3, 8.4, 12.1, 12.2, 15.1, 15.3 | buttons and fields; `_PasswordToggle`; `login.css` glass card over its own gradient; preference modes; focused invalid field keeps the danger red |
 | Account/Logout | inherits | buttons |
-| Account/Profile | 8.3, 8.4, 12.1, 15.4 | buttons and fields; `_PasswordToggle` x3; Appearance checkbox (outside the password form) |
+| Account/Profile | 8.3, 8.4, 12.1, 15.5 | buttons and fields; `_PasswordToggle` x3; Appearance checkbox (outside the password form) |
 | Dashboard (Index) | 9.2, 9.4, 12.3 | surface family; chips; heading order |
 | People/Index | 12.4 | segmented filter |
 | People/Customers, Sellers | 9.3, 12.4 | table idiom; `aria-sort` and indicator; empty state |
@@ -1159,7 +1173,7 @@ Every route is covered by at least one stage; "inherits" means no markup step is
 | Transactions/Index | 8.1, 9.3, 14.1 | row checkbox name; table; result count |
 | Transactions/Sell | 10.3-10.6, 11.2 | pickers and date picker keyboard model; action bar |
 | Transactions/Details | 9.2, 9.3 | surfaces, tables |
-| Reports/ProfitLoss | 9.2, 9.5, 14.2 | cards; tabs and segmented mode; chart description |
+| Reports/ProfitLoss | 9.2, 9.5, 14.2 | cards; tabs and segmented mode; chart description; legible danger loss rows |
 | Error, Privacy | 14.3 | copy and width class |
 | Dock (`NavigationMenu`) | 11.3, 11.4, 15.1 | token swap; safe area; preference modes |
 ## R15 Component-family specifications
@@ -1194,7 +1208,7 @@ Type tags in steps: V visual, A accessibility or markup behaviour, U UX or funct
 | UX-003 | Polite live result count in the two pickers | in Steps 10.3 and 10.4 |
 | UX-004 | Optional toast after redirects | deferred, no step |
 | UX-005 | Phone card layout for tables | deferred, no step |
-| UX-006 | Solid-surfaces switch on the Profile page | Step 15.4 |
+| UX-006 | Solid-surfaces switch on the Profile page | Step 15.5 |
 | UX-007 | Error page: production-safe wording | Step 14.3 |
 Information architecture is already small (six dock tabs, one-page sell flow) and is kept.
 ## R17 Dependency evaluation
@@ -1226,10 +1240,10 @@ Rule: native CSS first. No library is added to make a glass card. Fields per can
 | 10 | 3 Shared components (overlays) | 8, 9 | glass modals, modal labels, pickers keyboard model, date picker |
 | 11 | 4 Application shell | 9, 10 | template CSS removed, shell.css, dock tokens, mobile shell |
 | 12, 13, 14 | 5 Page-by-page | 8 to 11 | all routes in three batches |
-| 15 | 6 Motion and polish | 10 to 14 | preference modes, sheet entrance, Medium font retired, solid-surfaces switch |
+| 15 | 6 Motion and polish | 10 to 14 | preference modes, sheet entrance, Medium font retired, focused invalid login field red, solid-surfaces switch |
 | 16 | 7 Quality assurance | all | clean-up gates, owner evidence pack, README section, sign-off |
 ### R18.B Task-ID map (labels used in R4, R5 and in the steps' Task lines)
-DISC-001..004, RES-001..004: done in this planning pass (R3 to R8) · DISC-005: owner precondition of Step 7.2 and Step 16.2 · RES-005: owner decision Q-02 · FOUND-001..004: Steps 7.1-7.4 · COMP-001: 8.3 · COMP-002, COMP-003: 8.4 · COMP-004 (a to c): 8.1; 004d: dropped (dead code, R26) · COMP-005: 8.2 · COMP-006: folded into 8.3, 8.4, 9.1, 9.3, 10.5, 12.2 and 15.3 · COMP-007: 9.2 · COMP-008: 9.3 · COMP-009: 9.4, 9.5 · COMP-010: 9.4 · COMP-011: 12.4 · COMP-012: 10.1, 10.2 · COMP-013: 10.3, 10.4 · COMP-014: 10.5, 10.6 · COMP-015: 10.1 · SHELL-001: 9.6 (gated) · SHELL-002: 11.1 · SHELL-003: 11.3 · SHELL-004, SHELL-005: 11.2 · SHELL-006: 11.4 · SHELL-007, SHELL-009: deferred (Q-09 and optional view transitions) · SHELL-008: dropped (the skip link already exists) · ROUTE-001, ROUTE-002: 12.1, 12.2 · ROUTE-003: 12.3 · ROUTE-004: 12.4 · ROUTE-005, ROUTE-010: inherit, no step · ROUTE-006: 13.1 · ROUTE-007, ROUTE-008: 13.2 verification (008c dropped, dead code) · ROUTE-009: 8.1, 14.1 · ROUTE-011: 9.5, 14.2 · ROUTE-012: 14.3 · MOTION-001: folded into the family blocks and the gates of 16.1 · MOTION-002: 8.3, 15.1 · MOTION-003, MOTION-004: 15.1 · MOTION-005: 15.4 · MOTION-006: deferred (double-submit guard is a behaviour change, no step) · QA-001..005: 16.2 · QA-006: 16.1 · QA-007: 16.3.
+DISC-001..004, RES-001..004: done in this planning pass (R3 to R8) · DISC-005: owner precondition of Step 7.2 and Step 16.2 · RES-005: owner decision Q-02 · FOUND-001..004: Steps 7.1-7.4 · COMP-001: 8.3 · COMP-002, COMP-003: 8.4 · COMP-004 (a to c): 8.1; 004d: dropped (dead code, R26) · COMP-005: 8.2 · COMP-006: folded into 8.3, 8.4, 9.1, 9.3, 10.5, 12.2 and 15.4 · COMP-007: 9.2 · COMP-008: 9.3 · COMP-009: 9.4, 9.5 · COMP-010: 9.4 · COMP-011: 12.4 · COMP-012: 10.1, 10.2 · COMP-013: 10.3, 10.4 · COMP-014: 10.5, 10.6 · COMP-015: 10.1 · SHELL-001: 9.6 (gated) · SHELL-002: 11.1 · SHELL-003: 11.3 · SHELL-004, SHELL-005: 11.2 · SHELL-006: 11.4 · SHELL-007, SHELL-009: deferred (Q-09 and optional view transitions) · SHELL-008: dropped (the skip link already exists) · ROUTE-001, ROUTE-002: 12.1, 12.2 · ROUTE-003: 12.3 · ROUTE-004: 12.4 · ROUTE-005, ROUTE-010: inherit, no step · ROUTE-006: 13.1 · ROUTE-007, ROUTE-008: 13.2 verification (008c dropped, dead code) · ROUTE-009: 8.1, 14.1 · ROUTE-011: 9.5, 14.2 · ROUTE-012: 14.3 · MOTION-001: folded into the family blocks and the gates of 16.1 · MOTION-002: 8.3, 15.1 · MOTION-003, MOTION-004: 15.1 · MOTION-005: 15.5 · MOTION-006: deferred (double-submit guard is a behaviour change, no step) · QA-001..005: 16.2 · QA-006: 16.1 · QA-007: 16.3.
 ### R18.C Step index
 - Step 7.1 — Add the design-token layer (additive and inert)
 - Step 7.2 — Bootstrap dark mode flag and colour-scheme meta
@@ -1267,14 +1281,15 @@ DISC-001..004, RES-001..004: done in this planning pass (R3 to R8) · DISC-005: 
 - Step 13.1 — Products list: type buttons become a labelled navigation that wraps
 - Step 13.2 — Stage 13 validation (includes the owner visual pass)
 - Step 14.1 — Transactions: visible result count
-- Step 14.2 — ProfitLoss: describe the trend chart
+- Step 14.2 — ProfitLoss: describe the trend chart and make the loss rows legible
 - Step 14.3 — Error page copy and the `measure` class
 - Step 14.4 — Stage 14 validation
 - Step 15.1 — `motion.css`: preference modes and sheet entrance
 - Step 15.2 — Repair the Vazirmatn font assets (the tracked `.woff2` files are HTML pages, not fonts)
-- Step 15.3 — Retire the unused Vazirmatn Medium face
-- Step 15.4 — Solid-surfaces switch (Profile page, remembered per browser)
-- Step 15.5 — Stage 15 validation
+- Step 15.3 — `login.css`: the focused invalid field keeps the danger red
+- Step 15.4 — Retire the unused Vazirmatn Medium face
+- Step 15.5 — Solid-surfaces switch (Profile page, remembered per browser)
+- Step 15.6 — Stage 15 validation
 - Step 16.1 — Final consistency audit and clean-up
 - Step 16.2 — Owner verification pack (browser evidence)
 - Step 16.3 — README: short UI design-system section
@@ -1306,7 +1321,7 @@ DISC-001..004, RES-001..004: done in this planning pass (R3 to R8) · DISC-005: 
 | D-06 | `data-bs-theme="dark"` as the base for unthemed Bootstrap defaults | fixes F-12, F-13, F-44 in one line | proposed (Step 7.2) |
 | D-07 | Keep SF Pro Rounded until the licence question is answered | F-40, Q-02 | open |
 | D-08 | Rejected as baseline: SVG-displacement refraction, pointer-tracking lighting, WebGL, canvas, shaders | Chromium-only or costly, little value for a dense admin UI | proposed |
-| D-09 | In-app solid-surfaces switch, and every preference mode implemented by overriding the glass tokens in one place | `prefers-reduced-transparency` is Chromium-only (web-features, Oct 2026) | proposed (Steps 15.1, 15.4) |
+| D-09 | In-app solid-surfaces switch, and every preference mode implemented by overriding the glass tokens in one place | `prefers-reduced-transparency` is Chromium-only (web-features, Oct 2026) | proposed (Steps 15.1, 15.5) |
 | D-10 | Cross-document view transitions deferred | Chromium and Safari only; must not disturb dock invariants | deferred |
 | D-11 | One new partial only: `_PasswordToggle`; no `_FormField`, `_Modal`, `_Icons`, `_PageHead`, `_StatTile` | AGENTS.md minimal change; labels fixed in place | proposed |
 | D-12 | New semantic token prefixes beside legacy primitives; legacy `--r-*` and unused `--app-*` aliases removed in Step 16.1 | additive foundation, no mass rename | proposed |
@@ -1367,15 +1382,15 @@ Assumptions: A-01 dark is the primary theme; A-02 desktop first, phone and table
 - Step 11.3 changes only the dock radius (1.9rem to 2rem), the eyebrow capitalization and the aliases; Step 11.4 adds a safe-area bottom offset that equals the old value when the inset is 0.
 ## R25 Security-sensitive UI (separate Reviewer attention)
 The redesign changes markup and styling only; none of the following may change behaviour, field names, handlers or tokens.
-- Login (Steps 12.1, 12.2) and Profile (Steps 12.1, 15.4): password fields, `_PasswordToggle`, the new Appearance checkbox is outside the password form; antiforgery hidden inputs and `autocomplete` attributes stay.
+- Login (Steps 12.1, 12.2, 15.3) and Profile (Steps 12.1, 15.5): password fields, `_PasswordToggle`, the new Appearance checkbox is outside the password form; antiforgery hidden inputs and `autocomplete` attributes stay.
 - Apple ID plaintext display (Products/Details `code`, create and edit forms): project.md keeps these passwords plain; no step masks, hides or "fixes" them (Steps 9.3 and 13.2 only restyle the surrounding table and sections).
-- `site.js` (Steps 8.2, 10.3, 15.4): code near form submission (Enter-to-submit, validation); the Reviewer confirms submit logic is unchanged and that `stopPropagation` in the picker helper only applies to an active option.
+- `site.js` (Steps 8.2, 10.3, 15.5): code near form submission (Enter-to-submit, validation); the Reviewer confirms submit logic is unchanged and that `stopPropagation` in the picker helper only applies to an active option.
 - Factor and PDF download links on Transactions/Details: untouched.
-- The inline head script of Step 15.4 reads one `localStorage` key and stores no data about people or money.
+- The inline head script of Step 15.5 reads one `localStorage` key and stores no data about people or money.
 ## R26 Dead code found while planning (out of redesign scope, owner decision Q-12)
 Evidence (re-runnable): `grep -rn "product-create-modal" src --include=*.cshtml` finds no include; no markup defines `id="create-product-modal"`; `grep -rn "ProductCreateRegistry" src` finds only its own file; the 11 `_ProductCreate*Form` partials are referenced only by that registry; `jalali-datepicker.js` and `product-picker.js` still mention the modal and its `product-created` event. Size: 389 lines of partials, 197 lines of script, 29 lines of registry, 105 unassociated labels, 115 controls without ids. Effect on this plan: none of it is restyled or fixed; F-15 shrinks to 12 live labels. Proposal (needs approval, separate stage after Stage 16): delete the partials, the script, the registry and the `product-created` listener; CI would confirm nothing references them.
 ## R27 CSS spec blocks (validated; extracted by the steps with `sed`)
-Each block parses without errors, has balanced braces, contains no hex literal and uses only defined custom properties. Compared with the rules they replace, the only selectors not carried over are dead or intentionally merged: `.alert-warning`, `.badge`, `.border-bottom`, `.btn-info`, `.btn-warning`, `.btn-outline-success`, `.btn-outline-danger`, `.btn-outline-dark`, `.btn-outline-info`, `.dropdown-*`, `.popover`, `.progress`, `.lead`, `.text-body`, `.text-dark`, `.form-control-plaintext`, `.profit-chart-empty`, the `.table*` rules (Details moves to `.data-table`), the button hover-lift rule `.btn:hover`, and the picker-only hover rules (merged into the generic `.list-group-item-action`). Do not edit a block in place after a step has used it; a change needs a new Planner pass.
+Each block parses without errors, has balanced braces, contains no hex literal and uses only defined custom properties. Compared with the rules they replace, the only selectors not carried over are dead or intentionally merged: `.alert-warning`, `.badge`, `.border-bottom`, `.btn-info`, `.btn-warning`, `.btn-outline-success`, `.btn-outline-danger`, `.btn-outline-dark`, `.btn-outline-info`, `.dropdown-*`, `.popover`, `.progress`, `.lead`, `.text-body`, `.text-dark`, `.form-control-plaintext`, `.profit-chart-empty`, the `.table*` rules (Details moves to `.data-table`), the button hover-lift rule `.btn:hover`, and the picker-only hover rules (merged into the generic `.list-group-item-action`). Do not edit a block in place after a step has used it; a change needs a new Planner pass. The `login-v1` block was amended in the Stage 13 Job A correction pass (the rule `.account-login-field .form-control.input-validation-error:focus` was added); Step 15.3 re-extracts `login.css` from the amended block.
 
 ### controls-buttons-v1
 ```css
@@ -2639,6 +2654,10 @@ body.modal-open .navigation-dock {
 .account-login-field .form-control:focus {
   border-color: var(--accent);
   box-shadow: var(--focus-ring);
+}
+
+.account-login-field .form-control.input-validation-error:focus {
+  border-color: var(--danger);
 }
 
 .password-visibility-toggle {
