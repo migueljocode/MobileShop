@@ -10,18 +10,18 @@ body.has-floating-navigation {
 }
 
 .floating-navigation {
-  --nav-dock-radius: 1.9rem;
-  --nav-spring: linear(0, 0.044, 0.149, 0.284, 0.428, 0.565, 0.687, 0.789, 0.871, 0.933, 0.977, 1.007, 1.026, 1.035, 1.038, 1.037, 1.033, 1.028, 1.023, 1.018, 1.013, 1.009, 1.005, 1.003, 1.001, 1);
-  --nav-ease-out: cubic-bezier(0.32, 0.72, 0, 1);
-  --nav-ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --nav-dock-radius: var(--radius-2xl);
+  --nav-spring: var(--ease-spring);
+  --nav-ease-out: var(--ease-out);
+  --nav-ease-in-out: var(--ease-standard);
   --nav-flyout-h: min(clamp(18rem, 38vh, 22rem), calc(100dvh - 12rem));
-  --nav-glass-bg: color-mix(in srgb, var(--panel-raised) 78%, transparent);
-  --nav-glass-border: color-mix(in srgb, var(--ink) 16%, transparent);
-  --nav-glass-filter: blur(20px) saturate(1.5) brightness(0.6);
+  --nav-glass-bg: var(--glass-regular-bg);
+  --nav-glass-border: var(--border-glass);
+  --nav-glass-filter: var(--glass-regular-filter);
   --nav-compact-scale: 0.88;
   --nav-spring-pop: linear(0, 0.053, 0.179, 0.336, 0.497, 0.644, 0.769, 0.867, 0.94, 0.99, 1.022, 1.039, 1.046, 1.045, 1.04, 1.033, 1.026, 1.019, 1.013, 1.008, 1.004, 1.001, 0.999, 0.998, 0.998, 1);
   position: fixed;
-  z-index: 1040;
+  z-index: var(--z-dock);
   isolation: isolate;
   left: 50%;
   bottom: 1.25rem;
@@ -58,7 +58,7 @@ body.has-floating-navigation {
   background: var(--nav-glass-bg);
   -webkit-backdrop-filter: var(--nav-glass-filter);
   backdrop-filter: var(--nav-glass-filter);
-  box-shadow: 0 1rem 2rem rgb(0 0 0 / .45), inset 0 1px 0 color-mix(in srgb, var(--ink) 10%, transparent);
+  box-shadow: var(--shadow-3), var(--edge-highlight);
   pointer-events: auto;
   transform-origin: center bottom;
   transition: scale 520ms var(--nav-spring-pop);
@@ -82,12 +82,12 @@ body.has-floating-navigation {
 }
 
 @supports not ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
-  .navigation-dock { background: var(--panel-raised); }
+  .navigation-dock { background: var(--glass-solid-bg); }
 }
 
 @media (prefers-reduced-transparency: reduce) {
   .navigation-dock {
-    background: var(--panel-raised);
+    background: var(--glass-solid-bg);
     -webkit-backdrop-filter: none;
     backdrop-filter: none;
   }
@@ -295,8 +295,6 @@ body.has-floating-navigation {
   color: var(--ink-muted);
   font-size: 0.68rem;
   font-weight: 700;
-  letter-spacing: 0.13em;
-  text-transform: uppercase;
 }
 
 .navigation-panel__heading h2 {

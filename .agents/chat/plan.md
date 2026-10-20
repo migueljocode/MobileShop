@@ -406,7 +406,7 @@ Order rule: remove the template override first (11.1), then move the remaining s
 - Risk: MEDIUM
 - Confidence: MEDIUM
 
-## [ ] Step 11.3 — Dock token migration (value-identical)
+## ~~[x] Step 11.3 — Dock token migration (value-identical)~~
 - Task: SHELL-003 · F-09 · Priority P1 · Effort S · Mandatory · Type V.
 - Files: modify: `src/MobileShop.Web/wwwroot/css/navigation-menu.css` only.
 - Symbols (line numbers before the step): `--nav-dock-radius: 1.9rem;` (13), `--nav-spring: linear(…);` (14), `--nav-ease-out: cubic-bezier(…);` (15), `--nav-ease-in-out: cubic-bezier(…);` (16), the three `--nav-glass-*` custom properties (18-20), `z-index: 1040;` on `.floating-navigation` (24), the `box-shadow` of `.navigation-dock` (61), `background: var(--panel-raised);` inside the `@supports not` block (85) and the `prefers-reduced-transparency` block (90), and in the eyebrow rule `letter-spacing: 0.13em;` plus `text-transform: uppercase;` (298-299).
