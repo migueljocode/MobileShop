@@ -763,7 +763,7 @@ The Actor does the mechanical clean-up (16.1) and prepares the evidence sheet; t
 - Risk: LOW
 - Confidence: HIGH
 
-## [ ] Step 16.4 — Redesign sign-off
+## ~~[x] Step 16.4 — Redesign sign-off~~
 - Task: QA (final gate) · Mandatory.
 - Files: none modified.
 - Symbols: none.
