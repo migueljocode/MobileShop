@@ -186,67 +186,6 @@
   overflow-wrap: anywhere;
 }
 
-.modal-content,
-.dropdown-menu,
-.popover {
-  border: 1px solid var(--line-strong);
-  border-radius: var(--r-overlay);
-  color: var(--ink);
-  background-color: var(--panel-raised);
-  box-shadow: 0 1rem 2rem rgb(0 0 0 / .45);
-}
-
-.list-group-item {
-  border-color: var(--line);
-  color: var(--ink);
-  background-color: var(--panel);
-}
-
-.product-picker-results .list-group-item,
-.product-picker-results .list-group-item-action {
-  border-color: var(--line);
-  color: var(--ink);
-  background-color: var(--panel);
-}
-
-.product-picker-results .list-group-item-action:hover,
-.product-picker-results .list-group-item-action:focus {
-  color: var(--ink);
-  background-color: var(--panel-raised);
-}
-
-.modal {
-  z-index: 1060;
-}
-
-.modal-backdrop {
-  z-index: 1050;
-}
-
-.modal-backdrop.show {
-  background-color: rgb(0 0 0 / .6);
-  opacity: 1;
-}
-
-.modal-header,
-.modal-footer {
-  border-color: var(--line);
-}
-
-.dropdown-item {
-  color: var(--ink);
-}
-
-.dropdown-item:hover,
-.dropdown-item:focus {
-  color: var(--ink);
-  background-color: var(--panel);
-}
-
-.progress {
-  background: var(--panel-raised);
-}
-
 /* ──────────────────────────────────────────────────────────────────────────
    Jalali Date Picker – styled to match the dark app theme
    ────────────────────────────────────────────────────────────────────────── */

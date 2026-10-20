@@ -275,7 +275,7 @@ Order rule: base first (9.1), then `surfaces.css` grows by family (9.2 cards, 9.
 # Stage 10 — Overlays and pickers: glass modals and menus, scrim, picker keyboard support, Jalali date picker
 Order rule: the visual family first (10.1), then markup and behaviour (10.2-10.4), then the date picker (10.5 visual, 10.6 behaviour). The dead create-product modal subsystem (R26) is not touched. Picker result lists stay opaque because they sit in the page flow; only modal sheets and the date-picker panel are glass.
 
-## [ ] Step 10.1 — Modal sheets and scrim: create `overlays.css`
+## ~~[x] Step 10.1 — Modal sheets and scrim: create `overlays.css`~~
 - Task: COMP-012 (visual), COMP-015 · F-04 · Priority P1 · Effort M · Mandatory · Type V.
 - Files: create: `src/MobileShop.Web/wwwroot/css/overlays.css`; modify: `src/MobileShop.Web/wwwroot/css/app-theme.css`, `src/MobileShop.Web/Pages/Shared/_PersonPicker.cshtml`, `src/MobileShop.Web/Pages/Shared/_Layout.cshtml`.
 - Symbols: block `overlays-modal-v1` (R27); app-theme.css overlay group from `.modal-content,` (shared with `.dropdown-menu, .popover`) through `.progress { … }` (currently `app-theme.css:189-248`; the anchor is the selector text, not the line numbers): `.modal-content, .dropdown-menu, .popover`, `.list-group-item`, the `.product-picker-results` rules, `.modal-backdrop` and `.show`, `.modal-header, .modal-footer`, `.dropdown-item*`, `.progress`; in `_PersonPicker.cshtml` the only `<div class="modal-content">` (about line 35).

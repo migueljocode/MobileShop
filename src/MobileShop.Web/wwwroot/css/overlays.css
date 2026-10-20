@@ -1,0 +1,59 @@
+/* BEGIN overlays-modal-v1 */
+/* Modal sheets: glass overlay material (G3); solid (G3-solid) for scrollable dialogs and anything marked .modal-content--solid.
+   Scrim: one dimmed, blurred layer. List groups (picker results) stay opaque because they sit in the page flow. */
+.modal-content {
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius-xl);
+  color: var(--text-1);
+  background-color: var(--glass-overlay-bg);
+  -webkit-backdrop-filter: var(--glass-overlay-filter);
+  backdrop-filter: var(--glass-overlay-filter);
+  box-shadow: var(--shadow-4), var(--edge-highlight);
+}
+
+.modal-dialog-scrollable .modal-content,
+.modal-content--solid {
+  background-color: var(--glass-solid-bg);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .modal-content {
+    background-color: var(--glass-solid-bg);
+  }
+}
+
+.modal {
+  z-index: var(--z-modal);
+}
+
+.modal-backdrop {
+  z-index: var(--z-scrim);
+}
+
+.modal-backdrop.show {
+  background-color: var(--scrim-bg);
+  opacity: 1;
+  -webkit-backdrop-filter: var(--scrim-filter);
+  backdrop-filter: var(--scrim-filter);
+}
+
+.modal-header,
+.modal-footer {
+  border-color: var(--hairline);
+}
+
+.list-group-item {
+  border-color: var(--hairline);
+  color: var(--text-1);
+  background-color: var(--surface-1);
+}
+
+.list-group-item-action:hover,
+.list-group-item-action:focus,
+.list-group-item-action.is-active {
+  color: var(--text-1);
+  background-color: var(--surface-3);
+}
+/* END overlays-modal-v1 */
