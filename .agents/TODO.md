@@ -4,7 +4,7 @@
 - [x] ~~Stage 10 — Overlays and pickers: glass modals and menus, scrim, picker keyboard support, Jalali date picker~~
 - [x] ~~Stage 11 — Navigation shell: dock token migration, flyout grouping, focus clearance, action bar, mobile safe areas~~
 - [x] ~~Stage 12 — Pages A: Login, Profile, Dashboard, People~~
-- [ ] Stage 13 — Pages B: Products list, details, edit and the 11 create forms
+- [x] ~~Stage 13 — Pages B: Products list, details, edit and the 11 create forms~~
 - [ ] Stage 14 — Pages C: Transactions, Reports, Error and Privacy
 - [ ] Stage 15 — Motion and preference modes: motion tokens, press feedback, reduced motion/transparency/contrast, solid-surfaces switch
 - [ ] Stage 16 — QA and handoff: browser harness decision, baselines, accessibility sweep, performance, final audit
