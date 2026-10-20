@@ -331,7 +331,7 @@ Order rule: the visual family first (10.1), then markup and behaviour (10.2-10.4
 - Risk: LOW
 - Confidence: MEDIUM
 
-## [ ] Step 10.5 — Jalali date picker: glass panel and token styling
+## ~~[x] Step 10.5 — Jalali date picker: glass panel and token styling~~
 - Task: COMP-014 (visual) · F-04, F-07 · Priority P1 · Effort M · Mandatory · Type V.
 - Files: modify: `src/MobileShop.Web/wwwroot/css/overlays.css`, `src/MobileShop.Web/wwwroot/css/app-theme.css`.
 - Symbols: block `overlays-jalali-v1` (R27, derived from the existing rules); in app-theme.css the whole Jalali group: from the section comment before `.jalali-picker-panel` to the end of the file (currently `app-theme.css:250-457`; the anchor is the selector text, not the line numbers) including `@keyframes jalaliFadeIn`.

@@ -57,3 +57,207 @@
   background-color: var(--surface-3);
 }
 /* END overlays-modal-v1 */
+
+/* BEGIN overlays-jalali-v1 */
+/* ──────────────────────────────────────────────────────────────────────────
+   Jalali Date Picker – styled to match the dark app theme
+   ────────────────────────────────────────────────────────────────────────── */
+.jalali-picker-panel {
+  position: fixed;
+  z-index: var(--z-popover);
+  min-width: 260px;
+  padding: 0.75rem;
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius-xl);
+  color: var(--text-1);
+  background-color: var(--glass-overlay-bg);
+  -webkit-backdrop-filter: var(--glass-overlay-filter);
+  backdrop-filter: var(--glass-overlay-filter);
+  box-shadow: var(--shadow-3), var(--edge-highlight);
+  animation: jalaliFadeIn var(--dur-base) var(--ease-press);
+}
+
+@keyframes jalaliFadeIn {
+  from { opacity: 0; transform: translateY(6px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.jalali-picker-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.65rem;
+  padding: 0 0.25rem;
+}
+
+.jalali-picker-nav {
+  display: grid;
+  place-items: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border: 1px solid var(--border-control);
+  border-radius: var(--radius-sm);
+  color: var(--text-2);
+  background: transparent;
+  transition: color var(--dur-fast) var(--ease-standard), background-color var(--dur-fast) var(--ease-standard), border-color var(--dur-fast) var(--ease-standard), transform var(--dur-instant) var(--ease-press);
+}
+
+.jalali-picker-nav:hover {
+  color: var(--text-1);
+  background: var(--surface-1);
+  border-color: var(--accent);
+}
+
+.jalali-picker-nav:active {
+  transform: scale(0.98);
+}
+
+.jalali-picker-title {
+  font-size: 0.85rem;
+  font-weight: var(--fw-strong);
+  color: var(--text-1);
+}
+
+.jalali-picker-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  margin-bottom: 0.35rem;
+  text-align: center;
+  color: var(--text-2);
+  font-size: 0.68rem;
+  font-weight: var(--fw-strong);
+}
+
+.jalali-picker-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 0.18rem;
+}
+
+.jalali-picker-day {
+  display: grid;
+  place-items: center;
+  height: 2.35rem;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  color: var(--text-1);
+  background: transparent;
+  font-size: 0.82rem;
+  font-weight: var(--fw-strong);
+  transition: color var(--dur-fast) var(--ease-standard), background-color var(--dur-fast) var(--ease-standard), border-color var(--dur-fast) var(--ease-standard), box-shadow var(--dur-fast) var(--ease-standard), transform var(--dur-instant) var(--ease-press);
+}
+
+.jalali-picker-day:hover {
+  color: var(--text-1);
+  background: var(--surface-1);
+  border-color: var(--border-control);
+  box-shadow: none;
+}
+
+.jalali-picker-day.is-today {
+  color: var(--text-1);
+  background: var(--surface-1);
+  border-color: var(--border-control);
+  box-shadow: none;
+}
+
+.jalali-picker-day.is-selected {
+  color: var(--accent-ink);
+  background-color: var(--accent);
+  border-color: var(--accent);
+  box-shadow: none;
+}
+
+.jalali-picker-day.is-selected:hover {
+  color: var(--accent-ink);
+  background-color: var(--accent);
+}
+
+.jalali-picker-time {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--hairline);
+}
+
+.jalali-picker-time-label {
+  color: var(--text-2);
+  font-size: 0.72rem;
+  font-weight: var(--fw-strong);
+}
+
+.jalali-picker-time input[type="number"] {
+  width: 3.8rem;
+  height: 2.25rem;
+  padding: 0 0.5rem;
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-sm);
+  color: var(--text-1);
+  background: var(--surface-inset);
+  font-size: 0.82rem;
+  font-weight: var(--fw-strong);
+  text-align: center;
+  -moz-appearance: textfield;
+}
+
+.jalali-picker-time input[type="number"]::-webkit-outer-spin-button,
+.jalali-picker-time input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.jalali-picker-time input[type="number"]:focus {
+  outline: none;
+  border-color: var(--accent);
+  background: var(--surface-inset);
+  box-shadow: var(--focus-ring);
+}
+
+.jalali-picker-time-separator {
+  color: var(--text-2);
+  font-weight: var(--fw-strong);
+}
+
+.jalali-picker-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  height: 2.25rem;
+  padding: 0 0.75rem;
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-sm);
+  color: var(--text-2);
+  background: var(--surface-1);
+  font-size: 0.76rem;
+  font-weight: var(--fw-strong);
+  transition: color var(--dur-fast) var(--ease-standard), background-color var(--dur-fast) var(--ease-standard), border-color var(--dur-fast) var(--ease-standard), transform var(--dur-instant) var(--ease-press);
+}
+
+.jalali-picker-action:hover {
+  color: var(--text-1);
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+  border-color: color-mix(in srgb, var(--accent) 35%, transparent);
+}
+
+.jalali-picker-action:active {
+  transform: scale(0.98);
+}
+
+.jalali-picker-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--hairline);
+}
+
+.jalali-picker-feedback {
+  margin-top: 0.35rem;
+  color: var(--danger);
+  font-size: 0.76rem;
+}
+/* END overlays-jalali-v1 */
