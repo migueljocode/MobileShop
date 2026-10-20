@@ -600,7 +600,7 @@ Sell and Transactions/Details need no step: they inherit buttons, fields, surfac
 - Risk: LOW
 - Confidence: HIGH
 
-## [ ] Step 14.4 — Stage 14 validation
+## ~~[x] Step 14.4 — Stage 14 validation~~
 - Task: QA (stage gate) · Mandatory.
 - Files: none modified.
 - Symbols: none.

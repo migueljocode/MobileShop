@@ -1,29 +1,91 @@
-# Actor report — Step 13.2 (Stage 13 validation)
+# Actor report — Step 14.4 (Stage 14 validation)
 
-- Commit: the stage code is committed as one stage commit `bedb01a` — `fix(web): make the product type filters a labelled wrapping navigation`; this validation changes no production file (no commit, no push, no staging performed, per the owner's changed commit policy for Stage 13). The plan.md heading strike and this act.md are left uncommitted for the orchestrator's records commit after the sign-off.
-- Verification:
-  - CI (re-checked by me, not taken on record): `GET /repos/migueljocode/MobileShop/actions/runs?head_sha=bedb01a0f3aa3e0246ae2523775ab377b3c094b3` → `total_count: 1`; workflow `.NET CI`, event `push`, `run_number: 646`, `status: completed`, `conclusion: success` → **`Action: #646 — Success`** (the only run for the stage head SHA; it covers Step 13.1, the stage's single code commit).
-  - `git show --stat bedb01a` → the stage's file list: `src/MobileShop.Web/Pages/Products/Index.cshtml` (`4 ++--` → 1 file changed, 2 insertions(+), 2 deletions(-)), `.agents/chat/plan.md` (`2 +-` — the 13.1 heading strike), `graphify-out/GRAPH_REPORT.md` (`40 +++---`), `graphify-out/graph.json` (`2 +-`); total `4 files changed, 24 insertions(+), 24 deletions(-)`. The only production file in the stage is `Pages/Products/Index.cshtml`; the plan.md and graphify-out entries are the stage's records/graph refresh, not extra scope.
-  - `git show --stat --no-renames bedb01a` → identical to the above (no renames involved in this stage).
-  - `git show bedb01a -- src/MobileShop.Web/Pages/Products/Index.cshtml` → only the two wrapper lines: `-<div class="btn-group" role="group">` → `+<nav class="d-flex flex-wrap gap-2 mb-3" aria-label="Product type">` and `-</div>` → `+</nav>`; the loop body does not appear in the diff.
-  - `grep -c "btn-group" src/MobileShop.Web/Pages/Products/Index.cshtml` → `0` (no match, exit 1)
-  - `grep -c 'aria-label="Product type"' src/MobileShop.Web/Pages/Products/Index.cshtml` → `1`
-  - `git log --oneline -3` → `bedb01a fix(web): make the product type filters a labelled wrapping navigation` · `3160c13 docs(plan): fold Stage 13 Job A corrections and place the carried-forward fixes` · `fc4026c docs(stage-12): record CI #645, Job B PASS and the owner browser check`
-  - `git rev-parse HEAD` = `git rev-parse origin/main` = `bedb01a0f3aa3e0246ae2523775ab377b3c094b3` — the stage commit is pushed to origin/main.
-  - `git status --porcelain` → ` M .agents/chat/act.md`, ` M .agents/chat/audit.md` (audit.md is the Reviewer's Job B rewrite, not mine) and ` M .agents/chat/plan.md` (this step's heading strike); `git diff --cached --stat` → empty (nothing staged).
-  - All automated checks of the stage hold. No defect found in the stage's committed code.
-- Limitations:
-  - **The owner's manual check was NOT PERFORMED — the owner decided to skip the browser-based visual pass for the remaining stages (too slow).** It is recorded here as an OPEN item so the owner can run it later in one pass. Every item below is marked "not performed — owner skipped the browser pass":
-    1. Products list for phone and two other types (buttons, filters, table, chips, wrapping on a phone) — not performed — owner skipped the browser pass.
-    2. SecondHand — not performed — owner skipped the browser pass.
-    3. Product Details (sections, the Apple ID password still shown as plain `code`, transactions table) — not performed — owner skipped the browser pass.
-    4. Edit (all sections, finished price, action bar, Tab to the last field) — not performed — owner skipped the browser pass. Note: the Edit page still loads the Jalali date picker a second time — a redundant include removed only in Step 16.1, so it is expected here and is not a Stage 13 defect.
-    5. All 11 Create pages (section order, "Add new" modals open with the glass sheet and a visible close X, finished-price field, action bar) — not performed — owner skipped the browser pass.
-    6. Persian text in names renders with the system fallback stack — not performed — owner skipped the browser pass. Expected until Step 15.2 repairs the tracked font assets; not a Stage 13 defect.
-    7. Repeat the key ones in Safari and Firefox — not performed — owner skipped the browser pass.
-  - No dev server was started, no browser was launched and no web/browser tool was used in this step; consequently the visual/responsive behaviour of the new wrapping type navigation is confirmed only by the markup and the CI build, not by a rendered page.
-  - The CI run `Action: #646 — Success` is the only automated evidence for this stage; there is no automated test covering the stage's markup change (Step 13.1 specifies no tests).
-  - Anything else that changed in the pages is still unverified visually; if the owner finds a difference during the later manual pass, it must be listed for a fix step (not fixed inside Step 13.2).
-- Friction noted: None.
-- Problems: None.
-- Status: COMPLETE
+- **Commit:** the stage code is committed as one stage commit `4fa09c0` (`feat(web): make the Transactions count, chart description and error pages legible`); this validation changes no production file. Nothing was committed, pushed or staged by this step. The `plan.md` heading strike and this report stay uncommitted for the orchestrator's records commit after the sign-off.
+
+## Verification (all commands run from the repo root, real output)
+
+### CI
+
+- `gh api "repos/migueljocode/MobileShop/actions/runs?head_sha=4fa09c0883cc09b93651dcd96ca8cf01e74ee684"` → `total_count: 1`; the single run: `run_number: 647`, `status: completed`, `conclusion: success`, workflow `.NET CI`, `event: push`, `head_branch: main`.
+- **Action: #647 — Success** (completed AND successful; it is the only run for that head_sha).
+
+### Stage scope — `git show --stat --no-renames 4fa09c0` (exact output)
+
+```
+commit 4fa09c0883cc09b93651dcd96ca8cf01e74ee684
+Author: migueljocode <mikaeeiljorjany@gmail.com>
+Date:   Tue Oct 20 15:19:16 2026 +0330
+
+    feat(web): make the Transactions count, chart description and error pages legible
+
+    Steps 14.1-14.3 of plan.md: a visible transaction count, a described ProfitLoss chart, danger-red loss rows, and the developer copy removed from the error page.
+
+ .agents/chat/plan.md                               |  6 +++---
+ src/MobileShop.Web/Pages/Error.cshtml              | 13 +------------
+ src/MobileShop.Web/Pages/Privacy.cshtml            |  2 +-
+ src/MobileShop.Web/Pages/Reports/ProfitLoss.cshtml |  6 ++++--
+ src/MobileShop.Web/Pages/Transactions/Index.cshtml |  1 +
+ src/MobileShop.Web/wwwroot/css/surfaces.css        |  9 +++++++++
+ 6 files changed, 19 insertions(+), 18 deletions(-)
+```
+
+- The stage touches exactly the union of the Steps 14.1-14.3 file lists (`Transactions/Index.cshtml`, `Reports/ProfitLoss.cshtml`, `Error.cshtml`, `Privacy.cshtml`, `wwwroot/css/surfaces.css`) plus `.agents/chat/plan.md` (the 14.1/14.2/14.3 heading strikes — 3 lines changed, as shown in the commit diff). **No unexpected file is present.**
+- The two tracked `graphify-out` files (`graphify-out/graph.json`, `graphify-out/GRAPH_REPORT.md`) do **not** appear in the commit: `git diff --stat 4fa09c0 -- graphify-out` is empty and `git status --porcelain graphify-out` is empty, i.e. this stage left them unchanged. Step 14.3 recorded that `graphify update .` reported "No code-graph topology changes detected; outputs left untouched" — so there was no graph diff to commit. Everything else in the expected list is present.
+
+### `git log --oneline -3` (exact output)
+
+```
+4fa09c0 feat(web): make the Transactions count, chart description and error pages legible
+e22def9 docs(stage-13): record CI #646, Job B PASS and the skipped owner visual pass
+7f51c59 docs(todo): complete Stage 13
+```
+
+### Verify commands of Steps 14.1 / 14.2 / 14.3 (real output)
+
+| Step | Check | Result |
+|---|---|---|
+| 14.1 | `grep -c "transactions shown" src/MobileShop.Web/Pages/Transactions/Index.cshtml` | `1` ✔ |
+| 14.2 | `grep -c 'aria-describedby="profit-chart-desc"' src/MobileShop.Web/Pages/Reports/ProfitLoss.cshtml` | `1` ✔ |
+| 14.2 | `grep -c 'id="profit-chart-desc"' src/MobileShop.Web/Pages/Reports/ProfitLoss.cshtml` | `1` ✔ |
+| 14.2 | `grep -c "table-danger" src/MobileShop.Web/Pages/Reports/ProfitLoss.cshtml` | `0` ✔ |
+| 14.2 | `grep -c "row-danger" src/MobileShop.Web/Pages/Reports/ProfitLoss.cshtml` | `1` ✔ |
+| 14.2 | `grep -c "^\.data-table tbody tr\.row-danger td" src/MobileShop.Web/wwwroot/css/surfaces.css` | `1` ✔ |
+| 14.2 | brace balance of `src/MobileShop.Web/wwwroot/css/surfaces.css` | `{` = 62, `}` = 62 → equal ✔ |
+| 14.3 | `grep -c "Development" src/MobileShop.Web/Pages/Error.cshtml` | `0` ✔ |
+| 14.3 | `grep -c "max-width: 70ch" src/MobileShop.Web/Pages/Error.cshtml src/MobileShop.Web/Pages/Privacy.cshtml` | `src/MobileShop.Web/Pages/Error.cshtml:0` and `src/MobileShop.Web/Pages/Privacy.cshtml:0` (0 for both) ✔ |
+| 14.3 | `grep -c 'class="measure"' src/MobileShop.Web/Pages/Error.cshtml src/MobileShop.Web/Pages/Privacy.cshtml` | `src/MobileShop.Web/Pages/Error.cshtml:1` and `src/MobileShop.Web/Pages/Privacy.cshtml:1` (1 for each) ✔ |
+| 14.3 | `grep -c "^\.measure" src/MobileShop.Web/wwwroot/css/surfaces.css` | `1` ✔ |
+| 14.3 | brace balance of `src/MobileShop.Web/wwwroot/css/surfaces.css` | `{` = 62, `}` = 62 → equal ✔ |
+
+- Every automated check of Steps 14.1, 14.2 and 14.3 holds on the committed tree.
+
+### Owner's manual check — NOT PERFORMED (owner decision)
+
+The browser-based owner visual pass is skipped for the remaining stages (owner decision: too slow). No browser and no dev server were started; the following items stay **open** and are **not** claimed as passed — every one of them is "not performed — owner skipped the browser pass":
+
+1. Transactions list (count line, filters, sort, row checkboxes read by a screen reader) — not performed — owner skipped the browser pass.
+2. Sell (pickers by keyboard, date picker, action bar) — not performed — owner skipped the browser pass.
+3. Transaction Details — not performed — owner skipped the browser pass.
+4. ProfitLoss (segmented mode, tabs, chart cards, screen reader reads the chart description, the Distribution loss rows are danger red on a danger tint and legible in dark mode) — not performed — owner skipped the browser pass.
+5. `/Error` — not performed — owner skipped the browser pass.
+6. `/Privacy` — not performed — owner skipped the browser pass.
+7. Repeat the key ones in Safari and Firefox — not performed — owner skipped the browser pass.
+
+## Limitations
+
+- The CI run `Action: #647 — Success` is the **only** automated evidence for this stage. No local `dotnet build`/`dotnet test` was run and no browser-based or manual check was performed, per the CI-only gate and the owner's decision to skip the visual pass.
+- The deferred owner visual pass (the seven items listed above) is planned for the **final stage**; until then the Stage 14 UI changes are only validated by the greps and the green CI run.
+- The step's "Manual check (owner, hard refresh)" is therefore unanswered in this step — it is recorded as an OPEN owner item, not as a pass.
+
+## Friction noted
+
+- The `gh api --jq` query returned no output on the first attempt (the `--jq` filter silently produced nothing); re-running with the raw JSON and reading `run_number`/`status`/`conclusion` worked. No token fallback to `~/.git-credentials` was needed.
+- The expected stage file list mentions the two `graphify-out` files, but this stage produced no graph delta, so they are legitimately absent from the commit. A "must contain" check on those two files would fail for a no-change stage; checking "no unexpected file" is the meaningful assertion here.
+
+## Problems
+
+- None.
+
+## Status
+
+COMPLETE

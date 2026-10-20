@@ -1,32 +1,50 @@
-# Job B verdict — Stage 13, Step 13.2 (stage validation)
+# Reviewer — Job B verdict — Step 14.4 (Stage 14 validation) and Stage 14 sign-off
 
-**PASS**
+**Verdict: PASS** — the stage is complete and Stage 14 is signed off.
 
 ## CI evidence
-- `GET /repos/migueljocode/MobileShop/actions/runs?head_sha=bedb01a0f3aa3e0246ae2523775ab377b3c094b3` → `total_count: 1`; workflow `.NET CI`, event `push`, `run_number: 646`, `status: completed`, `conclusion: success`.
-- **`Action: #646 — Success`** (re-checked by the Reviewer, not taken on record; completed and successful, head_sha matches the stage commit exactly).
+- `GET /repos/migueljocode/MobileShop/actions/runs?head_sha=4fa09c0883cc09b93651dcd96ca8cf01e74ee684` → `total_count: 1`; the single run: `run_number: 647`, workflow `.NET CI`, `event: push`, `head_branch: main`, `status: completed`, `conclusion: success`.
+- **Action: #647 — Success** (completed AND successful — not pending, not interrupted).
 
-## Evidence checked
-- `git show --stat --no-renames bedb01a` → exactly 4 files: `src/MobileShop.Web/Pages/Products/Index.cshtml` (1 file, 2 insertions(+), 2 deletions(-)), `.agents/chat/plan.md` (the 13.1 heading strike), `graphify-out/GRAPH_REPORT.md`, `graphify-out/graph.json`. No other file in the stage; the only production file is `Pages/Products/Index.cshtml`.
-- Step 13.1 greps re-run and hold: `grep -c "btn-group" src/MobileShop.Web/Pages/Products/Index.cshtml` = `0`; `grep -c 'aria-label="Product type"' …Index.cshtml` = `1`.
-- Stage range `fc4026c..bedb01a`: only the two commits above; `git diff --name-only` over the range touches no `_ProductCreate*Form` partial, no `product-create-modal.js`, no `ProductCreateRegistry.cs` — the dead create-product subsystem (R26) is untouched, as the stage requires.
-- Deliverable correctness: the diff is only the two wrapper lines — `<div class="btn-group" role="group">` → `<nav class="d-flex flex-wrap gap-2 mb-3" aria-label="Product type">` and `</div>` → `</nav>`. The `@foreach (var (key, label, _, _) in tabs)` loop body is not in the diff; the 12 links (All + the 11 types, per the `tabs` array at `Products/Index.cshtml:5-19`) keep `btn btn-primary` / `btn btn-outline-primary` and `aria-current="page"` exactly.
-- Commit message `fix(web): make the product type filters a labelled wrapping navigation` is a valid Conventional Commit and describes the change accurately.
+## Stage scope
+- `git show --stat --no-renames 4fa09c0` lists exactly: `.agents/chat/plan.md`, `src/MobileShop.Web/Pages/Error.cshtml`, `src/MobileShop.Web/Pages/Privacy.cshtml`, `src/MobileShop.Web/Pages/Reports/ProfitLoss.cshtml`, `src/MobileShop.Web/Pages/Transactions/Index.cshtml`, `src/MobileShop.Web/wwwroot/css/surfaces.css` — 6 files, 19 insertions / 18 deletions. No unexpected file.
+- `git diff --stat 4fa09c0^ 4fa09c0 -- graphify-out` is empty and `git status --porcelain graphify-out` is empty: the two `graphify-out` files are legitimately absent because the stage produced no graph delta (`graphify update .` reported no topology change). No scope creep.
 
-## The owner's manual check — NOT PERFORMED, treated as ANSWERED
-The owner directed that the browser-based visual pass be skipped for the remaining stages (too slow). act.md records the item as an open item with all seven items listed and each marked "not performed — owner skipped the browser pass": Products list for phone and two other types; SecondHand; Product Details; Edit (incl. the expected redundant second Jalali include, removed only in Step 16.1); the 11 Create pages; the Persian fallback stack (expected until Step 15.2); Safari/Firefox repeat.
+## Greps of 14.1 / 14.2 / 14.3 re-run and hold
+| Check | Expected | Measured |
+|---|---|---|
+| `grep -c "transactions shown" …/Transactions/Index.cshtml` | 1 | 1 ✔ |
+| `grep -c 'aria-describedby="profit-chart-desc"' …/ProfitLoss.cshtml` | 1 | 1 ✔ |
+| `grep -c 'id="profit-chart-desc"' …/ProfitLoss.cshtml` | 1 | 1 ✔ |
+| `grep -c "table-danger" …/ProfitLoss.cshtml` | 0 | 0 ✔ |
+| `grep -c "row-danger" …/ProfitLoss.cshtml` | 1 | 1 ✔ |
+| `grep -c "^\.data-table tbody tr\.row-danger td" …/surfaces.css` | 1 | 1 ✔ |
+| `grep -c "Development" …/Error.cshtml` | 0 | 0 ✔ |
+| `grep -c "max-width: 70ch" …/Error.cshtml …/Privacy.cshtml` | 0 / 0 | 0 / 0 ✔ |
+| `grep -c 'class="measure"' …/Error.cshtml …/Privacy.cshtml` | 1 / 1 | 1 / 1 ✔ |
+| `grep -c "^\.measure" …/surfaces.css` | 1 | 1 ✔ |
+| brace balance of `surfaces.css` | equal | 62 / 62 ✔ |
 
-I treat "the owner's manual check answered" as **MET — answered as "not performed at the owner's direction, items listed for a later pass"**: the item is answered (a decision plus a complete item list), not silently skipped, and the deferred visual evidence is already covered by the owner's browser verification pack in Step 16.2, which repeats the manual checks for every stage on the final build. The two known visual conditions that act.md flags (the redundant Jalali include on Edit, the Persian font fallback) are scheduled non-defects (Step 16.1 / Step 15.2), not Stage 13 regressions. This item therefore **does not block the sign-off**; the visual pass remains an open owner item.
+## The stage's deliverable (from the diff)
+- **Visible transaction count** — `Transactions/Index.cshtml:73` adds `<p class="text-muted small">@Model.Transactions.Count transactions shown</p>` directly before `<div class="table-responsive">`, inside the `else` branch of `@if (Model.Transactions.Count == 0)`, using the same `Model.Transactions` collection the table iterates (`IReadOnlyList<TransactionListItemViewModel>`, `Index.cshtml.cs:6`). Plain text, no live region, as the plan required.
+- **Described ProfitLoss trend chart** — `ProfitLoss.cshtml` keeps the existing `aria-label` and adds `aria-describedby="profit-chart-desc"` on the `profitLossChart` canvas plus `<p id="profit-chart-desc" class="visually-hidden">…</p>` directly after the closing `</div>` of `.profit-chart-canvas`; `visually-hidden` is a Bootstrap utility already loaded by the app. Applied to the trend chart only.
+- **Legible loss rows — the pre-existing black-on-dark defect from `648034c` is closed** — the Distribution row class changed from Bootstrap's whole-table variant `table-danger` to the repo class `row-danger`, and `surfaces.css` gained `.data-table tbody tr.row-danger td { color: var(--danger); background-color: var(--danger-soft); }`. Both tokens exist in `tokens.css` (`--danger` line 38, `--danger-soft` line 77) — no hex literal, no new token, no `!important`. The rule is (0,2,3) and outranks `.data-table tbody tr:hover` (0,2,2) at `surfaces.css:234`, so the danger tint survives hover. The Stage 12 Job B carry-forward is therefore closed.
+- **Error page** — the `Development Mode` heading and the two developer paragraphs are removed from `Error.cshtml`; the apology sentence and the `@if (Model.ShowRequestId)` Request ID block stay. Both `Error.cshtml` and `Privacy.cshtml` now use `<div class="measure">` instead of the inline `max-width: 70ch` style, and `surfaces.css` gained `.measure { max-width: var(--size-measure); }` (`--size-measure: 70ch`, `tokens.css:127`).
 
-## Global Definition of Done — stage item
-- CI green with the run number recorded in act.md → `Action: #646 — Success`, recorded.
-- The greps of the stage recorded → `btn-group` = 0, `aria-label="Product type"` = 1, recorded in act.md and re-run here.
-- `git diff --stat` matching the stage's file list → `Products/Index.cshtml` (2+/2-) plus the plan.md records entry and the two graphify-out files; nothing else.
-- The owner's manual check answered → answered as "not performed at the owner's direction, items listed for a later pass" (see above).
-→ Met.
+## The skipped owner manual check
+- The browser-based owner visual pass was **skipped at the owner's direction** (the owner decided the browser pass is too slow for the remaining stages). `act.md` records the seven manual items as **NOT PERFORMED** and lists them as open owner items for the deferred final-stage pass — nothing is claimed as passed that was not performed.
+- Judgement applied explicitly, following the Stage 13 Job B precedent: a manual check **answered as "not performed at the owner's direction"** is **NOT blocking** for a stage sign-off. The item is *answered* (recorded, with its seven open items carried forward), not *skipped silently*, and the risk it covers is deferred by the owner to the final stage, which is the same disposition the Stage 13 Job B accepted. The only automated evidence for this stage is therefore `Action: #647 — Success` plus the greps above.
 
-## Stage sign-off performed
-- `.agents/TODO.md` line 7 changed from `- [ ] Stage 13 — Pages B: Products list, details, edit and the 11 create forms` to `- [x] ~~Stage 13 — Pages B: Products list, details, edit and the 11 create forms~~`. No other stage added, edited, reordered or unticked.
-- Committed as `docs(todo): complete Stage 13` (named file only, no push, no Co-authored-by).
+## Global Definition of Done (stage item) — met
+"CI green with run numbers recorded in act.md, the greps of the stage recorded, `git diff --stat` matching the stage's file lists, and the owner's manual check answered."
+- CI green with the run number recorded: **Action: #647 — Success** ✔ (recorded in `act.md` §CI)
+- Greps of the stage recorded and re-verified: ✔ (table above)
+- `git diff --stat` matching the stage's file lists: ✔ (exactly the 6 files listed; the two `graphify-out` files legitimately absent — no graph delta)
+- The owner's manual check answered: ✔ (answered as not performed at the owner's direction, recorded as seven open owner items for the deferred final-stage pass)
 
-Next: the Planner, for Stage 14.
+## Sign-off performed
+- `.agents/TODO.md`: `- [ ] Stage 14 — Pages C: Transactions, Reports, Error and Privacy` → `- [x] ~~Stage 14 — Pages C: Transactions, Reports, Error and Privacy~~` (that line only; no stage added, reordered, rewritten or unticked).
+- Committed as `docs(todo): complete Stage 14`, `.agents/TODO.md` only, no Co-authored-by, not pushed (the orchestrator pushes).
+- `act.md`, `plan.md` and this `audit.md` are left uncommitted for the orchestrator's records commit.
+
+**Next: the Planner — Stage 15 (Step 15.1).**
