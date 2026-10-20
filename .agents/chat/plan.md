@@ -303,7 +303,7 @@ Order rule: the visual family first (10.1), then markup and behaviour (10.2-10.4
 - Risk: LOW
 - Confidence: HIGH
 
-## [ ] Step 10.3 — Combobox keyboard model: helper in `site.js`, wired into the person picker
+## ~~[x] Step 10.3 — Combobox keyboard model: helper in `site.js`, wired into the person picker~~
 - Task: COMP-013 (part 1) · F-19 · Priority P0 · Effort M · Mandatory · Type A.
 - Files: modify: `src/MobileShop.Web/wwwroot/js/site.js`, `src/MobileShop.Web/wwwroot/js/person-picker.js`.
 - Symbols: new `window.wireComboboxKeys(input, list, hooks)` in site.js, **defined as a top-level global assignment** (the pattern of the existing `window.parseMoneyInput` at `site.js:5`, executed at parse time — **not** inside the `DOMContentLoaded` ready block at `site.js:101`); load order in `_Layout.cshtml`: the page `Scripts` section is rendered at line 40, `site.js` at line 41, `person-picker.js` at line 43 — so site.js is parsed **after** `product-picker.js` but **before** `person-picker.js`, and only a top-level definition makes the helper exist before any `DOMContentLoaded` handler runs; in person-picker.js the existing `renderResults`, the focus, input and blur handlers and the result-visibility code.

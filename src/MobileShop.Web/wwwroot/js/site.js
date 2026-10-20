@@ -31,6 +31,103 @@ window.formatMoneyInput = function (input) {
     }
 };
 
+// Keyboard model for the searchable comboboxes (person picker, product picker).
+// Defined at the top level of the file on purpose: it must already exist when a
+// ready handler runs, so it may not live inside the ready block below.
+window.wireComboboxKeys = function (input, list, hooks) {
+    if (!input || !list) {
+        return { reset: () => { } };
+    }
+
+    const openList = hooks && typeof hooks.open === 'function' ? hooks.open : () => { };
+    const closeList = hooks && typeof hooks.close === 'function' ? hooks.close : () => { };
+    let activeIndex = -1;
+
+    const isListOpen = () => !list.classList.contains('d-none');
+
+    const readOptions = () => {
+        const options = Array.from(list.querySelectorAll('[role="option"]'));
+        const prefix = list.id ? list.id : 'combo';
+        options.forEach((option, index) => {
+            if (!option.id) option.id = `${prefix}-opt-${index}`;
+            option.setAttribute('tabindex', '-1');
+        });
+        return options;
+    };
+
+    const clearActive = () => {
+        list.querySelectorAll('[role="option"]').forEach(option => {
+            option.classList.remove('is-active');
+            option.setAttribute('aria-selected', 'false');
+        });
+        input.removeAttribute('aria-activedescendant');
+        activeIndex = -1;
+    };
+
+    const setActive = index => {
+        const options = readOptions();
+        if (options.length === 0) return;
+
+        const target = Math.max(0, Math.min(index, options.length - 1));
+        options.forEach((option, position) => {
+            const isActive = position === target;
+            option.classList.toggle('is-active', isActive);
+            option.setAttribute('aria-selected', isActive ? 'true' : 'false');
+        });
+
+        const option = options[target];
+        activeIndex = target;
+        input.setAttribute('aria-activedescendant', option.id);
+        if (typeof option.scrollIntoView === 'function') {
+            option.scrollIntoView({ block: 'nearest' });
+        }
+    };
+
+    input.addEventListener('keydown', event => {
+        const key = event.key;
+        if (key !== 'ArrowDown' && key !== 'ArrowUp' && key !== 'Enter' && key !== 'Escape') return;
+
+        const options = readOptions();
+        const isOpen = isListOpen();
+
+        if (key === 'ArrowDown') {
+            if (options.length === 0) return;
+            if (!isOpen) {
+                openList();
+                event.preventDefault();
+                return;
+            }
+            setActive(activeIndex < 0 ? 0 : activeIndex + 1);
+            event.preventDefault();
+            return;
+        }
+
+        if (key === 'ArrowUp') {
+            if (!isOpen || options.length === 0) return;
+            setActive(activeIndex < 0 ? 0 : activeIndex - 1);
+            event.preventDefault();
+            return;
+        }
+
+        if (key === 'Enter') {
+            if (activeIndex < 0) return;
+            const option = options[activeIndex];
+            if (!option) return;
+            event.preventDefault();
+            event.stopPropagation();
+            option.click();
+            return;
+        }
+
+        if (!isOpen) return;
+        closeList();
+        event.preventDefault();
+        event.stopPropagation();
+    });
+
+    return { reset: clearActive };
+};
+
 const moneyInputSelector =
     '[data-price], [data-amount], [data-finished-price-input], input[inputmode="numeric"][name*="Price"], input[inputmode="numeric"][name*="ProfitAmount"]';
 

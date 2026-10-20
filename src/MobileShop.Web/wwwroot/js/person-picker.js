@@ -16,12 +16,29 @@ document.addEventListener('DOMContentLoaded', function () {
         var modalInstance = bootstrap.Modal.getOrCreateInstance(modal);
         var timer;
         var isFocused = false;
+        var combobox = null;
+
+        var liveRegion = document.createElement('span');
+        liveRegion.className = 'visually-hidden';
+        liveRegion.setAttribute('role', 'status');
+        liveRegion.setAttribute('aria-live', 'polite');
+        if (results.id) liveRegion.id = results.id + '-status';
+        results.insertAdjacentElement('afterend', liveRegion);
+
+        function openResults() {
+            results.classList.remove('d-none');
+            searchInput.setAttribute('aria-expanded', 'true');
+        }
+
+        function closeResults() {
+            results.classList.add('d-none');
+            searchInput.setAttribute('aria-expanded', 'false');
+        }
 
         function setSelection(id, label) {
             valueInput.value = String(id);
             searchInput.value = label;
-            results.classList.add('d-none');
-            searchInput.setAttribute('aria-expanded', 'false');
+            closeResults();
             picker.querySelector('[data-person-error]').textContent = '';
         }
 
@@ -40,9 +57,16 @@ document.addEventListener('DOMContentLoaded', function () {
                 results.appendChild(button);
             });
             var isVisible = isFocused && options.length > 0;
-            results.classList.toggle('d-none', !isVisible);
-            searchInput.setAttribute('aria-expanded', isVisible ? 'true' : 'false');
+            if (isVisible) {
+                openResults();
+            } else {
+                closeResults();
+            }
+            liveRegion.textContent = options.length > 0 ? options.length + ' results' : 'No results';
+            if (combobox) combobox.reset();
         }
+
+        combobox = window.wireComboboxKeys(searchInput, results, { open: openResults, close: closeResults });
 
         function showSearchLoading() {
             results.setAttribute('aria-busy', 'true');
@@ -104,8 +128,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         searchInput.addEventListener('blur', function () {
             isFocused = false;
-            results.classList.add('d-none');
-            searchInput.setAttribute('aria-expanded', 'false');
+            closeResults();
         });
 
         results.addEventListener('mousedown', function (event) {
