@@ -242,7 +242,7 @@ Order rule: base first (9.1), then `surfaces.css` grows by family (9.2 cards, 9.
 - Risk: LOW
 - Confidence: HIGH
 
-## [ ] Step 9.6 — Canvas shell and ambient layer (gated on owner decision Q-04)
+## ~~[x] Step 9.6 — Canvas shell and ambient layer (gated on owner decision Q-04)~~ — SKIPPED (Q-04 not approved)
 - Task: SHELL-001 · F-02, F-05 · Priority P2 · Effort M · Optional (owner approval) · Type V.
 - Gate: this step is GATED on owner decision Q-04 — run it only if the owner answered yes in the run instructions (the durable channel for the answer; `.agents/chat/audit.md` is overwritten by every Reviewer pass and is not a channel for it). Otherwise SKIP the step — do not implement it — tick it as skipped with the reason "Q-04 not approved" and continue. The Actor never invents the owner's answer.
 - Files: modify: `src/MobileShop.Web/wwwroot/css/base.css`.
@@ -257,7 +257,7 @@ Order rule: base first (9.1), then `surfaces.css` grows by family (9.2 cards, 9.
 - Risk: MEDIUM
 - Confidence: MEDIUM
 
-## [ ] Step 9.7 — Stage 9 validation
+## ~~[x] Step 9.7 — Stage 9 validation~~
 - Task: QA (stage gate) · Mandatory.
 - Files: none modified.
 - Symbols: none.
