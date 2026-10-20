@@ -508,7 +508,7 @@ Order rule: the shared password toggle first (12.1), then the login stylesheet t
 - Risk: LOW
 - Confidence: MEDIUM
 
-## [ ] Step 12.5 — Stage 12 validation
+## ~~[x] Step 12.5 — Stage 12 validation~~
 - Task: QA (stage gate) · Mandatory.
 - Files: none modified.
 - Symbols: none.
