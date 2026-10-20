@@ -214,7 +214,7 @@ Order rule: base first (9.1), then `surfaces.css` grows by family (9.2 cards, 9.
 - Risk: MEDIUM
 - Confidence: MEDIUM
 
-## [ ] Step 9.4 — Chips and alerts
+## ~~[x] Step 9.4 — Chips and alerts~~
 - Task: COMP-009 (chips), COMP-010 · F-03 · Priority P1 · Effort S · Mandatory · Type V.
 - Files: modify: `src/MobileShop.Web/wwwroot/css/surfaces.css`, `src/MobileShop.Web/wwwroot/css/app-theme.css`, `src/MobileShop.Web/wwwroot/css/components.css`.
 - Symbols: block `surfaces-feedback-v1` (R27); app-theme.css group from `.badge {` through the `.field-validation-valid`/`.validation-summary-valid` rule (`.badge`, `.alert`, the four `.alert-*` variants, `.text-danger`, `.field-validation-error`, `.validation-summary-errors`, the valid-state hide rule; find the group by its selector text, not by line number); components.css `.status-chip`, `.status-chip--available`, `.status-chip--sold`, `.status-chip--used`.

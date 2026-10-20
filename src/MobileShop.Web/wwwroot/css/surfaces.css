@@ -246,3 +246,56 @@ th.num {
   }
 }
 /* END surfaces-tables-v1 */
+
+/* BEGIN surfaces-feedback-v1 */
+/* Status chips (pill, tinted fill plus text, never colour alone), alerts (no blur), validation text. */
+.status-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.15rem 0.6rem;
+  border-radius: var(--radius-pill);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-strong);
+}
+
+.status-chip--available {
+  background-color: var(--accent-soft);
+  color: var(--accent);
+}
+
+.status-chip--sold {
+  background-color: color-mix(in srgb, var(--text-2) 16%, transparent);
+  color: var(--text-2);
+}
+
+.status-chip--used {
+  background-color: var(--warn-soft);
+  color: var(--warn);
+}
+
+.alert {
+  border-radius: var(--radius-lg);
+  color: var(--text-1);
+  background-color: var(--surface-2);
+}
+
+.alert-success,
+.alert-info {
+  border-color: var(--accent);
+}
+
+.alert-danger {
+  border-color: var(--danger);
+}
+
+.text-danger,
+.field-validation-error,
+.validation-summary-errors {
+  color: var(--danger) !important;
+}
+
+.validation-summary-valid,
+.field-validation-valid {
+  display: none;
+}
+/* END surfaces-feedback-v1 */

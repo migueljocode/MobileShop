@@ -213,53 +213,6 @@
   box-shadow: none;
 }
 
-.badge {
-  padding: 0.42em 0.66em;
-  border-radius: 999px;
-  font-weight: 500;
-  color: var(--ink-muted);
-  background-color: color-mix(in srgb, var(--ink-muted) 16%, transparent);
-}
-
-.alert {
-  border-radius: 0.95rem;
-  color: var(--ink);
-  background-color: var(--panel-raised);
-  -webkit-backdrop-filter: blur(16px);
-  backdrop-filter: blur(16px);
-}
-
-.alert-success {
-  border-color: var(--accent);
-  background-color: var(--panel-raised);
-}
-
-.alert-danger {
-  border-color: var(--danger);
-  background-color: var(--panel-raised);
-}
-
-.alert-warning {
-  border-color: var(--warn);
-  background-color: var(--panel-raised);
-}
-
-.alert-info {
-  border-color: var(--accent);
-  background-color: var(--panel-raised);
-}
-
-.text-danger,
-.field-validation-error,
-.validation-summary-errors {
-  color: var(--danger) !important;
-}
-
-.validation-summary-valid,
-.field-validation-valid {
-  display: none;
-}
-
 .modal-content,
 .dropdown-menu,
 .popover {

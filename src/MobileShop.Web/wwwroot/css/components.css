@@ -29,30 +29,6 @@
   }
 }
 
-.status-chip {
-  display: inline-flex;
-  align-items: center;
-  padding: 0.15rem 0.6rem;
-  border-radius: var(--r-control);
-  font-size: var(--fs-sm);
-  font-weight: 500;
-}
-
-.status-chip--available {
-  background-color: color-mix(in srgb, var(--accent) 16%, transparent);
-  color: var(--accent);
-}
-
-.status-chip--sold {
-  background-color: color-mix(in srgb, var(--ink-muted) 16%, transparent);
-  color: var(--ink-muted);
-}
-
-.status-chip--used {
-  background-color: color-mix(in srgb, var(--warn) 16%, transparent);
-  color: var(--warn);
-}
-
 .skip-link {
   position: absolute;
   left: -10000px;
