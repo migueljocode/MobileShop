@@ -186,7 +186,7 @@ Order rule: base first (9.1), then `surfaces.css` grows by family (9.2 cards, 9.
 - Risk: MEDIUM (load-order sensitive; every page)
 - Confidence: MEDIUM
 
-## [ ] Step 9.2 — Surface family: cards, stat tiles, form sections, chart cards, page header, empty and loading states
+## ~~[x] Step 9.2 — Surface family: cards, stat tiles, form sections, chart cards, page header, empty and loading states~~
 - Task: COMP-007 · F-01, F-02, F-09 · Priority P1 · Effort M · Mandatory · Type V.
 - Files: create: `src/MobileShop.Web/wwwroot/css/surfaces.css`; modify: `src/MobileShop.Web/wwwroot/css/app-theme.css`, `src/MobileShop.Web/wwwroot/css/components.css`, `src/MobileShop.Web/Pages/Shared/_Layout.cshtml`.
 - Symbols: block `surfaces-cards-v1` (R27); app-theme.css rules `.card { … }`, `.card-title { … }` and the contiguous profit-chart group from `.profit-chart-card {` through `.profit-chart-empty { … }` (find both groups by their selector text, not by line number: earlier steps shift them); components.css rules `.page-head`, `.page-head__title`, `.page-head__sub`, `.page-head__actions`, `.toolbar`, `.toolbar .form-label`, `.stat-grid`, `.stat`, `.stat__value`, `.stat__label`, `.form-section`, `.form-section__title`, `.empty-state`, `.empty-state__title`, `.empty-state__hint`, `.loading-line`, `.num`, `td.num, th.num`, and the `@media (max-width: 575.98px)` block that holds `.toolbar > *` and `.page-head__actions`.

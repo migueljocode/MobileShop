@@ -1,0 +1,196 @@
+/* BEGIN surfaces-cards-v1 */
+/* One surface family (material M2): cards, stat tiles, form sections and chart cards share fill, edge, radius
+   and elevation. Also page header, toolbar, stat grid, empty and loading states, numeric alignment. */
+.card,
+.stat,
+.form-section,
+.profit-chart-card {
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-lg);
+  color: var(--text-1);
+  background-color: var(--surface-2);
+  box-shadow: var(--shadow-1), var(--edge-highlight);
+}
+
+.card {
+  overflow: hidden;
+}
+
+.card-title {
+  color: var(--text-1);
+}
+
+.page-head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: end;
+  gap: var(--space-4);
+  margin-bottom: var(--space-5);
+  border-bottom: 1px solid var(--hairline);
+  padding-bottom: var(--space-3);
+}
+
+.page-head__title {
+  margin: 0;
+}
+
+.page-head__sub {
+  margin: 0;
+  color: var(--text-2);
+  font-size: var(--fs-sm);
+}
+
+.page-head__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: end;
+  margin-bottom: var(--space-4);
+}
+
+.toolbar .form-label {
+  font-size: var(--fs-sm);
+  color: var(--text-2);
+}
+
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+  gap: var(--space-3);
+}
+
+.stat {
+  padding: var(--space-4);
+}
+
+.stat__value {
+  font-size: var(--fs-h2);
+  font-weight: var(--fw-strong);
+  font-variant-numeric: tabular-nums;
+}
+
+.stat__label {
+  color: var(--text-2);
+  font-size: var(--fs-sm);
+}
+
+.form-section {
+  padding: var(--space-4) var(--space-5);
+  margin-bottom: var(--space-4);
+}
+
+.form-section__title {
+  font-size: var(--fs-lg);
+  font-weight: var(--fw-strong);
+  margin-bottom: var(--space-3);
+}
+
+.profit-chart-card {
+  margin: 1.4rem 0 1.8rem;
+  padding: clamp(1rem, 2vw, 1.5rem);
+  overflow: hidden;
+}
+
+.profit-chart-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin-bottom: 0.8rem;
+}
+
+.profit-chart-heading h2 {
+  margin-bottom: 0.25rem;
+  font-size: 1.1rem;
+}
+
+.profit-chart-heading p {
+  margin: 0;
+  color: var(--text-2);
+  font-size: 0.85rem;
+}
+
+.profit-chart-range {
+  flex: 0 0 auto;
+  padding: 0.35rem 0.65rem;
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-pill);
+  color: var(--text-2);
+  background: var(--surface-1);
+  font-size: 0.73rem;
+}
+
+.profit-chart-canvas {
+  position: relative;
+  width: 100%;
+  height: 360px;
+}
+
+.profit-chart-legend {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0.2rem 0 0 0.45rem;
+  color: var(--text-2);
+  font-size: 0.78rem;
+}
+
+.profit-chart-legend span {
+  width: 1.1rem;
+  height: 0.18rem;
+  border-radius: var(--radius-pill);
+  background: var(--accent);
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 2.5rem var(--space-4);
+  border: 1px dashed var(--border-control);
+  border-radius: var(--radius-lg);
+}
+
+.empty-state__title {
+  font-size: var(--fs-lg);
+  margin: 0;
+}
+
+.empty-state__hint {
+  color: var(--text-2);
+  margin: 0;
+}
+
+.loading-line {
+  color: var(--text-2);
+  font-size: var(--fs-sm);
+  padding: var(--space-2) var(--space-3);
+}
+
+.num {
+  font-variant-numeric: tabular-nums;
+}
+
+td.num,
+th.num {
+  text-align: end;
+}
+
+@media (max-width: 575.98px) {
+  .toolbar > * {
+    flex: 1 1 100%;
+  }
+
+  .page-head__actions {
+    width: 100%;
+  }
+}
+/* END surfaces-cards-v1 */
