@@ -378,7 +378,7 @@ Correction round (Job B HIGH): the optional `hooks.cancel()` hook and the reques
 # Stage 11 — Navigation shell: dock token migration, flyout grouping, focus clearance, action bar, mobile safe areas
 Order rule: remove the template override first (11.1), then move the remaining shell rules into `shell.css` and retire `components.css` (11.2), then the value-identical dock token swap (11.3), then the mobile shell (11.4). Flyout grouping (UX-001, Q-09) and cross-document view transitions (SHELL-009) are deferred: no step exists until the owner approves them (R22), at which point the Planner adds one.
 
-## [ ] Step 11.1 — Remove the scoped template stylesheet (footer and link override, F-45)
+## ~~[x] Step 11.1 — Remove the scoped template stylesheet (footer and link override, F-45)~~
 - Task: SHELL-002 · F-45 · Priority P1 · Effort S · Mandatory · Type V.
 - Files: delete: `src/MobileShop.Web/Pages/Shared/_Layout.cshtml.css`; modify: `src/MobileShop.Web/Pages/Shared/_Layout.cshtml` (the `MobileShop.Web.styles.css` link only).
 - Symbols: the layout line `<link rel="stylesheet" href="~/MobileShop.Web.styles.css" asp-append-version="true" />` and the whole scoped file (template leftovers `a`, `.navbar-brand`, `.btn-primary`, `.nav-pills`, `.border-top`, `.border-bottom`, `.box-shadow`, `button.accept-policy`, `.footer`).
