@@ -526,7 +526,7 @@ Order rule: the shared password toggle first (12.1), then the login stylesheet t
 # Stage 13 — Pages B: Products list, details, edit and the 11 create forms
 Stages 8-12 restyle these pages through shared classes (`page-head`, `toolbar`, `form-section`, `data-table`, `status-chip`, buttons, fields, modals, action bar), so this stage is mostly verification plus one markup fix. The 11 `_ProductCreate*Form` partials, `product-create-modal.js` and `ProductCreateRegistry.cs` are dead code (R26) and are neither restyled nor deleted here. Inline `style="display:none"` attributes are JS-toggled state, not visual debt, and stay.
 
-## [ ] Step 13.1 — Products list: type buttons become a labelled navigation that wraps
+## ~~[x] Step 13.1 — Products list: type buttons become a labelled navigation that wraps~~
 - Task: ROUTE-006 · F-32 (filters), F-27 (part) · Priority P2 · Effort S · Mandatory · Type A.
 - Files: modify: `src/MobileShop.Web/Pages/Products/Index.cshtml` only.
 - Symbols: line 34 `<div class="btn-group" role="group">` and its closing `</div>` on line 62 (around the `@foreach (var (key, label, _, _) in tabs)` loop of 12 type links: All + the 11 product types).

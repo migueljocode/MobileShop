@@ -31,7 +31,7 @@
         }
     </div>
 </div>
-<div class="btn-group" role="group">
+<nav class="d-flex flex-wrap gap-2 mb-3" aria-label="Product type">
     @foreach (var (key, label, _, _) in tabs)
     {
         var isActive = Model.Type == key;
@@ -59,7 +59,7 @@
                asp-route-sortDirection="@Model.SortDirection">@label</a>
         }
     }
-</div>
+</nav>
 <div class="toolbar">
     <form method="get" class="row g-2 align-items-end mb-3">
         <input type="hidden" name="type" value="@Model.Type" />

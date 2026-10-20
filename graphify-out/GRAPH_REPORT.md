@@ -1,7 +1,7 @@
 # Graph Report - MobileShop  (2026-10-20)
 
 ## Corpus Check
-- 366 files · ~161,883 words
+- 366 files · ~162,566 words
 - Verdict: corpus is large enough that graph structure adds value.
 - Unclassified: 23 file(s) not represented in the graph (top: .css 7, (none) 5, .woff2 5)
 
@@ -11,7 +11,7 @@
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `4e89e3cc`
+- Built from commit: `3160c136`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -62,7 +62,7 @@
 - QuestPdfGenerator
 - oo
 - ServiceResult
-- Laptop
+- .getProps
 - sn
 - AppDbContext
 - .OnGetAsync
@@ -77,7 +77,7 @@
 - MobileShop.Models.ViewModels.Web.BindModels
 - Task
 - CableConnector
-- .getProps
+- Laptop
 - .ConfigureBuilder
 - .Calculate
 - CreateGlassInputModel
@@ -87,7 +87,7 @@
 - MobileShop.Models.Extensions
 - DeviceSpec
 - InvoiceViewModel
-- Seller
+- MobileShop.Services.DataServices.Api
 - hs
 - Cable
 - CreateAppleIdInputModel
@@ -106,7 +106,7 @@
 - http
 - CreateChargerModel
 - AccountDataServiceTests
-- MobileShop.Services.DataServices.Api
+- SecondHand
 - MobileShop.Tests.Models.Extensions
 - InvoicePresentation
 - PersianInvoicePresentation
@@ -132,7 +132,7 @@
 - _PasswordToggle.cshtml
 - Charger
 - Guarantee
-- SecondHand
+- Seller
 - CreateCaseInputModel
 - DistributionRow
 - PageModel
@@ -419,9 +419,9 @@ Nodes (11): MobileShop.Web.Pages, MobileShop.Services.DataServices.Interfaces, A
 Cohesion: 0.10
 Nodes (15): beforeDatasetDraw(), beforeDatasetsDraw(), fa(), ga(), ia(), Ie(), io(), na() (+7 more)
 
-### Community 46 - "Laptop"
-Cohesion: 0.17
-Nodes (10): LaptopConfiguration, Laptop, CpuId, CpuNavigation, DisplaySize, GpuId, GpuNavigation, Notes (+2 more)
+### Community 46 - ".getProps"
+Cohesion: 0.16
+Nodes (18): ai(), average(), dataset(), getCenterPoint(), hi(), index(), inRange(), nearest() (+10 more)
 
 ### Community 51 - "microsoft_entityframeworkcore_migrations"
 Cohesion: 0.18
@@ -463,9 +463,9 @@ Nodes (4): PeopleDataService, Logger, IAccountDataService, PeopleDataServiceTest
 Cohesion: 0.07
 Nodes (26): MobileShop.Models.Enums, CableConnector, Hdmi, Jack35, Lightning, MicroUsb, Other, UsbA (+18 more)
 
-### Community 62 - ".getProps"
-Cohesion: 0.16
-Nodes (18): ai(), average(), dataset(), getCenterPoint(), hi(), index(), inRange(), nearest() (+10 more)
+### Community 62 - "Laptop"
+Cohesion: 0.17
+Nodes (10): LaptopConfiguration, Laptop, CpuId, CpuNavigation, DisplaySize, GpuId, GpuNavigation, Notes (+2 more)
 
 ### Community 63 - ".ConfigureBuilder"
 Cohesion: 0.24
@@ -494,10 +494,6 @@ Nodes (8): DeviceSpecConfiguration, DeviceSpec, ChargeSpeed, ProductId, ProductN
 ### Community 71 - "InvoiceViewModel"
 Cohesion: 0.19
 Nodes (7): InvoiceViewModel, IPdfGenerator, FakePdfGenerator, LastFactor, FakePdfGenerator, LastFactor, StubPdfGenerator
-
-### Community 72 - "Seller"
-Cohesion: 0.25
-Nodes (6): SellerConfiguration, Seller, EntityType, PersonId, PersonNavigation, Transactions
 
 ### Community 74 - "Cable"
 Cohesion: 0.10
@@ -558,6 +554,10 @@ Nodes (6): CreateChargerModel, Input, Manufacturers, Message, Models, SuccessMes
 ### Community 91 - "AccountDataServiceTests"
 Cohesion: 0.22
 Nodes (3): AccountDataService, Logger, AccountDataServiceTests
+
+### Community 92 - "SecondHand"
+Cohesion: 0.22
+Nodes (7): SecondHandConfiguration, SecondHand, Notes, ProductId, ProductNavigation, TestPeriodDays, UsedDurationDays
 
 ### Community 94 - "InvoicePresentation"
 Cohesion: 0.12
@@ -627,9 +627,9 @@ Nodes (8): Charger, Notes, Pd, PortCount, ProductId, ProductNavigation, Wattage,
 Cohesion: 0.20
 Nodes (8): GuaranteeConfiguration, Guarantee, Corporation, ExpirationDate, Notes, ProductId, ProductNavigation, StartDate
 
-### Community 118 - "SecondHand"
-Cohesion: 0.22
-Nodes (7): SecondHandConfiguration, SecondHand, Notes, ProductId, ProductNavigation, TestPeriodDays, UsedDurationDays
+### Community 118 - "Seller"
+Cohesion: 0.25
+Nodes (6): SellerConfiguration, Seller, EntityType, PersonId, PersonNavigation, Transactions
 
 ### Community 119 - "CreateCaseInputModel"
 Cohesion: 0.18
