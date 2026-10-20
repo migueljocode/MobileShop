@@ -619,7 +619,7 @@ Sell and Transactions/Details need no step: they inherit buttons, fields, surfac
 Press feedback and token-driven transitions already shipped with each family block (buttons in 8.3, tables and chips in 9.x, overlays in 10.x). This stage adds the preference modes in one place, the modal sheet entrance, the owner switch for solid surfaces, repairs the broken Vazirmatn font assets, and removes the font weight that no rule requests any more.
 Order rule: the motion and preference modes first (15.1), then the Vazirmatn font-asset repair (15.2) — it must run before the Medium face is retired (15.4) and before the stage validation (15.6), because every owner check in this stage looks at Persian text — then the `login.css` re-extraction for the focused invalid login field (15.3), which touches no font and no motion rule and therefore may run right after the font repair — and finally the owner switch for solid surfaces (15.5).
 
-## [ ] Step 15.1 — `motion.css`: preference modes and sheet entrance
+## ~~[x] Step 15.1 — `motion.css`: preference modes and sheet entrance~~
 - Task: MOTION-002/003/004 · F-41 · Priority P0 · Effort M · Mandatory · Type A.
 - Files: create: `src/MobileShop.Web/wwwroot/css/motion.css`; modify: `src/MobileShop.Web/wwwroot/css/tokens.css` (one new token line), `src/MobileShop.Web/Pages/Shared/_Layout.cshtml`.
 - Symbols: block `motion-v1` (R27); the token `--scrim-bg` in `src/MobileShop.Web/wwwroot/css/tokens.css` (line 90) and the new `--scrim-solid-bg` token added directly after it; the layout `<link>` for `navigation-menu.css`.
@@ -633,7 +633,7 @@ Order rule: the motion and preference modes first (15.1), then the Vazirmatn fon
 - Risk: MEDIUM
 - Confidence: MEDIUM
 
-## [ ] Step 15.2 — Repair the Vazirmatn font assets (the tracked `.woff2` files are HTML pages, not fonts)
+## ~~[x] Step 15.2 — Repair the Vazirmatn font assets (the tracked `.woff2` files are HTML pages, not fonts)~~
 - Task: F-06 (font assets), F-36 · Priority P0 · Effort M · Mandatory · Type V.
 - Files: replace: `src/MobileShop.Web/wwwroot/fonts/vazirmatn-regular.woff2`, `src/MobileShop.Web/wwwroot/fonts/vazirmatn-medium.woff2`, `src/MobileShop.Web/wwwroot/fonts/vazirmatn-bold.woff2`; modify (fallback branch only): `src/MobileShop.Web/wwwroot/css/tokens.css`.
 - Symbols: the three `@font-face` blocks of family Vazirmatn in `src/MobileShop.Web/wwwroot/css/tokens.css` (lines 1-23: weight 400 → `src: url('../fonts/vazirmatn-regular.woff2')`, weight 500 → `../fonts/vazirmatn-medium.woff2`, weight 700 → `../fonts/vazirmatn-bold.woff2`); the three tracked files `src/MobileShop.Web/wwwroot/fonts/vazirmatn-regular.woff2`, `vazirmatn-medium.woff2`, `vazirmatn-bold.woff2`.
@@ -647,7 +647,7 @@ Order rule: the motion and preference modes first (15.1), then the Vazirmatn fon
 - Risk: MEDIUM (binary assets the CI cannot inspect and the Actor may not be able to fetch them; the fallback branch changes the Persian face)
 - Confidence: MEDIUM
 
-## [ ] Step 15.3 — `login.css`: the focused invalid field keeps the danger red
+## ~~[x] Step 15.3 — `login.css`: the focused invalid field keeps the danger red~~
 - Task: F-14 (invalid state) · Priority P1 · Effort S · Mandatory · Type V.
 - Files: replace: `src/MobileShop.Web/wwwroot/css/login.css` only.
 - Symbols: the `login-v1` block in R27 (the whole file is the block); inside it the rule `.account-login-field .form-control:focus` and, right after it, the new rule `.account-login-field .form-control.input-validation-error:focus`; in `src/MobileShop.Web/wwwroot/css/controls.css` the rule `.form-control.input-validation-error` (about line 165).
@@ -661,7 +661,7 @@ Order rule: the motion and preference modes first (15.1), then the Vazirmatn fon
 - Risk: MEDIUM
 - Confidence: MEDIUM
 
-## [ ] Step 15.4 — Retire the unused Vazirmatn Medium face
+## ~~[x] Step 15.4 — Retire the unused Vazirmatn Medium face~~
 - Task: COMP-006 (remainder) · F-06, F-36 · Priority P2 · Effort S · Mandatory · Type V.
 - Files: modify: `src/MobileShop.Web/wwwroot/css/tokens.css`; delete: `src/MobileShop.Web/wwwroot/fonts/vazirmatn-medium.woff2`.
 - Symbols: the `@font-face` rule of family Vazirmatn with `font-weight: 500` and `src: url('../fonts/vazirmatn-medium.woff2')` (about lines 10-16).
@@ -675,7 +675,7 @@ Order rule: the motion and preference modes first (15.1), then the Vazirmatn fon
 - Risk: LOW
 - Confidence: HIGH
 
-## [ ] Step 15.5 — Solid-surfaces switch (Profile page, remembered per browser)
+## ~~[x] Step 15.5 — Solid-surfaces switch (Profile page, remembered per browser)~~
 - Task: MOTION-005 · F-08 (parity) · Priority P1 · Effort M · Mandatory · Type U.
 - Files: modify: `src/MobileShop.Web/Pages/Shared/_Layout.cshtml`, `src/MobileShop.Web/Pages/Account/Profile.cshtml`, `src/MobileShop.Web/wwwroot/js/site.js`.
 - Symbols: in the layout `<head>` after the `color-scheme` meta; in Profile.cshtml the end of the second `<section class="form-section" aria-label="Change username or password">` (its closing `</section>` is on line 60 of the 66-line file — find it by the section's `aria-label` text, never by a remembered line number, inside `<div class="col-md-6">`); in site.js the ready block.

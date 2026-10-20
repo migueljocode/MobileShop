@@ -9,14 +9,6 @@
 @font-face {
   font-family: 'Vazirmatn';
   font-style: normal;
-  font-weight: 500;
-  font-display: swap;
-  src: url('../fonts/vazirmatn-medium.woff2') format('woff2');
-}
-
-@font-face {
-  font-family: 'Vazirmatn';
-  font-style: normal;
   font-weight: 700;
   font-display: swap;
   src: url('../fonts/vazirmatn-bold.woff2') format('woff2');
@@ -88,6 +80,7 @@
   --glass-overlay-filter: blur(24px) saturate(1.4) brightness(0.85);
   --glass-solid-bg: var(--panel-raised);
   --scrim-bg: rgb(0 0 0 / 0.55);
+  --scrim-solid-bg: rgb(0 0 0 / 0.72);
   --scrim-filter: blur(6px);
 
   /* Elevation. */

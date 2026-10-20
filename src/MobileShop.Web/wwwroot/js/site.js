@@ -221,6 +221,28 @@ document.addEventListener('DOMContentLoaded', () => {
     }, true);
 
     wireValidationAria();
+
+    // Solid-surfaces switch (Profile page). The choice is remembered per browser in
+    // localStorage; the layout applies it before the first paint. Storage may be
+    // unavailable or blocked, so every access is guarded and the page still works.
+    const surfacesToggle = document.querySelector('[data-surfaces-toggle]');
+    if (surfacesToggle) {
+        surfacesToggle.checked = document.documentElement.dataset.surfaces === 'solid';
+
+        surfacesToggle.addEventListener('change', () => {
+            if (surfacesToggle.checked) {
+                document.documentElement.dataset.surfaces = 'solid';
+                try {
+                    localStorage.setItem('mobileshop.surfaces', 'solid');
+                } catch (e) { }
+            } else {
+                delete document.documentElement.dataset.surfaces;
+                try {
+                    localStorage.removeItem('mobileshop.surfaces');
+                } catch (e) { }
+            }
+        });
+    }
 });
 
 document.addEventListener('click', event => {

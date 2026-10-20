@@ -1,0 +1,103 @@
+/* BEGIN motion-v1 */
+/* Preference modes. Materials read only the glass tokens, so each mode overrides the tokens in one place:
+   solid surfaces for reduced transparency, more contrast, or the owner switch html[data-surfaces="solid"].
+   The solid scrim colour is the token --scrim-solid-bg (tokens.css); this file holds no colour literal. */
+@media (prefers-reduced-transparency: reduce) {
+  :root {
+    --glass-regular-bg: var(--glass-solid-bg);
+    --glass-subtle-bg: var(--glass-solid-bg);
+    --glass-overlay-bg: var(--glass-solid-bg);
+    --glass-regular-filter: none;
+    --glass-subtle-filter: none;
+    --glass-overlay-filter: none;
+    --scrim-bg: var(--scrim-solid-bg);
+    --scrim-filter: none;
+    --border-glass: var(--border-control);
+  }
+}
+
+html[data-surfaces="solid"] {
+  --glass-regular-bg: var(--glass-solid-bg);
+  --glass-subtle-bg: var(--glass-solid-bg);
+  --glass-overlay-bg: var(--glass-solid-bg);
+  --glass-regular-filter: none;
+  --glass-subtle-filter: none;
+  --glass-overlay-filter: none;
+  --scrim-bg: var(--scrim-solid-bg);
+  --scrim-filter: none;
+  --border-glass: var(--border-control);
+}
+
+@media (prefers-contrast: more) {
+  :root {
+    --glass-regular-bg: var(--glass-solid-bg);
+    --glass-subtle-bg: var(--glass-solid-bg);
+    --glass-overlay-bg: var(--glass-solid-bg);
+    --glass-regular-filter: none;
+    --glass-subtle-filter: none;
+    --glass-overlay-filter: none;
+    --scrim-bg: var(--scrim-solid-bg);
+    --scrim-filter: none;
+    --border-glass: var(--text-2);
+    --hairline: var(--text-2);
+    --border-control: var(--text-2);
+    --text-2: var(--text-1);
+    --focus-ring: 0 0 0 2px var(--ground), 0 0 0 5px var(--accent);
+  }
+}
+
+@media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
+  .account-login-page {
+    background: none;
+  }
+}
+
+html[data-surfaces="solid"] .account-login-page {
+  background: none;
+}
+
+@media (forced-colors: active) {
+  .btn,
+  .form-control,
+  .form-select,
+  .card,
+  .stat,
+  .form-section,
+  .modal-content,
+  .action-bar,
+  .account-login-card {
+    border: 1px solid CanvasText;
+    box-shadow: none;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+
+  :focus-visible {
+    outline: 2px solid Highlight;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn:active {
+    transform: none;
+  }
+}
+
+/* Modal sheet entrance: short spring, then settle; the backdrop fades. */
+.modal.fade {
+  transition: opacity var(--dur-base) var(--ease-standard);
+}
+
+.modal.fade .modal-dialog {
+  transform: translateY(12px) scale(0.98);
+  transition: transform var(--dur-sheet) var(--ease-spring);
+}
+
+.modal.show .modal-dialog {
+  transform: none;
+}
+
+.modal-backdrop.fade {
+  transition: opacity var(--dur-slow) var(--ease-out);
+}
+/* END motion-v1 */

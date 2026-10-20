@@ -89,6 +89,10 @@
   box-shadow: var(--focus-ring);
 }
 
+.account-login-field .form-control.input-validation-error:focus {
+  border-color: var(--danger);
+}
+
 .password-visibility-toggle {
   display: grid;
   min-width: 3rem;
