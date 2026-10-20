@@ -420,7 +420,7 @@ Order rule: remove the template override first (11.1), then move the remaining s
 - Risk: MEDIUM (value-identical, but it is the most elaborate component)
 - Confidence: HIGH
 
-## [ ] Step 11.4 — Mobile shell: safe areas, theme colour, dynamic viewport height, font preload
+## ~~[x] Step 11.4 — Mobile shell: safe areas, theme colour, dynamic viewport height, font preload~~
 - Task: SHELL-006 · F-26, F-36 · Priority P1 · Effort M · Mandatory · Type V.
 - Files: modify: `src/MobileShop.Web/Pages/Shared/_Layout.cshtml`, `src/MobileShop.Web/wwwroot/css/base.css`, `src/MobileShop.Web/wwwroot/css/navigation-menu.css`.
 - Symbols: the layout meta `<meta name="viewport" content="width=device-width, initial-scale=1.0" />` and the `color-scheme` meta added in Step 7.2; in base.css the `body` rule (`min-height: 100vh;`) and the `.container > main[role="main"]` rule (`min-height: calc(100vh - 10rem);`); in navigation-menu.css `.floating-navigation { … bottom: 1.25rem; … }` (line 27) **and** the phone override in the `@media (max-width: 575.98px)` block, `.floating-navigation { … bottom: max(0.65rem, env(safe-area-inset-bottom)); }` (line 480) — same specificity as line 27 and later in the file, so it wins on every phone and has to be edited too.

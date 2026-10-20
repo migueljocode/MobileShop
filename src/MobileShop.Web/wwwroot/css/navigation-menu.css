@@ -24,7 +24,7 @@ body.has-floating-navigation {
   z-index: var(--z-dock);
   isolation: isolate;
   left: 50%;
-  bottom: 1.25rem;
+  bottom: max(1.25rem, calc(env(safe-area-inset-bottom, 0px) + 0.5rem));
   width: max-content;
   max-width: calc(100vw - 2rem);
   transform: translateX(-50%);
@@ -475,7 +475,7 @@ body.has-floating-navigation {
   .floating-navigation {
     --nav-dock-radius: 2.05rem;
     --nav-flyout-h: min(clamp(17rem, 38vh, 20rem), calc(100dvh - 12rem));
-    bottom: max(0.65rem, env(safe-area-inset-bottom));
+    bottom: max(0.65rem, calc(env(safe-area-inset-bottom, 0px) + 0.5rem));
     max-width: calc(100vw - 0.75rem);
   }
 
