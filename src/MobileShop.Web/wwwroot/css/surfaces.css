@@ -299,3 +299,68 @@ th.num {
   display: none;
 }
 /* END surfaces-feedback-v1 */
+
+/* BEGIN surfaces-controls-v1 */
+/* Tabs (ProfitLoss) and the segmented control (pill track, one selected pill; markup: radios with .btn-check and labels with .btn). */
+.nav-tabs {
+  gap: var(--space-1);
+  border-bottom-color: var(--hairline);
+}
+
+.nav-tabs .nav-link {
+  border: 1px solid transparent;
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
+  color: var(--text-2);
+  transition:
+    color var(--dur-fast) var(--ease-standard),
+    background-color var(--dur-base) var(--ease-standard),
+    border-color var(--dur-base) var(--ease-standard);
+}
+
+.nav-tabs .nav-link:hover,
+.nav-tabs .nav-link:focus-visible {
+  border-color: var(--border-control);
+  color: var(--text-1);
+  background: var(--surface-2);
+}
+
+.nav-tabs .nav-link.active,
+.nav-tabs .nav-item.show .nav-link {
+  border-color: var(--border-control) var(--border-control) transparent;
+  color: var(--text-1);
+  background: var(--surface-2);
+  box-shadow: none;
+}
+
+.segmented {
+  display: inline-flex;
+  gap: 2px;
+  padding: 3px;
+  border: 1px solid var(--border-control);
+  border-radius: var(--radius-pill);
+  background: var(--surface-inset);
+}
+
+.segmented > .btn {
+  border: 0;
+  border-radius: var(--radius-pill);
+  padding: 0.3rem 0.9rem;
+  color: var(--text-2);
+  background: transparent;
+}
+
+.segmented > .btn:hover {
+  color: var(--text-1);
+  background: color-mix(in srgb, var(--ink) 6%, transparent);
+}
+
+.segmented > .btn-check:checked + .btn {
+  color: var(--accent);
+  background: var(--accent-soft);
+  font-weight: var(--fw-strong);
+}
+
+.segmented > .btn-check:focus-visible + .btn {
+  box-shadow: var(--focus-ring);
+}
+/* END surfaces-controls-v1 */

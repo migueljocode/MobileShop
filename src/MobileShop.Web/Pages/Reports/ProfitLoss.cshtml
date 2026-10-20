@@ -91,14 +91,14 @@
 <form method="get" class="row g-2 mb-3" id="profitLossFilters">
     <fieldset class="col-12">
         <legend class="form-label mb-1">Date range mode:</legend>
-        <div class="btn-group" role="group" aria-label="Date range mode">
+        <div class="segmented" role="group" aria-label="Date range mode">
             <input type="radio" class="btn-check" name="Mode" id="mode-auto" value="Automatic"
                    @(Model.Mode == DateRangeMode.Automatic ? "checked" : "") autocomplete="off" />
-            <label class="btn btn-outline-primary" for="mode-auto">Automatic</label>
+            <label class="btn" for="mode-auto">Automatic</label>
 
             <input type="radio" class="btn-check" name="Mode" id="mode-manual" value="Manual"
                    @(Model.Mode == DateRangeMode.Manual ? "checked" : "") autocomplete="off" />
-            <label class="btn btn-outline-primary" for="mode-manual">Manual</label>
+            <label class="btn" for="mode-manual">Manual</label>
         </div>
     </fieldset>
 

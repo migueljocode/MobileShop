@@ -228,7 +228,7 @@ Order rule: base first (9.1), then `surfaces.css` grows by family (9.2 cards, 9.
 - Risk: LOW
 - Confidence: HIGH
 
-## [ ] Step 9.5 — Tabs and segmented control (ProfitLoss)
+## ~~[x] Step 9.5 — Tabs and segmented control (ProfitLoss)~~
 - Task: COMP-009 (segmented) · Priority P1 · Effort S · Mandatory · Type V.
 - Files: modify: `src/MobileShop.Web/wwwroot/css/surfaces.css`, `src/MobileShop.Web/wwwroot/css/app-theme.css`, `src/MobileShop.Web/Pages/Reports/ProfitLoss.cshtml`.
 - Symbols: block `surfaces-controls-v1` (R27); app-theme.css `.nav-tabs` rules (`.nav-tabs`, `.nav-tabs .nav-link`, hover/focus, `.active`; find them by selector text, not by line number); ProfitLoss.cshtml lines 94-102: `<div class="btn-group" role="group" aria-label="Date range mode">` with two radios `class="btn-check"` and two labels `class="btn btn-outline-primary"`.

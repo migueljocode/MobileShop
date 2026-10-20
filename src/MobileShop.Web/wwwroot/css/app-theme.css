@@ -186,33 +186,6 @@
   overflow-wrap: anywhere;
 }
 
-.nav-tabs {
-  gap: 0.35rem;
-  border-bottom-color: var(--app-edge);
-}
-
-.nav-tabs .nav-link {
-  border: 1px solid transparent;
-  border-radius: 0.8rem 0.8rem 0 0;
-  color: var(--ink-muted);
-  transition: color 180ms ease, background-color 200ms ease, border-color 200ms ease, box-shadow 220ms ease;
-}
-
-.nav-tabs .nav-link:hover,
-.nav-tabs .nav-link:focus-visible {
-  border-color: var(--line-strong);
-  color: var(--ink);
-  background: var(--panel-raised);
-}
-
-.nav-tabs .nav-link.active,
-.nav-tabs .nav-item.show .nav-link {
-  border-color: var(--line-strong) var(--line-strong) transparent;
-  color: var(--ink);
-  background: var(--panel-raised);
-  box-shadow: none;
-}
-
 .modal-content,
 .dropdown-menu,
 .popover {
