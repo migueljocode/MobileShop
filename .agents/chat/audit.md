@@ -1,67 +1,46 @@
-# Reviewer — Job B (re-run on the Step 10.7 correction round, commit `19066f0`)
+# Reviewer — Job B (verify) — Step 11.5 / Stage 11
 
-**Verdict: PASS** — the Step 10.7 HIGH finding is fixed, verified in code and in a browser re-test, CI is green (`Action: #639 — Success`), the stage scope is intact. **Stage 10 is signed off**: `.agents/TODO.md` was ticked and committed (see "Stage sign-off" below). Nothing was pushed by me (the Reviewer never pushes).
+## Verdict: **PASS** (Step 11.5 verified; Stage 11 signed off)
 
-## CI evidence (read back myself, never inferred)
+## CI evidence — re-verified independently via the Actions API
+`gh api` hung again (exit 124, zero stdout); the runs were fetched with `curl` + the token from `~/.git-credentials` (http=200 each), `GET /repos/migueljocode/MobileShop/actions/runs?head_sha=<sha>`:
 
-`GET /repos/migueljocode/MobileShop/actions/runs?head_sha=19066f0b83df6dde6e3e80bb810febdd8084b815` → exactly one run, workflow `.NET CI`, event `push`, `status: completed`, `conclusion: success`:
+| Commit | Step | Run | Status | Conclusion |
+|---|---|---|---|---|
+| `fda6708` | 11.1 | **Action: #641 — Success** | completed | success |
+| `588075a` | 11.2 | **Action: #642 — Success** | completed | success |
+| `69d81b5` | 11.3 | **Action: #643 — Success** | completed | success |
+| `3ea8148` | 11.4 | **Action: #644 — Success** | completed | success |
 
-| Step | Commit | Run | conclusion |
-|---|---|---|---|
-| 10.1 | `81ee5f0` | **Action: #633 — Success** | success |
-| 10.2 | `453265f` | **Action: #634 — Success** | success |
-| 10.3 | `9de02d0` | **Action: #635 — Success** | success |
-| 10.4 | `865e980` | **Action: #636 — Success** | success |
-| 10.5 | `2062d8c` | **Action: #637 — Success** | success |
-| 10.6 | `237849d` | **Action: #638 — Success** | success |
-| 10.7 correction | `19066f0` | **Action: #639 — Success** | success |
+`total_count=1` per commit (one run each), workflow `.NET CI`, event `push`, branch `main`. `.github/workflows/` contains only `dotnet.yml` → no other relevant workflow, nothing `unavailable`. No pending or interrupted run was counted as success.
 
-Re-read back per commit just now: #633–#638 are still the runs of record for steps 10.1–10.6 (all `completed`/`success`, none pending or interrupted).
+## Evidence I checked myself
+- **Commits / scope:** `git log --oneline 63d05ae..3ea8148` = exactly `fda6708` (11.1), `588075a` (11.2), `69d81b5` (11.3), `3ea8148` (11.4) — no fifth commit; Step 11.5 produced no commit. `git diff --stat 63d05ae..3ea8148` / `--name-status` = exactly the seven expected paths (`_Layout.cshtml` M, `_Layout.cshtml.css` D, `base.css` M, `components.css` D, `navigation-menu.css` M, `shell.css` A, `.agents/chat/plan.md` M) — nothing else, no `bin`/`obj`, no dependency or config change.
+- **Plan bookkeeping:** the `## ~~[x] Step 11.5 — Stage 11 validation~~` heading is struck in plan.md; the committed plan.md diff carries only the 11.1–11.4 heading strikes. Working tree: only `.agents/chat/act.md`, `.agents/chat/audit.md`, `.agents/chat/plan.md` modified — no production file touched by 11.5.
+- **11.1:** `git ls-files '*.cshtml.css'` → empty; `grep -rn "MobileShop.Web.styles" src .github docs README.md` → empty; `git show --stat fda6708` = the deleted 48-line scoped file + the one-line link removal; `_Layout.cshtml` BOM `ef bb bf` intact, 0 CR.
+- **11.2:** `shell.css` braces 15/15 balanced; `git ls-files …/wwwroot/css | grep -c components.css` = 0; reference grep for `components.css` → empty; `scroll-padding-bottom` = 1; `shell.css` link in the layout = 1. `shell.css` is **byte-identical** to the plan's R27 `shell-v1` block (`sed` extraction diff → identical), so the Actor implemented the spec verbatim.
+- **11.3:** dock greps re-run and hold: `::before` 2, `@keyframes` 0, hex 0, `rgb(` 0, `text-transform` 0, `var(--ease-spring)` 1, `is-compact` 1, `is-settling` 1, `is-initializing` 2. The diff is the exact replacement list of the plan; every token resolves to the literal it replaced (`--radius-2xl` 2rem, `--ease-*`, `--glass-regular-bg/filter`, `--border-glass`, `--z-dock` 1040, `--shadow-3`, `--edge-highlight`, `--glass-solid-bg` — verified in `tokens.css`), only the dock radius changes 1.9rem → 2rem as planned.
+- **11.4:** `viewport-fit=cover` 1, `rel="preload"` 2, `theme-color` 1, `100dvh` 2 (base.css), `safe-area-inset-bottom` 3, `bottom: max(` 2 — exactly lines 27 and 478, both `max(…, calc(env(safe-area-inset-bottom, 0px) + 0.5rem))`. BOM/LF hold. The two preloaded files are real WOFF2 (`file`: "Web Open Font Format (Version 2)") and their names match the `@font-face` srcs in `base.css` exactly.
 
-## What I verified (read, not taken on trust)
+## Stage deliverable — met
+Scoped template stylesheet gone (file + link + bundle removed); `shell.css` carries the glass action bar (`--glass-subtle-bg/filter`, `--hairline` top edge), the token-restyled skip link and `html { scroll-padding-bottom: 12rem }`; the dock is token-migrated value-identically (eyebrow tracking/uppercase removed as specified); the mobile shell has `viewport-fit=cover`, `theme-color`, `100dvh` with `vh` fallback, the safe-area dock offsets and the two font preloads. Diff matches the plan file-by-file.
 
-**1 — The correction commit.** `git show --stat 19066f0` → 4 files: the three JS files plus `.agents/chat/plan.md` (2 ++-, the note + the Actor's own step-heading strike, see 2). Message `fix(web): discard a stale combobox response after the list is dismissed`, body `Correction round for the Step 10.7 Job B HIGH finding.`, Conventional Commits, no `Co-authored-by`. No CSS, no view, no markup, no other script.
-
-**2 — plan.md scope.** The diff is exactly the struck heading `## ~~[x] Step 10.7 — Stage 10 validation~~` (the Actor's own step heading, which the state-file table in AGENTS.md gives to the Actor, and which was **already struck in the working tree before the correction round** — I recorded it as uncommitted in my previous verdict) plus **one** new short note line under it. No other plan.md line, no other step heading touched. Not a finding.
-
-**3 — The fix, in the code.**
-- `site.js:46` — `const cancelList = hooks && typeof hooks.cancel === 'function' ? hooks.cancel : () => { };` — optional, no-op default, so a consumer that does not pass it cannot break.
-- `site.js:37` — `window.wireComboboxKeys = function (...)` is still a **top-level global**; the Step 10.3 definition-site check prints `OK: definition at line 37 precedes the ready block at line 205`. `hooks.open` / `hooks.close` are untouched.
-- `person-picker.js:19` `var latestSearchId = 0;`, `:101` `var searchId = ++latestSearchId;` before the fetch, `:111` `if (searchId !== latestSearchId) return;` **before** `renderResults(options)`, `:73` `cancel: function () { latestSearchId++; }`. The `finally { clearSearchLoading(); }` still clears `aria-busy` and the loading line, so a discarded response leaves no stuck loading state.
-- `product-picker.js:214` `cancel: function () { latestSearchId++; }`; the pre-existing staleness check at `:244` drops the late response. Only the hooks object changed in that file.
-- Unchanged as required: open/close behaviour, key handling, the live region, selection, price filling, the 150 ms blur timing (the 200 ms debounce and the 150 ms blur predate the stage — `git show 944104c:…` confirms `}, 200);` and `}, 150);`).
-- Greps re-run by me: `node --check` OK for site.js / person-picker.js / product-picker.js / jalali-datepicker.js; `wireComboboxKeys` = 1 / 1 / 3; `aria-activedescendant` = 2; `cancel` in site.js = 3; `latestSearchId` = 4 (person) / 5 (product). The 10.1, 10.2, 10.5, 10.6 greps also still hold (braces 37/37 and 27/27; `^\.(modal|dropdown|popover|progress|product-picker|list-group)` = 0; `modal-content--solid` = 1; `overlays.css` = 1; `class="modal fade"` without `aria-labelledby` = 0; per-page duplicate `-title` loop prints nothing; 24 `-title` labels under `Pages/Products`; `jalali` in app-theme.css = 0; `uppercase|letter-spacing|rgb\(|scale\(1\.0` in overlays.css = 0; `jalaliFadeIn` = 2; `jalaliSkipOpen` = 3; `ArrowDown` = 2).
-
-**4 — Stage scope.** `git diff --stat 944104c..19066f0` → exactly 19 files: `plan.md`, the ten `Pages/Products/Create*.cshtml`, `_Layout.cshtml`, `_PersonPicker.cshtml`, `app-theme.css`, `overlays.css` and the four `wwwroot/js/*.js`. The three JS files the correction touched were already in the stage's file list, so no new file entered the stage. Nothing else.
-
-**5 — Browser re-test** (`/tmp/kilo/stage10-escape-race-retest.md`, screenshot `/tmp/kilo/stage10/20-escape-race-person.png` — I read both). It covers exactly my finding: ~2 s latency injected two ways (BiDi `network.addIntercept` hold of **1999–2001 ms**, and an in-page `fetch` delay), a **no-Escape control** proving the late response *does* re-open the list, and **Escape during the in-flight window** leaving the list closed in **both** pickers (`d-none`, `display:none`, `aria-expanded="false"`, `aria-busy` cleared, **0 option nodes added**, live region empty, still closed **+4.5 s**). The strongest variant (list **open** *and* request in flight) also passes. The normal path still works: person "ah" + ↓↓ + Enter → "Omid Bahrami", `#Input_CustomerId=4`; product "le" + ↓↓ + Enter → "Phone: Apple iPhone 11 …", `#Input_ProductId=3`, price `180 000 000`. **0 console errors.** The screenshot shows the person search input holding "ah" with no dropdown open 4.5 s after the discarded response.
-
-## Judgement on the disclosed deviation — CORRECT, and necessary
-
-The Actor placed `cancelList()` **before** the `if (!isOpen) return;` guard. I verified the claim: both result lists start hidden — `_PersonPicker.cshtml:23` and `_ProductPickerOptions.cshtml:3` carry `d-none` — and are opened only by `renderResults()` → `openResults()`. So while a request is in flight the list is still `d-none`, `isOpen` is false, and my original snippet (`cancelList()` behind the guard) would **never** cancel: the HIGH finding would have survived the fix. The deviation is the minimal correct resolution and is behaviour-preserving:
-- Escape with the list **open** still closes it: `closeList()`, `event.preventDefault()` and `event.stopPropagation()` are still reached **only** when the list was open (`site.js:128-132`) — confirmed by the code and by the re-test (test #5: list open → Escape → `d-none`, `aria-expanded=false`, still closed +2.5 s).
-- The only behavioural delta is that Escape now always invalidates an in-flight search of that input, even when the list is hidden — which is precisely the intent of the finding; the hook is a pure counter bump in both pickers, so pressing Escape with nothing in flight is effect-free.
-- The helper remains safe for a consumer that does not pass `cancel` (no-op default), and the only two consumers of `wireComboboxKeys` both pass it.
-
-## Judgement on the residual the re-test found — MEDIUM, expected, carried forward
-
-**E1 — Escape inside the 200 ms input-debounce window still lets the list re-open ~200 ms later.** The `cancel` hook invalidates requests that already *exist*; a request only *scheduled* when Escape is pressed is created afterwards and gets a fresh id, so it is not stale. Rate: **MEDIUM** — a real but narrow timing window (≈200 ms between keystroke and request creation), and **pre-existing behaviour, not a regression**: before the correction the same window also re-opened the list (the 200 ms debounce predates the stage). The repo rule allows only **one** correction round, so this is **carried forward, not fixed here**. Proposed fix for a future step: clear the debounce timer on Escape and/or set a "dismissed" flag that suppresses the next render instead of only bumping `latestSearchId`.
+## Severity judgement on the open findings (none blocks — only CRITICAL/HIGH block)
+1. **Action bar / dock overlap at ≥1200px — MEDIUM, does not block.** It is **pre-existing geometry newly exposed, not a Stage 11 defect**: `git show 63d05ae:…/components.css` already carried `.action-bar { position: sticky; bottom: 0; z-index: 10 }` **and** the identical `@media (max-width: 1199.98px) { body.has-floating-navigation .action-bar { bottom: 5.5rem; } }` rule; Stage 11.2 changed only the material (opaque `var(--panel)` → 88% glass) and the tokens, and `shell.css` is byte-identical to the plan's spec block. Nothing is hidden: the Save/Cancel buttons (x 1093–1288) clear the centred dock (x 330–1023), no pointer/keyboard target is covered, and the bar's contrast was measured OK (7.94:1 / ≈13:1). A one-line fix exists in `shell.css` — drop the `@media (max-width: 1199.98px)` wrapper so `body.has-floating-navigation .action-bar { bottom: 5.5rem; }` applies at all widths — but it lifts the sticky bar 88px off the viewport bottom on wide desktops (a visible design change) and contradicts the plan's R27 spec, so it is **not** a Stage 11 correction round; it is an owner/Planner decision → **carry forward**.
+2. **Skip link does not park focus — MEDIUM, does not block.** Pre-existing: the skip link and `<main id="main" role="main">` predate the stage (Stage 11 touched only `.skip-link`'s styling; `_Layout.cshtml`'s `<main>` was never modified — only `<head>`), and no JS handles the skip link. The bypass mechanism exists (hash set, page scrolled, next Tab lands inside main) → not a trap and not a 2.4.1 failure; the missing focus move is a quality gap. **Exact fix:** add `tabindex="-1"` to the main element in `src/MobileShop.Web/Pages/Shared/_Layout.cshtml:25` → `<main id="main" role="main" tabindex="-1" class="mt-3 pb-3">`. **Where it belongs:** the Web layer layout markup (not `shell.css`); it is outside Stage 11's scope (11.2 = skip-link restyle), so it must go to a later stage as an owner-approved one-attribute change → **carry forward**.
+3. **`vazirmatn-*.woff2` are HTML pages, not fonts — PRE-EXISTING, confirmed by me** (`file`: "HTML document, Unicode text" for all three). Untouched by the stage; already scheduled as Step 15.2 → **carry forward**.
+4. **"Please enter a value greater than or equal to 0.1." on the empty Display size field — OUT OF SCOPE / pre-existing.** The `min="0.1"` markup lives in `src/MobileShop.Web/Pages/Products/CreateLaptop.cshtml:19`, a file the stage never touched (`git log 63d05ae..3ea8148 -- …CreateLaptop.cshtml` → empty). Not a Stage 11 regression → **carry forward** as a separate defect.
+5. **Not verifiable here** — real home-indicator inset, Safari/Chromium, GPU `backdrop-filter`, device pixel ratio, the dock's idle compact state (headless Firefox reports `hover: none`). Environment limitation, not a defect → carried forward as an owner/Stage 16.2 check.
 
 ## Carry-forward list
+- Action-bar/dock overlap ≥1200px (MEDIUM, cosmetic, pre-existing) — owner/Planner decision on the one-line clearance lift.
+- Skip-link focus parking (MEDIUM) — `tabindex="-1"` on `_Layout.cshtml`'s `<main>`, in a later stage.
+- Vazirmatn font files (PRE-EXISTING) — Step 15.2.
+- Spurious `min="0.1"` validation on CreateLaptop (PRE-EXISTING) — new defect ticket.
+- Not-verifiable matrix items — Stage 16.2 browser harness.
 
-1. **MEDIUM — pre-existing, not blocking — the person-picker modal does not return focus to its trigger.** The create button has no `data-bs-toggle` (`_PersonPicker.cshtml:19` carries only `data-person-create`) and the modal is opened through the Bootstrap JS API (`person-picker.js:16`, `:154`), so Bootstrap 5.3's data-api focus restorer is never registered; after Escape the focus lands on `BODY` (WCAG 2.4.3). The open path predates Stage 10 (Stage 10 changed only the modal's CSS class and the combobox wiring). One-liner for a future step: `modal.addEventListener('hidden.bs.modal', function () { createButton.focus(); });`. The Actor correctly left it out of the correction round (only the HIGH was in scope). **Must go to the Planner as a new step — no Stage 8-10 step owns it.**
-2. **LOW — pre-existing, not blocking — `/Reports/ProfitLoss` reloads the page as soon as a day is picked** (`submitFilters()` → `filterForm.requestSubmit()`, `ProfitLoss.cshtml:148`, wired to `#From`/`#To`/`#Preset` change). The file is **not** in the stage diff (`git diff --name-only 944104c..19066f0 | grep -c ProfitLoss` = 0). The Jalali picker's "focus returns to the field" is defeated on that page only — the page's filter design, not the picker. Carry as an owner note (auto-submit vs. an explicit Apply button).
-3. **HIGH for the app, pre-existing, OUT OF SCOPE for Stage 10 — the `vazirmatn-*.woff2` files are GitHub HTML, not fonts.** Verified by me now: `file src/MobileShop.Web/wwwroot/fonts/vazirmatn-{regular,medium,bold}.woff2` → "HTML document, Unicode text, UTF-8 text" (the content starts with `<!DOCTYPE html>` and is a GitHub page), while `sf-pro-rounded-{regular,bold}.woff2` are "Web Open Font Format (Version 2)"; `git ls-files` shows all three Vazirmatn files are **tracked in git**, so the bad bytes are in the repository. Impact: every Persian string in the app falls back to a system font app-wide (the browser downloads ~270 KB of HTML per weight) — the same for the whole redesign, not for Stage 10. It is touched by **no** stage 8-10 step, and the later stages 11-16 do not own it either → **it must be carried to the Planner as a dedicated asset step**: replace the three files with the genuine Vazirmatn woff2 weights (the TTF sources for the PDF layer exist under `src/MobileShop.Services/PDF/Fonts/`, but the Medium weight has no TTF there and must come from the Vazirmatn release).
-4. **LOW — not verifiable in this environment (Firefox 156 headless only):** Safari, a real coarse-pointer/touch device, real touch input, a real screen-reader announcement of the live region, and a real (non-emulated) 480 px window. No evidence of a defect; the Safari leg of the stage's owner check stays open (R6 defers the Safari-specific `prefers-reduced-transparency` work to Step 15.1).
+## Stage sign-off (performed)
+The Global Definition of Done's stage item is met: CI green with run numbers recorded in act.md and re-verified (#641–#644, all `completed`/`success`); the greps of 11.1–11.4 recorded in act.md and re-run by me — all hold; `git diff --stat 63d05ae..3ea8148` matches the stage's file lists exactly; the owner's manual check is answered with real headless-Firefox evidence (footer static + accent link, glass action bar over scrolling content with measured contrast, focus clearance at 1366/1280/1024/768/480, modal solidity, dock flyout/keyboard, mobile shell metrics, 0 console errors on 12 pages).
+`.agents/TODO.md` line 5 ticked to `- [x] ~~Stage 11 — Navigation shell: dock token migration, flyout grouping, focus clearance, action bar, mobile safe areas~~`; committed alone as `docs(todo): complete Stage 11` (no push, no other file staged).
 
-## Stage sign-off — performed
-
-Global Definition of Done, stage item: *CI green with run numbers recorded in act.md, the greps of the stage recorded, `git diff --stat` matching the stage's file lists, and the owner's manual check answered.*
-- CI green with run numbers — **met** (#633–#638 for 10.1–10.6, **#639** for the correction; all `completed`/`success`).
-- The greps of the stage recorded and re-run by me — **met**.
-- `git diff --stat` matching the stage's file lists — **met** (exactly the 19 files).
-- The owner's manual check answered — **met** (the browser re-test report answers the pickers' keyboard/Escape checks and the normal path; the Safari leg remains unverified and is carried as LOW, item 4 above). The HIGH defect that blocked the previous verdict is fixed and independently confirmed.
-
-`.agents/TODO.md` — the Stage 10 line was changed to `- [x] ~~Stage 10 — Overlays and pickers: glass modals and menus, scrim, picker keyboard support, Jalali date picker~~` (that line only; no other stage added, rewritten, reordered or unticked) and committed on its own as `docs(todo): complete Stage 10`. `act.md`, `audit.md` and `plan.md` were not committed; nothing was pushed.
-
-**Next:** the Planner continues with Stage 11 (Step 11.1) and adds the carry-forward items above as new steps where they are not already owned.
+**Next: the orchestrator** (push the single stage commit) — then the Planner for Stage 12.

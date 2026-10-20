@@ -434,7 +434,7 @@ Order rule: remove the template override first (11.1), then move the remaining s
 - Risk: MEDIUM
 - Confidence: MEDIUM
 
-## [ ] Step 11.5 — Stage 11 validation
+## ~~[x] Step 11.5 — Stage 11 validation~~
 - Task: QA (stage gate) · Mandatory.
 - Files: none modified.
 - Symbols: none.
