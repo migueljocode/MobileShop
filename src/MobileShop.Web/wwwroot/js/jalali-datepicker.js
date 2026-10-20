@@ -166,7 +166,7 @@
         panel.innerHTML =
             '<div class="jalali-picker-head">' +
                 '<button type="button" class="jalali-picker-nav" data-nav="-1" aria-label="Previous month">&lsaquo;</button>' +
-                '<span class="jalali-picker-title" data-title></span>' +
+                '<span class="jalali-picker-title" data-title aria-live="polite"></span>' +
                 '<button type="button" class="jalali-picker-nav" data-nav="1" aria-label="Next month">&rsaquo;</button>' +
             '</div>' +
             '<div class="jalali-picker-weekdays">' +
@@ -211,8 +211,9 @@
             state.jy = today.jy;
             state.jm = today.jm;
             setTime(now.getHours(), now.getMinutes());
+            var withTime = state.withTime;
             writeValue(today.jy, today.jm, today.jd);
-            if (!state.withTime) render();
+            if (state && !withTime) render();
         });
 
         panel.querySelector('[data-now]').addEventListener('click', function () {
@@ -243,6 +244,58 @@
         // Keeping the focus on the input prevents the blur handler from closing the panel
         // before a day click is delivered.
         panel.addEventListener('mousedown', function (event) { event.preventDefault(); });
+
+        // One delegated handler for the day grid: the arrow keys move between the days of the
+        // shown month, PageUp and PageDown change the month and Escape returns to the input.
+        panel.addEventListener('keydown', function (event) {
+            var target = event.target;
+            if (!target || !target.classList || !target.classList.contains('jalali-picker-day')) return;
+
+            var buttons = dayButtons();
+            var index = dayIndex(target);
+            if (index < 0) return;
+
+            switch (event.key) {
+                case 'ArrowLeft':
+                    event.preventDefault();
+                    focusDay(index - 1);
+                    break;
+                case 'ArrowRight':
+                    event.preventDefault();
+                    focusDay(index + 1);
+                    break;
+                case 'ArrowUp':
+                    event.preventDefault();
+                    focusDay(index - 7);
+                    break;
+                case 'ArrowDown':
+                    event.preventDefault();
+                    focusDay(index + 7);
+                    break;
+                case 'Home':
+                    event.preventDefault();
+                    focusDay(0);
+                    break;
+                case 'End':
+                    event.preventDefault();
+                    focusDay(buttons.length - 1);
+                    break;
+                case 'PageUp':
+                    event.preventDefault();
+                    changeMonth(-1);
+                    break;
+                case 'PageDown':
+                    event.preventDefault();
+                    changeMonth(1);
+                    break;
+                case 'Escape':
+                    event.preventDefault();
+                    escapeToInput();
+                    break;
+                default:
+                    break;
+            }
+        });
 
         ui = built;
     }
@@ -279,18 +332,68 @@
         }
     }
 
+    function dayButtons() {
+        return ui ? ui.grid.querySelectorAll('.jalali-picker-day') : [];
+    }
+
+    function dayIndex(button) {
+        var buttons = dayButtons();
+        for (var i = 0; i < buttons.length; i += 1) {
+            if (buttons[i] === button) return i;
+        }
+        return -1;
+    }
+
+    function focusDay(index) {
+        var buttons = dayButtons();
+        if (!buttons.length) return;
+        if (index < 0) index = 0;
+        if (index > buttons.length - 1) index = buttons.length - 1;
+        buttons[index].focus();
+    }
+
+    function focusFirstDay() {
+        if (!ui) return;
+        var target = ui.panel.querySelector('.jalali-picker-day.is-selected')
+            || ui.panel.querySelector('.jalali-picker-day.is-today')
+            || ui.panel.querySelector('.jalali-picker-day');
+        if (target) target.focus();
+    }
+
+    function changeMonth(step) {
+        if (!ui || !state) return;
+        var nav = ui.panel.querySelector('[data-nav="' + (step < 0 ? '-1' : '1') + '"]');
+        if (!nav) return;
+        nav.click();
+        focusDay(0);
+    }
+
+    function escapeToInput() {
+        var input = state ? state.input : null;
+        close();
+        focusInput(input);
+    }
+
     function pickDay(day) {
+        var withTime = state.withTime;
         writeValue(state.jy, state.jm, day);
-        if (!state.withTime) close();
+        if (!withTime) close();
     }
 
     function writeValue(jy, jm, jd) {
-        state.input.value = formatShamsiText(
+        var input = state.input;
+        input.value = formatShamsiText(
             { jy: jy, jm: jm, jd: jd, hour: state.hour, minute: state.minute },
             state.withTime);
-        markValid(state.input);
-        state.input.dispatchEvent(new Event('change', { bubbles: true }));
+        markValid(input);
+        input.dispatchEvent(new Event('change', { bubbles: true }));
+
+        // A day button inside the panel holds the focus; give it back to the input so the
+        // keyboard user keeps their place.
+        var active = document.activeElement;
+        var returnToInput = active && ui && ui.panel.contains(active);
         close();
+        if (returnToInput) focusInput(input);
     }
 
     function position() {
@@ -341,6 +444,15 @@
         state = null;
     }
 
+    // Focusing the input reopens the panel through its focus handler; the skip flag tells the
+    // handler that this focus is programmatic and must not open the panel again.
+    function focusInput(input) {
+        if (!input) return;
+        input.dataset.jalaliSkipOpen = '1';
+        input.focus();
+        if (document.activeElement === input) delete input.dataset.jalaliSkipOpen;
+    }
+
     // ── Wiring ───────────────────────────────────────────────────────────────
     function feedbackElement(input) {
         var next = input.nextElementSibling;
@@ -380,9 +492,18 @@
         input.dataset.jalaliWired = 'true';
         input.setAttribute('autocomplete', 'off');
 
-        input.addEventListener('focus', function () { open(input); });
+        input.addEventListener('focus', function () {
+            if (input.dataset.jalaliSkipOpen) { delete input.dataset.jalaliSkipOpen; return; }
+            open(input);
+        });
         input.addEventListener('click', function () { if (!isOpenFor(input)) open(input); });
-        input.addEventListener('keydown', function (event) { if (event.key === 'Escape') close(); });
+        input.addEventListener('keydown', function (event) {
+            if (event.key === 'Escape') { close(); return; }
+            if (event.key !== 'ArrowDown') return;
+            event.preventDefault();
+            if (!isOpenFor(input)) open(input);
+            focusFirstDay();
+        });
         input.addEventListener('input', function () {
             if (parseShamsiText(input.value)) markValid(input);
         });
@@ -390,7 +511,10 @@
     }
 
     document.addEventListener('focusin', function (event) {
-        var input = event.target.closest ? event.target.closest(INPUT_SELECTOR) : null;
+        var target = event.target;
+        if (state && ui && !ui.panel.contains(target) && target !== state.input) close();
+
+        var input = target && target.closest ? target.closest(INPUT_SELECTOR) : null;
         if (input) wire(input);
     });
 

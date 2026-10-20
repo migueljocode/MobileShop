@@ -345,7 +345,7 @@ Order rule: the visual family first (10.1), then markup and behaviour (10.2-10.4
 - Risk: MEDIUM
 - Confidence: MEDIUM
 
-## [ ] Step 10.6 — Jalali date picker: keyboard reach, focus return, close on leave
+## ~~[x] Step 10.6 — Jalali date picker: keyboard reach, focus return, close on leave~~
 - Task: COMP-014 (behaviour) · F-20 · Priority P2 · Effort M · Mandatory · Type A.
 - Files: modify: `src/MobileShop.Web/wwwroot/js/jalali-datepicker.js` only.
 - Symbols: `buildPanel`, `wire`, `writeValue`, `close`, the document `focusin` listener (wires inputs) and the document `keydown` listener (Escape).
