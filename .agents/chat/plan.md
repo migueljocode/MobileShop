@@ -689,7 +689,7 @@ Order rule: the motion and preference modes first (15.1), then the Vazirmatn fon
 - Risk: MEDIUM
 - Confidence: MEDIUM
 
-## [ ] Step 15.6 — Stage 15 validation
+## ~~[x] Step 15.6 — Stage 15 validation~~
 - Task: QA (stage gate) · Mandatory.
 - Files: none modified.
 - Symbols: none.

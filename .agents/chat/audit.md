@@ -1,50 +1,35 @@
-# Reviewer — Job B verdict — Step 14.4 (Stage 14 validation) and Stage 14 sign-off
+# Job B verdict — Stage 15, Step 15.6 (Stage 15 validation)
 
-**Verdict: PASS** — the stage is complete and Stage 14 is signed off.
+**Verdict: PASS**
 
 ## CI evidence
-- `GET /repos/migueljocode/MobileShop/actions/runs?head_sha=4fa09c0883cc09b93651dcd96ca8cf01e74ee684` → `total_count: 1`; the single run: `run_number: 647`, workflow `.NET CI`, `event: push`, `head_branch: main`, `status: completed`, `conclusion: success`.
-- **Action: #647 — Success** (completed AND successful — not pending, not interrupted).
+`GET /repos/migueljocode/MobileShop/actions/runs?head_sha=fc81aa159c438b5230aa175cd77662d7e25a8acd` → one run: `run_number: 648`, `name: ".NET CI"`, `status: "completed"`, `conclusion: "success"`, `head_sha` matches the stage commit.
+**`Action: #648 — Success`** (completed **and** successful — confirmed independently, not pending/interrupted). No local `dotnet build` / `dotnet test` was needed; CI is the only gate.
 
-## Stage scope
-- `git show --stat --no-renames 4fa09c0` lists exactly: `.agents/chat/plan.md`, `src/MobileShop.Web/Pages/Error.cshtml`, `src/MobileShop.Web/Pages/Privacy.cshtml`, `src/MobileShop.Web/Pages/Reports/ProfitLoss.cshtml`, `src/MobileShop.Web/Pages/Transactions/Index.cshtml`, `src/MobileShop.Web/wwwroot/css/surfaces.css` — 6 files, 19 insertions / 18 deletions. No unexpected file.
-- `git diff --stat 4fa09c0^ 4fa09c0 -- graphify-out` is empty and `git status --porcelain graphify-out` is empty: the two `graphify-out` files are legitimately absent because the stage produced no graph delta (`graphify update .` reported no topology change). No scope creep.
+## Stage scope — `git show --stat --no-renames fc81aa1`
+Exactly the expected list, nothing more: `.agents/chat/plan.md` · `Pages/Account/Profile.cshtml` (+7) · `Pages/Shared/_Layout.cshtml` (+2) · `wwwroot/css/login.css` (+4) · `wwwroot/css/motion.css` (new, 103) · `wwwroot/css/tokens.css` (9) · `wwwroot/js/site.js` (+22) · `wwwroot/fonts/vazirmatn-regular.woff2` (Bin 269016 → 50684) · `wwwroot/fonts/vazirmatn-bold.woff2` (Bin 268979 → 51020) · `wwwroot/fonts/vazirmatn-medium.woff2` (deleted, 530). 10 files changed. Commit message `feat(web): add preference modes, repair the Vazirmatn fonts and a solid-surfaces switch` is Conventional Commits and describes the change accurately. Steps 15.1-15.5 each had a Job B before the single stage commit.
+`graphify-out/GRAPH_REPORT.md` and `graphify-out/graph.json` are **not** in the commit and are still dirty in the working tree (`git status --porcelain` → ` M graphify-out/GRAPH_REPORT.md`, ` M graphify-out/graph.json`) — the stage produced no graph delta (CSS/JS/Razor only). Per AGENTS.md the graph outputs are rewritten whole on every build and are the orchestrator's to commit; dirty graph files are expected and are **not** a stage defect, so the file-list deviation is acceptable and not blocking.
 
-## Greps of 14.1 / 14.2 / 14.3 re-run and hold
-| Check | Expected | Measured |
-|---|---|---|
-| `grep -c "transactions shown" …/Transactions/Index.cshtml` | 1 | 1 ✔ |
-| `grep -c 'aria-describedby="profit-chart-desc"' …/ProfitLoss.cshtml` | 1 | 1 ✔ |
-| `grep -c 'id="profit-chart-desc"' …/ProfitLoss.cshtml` | 1 | 1 ✔ |
-| `grep -c "table-danger" …/ProfitLoss.cshtml` | 0 | 0 ✔ |
-| `grep -c "row-danger" …/ProfitLoss.cshtml` | 1 | 1 ✔ |
-| `grep -c "^\.data-table tbody tr\.row-danger td" …/surfaces.css` | 1 | 1 ✔ |
-| `grep -c "Development" …/Error.cshtml` | 0 | 0 ✔ |
-| `grep -c "max-width: 70ch" …/Error.cshtml …/Privacy.cshtml` | 0 / 0 | 0 / 0 ✔ |
-| `grep -c 'class="measure"' …/Error.cshtml …/Privacy.cshtml` | 1 / 1 | 1 / 1 ✔ |
-| `grep -c "^\.measure" …/surfaces.css` | 1 | 1 ✔ |
-| brace balance of `surfaces.css` | equal | 62 / 62 ✔ |
+## The greps of 15.1-15.5 re-run — all hold
+- **15.1 motion.css**: braces `17/17`; `html[data-surfaces="solid"]` → `3` (≥2); `prefers-contrast: more` → `2` (≥2); `forced-colors` → `1` (=1); `motion.css` linked once in `_Layout.cshtml` → `1`; `scrim-solid-bg` in `tokens.css` → `1`; `rgb(0 0 0 / 0.72)` not extracted → `0`; colour-literal grep over `wwwroot/css` excluding `tokens.css` → **no output**.
+- **15.2 fonts**: `file` → "Web Open Font Format (Version 2), TrueType" for both `vazirmatn-regular.woff2` (50684) and `vazirmatn-bold.woff2` (51020); `head -c 4` → `77 4f 46 32` (`wOF2`); `fonts/vazirmatn` in `tokens.css` → `2` (400, 700).
+- **15.3 login.css**: `diff` of the plan's `login-v1` block against the file → **no output** (identical); `input-validation-error:focus` → `1`; braces `28/28`; `login.css` linked once.
+- **15.4 retired Medium face**: `font-weight: 500` in `tokens.css` → `0`; the font-weight proof awk over all CSS → **no output**; `grep -rnE "font-weight: *(500|600|650)"` over the CSS → **no output**; `vazirmatn-medium` anywhere in `src`/`README.md`/`docs` → **no output**; `git ls-files wwwroot/fonts` → exactly `sf-pro-rounded-bold`, `sf-pro-rounded-regular`, `vazirmatn-bold`, `vazirmatn-regular`.
+- **15.5 solid-surfaces switch**: `node --check wwwroot/js/site.js` → exit 0, parses; `mobileshop.surfaces` → `_Layout.cshtml:1`, `site.js:2`; `data-surfaces-toggle` → `Profile.cshtml:1`, `site.js:1`; `_Layout.cshtml` BOM → ` ef bb bf` (kept).
+- **`git diff --stat` over the stage** (the commit `fc81aa1`) matches the file lists of Steps 15.1-15.5 as recorded above.
 
-## The stage's deliverable (from the diff)
-- **Visible transaction count** — `Transactions/Index.cshtml:73` adds `<p class="text-muted small">@Model.Transactions.Count transactions shown</p>` directly before `<div class="table-responsive">`, inside the `else` branch of `@if (Model.Transactions.Count == 0)`, using the same `Model.Transactions` collection the table iterates (`IReadOnlyList<TransactionListItemViewModel>`, `Index.cshtml.cs:6`). Plain text, no live region, as the plan required.
-- **Described ProfitLoss trend chart** — `ProfitLoss.cshtml` keeps the existing `aria-label` and adds `aria-describedby="profit-chart-desc"` on the `profitLossChart` canvas plus `<p id="profit-chart-desc" class="visually-hidden">…</p>` directly after the closing `</div>` of `.profit-chart-canvas`; `visually-hidden` is a Bootstrap utility already loaded by the app. Applied to the trend chart only.
-- **Legible loss rows — the pre-existing black-on-dark defect from `648034c` is closed** — the Distribution row class changed from Bootstrap's whole-table variant `table-danger` to the repo class `row-danger`, and `surfaces.css` gained `.data-table tbody tr.row-danger td { color: var(--danger); background-color: var(--danger-soft); }`. Both tokens exist in `tokens.css` (`--danger` line 38, `--danger-soft` line 77) — no hex literal, no new token, no `!important`. The rule is (0,2,3) and outranks `.data-table tbody tr:hover` (0,2,2) at `surfaces.css:234`, so the danger tint survives hover. The Stage 12 Job B carry-forward is therefore closed.
-- **Error page** — the `Development Mode` heading and the two developer paragraphs are removed from `Error.cshtml`; the apology sentence and the `@if (Model.ShowRequestId)` Request ID block stay. Both `Error.cshtml` and `Privacy.cshtml` now use `<div class="measure">` instead of the inline `max-width: 70ch` style, and `surfaces.css` gained `.measure { max-width: var(--size-measure); }` (`--size-measure: 70ch`, `tokens.css:127`).
+## The stage's deliverable and the carry-forwards it closed (Part 2)
+- **motion.css** carries the reduced-transparency mode, the `prefers-contrast: more` mode, the `forced-colors` mode and the `prefers-reduced-motion` press-feedback kill (`.btn:active { transform: none; }`); the solid scrim colour lives only in `tokens.css` as `--scrim-solid-bg: rgb(0 0 0 / 0.72)` and the file itself holds no colour literal. `motion.css` is byte-identical to the plan's `motion-v1` R27 block.
+- **Vazirmatn binaries replaced by real fonts** (both are genuine WOFF2, not the previous 268 KB placeholders) and the **unused Medium face retired** — the pre-existing font-asset defect carried from Stage 10 is **closed**.
+- **login.css re-extracted** and identical to the plan block, adding `.account-login-field .form-control.input-validation-error:focus { border-color: var(--danger); }` — the invalid-border carry-forward from the Stage 8/10/12 checks is **closed** (mechanically; the visual half is an open owner item, see below).
+- **Profile switch**: an `Appearance` section on the Profile page with the `data-surfaces-toggle` checkbox; `site.js` syncs the checkbox with `document.documentElement.dataset.surfaces` and writes/removes the `localStorage` key `mobileshop.surfaces` in `try/catch`; the layout applies `data-surfaces="solid"` before the first paint — the surfaces go solid and the choice is remembered per browser.
 
-## The skipped owner manual check
-- The browser-based owner visual pass was **skipped at the owner's direction** (the owner decided the browser pass is too slow for the remaining stages). `act.md` records the seven manual items as **NOT PERFORMED** and lists them as open owner items for the deferred final-stage pass — nothing is claimed as passed that was not performed.
-- Judgement applied explicitly, following the Stage 13 Job B precedent: a manual check **answered as "not performed at the owner's direction"** is **NOT blocking** for a stage sign-off. The item is *answered* (recorded, with its seven open items carried forward), not *skipped silently*, and the risk it covers is deferred by the owner to the final stage, which is the same disposition the Stage 13 Job B accepted. The only automated evidence for this stage is therefore `Action: #647 — Success` plus the greps above.
+## The owner's manual check — NOT PERFORMED (treated as answered, not blocking)
+`act.md` records the manual check as **NOT PERFORMED** with all seven items listed one by one (reduced transparency + Profile switch, high contrast, reduced motion, the `--scrim-solid-bg`/no-colour-literal item — mechanically verified, the Vazirmatn face no longer `unloaded`, Persian text in Vazirmatn, and the Profile switch sticking across reloads) plus the deferred open items: **Q-13** (the ≥1200px action-bar/dock overlap, kept by owner decision), the People empty-state strings, and the deferred browser pass for stages 12-15.
+**Judgement applied explicitly:** the DoD item is *"the owner's manual check answered"* — not "passed". The owner answered "not performed" at their own direction, and that answer is on record in `act.md` with the items and the reasons. As in the Stage 13 and Stage 14 Job B passes, an "answered as not performed at the owner's direction" manual check is **not blocking** for the stage verdict. It is **not** claimed as passed anywhere: the visual behaviour of the preference modes, the repaired fonts and the solid-surfaces switch has **no** browser evidence, and the whole stage rests on the greps above plus the green CI run `#648`. The skipped browser pass stays an **open owner item** for the final stage (16.2), and the mechanical parts of the manual check (the token, the greps, the CSS rule) are covered above.
 
-## Global Definition of Done (stage item) — met
-"CI green with run numbers recorded in act.md, the greps of the stage recorded, `git diff --stat` matching the stage's file lists, and the owner's manual check answered."
-- CI green with the run number recorded: **Action: #647 — Success** ✔ (recorded in `act.md` §CI)
-- Greps of the stage recorded and re-verified: ✔ (table above)
-- `git diff --stat` matching the stage's file lists: ✔ (exactly the 6 files listed; the two `graphify-out` files legitimately absent — no graph delta)
-- The owner's manual check answered: ✔ (answered as not performed at the owner's direction, recorded as seven open owner items for the deferred final-stage pass)
+## Stage sign-off (Global Definition of Done)
+The stage item — "CI green with run numbers recorded in act.md, the greps of the stage recorded, `git diff --stat` matching the stage's file lists, and the owner's manual check answered" — is **met** on the evidence on record: `Action: #648 — Success` recorded in `act.md`; the greps of 15.1-15.5 recorded and re-verified here; the commit's file list matching the stage's file lists; the owner's manual check answered (not performed, by owner decision, treated as non-blocking as in Stages 13/14). No CRITICAL/HIGH finding.
+**Sign-off performed:** `.agents/TODO.md` line 9 ticked to `- [x] ~~Stage 15 — Motion and preference modes: motion tokens, press feedback, reduced motion/transparency/contrast, solid-surfaces switch~~` (the line as it actually reads in `TODO.md`; no other stage added, edited, reordered or unticked) and committed alone as `docs(todo): complete Stage 15` — not pushed (the orchestrator pushes). `act.md`, `audit.md` and `plan.md` are left uncommitted for the orchestrator's records commit.
 
-## Sign-off performed
-- `.agents/TODO.md`: `- [ ] Stage 14 — Pages C: Transactions, Reports, Error and Privacy` → `- [x] ~~Stage 14 — Pages C: Transactions, Reports, Error and Privacy~~` (that line only; no stage added, reordered, rewritten or unticked).
-- Committed as `docs(todo): complete Stage 14`, `.agents/TODO.md` only, no Co-authored-by, not pushed (the orchestrator pushes).
-- `act.md`, `plan.md` and this `audit.md` are left uncommitted for the orchestrator's records commit.
-
-**Next: the Planner — Stage 15 (Step 15.1).**
+**Next: the Planner for Stage 16 (Step 16.1), after the orchestrator pushes the sign-off commit.**
