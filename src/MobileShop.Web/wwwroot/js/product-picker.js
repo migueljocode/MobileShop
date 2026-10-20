@@ -208,7 +208,11 @@ document.addEventListener('DOMContentLoaded', function () {
         // The keyboard model lives in site.js at the top level of that file, so it already
         // exists when this ready handler runs. A missing helper is a defect, not a no-op.
         if (window.wireComboboxKeys) {
-            combobox = window.wireComboboxKeys(searchInput, results, { open: openResults, close: closeResults });
+            combobox = window.wireComboboxKeys(searchInput, results, {
+                open: openResults,
+                close: closeResults,
+                cancel: function () { latestSearchId++; }
+            });
         } else {
             console.error('product-picker: window.wireComboboxKeys is missing, the product picker keyboard model is not wired.');
         }

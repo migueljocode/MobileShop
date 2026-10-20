@@ -41,6 +41,9 @@ window.wireComboboxKeys = function (input, list, hooks) {
 
     const openList = hooks && typeof hooks.open === 'function' ? hooks.open : () => { };
     const closeList = hooks && typeof hooks.close === 'function' ? hooks.close : () => { };
+    // Optional hook: lets a consumer invalidate a request that is still in flight,
+    // so a late response cannot re-open the list the user just dismissed.
+    const cancelList = hooks && typeof hooks.cancel === 'function' ? hooks.cancel : () => { };
     let activeIndex = -1;
 
     const isListOpen = () => !list.classList.contains('d-none');
@@ -119,6 +122,10 @@ window.wireComboboxKeys = function (input, list, hooks) {
             return;
         }
 
+        // Escape dismisses the list, so any search that is still in flight is
+        // cancelled as well — even when the list is still hidden, because the
+        // pending response would otherwise open it a moment later.
+        cancelList();
         if (!isOpen) return;
         closeList();
         event.preventDefault();

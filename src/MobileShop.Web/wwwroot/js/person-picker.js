@@ -16,6 +16,7 @@ document.addEventListener('DOMContentLoaded', function () {
         var modalInstance = bootstrap.Modal.getOrCreateInstance(modal);
         var timer;
         var isFocused = false;
+        var latestSearchId = 0;
         var combobox = null;
 
         var liveRegion = document.createElement('span');
@@ -66,7 +67,11 @@ document.addEventListener('DOMContentLoaded', function () {
             if (combobox) combobox.reset();
         }
 
-        combobox = window.wireComboboxKeys(searchInput, results, { open: openResults, close: closeResults });
+        combobox = window.wireComboboxKeys(searchInput, results, {
+            open: openResults,
+            close: closeResults,
+            cancel: function () { latestSearchId++; }
+        });
 
         function showSearchLoading() {
             results.setAttribute('aria-busy', 'true');
@@ -93,6 +98,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         async function search(query) {
+            var searchId = ++latestSearchId;
             var url = new URL(endpoint, window.location.origin);
             url.searchParams.set('handler', searchHandler);
             if (query) url.searchParams.set('q', query);
@@ -101,7 +107,9 @@ document.addEventListener('DOMContentLoaded', function () {
             try {
             var response = await fetch(url, { headers: { Accept: 'application/json' } });
             if (!response.ok) throw new Error('Search failed.');
-            renderResults(await response.json());
+            var options = await response.json();
+            if (searchId !== latestSearchId) return;
+            renderResults(options);
             } finally {
                 clearSearchLoading();
             }

@@ -359,7 +359,8 @@ Order rule: the visual family first (10.1), then markup and behaviour (10.2-10.4
 - Risk: MEDIUM
 - Confidence: MEDIUM
 
-## [ ] Step 10.7 — Stage 10 validation
+## ~~[x] Step 10.7 — Stage 10 validation~~
+Correction round (Job B HIGH): the optional `hooks.cancel()` hook and the request-id staleness guard were added after the Step 10.7 review, so an Escape during an in-flight search discards the late response instead of re-opening the dismissed list.
 - Task: QA (stage gate) · Mandatory.
 - Files: none modified.
 - Symbols: none.
