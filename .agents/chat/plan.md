@@ -392,7 +392,7 @@ Order rule: remove the template override first (11.1), then move the remaining s
 - Risk: MEDIUM (visible footer change; the effect is predicted from CSS, not yet seen)
 - Confidence: MEDIUM
 
-## [ ] Step 11.2 — `shell.css`: action bar, skip link, clearance; retire `components.css`
+## ~~[x] Step 11.2 — `shell.css`: action bar, skip link, clearance; retire `components.css`~~
 - Task: SHELL-004, SHELL-005 · F-21 · Priority P0 · Effort M · Mandatory · Type A.
 - Files: create: `src/MobileShop.Web/wwwroot/css/shell.css`; delete: `src/MobileShop.Web/wwwroot/css/components.css`; modify: `src/MobileShop.Web/Pages/Shared/_Layout.cshtml`.
 - Symbols: block `shell-v1` (R27); what remains in `components.css` after Steps 9.2-9.4: `.skip-link`, `.skip-link:focus`, `.action-bar`, `.form-section .action-bar`, the `@media (max-width: 575.98px)` block for `.form-section .action-bar .btn`, the two `.has-floating-navigation` media rules, `.has-floating-navigation`, plus header comments. Layout links for `components.css` and `navigation-menu.css`.

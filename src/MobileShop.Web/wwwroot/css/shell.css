@@ -1,0 +1,91 @@
+/* BEGIN shell-v1 */
+/* Skip link, action bar (material G2 subtle glass), dock clearance, focus clearance (WCAG 2.4.11).
+   Replaces the matching rules of components.css. */
+html {
+  scroll-padding-bottom: 12rem;
+}
+
+.skip-link {
+  position: absolute;
+  left: -10000px;
+  top: auto;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+.skip-link:focus {
+  position: fixed;
+  top: 0.75rem;
+  left: 0.75rem;
+  width: auto;
+  height: auto;
+  overflow: visible;
+  background: var(--accent);
+  color: var(--accent-ink);
+  border-radius: var(--radius-md);
+  padding: 0.5rem 0.75rem;
+  z-index: var(--z-modal);
+}
+
+.action-bar {
+  position: sticky;
+  bottom: 0;
+  z-index: 10;
+  display: flex;
+  gap: var(--space-2);
+  justify-content: flex-end;
+  border-top: 1px solid var(--hairline);
+  background: var(--glass-subtle-bg);
+  -webkit-backdrop-filter: var(--glass-subtle-filter);
+  backdrop-filter: var(--glass-subtle-filter);
+  padding-top: var(--space-4);
+  padding-bottom: calc(var(--space-4) + env(safe-area-inset-bottom));
+  margin-top: var(--space-5);
+}
+
+.form-section .action-bar {
+  position: static;
+  border-top: 0;
+  background: transparent;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  padding: 0;
+  margin-top: var(--space-5);
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .action-bar {
+    background: var(--glass-solid-bg);
+  }
+}
+
+body.modal-open .action-bar,
+body.modal-open .navigation-dock {
+  background: var(--glass-solid-bg);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+@media (max-width: 575.98px) {
+  .form-section .action-bar .btn {
+    flex: 1 1 auto;
+  }
+}
+
+@media (max-width: 1199.98px) {
+  body.has-floating-navigation .action-bar {
+    bottom: 5.5rem;
+  }
+}
+
+@media (max-width: 575.98px) {
+  body.has-floating-navigation .action-bar {
+    bottom: calc(max(0.65rem, env(safe-area-inset-bottom, 0px)) + 4.6rem);
+  }
+}
+
+.has-floating-navigation {
+  padding-bottom: calc(var(--nav-dock-height, 5rem) + 1rem);
+}
+/* END shell-v1 */
