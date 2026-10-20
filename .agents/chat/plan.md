@@ -749,7 +749,7 @@ The Actor does the mechanical clean-up (16.1) and prepares the evidence sheet; t
 - Risk: LOW
 - Confidence: MEDIUM
 
-## [ ] Step 16.3 — README: short UI design-system section
+## ~~[x] Step 16.3 — README: short UI design-system section~~
 - Task: QA-007 · Priority P2 · Effort S · Optional · Type D.
 - Files: modify: `README.md` only.
 - Symbols: a new section "UI design system" near the existing project documentation.

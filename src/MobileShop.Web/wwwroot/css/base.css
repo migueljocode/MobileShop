@@ -20,14 +20,6 @@
 
 :root {
   color-scheme: dark;
-  --app-ink: var(--ink);
-  --app-muted: var(--ink-muted);
-  --app-accent: var(--accent);
-  --app-accent-strong: var(--accent);
-  --app-surface: var(--panel);
-  --app-surface-raised: var(--panel-raised);
-  --app-edge: var(--line);
-  --app-edge-strong: var(--line-strong);
   --bs-body-font-family: var(--font-body);
   --bs-body-bg: var(--ground);
   --bs-body-color: var(--ink);

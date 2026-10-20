@@ -161,6 +161,31 @@ More detail is in [`docs/publishing.md`](docs/publishing.md).
 
 The full project rules are in [`.agents/project.md`](.agents/project.md).
 
+## UI design system
+
+The UI follows one rule set: quiet content, glass chrome. Glass is the navigation and overlay layer only; content surfaces stay opaque. The ten materials below are the vocabulary: the plain ones are opaque, the glass ones are the navigation layer, modal sheets, the date-picker panel, the action bar and the login card.
+
+**Stylesheets**: Bootstrap is loaded first, then the nine app stylesheets, in the order `Pages/Shared/_Layout.cshtml` links them: `tokens.css`, `base.css`, `controls.css`, `surfaces.css`, `overlays.css`, `shell.css`, `login.css`, `motion.css`, `navigation-menu.css`. Every colour, radius, size and z-index comes from the token families in `tokens.css`: surfaces, text, borders, glass, shadow, radius, space, size, motion, z.
+
+| Material | Use for |
+|---|---|
+| M0 Canvas | page background |
+| M1 Content surface | main groups, tables, form sections |
+| M2 Raised surface | cards, stat tiles, empty-state well |
+| M3 Inset surface | fields, readonly values, code |
+| G1 Regular glass | dock, flyout |
+| G2 Subtle glass | sticky action bar, tooltips |
+| G3 Overlay glass | modal sheets, date-picker panel, login card |
+| G3-solid | scrollable dialogs |
+| G4 Clear glass | reserved, not used today |
+| Scrim | behind modals |
+
+**States**: hover, focus-visible, pressed, selected, disabled, loading, error, success, empty. Hover never lifts or translates, pressed scales to 0.98, and every duration and easing comes from a token except the dock, which keeps its own curves. **Preferences**: `prefers-reduced-transparency`, `prefers-contrast`, `forced-colors` and the Profile "Solid surfaces" switch fall back to a solid, legible UI; `prefers-reduced-motion` only removes the animation — durations collapse to 0.01 ms and the press scale is dropped — and does not change the materials.
+
+**Audit gates** for every CSS change: only the nine stylesheets above; no colour literals outside `tokens.css`; at most 12 `!important`; `backdrop-filter` only in `overlays.css`, `shell.css`, `login.css`, `motion.css` and `navigation-menu.css`; no `translateY(-1px)` or `scale(1.0` hover lifts; no literal duration or easing outside `tokens.css` and the dock, except the reduced-motion `0.01 ms` in `base.css`; total CSS under 60,000 bytes.
+
+The design-system rules, their audit gates and the pipeline that maintains them live in [`.agents/`](.agents).
+
 ## Notes
 
 - **Not production-hardened.** The app has no production-grade authentication or authorization. Treat it as a single-shop tool on a trusted network.
