@@ -1,150 +1,112 @@
-# Actor — Step 9.7 (Stage 9 validation)
+# Actor — correction round (Step 10.7 Job B HIGH finding)
 
-- **Commit:** none — validation step, no code change; the plan.md heading is struck for the stage sign-off commit. Working tree (uncommitted): `.agents/chat/act.md` (this file), `.agents/chat/audit.md` (pre-existing), `.agents/chat/plan.md` (heading strike for Step 9.7; the 9.6 skip strike was already there).
+- **Commit:** `19066f0` — `fix(web): discard a stale combobox response after the list is dismissed`
+  (body: `Correction round for the Step 10.7 Job B HIGH finding.`; Conventional Commits, no `Co-authored-by`)
 
 ## Verification
 
-### CI (GitHub Actions, `.NET CI`, all via `gh api repos/migueljocode/MobileShop/actions/runs?head_sha=<sha>`)
+### CI
 
-| Step | Commit | Run | Conclusion |
-|---|---|---|---|
-| 9.1 | `62222fe` | `Action: #628 — Success` | status `completed`, conclusion `success` |
-| 9.2 | `4602c3a` | `Action: #629 — Success` | status `completed`, conclusion `success` |
-| 9.3 | `2b2340d` | `Action: #630 — Success` | status `completed`, conclusion `success` |
-| 9.4 | `46a5e8c` | `Action: #631 — Success` | status `completed`, conclusion `success` |
-| 9.5 | `3ebc194` | `Action: #632 — Success` | status `completed`, conclusion `success` |
+- `Action: #639 — Success` (workflow `.NET CI`, event `push`, `status: completed`, `conclusion: success`; read back with `gh api repos/migueljocode/MobileShop/actions/runs?head_sha=19066f0b83df6dde6e3e80bb810febdd8084b815` — exactly one run matched, no other workflow).
 
-No pending or interrupted run was recorded. 9.6 has no commit and no run (skipped, see below).
+### Commands (real output, run from the repo root)
 
-### Step 9.1 verify (re-run over the current tree)
+- `node --check src/MobileShop.Web/wwwroot/js/site.js` → OK (no syntax errors)
+- `node --check src/MobileShop.Web/wwwroot/js/person-picker.js` → OK (no syntax errors)
+- `node --check src/MobileShop.Web/wwwroot/js/product-picker.js` → OK (no syntax errors)
+- Step 10.3 definition-site check (`awk` over `site.js`) → `OK: definition at line 37 precedes the ready block at line 205` → **holds** (the helper is still a top-level global in `site.js`, outside the `DOMContentLoaded` block; the ready block only moved from line 198 to 205 because of the added lines above it).
+- `grep -c "cancel" src/MobileShop.Web/wwwroot/js/site.js` → `3` (>= 1) — **holds**
+- `grep -c "latestSearchId" src/MobileShop.Web/wwwroot/js/person-picker.js` → `4` (>= 3) — **holds**
+- `grep -c "latestSearchId" src/MobileShop.Web/wwwroot/js/product-picker.js` → `5` (>= 1) — **holds**
+- `git diff --stat` of the commit → `.agents/chat/plan.md` (3 ++-), `wwwroot/js/person-picker.js` (12 ++--), `wwwroot/js/product-picker.js` (6 ++-), `wwwroot/js/site.js` (7 ++++) — the three JS files and the plan note only. No CSS, no views, no other script.
 
-- Brace balance: `base.css` open=24 close=24 (balanced) · `app-theme.css` open=65 close=65 (balanced) · `tokens.css` open=7 close=7 (balanced) — **PASS**
-- `grep -c "site.css" src/MobileShop.Web/Pages/Shared/_Layout.cshtml` = **0** — PASS
-- `grep -c "base.css" …_Layout.cshtml` = **1** — PASS
-- `grep -rn --include=*.cshtml --include=*.cs --include=*.json --exclude-dir=bin --exclude-dir=obj "site.css" src | grep -v "/lib/"` → **prints nothing** — PASS
-- `grep -c "^:root" src/MobileShop.Web/wwwroot/css/app-theme.css` = **0** — PASS
-- `grep -c "fs-h1" src/MobileShop.Web/wwwroot/css/tokens.css` = **1**, value at tokens.css:47 = `--fs-h1: clamp(1.75rem, 1.5rem + 0.8vw, 2rem);` — PASS
-- `_Layout.cshtml` stylesheet link order (lines 9-17) = bootstrap → tokens → base → app-theme → components → controls → surfaces → navigation-menu → scoped (`MobileShop.Web.styles.css`) — PASS
+### Exact lines changed
 
-### Step 9.2 verify
+`src/MobileShop.Web/wwwroot/js/site.js` (7 lines added, nothing removed)
+- `:44-46` — new optional hook next to the existing ones:
+  ```js
+  // Optional hook: lets a consumer invalidate a request that is still in flight,
+  // so a late response cannot re-open the list the user just dismissed.
+  const cancelList = hooks && typeof hooks.cancel === 'function' ? hooks.cancel : () => { };
+  ```
+- `:125-131` — the Escape branch of the keydown handler:
+  ```js
+  // Escape dismisses the list, so any search that is still in flight is
+  // cancelled as well — even when the list is still hidden, because the
+  // pending response would otherwise open it a moment later.
+  cancelList();
+  if (!isOpen) return;
+  closeList();
+  event.preventDefault();
+  event.stopPropagation();
+  ```
+  `hooks.open` / `hooks.close` are untouched; `cancel` is an *additional, optional* hook — a consumer that does not pass it gets the no-op `() => { }`, so nothing throws and nothing changes.
 
-- Brace balance: `app-theme.css` 65/65 (balanced) · `components.css` 11/11 (balanced) · `surfaces.css` 60/60 (balanced) — PASS
-- `grep -cE "^\.(page-head|toolbar|stat|form-section|empty-state|loading-line)" src/MobileShop.Web/wwwroot/css/components.css` = **1** (current tree), not 5. **Not a regression:** the plan expected 5 *at the 9.2 commit* (the `.form-section .action-bar` rule + the four `.status-chip*` rules, the `stat` alternative also matching `status-chip`); Step 9.4 deleted the four `.status-chip*` rules. Re-checked at the 9.2 commit `4602c3a`: `git show 4602c3a:…/components.css | grep -cE "…" ` = **5** — the 9.2 check held at 9.2. The single surviving match today is `components.css:18: .form-section .action-bar {` (Step 11.2 owns it).
-- Negative grep A `grep -nE "^\.(page-head|toolbar|form-section|empty-state|loading-line)" …components.css | grep -v "action-bar"` → **prints nothing** — PASS
-- Negative grep B `grep -nE "^\.stat" …components.css | grep -v "status-chip"` → **prints nothing** — PASS
-- `grep -cE "^\.(card|profit-chart)" src/MobileShop.Web/wwwroot/css/app-theme.css` = **0** — PASS
-- `grep -c "backdrop-filter" src/MobileShop.Web/wwwroot/css/surfaces.css` = **0** — PASS
-- `grep -c "surfaces.css" …_Layout.cshtml` = **1** — PASS
+`src/MobileShop.Web/wwwroot/js/person-picker.js` (12 ++--)
+- `:19` — `var latestSearchId = 0;` (next to `var timer;` / `var isFocused;`).
+- `:70-74` — the wiring call now passes the hook:
+  ```js
+  combobox = window.wireComboboxKeys(searchInput, results, {
+      open: openResults,
+      close: closeResults,
+      cancel: function () { latestSearchId++; }
+  });
+  ```
+- `:101` — `var searchId = ++latestSearchId;` as the first statement of `search(query)` (before the `fetch`).
+- `:110-112` — the staleness guard before the render:
+  ```js
+  var options = await response.json();
+  if (searchId !== latestSearchId) return;
+  renderResults(options);
+  ```
+  The `finally { clearSearchLoading(); }` is unchanged, so `aria-busy` and the loading line are still cleared for a discarded response.
 
-### Step 9.3 verify
+`src/MobileShop.Web/wwwroot/js/product-picker.js` (6 ++--)
+- `:211-215` — the `wireComboboxKeys(...)` call now passes `cancel: function () { latestSearchId++; }`; the existing staleness check at `:240` (`if (searchId !== latestSearchId || …) return;`) drops the late response. No other change in this file.
 
-- Brace balance: `surfaces.css` 60/60 (balanced) · `app-theme.css` 65/65 (balanced) · `components.css` 11/11 (balanced) — PASS
-- `grep -rn 'class="table"' src/MobileShop.Web/Pages --include=*.cshtml` → **prints nothing** — PASS
-- `grep -c "data-table" src/MobileShop.Web/wwwroot/css/components.css` = **0** — PASS
-- `grep -cE "^\.table" src/MobileShop.Web/wwwroot/css/app-theme.css` = **0** — PASS
-- `grep -c "text-transform" src/MobileShop.Web/wwwroot/css/surfaces.css` = **0** — PASS
+`.agents/chat/plan.md` — one line added under the (already struck) `## ~~[x] Step 10.7 — Stage 10 validation~~` heading, noting the correction round. No existing line was changed, no heading was re-struck or rewritten.
 
-### Step 9.4 verify
+### Logical proof that the race is fixed
 
-- Brace balance: `surfaces.css` 60/60, `app-theme.css` 65/65, `components.css` 11/11 — all balanced — PASS
-- `grep -c "backdrop-filter" src/MobileShop.Web/wwwroot/css/surfaces.css` = **0** — PASS
-- `grep -cE "^\.(badge|alert|text-danger|field-validation|validation-summary)" src/MobileShop.Web/wwwroot/css/app-theme.css` = **0** — PASS
-- `grep -c "^\.status-chip" src/MobileShop.Web/wwwroot/css/components.css` = **0** — PASS
-- Repo-wide `!important` count across `src/MobileShop.Web/wwwroot/css/*.css`: `base.css` 9, `surfaces.css` 1, `navigation-menu.css` 2 (dock), `app-theme.css` 0, `components.css` 0, `controls.css` 0, `tokens.css` 0 → **total 12** — matches the plan's prediction (base.css 9 + surfaces.css 1 + dock 2 = 12) — PASS
+1. The user presses Escape in the search input. The keydown handler in `wireComboboxKeys` reaches the Escape branch and calls `cancelList()` → the picker's `cancel` hook runs `latestSearchId++`. (The hook is guarded: `hooks && typeof hooks.cancel === 'function'`, so a consumer without the hook gets a no-op and the helper still never throws when the list is empty or hidden.)
+2. `closeList()` then adds `d-none` and sets `aria-expanded="false"` — the open/close contract is unchanged.
+3. The in-flight response arrives afterwards. In the person picker the awaited payload is now assigned to `options` and the guard `if (searchId !== latestSearchId) return;` is true (the counter was bumped after the request was issued), so `search()` returns **before** `renderResults(options)` — the list is never re-opened and the live region is not re-announced. In the product picker the pre-existing check `if (searchId !== latestSearchId || …) return;` is true for the same reason, so `renderResults()` is not reached.
+4. Therefore `aria-expanded` stays `"false"` and `d-none` stays on the list, in both pickers, when the late response lands. The `finally { clearSearchLoading(); }` still removes `aria-busy` and the loading line, so the picker does not get stuck in a "loading" state.
 
-### Step 9.5 verify
+### Deviation from the Reviewer's snippet (deliberate, one line)
 
-- Brace balance: `surfaces.css` 60/60 (balanced) · `app-theme.css` 65/65 (balanced) — PASS
-- `grep -c "nav-tabs" src/MobileShop.Web/wwwroot/css/app-theme.css` = **0** — PASS
-- `grep -c "segmented" src/MobileShop.Web/Pages/Reports/ProfitLoss.cshtml` = **1** — PASS
-- `grep -c "btn-group" …ProfitLoss.cshtml` = **0** — PASS
+The Reviewer's snippet put `cancelList()` **after** the `if (!isOpen) return;` guard. That placement only cancels when the list happens to be open at the moment of the Escape. In the reproduction the Reviewer described — and in the exact re-test the orchestrator asked for ("type two letters, press Escape during the in-flight window") — the list is still `d-none` at the Escape, because no response has rendered yet: the result lists start hidden (`_PersonPicker.cshtml:23`, `_ProductPickerOptions.cshtml:3` both carry `d-none`) and only `renderResults()` opens them. With the guard first, `cancelList()` would never run in that window, the late response would still be current, and the list would still pop open — the HIGH finding would survive the fix.
 
-### Stage scope check — `git diff --stat c3d381b..3ebc194`
+The cancel call is therefore placed **before** the `!isOpen` guard, still inside the Escape branch and still before `closeList()`, which is what the orchestrator's instruction asks for ("call an OPTIONAL `hooks.cancel()` before `closeList()` in the Escape branch"). Consequences, all intended:
+- Escape now always invalidates the in-flight search of that input, whether or not the list is currently visible — which is the point of the finding ("Escape is not honoured while a search request is in flight").
+- `closeList()`, `event.preventDefault()` and `event.stopPropagation()` are still reached only when the list was open, so the key handling, the live region, the selection, the price filling and the 150 ms blur timing are untouched.
+- `hooks.cancel` is a pure counter bump in both pickers, so pressing Escape with nothing in flight is a no-op in effect (the next search simply gets a higher id).
 
-```
- .agents/chat/plan.md                               |  10 +-
- src/MobileShop.Web/Pages/Products/Details.cshtml   |   2 +-
- src/MobileShop.Web/Pages/Reports/ProfitLoss.cshtml |   6 +-
- src/MobileShop.Web/Pages/Shared/_Layout.cshtml     |   3 +-
- src/MobileShop.Web/wwwroot/css/app-theme.css       | 352 --------------------
- src/MobileShop.Web/wwwroot/css/base.css            | 161 +++++++++
- src/MobileShop.Web/wwwroot/css/components.css      | 186 -----------
- src/MobileShop.Web/wwwroot/css/site.css            |  53 ---
- src/MobileShop.Web/wwwroot/css/surfaces.css        | 366 +++++++++++++++++++++
- src/MobileShop.Web/wwwroot/css/tokens.css          |   2 +-
- 10 files changed, 539 insertions(+), 602 deletions(-)
-```
-
-Exactly the expected set — `base.css` (new), `site.css` (deleted), `app-theme.css`, `components.css`, `surfaces.css` (new), `tokens.css`, `_Layout.cshtml`, `Products/Details.cshtml`, `Reports/ProfitLoss.cshtml`, plus `.agents/chat/plan.md`. **Nothing unexpected; no out-of-scope file touched.**
-
-### Step 9.6 — skipped
-
-- **9.6 skipped (Q-04 not approved)** — gated on owner decision Q-04; no owner answer, so the step was not implemented: no commit, no production change, no CI run.
-- `grep -c "body::before" src/MobileShop.Web/wwwroot/css/base.css` = **0** — confirms the ambient layer is absent (expected for a skipped step).
-- `grep -c 'data-surfaces="solid"' src/MobileShop.Web/wwwroot/css/base.css` = **0** — same conclusion.
-
-### `git status --porcelain` (current tree)
-
-```
- M .agents/chat/act.md
- M .agents/chat/audit.md
- M .agents/chat/plan.md
-```
-
-(act.md = this report; audit.md = pre-existing Reviewer edit; plan.md = the 9.7 heading strike. No production file is modified.)
-
-### `git log --oneline c3d381b..3ebc194`
-
-```
-3ebc194 feat(css): port the ProfitLoss tabs and range control to the surface family
-46a5e8c feat(css): restyle status chips and alerts on the surface family
-2b2340d feat(css): unify every table on the data-table idiom
-4602c3a feat(css): add the Liquid Glass surface family for cards, stats and states
-62222fe feat(css): consolidate the base rules into base.css and set the type scale
-```
-
-### Owner's manual check — ANSWERED (real browser)
-
-The plan assumed no browser was available. In fact the .NET SDK and a headless Firefox (156.0.1) were present, so the app was run at http://localhost:5043 (Development, seeded data) and inspected with a real browser at 1366×900 and an emulated 480×800 viewport. The full report is at `/tmp/kilo/stage9-owner-check.md` (screenshots and raw measurement dumps under `/tmp/kilo/stage9/`). Findings, not a pass claim:
-
-**Confirmed as intended**
-
-- **One surface family.** `.card` (Dashboard), `.stat` (Dashboard), `.form-section` (/Products/CreatePhone) and `.profit-chart-card` (/Reports/ProfitLoss) all compute the same values: background `rgb(28, 37, 46)` (#1C252E = `--surface-2`), border `1px solid rgb(43, 55, 67)` (hairline), `border-radius: 16px` (`--radius-lg`), the two-layer shadow `--shadow-1` plus the top inset edge highlight `rgba(236,240,244,.1) 0 1px 0 inset`, and `backdrop-filter: none`.
-- **Table idiom.** Table headers are `text-transform: none` (no uppercase), 14px / weight 700 / `rgb(147,163,179)`, cells 12px 16px with hairline bottom separators; 8/8 tables app-wide are `.data-table` and 0 Bootstrap `.table` remain. The /Products/Details table kept its `td.num` right alignment (`text-align: end`, tabular numerals, "12 000 000 Toman").
-- **Chips.** 999px pills with tinted fill and bold text: available = `rgba(54,197,176,.16)` / `rgb(54,197,176)`, sold = `rgba(147,163,179,.16)` / `rgb(147,163,179)`, used = `rgba(229,169,75,.16)` / `rgb(229,169,75)`.
-- **Segmented control.** 999px pill track (`display: inline-flex`, gap 2px, padding 3px, border `1px solid rgb(102,120,138)`, bg `rgb(14,19,24)`) with exactly one selected pill (accent soft fill + bold); switching to Manual reloaded the page (`?Mode=Manual&Preset=Today&From=…&To=…`), redrew the chart (1172×360) and re-rendered the table (3 → 18 rows) with **no console error**.
-- **Alerts.** Radius 16px; danger border `rgb(240,112,122)`, accent border `rgb(54,197,176)`, `backdrop-filter: none` on both, no shadow.
-- **H1.** 32px at 1366px (clamp max 2rem, root 16px), 24.84px at 480px (root 14px); 30.13px @768, 25.59px @576.
-- **Page frame radius.** 24px at 1366px (`--radius-xl`), 14px at 576px (`--radius-lg` × 14px root), 0px at 480px (square below 576px).
-- **No console errors** on any visited page (Dashboard, /Products, Customers, Sellers, CreatePhone, Login, ProfitLoss). The only console entry app-wide is one INFO ("Chart data: Object(3)") emitted by the app's own chart code.
-
-**Open findings for the Reviewer's Job B**
-
-1. **FAIL — horizontal overflow on /Products at 480px** (`scrollWidth` 841 vs `innerWidth` 480, 361px overflow). The `.btn-group` category filter row is 816px wide with `overflow-x: visible` and `flex-wrap: nowrap`; the filter `.btn` labels wrap (row height 59px). **Identical to the Stage 8 measurement (841) → pre-existing, not a Stage 9 regression.** Needs a wrap/scroll container below 768px.
-2. **CONCERN (carried from Stage 8) — a FOCUSED invalid field on /Account/Login keeps the accent border `rgb(54,197,176)` instead of danger red**; the *unfocused* invalid field is correctly `rgb(240,112,122)`. Cause: `app-theme.css .account-login-field .form-control:focus` (0-3-0) outranks `.form-control.input-validation-error` (0-2-0).
-3. **NOTE — `.account-login-card` still carries `backdrop-filter: blur(28px) saturate(155%)`** (app-theme.css:20-21). It is the login card, not an alert, so it is outside the "alerts have no blur" rule, but the frosted login panel survived the Stage 9 surface consolidation.
-4. **NOTE — the dashboard "Recent transactions" is a card grid, not a table** (20 `.card` items in a `.row/.col` grid; `querySelectorAll('table').length === 0`). The Step 9.7 wording assumed a table; this matches the plan (Step 9.2 keeps the dashboard `card h-100` grid) → the surface family was applied to the cards instead. Not a defect.
-5. **NOTE — the server-side `.alert alert-danger` (`Model.Message` variant) is practically unreachable**: every `CreatePhoneAsync` failure carries an `ErrorField`, so `OnPostAsync` raises a field error instead; the visible error alert comes from the JS-generated modal error (`#manufacturerModalError`). Not a styling defect, but the "error alert" of the checklist is only reachable through the modal path.
+Everything else in the Reviewer's "Exact fix" is implemented literally: the optional hook in `site.js`, the `cancel` hook in `product-picker.js` (the staleness check there already existed), and the three changes in `person-picker.js` (`latestSearchId`, the captured `searchId`, the guard before `renderResults`, the `cancel` hook).
 
 ## Limitations
 
-- **Not verifiable here:** Safari/WebKit (and Chrome/Edge) — only Firefox 156 headless was run; a real coarse pointer / touch device and real touch input; a screen-reader announcement for `role="alert"` / `aria-live` / `role="status"` (DOM attributes verified, announcement not); forced-colors / high-contrast; print stylesheet; RTL / Persian text rendering; zoom ≠ 100%; real-device performance; iOS/Android WebViews.
-- The 480px numbers are real (innerWidth = 480 confirmed) but come from an **emulated** BiDi viewport, not a physical 480px window (Firefox clamps a real window to a 500px minimum width).
-- The `firefox-devtools` MCP server was not registered in the tool registry, so the same MCP server (`@mozilla/firefox-devtools-mcp` v0.10.6) was driven directly over stdio JSON-RPC; for the 480px pass the documented fallback was geckodriver 0.37.1 + `webSocketUrl: true` → WebDriver BiDi `browsingContext.setViewport`.
-- The Step 9.2 count `= 5` cannot hold in the final tree (Step 9.4 removed the four `.status-chip*` rules that the `stat` alternative matched); it was re-verified at the 9.2 commit and recorded there.
-- No repository file was modified by the owner's browser check; no `dotnet build` / `dotnet test` was run locally (CI is the only gate).
+- **The browser re-test of the race is still OPEN — no browser is available in this environment** (no Firefox/Chromium, no geckodriver/Playwright), so the fix is proven by code inspection and logic only, not by observation. The orchestrator should run exactly this check:
+  1. Open `/Transactions/Sell`.
+  2. Throttle the network so a search request takes ~2 s (e.g. 2 s latency in the devtools network throttling, or a delayed `window.fetch`).
+  3. Focus the customer (person picker) search input, type two letters (e.g. `Ma`).
+  4. While the request is still in flight (`aria-busy="true"`), press **Escape**.
+  5. Confirm the list stays closed for more than 4 s: `d-none` present, `aria-expanded="false"`, and still closed when the response arrives (no options rendered, no re-announcement in the live region). Repeat the same steps for the product picker search input.
+  6. Also confirm the normal path still works: type → options appear → ArrowDown/ArrowUp move the active option → Enter selects (person picker: customer id set; product picker: product id set and the price autofilled) → the list closes and `aria-expanded="false"`.
+- The person-picker modal focus-restoration one-liner (Reviewer finding 2, MEDIUM, pre-existing) was **not** included: only the HIGH finding was in scope for this correction round.
+- `/Reports/ProfitLoss` reload-on-day-pick (finding 3) and the broken `vazirmatn-*.woff2` files (finding 4) are untouched — out of scope.
+- Per the project rules CI is the only build/test gate — no local `dotnet build` / `dotnet test` was run.
+- `graphify update .` was run after the change; the `graphify-out/` files (`graph.json`, `GRAPH_REPORT.md`) are dirty in the working tree and were deliberately **not** committed.
 
 ## Friction noted
 
-- The `gh run list --commit <sha>` form of the CI query returns `[]` on this build; the `gh api repos/…/actions/runs?head_sha=<sha>` form works and was used instead (as the AGENTS.md rule prescribes).
-- The `gh api …/actions/runs?per_page=20` listing is enough to cover the whole stage, but it is capped at 20 runs; the per-`head_sha` query is the reliable form when more history exists.
-- Brace balance was measured with `grep -o "{" | wc -l` / `grep -o "}" | wc -l` per file — cheap and exact for these files, but it is a hand-rolled check rather than a CSS parser.
-- Counting occurrences of a CSS selector pattern across steps is not stable over time: the Step 9.2 count depends on the state of the tree at 9.2, and it must be re-read at that commit rather than at the tip.
+- The Reviewer's exact fix was internally inconsistent with its own acceptance criterion: the snippet's `cancelList()` sits behind the `if (!isOpen) return;` guard, while the acceptance criterion ("Escape pressed during the in-flight window must leave the list closed … and the list must still be closed when the response arrives") is only satisfiable when the cancel also runs while the list is still hidden. The one-line placement deviation above is the resolution; a re-read of the finding's own reproduction (`d-none` present at the Escape) confirms it.
+- The `git diff --stat` of the stage is large because `graphify-out/graph.json` is rewritten whole on every build; committing it is not wanted, but its dirtiness obscures the real scope of a change. A `git diff --stat -- . ':(exclude)graphify-out'` filter would read better.
 
 ## Problems
 
-- None in the Stage 9 code itself. The only FAIL in this stage is the pre-existing /Products 480px horizontal overflow (finding 1 above), which is unchanged from Stage 8 and out of Stage 9 scope; the /Account/Login focused-invalid border (finding 2) is likewise carried over from Stage 8.
+- None blocking. The one deliberate deviation from the Reviewer's literal snippet is documented above and in the plan note, with the reason.
 
 ## Status
 
-**COMPLETE** — all five Stage 9 code commits have a completed, successful CI run (#628, #629, #630, #631, #632); every re-run verify command holds; the stage `git diff --stat` matches the expected file list exactly; 9.6 is recorded as skipped (Q-04 not approved); the owner's manual check has been answered with the browser findings recorded above (one pre-existing FAIL and one carried-over CONCERN are listed for the Reviewer's Job B to judge — they are findings, not a Stage 9 regression).
+COMPLETE — the Step 10.7 Job B HIGH finding is fixed in the three JS files only, `Action: #639 — Success` is green, all required checks hold, and the commit is pushed to `main`. The browser re-test of the race remains open for the orchestrator (steps above). **Next: the Reviewer re-runs Job B on the correction commit `19066f0` and, if it passes, signs off Stage 10.**
