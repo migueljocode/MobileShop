@@ -317,7 +317,7 @@ Order rule: the visual family first (10.1), then markup and behaviour (10.2-10.4
 - Risk: MEDIUM (shared helper plus a behaviour change)
 - Confidence: MEDIUM
 
-## [ ] Step 10.4 — Product picker uses the same keyboard model
+## ~~[x] Step 10.4 — Product picker uses the same keyboard model~~
 - Task: COMP-013 (part 2) · F-19 · Priority P0 · Effort S · Mandatory · Type A.
 - Files: modify: `src/MobileShop.Web/wwwroot/js/product-picker.js` only.
 - Symbols: `window.wireComboboxKeys` from site.js — defined at the **top level** of site.js in Step 10.3, so it already exists when this file's `DOMContentLoaded` handler runs; its `renderResults` (or the function that rebuilds result buttons), the input handlers and the show or hide code for the result list (`[data-product-search]`, `[data-product-results]`).

@@ -26,6 +26,24 @@ document.addEventListener('DOMContentLoaded', function () {
         });
         var selectedSuggestedPrice = '';
         var latestSearchId = 0;
+        var combobox = null;
+
+        var liveRegion = document.createElement('span');
+        liveRegion.className = 'visually-hidden';
+        liveRegion.setAttribute('role', 'status');
+        liveRegion.setAttribute('aria-live', 'polite');
+        if (results.id) liveRegion.id = results.id + '-status';
+        results.insertAdjacentElement('afterend', liveRegion);
+
+        function openResults() {
+            results.classList.remove('d-none');
+            searchInput.setAttribute('aria-expanded', 'true');
+        }
+
+        function closeResults() {
+            results.classList.add('d-none');
+            searchInput.setAttribute('aria-expanded', 'false');
+        }
 
         function clearSuggestedPrice() {
             if (selectedSuggestedPrice &&
@@ -100,8 +118,7 @@ document.addEventListener('DOMContentLoaded', function () {
             searchInput.value = '';
             clearSuggestedPrice();
             latestSearchId++;
-            results.classList.add('d-none');
-            searchInput.setAttribute('aria-expanded', 'false');
+            closeResults();
         }
 
         function showSearchLoading() {
@@ -150,8 +167,7 @@ document.addEventListener('DOMContentLoaded', function () {
             }
             valueInput.value = String(option.productId);
             searchInput.value = option.label;
-            results.classList.add('d-none');
-            searchInput.setAttribute('aria-expanded', 'false');
+            closeResults();
 
             clearSuggestedPrice();
             var price = option.suggestedPrice ?? option.SuggestedPrice;
@@ -180,8 +196,21 @@ document.addEventListener('DOMContentLoaded', function () {
                 results.appendChild(button);
             });
             var showResults = options.length > 0 && document.activeElement === searchInput;
-            results.classList.toggle('d-none', !showResults);
-            searchInput.setAttribute('aria-expanded', showResults ? 'true' : 'false');
+            if (showResults) {
+                openResults();
+            } else {
+                closeResults();
+            }
+            liveRegion.textContent = options.length > 0 ? options.length + ' results' : 'No results';
+            if (combobox) combobox.reset();
+        }
+
+        // The keyboard model lives in site.js at the top level of that file, so it already
+        // exists when this ready handler runs. A missing helper is a defect, not a no-op.
+        if (window.wireComboboxKeys) {
+            combobox = window.wireComboboxKeys(searchInput, results, { open: openResults, close: closeResults });
+        } else {
+            console.error('product-picker: window.wireComboboxKeys is missing, the product picker keyboard model is not wired.');
         }
 
         async function search(query) {
@@ -250,8 +279,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         searchInput.addEventListener('blur', function () {
             setTimeout(function () {
-                results.classList.add('d-none');
-                searchInput.setAttribute('aria-expanded', 'false');
+                closeResults();
             }, 150);
         });
 
