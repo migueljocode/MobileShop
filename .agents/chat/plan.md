@@ -558,7 +558,7 @@ Stages 8-12 restyle these pages through shared classes (`page-head`, `toolbar`, 
 # Stage 14 — Pages C: Transactions, Reports, Error and Privacy
 Sell and Transactions/Details need no step: they inherit buttons, fields, surfaces, tables, the glass date picker, the pickers' keyboard model and the action bar from Stages 8-11. Privacy keeps the owner's placeholder sentence (policy text is the owner's decision, R22 Q-11); only its inline width style changes.
 
-## [ ] Step 14.1 — Transactions: visible result count
+## ~~[x] Step 14.1 — Transactions: visible result count~~
 - Task: ROUTE-009 (part) · F-22 (feedback) · Priority P2 · Effort S · Optional (UX, additive) · Type U.
 - Files: modify: `src/MobileShop.Web/Pages/Transactions/Index.cshtml` only.
 - Symbols: the `else` branch after `@if (Model.Transactions.Count == 0)` (line 63) that opens `<div class="table-responsive">` (line 73).
@@ -572,7 +572,7 @@ Sell and Transactions/Details need no step: they inherit buttons, fields, surfac
 - Risk: LOW
 - Confidence: HIGH
 
-## [ ] Step 14.2 — ProfitLoss: describe the trend chart and make the loss rows legible
+## ~~[x] Step 14.2 — ProfitLoss: describe the trend chart and make the loss rows legible~~
 - Task: ROUTE-011 · F-22 (part) · Priority P2 · Effort S · Mandatory · Type A.
 - Files: modify: `src/MobileShop.Web/Pages/Reports/ProfitLoss.cshtml`, `src/MobileShop.Web/wwwroot/css/surfaces.css`.
 - Symbols: (a) `<canvas id="profitLossChart" … aria-label="Profit and loss by …"></canvas>` (about lines 187-193) inside `<div class="profit-chart-canvas">` (line 186); (b) the Distribution row `<tr class="@(row.IsLossPeriod ? "table-danger" : "")">` (line 214) and the `.data-table` family in `surfaces.css`.
@@ -586,7 +586,7 @@ Sell and Transactions/Details need no step: they inherit buttons, fields, surfac
 - Risk: LOW
 - Confidence: HIGH
 
-## [ ] Step 14.3 — Error page copy and the `measure` class
+## ~~[x] Step 14.3 — Error page copy and the `measure` class~~
 - Task: ROUTE-012 · F-33, F-30 (part) · Priority P2 · Effort S · Mandatory · Type V.
 - Files: modify: `src/MobileShop.Web/Pages/Error.cshtml`, `src/MobileShop.Web/Pages/Privacy.cshtml`, `src/MobileShop.Web/wwwroot/css/surfaces.css`.
 - Symbols: Error.cshtml `<div style="max-width: 70ch;">` and the block from `<h2>Development Mode</h2>` through the end of the second `<p>` that follows it (the paragraph ending "and restarting the app."); Privacy.cshtml the same `<div style="max-width: 70ch;">`.

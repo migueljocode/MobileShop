@@ -190,8 +190,10 @@
                         data-values='@Html.Raw(chartValuesJson)'
                         data-current-index="@currentIndex"
                         data-interval-label="@chartIntervalLabel"
-                        aria-label="Profit and loss by @Model.TrendInterval.ToString().ToLowerInvariant()"></canvas>
+                        aria-label="Profit and loss by @Model.TrendInterval.ToString().ToLowerInvariant()"
+                        aria-describedby="profit-chart-desc"></canvas>
             </div>
+            <p id="profit-chart-desc" class="visually-hidden">Line chart of profit and loss over the selected date range. The table below lists profit and loss per product.</p>
                 <div class="profit-chart-legend"><span aria-hidden="true"></span> Net profit / loss</div>
         </section>
         <div class="table-responsive">
@@ -211,7 +213,7 @@
         <table class="data-table"><thead><tr><th scope="col">Employee</th><th scope="col" class="num">Share %</th><th scope="col" class="num">Amount (Toman)</th></tr></thead><tbody>
 @foreach (var row in Model.DistributionRows)
 {
-    <tr class="@(row.IsLossPeriod ? "table-danger" : "")">
+    <tr class="@(row.IsLossPeriod ? "row-danger" : "")">
         <td dir="auto">@row.EmployeeName</td>
         <td class="num">@row.SharePercent%</td>
         <td class="num">@row.CalculatedAmount.ToToman()</td>

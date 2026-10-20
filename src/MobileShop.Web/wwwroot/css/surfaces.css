@@ -364,3 +364,12 @@ th.num {
   box-shadow: var(--focus-ring);
 }
 /* END surfaces-controls-v1 */
+
+.data-table tbody tr.row-danger td {
+  color: var(--danger);
+  background-color: var(--danger-soft);
+}
+
+.measure {
+  max-width: var(--size-measure);
+}
