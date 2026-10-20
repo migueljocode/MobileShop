@@ -1,6 +1,6 @@
 - [x] ~~Stage 7 — Liquid Glass foundation: design tokens, Bootstrap dark mode, dead-CSS cleanup (no layout change)~~
 - [x] ~~Stage 8 — Core controls: buttons, fields, selects, checks, validation states, label association~~
-- [ ] Stage 9 — Content surfaces: canvas shell, cards, tables, chips, alerts, empty and loading states
+- [x] ~~Stage 9 — Content surfaces: canvas shell, cards, tables, chips, alerts, empty and loading states~~
 - [ ] Stage 10 — Overlays and pickers: glass modals and menus, scrim, picker keyboard support, Jalali date picker
 - [ ] Stage 11 — Navigation shell: dock token migration, flyout grouping, focus clearance, action bar, mobile safe areas
 - [ ] Stage 12 — Pages A: Login, Profile, Dashboard, People
