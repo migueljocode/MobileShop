@@ -1,47 +1,32 @@
-# Job B — Stage 12, Step 12.5 (stage validation) — PASS
+# Job B verdict — Stage 13, Step 13.2 (stage validation)
 
-**Verdict: PASS.** Stage 12 (`9875771`) met its goals, the stage gate's evidence is complete, and the Global Definition of Done's stage item is satisfied. Sign-off performed: `TODO.md` line 6 ticked and committed as `docs(todo): complete Stage 12`.
+**PASS**
 
 ## CI evidence
-- `GET /repos/migueljocode/MobileShop/actions/runs?head_sha=9875771a45db3d6e2d59e49ab739df320bb7e0b8` → `total_count: 1`; workflow `.NET CI`, `run_number: 645`, `status: completed`, `conclusion: success`.
-- **`Action: #645 — Success`** — the only run for the stage commit; it covers Steps 12.1-12.4 (the stage is one commit by the owner's policy). Re-checked by me, not taken on record.
+- `GET /repos/migueljocode/MobileShop/actions/runs?head_sha=bedb01a0f3aa3e0246ae2523775ab377b3c094b3` → `total_count: 1`; workflow `.NET CI`, event `push`, `run_number: 646`, `status: completed`, `conclusion: success`.
+- **`Action: #646 — Success`** (re-checked by the Reviewer, not taken on record; completed and successful, head_sha matches the stage commit exactly).
 
-## Stage scope — `git show --stat --no-renames 9875771` (verified myself)
-Exactly the expected set, nothing else: `M` `Pages/Account/Login.cshtml`, `Pages/Account/Profile.cshtml`, `Pages/Index.cshtml`, `Pages/People/Index.cshtml`, `Pages/People/Customers.cshtml`, `Pages/People/Sellers.cshtml`, `Pages/Shared/_Layout.cshtml`, `.agents/chat/plan.md`, `graphify-out/GRAPH_REPORT.md`, `graphify-out/graph.json`; `A` `Pages/Shared/_PasswordToggle.cshtml`, `wwwroot/css/login.css`; `D` `wwwroot/css/app-theme.css`. No `Api`/`Dal`/`Models`/`Services`/`Tests`/`bin`/`obj` path, no handler, page-model or route change. Commit message is Conventional Commits and accurate. (`git show --stat` without `--no-renames` renders the CSS as a rename — expected, not scope creep.)
+## Evidence checked
+- `git show --stat --no-renames bedb01a` → exactly 4 files: `src/MobileShop.Web/Pages/Products/Index.cshtml` (1 file, 2 insertions(+), 2 deletions(-)), `.agents/chat/plan.md` (the 13.1 heading strike), `graphify-out/GRAPH_REPORT.md`, `graphify-out/graph.json`. No other file in the stage; the only production file is `Pages/Products/Index.cshtml`.
+- Step 13.1 greps re-run and hold: `grep -c "btn-group" src/MobileShop.Web/Pages/Products/Index.cshtml` = `0`; `grep -c 'aria-label="Product type"' …Index.cshtml` = `1`.
+- Stage range `fc4026c..bedb01a`: only the two commits above; `git diff --name-only` over the range touches no `_ProductCreate*Form` partial, no `product-create-modal.js`, no `ProductCreateRegistry.cs` — the dead create-product subsystem (R26) is untouched, as the stage requires.
+- Deliverable correctness: the diff is only the two wrapper lines — `<div class="btn-group" role="group">` → `<nav class="d-flex flex-wrap gap-2 mb-3" aria-label="Product type">` and `</div>` → `</nav>`. The `@foreach (var (key, label, _, _) in tabs)` loop body is not in the diff; the 12 links (All + the 11 types, per the `tabs` array at `Products/Index.cshtml:5-19`) keep `btn btn-primary` / `btn btn-outline-primary` and `aria-current="page"` exactly.
+- Commit message `fix(web): make the product type filters a labelled wrapping navigation` is a valid Conventional Commit and describes the change accurately.
 
-## Greps of 12.1-12.4 — re-run by me, all hold (values identical to act.md)
-- 12.1: `password-visibility-toggle` → Login 0 / Profile 0; `_PasswordToggle` → Login 1 / Profile 3; `<svg` in `_PasswordToggle.cshtml` → 1.
-- 12.2: brace balance `login.css` 27/27; `git ls-files …/css | grep -c app-theme.css` → 0; no dangling `app-theme.css` reference in `src`; `uppercase|letter-spacing|var(--r-` in `login.css` → 0; `login.css` in `_Layout.cshtml` → 1; `tabindex="-1"` → 1. Link order confirmed: bootstrap → tokens → base → controls → surfaces → overlays → shell → login → navigation-menu.
-- 12.3: `<h5` in `Pages/Index.cshtml` → 0; `card-title h5` → 1 (`<h5 class="card-title">` became `<h3 class="card-title h5">`).
-- 12.4: `segmented` → 1; `form-check` → 0; `aria-sort` → 3 in Customers and 3 in Sellers; `_EmptyState` → 1 in each.
-- Retired CSS: `wwwroot/css/` = `base.css controls.css login.css navigation-menu.css overlays.css shell.css surfaces.css tokens.css` — no `app-theme.css`, no `components.css`, no `site.css`.
+## The owner's manual check — NOT PERFORMED, treated as ANSWERED
+The owner directed that the browser-based visual pass be skipped for the remaining stages (too slow). act.md records the item as an open item with all seven items listed and each marked "not performed — owner skipped the browser pass": Products list for phone and two other types; SecondHand; Product Details; Edit (incl. the expected redundant second Jalali include, removed only in Step 16.1); the 11 Create pages; the Persian fallback stack (expected until Step 15.2); Safari/Firefox repeat.
 
-## Stage deliverable — met
-- Password toggle partial: `_PasswordToggle.cshtml` (new, one `<svg>`, `aria-pressed`/`aria-label`); Login uses it once, Profile three times, each flipping its own field. Inline duplication removed.
-- `login.css` replaces `app-theme.css`: glass card (92% `--glass-overlay-bg`, `backdrop-filter: blur(24px)`, `--radius-xl` 24px, `--shadow-3` + `--edge-highlight`), 52px controls, teal focus ring on every control — all measured live by the owner. Skip-link fix: `<main id="main" role="main" tabindex="-1">` → after Enter, `document.activeElement` is `MAIN#main`, not BODY.
-- Dashboard heading order: `h1` Dashboard → `h2` Recent transactions → `h3` card title keeping the `h5` size class.
-- People: segmented control (999px radius, accent-16% selected pill), auto-submit to `/People?type=customers&sortBy=name&ascending=true`, `aria-sort` only on the 3 sortable headers with the arrow on the active column only, `_EmptyState` partial rendering live. Console sweep: 0 entries over 10 pages.
-
-## Open findings — severity judgement (AGENTS.md: only CRITICAL/HIGH block; MEDIUM/LOW are notes; one correction round)
-**None blocks the Stage 12 sign-off.** Both visible defects are pre-existing behaviours that Stage 12 neither introduced nor changed (Stage 12's commit does not touch the files involved), so they are not Stage 12 regressions; they are carried forward to the named stages below.
-
-1. **Focused invalid login field shows accent teal instead of danger red — MEDIUM (carried since the Stage 8/Stage 10 checks; NOT blocking).** Confirmed by me in the source: `login.css:87 .account-login-field .form-control:focus { border-color: var(--accent) }` (0,3,0) outranks `controls.css:165 .form-control.input-validation-error { border-color: var(--danger) }` (0,2,0), and `login.css` is linked after `controls.css`. The identical rule existed in the retired `app-theme.css` (line 83) and is the plan's own `login-v1` spec block verbatim, so this is not a Stage 12 regression; the invalid state is still fully conveyed (`aria-invalid="true"`, `aria-describedby="val-username Username-error"`, the class `input-validation-error`, the red border once blurred, and the visible message). **Where the fix belongs:** a Planner amendment of the `login-v1` spec block (plan.md, `/* BEGIN login-v1 */` … `/* END login-v1 */`) plus a stage step that re-extracts `login.css` with the same `sed` extraction — NOT a correction round inside Stage 12 (the Actor would have to deviate from the plan's verbatim spec block, which the Planner owns). Recommended landing: a new step in Stage 15 (the next stage that touches Account/Login and links CSS after `login.css`) or in Step 16.1 (final consistency audit), with the rule placed in the spec block as e.g. `.account-login-field .form-control.input-validation-error:focus { border-color: var(--danger); }` (or by moving the danger rule above the focus rule) and `login.css` re-extracted from the amended block. The Planner picks the step; the rule must not be patched into `login.css` alone, or the next extraction would silently revert it.
-2. **Login validation-summary CSS unreachable — LOW (no functional impact, NOT blocking).** Confirmed: the markup exists (`Login.cshtml:20` `<div asp-validation-summary="ModelOnly" class="account-login-validation" role="alert"></div>`) and `login.css` styles `.account-login-validation` / `.validation-summary-errors`, but the summary is `ModelOnly` and an empty submit raises only field-level errors, so the div stays empty. No visual regression; if it is ever wired, the CSS is already there. It rides along with any `login-v1` spec amendment above.
-3. **`/Reports/ProfitLoss` → Distribution: `<tr class="table-danger">` gives black text on the dark surface — HIGH as a defect, but PRE-EXISTING and OUT OF STAGE 12, so it does not block the Stage 12 sign-off.** Confirmed by me: `ProfitLoss.cshtml:214` `<tr class="@(row.IsLossPeriod ? "table-danger" : "")">`; Bootstrap's `.table-danger` is a whole-table variant (it sets `--bs-table-color: #000` on the element) and the repo's `.data-table td` rule (`surfaces.css:224`) sets no colour, so the cells inherit black. Introduced by commit `648034c` (24 Sep 2026), a file Stage 12 never touched, so it is not "anything that changed" and the plan's step rule does not make it a Stage 12 defect. **Where the fix belongs:** Stage 14 (Reports) — the Planner must fold it into the ProfitLoss step (14.2) or add a step there: stop applying Bootstrap's whole-table variant to a `<tr>` (move the class to the `<table>`, or use a repo class in `surfaces.css` that tints the row with the danger token and keeps the text legible). It must be closed before the Stage 16.4 redesign sign-off.
-4. **NOTE (not a defect):** on `/Account/Login` the first Tab lands on the username input because it carries `autofocus`, so the skip link is not the first stop on that page (Shift+Tab twice reaches it). The skip-link focus fix itself is verified correct on the dashboard (`activeElement` = `MAIN#main`). No action.
-5. **Not verifiable in this environment (NOTE):** Safari/WebKit (only Firefox 156 desktop was exercised), a real phone, mobile `backdrop-filter` and touch behaviour, screen-reader announcement of `aria-sort` / `role="status"`, and the People "No sellers yet" / "No customers yet" strings (both lists have seeded rows; the empty-state markup and CSS were verified live on an empty list elsewhere). These stay open for the Stage 16.2 owner verification pack.
-
-## Findings to carry forward
-- **Stage 15 (or 16.1), Planner-amended `login-v1` spec block + re-extraction of `login.css`:** focused invalid login field must keep the danger red border (finding 1); the unreachable validation-summary CSS may ride along (finding 2).
-- **Stage 14, ProfitLoss step:** replace the `<tr class="table-danger">` whole-table variant with a legible danger-row treatment (finding 3) — must be closed before the Stage 16.4 sign-off.
-- **Stage 16.2 owner pack:** Safari/WebKit, a real phone, screen-reader announcement, and the People empty-state strings (finding 5).
+I treat "the owner's manual check answered" as **MET — answered as "not performed at the owner's direction, items listed for a later pass"**: the item is answered (a decision plus a complete item list), not silently skipped, and the deferred visual evidence is already covered by the owner's browser verification pack in Step 16.2, which repeats the manual checks for every stage on the final build. The two known visual conditions that act.md flags (the redundant Jalali include on Edit, the Persian font fallback) are scheduled non-defects (Step 16.1 / Step 15.2), not Stage 13 regressions. This item therefore **does not block the sign-off**; the visual pass remains an open owner item.
 
 ## Global Definition of Done — stage item
-Met: CI green with the run number recorded (`Action: #645 — Success`, confirmed by me) · the greps of 12.1-12.4 recorded in act.md and re-run by me, all hold · `git show --stat 9875771` matches the stage's file lists exactly · the owner's manual check is answered with real browser evidence (served-HTML counts, computed styles, focus/`activeElement` measurements, console sweep), with the open findings recorded and triaged above.
+- CI green with the run number recorded in act.md → `Action: #646 — Success`, recorded.
+- The greps of the stage recorded → `btn-group` = 0, `aria-label="Product type"` = 1, recorded in act.md and re-run here.
+- `git diff --stat` matching the stage's file list → `Products/Index.cshtml` (2+/2-) plus the plan.md records entry and the two graphify-out files; nothing else.
+- The owner's manual check answered → answered as "not performed at the owner's direction, items listed for a later pass" (see above).
+→ Met.
 
-## Sign-off performed
-- `.agents/TODO.md` line 6 changed from `- [ ] Stage 12 — Pages A: Login, Profile, Dashboard, People` to `- [x] ~~Stage 12 — Pages A: Login, Profile, Dashboard, People~~` (no other stage added, edited, reordered or unticked).
-- Committed as `docs(todo): complete Stage 12` (named file only; no `Co-authored-by`; not pushed — the orchestrator pushes).
-- No production file was edited by this review; `act.md`, `plan.md` and `audit.md` were not committed.
+## Stage sign-off performed
+- `.agents/TODO.md` line 7 changed from `- [ ] Stage 13 — Pages B: Products list, details, edit and the 11 create forms` to `- [x] ~~Stage 13 — Pages B: Products list, details, edit and the 11 create forms~~`. No other stage added, edited, reordered or unticked.
+- Committed as `docs(todo): complete Stage 13` (named file only, no push, no Co-authored-by).
 
-Next: the Planner for Stage 13 (Job A on the Stage 13 plan), carrying the findings above.
+Next: the Planner, for Stage 14.

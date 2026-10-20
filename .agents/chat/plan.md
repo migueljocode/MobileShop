@@ -540,7 +540,7 @@ Stages 8-12 restyle these pages through shared classes (`page-head`, `toolbar`, 
 - Risk: LOW
 - Confidence: HIGH
 
-## [ ] Step 13.2 — Stage 13 validation (includes the owner visual pass)
+## ~~[x] Step 13.2 — Stage 13 validation (includes the owner visual pass)~~
 - Task: QA (stage gate) · Mandatory.
 - Files: none modified.
 - Symbols: none.
