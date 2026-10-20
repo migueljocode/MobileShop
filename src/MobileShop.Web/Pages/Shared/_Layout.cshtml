@@ -12,17 +12,17 @@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/tokens.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/base.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/css/app-theme.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/controls.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/surfaces.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/overlays.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/shell.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/login.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/navigation-menu.css" asp-append-version="true" />
 </head>
 <body class="has-floating-navigation">
     <a class="skip-link" href="#main">Skip to content</a>
     <div class="container">
-        <main id="main" role="main" class="mt-3 pb-3">
+        <main id="main" role="main" tabindex="-1" class="mt-3 pb-3">
             @RenderBody()
         </main>
     </div>

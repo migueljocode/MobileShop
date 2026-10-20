@@ -38,7 +38,7 @@ else
             <div class="col-md-6 col-lg-4">
                 <div class="card h-100">
                     <div class="card-body">
-                        <h5 class="card-title">@transaction.ProductLabel</h5>
+                        <h3 class="card-title h5">@transaction.ProductLabel</h3>
                         <p class="card-text mb-1">@transaction.Date.ToJalaliDateTimeString()</p>
                     <span class="status-chip status-chip--@(transaction.Direction == TransactionDirection.Buy ? "available" : "sold")">
                         @transaction.Direction

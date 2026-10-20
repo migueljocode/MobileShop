@@ -1,27 +1,27 @@
 # Graph Report - MobileShop  (2026-10-20)
 
 ## Corpus Check
-- 365 files · ~160,114 words
+- 366 files · ~161,883 words
 - Verdict: corpus is large enough that graph structure adds value.
-- Unclassified: 24 file(s) not represented in the graph (top: .css 8, (none) 5, .woff2 5)
+- Unclassified: 23 file(s) not represented in the graph (top: .css 7, (none) 5, .woff2 5)
 
 ## Summary
-- 3703 nodes · 9696 edges · 218 communities (121 shown, 97 thin omitted)
+- 3705 nodes · 9697 edges · 212 communities (117 shown, 95 thin omitted)
 - Extraction: 89% EXTRACTED · 11% INFERRED · 0% AMBIGUOUS · INFERRED: 1037 edges (avg confidence: 0.85)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `237849d3`
+- Built from commit: `4e89e3cc`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
 ## Community Hubs (Navigation)
 - tn
 - chart.umd.min.js
-- Fact
-- IProductsDataService
-- microsoft_entityframeworkcore_migrations
-- s
+- ProductsDataServiceTests
+- i
+- MigrationBuilder
+- .getParsed
 - n
 - CreatePhoneModelTests
 - .update
@@ -34,19 +34,19 @@
 - IActionResult
 - ProductDetailsViewModel
 - Stage 6 plan — frosted-glass compact/pop-up navigation dock
-- CreateLaptopModel
-- BaseRepoTests
-- MobileShop.Web.Pages.Products
+- .GetModelsAsync
+- Fact
+- DetailsModel
 - MobileShop.Tests
 - Transaction
 - xt
-- CreateGlassModelTests
-- CreatePowerBankModel
+- CreateGlassModel
+- CreatePortableStorageModel
 - TransactionsDataServiceTests
 - jt
 - NavItem
 - Manufacturer
-- bo
+- o
 - ReportsDataServiceTests
 - CreatePhoneInputModel
 - jalali-datepicker.js
@@ -57,46 +57,46 @@
 - TransactionsDataService
 - BaseRepo
 - DateTime
-- MobileShop.Models.Entities
-- IndexModel
-- ua
-- ProductsDataService
+- Person
+- MobileShop.Services.DataServices.Interfaces
+- QuestPdfGenerator
+- oo
+- ServiceResult
 - Laptop
 - sn
 - AppDbContext
 - .OnGetAsync
 - IReportsDataService
-- Func
+- microsoft_entityframeworkcore_migrations
 - ProfitLossModel
-- TransactionDirection
+- TransactionFactorRowViewModel
 - Product
 - JalaliDateTimeModelBinder.cs
 - MobileShop.Services/GlobalUsings.cs
 - .Migrate
 - MobileShop.Models.ViewModels.Web.BindModels
-- Person
+- Task
 - CableConnector
-- MobileShop.Tests/GlobalUsings.cs
-- MobileShop.Services.PDF.Configuration
+- .getProps
+- .ConfigureBuilder
 - .Calculate
-- IndexModelTests
+- CreateGlassInputModel
 - DatabaseMigratorTests
 - IndexModel
 - Model
 - MobileShop.Models.Extensions
 - DeviceSpec
-- TransactionFactorViewModel
+- InvoiceViewModel
 - Seller
 - hs
 - Cable
-- CreateCableModel
+- CreateAppleIdInputModel
 - Glass
-- User
-- MobileShop.Models.ViewModels.Web
+- Case
+- TransactionDirection
 - de
 - QuestPdfGeneratorTests
-- PowerBank
-- QuestPdfGenerator
+- BaseEntity
 - Product
 - PeopleIndexModel
 - ProfitLossInterval
@@ -106,45 +106,39 @@
 - http
 - CreateChargerModel
 - AccountDataServiceTests
-- Phone
+- MobileShop.Services.DataServices.Api
 - MobileShop.Tests.Models.Extensions
 - InvoicePresentation
 - PersianInvoicePresentation
 - PdfSettings
-- ReportsDataService
+- MobileShop.Web/GlobalUsings.cs
 - MigrationChainTests
 - CreatePowerBankInputModel
-- ProductListItemViewModel
+- MobileShop.Models.ViewModels.Web
 - IndexModel
 - product-picker.js
-- .AddMobileShopDataServices
+- ServiceCollectionExtensions
 - .CreateModel
 - CreatePortableStorageInputModel
-- ErrorModel
+- InvoiceViewModel
 - PortableStorage
-- CreateSellerInputModel
+- SolutionPaths
 - CreateCableInputModel
 - CreateChargerInputModel
-- CreateCaseModel
+- DistributionCalculatorTests.cs
 - navigation-menu.js
 - MobileShop.Services.DataServices.Dal
 - ProfitLossRowViewModel
-- PageModel
+- _PasswordToggle.cshtml
 - Charger
 - Guarantee
 - SecondHand
 - CreateCaseInputModel
 - DistributionRow
-- .OnPostCreateCustomerAsync
-- StorageKind
-- SellInputModel
+- PageModel
 - AppleInfo
-- AppLoggingSettings
-- SecondHand
-- MobileShop.Services.DataServices.Interfaces
 - CreateAppleIdModelTests
-- Task
-- InvoiceProfileExtensions.cs
+- RepoTestBase
 - .Hash
 - SmartWatch
 - Tablet
@@ -218,9 +212,9 @@
 - jQuery — MIT licence attribution
 - jQuery Validation — MIT licence attribution
 - jQuery Validation Unobtrusive — MIT licence attribution
-- MobileShop.Web/GlobalUsings.cs
+- MobileShop.Dal.Initialization
 - SampleDataSeedTests
-- MobileShop.Tests.Services.DataServices.Dal
+- .GetStockAsync_excludes_sold_second_hand_phone_from_available_count
 
 ## God Nodes (most connected - your core abstractions)
 1. `tn` - 127 edges
@@ -255,43 +249,43 @@
 - **Stage 6 nav-dock mechanisms working together** — _agents_chat_plan_frosted_glass_dock, _agents_chat_plan_compact_pop_dock, _agents_chat_plan_settle_gate, _agents_chat_plan_hover_footprint [EXTRACTED 1.00]
 - **Bundled third-party components with their licence/attribution files** — src_mobileshop_services_pdf_fonts_license_vazirmatn_ofl_1_1, src_mobileshop_web_wwwroot_lib_chart_js_license_mit_license, src_mobileshop_web_wwwroot_lib_jquery_license_mit_license, src_mobileshop_web_wwwroot_lib_jquery_validation_license_mit_license, src_mobileshop_web_wwwroot_lib_jquery_validation_unobtrusive_license_mit_license [INFERRED 0.75]
 
-## Communities (218 total, 97 thin omitted)
+## Communities (212 total, 95 thin omitted)
 
 ### Community 0 - "tn"
 Cohesion: 0.04
-Nodes (16): addBox(), afterDatasetsUpdate(), d(), generateLabels(), ke(), ln(), onClick(), Pn() (+8 more)
+Nodes (17): addBox(), Ae(), afterDatasetsUpdate(), configure(), d(), generateLabels(), ke(), onClick() (+9 more)
 
 ### Community 1 - "chart.umd.min.js"
 Cohesion: 0.03
-Nodes (73): ai(), at(), b(), beforeDraw(), beforeLayout(), beforeUpdate(), bs(), cn() (+65 more)
+Nodes (74): aa(), addElements(), at(), beforeLayout(), beforeUpdate(), Bn(), buildLookupTable(), buildTicks() (+66 more)
 
-### Community 2 - "Fact"
-Cohesion: 0.06
-Nodes (16): AppleId, Email, Notes, Password, ProductId, ProductNavigation, CreateGlassInputModel, CompatibleManufacturerId (+8 more)
+### Community 2 - "ProductsDataServiceTests"
+Cohesion: 0.09
+Nodes (8): AppleId, Email, Notes, Password, ProductId, ProductNavigation, TestDataHelpers, ProductsDataServiceTests
 
-### Community 3 - "IProductsDataService"
-Cohesion: 0.12
-Nodes (8): IProductsDataService, CreatePortableStorageModel, Input, Manufacturers, Message, Models, StorageCapacities, SuccessMessage
+### Community 3 - "i"
+Cohesion: 0.07
+Nodes (33): b(), bs(), cn(), ct(), dn(), e(), ei(), eo() (+25 more)
 
-### Community 4 - "microsoft_entityframeworkcore_migrations"
-Cohesion: 0.05
-Nodes (19): MobileShop.Tests.Dal.EfStructures, MobileShop.Dal.EfStructures, MobileShop.Tests.Dal.Initialization, MobileShop.Dal.Migrations, ModelBuilderExtensions, SolutionPaths, DatabaseFile, LogDirectory (+11 more)
+### Community 4 - "MigrationBuilder"
+Cohesion: 0.07
+Nodes (11): ModelBuilderExtensions, Initial, AddPhoneColor, NormalizeCatalog, AddEmployeeEntity, AddPartNumber, UseIntegerRialMoney, WidenMoneyToLong (+3 more)
 
-### Community 5 - "s"
-Cohesion: 0.05
-Nodes (44): aa(), Ae(), Bn(), buildTicks(), _calculateBarIndexPixels(), _calculateBarValuePixels(), _getAxis(), _getAxisCount() (+36 more)
+### Community 5 - ".getParsed"
+Cohesion: 0.14
+Nodes (11): beforeDraw(), draw(), fo(), getMaxOverflow(), parseArrayData(), parseObjectData(), parsePrimitiveData(), resolveDataElementOptions() (+3 more)
 
 ### Community 6 - "n"
-Cohesion: 0.07
-Nodes (12): Be(), ei(), fn(), gn(), je(), n(), ne(), numeric() (+4 more)
+Cohesion: 0.09
+Nodes (8): Be(), fn(), gn(), n(), ne(), numeric(), pi(), xn()
 
 ### Community 7 - "CreatePhoneModelTests"
 Cohesion: 0.08
 Nodes (10): CreatePhoneModelTests, CreatePhoneModel, Colors, Corporations, Input, Manufacturers, Message, Models (+2 more)
 
 ### Community 8 - ".update"
-Cohesion: 0.07
-Nodes (23): addElements(), afterDraw(), afterEvent(), afterUpdate(), Ba(), Bi(), Ci(), configure() (+15 more)
+Cohesion: 0.09
+Nodes (18): afterDraw(), afterEvent(), afterUpdate(), Ba(), Ee(), f(), ki(), Le() (+10 more)
 
 ### Community 9 - "CreateLaptopInputModel"
 Cohesion: 0.11
@@ -306,20 +300,20 @@ Cohesion: 0.05
 Nodes (43): EditProductInputModel, AppleIdPassword, CableLength, CapacityMah, Color, ColorId, CompatibleModels, Connector1 (+35 more)
 
 ### Community 12 - "ho"
-Cohesion: 0.05
-Nodes (20): a(), buildLookupTable(), determineDataLimits(), Di(), _generate(), _getTimestampsForTable(), ho(), initOffsets() (+12 more)
+Cohesion: 0.09
+Nodes (5): ho(), init(), nt(), rn(), Vo()
 
 ### Community 13 - "ProfileModel"
-Cohesion: 0.06
-Nodes (17): MobileShop.Web.Pages.Account, ServiceResult, IAccountDataService, ProfileModelTests, LoginModel, Message, Password, ReturnUrl (+9 more)
+Cohesion: 0.13
+Nodes (9): ServiceResult, ProfileModelTests, ProfileModel, ConfirmPassword, CurrentPassword, Message, NewPassword, NewUsername (+1 more)
 
 ### Community 14 - "IReadOnlyList"
-Cohesion: 0.07
-Nodes (3): ApiProductsDataService, ApiTransactionsDataService, ITransactionsDataService
+Cohesion: 0.10
+Nodes (3): ProductsDataService, Logger, IProductsDataService
 
 ### Community 15 - "IActionResult"
-Cohesion: 0.12
-Nodes (6): CreateGlassModel, CompatibleModels, Input, Manufacturers, Message, SuccessMessage
+Cohesion: 0.08
+Nodes (12): CreateCableModel, Input, Manufacturers, Message, Models, SuccessMessage, CreateCaseModel, CompatibleModels (+4 more)
 
 ### Community 16 - "ProductDetailsViewModel"
 Cohesion: 0.05
@@ -329,13 +323,17 @@ Nodes (40): ProductDetailsViewModel, AppleIdPassword, CableLength, CapacityMah, 
 Cohesion: 0.11
 Nodes (30): Actor report — Step 6.4 Stage 6 validation, Reviewer audit — Step 6.4 PASS and Stage 6 sign-off, Stage 6 plan — frosted-glass compact/pop-up navigation dock, Development-only destructive database initializer, Money as whole IRR long bounded by MoneyLimits.MaxRials, MobileShop project rules, QuestPDF community licence wiring, UseApi data-service switch (+22 more)
 
-### Community 18 - "CreateLaptopModel"
-Cohesion: 0.08
+### Community 18 - ".GetModelsAsync"
+Cohesion: 0.11
 Nodes (17): CreateDeviceModelTests, CreateLaptopModel, Corporations, Cpus, Gpus, Input, Manufacturers, Message (+9 more)
 
-### Community 20 - "MobileShop.Web.Pages.Products"
-Cohesion: 0.09
-Nodes (10): MobileShop.Web.Pages.Products, CreateAppleIdModel, Input, Message, SuccessMessage, DetailsModel, Product, Transactions (+2 more)
+### Community 19 - "Fact"
+Cohesion: 0.13
+Nodes (4): BaseRepoTests, LoggingsConfigurationTests, JalaliDateExtensionsTests, MoneyExtensionsTests
+
+### Community 20 - "DetailsModel"
+Cohesion: 0.20
+Nodes (5): ProductTransactionProjection, Selector, DetailsModel, Product, Transactions
 
 ### Community 21 - "MobileShop.Tests"
 Cohesion: 0.08
@@ -349,9 +347,13 @@ Nodes (19): CustomerConfiguration, TransactionConfiguration, Customer, NationalI
 Cohesion: 0.10
 Nodes (6): an(), as(), on, rs(), ts(), xt
 
-### Community 25 - "CreatePowerBankModel"
-Cohesion: 0.17
-Nodes (7): CreateAccessoryModelTests, CreatePowerBankModel, Input, Manufacturers, Message, Models, SuccessMessage
+### Community 24 - "CreateGlassModel"
+Cohesion: 0.18
+Nodes (7): CreateGlassModelTests, CreateGlassModel, CompatibleModels, Input, Manufacturers, Message, SuccessMessage
+
+### Community 25 - "CreatePortableStorageModel"
+Cohesion: 0.10
+Nodes (14): CreateAccessoryModelTests, CreatePortableStorageModel, Input, Manufacturers, Message, Models, StorageCapacities, SuccessMessage (+6 more)
 
 ### Community 27 - "jt"
 Cohesion: 0.09
@@ -362,15 +364,19 @@ Cohesion: 0.07
 Nodes (23): MobileShop.Web.ViewComponents, NavItem, ActionName, ControllerName, IconCssClass, Id, IsActive, PageName (+15 more)
 
 ### Community 29 - "Manufacturer"
-Cohesion: 0.09
-Nodes (15): Category, Models, Name, Manufacturer, Models, Name, CreateAppleIdInputModel, Email (+7 more)
+Cohesion: 0.07
+Nodes (18): Category, Models, Name, Manufacturer, Models, Name, Phone, IMEI1 (+10 more)
 
-### Community 30 - "bo"
-Cohesion: 0.20
-Nodes (4): bo, H(), j(), xo()
+### Community 30 - "o"
+Cohesion: 0.06
+Nodes (21): a(), bo, determineDataLimits(), Di(), g(), H(), l(), j() (+13 more)
+
+### Community 31 - "ReportsDataServiceTests"
+Cohesion: 0.27
+Nodes (3): ReportsDataService, Logger, ReportsDataServiceTests
 
 ### Community 32 - "CreatePhoneInputModel"
-Cohesion: 0.10
+Cohesion: 0.07
 Nodes (20): CreatePhoneInputModel, ColorId, GuaranteeCorporation, GuaranteeExpiry, GuaranteeNotes, HasGuarantee, IMEI1, IMEI2 (+12 more)
 
 ### Community 33 - "jalali-datepicker.js"
@@ -379,19 +385,19 @@ Nodes (37): buildPanel(), onTimeChanged(), changeMonth(), close(), d2g(), d2j(),
 
 ### Community 34 - "MobileShop.Models.Entities.Configuration"
 Cohesion: 0.10
-Nodes (10): MobileShop.Models.Entities.Configuration, AppleIdConfiguration, CaseConfiguration, CaseModelFitConfiguration, CategoryConfiguration, ColorConfiguration, ManufacturerConfiguration, PowerBankPortConfiguration (+2 more)
+Nodes (10): MobileShop.Models.Entities.Configuration, AppleIdConfiguration, CaseModelFitConfiguration, CategoryConfiguration, ManufacturerConfiguration, ModelConfiguration, PhoneConfiguration, PortableStorageConfiguration (+2 more)
 
 ### Community 35 - "SampleDataSet"
 Cohesion: 0.07
 Nodes (30): SampleDataSet, AppleIds, Cables, CaseModelFits, Cases, Categories, Chargers, Colors (+22 more)
 
 ### Community 36 - "SellModel"
-Cohesion: 0.24
-Nodes (7): RecordModelTests, SellModel, Customers, Input, Message, Products, SuccessMessage
+Cohesion: 0.17
+Nodes (12): SellInputModel, CustomerId, Date, Price, ProductId, RecordModelTests, SellModel, Customers (+4 more)
 
 ### Community 37 - "ro"
-Cohesion: 0.06
-Nodes (27): ao(), average(), ca, co(), da(), dataset(), Do(), getCenterPoint() (+19 more)
+Cohesion: 0.11
+Nodes (12): ao(), Bi(), Ci(), co(), da(), Do(), Fi(), inXRange() (+4 more)
 
 ### Community 38 - "TransactionsDataService"
 Cohesion: 0.19
@@ -399,43 +405,35 @@ Nodes (4): HomeDataService, Logger, TransactionsDataService, Logger
 
 ### Community 39 - "BaseRepo"
 Cohesion: 0.09
-Nodes (3): BaseRepo, Context, Table
+Nodes (4): BaseRepo, Context, Table, IBaseRepo
 
-### Community 41 - "MobileShop.Models.Entities"
-Cohesion: 0.06
-Nodes (31): MobileShop.Models.Entities, Case, ModelFits, Notes, ProductId, ProductNavigation, CaseModelFit, CaseId (+23 more)
+### Community 41 - "Person"
+Cohesion: 0.07
+Nodes (23): MobileShop.Models.Entities, UserConfiguration, Employee, HireDate, IsActive, Notes, PersonId, PersonNavigation (+15 more)
 
-### Community 42 - "IndexModel"
-Cohesion: 0.12
-Nodes (6): MobileShop.Services.DataServices.Api, ApiHomeDataService, IHomeDataService, IndexModel, RecentTransactions, Stock
+### Community 42 - "MobileShop.Services.DataServices.Interfaces"
+Cohesion: 0.08
+Nodes (11): MobileShop.Web.Pages, MobileShop.Services.DataServices.Interfaces, ApiHomeDataService, IHomeDataService, ErrorModel, RequestId, ShowRequestId, IndexModel (+3 more)
 
-### Community 44 - "ua"
-Cohesion: 0.16
-Nodes (14): beforeDatasetDraw(), beforeDatasetsDraw(), ea(), fa(), ga(), ia(), Ie(), ma() (+6 more)
-
-### Community 45 - "ProductsDataService"
-Cohesion: 0.11
-Nodes (3): ProductsDataService, Logger, PurchasePartyResolution
+### Community 44 - "oo"
+Cohesion: 0.10
+Nodes (15): beforeDatasetDraw(), beforeDatasetsDraw(), fa(), ga(), ia(), Ie(), io(), na() (+7 more)
 
 ### Community 46 - "Laptop"
 Cohesion: 0.17
 Nodes (10): LaptopConfiguration, Laptop, CpuId, CpuNavigation, DisplaySize, GpuId, GpuNavigation, Notes (+2 more)
 
-### Community 48 - "AppDbContext"
-Cohesion: 0.20
-Nodes (3): DatabaseInitializer, SampleDataInitializer, WebApplicationBuilderExtensions
-
-### Community 51 - "Func"
-Cohesion: 0.16
-Nodes (3): IBaseRepo, ProductTransactionProjection, Selector
+### Community 51 - "microsoft_entityframeworkcore_migrations"
+Cohesion: 0.18
+Nodes (3): MobileShop.Tests.Dal.EfStructures, MobileShop.Dal.EfStructures, MobileShop.Dal.Migrations
 
 ### Community 52 - "ProfitLossModel"
-Cohesion: 0.09
-Nodes (23): MobileShop.Web.Pages.Reports, AutomaticPreset, All, Month, Today, Week, Year, DateRangeMode (+15 more)
+Cohesion: 0.08
+Nodes (24): MobileShop.Web.Pages.Reports, MobileShop.Tests.Web.Pages.Reports, AutomaticPreset, All, Month, Today, Week, Year (+16 more)
 
-### Community 53 - "TransactionDirection"
-Cohesion: 0.11
-Nodes (8): TransactionFactorExtensions, TransactionDetailsViewModel, TransactionFactorRowViewModel, TransactionFactorViewModel, TotalPrice, TransactionListItemViewModel, CustomerId, TransactionFactorExtensionsTests
+### Community 53 - "TransactionFactorRowViewModel"
+Cohesion: 0.21
+Nodes (6): TransactionFactorRowViewModel, TransactionFactorViewModel, TotalPrice, TransactionListItemViewModel, CustomerId, TransactionFactorExtensionsTests
 
 ### Community 54 - "Product"
 Cohesion: 0.09
@@ -445,85 +443,97 @@ Nodes (23): Product, AppleIdProfile, AppleInfoProfile, Barcode, CableProfile, Ca
 Cohesion: 0.16
 Nodes (4): MobileShop.Web.Infrastructure, MobileShop.Web.Extensions, JalaliDateTimeModelBinder, JalaliDateTimeModelBinderProvider
 
+### Community 56 - "MobileShop.Services/GlobalUsings.cs"
+Cohesion: 0.06
+Nodes (10): MobileShop.Tests.Dal.Initialization, MobileShop.Services.Logging.Settings, MobileShop.Models.Entities.Base, MobileShop.Dal.Repo, MobileShop.Models.Settings, BaseEntity, Id, IsDeleted (+2 more)
+
 ### Community 57 - ".Migrate"
-Cohesion: 0.12
-Nodes (12): DatabaseMigrationResult, DatabaseMigrationStatus, Baselined, Created, Upgraded, UpToDate, DatabaseMigrator, SchemaColumn (+4 more)
+Cohesion: 0.18
+Nodes (6): DatabaseMigrator, SchemaColumn, DeclaredType, Name, NotNullFlag, PrimaryKey
 
 ### Community 59 - "MobileShop.Models.ViewModels.Web.BindModels"
-Cohesion: 0.27
+Cohesion: 0.21
 Nodes (6): MobileShop.Models.ViewModels, MobileShop.Models.ViewModels.Web.BindModels, MobileShop.Services.PDF, MobileShop.Tests.Web.Pages.Transactions, MobileShop.Web.Pages.Transactions, MobileShop.Tests.Web.Pages.Products
 
-### Community 60 - "Person"
-Cohesion: 0.11
-Nodes (12): Person, CustomerProfile, EmployeeProfile, FirstName, LastName, Notes, PhoneNumber, SellerProfile (+4 more)
+### Community 60 - "Task"
+Cohesion: 0.09
+Nodes (4): PeopleDataService, Logger, IAccountDataService, PeopleDataServiceTests
 
 ### Community 61 - "CableConnector"
-Cohesion: 0.10
-Nodes (17): MobileShop.Models.Enums, CableConnector, Hdmi, Jack35, Lightning, MicroUsb, Other, UsbA (+9 more)
+Cohesion: 0.07
+Nodes (26): MobileShop.Models.Enums, CableConnector, Hdmi, Jack35, Lightning, MicroUsb, Other, UsbA (+18 more)
 
-### Community 62 - "MobileShop.Tests/GlobalUsings.cs"
-Cohesion: 0.15
-Nodes (7): MobileShop.Models.Entities.Base, MobileShop.Models.Settings, BaseEntity, Id, IsDeleted, TimeStamp, MoneyLimits
+### Community 62 - ".getProps"
+Cohesion: 0.16
+Nodes (18): ai(), average(), dataset(), getCenterPoint(), hi(), index(), inRange(), nearest() (+10 more)
 
-### Community 63 - "MobileShop.Services.PDF.Configuration"
-Cohesion: 0.20
-Nodes (4): MobileShop.Services.PDF.Configuration, MobileShop.Tests, QuestPdfSetup, ModuleInitializer
+### Community 63 - ".ConfigureBuilder"
+Cohesion: 0.24
+Nodes (3): MobileShop.Tests, QuestPdfSetup, ModuleInitializer
+
+### Community 65 - "CreateGlassInputModel"
+Cohesion: 0.14
+Nodes (9): CreateGlassInputModel, CompatibleManufacturerId, CompatibleModelId, Count, GlassManufacturerId, Price, ProfitAmount, ProfitPercent (+1 more)
 
 ### Community 67 - "IndexModel"
-Cohesion: 0.10
-Nodes (16): IndexModel, Availability, AvailabilityRoute, ManufacturerId, ManufacturerOptions, ModelId, ModelOptions, NameColumnLabel (+8 more)
+Cohesion: 0.07
+Nodes (19): MobileShop.Web.Pages.Products, IndexModel, Availability, AvailabilityRoute, ManufacturerId, ManufacturerOptions, ModelId, ModelOptions (+11 more)
 
 ### Community 68 - "Model"
-Cohesion: 0.14
-Nodes (12): ModelConfiguration, Model, CaseFits, CategoryId, CategoryNavigation, GlassFits, ManufacturerId, ManufacturerNavigation (+4 more)
+Cohesion: 0.10
+Nodes (17): GlassModelFitConfiguration, GlassModelFit, GlassId, GlassNavigation, ModelId, ModelNavigation, Model, CaseFits (+9 more)
+
+### Community 69 - "MobileShop.Models.Extensions"
+Cohesion: 0.12
+Nodes (4): MobileShop.Models.Extensions, InvoiceProfileExtensions, MoneyExtensions, SecondHandExtensions
 
 ### Community 70 - "DeviceSpec"
 Cohesion: 0.20
 Nodes (8): DeviceSpecConfiguration, DeviceSpec, ChargeSpeed, ProductId, ProductNavigation, Ram, StorageCapacityId, StorageCapacityNavigation
 
-### Community 71 - "TransactionFactorViewModel"
-Cohesion: 0.12
-Nodes (7): IPdfGenerator, FakePdfGenerator, FakePdfGenerator, LastFactor, FakePdfGenerator, LastFactor, StubPdfGenerator
+### Community 71 - "InvoiceViewModel"
+Cohesion: 0.19
+Nodes (7): InvoiceViewModel, IPdfGenerator, FakePdfGenerator, LastFactor, FakePdfGenerator, LastFactor, StubPdfGenerator
 
 ### Community 72 - "Seller"
 Cohesion: 0.25
 Nodes (6): SellerConfiguration, Seller, EntityType, PersonId, PersonNavigation, Transactions
 
 ### Community 74 - "Cable"
-Cohesion: 0.20
-Nodes (8): Cable, Connector1, Connector2, Length, Notes, ProductId, ProductNavigation, CableConfiguration
+Cohesion: 0.10
+Nodes (14): Cable, Connector1, Connector2, Length, Notes, ProductId, ProductNavigation, CableConfiguration (+6 more)
 
-### Community 75 - "CreateCableModel"
-Cohesion: 0.18
-Nodes (6): CreateCableModel, Input, Manufacturers, Message, Models, SuccessMessage
+### Community 75 - "CreateAppleIdInputModel"
+Cohesion: 0.15
+Nodes (8): CreateAppleIdInputModel, Email, Notes, Password, Price, ProfitAmount, ProfitPercent, SellerId
 
 ### Community 76 - "Glass"
-Cohesion: 0.12
-Nodes (12): GlassConfiguration, GlassModelFitConfiguration, Glass, ModelFits, Notes, ProductId, ProductNavigation, GlassModelFit (+4 more)
-
-### Community 77 - "User"
 Cohesion: 0.25
-Nodes (6): UserConfiguration, User, PasswordHash, PersonId, PersonNavigation, Username
+Nodes (6): GlassConfiguration, Glass, ModelFits, Notes, ProductId, ProductNavigation
 
-### Community 78 - "MobileShop.Models.ViewModels.Web"
-Cohesion: 0.15
-Nodes (6): MobileShop.Models.ViewModels.Web, DashboardStockSummary, FactorPdfResult, PartyOptionViewModel, ProductTransactionViewModel, TransactionCardViewModel
+### Community 77 - "Case"
+Cohesion: 0.14
+Nodes (11): Case, ModelFits, Notes, ProductId, ProductNavigation, CaseModelFit, CaseId, CaseNavigation (+3 more)
+
+### Community 78 - "TransactionDirection"
+Cohesion: 0.19
+Nodes (4): TransactionFactorExtensions, ProductTransactionViewModel, TransactionCardViewModel, TransactionDetailsViewModel
 
 ### Community 79 - "de"
-Cohesion: 0.21
-Nodes (4): ce(), de, dt(), he()
+Cohesion: 0.19
+Nodes (5): ca, ce(), de, dt(), he()
 
-### Community 81 - "PowerBank"
-Cohesion: 0.17
-Nodes (10): PowerBankConfiguration, PowerBank, CapacityMah, MaxWattage, Notes, Pd, PortCount, Ports (+2 more)
+### Community 81 - "BaseEntity"
+Cohesion: 0.09
+Nodes (19): Color, Name, Products, ColorConfiguration, Cpu, Laptops, Name, Gpu (+11 more)
 
 ### Community 83 - "Product"
 Cohesion: 0.16
 Nodes (5): EditModel, Colors, Corporations, PartNumbers, Product
 
 ### Community 84 - "PeopleIndexModel"
-Cohesion: 0.13
-Nodes (12): CustomerListItemViewModel, SellerListItemViewModel, PeopleIndexModelTests, PeopleIndexModel, ActivityColumnLabel, Ascending, People, ShowAddCustomer (+4 more)
+Cohesion: 0.06
+Nodes (22): MobileShop.Tests.Web.Pages.People, MobileShop.Web.Pages.People, CustomersModelTests, PeopleIndexModelTests, SellersModelTests, CustomersModel, Ascending, Customers (+14 more)
 
 ### Community 86 - "http"
 Cohesion: 0.13
@@ -542,48 +552,40 @@ Cohesion: 0.13
 Nodes (15): ASPNETCORE_ENVIRONMENT, applicationUrl, commandName, dotnetRunMessages, environmentVariables, launchBrowser, applicationUrl, commandName (+7 more)
 
 ### Community 90 - "CreateChargerModel"
-Cohesion: 0.19
+Cohesion: 0.20
 Nodes (6): CreateChargerModel, Input, Manufacturers, Message, Models, SuccessMessage
 
 ### Community 91 - "AccountDataServiceTests"
-Cohesion: 0.23
+Cohesion: 0.22
 Nodes (3): AccountDataService, Logger, AccountDataServiceTests
 
-### Community 92 - "Phone"
-Cohesion: 0.14
-Nodes (12): PhoneConfiguration, Phone, IMEI1, IMEI2, Notes, OwnershipTransferred, PartNumberId, PartNumberNavigation (+4 more)
-
-### Community 93 - "MobileShop.Tests.Models.Extensions"
-Cohesion: 0.14
-Nodes (4): MobileShop.Tests.Models.Extensions, JalaliDateExtensionsTests, MoneyExtensionsTests, SecondHandExtensionsTests
-
 ### Community 94 - "InvoicePresentation"
-Cohesion: 0.13
+Cohesion: 0.12
 Nodes (15): InvoicePresentation, BuyerNationalId, FinishedPrice, GuaranteeInformation, InvoiceKind, Notes, OwnershipStatus, PartyLabel (+7 more)
 
 ### Community 95 - "PersianInvoicePresentation"
-Cohesion: 0.13
-Nodes (15): PersianInvoicePresentation, BuyerNationalId, FinishedPrice, GuaranteeInformation, InvoiceKind, Notes, OwnershipStatus, PartyLabel (+7 more)
+Cohesion: 0.11
+Nodes (16): MobileShop.Services.PDF.Configuration, PersianInvoicePresentation, BuyerNationalId, FinishedPrice, GuaranteeInformation, InvoiceKind, Notes, OwnershipStatus (+8 more)
 
 ### Community 96 - "PdfSettings"
-Cohesion: 0.17
-Nodes (11): MobileShop.Services.PDF.Settings, PdfSettings, MarginBottom, MarginLeft, MarginRight, MarginTop, PageSize, ShopAddress (+3 more)
+Cohesion: 0.14
+Nodes (12): MobileShop.Services.PDF.Settings, MobileShop.Tests.Services.PDF, PdfSettings, MarginBottom, MarginLeft, MarginRight, MarginTop, PageSize (+4 more)
 
-### Community 97 - "ReportsDataService"
-Cohesion: 0.09
-Nodes (9): MobileShop.Services.Logging.Configuration, MobileShop.Tests.Logging, MobileShop.Api.Extensions, MobileShop.Services, ApiApplicationBuilderExtensions, ReportsDataService, Logger, DistributionConfiguration (+1 more)
+### Community 97 - "MobileShop.Web/GlobalUsings.cs"
+Cohesion: 0.06
+Nodes (12): MobileShop.Services.Logging.Configuration, MobileShop.Tests.Logging, MobileShop.Tests.Web.Pages.Account, MobileShop.Api.Extensions, MobileShop.Services, ApiApplicationBuilderExtensions, DistributionConfiguration, LoggingsConfiguration (+4 more)
 
 ### Community 99 - "CreatePowerBankInputModel"
 Cohesion: 0.14
 Nodes (13): CreatePowerBankInputModel, CapacityMah, Count, ManufacturerId, MaxWattage, ModelId, Pd, PortCount (+5 more)
 
-### Community 100 - "ProductListItemViewModel"
-Cohesion: 0.14
-Nodes (10): CustomerDetailsViewModel, ProductListItemViewModel, ManufacturerId, ManufacturerName, ModelId, ModelName, PartNumberLabel, SuggestedPrice (+2 more)
+### Community 100 - "MobileShop.Models.ViewModels.Web"
+Cohesion: 0.09
+Nodes (16): MobileShop.Models.ViewModels.Web, CustomerDetailsViewModel, CustomerListItemViewModel, DashboardStockSummary, FactorPdfResult, PartyOptionViewModel, ProductListItemViewModel, ManufacturerId (+8 more)
 
 ### Community 101 - "IndexModel"
-Cohesion: 0.09
-Nodes (13): DetailsModel, Id, Transaction, IndexModel, CustomerId, Customers, DateRange, Direction (+5 more)
+Cohesion: 0.05
+Nodes (17): ApiTransactionsDataService, ITransactionsDataService, DetailsModelTests, IndexModelTests, DetailsModel, Id, Transaction, IndexModel (+9 more)
 
 ### Community 102 - "product-picker.js"
 Cohesion: 0.27
@@ -593,29 +595,21 @@ Nodes (15): clearSearchLoading(), clearSelection(), clearSuggestedPrice(), close
 Cohesion: 0.17
 Nodes (11): CreatePortableStorageInputModel, Count, ManufacturerId, ModelId, Price, ProfitAmount, ProfitPercent, SellerId (+3 more)
 
-### Community 106 - "ErrorModel"
-Cohesion: 0.25
-Nodes (4): MobileShop.Web.Pages, ErrorModel, RequestId, ShowRequestId
-
 ### Community 107 - "PortableStorage"
-Cohesion: 0.17
-Nodes (9): PortableStorageConfiguration, PortableStorage, Kind, Notes, ProductId, ProductNavigation, Speed, StorageCapacityId (+1 more)
+Cohesion: 0.12
+Nodes (13): StorageCapacityConfiguration, PortableStorage, Kind, Notes, ProductId, ProductNavigation, Speed, StorageCapacityId (+5 more)
 
-### Community 108 - "CreateSellerInputModel"
-Cohesion: 0.18
-Nodes (7): CreateSellerInputModel, EntityType, FirstName, LastName, Notes, PhoneNumber, CreateSellerModelTests
+### Community 108 - "SolutionPaths"
+Cohesion: 0.33
+Nodes (4): SolutionPaths, DatabaseFile, LogDirectory, Root
 
 ### Community 109 - "CreateCableInputModel"
-Cohesion: 0.11
-Nodes (16): PowerBankPort, Connector, PortNumber, PowerBankId, PowerBankNavigation, CreateCableInputModel, Connector1, Connector2 (+8 more)
+Cohesion: 0.17
+Nodes (11): CreateCableInputModel, Connector1, Connector2, Count, Length, ManufacturerId, ModelId, Price (+3 more)
 
 ### Community 110 - "CreateChargerInputModel"
 Cohesion: 0.17
 Nodes (11): CreateChargerInputModel, Count, ManufacturerId, ModelId, Pd, PortCount, Price, ProfitAmount (+3 more)
-
-### Community 111 - "CreateCaseModel"
-Cohesion: 0.18
-Nodes (6): CreateCaseModel, CompatibleModels, Input, Manufacturers, Message, SuccessMessage
 
 ### Community 112 - "navigation-menu.js"
 Cohesion: 0.35
@@ -624,10 +618,6 @@ Nodes (11): applyCompact(), clearPanelCloseState(), close(), finishClose(), isWi
 ### Community 114 - "ProfitLossRowViewModel"
 Cohesion: 0.24
 Nodes (5): MobileShop.Tests.Models.ViewModels, ProfitLossRowViewModel, Profit, ProfitPercent, ProfitLossRowViewModelTests
-
-### Community 115 - "PageModel"
-Cohesion: 0.07
-Nodes (23): MobileShop.Tests.Web.Pages.People, MobileShop.Web.Pages.People, CreateCustomerModel, Input, Message, CreateSellerModel, Input, Message (+15 more)
 
 ### Community 116 - "Charger"
 Cohesion: 0.20
@@ -649,37 +639,25 @@ Nodes (10): CreateCaseInputModel, CompatibleManufacturerId, CompatibleModelIds, 
 Cohesion: 0.18
 Nodes (10): DistributionCalculator, DistributionRow, CalculatedAmount, EmployeeId, EmployeeName, IsLossPeriod, SharePercent, DistributionSettings (+2 more)
 
-### Community 121 - ".OnPostCreateCustomerAsync"
-Cohesion: 0.36
-Nodes (3): DropdownCreateResult, DropdownOptionViewModel, PersonPickerModel
-
-### Community 122 - "StorageKind"
-Cohesion: 0.22
-Nodes (9): StorageKind, Cf, Hdd, MicroSd, MiniSd, Other, Sd, Ssd (+1 more)
-
-### Community 123 - "SellInputModel"
-Cohesion: 0.29
-Nodes (5): SellInputModel, CustomerId, Date, Price, ProductId
+### Community 121 - "PageModel"
+Cohesion: 0.12
+Nodes (10): MobileShop.Web.Pages.Account, DropdownCreateResult, DropdownOptionViewModel, LoginModel, Message, Password, ReturnUrl, Username (+2 more)
 
 ### Community 124 - "AppleInfo"
 Cohesion: 0.22
 Nodes (7): AppleInfo, BatteryHealth, ChargeCycle, Notes, ProductId, ProductNavigation, AppleInfoConfiguration
 
-### Community 125 - "AppLoggingSettings"
-Cohesion: 0.22
-Nodes (5): LoggingsConfiguration, AppLoggingSettings, Console, Default, File
+### Community 128 - "CreateAppleIdModelTests"
+Cohesion: 0.26
+Nodes (5): CreateAppleIdModelTests, CreateAppleIdModel, Input, Message, SuccessMessage
 
-### Community 127 - "MobileShop.Services.DataServices.Interfaces"
-Cohesion: 0.22
-Nodes (3): MobileShop.Services.Logging.Settings, MobileShop.Tests.Web.Pages.Reports, MobileShop.Services.DataServices.Interfaces
-
-### Community 129 - "Task"
-Cohesion: 0.04
-Nodes (18): CreateCustomerInputModel, FirstName, LastName, NationalId, Notes, PhoneNumber, ApiAccountDataService, ApiPeopleDataService (+10 more)
+### Community 129 - "RepoTestBase"
+Cohesion: 0.03
+Nodes (33): CreateCustomerInputModel, FirstName, LastName, NationalId, Notes, PhoneNumber, CreateSellerInputModel, EntityType (+25 more)
 
 ### Community 132 - ".Hash"
-Cohesion: 0.21
-Nodes (4): MobileShop.Tests.Services.Security, ArgonPasswordHasher, IPasswordHasher, ArgonPasswordHasherTests
+Cohesion: 0.18
+Nodes (5): MobileShop.Tests.Services.Security, MobileShop.Services.Security, ArgonPasswordHasher, IPasswordHasher, ArgonPasswordHasherTests
 
 ### Community 133 - "SmartWatch"
 Cohesion: 0.29
@@ -714,7 +692,7 @@ Cohesion: 0.15
 Nodes (6): MobileShop.Tests.Dal.BaseClass, RepoTestBase, Context, SqliteRepoTestBase, ConnectionString, Context
 
 ### Community 143 - "CreateSmartWatchModel"
-Cohesion: 0.17
+Cohesion: 0.20
 Nodes (7): CreateSmartWatchModel, Corporations, Input, Manufacturers, Message, Models, SuccessMessage
 
 ### Community 145 - "log.ps1"
@@ -733,33 +711,33 @@ Nodes (3): expect_fail(), fail(), test-bash.sh script
 Cohesion: 0.20
 Nodes (8): PartNumberConfiguration, PartNumber, Code, ModelId, ModelNavigation, Phones, SupportsDualSim, SupportsEsim
 
-### Community 217 - "MobileShop.Web/GlobalUsings.cs"
-Cohesion: 0.14
-Nodes (3): MobileShop.Tests.Web.Pages.Account, MobileShop.Dal.Initialization, MobileShop.Services.Security
+### Community 217 - "MobileShop.Dal.Initialization"
+Cohesion: 0.20
+Nodes (8): MobileShop.Dal.Initialization, DatabaseInitializer, DatabaseMigrationResult, DatabaseMigrationStatus, Baselined, Created, Upgraded, UpToDate
 
-### Community 219 - "MobileShop.Tests.Services.DataServices.Dal"
-Cohesion: 0.17
-Nodes (3): MobileShop.Tests.Services.DataServices.Dal, MobileShop.Tests.Services.PDF, MobileShopDalSerialCollection
+### Community 219 - ".GetStockAsync_excludes_sold_second_hand_phone_from_available_count"
+Cohesion: 0.16
+Nodes (3): MobileShop.Tests.Services.DataServices.Dal, HomeDataServiceTests, MobileShopDalSerialCollection
 
 ## Knowledge Gaps
-- **848 isolated node(s):** `net10.0`, `Microsoft.AspNetCore.OpenApi (10.0.12)`, `Microsoft.NET.Sdk.Web`, `People`, `Sellers` (+843 more)
-  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 1121 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
-- **97 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **849 isolated node(s):** `net10.0`, `Microsoft.AspNetCore.OpenApi (10.0.12)`, `Microsoft.NET.Sdk.Web`, `People`, `Sellers` (+844 more)
+  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 1123 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
+- **95 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `EditProductInputModel` connect `EditProductInputModel` to `.Calculate`, `Fact`, `DateTime`, `PortableStorage`, `CreateCableInputModel`?**
+- **Why does `EditProductInputModel` connect `EditProductInputModel` to `.Calculate`, `ProductsDataServiceTests`, `DateTime`, `Cable`, `PortableStorage`?**
   _High betweenness centrality (0.032) - this node is a cross-community bridge._
 - **What connects `net10.0`, `Microsoft.AspNetCore.OpenApi (10.0.12)`, `Microsoft.NET.Sdk.Web` to the rest of the system?**
-  _848 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _849 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `tn` be split into smaller, more focused modules?**
-  _Cohesion score 0.04065040650406504 - nodes in this community are weakly interconnected._
-- **Why does `ProductsDataService` connect `ProductsDataService` to `CreateAppleIdModelTests`, `Fact`, `TransactionsDataService`, `BaseRepo`, `CreatePhoneModelTests`, `MobileShop.Models.Entities`, `AppDbContext`, `IReadOnlyList`, `MobileShop.Services.DataServices.Dal`, `Func`, `MobileShop.Web.Pages.Products`, `Person`, `Product`, `CreateGlassModelTests`, `.Load`, `Person`?**
-  _High betweenness centrality (0.030) - this node is a cross-community bridge._
+  _Cohesion score 0.04038814581694204 - nodes in this community are weakly interconnected._
+- **Why does `ProductsDataService` connect `IReadOnlyList` to `CreatePhoneInputModel`, `CreateGlassInputModel`, `ProductsDataServiceTests`, `IndexModel`, `CreateAppleIdModelTests`, `TransactionsDataService`, `BaseRepo`, `CreatePhoneModelTests`, `AppDbContext`, `CreateAppleIdInputModel`, `ServiceResult`, `MobileShop.Services.DataServices.Dal`, `BaseEntity`, `Person`, `Product`, `CreateGlassModel`, `.Load`, `Task`?**
+  _High betweenness centrality (0.023) - this node is a cross-community bridge._
 - **Should `chart.umd.min.js` be split into smaller, more focused modules?**
-  _Cohesion score 0.027117721748594233 - nodes in this community are weakly interconnected._
-- **Why does `MobileShop.Models.Enums` connect `CableConnector` to `MobileShop.Services/GlobalUsings.cs`, `MobileShop.Web/GlobalUsings.cs`, `MobileShop.Tests/GlobalUsings.cs`?**
+  _Cohesion score 0.027884280237016383 - nodes in this community are weakly interconnected._
+- **Why does `MobileShop.Models.Enums` connect `CableConnector` to `MobileShop.Services/GlobalUsings.cs`, `MobileShop.Web/GlobalUsings.cs`?**
   _High betweenness centrality (0.020) - this node is a cross-community bridge._
-- **Should `Fact` be split into smaller, more focused modules?**
-  _Cohesion score 0.06031746031746032 - nodes in this community are weakly interconnected._
+- **Should `ProductsDataServiceTests` be split into smaller, more focused modules?**
+  _Cohesion score 0.08626434653831914 - nodes in this community are weakly interconnected._

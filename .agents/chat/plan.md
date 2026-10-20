@@ -452,7 +452,7 @@ Order rule: remove the template override first (11.1), then move the remaining s
 # Stage 12 — Pages A: Login, Profile, Dashboard, People
 Order rule: the shared password toggle first (12.1), then the login stylesheet that also retires `app-theme.css` (12.2), then Dashboard (12.3) and People (12.4). People details and create pages (CustomerDetails, SellerDetails, CreateCustomer, CreateSeller) need no step: they already use `page-head` and `form-section` and inherit Stages 8-11 (they hold no `data-table` and no `_EmptyState` of their own — the details pages use `<dl class="row">` and the create pages have no table). Security-sensitive pages (R25): Login and Profile change markup only; no handler, token or field name changes.
 
-## [ ] Step 12.1 — `_PasswordToggle` partial (4 duplicated eye buttons)
+## ~~[x] Step 12.1 — `_PasswordToggle` partial (4 duplicated eye buttons)~~
 - Task: ROUTE-001/002 (part) · F-28 · Priority P2 · Effort S · Mandatory · Type V.
 - Files: create: `src/MobileShop.Web/Pages/Shared/_PasswordToggle.cshtml`; modify: `src/MobileShop.Web/Pages/Account/Login.cshtml`, `src/MobileShop.Web/Pages/Account/Profile.cshtml`.
 - Symbols: the `<button class="btn btn-outline-secondary password-visibility-toggle" …>…</button>` block with its inline `<svg>` (Login lines 32-45; Profile lines 31-44 and two more copies for `NewPassword` and `ConfirmPassword`); the only part that differs is `data-password-toggle="<field name>"`.
@@ -466,7 +466,7 @@ Order rule: the shared password toggle first (12.1), then the login stylesheet t
 - Risk: LOW
 - Confidence: HIGH
 
-## [ ] Step 12.2 — `login.css` and retirement of `app-theme.css`
+## ~~[x] Step 12.2 — `login.css` and retirement of `app-theme.css`~~
 - Task: ROUTE-001 (visual) · F-03, F-07, F-09 · Priority P1 · Effort M · Mandatory · Type V.
 - Files: create: `src/MobileShop.Web/wwwroot/css/login.css`; delete: `src/MobileShop.Web/wwwroot/css/app-theme.css`; modify: `src/MobileShop.Web/Pages/Shared/_Layout.cshtml`.
 - Symbols: block `login-v1` (R27, derived from the existing rules); after Steps 8.3, 8.4, 9.1-9.5 and 10.1, 10.5 the only content left in `app-theme.css` is the login group (`.account-login-page` … `.account-login-message`, including the password toggle and validation rules); the layout link for `app-theme.css`; the main element `_Layout.cshtml:25` `<main id="main" role="main" class="mt-3 pb-3">` that the skip link targets.
@@ -480,7 +480,7 @@ Order rule: the shared password toggle first (12.1), then the login stylesheet t
 - Risk: MEDIUM
 - Confidence: MEDIUM
 
-## [ ] Step 12.3 — Dashboard heading order
+## ~~[x] Step 12.3 — Dashboard heading order~~
 - Task: ROUTE-003 · F-35 · Priority P2 · Effort S · Mandatory · Type A.
 - Files: modify: `src/MobileShop.Web/Pages/Index.cshtml` only.
 - Symbols: line 41 `<h5 class="card-title">@transaction.ProductLabel</h5>` under `<h2>Recent transactions</h2>` (line 28).
@@ -494,7 +494,7 @@ Order rule: the shared password toggle first (12.1), then the login stylesheet t
 - Risk: LOW
 - Confidence: HIGH
 
-## [ ] Step 12.4 — People: segmented filter, sortable headers with state, empty state
+## ~~[x] Step 12.4 — People: segmented filter, sortable headers with state, empty state~~
 - Task: ROUTE-004 · F-23, F-24 · Priority P1 · Effort M · Mandatory · Type A.
 - Files: modify: `src/MobileShop.Web/Pages/People/Index.cshtml`, `src/MobileShop.Web/Pages/People/Customers.cshtml`, `src/MobileShop.Web/Pages/People/Sellers.cshtml`.
 - Symbols: People/Index.cshtml lines 24-37 (the `d-flex flex-wrap gap-3` wrapper with three `form-check` radios named `type`, ids `peopleAll`, `peopleCustomers`, `peopleSellers`, each with `onchange="this.form.submit()"`); Customers.cshtml and Sellers.cshtml: the three sortable `<th scope="col"><a asp-route-sortBy="…" …>…</a></th>` cells (Name, Phone, Purchased or Sold) and the table block (`<div class="table-responsive">` … `</div>`).

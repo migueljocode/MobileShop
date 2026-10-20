@@ -9,18 +9,49 @@
         <a asp-page="/People/CreateCustomer" class="btn btn-success">Add customer</a>
     </div>
 </div>
-<div class="table-responsive">
-<table class="data-table"><thead><tr>
-    <th scope="col"><a asp-route-sortBy="Name" asp-route-ascending="@(Model.SortBy == "Name" && Model.Ascending ? "false" : "true")">Name</a></th>
-    <th scope="col"><a asp-route-sortBy="Phone" asp-route-ascending="@(Model.SortBy == "Phone" && Model.Ascending ? "false" : "true")">Phone</a></th>
+@if (!Model.Customers.Any())
+{
+    <partial name="_EmptyState" model='("No customers yet", "Add the first customer to get started.")' />
+}
+else
+{
+    <div class="table-responsive">
+    <table class="data-table"><thead><tr>
+    <th scope="col" aria-sort="@(Model.SortBy == "Name" ? (Model.Ascending ? "ascending" : "descending") : "none")">
+        <a asp-route-sortBy="Name" asp-route-ascending="@(Model.SortBy == "Name" && Model.Ascending ? "false" : "true")">
+            Name
+            @if (Model.SortBy == "Name")
+            {
+                <span aria-hidden="true">@(Model.Ascending ? "↑" : "↓")</span>
+            }
+        </a>
+    </th>
+    <th scope="col" aria-sort="@(Model.SortBy == "Phone" ? (Model.Ascending ? "ascending" : "descending") : "none")">
+        <a asp-route-sortBy="Phone" asp-route-ascending="@(Model.SortBy == "Phone" && Model.Ascending ? "false" : "true")">
+            Phone
+            @if (Model.SortBy == "Phone")
+            {
+                <span aria-hidden="true">@(Model.Ascending ? "↑" : "↓")</span>
+            }
+        </a>
+    </th>
     <th scope="col">National ID</th>
-    <th scope="col"><a asp-route-sortBy="Count" asp-route-ascending="@(Model.SortBy == "Count" && Model.Ascending ? "false" : "true")">Purchased</a></th>
+    <th scope="col" aria-sort="@(Model.SortBy == "Count" ? (Model.Ascending ? "ascending" : "descending") : "none")">
+        <a asp-route-sortBy="Count" asp-route-ascending="@(Model.SortBy == "Count" && Model.Ascending ? "false" : "true")">
+            Purchased
+            @if (Model.SortBy == "Count")
+            {
+                <span aria-hidden="true">@(Model.Ascending ? "↑" : "↓")</span>
+            }
+        </a>
+    </th>
     <th scope="col"><span class="visually-hidden">Actions</span></th>
 </tr></thead><tbody>
 @foreach (var customer in Model.Customers)
 { <tr><td dir="auto">@customer.Name</td><td dir="auto" class="num">@customer.PhoneNumber</td><td dir="auto">@customer.NationalId</td><td>@customer.PurchasedCount</td><td><a asp-page="/People/CustomerDetails" asp-route-id="@customer.Id">Details</a></td></tr> }
 </tbody></table>
-</div>
+    </div>
+}
 <div class="action-bar">
     <a asp-page="/People/Index" class="btn btn-outline-secondary">Back to people</a>
 </div>

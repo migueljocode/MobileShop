@@ -21,19 +21,13 @@
     <form method="get" class="row g-3 align-items-end mb-3">
         <fieldset class="col-12">
             <legend class="fs-6">Show</legend>
-            <div class="d-flex flex-wrap gap-3">
-                <div class="form-check">
-                    <input class="form-check-input" type="radio" name="type" id="peopleAll" value="all" checked="@(Model.Type == "all")" onchange="this.form.submit()" />
-                    <label class="form-check-label" for="peopleAll">All</label>
-                </div>
-                <div class="form-check">
-                    <input class="form-check-input" type="radio" name="type" id="peopleCustomers" value="customers" checked="@(Model.Type == "customers")" onchange="this.form.submit()" />
-                    <label class="form-check-label" for="peopleCustomers">Customers</label>
-                </div>
-                <div class="form-check">
-                    <input class="form-check-input" type="radio" name="type" id="peopleSellers" value="sellers" checked="@(Model.Type == "sellers")" onchange="this.form.submit()" />
-                    <label class="form-check-label" for="peopleSellers">Sellers</label>
-                </div>
+            <div class="segmented">
+                <input class="btn-check" type="radio" name="type" id="peopleAll" value="all" checked="@(Model.Type == "all")" onchange="this.form.submit()" />
+                <label class="btn" for="peopleAll">All</label>
+                <input class="btn-check" type="radio" name="type" id="peopleCustomers" value="customers" checked="@(Model.Type == "customers")" onchange="this.form.submit()" />
+                <label class="btn" for="peopleCustomers">Customers</label>
+                <input class="btn-check" type="radio" name="type" id="peopleSellers" value="sellers" checked="@(Model.Type == "sellers")" onchange="this.form.submit()" />
+                <label class="btn" for="peopleSellers">Sellers</label>
             </div>
         </fieldset>
         <div class="col-auto">
