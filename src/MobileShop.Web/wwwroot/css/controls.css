@@ -56,6 +56,11 @@
 
 .btn-secondary,
 .btn-dark {
+  /* The label has to follow the surface: Bootstrap's default is white text,
+     which vanishes on the raised neutral background in the light theme. */
+  --bs-btn-color: var(--ink);
+  --bs-btn-hover-color: var(--ink);
+  --bs-btn-active-color: var(--ink);
   --bs-btn-bg: var(--surface-2);
   --bs-btn-border-color: var(--border-control);
   --bs-btn-hover-bg: var(--surface-3);
@@ -172,6 +177,43 @@ label {
 .form-select option {
   color: var(--text-1);
   background: var(--surface-1);
+}
+
+/* The app's own combo box: the same shell as a text field, with the app's
+   chevron instead of the browser/Bootstrap default arrow. */
+.form-select {
+  -webkit-appearance: none;
+  appearance: none;
+  padding-right: 2.4rem;
+  padding-left: 0.75rem;
+  background-image: var(--select-chevron);
+  background-repeat: no-repeat;
+  background-position: right 0.95rem center;
+  background-size: 0.72rem 0.48rem;
+  cursor: pointer;
+}
+
+.form-select::-ms-expand {
+  display: none;
+}
+
+/* A list box has no chevron: it is the list that is the control. */
+.form-select[multiple] {
+  padding-right: 0.75rem;
+  background-image: none;
+  min-height: 8rem;
+}
+
+.form-select:disabled {
+  cursor: not-allowed;
+  opacity: 0.75;
+}
+
+/* The native drop-down list is drawn by the browser; keeping the options on
+   the app surfaces is what makes it read as part of the app. */
+.form-select option:checked {
+  color: var(--accent-ink);
+  background: var(--accent);
 }
 
 .form-check-input {

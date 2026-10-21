@@ -92,7 +92,7 @@
         <partial name="/Pages/Shared/_ProductEditForm.cshtml" model="Model" />
 
         <div class="col-12">
-            <div class="action-bar">
+            <div class="action-bar action-bar--static">
                 <button type="submit" class="btn btn-primary">Save changes</button>
                 <a asp-page="/Products/Details" asp-route-id="@Model.Product.ProductId" asp-route-type="@Model.Product.Type" class="btn btn-outline-secondary">Cancel</a>
             </div>

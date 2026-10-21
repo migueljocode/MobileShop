@@ -5,18 +5,22 @@ public class ProfileModel(IAccountDataService dataService) : PageModel
     [BindProperty]
     [Required]
     [StringLength(50)]
+    [Display(Name = "New username")]
     public string? NewUsername { get; set; }
 
     [BindProperty]
     [Required]
+    [Display(Name = "Current password")]
     public string? CurrentPassword { get; set; }
 
     [BindProperty]
     [StringLength(100, MinimumLength = 6, ErrorMessage = "New password must be at least 6 characters.")]
+    [Display(Name = "New password")]
     public string? NewPassword { get; set; }
 
     [BindProperty]
     [Compare(nameof(NewPassword), ErrorMessage = "New passwords do not match.")]
+    [Display(Name = "Confirm password")]
     public string? ConfirmPassword { get; set; }
 
     public string? Message { get; set; }

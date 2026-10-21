@@ -1,6 +1,6 @@
 @model MobileShop.Models.ViewModels.Web.ProductPickerViewModel
 @* Shared searchable product-picker results for the transaction forms. *@
-<div id="product-results" class="list-group mt-1 d-none product-picker-results" role="listbox" data-product-results>
+<div id="product-results" class="list-group d-none product-picker-results" role="listbox" data-product-results>
 @foreach (var product in Model.Products)
 {
     var label = string.IsNullOrWhiteSpace(product.Name)

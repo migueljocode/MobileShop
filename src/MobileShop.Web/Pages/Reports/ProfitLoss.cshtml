@@ -88,42 +88,46 @@
     };
 }
 <div class="page-head"><div><h1 class="page-head__title">Profit and loss</h1><p class="page-head__sub">Income, expenses and net result for the selected period</p></div></div>
-<form method="get" class="row g-2 mb-3" id="profitLossFilters">
-    <fieldset class="col-12">
-        <legend class="form-label mb-1">Date range mode:</legend>
-        <div class="segmented" role="group" aria-label="Date range mode">
-            <input type="radio" class="btn-check" name="Mode" id="mode-auto" value="Automatic"
-                   @(Model.Mode == DateRangeMode.Automatic ? "checked" : "") autocomplete="off" />
-            <label class="btn" for="mode-auto">Automatic</label>
+<form method="get" class="form-section" id="profitLossFilters">
+    <div class="row g-3 align-items-end">
+        <fieldset class="col-12 col-lg-auto">
+            <legend class="form-label mb-2">Date range mode</legend>
+            <div class="segmented" role="group" aria-label="Date range mode">
+                <input type="radio" class="btn-check" name="Mode" id="mode-auto" value="Automatic"
+                       @(Model.Mode == DateRangeMode.Automatic ? "checked" : "") autocomplete="off" />
+                <label class="btn" for="mode-auto">Automatic</label>
 
-            <input type="radio" class="btn-check" name="Mode" id="mode-manual" value="Manual"
-                   @(Model.Mode == DateRangeMode.Manual ? "checked" : "") autocomplete="off" />
-            <label class="btn" for="mode-manual">Manual</label>
+                <input type="radio" class="btn-check" name="Mode" id="mode-manual" value="Manual"
+                       @(Model.Mode == DateRangeMode.Manual ? "checked" : "") autocomplete="off" />
+                <label class="btn" for="mode-manual">Manual</label>
+            </div>
+        </fieldset>
+
+        <div id="auto-controls" class="@(Model.Mode == DateRangeMode.Automatic ? "" : "d-none") col-12 col-md-6 col-lg-4">
+            <label class="form-label mb-2" asp-for="Preset">Preset</label>
+            <select asp-for="Preset" class="form-select">
+                <option value="Today">Today</option>
+                <option value="Week">Week</option>
+                <option value="Month">Month</option>
+                <option value="Year">Year</option>
+                <option value="All">All</option>
+            </select>
         </div>
-    </fieldset>
 
-    <div id="auto-controls" class="@(Model.Mode == DateRangeMode.Automatic ? "" : "d-none") col-12">
-        <label class="form-label mb-1" asp-for="Preset">Preset:</label>
-        <select asp-for="Preset" class="form-select" style="max-width: 150px;">
-            <option value="Today">Today</option>
-            <option value="Week">Week</option>
-            <option value="Month">Month</option>
-            <option value="Year">Year</option>
-            <option value="All">All</option>
-        </select>
-    </div>
-
-    <div id="manual-controls" class="@(Model.Mode == DateRangeMode.Manual ? "" : "d-none") row g-2">
-        <div class="col-md-3"><label class="form-label" asp-for="From">From</label><input type="text" id="From" name="From" class="form-control" data-jalali-date placeholder="1405/01/01" value="@(Model.From?.ToJalaliDateString())" /></div>
-        <div class="col-md-3"><label class="form-label" asp-for="To">To</label><input type="text" id="To" name="To" class="form-control" data-jalali-date placeholder="1405/12/29" value="@(Model.To?.ToJalaliDateString())" /></div>
-    </div>
-
-    @if (Model.EmptyDatabaseNote is not null)
-    {
-        <div class="col-12">
-            <partial name="_EmptyState" model="(Model.EmptyDatabaseNote!, (string?)null)" />
+        <div id="manual-controls" class="@(Model.Mode == DateRangeMode.Manual ? "" : "d-none") col-12 col-md-6 col-lg-5">
+            <div class="row g-3">
+                <div class="col-6"><label class="form-label mb-2" asp-for="From">From</label><input type="text" id="From" name="From" class="form-control" data-jalali-date placeholder="1405/01/01" value="@(Model.From?.ToJalaliDateString())" /></div>
+                <div class="col-6"><label class="form-label mb-2" asp-for="To">To</label><input type="text" id="To" name="To" class="form-control" data-jalali-date placeholder="1405/12/29" value="@(Model.To?.ToJalaliDateString())" /></div>
+            </div>
         </div>
-    }
+
+        @if (Model.EmptyDatabaseNote is not null)
+        {
+            <div class="col-12">
+                <partial name="_EmptyState" model="(Model.EmptyDatabaseNote!, (string?)null)" />
+            </div>
+        }
+    </div>
 </form>
 
 <script>

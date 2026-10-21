@@ -18,6 +18,82 @@ body.has-floating-navigation {
   --nav-glass-bg: var(--glass-regular-bg);
   --nav-glass-border: var(--border-glass);
   --nav-glass-filter: var(--glass-regular-filter);
+
+  /* Reversed navbar palette: green dock, white foreground. The dock stays
+     translucent (80%) but on a darker green base so white labels clear 3:1 and
+     page content ghosts through without washing out the text. Plain rgb alpha
+     instead of color-mix: no fallback surprises in older engines. */
+  --nav-inverted-bg: rgb(12 112 99 / 0.8);
+  /* The flyout is a solid sheet: heading text and cards sit on it, so it must
+     not let page content bleed through behind them. */
+  --nav-sheet-bg: #0B6357;
+  --nav-inverted-fg: #FFFFFF;
+  --nav-inverted-fg-dim: #FFFFFF;
+  /* Solid pastels instead of translucent white: alpha white over green picks up
+     the green cast and reads muddy, especially at small sizes. */
+  --nav-inverted-fg-soft: #CFEAE3;
+  --nav-eyebrow: #D9F3EC;
+  --nav-arrow: #A9D9CF;
+  /* 13% keeps the hover sheen visible while white labels stay above 3.3:1. */
+  --nav-inverted-hover: rgb(255 255 255 / 0.13);
+  /* The tab whose flyout is open (or being hovered): a light mint one step
+     dimmer than the selected pill, with the same dark green label. */
+  --nav-tab-open-bg: #CFE6DF;
+  --nav-tab-open-fg: #08443B;
+  --nav-inverted-border: rgb(255 255 255 / 0.26);
+  /* Menu tiles on the solid sheet. */
+  --nav-tile-bg: rgb(255 255 255 / 0.09);
+  --nav-tile-border: rgb(255 255 255 / 0.15);
+  --nav-tile-hover: rgb(255 255 255 / 0.16);
+  /* The current page is a light card with dark green text: it can never be
+     confused with the green hover state. */
+  --nav-tile-current-bg: #F2FBF8;
+  --nav-tile-current-fg: #08443B;
+  --nav-tile-current-soft: #2F6B60;
+  --nav-tile-current-chip: #DCEFE9;
+  --nav-icon-chip: rgb(255 255 255 / 0.13);
+  --nav-badge-bg: rgb(255 255 255 / 0.2);
+  /* Mint glow for hovered menu tiles. Kept tight enough to live inside the
+     scroll viewport padding, so the halo is never chopped off. */
+  --nav-glow: 0 0 0 1px rgb(185 255 240 / 0.6), 0 4px 14px rgb(127 240 216 / 0.42);
+  /* Slightly darker mint for a hovered tab: clearly lighter than the dock but
+     still dimmer than the near-white selected pill. */
+  --nav-tab-hover-bg: #CFE6DF;
+  --nav-tab-hover-fg: #08443B;
+  /* Active tab: light pill, dark green label. */
+  --nav-tab-current-bg: #F4FBF9;
+  --nav-tab-current-fg: #08443B;
+  /* Focus rings are drawn on green, where the app-wide ring (light ground +
+     green accent) turns into a green-on-green blur. Dark inner halo + white
+     outer ring stays visible on both the dock and the sheet. */
+  --nav-focus-ring: 0 0 0 2px rgb(0 0 0 / 0.35), 0 0 0 4px #FFFFFF;
+  /* Focus adds the same mint halo as hover on top of the ring, so a focused
+     tile reads as lit whether it is the current page or not. */
+  --nav-focus-glow: 0 0 0 2px rgb(0 0 0 / 0.35), 0 0 0 4px #FFFFFF, 0 6px 18px rgb(127 240 216 / 0.5);
+  /* Solid stand-ins for engines without backdrop-filter and for the
+     reduced-transparency preference. */
+  --nav-inverted-bg-solid: #0C7063;
+  --nav-sheet-bg-solid: #0B6357;
+  /* Sheet rim: a hairline that fades in as the panel rises. */
+  --nav-sheet-rim: rgb(5 42 37 / 0.45);
+  --nav-sheet-rim-fade: rgb(5 42 37 / 0);
+  /* Current tab and current tile details. */
+  --nav-tab-current-hover-bg: #E6F6F1;
+  --nav-tab-current-shadow:
+    0 1px 2px rgb(0 0 0 / 0.14),
+    0 6px 16px rgb(0 0 0 / 0.2);
+  --nav-tab-open-shadow: inset 0 0 0 1px rgb(8 68 59 / 0.1);
+  --nav-tile-hover-border: rgb(185 255 240 / 0.6);
+  --nav-tile-current-border: #B9DED5;
+  --nav-tile-current-hover-border: #A2D3C6;
+  --nav-tile-current-shadow: 0 8px 18px rgb(0 0 0 / 0.16);
+  /* Hover glow for the selected tile: a deep drop shadow, not the mint halo
+     the unselected tiles use. */
+  --nav-tile-current-glow: 0 10px 24px rgb(4 48 40 / 0.42);
+  --nav-panel-count-border: rgb(255 255 255 / 0.28);
+  --nav-panel-count-bg: rgb(255 255 255 / 0.1);
+  --nav-scrollbar-thumb: rgb(255 255 255 / 0.24);
+  --nav-scrollbar-thumb-hover: rgb(255 255 255 / 0.42);
   --nav-compact-scale: 0.88;
   --nav-spring-pop: linear(0, 0.053, 0.179, 0.336, 0.497, 0.644, 0.769, 0.867, 0.94, 0.99, 1.022, 1.039, 1.046, 1.045, 1.04, 1.033, 1.026, 1.019, 1.013, 1.008, 1.004, 1.001, 0.999, 0.998, 0.998, 1);
   position: fixed;
@@ -32,6 +108,75 @@ body.has-floating-navigation {
 }
 
 @supports not (transition-timing-function: linear(0, 1)) { .floating-navigation { --nav-spring: cubic-bezier(0.3, 1.25, 0.5, 1); --nav-spring-pop: cubic-bezier(0.34, 1.56, 0.64, 1); } }
+
+/* Dark theme: the dock is a dim, desaturated green — a green-tinted step just
+   above the page (#0E1318), never a bright slab — and every label is light.
+   The old sage bar glowed against the dark page and carried deep-green ink, so
+   the text sank into the surface. This ramp keeps the green identity while the
+   light ink clears ~9:1 on the dock; the state ladder is unchanged: base, then
+   a lighter hover/expanded chip, then the brightest selected pill. */
+html[data-theme="dark"] .floating-navigation {
+  --nav-inverted-bg: rgb(24 66 57 / 0.92);
+  --nav-inverted-bg-solid: #184239;
+  --nav-inverted-border: rgb(158 220 204 / 0.18);
+  --nav-inverted-fg: #E6F3EF;
+  --nav-inverted-fg-dim: #DCEBE6;
+  --nav-inverted-fg-soft: #B7D6CC;
+  --nav-eyebrow: #9FC8BC;
+  --nav-arrow: #A9CFC4;
+  --nav-inverted-hover: rgb(255 255 255 / 0.08);
+  --nav-sheet-bg: rgb(31 80 70 / 0.97);
+  --nav-sheet-bg-solid: #1F5046;
+  --nav-sheet-rim: rgb(170 225 210 / 0.16);
+  --nav-sheet-rim-fade: rgb(170 225 210 / 0);
+  /* Tiles are a faint light film on the sheet; the selected tile is the one
+     clearly brighter surface. */
+  --nav-tile-bg: rgb(255 255 255 / 0.06);
+  --nav-tile-border: rgb(214 245 236 / 0.12);
+  --nav-tile-hover: rgb(255 255 255 / 0.1);
+  --nav-tile-hover-border: rgb(170 235 215 / 0.38);
+  /* A soft mint halo still reads on the dim sheet, but dimmer than the light
+     theme's so it does not light up the whole panel. */
+  --nav-glow: 0 0 0 1px rgb(150 235 210 / 0.4), 0 4px 14px rgb(60 200 170 / 0.26);
+  --nav-tile-current-bg: #2F6E5F;
+  --nav-tile-current-fg: #F4FBF8;
+  --nav-tile-current-soft: #D2E8DF;
+  --nav-tile-current-chip: rgb(255 255 255 / 0.14);
+  --nav-tile-current-border: rgb(190 245 228 / 0.28);
+  --nav-tile-current-hover-border: rgb(190 245 228 / 0.44);
+  --nav-tile-current-shadow: 0 8px 18px rgb(0 0 0 / 0.34);
+  --nav-tile-current-glow: 0 10px 24px rgb(0 0 0 / 0.5);
+  --nav-icon-chip: rgb(255 255 255 / 0.1);
+  --nav-badge-bg: rgb(255 255 255 / 0.16);
+  --nav-panel-count-border: rgb(230 250 244 / 0.22);
+  --nav-panel-count-bg: rgb(255 255 255 / 0.1);
+  --nav-tab-open-bg: #26564B;
+  --nav-tab-open-fg: #E9F6F1;
+  --nav-tab-open-shadow: inset 0 0 0 1px rgb(190 245 228 / 0.16);
+  --nav-tab-hover-bg: #26564B;
+  --nav-tab-hover-fg: #E9F6F1;
+  --nav-tab-current-bg: #2F6E5F;
+  --nav-tab-current-fg: #F4FBF8;
+  --nav-tab-current-hover-bg: #387A6A;
+  --nav-tab-current-shadow:
+    0 1px 2px rgb(0 0 0 / 0.3),
+    0 6px 16px rgb(0 0 0 / 0.34);
+  /* On a dim surface the ring flips: dark inner gap, near-white outer halo. */
+  --nav-focus-ring: 0 0 0 2px rgb(4 16 13 / 0.85), 0 0 0 4px #EAF7F3;
+  --nav-focus-glow: 0 0 0 2px rgb(4 16 13 / 0.85), 0 0 0 4px #EAF7F3, 0 6px 18px rgb(56 200 172 / 0.4);
+  --nav-scrollbar-thumb: rgb(255 255 255 / 0.22);
+  --nav-scrollbar-thumb-hover: rgb(255 255 255 / 0.38);
+  /* A faint light top edge reads as glass on a dim surface. */
+  --edge-highlight: inset 0 1px 0 rgb(255 255 255 / 0.14);
+}
+
+/* The app-wide "solid glass" fallback paints the dock with the panel colour;
+   in the dark theme that would drop the mint bar back into the page. */
+html[data-theme="dark"] body.modal-open .navigation-dock {
+  background: var(--nav-inverted-bg-solid);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
 
 .floating-navigation::before {
   position: absolute;
@@ -53,11 +198,13 @@ body.has-floating-navigation {
   flex-direction: column;
   width: max-content;
   max-width: calc(100vw - 2rem);
-  border: 1px solid var(--nav-glass-border);
+  border: 1px solid var(--nav-inverted-border);
   border-radius: var(--nav-dock-radius);
-  background: var(--nav-glass-bg);
-  -webkit-backdrop-filter: var(--nav-glass-filter);
-  backdrop-filter: var(--nav-glass-filter);
+  background: var(--nav-inverted-bg);
+  /* Slightly tighter blur than the app-wide glass: the dock stays readable
+     without smearing the page behind it into a milky band. */
+  -webkit-backdrop-filter: blur(14px) saturate(1.4) brightness(var(--glass-regular-brightness));
+  backdrop-filter: blur(14px) saturate(1.4) brightness(var(--glass-regular-brightness));
   box-shadow: var(--shadow-3), var(--edge-highlight);
   pointer-events: auto;
   transform-origin: center bottom;
@@ -82,12 +229,40 @@ body.has-floating-navigation {
 }
 
 @supports not ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
-  .navigation-dock { background: var(--glass-solid-bg); }
+  .navigation-dock { background: var(--nav-inverted-bg-solid); }
+  .navigation-panel { background: var(--nav-sheet-bg-solid); }
 }
 
 @media (prefers-reduced-transparency: reduce) {
   .navigation-dock {
-    background: var(--glass-solid-bg);
+    background: var(--nav-inverted-bg-solid);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+
+  .navigation-panel {
+    background: var(--nav-sheet-bg-solid);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
+
+/* High-contrast mode flattens the translucent greens to Canvas, so restore the
+   boundaries that the sheet and tiles normally provide. */
+@media (forced-colors: active) {
+  .navigation-dock,
+  .navigation-panel,
+  .navigation-link {
+    border: 1px solid CanvasText;
+  }
+
+  .navigation-tab.is-current,
+  .navigation-link.is-current {
+    outline: 2px solid Highlight;
+    outline-offset: -2px;
+  }
+
+  .navigation-dock {
     -webkit-backdrop-filter: none;
     backdrop-filter: none;
   }
@@ -106,8 +281,10 @@ body.has-floating-navigation {
   transition: border-color 240ms ease;
 }
 
+/* With a flyout open, the sheet already separates itself from the dock; the
+   hairline just adds a seam, so drop it. */
 .floating-navigation.is-engaged .navigation-dock__tabs {
-  border-top-color: var(--line);
+  border-top-color: transparent;
 }
 
 .navigation-flyout {
@@ -175,7 +352,7 @@ body.has-floating-navigation {
   border: 0;
   border-radius: 999px;
   background: transparent;
-  color: var(--ink-muted);
+  color: var(--nav-inverted-fg-dim);
   font: inherit;
   font-size: 0.83rem;
   font-weight: 700;
@@ -192,8 +369,8 @@ body.has-floating-navigation {
 
 .navigation-tab:hover {
   z-index: 2;
-  background: var(--panel);
-  color: var(--ink);
+  background: var(--nav-tab-hover-bg);
+  color: var(--nav-tab-hover-fg);
   text-decoration: none;
 }
 
@@ -201,37 +378,48 @@ body.has-floating-navigation {
   transform: scale(0.95);
 }
 
-.navigation-tab:focus-visible,
-.navigation-link:focus-visible {
-  outline: none;
-  box-shadow: var(--focus-ring);
-}
-
+/* The selected main item is a light pill with dark green text: on a dark green
+   dock it is the only element that reads as "selected" at a glance. */
 .navigation-tab.is-current {
-  background: var(--accent);
-  color: var(--accent-ink);
+  background: var(--nav-tab-current-bg);
+  color: var(--nav-tab-current-fg);
+  box-shadow: var(--nav-tab-current-shadow);
 }
 
 .navigation-tab.is-current:hover {
-  background: color-mix(in srgb, var(--accent) 88%, white);
-  color: var(--accent-ink);
+  background: var(--nav-tab-current-hover-bg);
+  color: var(--nav-tab-current-fg);
 }
 
+/* The tab whose flyout is open: a light mint chip, dimmer than the near-white
+   selected pill so the two never read as the same state. */
 .navigation-tab.is-expanded {
   z-index: 3;
-  background: color-mix(in srgb, var(--accent) 25%, transparent);
-  color: var(--ink);
+  background: var(--nav-tab-open-bg);
+  color: var(--nav-tab-open-fg);
+  box-shadow: var(--nav-tab-open-shadow);
 }
 
 .navigation-tab.is-current.is-expanded {
-  background: var(--accent);
-  color: var(--accent-ink);
+  background: var(--nav-tab-current-bg);
+  color: var(--nav-tab-current-fg);
+  box-shadow: var(--nav-tab-current-shadow);
+}
+
+/* After every tab state rule, so the ring is never replaced by a state
+   shadow — including on the light current pill. */
+.navigation-tab:focus-visible,
+.navigation-tab.is-current:focus-visible,
+.navigation-tab.is-expanded:focus-visible,
+.navigation-tab.is-current.is-expanded:focus-visible {
+  outline: none;
+  box-shadow: var(--nav-focus-ring);
 }
 
 .navigation-tab.is-expanded .navigation-tab__indicator {
   width: 0.8rem;
   border-radius: 999px;
-  background: var(--accent);
+  background: var(--nav-tab-open-fg);
   box-shadow: none;
 }
 
@@ -265,7 +453,7 @@ body.has-floating-navigation {
 }
 
 .navigation-tab.is-current .navigation-tab__indicator {
-  background: var(--accent);
+  background: currentColor;
 }
 
 .navigation-panel[hidden] {
@@ -273,10 +461,35 @@ body.has-floating-navigation {
 }
 
 .navigation-panel {
+  position: relative;
+  box-sizing: border-box;
   display: flex;
   height: 100%;
   min-height: 0;
   flex-direction: column;
+  padding: 0.8rem 0.8rem 0.45rem;
+  border: 1px solid var(--nav-sheet-rim);
+  border-radius: 1.1rem;
+  /* A touch of translucency keeps the sheet feeling like glass. The dock's own
+     backdrop-filter roots the page behind it, so this blur never runs; keep the
+     alpha high enough that page text cannot ghost through the tiles. */
+  background: var(--nav-sheet-bg);
+  -webkit-backdrop-filter: blur(16px) saturate(1.35);
+  backdrop-filter: blur(16px) saturate(1.35);
+  /* Local stacking context: a lifted, glowing tile can never paint above the
+     heading, the dock tabs, or the page. */
+  isolation: isolate;
+}
+
+/* The rim fades in as the sheet rises, so the edge does not snap on before the
+   panel has finished opening. */
+.navigation-flyout.is-open .navigation-panel {
+  animation: navSheetEdgeIn 460ms var(--nav-ease-out) both;
+}
+
+@keyframes navSheetEdgeIn {
+  from { border-color: var(--nav-sheet-rim-fade); }
+  to { border-color: var(--nav-sheet-rim); }
 }
 
 .navigation-panel__heading {
@@ -284,23 +497,23 @@ body.has-floating-navigation {
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  margin: 0 0 0.55rem;
-  padding: 0 0.25rem 0.55rem;
-  border-bottom: 1px solid var(--line);
+  margin: 0 0 0.35rem;
+  /* Matches the link rails below so heading and tiles share one left edge. */
+  padding: 0 1.4rem 0.15rem 1.4rem;
   transition: opacity 200ms ease, transform 560ms var(--nav-spring);
 }
 
 .navigation-panel__eyebrow {
   margin: 0 0 0.15rem;
-  color: var(--ink-muted);
+  color: var(--nav-eyebrow);
   font-size: 0.68rem;
   font-weight: 700;
 }
 
 .navigation-panel__heading h2 {
   margin: 0;
-  color: var(--ink);
-  font-size: 1.2rem;
+  color: var(--nav-inverted-fg);
+  font-size: 1.25rem;
   font-weight: 700;
 }
 
@@ -309,9 +522,10 @@ body.has-floating-navigation {
   width: 2.2rem;
   height: 2.2rem;
   place-items: center;
-  border: 1px solid var(--line);
+  border: 1px solid var(--nav-panel-count-border);
   border-radius: 50%;
-  color: var(--ink-muted);
+  background: var(--nav-panel-count-bg);
+  color: var(--nav-inverted-fg);
   font-size: 0.67rem;
   font-weight: 700;
 }
@@ -325,29 +539,58 @@ body.has-floating-navigation {
   gap: 0.38rem;
   overflow-x: hidden;
   overflow-y: auto;
-  padding: 0.3rem 0.5rem 0.5rem 0.3rem;
-  scrollbar-color: var(--ink-muted) var(--panel);
+  /* The rails are wide enough to contain the hover halo, so a lifted tile is
+     never clipped by the scroll viewport, and the fade only eats padding.
+     1.4rem of side padding holds the 14px glow plus the 2% scale overhang on
+     both sides, so the halo is never sliced by the scroll port. */
+  padding: 0.75rem 1.4rem 0.75rem 1.4rem;
+  scrollbar-color: var(--nav-scrollbar-thumb) transparent;
   scrollbar-width: thin;
+  /* Both edges fade, so the list melts into the sheet from the top and from
+     the bottom — the same treatment on each side. */
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 0.65rem, #000 calc(100% - 0.65rem), transparent 100%);
+  mask-image: linear-gradient(to bottom, transparent 0, #000 0.65rem, #000 calc(100% - 0.65rem), transparent 100%);
+}
+
+/* While a tile inside the list has keyboard focus, drop the edge fade: it would
+   otherwise eat the top or bottom of the focus ring and glow. */
+.navigation-panel__links:focus-within {
+  -webkit-mask-image: none;
+  mask-image: none;
 }
 
 .navigation-panel__links::-webkit-scrollbar {
-  width: 0.4rem;
+  width: 0.55rem;
+}
+
+/* Minimal scrollbar: no arrow buttons, no corner box. */
+.navigation-panel__links::-webkit-scrollbar-button {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+.navigation-panel__links::-webkit-scrollbar-corner {
+  display: none;
 }
 
 .navigation-panel__links::-webkit-scrollbar-track {
-  margin-block: 0.35rem;
-  border-radius: 999px;
-  background: var(--panel);
+  margin-block: 0.45rem;
+  background: transparent;
 }
 
+/* Border + background-clip insets the thumb from the sheet edge, so it reads as
+   a floating pill instead of a painted stripe. */
 .navigation-panel__links::-webkit-scrollbar-thumb {
-  border: 1px solid var(--line);
+  border: 2px solid transparent;
   border-radius: 999px;
-  background: var(--ink-muted);
+  background: var(--nav-scrollbar-thumb);
+  background-clip: padding-box;
 }
 
 .navigation-panel__links::-webkit-scrollbar-thumb:hover {
-  background: var(--ink);
+  background: var(--nav-scrollbar-thumb-hover);
+  background-clip: padding-box;
 }
 
 .navigation-panel.is-switching .navigation-panel__heading,
@@ -376,28 +619,58 @@ body.has-floating-navigation {
 }
 
 .navigation-link {
+  position: relative;
   display: flex;
   min-width: 0;
+  scroll-margin-block: 0.9rem;
   align-items: center;
   gap: 0.68rem;
   padding: 0.78rem 0.85rem;
-  border: 1px solid var(--line);
+  border: 1px solid var(--nav-tile-border);
   border-radius: 1rem;
-  color: var(--ink);
-  background: var(--panel);
+  color: var(--nav-inverted-fg);
+  background: var(--nav-tile-bg);
   text-decoration: none;
   transition:
     background-color 160ms ease,
     border-color 160ms ease,
+    box-shadow 220ms ease,
     opacity 200ms ease,
+    scale 200ms var(--nav-ease-out),
     transform 560ms var(--nav-spring);
 }
 
-.navigation-link:hover,
-.navigation-link.is-current {
-  border-color: var(--accent);
-  background: color-mix(in srgb, var(--accent) 16%, transparent);
-  color: var(--ink);
+/* Hover: a bright mint rim plus an outer glow, so the pointer target reads as
+   lit rather than merely repainted. Every tile lifts a touch, the selected
+   one included. */
+.navigation-link:hover {
+  z-index: 1;
+  border-color: var(--nav-tile-hover-border);
+  background: var(--nav-tile-hover);
+  color: var(--nav-inverted-fg);
+  box-shadow: var(--nav-glow);
+  scale: 1.02;
+}
+
+/* Current page: light card with dark green text. Deliberately the inverse of
+   the hover state so "selected" can never be mistaken for "hovered". */
+.navigation-link.is-current,
+.navigation-link.is-current:hover {
+  border-color: var(--nav-tile-current-border);
+  background: var(--nav-tile-current-bg);
+  color: var(--nav-tile-current-fg);
+  box-shadow: var(--nav-tile-current-shadow);
+}
+
+/* The current tile keeps its light card on hover, but it should still answer
+   the pointer: the same small lift as every other tile, with a deep drop
+   shadow instead of the mint halo — on a white card the mint glow would
+   disappear. */
+.navigation-link.is-current:hover {
+  z-index: 2;
+  border-color: var(--nav-tile-current-hover-border);
+  box-shadow: var(--nav-tile-current-shadow), var(--nav-tile-current-glow);
+  scale: 1.02;
 }
 
 .navigation-link:active { transform: scale(0.985); }
@@ -409,8 +682,24 @@ body.has-floating-navigation {
   flex: 0 0 auto;
   place-items: center;
   border-radius: 0.78rem;
-  background: color-mix(in srgb, var(--accent) 16%, transparent);
-  color: var(--accent);
+  background: var(--nav-icon-chip);
+  color: var(--nav-inverted-fg);
+}
+
+/* Child colors for the light current card. */
+.navigation-link.is-current .navigation-link__icon {
+  background: var(--nav-tile-current-chip);
+  color: var(--nav-tile-current-fg);
+}
+
+.navigation-link.is-current .navigation-link__description,
+.navigation-link.is-current .navigation-link__arrow {
+  color: var(--nav-tile-current-soft);
+}
+
+.navigation-link.is-current .navigation-link__badge {
+  background: var(--nav-tile-current-chip);
+  color: var(--nav-tile-current-fg);
 }
 
 .navigation-link__icon svg {
@@ -440,7 +729,7 @@ body.has-floating-navigation {
 .navigation-link__description {
   display: -webkit-box;
   overflow: hidden;
-  color: var(--ink-muted);
+  color: var(--nav-inverted-fg-soft);
   font-size: 0.69rem;
   line-height: 1.35;
   -webkit-box-orient: vertical;
@@ -451,20 +740,32 @@ body.has-floating-navigation {
   margin-left: auto;
   padding: 0.2rem 0.42rem;
   border-radius: 999px;
-  background: color-mix(in srgb, var(--accent) 20%, transparent);
-  color: var(--accent);
+  background: var(--nav-badge-bg);
+  color: var(--nav-inverted-fg);
   font-size: 0.65rem;
   font-weight: 700;
 }
 
 .navigation-link__arrow {
   margin-left: auto;
-  color: var(--ink-muted);
+  color: var(--nav-arrow);
   font-size: 0.9rem;
 }
 
 .navigation-link__badge + .navigation-link__arrow {
   margin-left: 0;
+}
+
+/* Declared last so focus outranks both :hover and .is-current. A focused tile
+   lights up like a hovered one and expands a touch; the raised z-index keeps
+   its halo above its neighbours inside the scroll list. */
+.navigation-link:focus-visible,
+.navigation-link.is-current:focus-visible,
+.navigation-link.is-current:hover:focus-visible {
+  z-index: 3;
+  outline: none;
+  box-shadow: var(--nav-focus-glow);
+  scale: 1.02;
 }
 
 @media (max-width: 575.98px) {
@@ -514,7 +815,13 @@ body.has-floating-navigation {
 
   .navigation-panel__links {
     grid-template-columns: minmax(0, 1fr);
-    padding-right: 0.5rem;
+    /* Narrow screens cannot spare 1.4rem of rails; keep enough for the halo
+       to breathe without eating the tile. */
+    padding: 0.7rem 0.9rem 0.7rem 0.75rem;
+  }
+
+  .navigation-panel__heading {
+    padding: 0 0.9rem 0.15rem 0.75rem;
   }
 
   .navigation-link {
@@ -539,5 +846,9 @@ body.has-floating-navigation {
     scroll-behavior: auto;
     transition-duration: 0.01ms !important;
     transition-delay: 0ms !important;
+  }
+
+  .navigation-flyout.is-open .navigation-panel {
+    animation: none;
   }
 }

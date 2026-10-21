@@ -14,17 +14,19 @@
     var modalLabelId = modalId + "-label";
 }
 <div class="mb-3" data-person-picker data-person-role="@role" data-search-handler="@searchHandler" data-create-handler="@createHandler" data-person-endpoint="@endpoint">
-    <div class="d-flex align-items-center justify-content-between">
-        <label for="@pickerId" class="form-label mt-2 mb-1">@label</label>
-        <button type="button" class="btn btn-link btn-sm px-0" data-person-create aria-controls="@modalId">Create new</button>
-    </div>
+    <label for="@pickerId" class="form-label mt-2 mb-1">@label</label>
     <input type="hidden" name="@fieldName" id="@fieldId" value="@(ViewData.ModelState[$"{fieldName}"]?.AttemptedValue ?? "0")" data-person-value />
-    <input id="@pickerId" type="text" class="form-control" autocomplete="off" role="combobox" aria-autocomplete="list" aria-controls="@resultsId" aria-expanded="false" placeholder="Search by name@(isCustomer ? ", phone or national code" : " or phone")" data-person-search />
-    <div id="@resultsId" class="list-group mt-1 d-none" role="listbox" data-person-results>
-        @foreach (var person in Model)
-        {
-            <button type="button" class="list-group-item list-group-item-action" role="option" dir="auto" data-person-id="@person.Id">@person.Label@(string.IsNullOrWhiteSpace(person.TypeLabel) ? string.Empty : $" ({person.TypeLabel})")</button>
-        }
+    <div class="input-group">
+        <div class="person-picker__field">
+            <input id="@pickerId" type="text" class="form-control" autocomplete="off" role="combobox" aria-autocomplete="list" aria-controls="@resultsId" aria-expanded="false" placeholder="Search by name@(isCustomer ? ", phone or national code" : " or phone")" data-person-search />
+            <div id="@resultsId" class="list-group d-none" role="listbox" data-person-results>
+                @foreach (var person in Model)
+                {
+                    <button type="button" class="list-group-item list-group-item-action" role="option" dir="auto" data-person-id="@person.Id">@person.Label@(string.IsNullOrWhiteSpace(person.TypeLabel) ? string.Empty : $" ({person.TypeLabel})")</button>
+                }
+            </div>
+        </div>
+        <button type="button" class="btn btn-outline-secondary input-group-add-icon" data-person-create aria-controls="@modalId" aria-label="Create new @label" title="Create new @label"><svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M8 3.25v9.5M3.25 8h9.5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></button>
     </div>
     <span class="text-danger" data-person-error></span>
     @Html.ValidationMessage(fieldName, string.Empty, new { @class = "text-danger" })

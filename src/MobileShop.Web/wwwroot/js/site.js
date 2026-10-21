@@ -243,6 +243,34 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
+
+    // Light/dark theme switch. The choice is remembered per browser in
+    // localStorage; the layout applies it before the first paint. Storage may be
+    // unavailable or blocked, so every access is guarded and the page still works.
+    const themeColorMeta = document.querySelector('meta[name="theme-color"]');
+    const themeColors = { dark: '#0E1318', light: '#F1F4F7' };
+    const applyTheme = theme => {
+        document.documentElement.dataset.theme = theme;
+        document.documentElement.setAttribute('data-bs-theme', theme);
+        if (themeColorMeta) {
+            themeColorMeta.setAttribute('content', themeColors[theme] || themeColors.dark);
+        }
+    };
+
+    const currentTheme = document.documentElement.dataset.theme === 'light' ? 'light' : 'dark';
+    applyTheme(currentTheme);
+
+    document.querySelectorAll('[data-theme-toggle]').forEach(toggle => {
+        toggle.checked = toggle.value === currentTheme;
+        toggle.addEventListener('change', () => {
+            if (!toggle.checked) return;
+            const theme = toggle.value === 'light' ? 'light' : 'dark';
+            applyTheme(theme);
+            try {
+                localStorage.setItem('mobileshop.theme', theme);
+            } catch (e) { }
+        });
+    });
 });
 
 document.addEventListener('click', event => {

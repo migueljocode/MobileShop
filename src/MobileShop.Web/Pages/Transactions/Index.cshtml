@@ -139,10 +139,9 @@
                             <td class="num">@transaction.FinishedPrice.ToIrr()</td>
                             <td>@transaction.SellerLabel</td>
                             <td>@transaction.CustomerLabel</td>
-                            <td>
+                            <td class="table-actions">
                                 <a asp-page="/Transactions/Details" asp-route-id="@transaction.Id">Details</a>
-                                |
-                                <a href="@Url.Page("/Transactions/Index", "DownloadFactor", new { direction = Model.Direction, customerId = Model.CustomerId, dateRange = Model.DateRange, take = Model.Take, sort = Model.Sort, order = Model.Order, selectedIds = transaction.Id })">Download Factor</a>
+                                <a href="@Url.Page("/Transactions/Index", "DownloadFactor", new { direction = Model.Direction, customerId = Model.CustomerId, dateRange = Model.DateRange, take = Model.Take, sort = Model.Sort, order = Model.Order, selectedIds = transaction.Id })">Download factor</a>
                             </td>
                         </tr>
                     }

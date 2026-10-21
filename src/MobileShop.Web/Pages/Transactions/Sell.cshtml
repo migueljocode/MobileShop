@@ -21,8 +21,10 @@
             </div>
             <label for="sell-product-search" class="form-label">Suggested models</label>
             <input type="hidden" name="Input.ProductId" id="Input_ProductId" value="@Model.Input.ProductId" data-product-value />
-            <input id="sell-product-search" type="text" class="form-control" autocomplete="off" role="combobox" aria-autocomplete="list" aria-controls="product-results" aria-expanded="false" placeholder="Select product type and details first" data-product-search disabled />
-            <partial name="/Pages/Shared/_ProductPickerOptions.cshtml" model="new ProductPickerViewModel(Model.Products, Model.Input.ProductId)" />
+            <div class="product-picker__field">
+                <input id="sell-product-search" type="text" class="form-control" autocomplete="off" role="combobox" aria-autocomplete="list" aria-controls="product-results" aria-expanded="false" placeholder="Select product type and details first" data-product-search disabled />
+                <partial name="/Pages/Shared/_ProductPickerOptions.cshtml" model="new ProductPickerViewModel(Model.Products, Model.Input.ProductId)" />
+            </div>
         </div>
         <span asp-validation-for="Input.ProductId" class="text-danger"></span>
     </div>

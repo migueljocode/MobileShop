@@ -54,6 +54,40 @@ html {
   margin-top: var(--space-5);
 }
 
+/* Product create/edit pages: the action bar belongs to the page flow, so it
+   never floats over fields or the navigation dock. Width matches the
+   col-lg-7 form above it. */
+.action-bar--static {
+  position: static;
+  padding-top: var(--space-4);
+  padding-bottom: 0;
+  border-top: 0;
+  background: transparent;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+/* Create pages place the bar directly in the page, outside the col-lg-7 form;
+   match the form's width so the buttons sit on its right edge. Inside a form
+   (Edit), the bar simply fills its column. */
+main > .action-bar--static {
+  width: 100%;
+  max-width: 58.3333%;
+  margin-inline: auto;
+}
+
+@media (max-width: 991.98px) {
+  main > .action-bar--static {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 575.98px) {
+  .action-bar--static .btn {
+    flex: 1 1 auto;
+  }
+}
+
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
   .action-bar {
     background: var(--glass-solid-bg);

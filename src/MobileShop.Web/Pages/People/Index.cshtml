@@ -18,9 +18,9 @@
 </div>
 
 <div class="toolbar">
-    <form method="get" class="row g-3 align-items-end mb-3">
-        <fieldset class="col-12">
-            <legend class="fs-6">Show</legend>
+    <form method="get" class="row g-3 align-items-end">
+        <fieldset class="col-12 col-lg-auto">
+            <legend class="form-label mb-2">Show</legend>
             <div class="segmented">
                 <input class="btn-check" type="radio" name="type" id="peopleAll" value="all" checked="@(Model.Type == "all")" onchange="this.form.submit()" />
                 <label class="btn" for="peopleAll">All</label>
@@ -30,16 +30,16 @@
                 <label class="btn" for="peopleSellers">Sellers</label>
             </div>
         </fieldset>
-        <div class="col-auto">
-            <label for="sortBy" class="form-label">Sort by</label>
+        <div class="col-12 col-sm-6 col-lg-3">
+            <label for="sortBy" class="form-label mb-2">Sort by</label>
             <select class="form-select" id="sortBy" name="sortBy" onchange="this.form.submit()">
                 <option value="name" selected="@(Model.SortBy == "Name")">Name</option>
                 <option value="phone" selected="@(Model.SortBy == "Phone")">Phone</option>
                 <option value="count" selected="@(Model.SortBy == "Count")">@Model.ActivityColumnLabel</option>
             </select>
         </div>
-        <div class="col-auto">
-            <label for="ascending" class="form-label">Direction</label>
+        <div class="col-12 col-sm-6 col-lg-3">
+            <label for="ascending" class="form-label mb-2">Direction</label>
             <select class="form-select" id="ascending" name="ascending" onchange="this.form.submit()">
                 <option value="true" selected="@Model.Ascending">Ascending</option>
                 <option value="false" selected="@(!Model.Ascending)">Descending</option>

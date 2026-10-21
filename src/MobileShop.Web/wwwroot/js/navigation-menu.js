@@ -197,6 +197,15 @@ document.addEventListener('DOMContentLoaded', function () {
         window.clearTimeout(closeTimer);
         window.clearTimeout(gapCloseTimer);
     });
+
+    /* A focused tile grows and glows; scroll it clear of the list's soft edges
+       so the ring is never sliced by the viewport. */
+    flyout.addEventListener('focusin', function (event) {
+        var link = event.target.closest ? event.target.closest('.navigation-link') : null;
+        if (!link) return;
+        link.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+    });
+
     function finishClose() {
         if (openedId !== null) return;
         window.clearTimeout(closeCleanupTimer);

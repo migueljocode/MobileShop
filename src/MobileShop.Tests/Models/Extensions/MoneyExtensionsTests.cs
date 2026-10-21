@@ -25,4 +25,18 @@ public class MoneyExtensionsTests
         Assert.Equal(string.Empty, value.ToGroupedDigits());
         Assert.Equal(string.Empty, value.ToIrr());
     }
+
+    [Fact]
+    public void ToPersianDigits_converts_ascii_digits_to_persian_digits()
+    {
+        Assert.Equal("۱۲۳", "123".ToPersianDigits());
+        Assert.Equal("۱ ۲۳۴ ۵۶۷", "1 234 567".ToPersianDigits());
+    }
+
+    [Fact]
+    public void ToPersianDigits_keeps_non_digit_characters()
+    {
+        Assert.Equal("مبلغ ۱۲۳ ریال", "مبلغ 123 ریال".ToPersianDigits());
+        Assert.Equal(string.Empty, string.Empty.ToPersianDigits());
+    }
 }

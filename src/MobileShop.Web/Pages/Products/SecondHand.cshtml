@@ -33,8 +33,10 @@ else
                     <td dir="auto" class="num">@product.Identifier</td>
                     <td dir="auto">@(string.IsNullOrWhiteSpace(product.Color) ? "N/A" : product.Color)</td>
                     <td>
-                        <span class="status-chip status-chip--@(product.IsSold ? "sold" : "available")">@(product.IsSold ? "Sold" : "Available")</span>
-                        <span class="status-chip status-chip--used ms-1">Second-hand</span>
+                        <div class="status-chips">
+                            <span class="status-chip status-chip--@(product.IsSold ? "sold" : "available")">@(product.IsSold ? "Sold" : "Available")</span>
+                            <span class="status-chip status-chip--used">Second-hand</span>
+                        </div>
                     </td>
                     <td><a asp-page="/Products/Details" asp-route-id="@product.EntityId" asp-route-type="@product.Type.ToLowerInvariant().Replace(" ", "")">Details</a></td>
                 </tr>

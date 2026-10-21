@@ -23,7 +23,7 @@
                     <select asp-for="Input.CompatibleManufacturerId" asp-items="@(new SelectList(Model.Manufacturers, "Id", "Name"))" class="form-select" id="compatibleManufacturerSelect">
                         <option value="">-- Select manufacturer --</option>
                     </select>
-                    <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#addCompatibleManufacturerModal">Add New</button>
+                    <button type="button" class="btn btn-outline-secondary input-group-add-icon" data-bs-toggle="modal" data-bs-target="#addCompatibleManufacturerModal" aria-label="Add compatible manufacturer" title="Add compatible manufacturer"><svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M8 3.25v9.5M3.25 8h9.5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></button>
                 </div>
                 <span asp-validation-for="Input.CompatibleManufacturerId" class="text-danger"></span>
             </div>
@@ -34,7 +34,7 @@
                     <select asp-for="Input.CompatibleModelId" asp-items="@(new SelectList(Model.CompatibleModels, "Id", "Name"))" class="form-select" id="compatibleModelSelect">
                         <option value="">-- Select model --</option>
                     </select>
-                    <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#addCompatibleModelModal">Add New</button>
+                    <button type="button" class="btn btn-outline-secondary input-group-add-icon" data-bs-toggle="modal" data-bs-target="#addCompatibleModelModal" aria-label="Add compatible model" title="Add compatible model"><svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M8 3.25v9.5M3.25 8h9.5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></button>
                 </div>
                 <span asp-validation-for="Input.CompatibleModelId" class="text-danger"></span>
             </div>
@@ -46,7 +46,7 @@
                     <select asp-for="Input.GlassManufacturerId" asp-items="@(new SelectList(Model.Manufacturers, "Id", "Name"))" class="form-select" id="glassManufacturerSelect">
                         <option value="">-- Select glass manufacturer --</option>
                     </select>
-                    <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#addGlassManufacturerModal">Add New</button>
+                    <button type="button" class="btn btn-outline-secondary input-group-add-icon" data-bs-toggle="modal" data-bs-target="#addGlassManufacturerModal" aria-label="Add glass manufacturer" title="Add glass manufacturer"><svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M8 3.25v9.5M3.25 8h9.5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></button>
                 </div>
                 <span asp-validation-for="Input.GlassManufacturerId" class="text-danger"></span>
             </div>
@@ -98,7 +98,7 @@
     </div>
 
 </form>
-<div class="action-bar">
+<div class="action-bar action-bar--static">
     <button class="btn btn-primary" type="submit" form="productCreateForm">Save glass</button>
     <a asp-page="/Products/Index" class="btn btn-outline-secondary">Cancel</a>
 </div>

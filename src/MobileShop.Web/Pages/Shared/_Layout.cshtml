@@ -1,10 +1,11 @@
 ﻿<!DOCTYPE html>
-<html lang="en" data-bs-theme="dark">
+<html lang="en" data-bs-theme="dark" data-theme="dark">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="color-scheme" content="dark" />
     <script>try{if(localStorage.getItem('mobileshop.surfaces')==='solid')document.documentElement.setAttribute('data-surfaces','solid');}catch(e){}</script>
+    <script>try{var t=localStorage.getItem('mobileshop.theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.setAttribute('data-bs-theme','light');}}catch(e){}</script>
     <meta name="theme-color" content="#0E1318" />
     <title>@ViewData["Title"] - MobileShop</title>
     <script type="importmap"></script>
@@ -44,6 +45,7 @@
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     @await RenderSectionAsync("Scripts", required: false)
     <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="~/js/combobox.js" asp-append-version="true"></script>
     <script src="~/js/navigation-menu.js" asp-append-version="true"></script>
     <script src="~/js/person-picker.js" asp-append-version="true"></script>
     <script src="~/js/jalali-datepicker.js" asp-append-version="true"></script>

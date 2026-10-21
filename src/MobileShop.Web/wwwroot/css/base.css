@@ -32,6 +32,19 @@
   --bs-link-hover-color: var(--ink);
 }
 
+html[data-theme="light"] {
+  color-scheme: light;
+  --bs-body-bg: var(--ground);
+  --bs-body-color: var(--ink);
+  --bs-secondary-color: var(--ink-muted);
+  --bs-tertiary-color: var(--ink-muted);
+  --bs-border-color: var(--line);
+  --bs-primary: var(--accent);
+  --bs-primary-rgb: 15, 140, 123;
+  --bs-link-color: var(--accent);
+  --bs-link-hover-color: var(--ink);
+}
+
 html {
   position: relative;
   min-height: 100%;

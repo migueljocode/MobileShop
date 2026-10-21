@@ -63,26 +63,31 @@ public sealed class QuestPdfGenerator(IOptions<PdfSettings> options) : IPdfGener
             .BorderColor("#243B53")
             .Row(row =>
             {
-                row.RelativeItem().AlignLeft().Column(column =>
+                row.Spacing(16);
+
+                row.RelativeItem(1.15f).AlignMiddle().Column(column =>
                 {
-                    column.Item().Text(_settings.ShopName).FontSize(19).SemiBold().FontColor("#102A43");
-                    if (!string.IsNullOrWhiteSpace(_settings.ShopAddress))
-                        column.Item().PaddingTop(3).Text(_settings.ShopAddress).FontSize(8).FontColor("#627D98");
+                    column.Spacing(4);
+
+                    column.Item().AlignRight().Text("فاکتور تراکنش‌ها").FontSize(20).SemiBold().FontColor("#102A43").FontFamily("Vazirmatn");
+                    column.Item().AlignRight().Text(text =>
+                    {
+                        text.Span("تاریخ صدور: ").SemiBold().FontFamily("Vazirmatn");
+                        text.Span(model.GeneratedAt.ToJalaliDateTimeString().ToPersianDigits()).FontFamily("Vazirmatn");
+                    });
+                    column.Item().AlignRight().Text(text =>
+                    {
+                        text.Span("تعداد اقلام: ").SemiBold().FontFamily("Vazirmatn");
+                        text.Span(model.Rows.Count.ToString().ToPersianDigits()).FontFamily("Vazirmatn");
+                    });
                 });
 
-                row.ConstantItem(190).AlignRight().Column(column =>
+                row.RelativeItem().AlignMiddle().Column(column =>
                 {
-                    column.Item().AlignRight().Text("فاکتور تراکنش‌ها").FontSize(20).SemiBold().FontColor("#102A43");
-                    column.Item().PaddingTop(4).AlignRight().Text(text =>
-                    {
-                        text.Span("تاریخ صدور: ").SemiBold();
-                        text.Span(model.GeneratedAt.ToJalaliDateTimeString());
-                    });
-                    column.Item().PaddingTop(2).AlignRight().Text(text =>
-                    {
-                        text.Span("تعداد اقلام: ").SemiBold();
-                        text.Span(model.Rows.Count.ToString());
-                    });
+                    column.Spacing(3);
+                    column.Item().AlignLeft().Text(_settings.ShopName).FontSize(19).SemiBold().FontColor("#102A43").FontFamily("Vazirmatn");
+                    if (!string.IsNullOrWhiteSpace(_settings.ShopAddress))
+                        column.Item().AlignLeft().Text(_settings.ShopAddress).FontSize(8).FontColor("#627D98").FontFamily("Vazirmatn");
                 });
             });
 
@@ -155,25 +160,27 @@ public sealed class QuestPdfGenerator(IOptions<PdfSettings> options) : IPdfGener
                 var row = model.Rows[index];
                 var background = index % 2 == 0 ? "#FFFFFF" : "#F8FAFC";
 
-                BodyCell(table.Cell(), row.FinishedPrice.ToGroupedDigits(), background, true);
+                BodyCell(table.Cell(), row.FinishedPrice.ToGroupedDigits().ToPersianDigits(), background, true);
                 BodyCell(table.Cell(), row.PersonLabel, background);
                 BodyCell(table.Cell(), row.ProductLabel, background);
-                BodyCell(table.Cell(), DirectionLabel(row.Direction), background, false, true);
-                BodyCell(table.Cell(), row.Date.ToJalaliDateTimeString(), background, false, true);
-                BodyCell(table.Cell(), (index + 1).ToString(), background, false, true);
+                BodyCell(table.Cell(), DirectionLabel(row.Direction), background);
+                BodyCell(table.Cell(), row.Date.ToJalaliDateTimeString().ToPersianDigits(), background, false, true);
+                BodyCell(table.Cell(), (index + 1).ToString().ToPersianDigits(), background, false, true);
             }
         });
 
     private static void HeaderCell(IContainer cell, string text)
         => cell
             .Background("#243B53")
-            .PaddingVertical(3)
+            .PaddingVertical(4)
             .PaddingHorizontal(6)
             .AlignMiddle()
+            .AlignCenter()
             .Text(text)
-            .FontSize(8)
+            .FontSize(8.5f)
             .SemiBold()
             .FontColor("#FFFFFF")
+            .FontFamily("Vazirmatn")
             .AlignCenter();
 
     private static void BodyCell(
@@ -181,7 +188,7 @@ public sealed class QuestPdfGenerator(IOptions<PdfSettings> options) : IPdfGener
         string text,
         string background,
         bool amount = false,
-        bool centered = false)
+        bool numeric = false)
     {
         var content = cell
             .Background(background)
@@ -189,14 +196,16 @@ public sealed class QuestPdfGenerator(IOptions<PdfSettings> options) : IPdfGener
             .BorderColor("#E5E7EB")
             .PaddingVertical(8)
             .PaddingHorizontal(7)
-            .AlignMiddle();
+            .AlignMiddle()
+            .AlignCenter();
+
+        if (amount || numeric)
+            content = content.ContentFromLeftToRight();
+
+        var label = content.Text(text).FontSize(amount ? 8.5f : 8).AlignCenter().FontFamily("Vazirmatn");
 
         if (amount)
-            content.ContentFromLeftToRight().Text(text).FontSize(8.5f).SemiBold();
-        else if (centered)
-            content.ContentFromLeftToRight().AlignCenter().Text(text).FontSize(8);
-        else
-            content.AlignLeft().Text(text).FontSize(8);
+            label.SemiBold();
     }
 
     private static string DirectionLabel(TransactionDirection direction)
@@ -206,18 +215,21 @@ public sealed class QuestPdfGenerator(IOptions<PdfSettings> options) : IPdfGener
         => container.Row(row =>
         {
             row.RelativeItem();
-            row.ConstantItem(250)
+            row.ConstantItem(280)
                 .Background("#F1F5F9")
                 .Border(1)
                 .BorderColor("#CBD5E1")
-                .Padding(8)
+                .PaddingVertical(8)
+                .PaddingHorizontal(12)
+                .AlignMiddle()
                 .Row(summary =>
                 {
-                    summary.RelativeItem().Text("جمع کل").FontSize(11).SemiBold().FontColor("#102A43");
-                    summary.ConstantItem(120).AlignRight().Text(text =>
+                    summary.Spacing(8);
+                    summary.RelativeItem().AlignRight().Text("جمع کل").FontSize(11).SemiBold().FontColor("#102A43").FontFamily("Vazirmatn");
+                    summary.RelativeItem().ContentFromLeftToRight().AlignLeft().Text(text =>
                     {
-                        text.Span(model.TotalPrice.ToGroupedDigits()).FontSize(13).SemiBold().FontColor("#102A43");
-                        text.Span("  ریال").FontSize(9).FontColor("#627D98");
+                        text.Span(model.TotalPrice.ToGroupedDigits().ToPersianDigits()).FontSize(13).SemiBold().FontColor("#102A43").FontFamily("Vazirmatn");
+                        text.Span(" ریال").FontSize(9).FontColor("#627D98").FontFamily("Vazirmatn");
                     });
                 });
         });

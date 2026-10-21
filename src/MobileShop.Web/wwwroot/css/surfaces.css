@@ -240,6 +240,18 @@ th.num {
   text-align: end;
 }
 
+/* Inline row actions stay on one line and use a hairline divider, so a label
+   like "Download factor" can never wrap or spill outside its cell. */
+.data-table .table-actions {
+  white-space: nowrap;
+}
+
+.data-table .table-actions > a + a::before {
+  content: "|";
+  margin-inline: 0.55rem;
+  color: var(--text-2);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .data-table tbody tr {
     transition: none;
@@ -256,6 +268,18 @@ th.num {
   border-radius: var(--radius-pill);
   font-size: var(--fs-sm);
   font-weight: var(--fw-strong);
+  /* A chip is a label, not a paragraph: it never wraps or gets squeezed. */
+  white-space: nowrap;
+  flex: 0 0 auto;
+}
+
+/* Status chips in a cell stack vertically, one per line, so "Available" and
+   "Second-hand" never compete for the column's width. */
+.status-chips {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.25rem;
 }
 
 .status-chip--available {
@@ -344,9 +368,14 @@ th.num {
 .segmented > .btn {
   border: 0;
   border-radius: var(--radius-pill);
-  padding: 0.3rem 0.9rem;
+  padding: 0.32rem 0.95rem;
   color: var(--text-2);
   background: transparent;
+  font-size: 0.86rem;
+  transition:
+    color var(--dur-fast) var(--ease-standard),
+    background-color var(--dur-fast) var(--ease-standard),
+    box-shadow var(--dur-fast) var(--ease-standard);
 }
 
 .segmented > .btn:hover {
@@ -354,10 +383,14 @@ th.num {
   background: color-mix(in srgb, var(--ink) 6%, transparent);
 }
 
-.segmented > .btn-check:checked + .btn {
-  color: var(--accent);
-  background: var(--accent-soft);
+/* Selected segment: deep green fill, light label. Works in both themes and
+   gives the toggle an unmistakable current value. */
+.segmented > .btn-check:checked + .btn,
+.segmented > .btn-check:checked + .btn:hover {
+  color: #FFFFFF;
+  background: #0B6B5E;
   font-weight: var(--fw-strong);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.18);
 }
 
 .segmented > .btn-check:focus-visible + .btn {

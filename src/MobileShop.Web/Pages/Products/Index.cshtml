@@ -138,11 +138,13 @@ else
                     <td>@p.PartNumberLabel</td>
                     <td>@(string.IsNullOrWhiteSpace(p.Color) ? "N/A" : p.Color)</td>
                     <td>
-                        <span class="status-chip status-chip--@(p.IsSold ? "sold" : "available")">@(p.IsSold ? "Sold" : "Available")</span>
-                        @if (p.IsSecondHand)
-                        {
-                            <span class="status-chip status-chip--used">Second-hand</span>
-                        }
+                        <div class="status-chips">
+                            <span class="status-chip status-chip--@(p.IsSold ? "sold" : "available")">@(p.IsSold ? "Sold" : "Available")</span>
+                            @if (p.IsSecondHand)
+                            {
+                                <span class="status-chip status-chip--used">Second-hand</span>
+                            }
+                        </div>
                     </td>
                     <td>
                         <a asp-page="/Products/Details" asp-route-id="@p.EntityId" asp-route-type="@p.Type.ToLowerInvariant().Replace(" ", "")">Details</a>

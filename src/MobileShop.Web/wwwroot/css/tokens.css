@@ -25,6 +25,9 @@
   --ink-muted: #93A3B3;
   --accent: #36C5B0;
   --accent-ink: #06201C;
+  /* Chevron for the app's own combo box. Drawn as an inline SVG so it can
+     follow the theme instead of the browser's default arrow. */
+  --select-chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8' fill='none' stroke='%2393A3B3' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M1 1.75 6 6.25 11 1.75'/%3E%3C/svg%3E");
   --warn: #E5A94B;
   --warn-ink: #2B1D05;
   --danger: #F0707A;
@@ -37,6 +40,56 @@
   --focus-ring: 0 0 0 2px var(--ground), 0 0 0 4px var(--accent);
   --nav-dock-height: 5rem;
   --font-body: 'SF Pro Rounded', 'Vazirmatn', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+}
+
+/* Light theme. Overrides the primitives above; every semantic token in tokens-v1
+   aliases these primitives, so the whole app follows. Set on <html data-theme="light">. */
+html[data-theme="light"] {
+  color-scheme: light;
+  /* Same cool-slate spectrum as dark, but as a gentle tonal ladder so surfaces
+     stay distinguishable: canvas is deepest, panels sit a step above, raised
+     surfaces are pure white to lift off the panels. */
+  --ground: #E9EEF4;
+  --panel: #F7F9FC;
+  --panel-raised: #FFFFFF;
+  --line: #D0D9E4;
+  --line-strong: #8494A6;
+  --ink: #16212B;
+  --ink-muted: #4F5D6B;
+  --accent: #0F8C7B;
+  --accent-ink: #FFFFFF;
+  --select-chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8' fill='none' stroke='%234F5D6B' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M1 1.75 6 6.25 11 1.75'/%3E%3C/svg%3E");
+  --warn: #A2680F;
+  --warn-ink: #FFFFFF;
+  --danger: #C33A44;
+  --danger-ink: #FFFFFF;
+
+  /* Composed tokens in tokens-v1 that hold a literal colour and therefore do
+     not follow the primitives on their own. */
+  /* Accent hover: mixed towards white in dark (light accent, dark text),
+     towards black in light (dark accent, light text) so the contrast holds. */
+  --accent-strong: color-mix(in srgb, var(--accent) 88%, black);
+  /* Edge highlight: a sheen on the top edge of a surface. On a light surface the
+     sheen has to stay light too, otherwise it reads as a shadow. */
+  --edge-highlight: inset 0 1px 0 color-mix(in srgb, #FFFFFF 60%, transparent);
+  /* Scrims: black in dark, an ink-tinted scrim in light. */
+  --scrim-ink: rgb(22 33 43 / 0.42);
+  --scrim-solid-ink: rgb(22 33 43 / 0.6);
+  /* Glass filters darken the backdrop (brightness below 1) — a dark-mode look. */
+  --glass-regular-brightness: 1;
+  --glass-subtle-brightness: 1;
+  --glass-overlay-brightness: 1;
+  /* Floating nav dock sits over content and reads as a bright white slab at the
+     dark-mode opacity (78% white). On light surfaces it needs a cooler, darker
+     base and more transparency so the backdrop shows through and the dock stops
+     out-shining the page. */
+  --glass-regular-bg: color-mix(in srgb, #C6D2DF 64%, transparent);
+  --glass-regular-filter: blur(20px) saturate(1.4) brightness(var(--glass-regular-brightness));
+  /* Shadows: black in dark, ink-tinted and lighter in light. */
+  --shadow-1: 0 1px 2px color-mix(in srgb, var(--ink) 10%, transparent), 0 1px 1px color-mix(in srgb, var(--ink) 6%, transparent);
+  --shadow-2: 0 0.5rem 1.25rem color-mix(in srgb, var(--ink) 12%, transparent);
+  --shadow-3: 0 1rem 2rem color-mix(in srgb, var(--ink) 16%, transparent);
+  --shadow-4: 0 1.5rem 3rem color-mix(in srgb, var(--ink) 22%, transparent);
 }
 
 /* BEGIN tokens-v1 */
@@ -70,14 +123,19 @@
 
   /* Materials (usage rules: plan R10). */
   --glass-regular-bg: color-mix(in srgb, var(--panel-raised) 78%, transparent);
-  --glass-regular-filter: blur(20px) saturate(1.5) brightness(0.6);
+  --glass-regular-brightness: 0.6;
+  --glass-regular-filter: blur(20px) saturate(1.5) brightness(var(--glass-regular-brightness));
   --glass-subtle-bg: color-mix(in srgb, var(--panel-raised) 88%, transparent);
-  --glass-subtle-filter: blur(12px) saturate(1.3) brightness(0.8);
+  --glass-subtle-brightness: 0.8;
+  --glass-subtle-filter: blur(12px) saturate(1.3) brightness(var(--glass-subtle-brightness));
   --glass-overlay-bg: color-mix(in srgb, var(--panel-raised) 92%, transparent);
-  --glass-overlay-filter: blur(24px) saturate(1.4) brightness(0.85);
+  --glass-overlay-brightness: 0.85;
+  --glass-overlay-filter: blur(24px) saturate(1.4) brightness(var(--glass-overlay-brightness));
   --glass-solid-bg: var(--panel-raised);
-  --scrim-bg: rgb(0 0 0 / 0.55);
-  --scrim-solid-bg: rgb(0 0 0 / 0.72);
+  --scrim-ink: rgb(0 0 0 / 0.55);
+  --scrim-bg: var(--scrim-ink);
+  --scrim-solid-ink: rgb(0 0 0 / 0.72);
+  --scrim-solid-bg: var(--scrim-solid-ink);
   --scrim-filter: blur(6px);
 
   /* Elevation. */
@@ -137,6 +195,9 @@
   --ease-spring: linear(0, 0.044, 0.149, 0.284, 0.428, 0.565, 0.687, 0.789, 0.871, 0.933, 0.977, 1.007, 1.026, 1.035, 1.038, 1.037, 1.033, 1.028, 1.023, 1.018, 1.013, 1.009, 1.005, 1.003, 1.001, 1);
 
   /* Stacking order (Bootstrap defaults: dropdown 1000, sticky 1020, fixed 1030). */
+  /* Combo box menus live below the floating navigation dock: when both are on
+     screen the main menu always wins the overlap. */
+  --z-dropdown: 1030;
   --z-dock: 1040;
   --z-scrim: 1050;
   --z-modal: 1060;
