@@ -198,6 +198,10 @@ public class ProductsDataService(
     /// <inheritdoc />
     public async Task<ProductDetailsViewModel?> GetDetailsAsync(int id, string type)
     {
+        type = NormalizeDetailsType(type);
+        if (type is not ("phone" or "appleid" or "glass" or "tablet" or "smartwatch" or "laptop" or "cable" or "charger" or "powerbank" or "portablestorage" or "case"))
+            return null;
+
         ProductDetailsViewModel? details;
 
         if (string.Equals(type, "glass", StringComparison.OrdinalIgnoreCase))
@@ -224,28 +228,28 @@ public class ProductsDataService(
         }
         else if (string.Equals(type, "appleid", StringComparison.OrdinalIgnoreCase))
         {
-            details = await appleIds.SelectAsync(
-                id,
-                appleId => new ProductDetailsViewModel(
+            details = await products.SelectAsync(
+                product => product.Id == id && product.AppleIdProfile != null,
+                product => new ProductDetailsViewModel(
                     "Apple ID",
-                    appleId.ProductId,
-                    appleId.ProductNavigation.ModelNavigation.ManufacturerNavigation.Name,
-                    appleId.ProductNavigation.ModelNavigation.Name,
-                    "Email: " + appleId.Email,
+                    product.Id,
+                    product.ModelNavigation.ManufacturerNavigation.Name,
+                    product.ModelNavigation.Name,
+                    "Email: " + product.AppleIdProfile!.Email,
                     null,
-                    appleId.ProductNavigation.Transactions
+                    product.Transactions
                         .Where(t => t.Direction == TransactionDirection.Sell)
                         .OrderByDescending(t => t.Date)
                         .Select(t => t.CustomerNavigation.PersonNavigation)
                         .Select(person => person.FirstName + " " + person.LastName)
                         .FirstOrDefault() ?? "Not sold",
-                    appleId.ProductNavigation.GuaranteeProfile == null
+                    product.GuaranteeProfile == null
                         ? "None"
-                        : appleId.ProductNavigation.GuaranteeProfile.Corporation + " until " + appleId.ProductNavigation.GuaranteeProfile.ExpirationDate,
-                    appleId.ProductNavigation.SecondHandProfile != null)
+                        : product.GuaranteeProfile.Corporation + " until " + product.GuaranteeProfile.ExpirationDate,
+                    product.SecondHandProfile != null)
                 {
-                    AppleIdPassword = appleId.Password,
-                    Notes = appleId.Notes,
+                    AppleIdPassword = product.AppleIdProfile!.Password,
+                    Notes = product.AppleIdProfile!.Notes,
                 });
         }
         else if (string.Equals(type, "tablet", StringComparison.OrdinalIgnoreCase))
@@ -280,7 +284,7 @@ public class ProductsDataService(
         {
             details = await products.SelectAsync(id, product => new ProductDetailsViewModel("Case", product.Id, product.ModelNavigation.ManufacturerNavigation.Name, product.ModelNavigation.Name, "Barcode: " + product.Barcode, null, product.Transactions.Where(t => t.Direction == TransactionDirection.Sell).OrderByDescending(t => t.Date).Select(t => t.CustomerNavigation.PersonNavigation).Select(person => person.FirstName + " " + person.LastName).FirstOrDefault() ?? "Not sold", product.GuaranteeProfile == null ? "None" : product.GuaranteeProfile.Corporation + " until " + product.GuaranteeProfile.ExpirationDate.ToString("d"), product.SecondHandProfile != null) { CompatibleModels = product.CaseProfile!.ModelFits.Select(fit => fit.ModelNavigation.Name).ToList(), Notes = product.CaseProfile.Notes });
         }
-        else
+        else if (string.Equals(type, "phone", StringComparison.Ordinal))
         {
             details = await phones.SelectAsync(
                 id,
@@ -315,12 +319,19 @@ public class ProductsDataService(
                         : (phone.SupportsEsim.Value ? "Yes" : "No"),
                 });
         }
+        else
+        {
+            return null;
+        }
 
         if (details is null) return null;
 
         var rows = await GetProductTransactionsAsync(details.ProductId);
         return details with { Transactions = rows };
     }
+
+    private static string NormalizeDetailsType(string? type)
+        => string.Concat((type ?? string.Empty).Trim().Where(character => !char.IsWhiteSpace(character) && character != '-')).ToLowerInvariant();
 
     private async Task<IReadOnlyList<ProductTransactionViewModel>> GetProductTransactionsAsync(int productId)
         => (await transactions.SelectAllAsync(

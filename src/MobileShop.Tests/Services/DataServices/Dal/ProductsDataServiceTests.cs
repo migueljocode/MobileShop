@@ -741,18 +741,22 @@ public class ProductsDataServiceTests : RepoTestBase
     }
 
     [Fact]
-    public async Task GetDetailsAsync_for_apple_id_routes_on_appleid_type()
+    public async Task GetDetailsAsync_for_apple_id_uses_base_product_id_when_profile_ids_collide()
     {
         SeedCatalog(out _, out var appleIdModel);
+        var unrelatedProduct = TestDataHelpers.CreateProduct(Context);
         var product = TestDataHelpers.CreateProduct(Context);
         product.ModelId = appleIdModel.Id;
         product = Context.Products.First(p => p.Id == product.Id);
         Context.Products.Update(product);
         var appleId = new AppleId { ProductId = product.Id, Email = "detail@example.com", Password = "secret", Notes = "Recovery info stored separately" };
-        Context.AppleIds.Add(appleId);
+        var conflictingAppleId = new AppleId { ProductId = unrelatedProduct.Id, Email = "wrong@example.com", Password = "wrong" };
+        Context.AppleIds.AddRange(appleId, conflictingAppleId);
         Context.SaveChanges();
 
-        var details = await _service.GetDetailsAsync(appleId.Id, "appleid");
+        Assert.Equal(product.Id, conflictingAppleId.Id);
+        Assert.NotEqual(product.Id, appleId.Id);
+        var details = await _service.GetDetailsAsync(product.Id, " Apple ID ");
 
         Assert.NotNull(details);
         Assert.Equal("Apple ID", details!.Type);
@@ -766,6 +770,22 @@ public class ProductsDataServiceTests : RepoTestBase
     {
         SeedCatalog(out _, out _);
         var details = await _service.GetDetailsAsync(999, "phone");
+        Assert.Null(details);
+    }
+
+    [Fact]
+    public async Task GetDetailsAsync_returns_null_for_unknown_type_instead_of_falling_back_to_phone()
+    {
+        SeedCatalog(out var phoneModel, out _);
+        var product = TestDataHelpers.CreateProduct(Context);
+        product.ModelId = phoneModel.Id;
+        product = Context.Products.First(p => p.Id == product.Id);
+        Context.Products.Update(product);
+        Context.Phones.Add(new Phone { ProductId = product.Id, IMEI1 = TestDataHelpers.GenerateImei(), OwnershipTransferred = false });
+        Context.SaveChanges();
+
+        var details = await _service.GetDetailsAsync(product.Id, "unsupported-type");
+
         Assert.Null(details);
     }
 
@@ -930,7 +950,7 @@ public class ProductsDataServiceTests : RepoTestBase
         Context.AppleIds.Add(appleId);
         Context.SaveChanges();
 
-        var details = await _service.GetDetailsAsync(appleId.Id, "appleid");
+        var details = await _service.GetDetailsAsync(product.Id, "appleid");
 
         Assert.NotNull(details);
         Assert.Equal("Apple ID", details!.Type);

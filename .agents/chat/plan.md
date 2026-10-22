@@ -34,7 +34,7 @@
 - Done when: Case/Glass GETs do not throw and valid current compatibility selections are available.
 - Risk: MEDIUM. Confidence: HIGH for the null-dereference diagnosis; MEDIUM for the smallest include change until the abstraction is inspected.
 
-## [ ] Step 2 — Correct Apple ID Details lookup and post-save navigation
+## ~~[x] Step 2 — Correct Apple ID Details lookup and post-save navigation
 - Files: inspect `ProductsDataService.cs`, `Edit.cshtml.cs`, `Details.cshtml.cs`, product list/details links and their projections; modify only required service/page/tests. Do not touch API files.
 - Symbols: `ProductsDataService.GetDetailsAsync`, type normalization/resolution helper, `EditModel.OnPostAsync`, `DetailsModel.OnGetAsync`, Details links/projections.
 - Current -> Desired: Apple ID saves redirect to a Details page that does not resolve the intended record. Trace the actual identifier contract before choosing the fix; do not assume whitespace normalization or an ID mismatch without verifying callers.
