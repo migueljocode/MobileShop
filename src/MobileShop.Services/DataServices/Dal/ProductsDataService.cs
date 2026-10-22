@@ -288,7 +288,7 @@ public class ProductsDataService(
         else if (string.Equals(type, "phone", StringComparison.Ordinal))
         {
             details = await phones.SelectAsync(
-                id,
+                phone => phone.ProductId == id,
                 phone => new ProductDetailsViewModel(
                     "Phone",
                     phone.ProductId,

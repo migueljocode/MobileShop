@@ -14,6 +14,8 @@
 
 @if (Model.Product is not null)
 {
+    <partial name="_ProductCreateSuccess" model="Model.SuccessMessage" />
+
     <div class="page-head">
         <div>
             <h1 class="page-head__title">@Model.Product.Manufacturer @Model.Product.Model</h1>

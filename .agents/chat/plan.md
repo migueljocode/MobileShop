@@ -5,7 +5,7 @@
 - MEDIUM risk, high confidence: Edit stores `TempData["SuccessMessage"]`, but Details does not render it. Reuse the existing success partial.
 - Keep the four LOW audit findings out of scope: edit-form formatting, per-manufacturer query count, Glass compatibility display, and paid-price transaction semantics.
 
-## [ ] Step 1 — Fix Phone details identity and render edit feedback
+## ~~[x] Step 1 — Fix Phone details identity and render edit feedback~~
 - Files: inspect: `src/MobileShop.Web/Pages/Products/Index.cshtml`, `src/MobileShop.Web/Pages/Products/Edit.cshtml.cs`, `src/MobileShop.Services/DataServices/Dal/ProductsDataService.cs`, `src/MobileShop.Web/Pages/Products/Details.cshtml.cs`, `src/MobileShop.Web/Pages/Products/Details.cshtml`, `src/MobileShop.Web/Pages/Shared/_ProductCreateSuccess.cshtml`, and `src/MobileShop.Tests/Services/DataServices/Dal/ProductsDataServiceTests.cs`; modify only `ProductsDataService.cs`, `Details.cshtml.cs`, `Details.cshtml`, and `ProductsDataServiceTests.cs`. Do not touch API files/stubs/config/endpoints, sample-data JSON, or unrelated findings.
 - Symbols: `ProductsDataService.GetDetailsAsync(int id, string type)`, `DetailsModel`, and Phone details tests in `ProductsDataServiceTests`.
 - Current -> Desired: Phone links and edit redirects send the base `Product.Id`, but the Phone details branch queries by `Phone.Id`. Edit sets `TempData["SuccessMessage"]`, but Details never renders it.

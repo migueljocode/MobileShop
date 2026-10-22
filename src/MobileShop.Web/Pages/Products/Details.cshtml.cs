@@ -6,6 +6,9 @@ public class DetailsModel(
     public ProductDetailsViewModel? Product { get; private set; }
     public IReadOnlyList<ProductTransactionViewModel> Transactions { get; private set; } = [];
 
+    [TempData]
+    public string? SuccessMessage { get; set; }
+
     public async Task<IActionResult> OnGetAsync(int id, string? type = null)
     {
         Product = await dataService.GetDetailsAsync(id, type ?? string.Empty);

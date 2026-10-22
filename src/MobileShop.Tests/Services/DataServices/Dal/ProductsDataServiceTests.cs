@@ -731,13 +731,52 @@ public class ProductsDataServiceTests : RepoTestBase
         Context.Phones.Add(phone);
         Context.SaveChanges();
 
-        var details = await _service.GetDetailsAsync(phone.Id, "phone");
+        var details = await _service.GetDetailsAsync(phone.ProductId, "phone");
 
         Assert.NotNull(details);
         Assert.Equal("Phone", details!.Type);
         Assert.Equal($"IMEI: {phone.IMEI1} / {phone.IMEI2}", details.Identifier);
         Assert.Equal("Not sold", details.OwnerLabel);
         Assert.Equal("None", details.GuaranteeLabel);
+    }
+
+    [Fact]
+    public async Task GetDetailsAsync_for_phone_uses_product_id_when_profile_ids_collide()
+    {
+        SeedCatalog(out var phoneModel, out _);
+        var targetProduct = TestDataHelpers.CreateProduct(Context);
+        var otherProduct = TestDataHelpers.CreateProduct(Context);
+
+        var trackedTarget = Context.Products.Single(product => product.Id == targetProduct.Id);
+        trackedTarget.ModelId = phoneModel.Id;
+        var trackedOther = Context.Products.Single(product => product.Id == otherProduct.Id);
+        trackedOther.ModelId = phoneModel.Id;
+        Context.SaveChanges();
+
+        // Add the unrelated phone first so its profile ID collides with the target product ID.
+        var conflictingPhone = new Phone
+        {
+            ProductId = otherProduct.Id,
+            IMEI1 = TestDataHelpers.GenerateImei(),
+            OwnershipTransferred = false
+        };
+        var targetPhone = new Phone
+        {
+            ProductId = targetProduct.Id,
+            IMEI1 = TestDataHelpers.GenerateImei(),
+            OwnershipTransferred = false
+        };
+        Context.Phones.AddRange(conflictingPhone, targetPhone);
+        Context.SaveChanges();
+
+        Assert.Equal(targetProduct.Id, conflictingPhone.Id);
+        Assert.NotEqual(targetProduct.Id, targetPhone.Id);
+
+        var details = await _service.GetDetailsAsync(targetProduct.Id, "phone");
+
+        Assert.NotNull(details);
+        Assert.Equal(targetProduct.Id, details!.ProductId);
+        Assert.Equal($"IMEI: {targetPhone.IMEI1}", details.Identifier);
     }
 
     [Fact]
@@ -820,7 +859,7 @@ public class ProductsDataServiceTests : RepoTestBase
             new Transaction { ProductId = product.Id, SellerId = seller.Id, CustomerId = customer.Id, FinishedPrice = 150, Date = new DateTime(2026, 2, 1), Direction = TransactionDirection.Sell });
         Context.SaveChanges();
 
-        var details = await _service.GetDetailsAsync(phone.Id, "phone");
+        var details = await _service.GetDetailsAsync(phone.ProductId, "phone");
 
         Assert.NotNull(details);
         Assert.Equal(2, details!.Transactions.Count);
@@ -888,7 +927,7 @@ public class ProductsDataServiceTests : RepoTestBase
     {
         var phone = SeedPhoneWithPartNumber(out var partNumber, supportsDualSim: true, supportsEsim: false);
 
-        var details = await _service.GetDetailsAsync(phone.Id, "phone");
+        var details = await _service.GetDetailsAsync(phone.ProductId, "phone");
 
         Assert.NotNull(details);
         Assert.Equal("CH/ZAA", details!.PartNumberLabel);
@@ -902,7 +941,7 @@ public class ProductsDataServiceTests : RepoTestBase
     {
         var phone = SeedPhoneWithPartNumber(out _, supportsDualSim: true, supportsEsim: true);
 
-        var details = await _service.GetDetailsAsync(phone.Id, "phone");
+        var details = await _service.GetDetailsAsync(phone.ProductId, "phone");
 
         Assert.NotNull(details);
         Assert.Equal("Yes", details!.DualSimLabel);
@@ -914,7 +953,7 @@ public class ProductsDataServiceTests : RepoTestBase
     {
         var phone = SeedPhoneWithoutPartNumber();
 
-        var details = await _service.GetDetailsAsync(phone.Id, "phone");
+        var details = await _service.GetDetailsAsync(phone.ProductId, "phone");
 
         Assert.NotNull(details);
         Assert.Null(Context.Phones.Single(p => p.Id == phone.Id).PartNumberId);
@@ -930,7 +969,7 @@ public class ProductsDataServiceTests : RepoTestBase
         // used for a phone that has no part number at all.
         var phone = SeedPhoneWithPartNumber(out _, supportsDualSim: false, supportsEsim: false);
 
-        var details = await _service.GetDetailsAsync(phone.Id, "phone");
+        var details = await _service.GetDetailsAsync(phone.ProductId, "phone");
 
         Assert.NotNull(details);
         Assert.Equal("CH/ZAA", details!.PartNumberLabel);
