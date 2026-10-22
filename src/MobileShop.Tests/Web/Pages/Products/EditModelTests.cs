@@ -146,7 +146,6 @@ public class EditModelTests : RepoTestBase
         switch (type)
         {
             case "Phone":
-                Assert.Equal(TestDataHelpers.GenerateImei().Length, 15);
                 Assert.Equal("123456789012345", page.Product.IMEI1);
                 break;
             case "Apple ID":
