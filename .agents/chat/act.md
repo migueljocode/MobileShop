@@ -1,6 +1,6 @@
-- Commit: [ac0a8b42bec1a28e41a90841297ddf72edc21558](https://github.com/migueljocode/MobileShop/commit/ac0a8b42bec1a28e41a90841297ddf72edc21558) — `test(products): ignore retired compatibility fits`
-- Verification: Action #672 — Success; 467 passed, 0 failed, 0 skipped.
-- Limitations: None reported.
-- Friction noted: The sandbox had no accessible local clone; repository state files were updated through the GitHub connector.
-- Problems: None reported.
+- Commit: [1bf800b4afb763685e00675d99925d763cd2cfc3](https://github.com/migueljocode/MobileShop/commit/1bf800b4afb763685e00675d99925d763cd2cfc3) — `fix(products): resolve phone details by product ID`
+- Verification: Action #673 — Success (build/test and both log utility jobs).
+- Limitations: LOW audit findings remain out of scope as planned.
+- Friction noted: The specialized workflow-run helper filters to pull-request runs; the repository's Actions REST endpoint was used to verify the push run.
+- Problems: None.
 - Status: COMPLETE
