@@ -1,8 +1,5 @@
 # Plan — Stage 17 — Repair product edit loading, binding, and update integrity
 
-## Proposed stages
-- [ ] Stage 17 — Repair product edit loading, binding, and update integrity
-
 ## Reviewer Briefing
 - **HIGH risk:** `ProductsDataService.UpdateProductAsync` mutates shared fields and clears Guarantee/SecondHand profiles before type-specific handling. Validate identity and all submitted data before mutating; preserve unrelated profile data.
 - **HIGH risk:** Details must use one canonical product identifier. Never use an ambiguous `Id == id || ProductId == id` predicate; numeric IDs can overlap.
@@ -21,7 +18,7 @@
 - Keep changes minimal and follow existing service, repository, Razor Pages, and test patterns.
 - The query-string `type` is untrusted. Validate it against the loaded product's actual type and reject mismatches before mutation.
 
-## [ ] Step 1 — Fix Case/Glass navigation loading and null-safe mapping
+## ~~[x] Step 1 — Fix Case/Glass navigation loading and null-safe mapping~~
 - Files: inspect `src/MobileShop.Dal/Repo/IBaseRepo.cs`, `src/MobileShop.Dal/Repo/BaseRepo.cs`, `src/MobileShop.Services/DataServices/Dal/ProductsDataService.cs`, `src/MobileShop.Web/Pages/Products/Edit.cshtml.cs`, and relevant tests; modify only the minimum required files/tests. Do not touch API files or sample data.
 - Symbols: `ProductsDataService.EditIncludes`, `GetProductForEditAsync`, `EditModel.OnGetAsync`, `EditModel.MapToEditModel`, `IBaseRepo<T>.FindWithIncludesAsync`, `BaseRepo<T>.FindWithIncludesAsync`.
 - Current -> Desired: Case/Glass mapping dereferences `f.ModelNavigation.Name`; missing nested navigation can crash GET. Load the required nested model navigation and map defensively.
@@ -136,7 +133,7 @@
 - Other product types have regression coverage for shared mapping/update behavior.
 - No unrelated refactors, API changes, seed-data changes or new dependencies.
 - CI build/test results are reported with visible run numbers; no unsupported claim of success.
-- This file is a plan only; do not implement production changes until Reviewer approval.
+- Active-stage plan. Actor implements one approved step per commit; Reviewer Job B verifies each completed step.
 
 ## Handoff
-- Next role: Reviewer (Job A) to review this plan only. Do not begin implementation until the plan is approved.
+- Next role: Reviewer (Job B) to verify the Actor's completed Step 1 against the implementation and CI evidence.
