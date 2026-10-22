@@ -176,6 +176,37 @@ public class QuestPdfGeneratorTests
         File.WriteAllBytes(
             Path.Combine(outputDirectory, "selected-mixed-factor.pdf"),
             _generator.GenerateTransactionFactor(selected));
+
+        File.WriteAllBytes(
+            Path.Combine(outputDirectory, "spaced-phone-factor.pdf"),
+            CreateSpacedPhoneGenerator().GenerateTransactionFactor(single));
+    }
+
+    [Fact]
+    public void GenerateTransactionFactor_supports_spaced_shop_phone()
+    {
+        var generator = CreateSpacedPhoneGenerator();
+        var model = Factor(
+            new TransactionFactorRowViewModel(1, DateTime.UtcNow, TransactionDirection.Sell, "iPhone 13", 45_000_000, "Customer", "Sara"));
+
+        AssertValidPdf(generator.GenerateTransactionFactor(model));
+    }
+
+    private static QuestPdfGenerator CreateSpacedPhoneGenerator()
+    {
+        var settings = new PdfSettings
+        {
+            ShopName = "Test Shop",
+            ShopAddress = "Test Address",
+            ShopPhone = "0911 500 9109",
+            PageSize = "A4",
+            MarginTop = 25,
+            MarginRight = 25,
+            MarginBottom = 25,
+            MarginLeft = 25
+        };
+
+        return new QuestPdfGenerator(Mock.Of<IOptions<PdfSettings>>(o => o.Value == settings));
     }
 
     [Fact]

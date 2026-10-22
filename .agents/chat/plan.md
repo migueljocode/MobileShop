@@ -24,7 +24,7 @@
 - Risk: LOW
 - Confidence: HIGH (length), MEDIUM (connectors, see Briefing)
 
-## [ ] Step 2 — Keep spaced phone numbers in order on RTL invoices
+## ~~[x] Step 2 — Keep spaced phone numbers in order on RTL invoices~~
 - Files: inspect: `src/MobileShop.Services/PDF/Configuration/QuestPdfGenerator.cs`, `src/MobileShop.Models/Extensions/MoneyExtensions.cs`, `src/MobileShop.Tests/Services/PDF/QuestPdfGeneratorTests.cs`; create: `src/MobileShop.Models/Extensions/PhoneNumberExtensions.cs`, `src/MobileShop.Tests/Models/Extensions/PhoneNumberExtensionsTests.cs` (next to `MoneyExtensionsTests.cs`); modify: `QuestPdfGenerator.cs`, `QuestPdfGeneratorTests.cs`; do not touch: `ComposePagePersian`/`RenderFooterPersian`/`RenderPartyInfoPersian` and English-layout phone lines (not RTL), PDF settings, appsettings, API files.
 - Symbols: new `PhoneNumberExtensions.ToBidiSafePhone(this string value)`; call site in `QuestPdfGenerator.RenderFactorFooter`: `text.Span(_settings.ShopPhone)` (inside `ContentFromRightToLeft()`, ~line 371). The only RTL phone site; the factor renders no buyer/seller phone.
 - Current -> Desired: spaces inside a phone are neutral characters, so the bidi algorithm reverses the digit groups in RTL text. Desired: the phone prints exactly as typed (`0911 500 9109`, Persian or Latin digits), left-to-right.
