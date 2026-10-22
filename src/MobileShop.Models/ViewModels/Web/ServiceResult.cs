@@ -6,3 +6,6 @@ namespace MobileShop.Models.ViewModels.Web;
 /// <param name="ErrorField">The model-field key the page should attach the error to, if any.</param>
 /// <param name="EntityId">The identifier of the created entity, when the operation succeeds.</param>
 public sealed record ServiceResult(bool Succeeded, string? Message, string? ErrorField = null, int? EntityId = null);
+
+/// <summary>Whether persisted data changed; null when an operation does not report change state.</summary>
+public bool? Changed { get; init; }

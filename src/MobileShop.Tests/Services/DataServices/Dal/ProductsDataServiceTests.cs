@@ -2322,6 +2322,7 @@ public class ProductsDataServiceTests : RepoTestBase
         var result = await _service.UpdateProductAsync(input);
 
         Assert.True(result.Succeeded);
+        Assert.True(result.Changed);
         var updated = await Context.Products
             .AsNoTracking()
             .Include(p => p.PhoneProfile)
@@ -2411,6 +2412,100 @@ public class ProductsDataServiceTests : RepoTestBase
     }
 
     [Fact]
+    public async Task UpdateProductAsync_charger_noop_preserves_unexposed_profiles_and_price()
+    {
+        var product = TestDataHelpers.CreateProduct(Context);
+        Context.Chargers.Add(new Charger { ProductId = product.Id, Wattage = 20, Pd = true, PortCount = 2, Notes = "charger note" });
+        Context.SecondHands.Add(new SecondHand { ProductId = product.Id, TestPeriodDays = 60, UsedDurationDays = 120, Notes = "used profile" });
+        Context.Guarantees.Add(new Guarantee { ProductId = product.Id, StartDate = new DateTime(2025, 1, 1), ExpirationDate = new DateTime(2027, 1, 1), Corporation = "Warranty Co", Notes = "warranty profile" });
+        await Context.SaveChangesAsync();
+
+        var result = await _service.UpdateProductAsync(new MobileShop.Models.ViewModels.Web.BindModels.EditProductInputModel
+        {
+            ProductId = product.Id,
+            Type = "Charger",
+            Identifier = product.Barcode,
+            Price = product.Price,
+            Wattage = 20,
+            Pd = true,
+            PortCount = 2,
+            Notes = "charger note",
+        });
+
+        Assert.True(result.Succeeded);
+        Assert.False(result.Changed);
+        var updated = await Context.Products.AsNoTracking()
+            .Include(item => item.ChargerProfile)
+            .Include(item => item.SecondHandProfile)
+            .Include(item => item.GuaranteeProfile)
+            .SingleAsync(item => item.Id == product.Id);
+        Assert.Equal(product.Price, updated.Price);
+        Assert.Equal(product.Barcode, updated.Barcode);
+        Assert.Equal(20, updated.ChargerProfile!.Wattage);
+        Assert.Equal(60, updated.SecondHandProfile!.TestPeriodDays);
+        Assert.Equal(120, updated.SecondHandProfile.UsedDurationDays);
+        Assert.Equal("used profile", updated.SecondHandProfile.Notes);
+        Assert.Equal("Warranty Co", updated.GuaranteeProfile!.Corporation);
+        Assert.Equal("warranty profile", updated.GuaranteeProfile.Notes);
+    }
+
+    [Fact]
+    public async Task UpdateProductAsync_rejects_forged_type_before_mutating_product()
+    {
+        var product = TestDataHelpers.CreateProduct(Context);
+        Context.Chargers.Add(new Charger { ProductId = product.Id, Wattage = 20, Pd = true, PortCount = 2 });
+        await Context.SaveChangesAsync();
+
+        var result = await _service.UpdateProductAsync(new MobileShop.Models.ViewModels.Web.BindModels.EditProductInputModel
+        {
+            ProductId = product.Id,
+            Type = "Phone",
+            Identifier = "FORGED-CHANGE",
+            Price = product.Price + 500,
+            IMEI1 = "123456789012345",
+        });
+
+        Assert.False(result.Succeeded);
+        Assert.Equal("Type", result.ErrorField);
+        var unchanged = await Context.Products.AsNoTracking().SingleAsync(item => item.Id == product.Id);
+        Assert.Equal(product.Barcode, unchanged.Barcode);
+        Assert.Equal(product.Price, unchanged.Price);
+    }
+
+    [Fact]
+    public async Task UpdateProductAsync_charger_real_change_preserves_unexposed_profiles()
+    {
+        var product = TestDataHelpers.CreateProduct(Context);
+        Context.Chargers.Add(new Charger { ProductId = product.Id, Wattage = 20, Pd = true, PortCount = 2, Notes = "charger note" });
+        Context.SecondHands.Add(new SecondHand { ProductId = product.Id, TestPeriodDays = 60, UsedDurationDays = 120, Notes = "used profile" });
+        Context.Guarantees.Add(new Guarantee { ProductId = product.Id, StartDate = new DateTime(2025, 1, 1), ExpirationDate = new DateTime(2027, 1, 1), Corporation = "Warranty Co", Notes = "warranty profile" });
+        await Context.SaveChangesAsync();
+
+        var result = await _service.UpdateProductAsync(new MobileShop.Models.ViewModels.Web.BindModels.EditProductInputModel
+        {
+            ProductId = product.Id,
+            Type = "Charger",
+            Identifier = product.Barcode,
+            Price = product.Price,
+            Wattage = 30,
+            Pd = true,
+            PortCount = 2,
+            Notes = "charger note",
+        });
+
+        Assert.True(result.Succeeded);
+        Assert.True(result.Changed);
+        var updated = await Context.Products.AsNoTracking()
+            .Include(item => item.ChargerProfile)
+            .Include(item => item.SecondHandProfile)
+            .Include(item => item.GuaranteeProfile)
+            .SingleAsync(item => item.Id == product.Id);
+        Assert.Equal(30, updated.ChargerProfile!.Wattage);
+        Assert.Equal(60, updated.SecondHandProfile!.TestPeriodDays);
+        Assert.Equal("Warranty Co", updated.GuaranteeProfile!.Corporation);
+    }
+
+    [Fact]
     public async Task UpdateProductAsync_succeeds_when_nothing_changed()
     {
         SeedCatalog(out var phoneModel, out _);
@@ -2440,6 +2535,7 @@ public class ProductsDataServiceTests : RepoTestBase
         var result = await _service.UpdateProductAsync(input);
 
         Assert.True(result.Succeeded);
+        Assert.False(result.Changed);
         var updated = await Context.Products
             .AsNoTracking()
             .Include(p => p.PhoneProfile)

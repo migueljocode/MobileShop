@@ -35,6 +35,32 @@ public class EditModelTests : RepoTestBase
     }
 
     [Fact]
+    public async Task Get_edit_model_maps_paid_price_and_profit_from_purchase_transaction()
+    {
+        var product = TestDataHelpers.CreateProduct(Context);
+        product.Price = 7000;
+        await Context.SaveChangesAsync();
+        Context.Transactions.Add(new Transaction
+        {
+            ProductId = product.Id,
+            SellerId = 1,
+            CustomerId = 1,
+            FinishedPrice = 5000,
+            Date = new DateTime(2026, 1, 1),
+            Direction = TransactionDirection.Buy,
+        });
+        await Context.SaveChangesAsync();
+        var page = new EditModel(_service);
+
+        var result = await page.OnGetAsync(product.Id);
+
+        Assert.IsType<PageResult>(result);
+        Assert.Equal(5000, page.Product.Price);
+        Assert.Equal(2000, page.Product.ProfitAmount);
+        Assert.Equal(40m, page.Product.ProfitPercent);
+    }
+
+    [Fact]
     public async Task Cable_post_rejects_missing_connector_and_repopulates_connector_options()
     {
         var product = TestDataHelpers.CreateProduct(Context);

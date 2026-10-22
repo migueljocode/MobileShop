@@ -94,7 +94,7 @@ public class EditModel(
             return Page();
         }
 
-        TempData["SuccessMessage"] = "Product updated successfully.";
+        TempData["SuccessMessage"] = result.Changed == false ? "No changes were made." : "Product updated successfully.";
         return RedirectToPage("/Products/Details", new { id = Product.ProductId, type = Product.Type });
     }
 
@@ -123,6 +123,18 @@ public class EditModel(
 
     private static EditProductInputModel MapToEditModel(Product product, string type)
     {
+        var purchasePrice = product.Transactions
+            .Where(transaction => transaction.Direction == TransactionDirection.Buy)
+            .OrderByDescending(transaction => transaction.Date)
+            .Select(transaction => (long?)transaction.FinishedPrice)
+            .FirstOrDefault();
+        var hasUsablePurchasePrice = purchasePrice.HasValue && purchasePrice.Value <= product.Price;
+        var paidPrice = hasUsablePurchasePrice ? purchasePrice!.Value : product.Price;
+        long? profitAmount = hasUsablePurchasePrice ? product.Price - paidPrice : null;
+        decimal? profitPercent = profitAmount is > 0 && paidPrice > 0
+            ? Math.Round((decimal)profitAmount.Value / paidPrice * 100m, 2)
+            : null;
+
         return new EditProductInputModel
         {
             ProductId = product.Id,
@@ -132,9 +144,9 @@ public class EditModel(
             Identifier = product.Barcode,
             Color = product.ColorNavigation?.Name,
             ColorId = product.ColorId ?? 0,
-            Price = product.Price,
-            ProfitPercent = 0, // Not stored directly, would need calculation
-            ProfitAmount = 0,
+            Price = paidPrice,
+            ProfitPercent = profitPercent,
+            ProfitAmount = profitAmount,
             IsSecondHand = product.SecondHandProfile != null,
             GuaranteeCorporation = product.GuaranteeProfile?.Corporation,
             GuaranteeExpiry = product.GuaranteeProfile?.ExpirationDate,

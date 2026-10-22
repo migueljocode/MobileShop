@@ -68,7 +68,7 @@
 - Done when: valid connector choices round-trip and invalid values never persist.
 - Risk: HIGH. Confidence: MEDIUM pending inspection of current form conventions.
 
-## [ ] Step 4 — Make updates type-safe and no-op safe
+## ~~[x] Step 4 — Make updates type-safe and no-op safe~~
 - Files: inspect `ProductsDataService.UpdateProductAsync`, `EditProductInputModel`, edit PageModel/form and profile entities; modify only necessary service/page/model/tests. Do not touch API files or seed data.
 - Symbols: `ProductsDataService.UpdateProductAsync`, `EditModel.OnPostAsync`, `EditProductInputModel`, `SecondHandProfile`, `GuaranteeProfile`, pricing fields.
 - Current -> Desired: The service loads a tracked product, recomputes price, mutates shared fields and clears SecondHand/Guarantee profiles when form fields are absent before switching on type. A no-op or partial accessory edit can lose unrelated data.
