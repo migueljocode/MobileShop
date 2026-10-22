@@ -7,6 +7,7 @@ public class EditModel(
     public IReadOnlyList<DropdownOptionViewModel> Colors { get; private set; } = [];
     public IReadOnlyList<DropdownOptionViewModel> PartNumbers { get; private set; } = [];
     public IReadOnlyList<string> Corporations { get; private set; } = [];
+    public IReadOnlyList<DropdownOptionViewModel> CableConnectors { get; private set; } = [];
 
     public async Task<IActionResult> OnGetAsync(int id, string? type = null)
     {
@@ -62,6 +63,20 @@ public class EditModel(
                 ModelState.AddModelError("Product.IMEI2", "IMEI must be exactly 15 digits.");
         }
 
+        if (Product.ProductId > 0)
+        {
+            var existingProduct = await dataService.GetProductForEditAsync(Product.ProductId);
+            if (existingProduct is null) return NotFound();
+
+            if (existingProduct.CableProfile is not null)
+            {
+                if (Product.Connector1 is null || !Enum.IsDefined(Product.Connector1.Value))
+                    ModelState.AddModelError("Product.Connector1", "Select a valid connector for Connector 1.");
+                if (Product.Connector2 is null || !Enum.IsDefined(Product.Connector2.Value))
+                    ModelState.AddModelError("Product.Connector2", "Select a valid connector for Connector 2.");
+            }
+        }
+
         if (!ModelState.IsValid)
         {
             await PopulateDropdownsAsync(Product.Type);
@@ -85,6 +100,11 @@ public class EditModel(
 
     private async Task PopulateDropdownsAsync(string type)
     {
+        CableConnectors = Enum.GetValues<CableConnector>()
+            .Select(connector => new DropdownOptionViewModel((int)connector, connector.ToString()))
+            .ToList()
+            .AsReadOnly();
+
         if (type == "Phone" || type == "Tablet" || type == "Smart Watch" || type == "Laptop")
         {
             Colors = await dataService.GetColorsAsync();

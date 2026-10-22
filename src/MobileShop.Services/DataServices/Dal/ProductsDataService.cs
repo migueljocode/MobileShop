@@ -985,6 +985,14 @@ public class ProductsDataService(
         if (product is null)
             return new ServiceResult(false, "Product not found.", nameof(input.ProductId), null);
 
+        if (product.CableProfile is not null)
+        {
+            if (input.Connector1 is null || !Enum.IsDefined(input.Connector1.Value))
+                return new ServiceResult(false, "Select a valid connector for Connector 1.", nameof(input.Connector1), null);
+            if (input.Connector2 is null || !Enum.IsDefined(input.Connector2.Value))
+                return new ServiceResult(false, "Select a valid connector for Connector 2.", nameof(input.Connector2), null);
+        }
+
         if (!TryComputeFinishedPrice(input.Price, input.ProfitPercent, input.ProfitAmount, out var finishedPrice))
             return new ServiceResult(false, "The price is too large.", nameof(input.Price), null);
 

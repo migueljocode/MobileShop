@@ -52,7 +52,7 @@
 - Done when: Apple ID saves reach the correct Details page and ID resolution is unambiguous.
 - Risk: HIGH until contracts are traced; MEDIUM after canonical contract/collision test. Confidence: MEDIUM until all callers are inspected.
 
-## [ ] Step 3 — Populate and validate Cable connector fields
+## ~~[x] Step 3 — Populate and validate Cable connector fields~~
 - Files: inspect `_ProductEditForm.cshtml`, `Edit.cshtml.cs`, `ProductsDataService.cs`, `EditProductInputModel.cs`, Cable enum and create-form binding; modify only necessary files/tests. Do not touch API files.
 - Symbols: `EditModel.OnPostAsync`, `PopulateDropdownsAsync`, `EditProductInputModel.Connector1`, `Connector2`, `ProductsDataService.UpdateProductAsync`.
 - Current -> Desired: Cable selects contain only placeholders, and nullable connector values can be submitted. Both selects must show defined values and persisted selections; missing/undefined values must be rejected server-side.

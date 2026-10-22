@@ -2336,6 +2336,81 @@ public class ProductsDataServiceTests : RepoTestBase
     }
 
     [Fact]
+    public async Task UpdateProductAsync_rejects_missing_cable_connector_without_mutating_product()
+    {
+        var product = TestDataHelpers.CreateProduct(Context);
+        Context.Cables.Add(new Cable { ProductId = product.Id, Connector1 = CableConnector.UsbC, Connector2 = CableConnector.UsbA, Length = 1.5m });
+        Context.SaveChanges();
+
+        var result = await _service.UpdateProductAsync(new MobileShop.Models.ViewModels.Web.BindModels.EditProductInputModel
+        {
+            ProductId = product.Id,
+            Type = "Cable",
+            Identifier = "CHANGED-BARCODE",
+            Price = product.Price,
+            Connector1 = null,
+            Connector2 = CableConnector.UsbA,
+        });
+
+        Assert.False(result.Succeeded);
+        Assert.Equal("Connector1", result.ErrorField);
+        var unchanged = await Context.Products.AsNoTracking().SingleAsync(item => item.Id == product.Id);
+        var cable = await Context.Cables.AsNoTracking().SingleAsync(item => item.ProductId == product.Id);
+        Assert.Equal(product.Barcode, unchanged.Barcode);
+        Assert.Equal(product.Price, unchanged.Price);
+        Assert.Equal(CableConnector.UsbC, cable.Connector1);
+    }
+
+    [Fact]
+    public async Task UpdateProductAsync_rejects_undefined_cable_connector_without_mutating_product()
+    {
+        var product = TestDataHelpers.CreateProduct(Context);
+        Context.Cables.Add(new Cable { ProductId = product.Id, Connector1 = CableConnector.UsbC, Connector2 = CableConnector.UsbA, Length = 1.5m });
+        Context.SaveChanges();
+
+        var result = await _service.UpdateProductAsync(new MobileShop.Models.ViewModels.Web.BindModels.EditProductInputModel
+        {
+            ProductId = product.Id,
+            Type = "Cable",
+            Identifier = "CHANGED-BARCODE",
+            Price = product.Price,
+            Connector1 = (CableConnector)999,
+            Connector2 = CableConnector.UsbA,
+        });
+
+        Assert.False(result.Succeeded);
+        Assert.Equal("Connector1", result.ErrorField);
+        var unchanged = await Context.Products.AsNoTracking().SingleAsync(item => item.Id == product.Id);
+        Assert.Equal(product.Barcode, unchanged.Barcode);
+        Assert.Equal(product.Price, unchanged.Price);
+    }
+
+    [Fact]
+    public async Task UpdateProductAsync_persists_valid_cable_connectors()
+    {
+        var product = TestDataHelpers.CreateProduct(Context);
+        Context.Cables.Add(new Cable { ProductId = product.Id, Connector1 = CableConnector.UsbC, Connector2 = CableConnector.UsbA, Length = 1.5m });
+        Context.SaveChanges();
+
+        var result = await _service.UpdateProductAsync(new MobileShop.Models.ViewModels.Web.BindModels.EditProductInputModel
+        {
+            ProductId = product.Id,
+            Type = "Cable",
+            Identifier = product.Barcode,
+            Price = product.Price,
+            Connector1 = CableConnector.Lightning,
+            Connector2 = CableConnector.MicroUsb,
+            CableLength = 2m,
+        });
+
+        Assert.True(result.Succeeded);
+        var updated = await Context.Cables.AsNoTracking().SingleAsync(item => item.ProductId == product.Id);
+        Assert.Equal(CableConnector.Lightning, updated.Connector1);
+        Assert.Equal(CableConnector.MicroUsb, updated.Connector2);
+        Assert.Equal(2m, updated.Length);
+    }
+
+    [Fact]
     public async Task UpdateProductAsync_succeeds_when_nothing_changed()
     {
         SeedCatalog(out var phoneModel, out _);
