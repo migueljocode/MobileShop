@@ -336,114 +336,51 @@
 
 @if (Model.Product.Type == "Power Bank")
 {
-    <div class="form-section col-12">
-        <h2 class="form-section__title">Power Bank details</h2>
-        <div class="row g-3">
-            <div class="col-md-3">
-                <label asp-for="Product.CapacityMah" class="form-label">Capacity (mAh)</label>
-                <input asp-for="Product.CapacityMah" class="form-control" min="0" />
+    <div class="form-section col-12"><h2 class="form-section__title">Power Bank details</h2><div class="row g-3">
+        <div class="col-md-3"><label asp-for="Product.CapacityMah" class="form-label">Capacity (mAh)</label><input asp-for="Product.CapacityMah" class="form-control" min="0" /><span asp-validation-for="Product.CapacityMah" class="text-danger"></span></div>
+        <div class="col-md-3"><label asp-for="Product.MaxWattage" class="form-label">Max wattage (W)</label><input asp-for="Product.MaxWattage" class="form-control" min="0" /><span asp-validation-for="Product.MaxWattage" class="text-danger"></span></div>
+        <div class="col-md-3"><label asp-for="Product.Pd" class="form-label">PD</label><select asp-for="Product.Pd" class="form-select"><option value="">-- Select --</option><option value="true">Yes</option><option value="false">No</option></select></div>
+        <div class="col-12">
+            <div class="d-flex align-items-center justify-content-between mb-2"><label class="form-label mb-0">Ports</label><button type="button" class="btn btn-outline-secondary btn-sm" id="addPowerBankPort">Add port</button></div>
+            <div class="row g-3" id="powerBankPortRows">
+                @for (var index = 0; index < Math.Max(Model.Product.PortTypes.Count, 1); index++)
+                {
+                    <div class="col-md-6" data-port-row><label class="form-label" data-port-label for="Product_PortTypes_@index">Port @(index + 1) connector</label><div class="input-group">
+                        <select name="Product.PortTypes" id="Product_PortTypes_@index" class="form-select" data-port-select required><option value="">-- Select connector --</option>
+                            @foreach (var connector in Enum.GetValues<MobileShop.Models.Enums.CableConnector>()) { <option value="@((int)connector)" selected="@(index < Model.Product.PortTypes.Count && Model.Product.PortTypes[index] == (int)connector)">@connector</option> }
+                        </select><button type="button" class="btn btn-outline-secondary" data-remove-port>Remove</button>
+                    </div></div>
+                }
             </div>
-
-            <div class="col-md-3">
-                <label asp-for="Product.MaxWattage" class="form-label">Max wattage (W)</label>
-                <input asp-for="Product.MaxWattage" class="form-control" min="0" />
-            </div>
-
-            <div class="col-md-3">
-                <label asp-for="Product.Pd" class="form-label">PD</label>
-                <select asp-for="Product.Pd" class="form-select">
-                    <option value="">-- Select --</option>
-                    <option value="true">Yes</option>
-                    <option value="false">No</option>
-                </select>
-            </div>
-
-            <div class="col-md-3">
-                <label asp-for="Product.PortCount" class="form-label">Ports</label>
-                <input asp-for="Product.PortCount" class="form-control" min="1" />
-            </div>
-
-            <div class="col-md-6">
-                <label asp-for="Product.PortTypes" class="form-label">Port types</label>
-                <select asp-for="Product.PortTypes" class="form-select" multiple>
-                    <option value="">-- Select connectors --</option>
-                </select>
-            </div>
-
-            <div class="col-md-12">
-                <label asp-for="Product.Notes" class="form-label">Notes</label>
-                <textarea asp-for="Product.Notes" class="form-control" rows="3"></textarea>
-            </div>
+            <input asp-for="Product.PortCount" type="hidden" id="Product_PortCount" /><span asp-validation-for="Product.PortTypes" class="text-danger"></span>
         </div>
-    </div>
+        <div class="col-md-12"><label asp-for="Product.Notes" class="form-label">Notes</label><textarea asp-for="Product.Notes" class="form-control" rows="3"></textarea></div>
+    </div></div>
+    <template id="powerBankPortTemplate"><div class="col-md-6" data-port-row><label class="form-label" data-port-label>Port connector</label><div class="input-group">
+        <select class="form-select" name="Product.PortTypes" data-port-select required><option value="">-- Select connector --</option>@foreach (var connector in Enum.GetValues<MobileShop.Models.Enums.CableConnector>()) { <option value="@((int)connector)">@connector</option> }</select>
+        <button type="button" class="btn btn-outline-secondary" data-remove-port>Remove</button>
+    </div></div></template>
 }
-
 @if (Model.Product.Type == "Portable Storage")
 {
-    <div class="form-section col-12">
-        <h2 class="form-section__title">Portable Storage details</h2>
-        <div class="row g-3">
-            <div class="col-md-6">
-                <label asp-for="Product.StorageKind" class="form-label">Storage kind</label>
-                <select asp-for="Product.StorageKind" class="form-select">
-                    <option value="">-- Select kind --</option>
-                </select>
-            </div>
-
-            <div class="col-md-6">
-                <label asp-for="Product.StorageCapacityLabel" class="form-label">Capacity</label>
-                <input asp-for="Product.StorageCapacityLabel" class="form-control" />
-            </div>
-
-            <div class="col-md-3">
-                <label asp-for="Product.Speed" class="form-label">Speed (MB/s)</label>
-                <input asp-for="Product.Speed" class="form-control" min="0" />
-            </div>
-
-            <div class="col-md-12">
-                <label asp-for="Product.Notes" class="form-label">Notes</label>
-                <textarea asp-for="Product.Notes" class="form-control" rows="3"></textarea>
-            </div>
-        </div>
-    </div>
+    <div class="form-section col-12"><h2 class="form-section__title">Portable Storage details</h2><div class="row g-3">
+        <div class="col-md-6"><label asp-for="Product.StorageKind" class="form-label">Storage kind</label><select asp-for="Product.StorageKind" asp-items="Html.GetEnumSelectList<MobileShop.Models.Enums.StorageKind>()" class="form-select"><option value="">-- Select kind --</option></select><span asp-validation-for="Product.StorageKind" class="text-danger"></span></div>
+        <div class="col-md-6"><label asp-for="Product.StorageCapacityLabel" class="form-label">Capacity</label><input asp-for="Product.StorageCapacityLabel" class="form-control" /></div>
+        <div class="col-md-3"><label asp-for="Product.Speed" class="form-label">Speed (MB/s)</label><input asp-for="Product.Speed" class="form-control" min="0" /><span asp-validation-for="Product.Speed" class="text-danger"></span></div>
+        <div class="col-md-12"><label asp-for="Product.Notes" class="form-label">Notes</label><textarea asp-for="Product.Notes" class="form-control" rows="3"></textarea></div>
+    </div></div>
 }
-
 @if (Model.Product.Type == "Case")
 {
-    <div class="form-section col-12">
-        <h2 class="form-section__title">Case details</h2>
-        <div class="row g-3">
-            <div class="col-md-12">
-                <label asp-for="Product.CompatibleModels" class="form-label">Compatible models</label>
-                <select asp-for="Product.CompatibleModels" class="form-select" multiple>
-                    <option value="">-- Select models --</option>
-                </select>
-            </div>
-
-            <div class="col-md-12">
-                <label asp-for="Product.Notes" class="form-label">Notes</label>
-                <textarea asp-for="Product.Notes" class="form-control" rows="3"></textarea>
-            </div>
-        </div>
-    </div>
+    <div class="form-section col-12"><h2 class="form-section__title">Case details</h2><div class="row g-3">
+        <div class="col-md-12"><label asp-for="Product.CompatibleModels" class="form-label">Compatible models</label><select asp-for="Product.CompatibleModels" asp-items="@(new SelectList(Model.CompatibleModelOptions, "Id", "Name"))" class="form-select" multiple></select><span asp-validation-for="Product.CompatibleModels" class="text-danger"></span></div>
+        <div class="col-md-12"><label asp-for="Product.Notes" class="form-label">Notes</label><textarea asp-for="Product.Notes" class="form-control" rows="3"></textarea></div>
+    </div></div>
 }
-
 @if (Model.Product.Type == "Glass")
 {
-    <div class="form-section col-12">
-        <h2 class="form-section__title">Glass details</h2>
-        <div class="row g-3">
-            <div class="col-md-12">
-                <label asp-for="Product.CompatibleModels" class="form-label">Compatible models</label>
-                <select asp-for="Product.CompatibleModels" class="form-select" multiple>
-                    <option value="">-- Select models --</option>
-                </select>
-            </div>
-
-            <div class="col-md-12">
-                <label asp-for="Product.Notes" class="form-label">Notes</label>
-                <textarea asp-for="Product.Notes" class="form-control" rows="3"></textarea>
-            </div>
-        </div>
-    </div>
+    <div class="form-section col-12"><h2 class="form-section__title">Glass details</h2><div class="row g-3">
+        <div class="col-md-12"><label asp-for="Product.CompatibleModels" class="form-label">Compatible models</label><select asp-for="Product.CompatibleModels" asp-items="@(new SelectList(Model.CompatibleModelOptions, "Id", "Name"))" class="form-select" multiple></select><span asp-validation-for="Product.CompatibleModels" class="text-danger"></span></div>
+        <div class="col-md-12"><label asp-for="Product.Notes" class="form-label">Notes</label><textarea asp-for="Product.Notes" class="form-control" rows="3"></textarea></div>
+    </div></div>
 }

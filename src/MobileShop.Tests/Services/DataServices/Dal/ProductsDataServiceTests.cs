@@ -2544,4 +2544,71 @@ public class ProductsDataServiceTests : RepoTestBase
         Assert.Equal(product.Price, updated.Price);
         Assert.Equal("345678901234567", updated.PhoneProfile!.IMEI1);
     }
+
+    [Fact]
+    public async Task UpdateProductAsync_power_bank_syncs_port_rows_and_count()
+    {
+        var product = TestDataHelpers.CreateProduct(Context);
+        Context.PowerBanks.Add(new PowerBank
+        {
+            ProductId = product.Id, CapacityMah = 10000, MaxWattage = 20, PortCount = 2,
+            Ports = [new PowerBankPort { PortNumber = 1, Connector = CableConnector.UsbC }, new PowerBankPort { PortNumber = 2, Connector = CableConnector.UsbA }]
+        });
+        await Context.SaveChangesAsync();
+        var result = await _service.UpdateProductAsync(new MobileShop.Models.ViewModels.Web.BindModels.EditProductInputModel
+        {
+            ProductId = product.Id, Type = "Power Bank", Identifier = product.Barcode, Price = product.Price,
+            CapacityMah = 12000, MaxWattage = 30, PortCount = 2,
+            PortTypes = [(int)CableConnector.Hdmi, (int)CableConnector.Lightning], Pd = true
+        });
+        Assert.True(result.Succeeded);
+        var updated = await Context.PowerBanks.AsNoTracking().Include(bank => bank.Ports).SingleAsync(bank => bank.ProductId == product.Id);
+        Assert.Equal(2, updated.PortCount);
+        Assert.Equal(new[] { CableConnector.Hdmi, CableConnector.Lightning }, updated.Ports.OrderBy(port => port.PortNumber).Select(port => port.Connector));
+        Assert.Equal(new[] { 1, 2 }, updated.Ports.OrderBy(port => port.PortNumber).Select(port => port.PortNumber));
+    }
+
+    [Fact]
+    public async Task UpdateProductAsync_rejects_power_bank_port_count_mismatch_before_mutation()
+    {
+        var product = TestDataHelpers.CreateProduct(Context);
+        Context.PowerBanks.Add(new PowerBank { ProductId = product.Id, CapacityMah = 10000, MaxWattage = 20, PortCount = 1, Ports = [new PowerBankPort { PortNumber = 1, Connector = CableConnector.UsbC }] });
+        await Context.SaveChangesAsync();
+        var result = await _service.UpdateProductAsync(new MobileShop.Models.ViewModels.Web.BindModels.EditProductInputModel
+        {
+            ProductId = product.Id, Type = "Power Bank", Identifier = "should-not-save", Price = product.Price + 100,
+            PortCount = 2, PortTypes = [(int)CableConnector.UsbA]
+        });
+        Assert.False(result.Succeeded);
+        var unchanged = await Context.Products.AsNoTracking().SingleAsync(item => item.Id == product.Id);
+        Assert.Equal(product.Barcode, unchanged.Barcode);
+        Assert.Equal(product.Price, unchanged.Price);
+    }
+
+    [Fact]
+    public async Task UpdateProductAsync_case_uses_phone_model_ids_and_rejects_ineligible_models()
+    {
+        SeedCatalog(out var phoneModel, out var appleIdModel);
+        var product = TestDataHelpers.CreateProduct(Context);
+        Context.Cases.Add(new Case { ProductId = product.Id });
+        await Context.SaveChangesAsync();
+        var result = await _service.UpdateProductAsync(new MobileShop.Models.ViewModels.Web.BindModels.EditProductInputModel
+        {
+            ProductId = product.Id, Type = "Case", Identifier = product.Barcode, Price = product.Price,
+            CompatibleModels = [phoneModel.Id]
+        });
+        Assert.True(result.Succeeded);
+        var caseProfile = await Context.Cases.AsNoTracking().Include(item => item.ModelFits).SingleAsync(item => item.ProductId == product.Id);
+        Assert.Contains(caseProfile.ModelFits, fit => fit.ModelId == phoneModel.Id);
+        var invalid = await _service.UpdateProductAsync(new MobileShop.Models.ViewModels.Web.BindModels.EditProductInputModel
+        {
+            ProductId = product.Id, Type = "Case", Identifier = product.Barcode, Price = product.Price,
+            CompatibleModels = [appleIdModel.Id]
+        });
+        Assert.False(invalid.Succeeded);
+        Assert.Equal("CompatibleModels", invalid.ErrorField);
+        var stillValid = await Context.Cases.AsNoTracking().Include(item => item.ModelFits).SingleAsync(item => item.ProductId == product.Id);
+        Assert.Contains(stillValid.ModelFits, fit => fit.ModelId == phoneModel.Id);
+    }
+
 }

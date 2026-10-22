@@ -8,6 +8,7 @@ public class EditModel(
     public IReadOnlyList<DropdownOptionViewModel> PartNumbers { get; private set; } = [];
     public IReadOnlyList<string> Corporations { get; private set; } = [];
     public IReadOnlyList<DropdownOptionViewModel> CableConnectors { get; private set; } = [];
+    public IReadOnlyList<DropdownOptionViewModel> CompatibleModelOptions { get; private set; } = [];
 
     public async Task<IActionResult> OnGetAsync(int id, string? type = null)
     {
@@ -119,6 +120,9 @@ public class EditModel(
         {
             Corporations = await dataService.GetGuaranteeCorporationsAsync();
         }
+
+        if (type is "Case" or "Glass")
+            CompatibleModelOptions = await dataService.GetCompatibleModelsAsync();
     }
 
     private static EditProductInputModel MapToEditModel(Product product, string type)
@@ -176,19 +180,15 @@ public class EditModel(
             // Power Bank-specific
             CapacityMah = product.PowerBankProfile?.CapacityMah,
             MaxWattage = product.PowerBankProfile?.MaxWattage,
-            PortTypes = product.PowerBankProfile?.Ports?.Select(p => p.Connector.ToString()).ToList() ?? [],
+            PortTypes = product.PowerBankProfile?.Ports?.OrderBy(p => p.PortNumber).Select(p => (int)p.Connector).ToList() ?? [],
             // Portable Storage-specific
             StorageKind = product.PortableStorageProfile?.Kind,
             StorageCapacityId = product.PortableStorageProfile?.StorageCapacityId,
             StorageCapacityLabel = product.PortableStorageProfile?.StorageCapacityNavigation?.Gb + " GB",
             Speed = product.PortableStorageProfile?.Speed,
             // Case/Glass-specific
-            CompatibleModels = product.CaseProfile?.ModelFits?.Where(f => f.ModelNavigation is not null)
-                                   .Select(f => f.ModelNavigation.Name)
-                                   .ToList() ??
-                               product.GlassProfile?.ModelFits?.Where(f => f.ModelNavigation is not null)
-                                   .Select(f => f.ModelNavigation.Name)
-                                   .ToList() ?? [],
+            CompatibleModels = product.CaseProfile?.ModelFits?.Select(f => f.ModelId).ToList() ??
+                               product.GlassProfile?.ModelFits?.Select(f => f.ModelId).ToList() ?? [],
             TestPeriodDays = product.SecondHandProfile?.TestPeriodDays,
             UsedDurationDays = product.SecondHandProfile?.UsedDurationDays,
             SecondHandNotes = product.SecondHandProfile?.Notes

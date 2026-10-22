@@ -88,7 +88,7 @@
 - Done when: no-op submissions do not mutate fields/pricing/profiles, and unrelated profile data survives edits.
 - Risk: HIGH. Confidence: MEDIUM; inspect pricing contract and form fields before implementation.
 
-## [ ] Step 5 — Repair Power Bank port builder and accessory dropdown binding
+## ~~[x] Step 5 — Repair Power Bank port builder and accessory dropdown binding~~
 - Files: inspect `_ProductEditForm.cshtml`, `Edit.cshtml.cs`, `Edit.cshtml`, `ProductsDataService.cs`, `EditProductInputModel.cs`, `PowerBank`/`PowerBankPort` entities and create-form JavaScript; modify only required files/tests; optional new `wwwroot/js/product-edit-ports.js`. Do not touch API files.
 - Symbols: `EditModel.PopulateDropdownsAsync`, `EditProductInputModel.PortTypes`, `EditProductInputModel.CompatibleModels`, `PowerBankProfile.Ports`, `PowerBankPort.PortNumber`, `CableConnector`, `StorageKind`.
 - Current -> Desired: Power Bank has no usable port options/Add control; connector string/numeric representations may not match. Portable Storage `StorageKind` and Case/Glass compatibility options are unpopulated.

@@ -87,7 +87,7 @@ public sealed class EditProductInputModel
     // Power Bank-specific
     public int? CapacityMah { get; set; }
     public int? MaxWattage { get; set; }
-    public List<string> PortTypes { get; set; } = [];
+    public List<int> PortTypes { get; set; } = [];
 
     // Portable Storage-specific
     public StorageKind? StorageKind { get; set; }
@@ -96,5 +96,5 @@ public sealed class EditProductInputModel
     public int? Speed { get; set; }
 
     // Case/Glass-specific
-    public List<string> CompatibleModels { get; set; } = [];
+    public List<int> CompatibleModels { get; set; } = [];
 }

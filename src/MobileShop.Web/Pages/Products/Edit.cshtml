@@ -103,4 +103,33 @@
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
     <script src="~/js/create-product-pricing.js" asp-append-version="true"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const rows = document.getElementById('powerBankPortRows');
+            const count = document.getElementById('Product_PortCount');
+            const add = document.getElementById('addPowerBankPort');
+            const template = document.getElementById('powerBankPortTemplate');
+            if (!rows || !count || !add || !template) return;
+            function syncRows() {
+                const portRows = Array.from(rows.querySelectorAll('[data-port-row]'));
+                count.value = String(portRows.length);
+                portRows.forEach((row, index) => {
+                    const label = row.querySelector('[data-port-label]');
+                    const select = row.querySelector('[data-port-select]');
+                    label.textContent = 'Port ' + (index + 1) + ' connector';
+                    label.htmlFor = 'Product_PortTypes_' + index;
+                    select.id = label.htmlFor;
+                    select.name = 'Product.PortTypes';
+                    row.querySelector('[data-remove-port]').disabled = portRows.length <= 1;
+                });
+            }
+            add.addEventListener('click', function () { rows.appendChild(template.content.firstElementChild.cloneNode(true)); syncRows(); });
+            rows.addEventListener('click', function (event) {
+                const remove = event.target.closest('[data-remove-port]');
+                if (!remove || rows.querySelectorAll('[data-port-row]').length <= 1) return;
+                remove.closest('[data-port-row]').remove(); syncRows();
+            });
+            syncRows();
+        });
+    </script>
 }

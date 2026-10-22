@@ -353,6 +353,13 @@ public class ProductsDataService(
             .AsReadOnly();
 
     /// <inheritdoc />
+    public async Task<IReadOnlyList<DropdownOptionViewModel>> GetCompatibleModelsAsync()
+        => (await models.FindAllAsync(model => model.CategoryNavigation.Name == PhoneCategoryName))
+            .OrderBy(model => model.Name)
+            .Select(model => new DropdownOptionViewModel(model.Id, model.Name))
+            .ToList()
+            .AsReadOnly();
+
     public async Task<IReadOnlyList<DropdownOptionViewModel>> GetColorsAsync()
         => (await colors.FindAllAsync()).Select(c => new DropdownOptionViewModel(c.Id, c.Name)).ToList().AsReadOnly();
 
@@ -1057,13 +1064,14 @@ public class ProductsDataService(
         List<CableConnector> parsedPortTypes = [];
         if (actualType == "Power Bank")
         {
-            if (input.CapacityMah is < 0 || input.MaxWattage is < 0 || input.PortCount is <= 0)
+            if (input.CapacityMah is < 0 || input.MaxWattage is < 0 || input.PortCount is null or <= 0)
                 return new ServiceResult(false, "Power Bank values must be non-negative and port count must be at least 1.", null, null);
-            if (input.PortTypes is null)
-                return new ServiceResult(false, "Power Bank connector list is required.", nameof(input.PortTypes), null);
+            if (input.PortTypes is null || input.PortTypes.Count == 0 || input.PortTypes.Count != input.PortCount)
+                return new ServiceResult(false, "Add at least one connector and make sure the port count matches the connector rows.", nameof(input.PortTypes), null);
             foreach (var portType in input.PortTypes)
             {
-                if (!Enum.TryParse<CableConnector>(portType, ignoreCase: false, out var connector) || !Enum.IsDefined(connector))
+                var connector = (CableConnector)portType;
+                if (!Enum.IsDefined(connector))
                     return new ServiceResult(false, "Select a valid connector for every port.", nameof(input.PortTypes), null);
                 parsedPortTypes.Add(connector);
             }
@@ -1081,19 +1089,18 @@ public class ProductsDataService(
         }
 
         List<Model>? selectedCompatibleModels = null;
-        if (actualType is "Case" or "Glass" && input.CompatibleModels is { Count: > 0 })
+        if (actualType is "Case" or "Glass")
         {
             selectedCompatibleModels = [];
-            foreach (var submittedName in input.CompatibleModels)
+            var selectedIds = new HashSet<int>();
+            foreach (var modelId in input.CompatibleModels ?? [])
             {
-                var name = submittedName?.Trim();
-                if (string.IsNullOrWhiteSpace(name))
-                    return new ServiceResult(false, "Select valid compatible models.", nameof(input.CompatibleModels), null);
-                var model = await models.FindAsync(item => item.Name == name);
+                if (modelId <= 0 || !selectedIds.Add(modelId))
+                    return new ServiceResult(false, "Compatible model IDs must be positive and distinct.", nameof(input.CompatibleModels), null);
+                var model = await models.FindAsync(item => item.Id == modelId && item.CategoryNavigation.Name == PhoneCategoryName);
                 if (model is null)
-                    return new ServiceResult(false, "One or more selected compatible models were not found.", nameof(input.CompatibleModels), null);
-                if (selectedCompatibleModels.All(existing => existing.Id != model.Id))
-                    selectedCompatibleModels.Add(model);
+                    return new ServiceResult(false, "Every compatible model must be an existing phone model.", nameof(input.CompatibleModels), null);
+                selectedCompatibleModels.Add(model);
             }
         }
 
@@ -1181,14 +1188,16 @@ public class ProductsDataService(
             case "Power Bank":
                 product.PowerBankProfile!.CapacityMah = input.CapacityMah ?? product.PowerBankProfile.CapacityMah;
                 product.PowerBankProfile.MaxWattage = input.MaxWattage ?? product.PowerBankProfile.MaxWattage;
-                product.PowerBankProfile.PortCount = input.PortCount ?? product.PowerBankProfile.PortCount;
+                product.PowerBankProfile.PortCount = parsedPortTypes.Count;
                 product.PowerBankProfile.Pd = input.Pd ?? product.PowerBankProfile.Pd;
-                if (parsedPortTypes.Count > 0)
-                    product.PowerBankProfile.Ports = parsedPortTypes.Select((connector, index) => new PowerBankPort
+                product.PowerBankProfile.Ports.Clear();
+                for (var index = 0; index < parsedPortTypes.Count; index++)
+                    product.PowerBankProfile.Ports.Add(new PowerBankPort
                     {
+                        PowerBankNavigation = product.PowerBankProfile,
                         PortNumber = index + 1,
-                        Connector = connector
-                    }).ToList();
+                        Connector = parsedPortTypes[index]
+                    });
                 product.PowerBankProfile.Notes = NormalizeNote(input.Notes);
                 break;
 

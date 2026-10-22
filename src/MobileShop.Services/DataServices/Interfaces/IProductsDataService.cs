@@ -30,6 +30,9 @@ public interface IProductsDataService
     /// <param name="manufacturerId">The manufacturer identifier.</param>
     Task<IReadOnlyList<DropdownOptionViewModel>> GetModelsAsync(int manufacturerId, string categoryName = "Phone");
 
+    /// <summary>Gets eligible phone-model options for accessory compatibility.</summary>
+    Task<IReadOnlyList<DropdownOptionViewModel>> GetCompatibleModelsAsync();
+
     /// <summary>Gets all color dropdown options.</summary>
     Task<IReadOnlyList<DropdownOptionViewModel>> GetColorsAsync();
 

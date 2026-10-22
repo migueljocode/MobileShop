@@ -88,4 +88,19 @@ public class EditModelTests : RepoTestBase
         var unchanged = await Context.Cables.AsNoTracking().SingleAsync(item => item.ProductId == product.Id);
         Assert.Equal(CableConnector.UsbC, unchanged.Connector1);
     }
+
+    [Fact]
+    public async Task Case_edit_populates_phone_model_options_and_uses_model_ids_for_selections()
+    {
+        var product = TestDataHelpers.CreateProduct(Context);
+        var phoneModel = await Context.Models.Include(model => model.CategoryNavigation).FirstAsync(model => model.CategoryNavigation.Name == "Phone");
+        Context.Cases.Add(new Case { ProductId = product.Id, ModelFits = [new CaseModelFit { ModelId = phoneModel.Id, ModelNavigation = phoneModel }] });
+        await Context.SaveChangesAsync();
+        var page = new EditModel(_service);
+        var result = await page.OnGetAsync(product.Id);
+        Assert.IsType<PageResult>(result);
+        Assert.Contains(page.CompatibleModelOptions, option => option.Id == phoneModel.Id);
+        Assert.Contains(phoneModel.Id, page.Product.CompatibleModels);
+    }
+
 }
