@@ -51,13 +51,15 @@ public sealed class QuestPdfGenerator(IOptions<PdfSettings> options) : IPdfGener
         page.MarginLeft(_settings.MarginLeft);
         page.DefaultTextStyle(x => x.FontFamily("Vazirmatn").FontSize(9.5f).FontColor("#25313C"));
 
-        page.Header().Element(c => c.ContentFromRightToLeft().Element(x => RenderFactorHeader(x, model)));
-        page.Content().Element(c => c.ContentFromRightToLeft().Element(x => RenderFactorContent(x, model)));
+        page.Header()
+            .Element(c => c.ContentFromRightToLeft().Element(x => RenderFactorHeader(x, model)));
+        page.Content()
+            .Element(c => c.ContentFromRightToLeft().Element(x => RenderFactorContent(x, model)));
         page.Footer().Element(c => c.ContentFromRightToLeft().Element(RenderFactorFooter));
     }
 
-    private void RenderFactorHeader(IContainer container, TransactionFactorViewModel model)
-        => container
+    private void RenderFactorHeader(IContainer container, TransactionFactorViewModel model) =>
+        container
             .PaddingBottom(12)
             .BorderBottom(1.5f)
             .BorderColor("#243B53")
@@ -65,63 +67,110 @@ public sealed class QuestPdfGenerator(IOptions<PdfSettings> options) : IPdfGener
             {
                 row.Spacing(16);
 
-                row.RelativeItem(1.15f).AlignMiddle().Column(column =>
-                {
-                    column.Spacing(4);
-
-                    column.Item().AlignRight().Text("فاکتور تراکنش‌ها").FontSize(20).SemiBold().FontColor("#102A43").FontFamily("Vazirmatn");
-                    column.Item().AlignRight().Text(text =>
+                row.RelativeItem(1.15f)
+                    .AlignMiddle()
+                    .Column(column =>
                     {
-                        text.Span("تاریخ صدور: ").SemiBold().FontFamily("Vazirmatn");
-                        text.Span(model.GeneratedAt.ToJalaliDateTimeString().ToPersianDigits()).FontFamily("Vazirmatn");
-                    });
-                    column.Item().AlignRight().Text(text =>
-                    {
-                        text.Span("تعداد اقلام: ").SemiBold().FontFamily("Vazirmatn");
-                        text.Span(model.Rows.Count.ToString().ToPersianDigits()).FontFamily("Vazirmatn");
-                    });
-                });
+                        column.Spacing(4);
 
-                row.RelativeItem().AlignMiddle().Column(column =>
-                {
-                    column.Spacing(3);
-                    column.Item().AlignLeft().Text(_settings.ShopName).FontSize(19).SemiBold().FontColor("#102A43").FontFamily("Vazirmatn");
-                    if (!string.IsNullOrWhiteSpace(_settings.ShopAddress))
-                        column.Item().AlignLeft().Text(_settings.ShopAddress).FontSize(8).FontColor("#627D98").FontFamily("Vazirmatn");
-                });
+                        column
+                            .Item()
+                            .AlignRight()
+                            .Text("فاکتور تراکنش‌ها")
+                            .FontSize(20)
+                            .SemiBold()
+                            .FontColor("#102A43")
+                            .FontFamily("Vazirmatn");
+                        column
+                            .Item()
+                            .AlignRight()
+                            .Text(text =>
+                            {
+                                text.Span("تاریخ صدور: ").SemiBold().FontFamily("Vazirmatn");
+                                text.Span(
+                                        model.GeneratedAt.ToJalaliDateTimeString().ToPersianDigits()
+                                    )
+                                    .FontFamily("Vazirmatn");
+                            });
+                        column
+                            .Item()
+                            .AlignRight()
+                            .Text(text =>
+                            {
+                                text.Span("تعداد اقلام: ").SemiBold().FontFamily("Vazirmatn");
+                                text.Span(model.Rows.Count.ToString().ToPersianDigits())
+                                    .FontFamily("Vazirmatn");
+                            });
+                    });
+
+                row.RelativeItem()
+                    .AlignMiddle()
+                    .Column(column =>
+                    {
+                        column.Spacing(3);
+                        column
+                            .Item()
+                            .AlignLeft()
+                            .Text(_settings.ShopName)
+                            .FontSize(19)
+                            .SemiBold()
+                            .FontColor("#102A43")
+                            .FontFamily("Vazirmatn");
+                        if (!string.IsNullOrWhiteSpace(_settings.ShopAddress))
+                            column
+                                .Item()
+                                .AlignLeft()
+                                .Text(_settings.ShopAddress)
+                                .FontSize(8)
+                                .FontColor("#627D98")
+                                .FontFamily("Vazirmatn");
+                    });
             });
 
-    private static void RenderFactorContent(IContainer container, TransactionFactorViewModel model)
-        => container.Column(column =>
+    private static void RenderFactorContent(
+        IContainer container,
+        TransactionFactorViewModel model
+    ) =>
+        container.Column(column =>
         {
             column.Spacing(12);
             column.Item().Element(c => RenderFactorParties(c, model));
             column.Item().Element(c => RenderFactorTable(c, model));
             column.Item().Element(c => RenderFactorSummary(c, model));
             column.Item().Element(RenderFactorSignatures);
+            column.Item().Element(RenderFactorTermsSection);
         });
 
-    private static void RenderFactorParties(IContainer container, TransactionFactorViewModel model)
-        => container.Row(row =>
+    private static void RenderFactorParties(
+        IContainer container,
+        TransactionFactorViewModel model
+    ) =>
+        container.Row(row =>
         {
-            row.RelativeItem().Element(c => FactorInfoCard(c, "خریدار / مشتری", FindParty(model, "Customer")));
+            row.RelativeItem()
+                .Element(c => FactorInfoCard(c, "خریدار / مشتری", FindParty(model, "Customer")));
             row.ConstantItem(10);
-            row.RelativeItem().Element(c => FactorInfoCard(c, "فروشنده", FindParty(model, "Seller")));
+            row.RelativeItem()
+                .Element(c => FactorInfoCard(c, "فروشنده", FindParty(model, "Seller")));
         });
 
-    private static string FindParty(TransactionFactorViewModel model, string role)
-        => string.Join("، ",
-            model.Rows
-                .Where(x => string.Equals(x.PersonRole, role, StringComparison.OrdinalIgnoreCase))
+    private static string FindParty(TransactionFactorViewModel model, string role) =>
+        string.Join(
+            "، ",
+            model
+                .Rows.Where(x =>
+                    string.Equals(x.PersonRole, role, StringComparison.OrdinalIgnoreCase)
+                )
                 .Select(x => x.PersonLabel)
                 .Where(x => !string.IsNullOrWhiteSpace(x))
-                .Distinct(StringComparer.OrdinalIgnoreCase))
-           is { Length: > 0 } value
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+        )
+            is { Length: > 0 } value
             ? value
             : "در ردیف‌های فاکتور مشخص شده است";
 
-    private static void FactorInfoCard(IContainer container, string title, string value)
-        => container
+    private static void FactorInfoCard(IContainer container, string title, string value) =>
+        container
             .Border(1)
             .BorderColor("#D9E2EC")
             .Background("#F8FAFC")
@@ -129,11 +178,17 @@ public sealed class QuestPdfGenerator(IOptions<PdfSettings> options) : IPdfGener
             .Column(column =>
             {
                 column.Item().Text(title).FontSize(8).SemiBold().FontColor("#627D98");
-                column.Item().PaddingTop(3).Text(value).FontSize(10).SemiBold().FontColor("#243B53");
+                column
+                    .Item()
+                    .PaddingTop(3)
+                    .Text(value)
+                    .FontSize(10)
+                    .SemiBold()
+                    .FontColor("#243B53");
             });
 
-    private static void RenderFactorTable(IContainer container, TransactionFactorViewModel model)
-        => container.Table(table =>
+    private static void RenderFactorTable(IContainer container, TransactionFactorViewModel model) =>
+        container.Table(table =>
         {
             table.ColumnsDefinition(columns =>
             {
@@ -160,18 +215,34 @@ public sealed class QuestPdfGenerator(IOptions<PdfSettings> options) : IPdfGener
                 var row = model.Rows[index];
                 var background = index % 2 == 0 ? "#FFFFFF" : "#F8FAFC";
 
-                BodyCell(table.Cell(), row.FinishedPrice.ToGroupedDigits().ToPersianDigits(), background, true);
+                BodyCell(
+                    table.Cell(),
+                    row.FinishedPrice.ToGroupedDigits().ToPersianDigits(),
+                    background,
+                    true
+                );
                 BodyCell(table.Cell(), row.PersonLabel, background);
                 BodyCell(table.Cell(), row.ProductLabel, background);
                 BodyCell(table.Cell(), DirectionLabel(row.Direction), background);
-                BodyCell(table.Cell(), row.Date.ToJalaliDateTimeString().ToPersianDigits(), background, false, true);
-                BodyCell(table.Cell(), (index + 1).ToString().ToPersianDigits(), background, false, true);
+                BodyCell(
+                    table.Cell(),
+                    row.Date.ToJalaliDateTimeString().ToPersianDigits(),
+                    background,
+                    false,
+                    true
+                );
+                BodyCell(
+                    table.Cell(),
+                    (index + 1).ToString().ToPersianDigits(),
+                    background,
+                    false,
+                    true
+                );
             }
         });
 
-    private static void HeaderCell(IContainer cell, string text)
-        => cell
-            .Background("#243B53")
+    private static void HeaderCell(IContainer cell, string text) =>
+        cell.Background("#243B53")
             .PaddingVertical(4)
             .PaddingHorizontal(6)
             .AlignMiddle()
@@ -188,10 +259,10 @@ public sealed class QuestPdfGenerator(IOptions<PdfSettings> options) : IPdfGener
         string text,
         string background,
         bool amount = false,
-        bool numeric = false)
+        bool numeric = false
+    )
     {
-        var content = cell
-            .Background(background)
+        var content = cell.Background(background)
             .BorderBottom(1)
             .BorderColor("#E5E7EB")
             .PaddingVertical(8)
@@ -202,17 +273,24 @@ public sealed class QuestPdfGenerator(IOptions<PdfSettings> options) : IPdfGener
         if (amount || numeric)
             content = content.ContentFromLeftToRight();
 
-        var label = content.Text(text).FontSize(amount ? 8.5f : 8).AlignCenter().FontFamily("Vazirmatn");
+        var label = content
+            .Text(text)
+            .FontSize(amount ? 8.5f : 8)
+            .AlignCenter()
+            .FontFamily("Vazirmatn");
 
         if (amount)
             label.SemiBold();
     }
 
-    private static string DirectionLabel(TransactionDirection direction)
-        => direction == TransactionDirection.Buy ? "خرید" : "فروش";
+    private static string DirectionLabel(TransactionDirection direction) =>
+        direction == TransactionDirection.Buy ? "خرید" : "فروش";
 
-    private static void RenderFactorSummary(IContainer container, TransactionFactorViewModel model)
-        => container.Row(row =>
+    private static void RenderFactorSummary(
+        IContainer container,
+        TransactionFactorViewModel model
+    ) =>
+        container.Row(row =>
         {
             row.RelativeItem();
             row.ConstantItem(280)
@@ -225,17 +303,35 @@ public sealed class QuestPdfGenerator(IOptions<PdfSettings> options) : IPdfGener
                 .Row(summary =>
                 {
                     summary.Spacing(8);
-                    summary.RelativeItem().AlignRight().Text("جمع کل").FontSize(11).SemiBold().FontColor("#102A43").FontFamily("Vazirmatn");
-                    summary.RelativeItem().ContentFromLeftToRight().AlignLeft().Text(text =>
-                    {
-                        text.Span(model.TotalPrice.ToGroupedDigits().ToPersianDigits()).FontSize(13).SemiBold().FontColor("#102A43").FontFamily("Vazirmatn");
-                        text.Span(" ریال").FontSize(9).FontColor("#627D98").FontFamily("Vazirmatn");
-                    });
+                    summary
+                        .RelativeItem()
+                        .AlignRight()
+                        .Text("جمع کل")
+                        .FontSize(11)
+                        .SemiBold()
+                        .FontColor("#102A43")
+                        .FontFamily("Vazirmatn");
+                    summary
+                        .RelativeItem()
+                        .ContentFromLeftToRight()
+                        .AlignLeft()
+                        .Text(text =>
+                        {
+                            text.Span(model.TotalPrice.ToGroupedDigits().ToPersianDigits())
+                                .FontSize(13)
+                                .SemiBold()
+                                .FontColor("#102A43")
+                                .FontFamily("Vazirmatn");
+                            text.Span(" ریال")
+                                .FontSize(9)
+                                .FontColor("#627D98")
+                                .FontFamily("Vazirmatn");
+                        });
                 });
         });
 
-    private static void RenderFactorSignatures(IContainer container)
-        => container
+    private static void RenderFactorSignatures(IContainer container) =>
+        container
             .PaddingTop(2)
             .PreventPageBreak()
             .Row(row =>
@@ -245,8 +341,8 @@ public sealed class QuestPdfGenerator(IOptions<PdfSettings> options) : IPdfGener
                 row.RelativeItem().Element(c => SignatureBox(c, "مهر و امضای فروشگاه"));
             });
 
-    private static void SignatureBox(IContainer container, string title)
-        => container
+    private static void SignatureBox(IContainer container, string title) =>
+        container
             .Height(48)
             .Border(1)
             .BorderColor("#D9E2EC")
@@ -257,8 +353,8 @@ public sealed class QuestPdfGenerator(IOptions<PdfSettings> options) : IPdfGener
                 column.Item().PaddingTop(16).BorderBottom(1).BorderColor("#9FB3C8");
             });
 
-    private void RenderFactorFooter(IContainer container)
-        => container
+    private void RenderFactorFooter(IContainer container) =>
+        container
             .PaddingTop(7)
             .BorderTop(1)
             .BorderColor("#D9E2EC")
@@ -277,12 +373,87 @@ public sealed class QuestPdfGenerator(IOptions<PdfSettings> options) : IPdfGener
 
                 if (!string.IsNullOrWhiteSpace(_settings.ShopInstagram))
                 {
-                    if (!string.IsNullOrWhiteSpace(_settings.ShopAddress) || !string.IsNullOrWhiteSpace(_settings.ShopPhone))
+                    if (
+                        !string.IsNullOrWhiteSpace(_settings.ShopAddress)
+                        || !string.IsNullOrWhiteSpace(_settings.ShopPhone)
+                    )
                         text.Span("  |  ").FontSize(7.5f).FontColor("#829AB1");
                     text.Span(_settings.ShopInstagram).FontSize(7.5f).FontColor("#829AB1");
                 }
             });
 
+    private static void RenderFactorTermsSection(IContainer container) =>
+        container.Column(column =>
+        {
+            column.Spacing(4);
+            column
+                .Item()
+                .Text("خریدار محترم لطفا موارد زیر را به دقت مطالعه و سپس امضا فرمایید")
+                .FontSize(9)
+                .SemiBold()
+                .FontColor("#102A43")
+                .FontFamily("Vazirmatn");
+
+            foreach (var line in FactorTermsLines)
+                column.Item().Text(line).FontSize(8).FontColor("#25313C").FontFamily("Vazirmatn");
+
+            column
+                .Item()
+                .PaddingTop(4)
+                .Text(text =>
+                {
+                    text.Span("گوشی کاملا تست و تحویل اینجانب ")
+                        .FontSize(8)
+                        .FontFamily("Vazirmatn")
+                        .FontColor("#25313C");
+                    text.Span("..................................")
+                        .FontSize(8)
+                        .FontFamily("Vazirmatn")
+                        .FontColor("#627D98");
+                    text.Span(" گردید.").FontSize(8).FontFamily("Vazirmatn").FontColor("#25313C");
+                });
+
+            column
+                .Item()
+                .PaddingTop(20)
+                .AlignCenter()
+                .Text("گنبدکاووس٬ خیابان طالقانی شرقی٬ طالقانی دوم ٬ زون موبایل")
+                .FontSize(8)
+                .FontColor("#627D98")
+                .FontFamily("Vazirmatn");
+            column
+                .Item()
+                .AlignCenter()
+                .Text(text =>
+                {
+                    text.Span("شماره تماس: ")
+                        .FontSize(8)
+                        .FontColor("#627D98")
+                        .FontFamily("Vazirmatn");
+                    text.Span("۰۹۱۱۵۰۰۹۱۰۹")
+                        .FontSize(8)
+                        .FontColor("#627D98")
+                        .FontFamily("Vazirmatn");
+                });
+            column
+                .Item()
+                .AlignCenter()
+                .ContentFromLeftToRight()
+                .Text("@zonemobile.ir")
+                .FontSize(8)
+                .FontColor("#627D98")
+                .FontFamily("Vazirmatn");
+        });
+
+    private static readonly string[] FactorTermsLines =
+    [
+        "۱. مورد معامله صحیح و سالم تحویل خریدار گردید و خریدار موظف است قبل از تغییرات قیمت را بررسی فرماید. فروشنده در قبال نوسانات بازار مسئول نمیباشد.",
+        "۲. تا تسویه حساب کامل دستگاه ها به صورت امانت نزد خریدار میباشد.",
+        "۳. این معامله بر اساس ماده ۱۰ آیین نامه قانون مدنی تنظیم گردیده و در صورت فسخ معامله خسارت برابر عرف بازار و اعلام نظر کارشناس اتحادیه به عهده خریدار میباشد.",
+        "۴. کلیه موارد فوق به رویت خریدار رسیده و خریدار هیچگاه اعتراضی ندارد.",
+        "۵. به دلیل الکترونیکی بودن کالا در هنگام خرید دقت کامل فرمایید پس از انجام معامله مرجوع یا تعویض نمیشود.",
+        "۶. ارسال گوشی جهت گارانتی به عهده مشتری میباشد.",
+    ];
 
     private void ComposePage(PageDescriptor page, InvoicePresentation p)
     {
@@ -392,7 +563,10 @@ public sealed class QuestPdfGenerator(IOptions<PdfSettings> options) : IPdfGener
         RenderNotesAndSignaturePersian(column, p);
     }
 
-    private static void RenderPartyInfoPersian(ColumnDescriptor column, PersianInvoicePresentation p)
+    private static void RenderPartyInfoPersian(
+        ColumnDescriptor column,
+        PersianInvoicePresentation p
+    )
     {
         if (!string.IsNullOrWhiteSpace(p.PartyName))
             column.Item().Text($"{p.PartyLabel} : {p.PartyName}").FontFamily("Vazirmatn");
@@ -404,12 +578,18 @@ public sealed class QuestPdfGenerator(IOptions<PdfSettings> options) : IPdfGener
             column.Item().Text($"کد ملی : {p.BuyerNationalId}").FontFamily("Vazirmatn");
     }
 
-    private static void RenderProductInfoPersian(ColumnDescriptor column, PersianInvoicePresentation p)
+    private static void RenderProductInfoPersian(
+        ColumnDescriptor column,
+        PersianInvoicePresentation p
+    )
     {
         if (!string.IsNullOrWhiteSpace(p.ProductInformation))
             column.Item().PaddingTop(8).Text(p.ProductInformation).FontFamily("Vazirmatn");
 
-        column.Item().Text($"قیمت : {p.FinishedPrice.ToGroupedDigits()} ریال").FontFamily("Vazirmatn");
+        column
+            .Item()
+            .Text($"قیمت : {p.FinishedPrice.ToGroupedDigits()} ریال")
+            .FontFamily("Vazirmatn");
         column.Item().Text($"تعداد : {p.ProductCount}").FontFamily("Vazirmatn");
 
         if (!string.IsNullOrWhiteSpace(p.OwnershipStatus))
@@ -418,7 +598,10 @@ public sealed class QuestPdfGenerator(IOptions<PdfSettings> options) : IPdfGener
         column.Item().Text($"تاریخ : {p.TransactionDate:yyyy/MM/dd HH:mm}").FontFamily("Vazirmatn");
     }
 
-    private static void RenderGuaranteeInfoPersian(ColumnDescriptor column, PersianInvoicePresentation p)
+    private static void RenderGuaranteeInfoPersian(
+        ColumnDescriptor column,
+        PersianInvoicePresentation p
+    )
     {
         foreach (var (label, value) in p.ProductExtras)
             column.Item().Text($"{label} : {value}").FontFamily("Vazirmatn");
@@ -427,7 +610,10 @@ public sealed class QuestPdfGenerator(IOptions<PdfSettings> options) : IPdfGener
             column.Item().Text($"{label} : {value}").FontFamily("Vazirmatn");
     }
 
-    private static void RenderNotesAndSignaturePersian(ColumnDescriptor column, PersianInvoicePresentation p)
+    private static void RenderNotesAndSignaturePersian(
+        ColumnDescriptor column,
+        PersianInvoicePresentation p
+    )
     {
         if (!string.IsNullOrWhiteSpace(p.Notes))
             column.Item().PaddingTop(8).Text(p.Notes).FontFamily("Vazirmatn");
@@ -444,12 +630,12 @@ public sealed class QuestPdfGenerator(IOptions<PdfSettings> options) : IPdfGener
             text.Span($" | {_settings.ShopInstagram}").FontFamily("Vazirmatn");
     }
 
-    private static PageSize ParsePageSize(string pageSize)
-        => pageSize.Trim().ToUpperInvariant() switch
+    private static PageSize ParsePageSize(string pageSize) =>
+        pageSize.Trim().ToUpperInvariant() switch
         {
             "A5" => PageSizes.A5,
             "LETTER" => PageSizes.Letter,
-            _ => PageSizes.A4
+            _ => PageSizes.A4,
         };
 
     private InvoicePresentation Resolve(InvoiceViewModel model)
@@ -466,11 +652,13 @@ public sealed class QuestPdfGenerator(IOptions<PdfSettings> options) : IPdfGener
             ProductInformation = model.ProductInformation,
             FinishedPrice = model.FinishedPrice,
             ProductCount = model.ProductCount,
-            OwnershipStatus = model.OwnershipTransferred is bool t ? (t ? "Transferred" : "Not transferred") : null,
+            OwnershipStatus = model.OwnershipTransferred is bool t
+                ? (t ? "Transferred" : "Not transferred")
+                : null,
             TransactionDate = model.TransactionDate,
             ProductExtras = model.ProductExtras,
             GuaranteeInformation = model.GuaranteeInformation,
-            Notes = model.Notes
+            Notes = model.Notes,
         };
     }
 
@@ -488,11 +676,13 @@ public sealed class QuestPdfGenerator(IOptions<PdfSettings> options) : IPdfGener
             ProductInformation = model.ProductInformation,
             FinishedPrice = model.FinishedPrice,
             ProductCount = model.ProductCount,
-            OwnershipStatus = model.OwnershipTransferred is bool t ? (t ? "انتقال یافته" : "انتقال نیافته") : null,
+            OwnershipStatus = model.OwnershipTransferred is bool t
+                ? (t ? "انتقال یافته" : "انتقال نیافته")
+                : null,
             TransactionDate = model.TransactionDate,
             ProductExtras = model.ProductExtras,
             GuaranteeInformation = model.GuaranteeInformation,
-            Notes = model.Notes
+            Notes = model.Notes,
         };
     }
 }

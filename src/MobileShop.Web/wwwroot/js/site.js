@@ -257,7 +257,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    const currentTheme = document.documentElement.dataset.theme === 'light' ? 'light' : 'dark';
+    const currentTheme = 'light';
     applyTheme(currentTheme);
 
     document.querySelectorAll('[data-theme-toggle]').forEach(toggle => {
