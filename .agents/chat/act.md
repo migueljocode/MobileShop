@@ -5,3 +5,7 @@
 - Friction noted: Artifact download blocked by sandbox network; no way to render PDFs without the .NET SDK.
 - Problems: Rendered verification of Step 2 is missing. Step 3 and stage sign-off depend on it.
 - Status: BLOCKED (verification evidence missing; code and CI complete)
+
+## Update — user test result
+- User reports the factor footer still prints the phone reversed (`9109 500 0911`) after commit `3c51d05`. The NBSP-only approach in Step 2 is NOT effective. Rendered check failed; Step 2 cannot be marked verified.
+- Status: BLOCKED — plan approach needs revision (Planner decision). Candidate: render the phone in its own `ContentFromLeftToRight()` container, the same pattern this file already uses for amount cells.
