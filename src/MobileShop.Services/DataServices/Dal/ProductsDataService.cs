@@ -33,33 +33,31 @@ public class ProductsDataService(
     // Product creation represents stock intake, so its paid cost is recorded as a Buy leg.
     private const string PhoneCategoryName = "Phone";
 
-#pragma warning disable CS8603, CS8602 // Include lambda returns nullable nav; benign
-    private static readonly Expression<Func<Product, object>>[] EditIncludes =
+    private static readonly string[] EditIncludes =
     [
-        p => p.ModelNavigation,
-        p => p.ModelNavigation.ManufacturerNavigation,
-        p => p.ColorNavigation,
-        p => p.SecondHandProfile,
-        p => p.GuaranteeProfile,
-        p => p.PhoneProfile,
-        p => p.TabletProfile,
-        p => p.SmartWatchProfile,
-        p => p.LaptopProfile,
-        p => p.AppleIdProfile,
-        p => p.CableProfile,
-        p => p.ChargerProfile,
-        p => p.PowerBankProfile,
-        p => p.PowerBankProfile.Ports,
-        p => p.PortableStorageProfile,
-        p => p.PortableStorageProfile.StorageCapacityNavigation,
-        p => p.CaseProfile,
-        p => p.CaseProfile.ModelFits,
-        p => p.CaseProfile.ModelFits.Select(fit => fit.ModelNavigation),
-        p => p.GlassProfile,
-        p => p.GlassProfile.ModelFits,
-        p => p.GlassProfile.ModelFits.Select(fit => fit.ModelNavigation)
+        "ModelNavigation",
+        "ModelNavigation.ManufacturerNavigation",
+        "ColorNavigation",
+        "SecondHandProfile",
+        "GuaranteeProfile",
+        "PhoneProfile",
+        "TabletProfile",
+        "SmartWatchProfile",
+        "LaptopProfile",
+        "AppleIdProfile",
+        "CableProfile",
+        "ChargerProfile",
+        "PowerBankProfile",
+        "PowerBankProfile.Ports",
+        "PortableStorageProfile",
+        "PortableStorageProfile.StorageCapacityNavigation",
+        "CaseProfile",
+        "CaseProfile.ModelFits",
+        "CaseProfile.ModelFits.ModelNavigation",
+        "GlassProfile",
+        "GlassProfile.ModelFits",
+        "GlassProfile.ModelFits.ModelNavigation"
     ];
-#pragma warning restore CS8603, CS8602
 
     /// <summary>Gets the structured logger for this products service.</summary>
     protected ILogger<ProductsDataService> Logger { get; } = logger;
