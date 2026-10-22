@@ -1,14 +1,3 @@
-## Reviewer Audit — Stage 17, Job A
+## Reviewer Audit — Stage 17, Job B and stage sign-off
 
-**Verdict: APPROVED**
-
-The revised plan addresses both previous findings:
-
-- **Type resolution:** explicitly rejects unknown product types instead of falling through to Phone.
-- **Compatible models:** specifies `List<int>` using `Model.Id`, with complete validation before modifying relationships.
-
-The six steps cover the reported defects, include regression tests, and respect project scope restrictions.
-
-**Implementation note:** Apple ID Details lookup must use the canonical base `Product.Id` consistently with the post-save redirect; never confuse it with the Apple ID profile ID.
-
-No production code was changed.
+**Verdict: PASS.** Verified the final regression-test step against commit [ac0a8b4](https://github.com/migueljocode/MobileShop/commit/ac0a8b42bec1a28e41a90841297ddf72edc21558); GitHub Actions **#672 — Success** (467 passed, 0 failed, 0 skipped). The test correctly ignores retired compatibility-fit rows. Stage 17's recorded Definition of Done is satisfied.
