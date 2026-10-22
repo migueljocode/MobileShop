@@ -54,8 +54,10 @@ public class ProductsDataService(
         p => p.PortableStorageProfile.StorageCapacityNavigation,
         p => p.CaseProfile,
         p => p.CaseProfile.ModelFits,
+        p => p.CaseProfile.ModelFits.Select(fit => fit.ModelNavigation),
         p => p.GlassProfile,
-        p => p.GlassProfile.ModelFits
+        p => p.GlassProfile.ModelFits,
+        p => p.GlassProfile.ModelFits.Select(fit => fit.ModelNavigation)
     ];
 #pragma warning restore CS8603, CS8602
 
