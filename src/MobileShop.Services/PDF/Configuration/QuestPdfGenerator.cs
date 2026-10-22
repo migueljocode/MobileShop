@@ -430,7 +430,7 @@ public sealed class QuestPdfGenerator(IOptions<PdfSettings> options) : IPdfGener
                         .FontSize(8)
                         .FontColor("#627D98")
                         .FontFamily("Vazirmatn");
-                    text.Span("۰۹۱۱۵۰۰۹۱۰۹")
+                    text.Span("۹۱۰۹ ۵۰۰ ۰۹۱۱")
                         .FontSize(8)
                         .FontColor("#627D98")
                         .FontFamily("Vazirmatn");
