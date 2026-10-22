@@ -1,123 +1,133 @@
 # MobileShop
 
-ASP.NET Core inventory and sales system for a local mobile phone shop. It tracks stock (including IMEI-tracked devices), records sales, and produces invoices and reports as PDF.
+A self-hostable inventory and sales management application for a mobile phone shop, built with **ASP.NET Core, .NET 10, EF Core, and SQLite**.
+
+MobileShop helps a shop manage products and IMEI-tracked devices, customers, sellers, sales, PDF invoices, and period-based profit-and-loss reports from one web interface.
+
+> **Important — development data is destructive.** The Development launch profile deletes and recreates the local database on every start, then seeds sample data. Never run Development mode against real shop data.
+>
+> **Security notice:** this project is not production-hardened and does not provide production-grade authentication or authorization. Review the limitations under [Security and deployment](#security-and-deployment) before exposing it to a network.
 
 ## Features
 
-- **Products:** phones, laptops, tablets, smart watches, power banks, portable storage, cables, chargers, cases, glass protectors, Apple ID inventory, and second-hand items.
-- **People:** customers and sellers, each with a details page.
-- **Transactions:** selling a product to a customer, with a transaction list, details, and invoice generation.
-- **Reports:** profit and loss by period.
-- **Dashboard:** a home page with a stock summary.
-- **Account:** sign in, sign out, and a profile page for changing the admin username and password.
+- **Inventory:** phones, laptops, tablets, smart watches, power banks, portable storage, cables, chargers, cases, glass protectors, Apple ID inventory, and second-hand products.
+- **Device tracking:** support for IMEI-tracked devices and product-specific details.
+- **People management:** customer and seller records with detail pages.
+- **Sales:** record transactions, inspect transaction details, and generate PDF invoices.
+- **Reporting:** profit-and-loss reports by period and a dashboard with stock summaries.
+- **Shop account:** sign in and update the admin username and password.
+- **Local-first storage:** SQLite database; no separate database server required.
+- **Operational tooling:** bash and PowerShell utilities for querying application logs.
+- **Standalone publishing:** self-contained single-file builds for supported target runtimes.
 
-## Solution structure
+## Technology stack
 
-| Project | Responsibility |
+| Area | Technology |
 |---|---|
-| `src/MobileShop.Web` | Razor Pages UI. This is the main application. |
-| `src/MobileShop.Api` | Thin API host. Not used in normal development (see [Notes](#notes)). |
-| `src/MobileShop.Services` | Orchestration, dependency injection (`AddMobileShop(...)`), data services, password hashing, and PDF wiring. |
-| `src/MobileShop.Dal` | EF Core `AppDbContext`, repositories (`*Repo`), migrations, database initialization and seeding. |
-| `src/MobileShop.Models` | Entities, DTOs, view models, and settings. |
-| `src/MobileShop.Tests` | xUnit tests. |
-| `src/MobileShop.Scripts` | Log query utilities for bash and PowerShell. |
+| Runtime and web framework | .NET 10, ASP.NET Core Razor Pages |
+| Data access | Entity Framework Core |
+| Database | SQLite |
+| PDF generation | QuestPDF |
+| Automated tests | xUnit |
+| CI | GitHub Actions |
 
-The solution file is `src/MobileShop.slnx`. Run every command from the repository root.
+## Getting started
 
-## Requirements
+### Prerequisites
 
-- .NET 10 SDK. CI uses `10.0.x`.
-- No database server is needed. The app uses SQLite through EF Core.
-- Developed on Linux. CI builds and tests on Ubuntu 24.04.
+- [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0)
+- Git
 
-## Quick start
+SQLite is bundled as a local database file, so no database server is required.
+
+### Run locally
+
+From the repository root:
 
 ```sh
 git clone https://github.com/migueljocode/MobileShop.git
 cd MobileShop
+dotnet restore src/MobileShop.slnx
 dotnet build src/MobileShop.slnx
 dotnet run --project src/MobileShop.Web
 ```
 
-The development profile serves the app at `http://localhost:5043`, and the HTTPS profile at `https://localhost:7043`. Sign in as `admin` with the default password described in [Default admin account](#default-admin-account).
+The Development launch profile serves the application at:
 
-## Running modes
+- HTTP: http://localhost:5043
+- HTTPS: https://localhost:7043
+
+The default local admin account is `admin` / `Admin@123`. Change the password immediately if you use the account beyond a disposable local environment. See [Default admin account](#default-admin-account).
+
+## Runtime environments and database safety
 
 ### Development
 
-`dotnet run` uses `ASPNETCORE_ENVIRONMENT=Development` from `src/MobileShop.Web/Properties/launchSettings.json`. On every start the app:
+The Web project's launch settings select the Development environment. At startup, Development mode:
 
-1. Deletes and recreates the database from the current model.
-2. Loads the sample data from `src/MobileShop.Dal/Initialization/sample-data.json`.
+1. Deletes and recreates the database from the current EF Core model.
+2. Loads sample data from `src/MobileShop.Dal/Initialization/sample-data.json`.
 3. Ensures the admin account exists.
 
-**All data is erased on each start.** Use development mode only for local work, never against a real shop database.
+**Every Development-mode startup erases the existing database.** Use this mode only with disposable local data.
 
 ### Production
 
-Production startup is non-destructive. The app checks that the database schema is current. If the database is missing or empty, it creates the schema and the initial admin account. If the schema is outdated, startup points you to the migration command.
+Production startup is non-destructive. It checks that the database schema is current and creates the schema and initial admin account if the database is missing or empty. An outdated schema requires an explicit migration.
 
-### Migrating an existing database
+Before migrating an existing database, make a verified backup. Then run:
 
-1. Back up `MobileShop.db` (in the repository root by default).
-2. Run the migration:
+```sh
+dotnet run --project src/MobileShop.Web -- --migrate-database
+```
 
-   ```sh
-   dotnet run --project src/MobileShop.Web -- --migrate-database
-   ```
-
-The command verifies a backup and reports one of four results: the database was created, it was already up to date, it was upgraded (with the verified backup path), or a legacy database was baselined (with the verified backup path).
+The database is `MobileShop.db` in the repository root by default. Its location is resolved through `SolutionPaths.DatabaseFile`; do not rely on hard-coded relative paths. The database file is git-ignored.
 
 ## Configuration
 
-Settings live in `src/MobileShop.Web/appsettings.json`.
+Application settings are in `src/MobileShop.Web/appsettings.json`; environment and local development ports are configured in `src/MobileShop.Web/Properties/launchSettings.json`.
 
-| Key | Default | Purpose |
-|---|---|---|
-| `UseApi` | `false` | Keep `false`. `true` switches data services to the API stubs, which are not implemented yet. |
-| `AppLogging` | Default `Debug`, Console `Information`, File `Debug` | Log levels for the default, console and file outputs. |
-| `Pdf` | A4, 36 pt margins, shop name, address, phone, Instagram | Page layout and shop details printed on PDFs. Fill in the shop address, phone and Instagram before printing invoices. |
-| `Distribution` | `DefaultSharePercent` 50, `MaxTotalSharePercent` 100 | Default and maximum share percentages. |
-| `AllowedHosts` | `*` | Standard ASP.NET Core host filter. |
+Important settings:
 
-Ports and environment variables are set in `src/MobileShop.Web/Properties/launchSettings.json`.
+| Setting | Guidance |
+|---|---|
+| `UseApi` | Keep `false` for normal operation. The alternative API data-service implementations are stubs and throw `NotImplementedException`. |
+| `Pdf` | Configure shop details such as address and phone before producing customer-facing invoices. |
+| `AppLogging` | Configure default, console, and file log levels. |
+| `Distribution` | Controls default and maximum share percentages. |
+| `AllowedHosts` | Standard ASP.NET Core host filtering; configure it appropriately for your deployment. |
 
-## Database
+Logs are written under `logs/`. See the [log utilities guide](src/MobileShop.Scripts/README.md) for bash and PowerShell commands.
 
-- The database is a SQLite file, `MobileShop.db`, in the repository root. Its path comes from `SolutionPaths.DatabaseFile`. Do not hard-code relative paths. The file is git-ignored.
-- The schema is managed by EF Core migrations in `src/MobileShop.Dal/Migrations`.
-- Entity mappings live in `src/MobileShop.Models/Entities/Configuration` and are applied from `AppDbContext.OnModelCreating`.
-- The entity relationship diagram is in [`docs/erd.mermaid`](docs/erd.mermaid).
-- Money is stored as whole rials (`long`), bounded by `MoneyLimits.MaxRials`, and displayed with `ToIrr()` or `ToGroupedDigits()`.
+## Solution structure
 
-## Default admin account
+The solution file is `src/MobileShop.slnx`. Run commands from the repository root.
 
-When no admin account exists, the app creates one:
+| Project | Responsibility |
+|---|---|
+| `src/MobileShop.Web` | Main web application and Razor Pages UI |
+| `src/MobileShop.Api` | Thin API host; not used in the normal application path |
+| `src/MobileShop.Services` | Business orchestration, dependency injection, data services, password hashing, and PDF integration |
+| `src/MobileShop.Dal` | EF Core context, repositories, migrations, database initialization, and seeding |
+| `src/MobileShop.Models` | Entities, DTOs, view models, settings, and entity configuration |
+| `src/MobileShop.Tests` | Automated xUnit tests |
+| `src/MobileShop.Scripts` | Bash and PowerShell log-query utilities |
 
-- Username: `admin`
-- Password: `Admin@123`
+Additional implementation references:
 
-**Change this password from the Profile page immediately**, especially before any production or shared use.
+- [Entity relationship diagram](docs/erd.mermaid)
+- [Publishing guide](docs/publishing.md)
+- [Project conventions and architecture rules](.agents/project.md)
 
-## Logs and log utilities
+### Architecture notes
 
-The app writes logs under `logs/` (for example `logs/app-*.log`). Two equivalent utilities query them:
+- The Web and API hosts use `AddMobileShop(...)` for dependency injection.
+- EF Core entity mappings are centralized in `src/MobileShop.Models/Entities/Configuration`.
+- Schema migrations live in `src/MobileShop.Dal/Migrations`.
+- Money is represented as whole Iranian rials (`long`) and bounded by `MoneyLimits.MaxRials`.
+- Invoices and reports share the `IPdfGenerator` abstraction.
 
-- `src/MobileShop.Scripts/Bash/log.sh`
-- `src/MobileShop.Scripts/PowerShell/log.ps1`
-
-Both support level filtering, line limits, file paths, stdin, and date or date-time ranges. Examples:
-
-```sh
-./src/MobileShop.Scripts/Bash/log.sh --level error --above -n 20
-./src/MobileShop.Scripts/Bash/log.sh --level warning --date-from 2026-01-01 --date-to 2026-01-31
-cat logs/app-*.log | ./src/MobileShop.Scripts/Bash/log.sh --level error
-```
-
-Full usage is in [`src/MobileShop.Scripts/README.md`](src/MobileShop.Scripts/README.md).
-
-## Building, testing and CI
+## Build and test
 
 ```sh
 dotnet restore src/MobileShop.slnx
@@ -125,83 +135,53 @@ dotnet build src/MobileShop.slnx --no-restore
 dotnet test src/MobileShop.slnx --no-build
 ```
 
-Run a single test with a filter:
+Run a focused test by name:
 
 ```sh
 dotnet test src/MobileShop.slnx --no-build --filter "FullyQualifiedName~CustomerRepoTests"
 ```
 
-Tests use xUnit. Most use EF Core InMemory. Migration and database migrator tests use a temporary SQLite file.
+Tests use xUnit, primarily with EF Core InMemory; migration and database-migrator tests use a temporary SQLite database.
 
-The workflow in [`.github/workflows/dotnet.yml`](.github/workflows/dotnet.yml) runs on pushes to `main` and on pull requests:
+The [GitHub Actions workflow](.github/workflows/dotnet.yml) builds and tests the solution on Ubuntu with .NET 10 and tests the log utilities on Ubuntu and Windows. Markdown-only changes do not trigger this workflow.
 
-- **Build and test** on Ubuntu 24.04 with .NET 10.
-- **Log utility tests** on Ubuntu 24.04 (bash) and Windows 2025 (PowerShell).
+## Publish a standalone build
 
-Pushes that change only Markdown, `.agents/`, `.kilo/` or `docs/` do not trigger the workflow.
-
-## Publishing a standalone build
+Example targets:
 
 ```sh
 dotnet publish src/MobileShop.Web -c Release -r linux-x64
 dotnet publish src/MobileShop.Web -c Release -r osx-arm64
 ```
 
-Output goes to `Publishes/<RID>/`. The build is self-contained single-file with no .NET runtime needed on the target. The publish output does not include a database. On first start the app creates the schema and the default admin account. Start it with `./MobileShop.Web` from that directory. Native AOT is not enabled because Razor Pages and MVC do not support it.
+Publish output is written under `Publishes/<RID>/`. The build is self-contained and single-file, so the target machine does not need a separately installed .NET runtime. The database is not bundled; first startup creates the schema and initial admin account.
 
-More detail is in [`docs/publishing.md`](docs/publishing.md).
+See the [publishing guide](docs/publishing.md) for details. Native AOT is not enabled because the Razor Pages/MVC application does not support it.
 
-## Architecture and conventions
+## Default admin account
 
-- **Layers:** `Web` owns Razor Pages and UI. `Services` owns orchestration and dependency injection. `Dal` owns EF Core, repositories and database setup. `Models` owns entities, DTOs, view models and settings. `Api` is a thin host.
-- **Dependency injection:** `AddMobileShop(...)` is called by the Web and API hosts. It registers the DbContext, repositories, password hashing, PDF generation and the data services.
-- **PDF:** QuestPDF uses its community licence, set once by `QuestPdfSetup.UseCommunityLicense()` from the host's `ConfigureBuilder`. Invoices and reports share one PDF generator (`IPdfGenerator`).
-- **Naming:** follow existing layering, repository, service, Razor Pages and test conventions. Project-wide `using`s live in each project's `GlobalUsings.cs`.
-- **Async:** prefer async repository and service methods where an async equivalent exists.
+When no admin account exists, the application creates:
 
-The full project rules are in [`.agents/project.md`](.agents/project.md).
+- **Username:** `admin`
+- **Password:** `Admin@123`
 
-## UI design system
+Change these credentials immediately in the Profile page before any shared or non-disposable use. Do not treat the default credentials as suitable for a publicly accessible deployment.
 
-The UI follows one rule set: quiet content, glass chrome. Glass is the navigation and overlay layer only; content surfaces stay opaque. The ten materials below are the vocabulary: the plain ones are opaque, the glass ones are the navigation layer, modal sheets, the date-picker panel, the action bar and the login card.
+## Security and deployment
 
-**Stylesheets**: Bootstrap is loaded first, then the nine app stylesheets, in the order `Pages/Shared/_Layout.cshtml` links them: `tokens.css`, `base.css`, `controls.css`, `surfaces.css`, `overlays.css`, `shell.css`, `login.css`, `motion.css`, `navigation-menu.css`. Every colour, radius, size and z-index comes from the token families in `tokens.css`: surfaces, text, borders, glass, shadow, radius, space, size, motion, z.
+MobileShop is intended as a local or trusted-network shop tool and is **not production-hardened**.
 
-| Material | Use for |
-|---|---|
-| M0 Canvas | page background |
-| M1 Content surface | main groups, tables, form sections |
-| M2 Raised surface | cards, stat tiles, empty-state well |
-| M3 Inset surface | fields, readonly values, code |
-| G1 Regular glass | dock, flyout |
-| G2 Subtle glass | sticky action bar, tooltips |
-| G3 Overlay glass | modal sheets, date-picker panel, login card |
-| G3-solid | scrollable dialogs |
-| G4 Clear glass | reserved, not used today |
-| Scrim | behind modals |
-
-**States**: hover, focus-visible, pressed, selected, disabled, loading, error, success, empty. Hover never lifts or translates, pressed scales to 0.98, and every duration and easing comes from a token except the dock, which keeps its own curves. **Preferences**: `prefers-reduced-transparency`, `prefers-contrast`, `forced-colors` and the Profile "Solid surfaces" switch fall back to a solid, legible UI; `prefers-reduced-motion` only removes the animation — durations collapse to 0.01 ms and the press scale is dropped — and does not change the materials.
-
-**Audit gates** for every CSS change: only the nine stylesheets above; no colour literals outside `tokens.css`; at most 12 `!important`; `backdrop-filter` only in `overlays.css`, `shell.css`, `login.css`, `motion.css` and `navigation-menu.css`; no `translateY(-1px)` or `scale(1.0` hover lifts; no literal duration or easing outside `tokens.css` and the dock, except the reduced-motion `0.01 ms` in `base.css`; total CSS under 60,000 bytes.
-
-The design-system rules, their audit gates and the pipeline that maintains them live in [`.agents/`](.agents).
-
-## Notes
-
-- **Not production-hardened.** The app has no production-grade authentication or authorization. Treat it as a single-shop tool on a trusted network.
-- **Apple ID passwords are stored in plaintext, by design.** The shop must be able to recover them for customers. Application user passwords are hashed.
-- **API stubs.** When `UseApi` is `true`, the `MobileShop.Services.DataServices.Api` classes throw `NotImplementedException`. Keep `UseApi` at `false`.
-- **Sample data** contains no real contact details or credentials.
+- It does not implement production-grade authentication or authorization.
+- Apple ID inventory passwords are stored in plaintext by design because the shop must be able to retrieve them for customers. Do not enter sensitive credentials unless this storage model is acceptable for your environment.
+- Application-user passwords are handled separately and hashed.
+- Development mode deletes and recreates the database on every startup; never point it at real data.
+- Keep `UseApi` set to `false` unless the API data-service stubs are implemented.
+- Configure host filtering, network exposure, backups, shop details, and account credentials for your deployment.
 
 ## Contributing
 
-Changes follow the multi-agent workflow in [`AGENTS.md`](AGENTS.md):
-
-- Planner, Reviewer and Actor roles are defined in [`.agents/roles`](.agents/roles).
-- Project rules are in [`.agents/project.md`](.agents/project.md).
-- Commits follow Conventional Commits (`feat`, `fix`, `refactor`, `test`, `docs`, `chore`, `perf`, `build`, `ci`).
-- CI is the build and test gate. Make changes minimal and avoid unrelated refactors.
+Before changing the code, review [`AGENTS.md`](AGENTS.md) and the [project rules](.agents/project.md). The repository defines a Planner → Reviewer → Actor workflow for scoped changes. Follow existing layering and conventions, keep changes focused, and use [Conventional Commits](https://www.conventionalcommits.org/) (for example, `docs(readme): clarify setup and deployment`).
 
 ## License
 
-MIT License. Copyright (c) 2026 Mikaeeil. See [`LICENSE`](LICENSE).
+Distributed under the [MIT License](LICENSE). Copyright © 2026 Mikaeeil.
