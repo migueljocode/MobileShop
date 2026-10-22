@@ -107,7 +107,7 @@
 - Done when: controls are populated, valid selections persist, and port count/rows stay consistent.
 - Risk: HIGH. Confidence: MEDIUM until persistence semantics and current form binding are inspected.
 
-## [ ] Step 6 — Cross-type regression coverage and CI validation
+## ~~[x] Step 6 — Cross-type regression coverage and CI validation~~
 - Files: inspect `src/MobileShop.Tests/**/*`, fixtures, `.github/workflows/dotnet.yml`; modify/create only necessary tests. Do not touch API files, sample data or unrelated workflows.
 - Symbols: existing `ProductsDataServiceTests`, Products Edit/Details PageModel tests, repository tests and fixtures.
 - Current -> Desired: all six reported symptoms and shared update behavior across other product types are covered by tests asserting response behavior and persisted state.
