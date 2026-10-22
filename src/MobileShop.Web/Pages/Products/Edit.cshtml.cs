@@ -151,8 +151,12 @@ public class EditModel(
             StorageCapacityLabel = product.PortableStorageProfile?.StorageCapacityNavigation?.Gb + " GB",
             Speed = product.PortableStorageProfile?.Speed,
             // Case/Glass-specific
-            CompatibleModels = product.CaseProfile?.ModelFits?.Select(f => f.ModelNavigation.Name).ToList() ??
-                               product.GlassProfile?.ModelFits?.Select(f => f.ModelNavigation.Name).ToList() ?? [],
+            CompatibleModels = product.CaseProfile?.ModelFits?.Where(f => f.ModelNavigation is not null)
+                                   .Select(f => f.ModelNavigation.Name)
+                                   .ToList() ??
+                               product.GlassProfile?.ModelFits?.Where(f => f.ModelNavigation is not null)
+                                   .Select(f => f.ModelNavigation.Name)
+                                   .ToList() ?? [],
             TestPeriodDays = product.SecondHandProfile?.TestPeriodDays,
             UsedDurationDays = product.SecondHandProfile?.UsedDurationDays,
             SecondHandNotes = product.SecondHandProfile?.Notes
