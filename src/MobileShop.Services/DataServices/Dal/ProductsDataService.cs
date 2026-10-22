@@ -1205,9 +1205,7 @@ public class ProductsDataService(
                 product.CaseProfile!.Notes = NormalizeNote(input.Notes);
                 if (selectedCompatibleModels is not null)
                 {
-                    product.CaseProfile.ModelFits.Clear();
-                    foreach (var model in selectedCompatibleModels)
-                        product.CaseProfile.ModelFits.Add(new CaseModelFit { CaseNavigation = product.CaseProfile, ModelId = model.Id, ModelNavigation = model });
+                    SynchronizeCaseModelFits(product.CaseProfile, selectedCompatibleModels);
                 }
                 break;
 
@@ -1215,9 +1213,7 @@ public class ProductsDataService(
                 product.GlassProfile!.Notes = NormalizeNote(input.Notes);
                 if (selectedCompatibleModels is not null)
                 {
-                    product.GlassProfile.ModelFits.Clear();
-                    foreach (var model in selectedCompatibleModels)
-                        product.GlassProfile.ModelFits.Add(new GlassModelFit { GlassNavigation = product.GlassProfile, ModelId = model.Id, ModelNavigation = model });
+                    SynchronizeGlassModelFits(product.GlassProfile, selectedCompatibleModels);
                 }
                 break;
         }
@@ -1228,6 +1224,29 @@ public class ProductsDataService(
 
         await products.SaveChangesAsync();
         return new ServiceResult(true, "Product updated successfully.", null, input.ProductId) { Changed = true };
+    }
+
+
+    private static void SynchronizeCaseModelFits(Case profile, IReadOnlyCollection<Model> selectedModels)
+    {
+        var selectedIds = selectedModels.Select(model => model.Id).ToHashSet();
+        foreach (var fit in profile.ModelFits.Where(fit => !fit.IsDeleted && !selectedIds.Contains(fit.ModelId)))
+            fit.IsDeleted = true;
+
+        var existingIds = profile.ModelFits.Where(fit => !fit.IsDeleted).Select(fit => fit.ModelId).ToHashSet();
+        foreach (var model in selectedModels.Where(model => !existingIds.Contains(model.Id)))
+            profile.ModelFits.Add(new CaseModelFit { CaseNavigation = profile, ModelId = model.Id, ModelNavigation = model });
+    }
+
+    private static void SynchronizeGlassModelFits(Glass profile, IReadOnlyCollection<Model> selectedModels)
+    {
+        var selectedIds = selectedModels.Select(model => model.Id).ToHashSet();
+        foreach (var fit in profile.ModelFits.Where(fit => !fit.IsDeleted && !selectedIds.Contains(fit.ModelId)))
+            fit.IsDeleted = true;
+
+        var existingIds = profile.ModelFits.Where(fit => !fit.IsDeleted).Select(fit => fit.ModelId).ToHashSet();
+        foreach (var model in selectedModels.Where(model => !existingIds.Contains(model.Id)))
+            profile.ModelFits.Add(new GlassModelFit { GlassNavigation = profile, ModelId = model.Id, ModelNavigation = model });
     }
 
     private static string? GetProductType(Product product)
@@ -1274,8 +1293,8 @@ public class ProductsDataService(
                     .Select(port => new { port.PortNumber, port.Connector }).ToArray()
             },
             "Portable Storage" => new { product.PortableStorageProfile!.Kind, product.PortableStorageProfile.StorageCapacityId, product.PortableStorageProfile.Speed, product.PortableStorageProfile.Notes },
-            "Case" => new { product.CaseProfile!.Notes, ModelIds = product.CaseProfile.ModelFits.Select(fit => fit.ModelId).OrderBy(id => id).ToArray() },
-            "Glass" => new { product.GlassProfile!.Notes, ModelIds = product.GlassProfile.ModelFits.Select(fit => fit.ModelId).OrderBy(id => id).ToArray() },
+            "Case" => new { product.CaseProfile!.Notes, ModelIds = product.CaseProfile.ModelFits.Where(fit => !fit.IsDeleted).Select(fit => fit.ModelId).OrderBy(id => id).ToArray() },
+            "Glass" => new { product.GlassProfile!.Notes, ModelIds = product.GlassProfile.ModelFits.Where(fit => !fit.IsDeleted).Select(fit => fit.ModelId).OrderBy(id => id).ToArray() },
             _ => null
         };
 

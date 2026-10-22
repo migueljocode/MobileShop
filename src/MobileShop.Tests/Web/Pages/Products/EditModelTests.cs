@@ -286,7 +286,7 @@ public class EditModelTests : RepoTestBase
         Assert.Equal("CompatibleModels", duplicate.ErrorField);
         var selectedIds = type == "Case"
             ? (await Context.Cases.AsNoTracking().Include(item => item.ModelFits).SingleAsync(item => item.ProductId == product.Id)).ModelFits.Select(fit => fit.ModelId).ToArray()
-            : (await Context.Glasses.AsNoTracking().Include(item => item.ModelFits).SingleAsync(item => item.ProductId == product.Id)).ModelFits.Select(fit => fit.ModelId).ToArray();
+            : (await Context.Glasses.AsNoTracking().Include(item => item.ModelFits).SingleAsync(item => item.ProductId == product.Id)).ModelFits.Where(fit => !fit.IsDeleted).Select(fit => fit.ModelId).ToArray();
         Assert.Equal([compatibleModelId.Value], selectedIds);
     }
 

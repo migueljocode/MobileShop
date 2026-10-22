@@ -182,7 +182,7 @@ public class EditModel(
             // Charger-specific
             Wattage = product.ChargerProfile?.Wattage,
             Pd = product.ChargerProfile?.Pd,
-            PortCount = product.ChargerProfile?.PortCount,
+            PortCount = product.ChargerProfile?.PortCount ?? product.PowerBankProfile?.PortCount,
             // Power Bank-specific
             CapacityMah = product.PowerBankProfile?.CapacityMah,
             MaxWattage = product.PowerBankProfile?.MaxWattage,
@@ -193,8 +193,8 @@ public class EditModel(
             StorageCapacityLabel = product.PortableStorageProfile?.StorageCapacityNavigation?.Gb + " GB",
             Speed = product.PortableStorageProfile?.Speed,
             // Case/Glass-specific
-            CompatibleModels = product.CaseProfile?.ModelFits?.Select(f => f.ModelId).ToList() ??
-                               product.GlassProfile?.ModelFits?.Select(f => f.ModelId).ToList() ?? [],
+            CompatibleModels = product.CaseProfile?.ModelFits?.Where(f => !f.IsDeleted).Select(f => f.ModelId).ToList() ??
+                               product.GlassProfile?.ModelFits?.Where(f => !f.IsDeleted).Select(f => f.ModelId).ToList() ?? [],
             TestPeriodDays = product.SecondHandProfile?.TestPeriodDays,
             UsedDurationDays = product.SecondHandProfile?.UsedDurationDays,
             SecondHandNotes = product.SecondHandProfile?.Notes
