@@ -122,7 +122,13 @@ public class EditModel(
         }
 
         if (type is "Case" or "Glass")
-            CompatibleModelOptions = await dataService.GetCompatibleModelsAsync();
+        {
+            var manufacturers = await dataService.GetManufacturersAsync();
+            var modelOptions = new List<DropdownOptionViewModel>();
+            foreach (var manufacturer in manufacturers)
+                modelOptions.AddRange(await dataService.GetModelsAsync(manufacturer.Id));
+            CompatibleModelOptions = modelOptions.OrderBy(option => option.Name).ToList().AsReadOnly();
+        }
     }
 
     private static EditProductInputModel MapToEditModel(Product product, string type)

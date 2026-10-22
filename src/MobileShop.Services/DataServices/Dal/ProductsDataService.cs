@@ -353,13 +353,6 @@ public class ProductsDataService(
             .AsReadOnly();
 
     /// <inheritdoc />
-    public async Task<IReadOnlyList<DropdownOptionViewModel>> GetCompatibleModelsAsync()
-        => (await models.FindAllAsync(model => model.CategoryNavigation.Name == PhoneCategoryName))
-            .OrderBy(model => model.Name)
-            .Select(model => new DropdownOptionViewModel(model.Id, model.Name))
-            .ToList()
-            .AsReadOnly();
-
     public async Task<IReadOnlyList<DropdownOptionViewModel>> GetColorsAsync()
         => (await colors.FindAllAsync()).Select(c => new DropdownOptionViewModel(c.Id, c.Name)).ToList().AsReadOnly();
 
