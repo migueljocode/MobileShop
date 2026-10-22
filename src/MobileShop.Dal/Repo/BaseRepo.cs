@@ -250,4 +250,22 @@ public class BaseRepo<T>(AppDbContext context) : IBaseRepo<T> where T : BaseEnti
             query = query.Include(include);
         return await query.FirstOrDefaultAsync(e => e.Id == id);
     }
+
+    /// <inheritdoc />
+    public virtual async Task<T?> FindWithIncludesAsync(int id, params string[] includePaths)
+    {
+        var query = Table.AsNoTracking();
+        foreach (var includePath in includePaths)
+            query = query.Include(includePath);
+        return await query.FirstOrDefaultAsync(e => e.Id == id);
+    }
+
+    /// <inheritdoc />
+    public virtual async Task<T?> FindTrackedWithIncludesAsync(int id, params string[] includePaths)
+    {
+        var query = Table.AsTracking();
+        foreach (var includePath in includePaths)
+            query = query.Include(includePath);
+        return await query.FirstOrDefaultAsync(e => e.Id == id);
+    }
 }
