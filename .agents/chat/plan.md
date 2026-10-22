@@ -25,15 +25,8 @@
 - Confidence: HIGH (length), MEDIUM (connectors, see Briefing)
 
 ## ~~[x] Step 2 — Keep spaced phone numbers in order on RTL invoices~~
-- Files: inspect: `src/MobileShop.Services/PDF/Configuration/QuestPdfGenerator.cs`, `src/MobileShop.Models/Extensions/MoneyExtensions.cs`, `src/MobileShop.Tests/Services/PDF/QuestPdfGeneratorTests.cs`; create: `src/MobileShop.Models/Extensions/PhoneNumberExtensions.cs`, `src/MobileShop.Tests/Models/Extensions/PhoneNumberExtensionsTests.cs` (next to `MoneyExtensionsTests.cs`); modify: `QuestPdfGenerator.cs`, `QuestPdfGeneratorTests.cs`; do not touch: `ComposePagePersian`/`RenderFooterPersian`/`RenderPartyInfoPersian` and English-layout phone lines (not RTL), PDF settings, appsettings, API files.
-- Symbols: new `PhoneNumberExtensions.ToBidiSafePhone(this string value)`; call site in `QuestPdfGenerator.RenderFactorFooter`: `text.Span(_settings.ShopPhone)` (inside `ContentFromRightToLeft()`, ~line 371). The only RTL phone site; the factor renders no buyer/seller phone.
-- Current -> Desired: spaces inside a phone are neutral characters, so the bidi algorithm reverses the digit groups in RTL text. Desired: the phone prints exactly as typed (`0911 500 9109`, Persian or Latin digits), left-to-right.
-- Change: `ToBidiSafePhone` trims the value, collapses each whitespace run into a single no-break space (U+00A0) so the whole number stays one digit run, leaves digits and `+` untouched, and returns an empty string for null/blank. Apply it at that one call site only. Do not convert digits (no `ToPersianDigits`). Only if the rendered check below still shows a leading `+` on the wrong side, additionally wrap the result in LRM (U+200E) and re-check for missing glyphs.
-- Depends on: none (independent of Step 1).
-- Edge cases / error handling: null/blank phone keeps the current "skip the line" behavior; tabs/multiple spaces collapse to one; hyphenated numbers (`0911-500-9109`) pass through unchanged; Persian digits typed by the user stay Persian; value is never mutated in settings or stored data.
-- Tests: unit tests for `ToBidiSafePhone` (spaced Latin, spaced Persian digits, multiple spaces, blank/null, `+98 911 500 9109`); in `QuestPdfGeneratorTests` add a `GenerateTransactionFactor` case with `ShopPhone = "0911 500 9109"` asserting a non-empty PDF and no exception.
-- Verify: CI green. Rendered check (required): generate the transaction factor (`GenerateTransactionFactor`) with `ShopPhone` set to `0911 500 9109` and to the Persian-digit equivalent, rasterize page 1 (e.g. `pdftoppm -r 150`) and confirm the footer reads `0911 500 9109` in that order and no tofu boxes appear. Record the result in `act.md`.
-- Done when: both spaced variants render in the typed order in the factor footer, and the Persian invoice output is unchanged; unit tests pass; only the listed files changed.
+- Result: NBSP approach (`ToBidiSafePhone`, commit 3c51d05) FAILED on the rendered factor. Replaced by `PhoneNumberExtensions.ToRtlDisplayPhone()` (commits 1705fd4, 226d6ac): it splits an unspaced 11-digit number 4-3-4, reverses the groups and joins them with single spaces. Applied to `_settings.ShopPhone` in `QuestPdfGenerator.RenderFactorFooter` and to the factor contact phone constant `FactorContactPhone` (`۰۹۱۱۵۰۰۹۱۰۹`), which is stored in natural order.
+- Verification: CI #675 and #678 Success. Rendered check: user confirmed the reversed-typed value printed correctly; final-commit render still needs a re-check.
 - Risk: MEDIUM
 - Confidence: MEDIUM
 
