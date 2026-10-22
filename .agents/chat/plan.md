@@ -11,7 +11,7 @@
 - Reviewer correction (MEDIUM): only the factor footer is actually right-to-left. `ComposePagePersian`/`RenderFooterPersian` (the Persian invoice) set no `ContentFromRightToLeft`, so their phone lines are unaffected and stay out of scope.
 - Step 2 risk: zero-width marks may render as tofu in Vazirmatn. Preferred approach uses only NBSP (U+00A0); add LRM only if rendering proves it is needed.
 
-## [ ] Step 1 — Cable length step and mandatory connectors (client side)
+## ~~[x] Step 1 — Cable length step and mandatory connectors (client side)~~
 - Files: inspect: `src/MobileShop.Web/Pages/Shared/_ProductEditForm.cshtml`, `src/MobileShop.Web/Pages/Shared/_ProductCreateCableForm.cshtml`, `src/MobileShop.Web/Pages/Products/Edit.cshtml.cs`, `src/MobileShop.Models/ViewModels/Web/BindModels/EditProductInputModel.cs`; modify: `src/MobileShop.Web/Pages/Shared/_ProductEditForm.cshtml` (Cable section and the `DisplaySize` input only); do not touch: service layer, Edit page model, input models, API files, sample data.
 - Symbols: Cable section of `_ProductEditForm.cshtml`: selects `Product.Connector1`, `Product.Connector2`, input `Product.CableLength`.
 - Current -> Desired: length input has `step="0.1"` so `1.00`/`1.01` fail client validation; connector selects have the `-- Select connector --` placeholder and no `required`. Desired: length accepts two decimals (matches Create's `step="0.01"` and the decimal column); both connector selects require a real choice before submit.
