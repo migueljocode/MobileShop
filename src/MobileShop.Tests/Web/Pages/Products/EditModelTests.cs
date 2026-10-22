@@ -93,7 +93,21 @@ public class EditModelTests : RepoTestBase
     public async Task Case_edit_populates_phone_model_options_and_uses_model_ids_for_selections()
     {
         var product = TestDataHelpers.CreateProduct(Context);
-        var phoneModel = await Context.Models.Include(model => model.CategoryNavigation).FirstAsync(model => model.CategoryNavigation.Name == "Phone");
+        var phoneCategory = new Category { Name = "Phone" };
+        var phoneManufacturer = new Manufacturer { Name = $"Phone manufacturer {Guid.NewGuid():N}" };
+        Context.Categories.Add(phoneCategory);
+        Context.Manufacturers.Add(phoneManufacturer);
+        await Context.SaveChangesAsync();
+
+        var phoneModel = new Model
+        {
+            ManufacturerId = phoneManufacturer.Id,
+            CategoryId = phoneCategory.Id,
+            Name = "Compatible phone model"
+        };
+        Context.Models.Add(phoneModel);
+        await Context.SaveChangesAsync();
+
         Context.Cases.Add(new Case { ProductId = product.Id, ModelFits = [new CaseModelFit { ModelId = phoneModel.Id, ModelNavigation = phoneModel }] });
         await Context.SaveChangesAsync();
         var page = new EditModel(_service);
