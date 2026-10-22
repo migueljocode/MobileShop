@@ -8,6 +8,8 @@ public sealed class QuestPdfGenerator(IOptions<PdfSettings> options) : IPdfGener
 {
     private readonly PdfSettings _settings = options.Value;
 
+    private const string FactorContactPhone = "۰۹۱۱۵۰۰۹۱۰۹";
+
     /// <inheritdoc />
     public byte[] Generate(InvoiceViewModel model)
     {
@@ -430,7 +432,7 @@ public sealed class QuestPdfGenerator(IOptions<PdfSettings> options) : IPdfGener
                         .FontSize(8)
                         .FontColor("#627D98")
                         .FontFamily("Vazirmatn");
-                    text.Span("۹۱۰۹ ۵۰۰ ۰۹۱۱")
+                    text.Span(FactorContactPhone.ToRtlDisplayPhone())
                         .FontSize(8)
                         .FontColor("#627D98")
                         .FontFamily("Vazirmatn");
