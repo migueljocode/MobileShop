@@ -1,20 +1,24 @@
-# Plan — Stage 17 — Repair product edit loading, binding, and update integrity
+# Plan — Stage 18 — Fix Phone details identity and edit feedback
 
-## Completed steps
-- ~~[x] Step 1 — Case/Glass navigation loading~~ Case and Glass edit mapping safely loads current eligible fits.
-- ~~[x] Step 2 — Apple ID Details lookup~~ Details navigation uses the canonical product identity and rejects unsupported type keys.
-- ~~[x] Step 3 — Cable connector validation~~ Connector options round-trip and invalid connector values are rejected server-side.
-- ~~[x] Step 4 — Type-safe, no-op-safe updates~~ Validation precedes mutation; unrelated profiles and unchanged product state are preserved.
-- ~~[x] Step 5 — Power Bank ports and accessory dropdowns~~ Port collections and counts stay synchronized; accessory options use validated model IDs.
-- ~~[x] Step 6 — Cross-type regression coverage and CI~~ Edit mapping/update regressions cover all 11 product types; CI passed.
+## Reviewer Briefing
+- HIGH risk, high confidence: Phone inventory links and edit redirects use the base `Product.Id`, but `GetDetailsAsync` currently queries the Phone profile by `Phone.Id`. Use the product ID contract and test mismatched/colliding IDs.
+- MEDIUM risk, high confidence: Edit stores `TempData["SuccessMessage"]`, but Details does not render it. Reuse the existing success partial.
+- Keep the four LOW audit findings out of scope: edit-form formatting, per-manufacturer query count, Glass compatibility display, and paid-price transaction semantics.
+
+## [ ] Step 1 — Fix Phone details identity and render edit feedback
+- Files: inspect: `src/MobileShop.Web/Pages/Products/Index.cshtml`, `src/MobileShop.Web/Pages/Products/Edit.cshtml.cs`, `src/MobileShop.Services/DataServices/Dal/ProductsDataService.cs`, `src/MobileShop.Web/Pages/Products/Details.cshtml.cs`, `src/MobileShop.Web/Pages/Products/Details.cshtml`, `src/MobileShop.Web/Pages/Shared/_ProductCreateSuccess.cshtml`, and `src/MobileShop.Tests/Services/DataServices/Dal/ProductsDataServiceTests.cs`; modify only `ProductsDataService.cs`, `Details.cshtml.cs`, `Details.cshtml`, and `ProductsDataServiceTests.cs`. Do not touch API files/stubs/config/endpoints, sample-data JSON, or unrelated findings.
+- Symbols: `ProductsDataService.GetDetailsAsync(int id, string type)`, `DetailsModel`, and Phone details tests in `ProductsDataServiceTests`.
+- Current -> Desired: Phone links and edit redirects send the base `Product.Id`, but the Phone details branch queries by `Phone.Id`. Edit sets `TempData["SuccessMessage"]`, but Details never renders it.
+- Change: query the Phone using `phone.ProductId == id` only; add `[TempData] public string? SuccessMessage { get; set; }` to `DetailsModel`; render `/Pages/Shared/_ProductCreateSuccess.cshtml` with `Model.SuccessMessage`; update Phone detail tests to pass `Product.Id` and add a regression where the requested product ID differs from its Phone profile ID and a colliding profile ID belongs to another phone.
+- Depends on: none.
+- Edge cases / error handling: unknown product IDs still return null/NotFound; never combine profile and product IDs with an `Id == id || ProductId == id` predicate; empty TempData must not show an alert. Preserve message text, existing transaction projection, and all unrelated behavior.
+- Tests: focused Phone details tests in `ProductsDataServiceTests.cs`, including distinct and colliding IDs. No schema, seed-data, or API changes.
+- Verify: inspect exact diff and wait for GitHub Actions build/test. Do not run local `dotnet build/test` unless CI is unavailable or requested.
+- Done when: Phone Details/Edit resolve the correct product independently of profile IDs; post-save and no-op feedback renders on Details; regression tests pass; CI is green; no out-of-scope files change.
+- Risk: HIGH
+- Confidence: HIGH
 
 ## Global Definition of Done
-- Apple ID save returns to the correct product Details page.
-- Case and Glass edit pages handle missing navigation safely and retain valid compatibility selections.
-- Cable connectors, Power Bank ports, Portable Storage kind, and Case/Glass model options validate and round-trip.
-- No-op updates preserve product pricing and unrelated profiles.
-- Cross-type regression suite and GitHub Actions pass.
-- Scope restrictions were respected; no API or sample-data changes.
-
-## Handoff
-Stage 17 is complete. No carry-over is recorded. Next role: Planner to identify the next stage from `.agents/TODO.md`.
+- Canonical base-product ID lookup for Phone details with mismatched/colliding-ID regression coverage.
+- Edit success/no-op feedback renders through the existing partial and TempData.
+- Focused tests and GitHub Actions pass; scope restrictions are respected.
