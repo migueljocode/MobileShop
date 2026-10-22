@@ -1,6 +1,6 @@
-- Commit: [1bf800b4afb763685e00675d99925d763cd2cfc3](https://github.com/migueljocode/MobileShop/commit/1bf800b4afb763685e00675d99925d763cd2cfc3) — `fix(products): resolve phone details by product ID`
-- Verification: Action #673 — Success (build/test and both log utility jobs).
-- Limitations: LOW audit findings remain out of scope as planned.
-- Friction noted: The specialized workflow-run helper filters to pull-request runs; the repository's Actions REST endpoint was used to verify the push run.
-- Problems: None.
+- Commit: [24f047c](https://github.com/migueljocode/MobileShop/commit/24f047c) — `fix(products): allow two-decimal cable and screen sizes and require connectors`
+- Verification: `Action: #674 — Success` (build/test). Diff matches Step 1: `CableLength` and `DisplaySize` step `0.1`→`0.01`; `required` added to the Connector 1 and Connector 2 selects. The placeholder option (`value=""`) stays.
+- Limitations: Manual checks from the plan (cable `1.00` saves untouched, `1.01` saves, connector placeholder blocks submit) were not run in a browser; app not launched. Server-side checks unchanged.
+- Friction noted: None
+- Problems: None
 - Status: COMPLETE
