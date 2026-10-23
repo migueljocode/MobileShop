@@ -8,6 +8,7 @@ public sealed class QuestPdfGenerator(IOptions<PdfSettings> options) : IPdfGener
 {
     private readonly PdfSettings _settings = options.Value;
 
+    private const string FactorShopName = "زون موبایل";
     private const string FactorContactPhone = "۰۹۱۱۵۰۰۹۱۰۹";
 
     private const string PhoneGlyph =
@@ -190,7 +191,7 @@ public sealed class QuestPdfGenerator(IOptions<PdfSettings> options) : IPdfGener
         )
             is { Length: > 0 } value
             ? value
-            : "در ردیف‌های فاکتور مشخص شده است";
+            : FactorShopName;
 
     private static void FactorInfoCard(IContainer container, string title, string value) =>
         container
