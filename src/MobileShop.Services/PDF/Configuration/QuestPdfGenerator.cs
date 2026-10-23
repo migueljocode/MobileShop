@@ -231,8 +231,6 @@ public sealed class QuestPdfGenerator(IOptions<PdfSettings> options) : IPdfGener
                 columns.ConstantColumn(105);
                 columns.RelativeColumn(1.15f);
                 columns.RelativeColumn(2.25f);
-                columns.ConstantColumn(60);
-                columns.ConstantColumn(85);
                 columns.ConstantColumn(35);
             });
 
@@ -241,8 +239,6 @@ public sealed class QuestPdfGenerator(IOptions<PdfSettings> options) : IPdfGener
                 HeaderCell(header.Cell(), "مبلغ (ریال)");
                 HeaderCell(header.Cell(), "طرف معامله");
                 HeaderCell(header.Cell(), "محصول");
-                HeaderCell(header.Cell(), "نوع");
-                HeaderCell(header.Cell(), "تاریخ");
                 HeaderCell(header.Cell(), "#");
             });
 
@@ -259,14 +255,6 @@ public sealed class QuestPdfGenerator(IOptions<PdfSettings> options) : IPdfGener
                 );
                 BodyCell(table.Cell(), row.PersonLabel, background);
                 BodyCell(table.Cell(), row.ProductLabel, background);
-                BodyCell(table.Cell(), DirectionLabel(row.Direction), background);
-                BodyCell(
-                    table.Cell(),
-                    row.Date.ToJalaliDateTimeString().ToPersianDigits(),
-                    background,
-                    false,
-                    true
-                );
                 BodyCell(
                     table.Cell(),
                     (index + 1).ToString().ToPersianDigits(),
@@ -318,9 +306,6 @@ public sealed class QuestPdfGenerator(IOptions<PdfSettings> options) : IPdfGener
         if (amount)
             label.SemiBold();
     }
-
-    private static string DirectionLabel(TransactionDirection direction) =>
-        direction == TransactionDirection.Buy ? "خرید" : "فروش";
 
     private static void RenderFactorSummary(
         IContainer container,
