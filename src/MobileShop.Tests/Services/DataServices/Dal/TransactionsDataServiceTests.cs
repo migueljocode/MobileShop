@@ -10,7 +10,13 @@ public class TransactionsDataServiceTests : RepoTestBase
     {
         public byte[] Generate(InvoiceViewModel model) => [1, 2, 3];
 
-        public byte[] GenerateTransactionFactor(TransactionFactorViewModel model) => [4, 5, 6];
+        public TransactionFactorViewModel? LastFactor { get; private set; }
+
+        public byte[] GenerateTransactionFactor(TransactionFactorViewModel model)
+        {
+            LastFactor = model;
+            return [4, 5, 6];
+        }
     }
 
     public TransactionsDataServiceTests()
@@ -574,4 +580,74 @@ public class TransactionsDataServiceTests : RepoTestBase
         Assert.Equal(1_250, row.SuggestedPrice);
     }
 
+    private Product AddTwinProduct(Product template, int? colorId = null)
+    {
+        var twin = new Product
+        {
+            Price = template.Price,
+            ModelId = template.ModelId,
+            ColorId = colorId,
+            Barcode = Guid.NewGuid().ToString("N")[..12],
+        };
+        Context.Products.Add(twin);
+        Context.SaveChanges();
+        return twin;
+    }
+
+    [Fact]
+    public async Task GenerateListFactorPdfAsync_merges_identical_specs_into_one_line()
+    {
+        var product = TestDataHelpers.CreateProduct(Context);
+        var twin = AddTwinProduct(product);
+        var seller = AddSeller("Ali", "Zed");
+        var customer = AddCustomer("Sara", "Ahmadi");
+        AddTransaction(product, seller.Id, customer.Id, TransactionDirection.Sell, new DateTime(2024, 1, 1), 500);
+        AddTransaction(twin, seller.Id, customer.Id, TransactionDirection.Sell, new DateTime(2024, 1, 2), 500);
+
+        await _service.GenerateListFactorPdfAsync("all", 50, true, []);
+
+        var line = Assert.Single(_pdfGenerator.LastFactor!.Lines);
+        Assert.Equal(2, line.Quantity);
+        Assert.Equal(1_000, line.PaidAmount);
+    }
+
+    [Fact]
+    public async Task GenerateListFactorPdfAsync_keeps_different_colours_on_separate_lines()
+    {
+        var blue = new Color { Name = "Blue" };
+        var green = new Color { Name = "Green" };
+        Context.Colors.AddRange(blue, green);
+        Context.SaveChanges();
+
+        var product = TestDataHelpers.CreateProduct(Context);
+        product.ColorId = blue.Id;
+        Context.SaveChanges();
+        var twin = AddTwinProduct(product, green.Id);
+        var seller = AddSeller("Ali", "Zed");
+        var customer = AddCustomer("Sara", "Ahmadi");
+        AddTransaction(product, seller.Id, customer.Id, TransactionDirection.Sell, new DateTime(2024, 1, 1), 500);
+        AddTransaction(twin, seller.Id, customer.Id, TransactionDirection.Sell, new DateTime(2024, 1, 2), 500);
+
+        await _service.GenerateListFactorPdfAsync("all", 50, true, []);
+
+        var lines = _pdfGenerator.LastFactor!.Lines;
+        Assert.Equal(2, lines.Count);
+        Assert.All(lines, line => Assert.Equal(1, line.Quantity));
+        Assert.EndsWith("Blue", lines[0].ProductText);
+        Assert.EndsWith("Green", lines[1].ProductText);
+    }
+
+    [Fact]
+    public async Task GetTransactionFactorPdfAsync_fills_the_row_with_the_product_spec_key()
+    {
+        var product = TestDataHelpers.CreateProduct(Context);
+        var seller = AddSeller("Ali", "Zed");
+        var customer = AddCustomer("Sara", "Ahmadi");
+        var transaction = AddTransaction(product, seller.Id, customer.Id, TransactionDirection.Sell, new DateTime(2024, 1, 1));
+
+        await _service.GetTransactionFactorPdfAsync(transaction.Id);
+
+        var row = Assert.Single(_pdfGenerator.LastFactor!.Rows);
+        Assert.Equal(product.ToSpecKey(), row.SpecKey);
+    }
 }

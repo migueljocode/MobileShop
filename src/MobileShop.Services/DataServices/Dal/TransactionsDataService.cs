@@ -114,7 +114,8 @@ public class TransactionsDataService(
         if (details is null)
             return null;
 
-        var model = new TransactionFactorViewModel([details.ToFactorRow(transactionId)], DateTime.Now);
+        var rows = await WithSpecsAsync([details.ToFactorRow(transactionId)]);
+        var model = new TransactionFactorViewModel(rows, DateTime.Now);
         return pdfGenerator.GenerateTransactionFactor(model);
     }
 
@@ -432,7 +433,7 @@ public class TransactionsDataService(
             rows = resolved;
         }
 
-        var model = new TransactionFactorViewModel(rows, DateTime.Now);
+        var model = new TransactionFactorViewModel(await WithSpecsAsync(rows), DateTime.Now);
         return new FactorPdfResult(true, pdfGenerator.GenerateTransactionFactor(model), null);
     }
 
@@ -441,30 +442,56 @@ public class TransactionsDataService(
     /// because the invoice shape needs eager <c>Include</c> chains that <see cref="IBaseRepo{T}"/> does not expose.
     /// </summary>
     private Transaction? LoadInvoiceGraph(int transactionId)
-        => context.Transactions
-            .Include(t => t.SellerNavigation).ThenInclude(s => s.PersonNavigation)
-            .Include(t => t.CustomerNavigation).ThenInclude(c => c.PersonNavigation)
-            .Include(t => t.ProductNavigation).ThenInclude(p => p.ModelNavigation).ThenInclude(m => m.ManufacturerNavigation)
-            .Include(t => t.ProductNavigation).ThenInclude(p => p.ModelNavigation).ThenInclude(m => m.CategoryNavigation)
-            .Include(t => t.ProductNavigation).ThenInclude(p => p.ColorNavigation)
-            .Include(t => t.ProductNavigation).ThenInclude(p => p.PhoneProfile)
-            .Include(t => t.ProductNavigation).ThenInclude(p => p.AppleIdProfile)
-            .Include(t => t.ProductNavigation).ThenInclude(p => p.SecondHandProfile)
-            .Include(t => t.ProductNavigation).ThenInclude(p => p.GuaranteeProfile)
-            .Include(t => t.ProductNavigation).ThenInclude(p => p.LaptopProfile).ThenInclude(laptop => laptop!.CpuNavigation)
-            .Include(t => t.ProductNavigation).ThenInclude(p => p.LaptopProfile).ThenInclude(laptop => laptop!.GpuNavigation)
-            .Include(t => t.ProductNavigation).ThenInclude(p => p.CableProfile)
-            .Include(t => t.ProductNavigation).ThenInclude(p => p.ChargerProfile)
-            .Include(t => t.ProductNavigation).ThenInclude(p => p.PowerBankProfile)
-            .Include(t => t.ProductNavigation).ThenInclude(p => p.PortableStorageProfile)
-            .Include(t => t.ProductNavigation)
-                .ThenInclude(p => p.PortableStorageProfile)
-                .ThenInclude(s => s!.StorageCapacityNavigation)
-            .Include(t => t.ProductNavigation).ThenInclude(p => p.CaseProfile)
-            .Include(t => t.ProductNavigation).ThenInclude(p => p.GlassProfile)
-            .Include(t => t.ProductNavigation).ThenInclude(p => p.TabletProfile)
-            .Include(t => t.ProductNavigation).ThenInclude(p => p.SmartWatchProfile)
+        => IncludeProductGraph(context.Transactions
+                .Include(t => t.SellerNavigation).ThenInclude(s => s.PersonNavigation)
+                .Include(t => t.CustomerNavigation).ThenInclude(c => c.PersonNavigation))
             .FirstOrDefault(t => t.Id == transactionId);
+
+    /// <summary>Eagerly loads everything a product's invoice text and spec identity need.</summary>
+    private static IQueryable<Transaction> IncludeProductGraph(IQueryable<Transaction> query) => query
+        .Include(t => t.ProductNavigation).ThenInclude(p => p.ModelNavigation).ThenInclude(m => m.ManufacturerNavigation)
+        .Include(t => t.ProductNavigation).ThenInclude(p => p.ModelNavigation).ThenInclude(m => m.CategoryNavigation)
+        .Include(t => t.ProductNavigation).ThenInclude(p => p.ColorNavigation)
+        .Include(t => t.ProductNavigation).ThenInclude(p => p.DeviceSpecProfile).ThenInclude(d => d!.StorageCapacityNavigation)
+        .Include(t => t.ProductNavigation).ThenInclude(p => p.PhoneProfile)
+        .Include(t => t.ProductNavigation).ThenInclude(p => p.AppleIdProfile)
+        .Include(t => t.ProductNavigation).ThenInclude(p => p.SecondHandProfile)
+        .Include(t => t.ProductNavigation).ThenInclude(p => p.GuaranteeProfile)
+        .Include(t => t.ProductNavigation).ThenInclude(p => p.LaptopProfile).ThenInclude(laptop => laptop!.CpuNavigation)
+        .Include(t => t.ProductNavigation).ThenInclude(p => p.LaptopProfile).ThenInclude(laptop => laptop!.GpuNavigation)
+        .Include(t => t.ProductNavigation).ThenInclude(p => p.CableProfile)
+        .Include(t => t.ProductNavigation).ThenInclude(p => p.ChargerProfile)
+        .Include(t => t.ProductNavigation).ThenInclude(p => p.PowerBankProfile)
+        .Include(t => t.ProductNavigation).ThenInclude(p => p.PortableStorageProfile)
+        .Include(t => t.ProductNavigation)
+            .ThenInclude(p => p.PortableStorageProfile)
+            .ThenInclude(s => s!.StorageCapacityNavigation)
+        .Include(t => t.ProductNavigation).ThenInclude(p => p.CaseProfile).ThenInclude(c => c!.ModelFits)
+        .Include(t => t.ProductNavigation).ThenInclude(p => p.GlassProfile).ThenInclude(g => g!.ModelFits)
+        .Include(t => t.ProductNavigation).ThenInclude(p => p.TabletProfile)
+        .Include(t => t.ProductNavigation).ThenInclude(p => p.SmartWatchProfile);
+
+    /// <summary>
+    /// Fills each factor row with its product's spec key and label, using one query for all rows.
+    /// A row whose transaction is not found keeps empty spec values.
+    /// </summary>
+    private async Task<IReadOnlyList<TransactionFactorRowViewModel>> WithSpecsAsync(
+        IReadOnlyList<TransactionFactorRowViewModel> rows)
+    {
+        var ids = rows.Select(row => row.TransactionId).Distinct().ToList();
+        var transactionsWithSpecs = await IncludeProductGraph(context.Transactions.Where(t => ids.Contains(t.Id)))
+            .ToListAsync();
+
+        var specs = transactionsWithSpecs.ToDictionary(
+            t => t.Id,
+            t => (Key: t.ProductNavigation.ToSpecKey(), Label: t.ProductNavigation.ToSpecLabel()));
+
+        return rows
+            .Select(row => specs.TryGetValue(row.TransactionId, out var spec)
+                ? row with { SpecKey = spec.Key, SpecLabel = spec.Label }
+                : row)
+            .ToList();
+    }
 
     private static IEnumerable<(string Label, string Value)> GetProductExtras(Product product)
     {
