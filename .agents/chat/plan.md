@@ -1,9 +1,5 @@
 # Plan — Stage 20 — Factor lines grouped by product specs with quantity and paid amount
 
-## Proposed stages
-(Stay here until the Planner adds them to `TODO.md`; this request did not ask for a `TODO.md` change.)
-- [ ] Stage 20 — Factor lines grouped by product specs with quantity and paid amount
-
 ## Requirements
 - Quantity is **not stored**. It is the number of factor rows that are the same product, merged into one line (e.g. `20× iPhone 17 glass`).
 - Products that differ in specs (e.g. iPhone 17 blue vs green) stay on separate lines.

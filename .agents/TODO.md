@@ -11,3 +11,4 @@
 - [x] ~~Stage 17 — Repair product edit loading, binding, and update integrity~~
 - [x] ~~Stage 18 — Fix Phone details identity and edit feedback~~
 - [x] ~~Stage 19 — Cable edit validation and invoice phone display~~
+- [ ] Stage 20 — Factor lines grouped by product specs with quantity and paid amount
