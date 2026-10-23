@@ -86,37 +86,56 @@ public sealed class QuestPdfGenerator(IOptions<PdfSettings> options) : IPdfGener
             .PaddingBottom(12)
             .BorderBottom(1.5f)
             .BorderColor("#243B53")
-            .Row(row =>
+            .Column(header =>
             {
-                row.Spacing(16);
+                header.Spacing(6);
 
-                row.RelativeItem(1.15f)
-                    .AlignMiddle()
-                    .Column(column =>
+                header
+                    .Item()
+                    .Row(row =>
                     {
-                        column.Spacing(4);
+                        row.Spacing(16);
 
-                        column
-                            .Item()
+                        row.RelativeItem(1.15f)
+                            .AlignMiddle()
                             .AlignRight()
                             .Text("فاکتور تراکنش‌ها")
                             .FontSize(20)
                             .SemiBold()
                             .FontColor("#102A43")
                             .FontFamily("Vazirmatn");
-                        column
-                            .Item()
-                            .AlignRight()
-                            .Text(text =>
+
+                        row.RelativeItem()
+                            .AlignMiddle()
+                            .Column(column =>
                             {
-                                text.Span("تاریخ صدور: ").SemiBold().FontFamily("Vazirmatn");
-                                text.Span(
-                                        model.GeneratedAt.ToJalaliDateTimeMeridiemRtlString().ToPersianDigits()
-                                    )
+                                column.Spacing(3);
+                                column
+                                    .Item()
+                                    .AlignLeft()
+                                    .Text(_settings.ShopName)
+                                    .FontSize(19)
+                                    .SemiBold()
+                                    .FontColor("#102A43")
                                     .FontFamily("Vazirmatn");
+                                if (!string.IsNullOrWhiteSpace(_settings.ShopAddress))
+                                    column
+                                        .Item()
+                                        .AlignLeft()
+                                        .Text(_settings.ShopAddress)
+                                        .FontSize(8)
+                                        .FontColor("#627D98")
+                                        .FontFamily("Vazirmatn");
                             });
-                        column
-                            .Item()
+                    });
+
+                header
+                    .Item()
+                    .Row(row =>
+                    {
+                        row.Spacing(16);
+
+                        row.RelativeItem(1.15f)
                             .AlignRight()
                             .Text(text =>
                             {
@@ -124,29 +143,11 @@ public sealed class QuestPdfGenerator(IOptions<PdfSettings> options) : IPdfGener
                                 text.Span(model.Rows.Count.ToString().ToPersianDigits())
                                     .FontFamily("Vazirmatn");
                             });
-                    });
 
-                row.RelativeItem()
-                    .AlignMiddle()
-                    .Column(column =>
-                    {
-                        column.Spacing(3);
-                        column
-                            .Item()
+                        row.RelativeItem()
                             .AlignLeft()
-                            .Text(_settings.ShopName)
-                            .FontSize(19)
-                            .SemiBold()
-                            .FontColor("#102A43")
+                            .Text(model.GeneratedAt.ToJalaliDateTimeMeridiemRtlString().ToPersianDigits())
                             .FontFamily("Vazirmatn");
-                        if (!string.IsNullOrWhiteSpace(_settings.ShopAddress))
-                            column
-                                .Item()
-                                .AlignLeft()
-                                .Text(_settings.ShopAddress)
-                                .FontSize(8)
-                                .FontColor("#627D98")
-                                .FontFamily("Vazirmatn");
                     });
             });
 
