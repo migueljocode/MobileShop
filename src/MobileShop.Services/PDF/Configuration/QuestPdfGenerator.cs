@@ -155,7 +155,13 @@ public sealed class QuestPdfGenerator(IOptions<PdfSettings> options) : IPdfGener
             column.Item().Element(c => RenderFactorParties(c, model));
             column.Item().Element(c => RenderFactorTable(c, model));
             column.Item().Element(c => RenderFactorSummary(c, model));
-            column.Item().Element(RenderFactorTermsSection);
+            column
+                .Item()
+                .ExtendVertical()
+                .AlignBottom()
+                .PaddingBottom(10)
+                .ShowEntire()
+                .Element(RenderFactorTermsSection);
         });
 
     private static void RenderFactorParties(

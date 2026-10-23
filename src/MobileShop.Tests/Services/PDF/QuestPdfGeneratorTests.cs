@@ -180,6 +180,22 @@ public class QuestPdfGeneratorTests
         File.WriteAllBytes(
             Path.Combine(outputDirectory, "spaced-phone-factor.pdf"),
             CreateSpacedPhoneGenerator().GenerateTransactionFactor(single));
+
+        var multiPage = Factor(
+            Enumerable.Range(1, 90)
+                .Select(id => new TransactionFactorRowViewModel(
+                    id,
+                    new(2026, 1, 1 + id % 28, 10, 30, 0, DateTimeKind.Utc),
+                    id % 2 == 0 ? TransactionDirection.Sell : TransactionDirection.Buy,
+                    "Apple iPhone 17 Pro Max 512GB",
+                    120_000_000 + id * 1_234_568,
+                    id % 2 == 0 ? "Customer" : "Seller",
+                    "سارا احمدی"))
+                .ToArray());
+
+        File.WriteAllBytes(
+            Path.Combine(outputDirectory, "long-multipage-factor.pdf"),
+            _generator.GenerateTransactionFactor(multiPage));
     }
 
     [Fact]
