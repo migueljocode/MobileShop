@@ -20,11 +20,11 @@ public class JalaliDateExtensionsTests
     }
 
     [Theory]
-    [InlineData(14, 30, "1404/07/13 02:30 ب.ظ")]
-    [InlineData(9, 5, "1404/07/13 09:05 ق.ظ")]
-    [InlineData(0, 10, "1404/07/13 12:10 ق.ظ")]
-    [InlineData(12, 0, "1404/07/13 12:00 ب.ظ")]
-    [InlineData(23, 59, "1404/07/13 11:59 ب.ظ")]
-    public void ToJalaliDateTimeMeridiemString_uses_12_hour_clock_with_persian_marker(int hour, int minute, string expected)
-        => Assert.Equal(expected, new DateTime(2025, 10, 5, hour, minute, 0).ToJalaliDateTimeMeridiemString());
+    [InlineData(14, 30, "ب.ظ 02:30 1404/07/13")]
+    [InlineData(9, 5, "ق.ظ 09:05 1404/07/13")]
+    [InlineData(0, 10, "ق.ظ 12:10 1404/07/13")]
+    [InlineData(12, 0, "ب.ظ 12:00 1404/07/13")]
+    [InlineData(23, 59, "ب.ظ 11:59 1404/07/13")]
+    public void ToJalaliDateTimeMeridiemRtlString_lists_marker_time_then_date(int hour, int minute, string expected)
+        => Assert.Equal(expected, new DateTime(2025, 10, 5, hour, minute, 0).ToJalaliDateTimeMeridiemRtlString());
 }
