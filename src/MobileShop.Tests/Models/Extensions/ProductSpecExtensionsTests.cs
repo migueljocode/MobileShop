@@ -21,7 +21,7 @@ public class ProductSpecExtensionsTests
     [Fact]
     public void Same_specs_with_different_barcode_and_imei_share_a_key()
     {
-        var first = MakeMakePhone("A-1", colorId: 1);
+        var first = MakePhone("A-1", colorId: 1);
         var second = MakePhone("A-2", colorId: 1);
         second.PhoneProfile!.IMEI1 = "999999999999999";
 
@@ -96,7 +96,7 @@ public class ProductSpecExtensionsTests
     [Fact]
     public void Label_names_colour_and_built_in_storage()
     {
-        Assert.Equal("Blue · 256 GB", MakeMakePhone("A-1", colorId: 1).ToSpecLabel());
+        Assert.Equal("Blue · 256 GB", MakePhone("A-1", colorId: 1).ToSpecLabel());
     }
 
     [Fact]
