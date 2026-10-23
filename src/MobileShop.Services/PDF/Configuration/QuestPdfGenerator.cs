@@ -389,7 +389,7 @@ public sealed class QuestPdfGenerator(IOptions<PdfSettings> options) : IPdfGener
                         || !string.IsNullOrWhiteSpace(_settings.ShopPhone)
                     )
                         text.Span("  |  ").FontSize(7.5f).FontColor("#829AB1");
-                    text.Element().PaddingBottom(-1.5f).Size(8).Svg(InstagramGlyph);
+                    text.Element().PaddingBottom(-1.5f).Width(8).Height(8).Svg(InstagramGlyph);
                     text.Span(" ").FontSize(7.5f);
                     text.Span(_settings.ShopInstagram).FontSize(7.5f).FontColor("#829AB1");
                 }
