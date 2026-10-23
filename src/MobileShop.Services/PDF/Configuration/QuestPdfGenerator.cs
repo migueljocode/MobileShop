@@ -229,9 +229,9 @@ public sealed class QuestPdfGenerator(IOptions<PdfSettings> options) : IPdfGener
             // Declared left to right; the content is right-to-left, so the first column is the rightmost.
             table.ColumnsDefinition(columns =>
             {
-                columns.ConstantColumn(105);
-                columns.ConstantColumn(40);
                 columns.ConstantColumn(120);
+                columns.ConstantColumn(40);
+                columns.ConstantColumn(105);
                 columns.RelativeColumn(1.15f);
                 columns.RelativeColumn(2.25f);
                 columns.ConstantColumn(35);
@@ -239,9 +239,9 @@ public sealed class QuestPdfGenerator(IOptions<PdfSettings> options) : IPdfGener
 
             table.Header(header =>
             {
-                HeaderCell(header.Cell(), "فی (ریال)");
-                HeaderCell(header.Cell(), "تعداد");
                 HeaderCell(header.Cell(), "مبلغ پرداختی (ریال)");
+                HeaderCell(header.Cell(), "تعداد");
+                HeaderCell(header.Cell(), "فی (ریال)");
                 HeaderCell(header.Cell(), "طرف معامله");
                 HeaderCell(header.Cell(), "محصول");
                 HeaderCell(header.Cell(), "#");
@@ -254,7 +254,7 @@ public sealed class QuestPdfGenerator(IOptions<PdfSettings> options) : IPdfGener
 
                 BodyCell(
                     table.Cell(),
-                    line.UnitPrice.ToGroupedDigits().ToPersianDigits(),
+                    line.PaidAmount.ToGroupedDigits().ToPersianDigits(),
                     background,
                     true
                 );
@@ -267,7 +267,7 @@ public sealed class QuestPdfGenerator(IOptions<PdfSettings> options) : IPdfGener
                 );
                 BodyCell(
                     table.Cell(),
-                    line.PaidAmount.ToGroupedDigits().ToPersianDigits(),
+                    line.UnitPrice.ToGroupedDigits().ToPersianDigits(),
                     background,
                     true
                 );
