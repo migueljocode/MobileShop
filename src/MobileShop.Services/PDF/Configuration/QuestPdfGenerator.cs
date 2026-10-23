@@ -131,6 +131,7 @@ public sealed class QuestPdfGenerator(IOptions<PdfSettings> options) : IPdfGener
 
                 header
                     .Item()
+                    .PaddingBottom(5)
                     .Row(row =>
                     {
                         row.Spacing(16);
