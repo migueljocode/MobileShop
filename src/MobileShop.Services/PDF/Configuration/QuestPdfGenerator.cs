@@ -155,7 +155,6 @@ public sealed class QuestPdfGenerator(IOptions<PdfSettings> options) : IPdfGener
             column.Item().Element(c => RenderFactorParties(c, model));
             column.Item().Element(c => RenderFactorTable(c, model));
             column.Item().Element(c => RenderFactorSummary(c, model));
-            column.Item().Element(RenderFactorSignatures);
             column.Item().Element(RenderFactorTermsSection);
         });
 
@@ -430,6 +429,8 @@ public sealed class QuestPdfGenerator(IOptions<PdfSettings> options) : IPdfGener
                         .FontColor("#627D98");
                     text.Span(" گردید.").FontSize(8).FontFamily("Vazirmatn").FontColor("#25313C");
                 });
+
+            column.Item().PaddingTop(12).Element(RenderFactorSignatures);
 
             column
                 .Item()
