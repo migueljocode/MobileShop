@@ -236,7 +236,7 @@ public sealed class QuestPdfGenerator(IOptions<PdfSettings> options) : IPdfGener
 
             table.Header(header =>
             {
-                HeaderCell(header.Cell(), "فی (به ریال)");
+                HeaderCell(header.Cell(), "فی (ریال)");
                 HeaderCell(header.Cell(), "طرف معامله");
                 HeaderCell(header.Cell(), "محصول");
                 HeaderCell(header.Cell(), "#");
