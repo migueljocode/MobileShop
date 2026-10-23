@@ -178,20 +178,24 @@ public sealed class QuestPdfGenerator(IOptions<PdfSettings> options) : IPdfGener
                 .Element(c => FactorInfoCard(c, "فروشنده", FindParty(model, "Seller")));
         });
 
-    private static string FindParty(TransactionFactorViewModel model, string role) =>
-        string.Join(
-            "، ",
-            model
-                .Rows.Where(x =>
-                    string.Equals(x.PersonRole, role, StringComparison.OrdinalIgnoreCase)
-                )
-                .Select(x => x.PersonLabel)
-                .Where(x => !string.IsNullOrWhiteSpace(x))
-                .Distinct(StringComparer.OrdinalIgnoreCase)
-        )
-            is { Length: > 0 } value
-            ? value
-            : FactorShopName;
+    private static string FindParty(TransactionFactorViewModel model, string role)
+    {
+        bool IsRole(TransactionFactorRowViewModel row) =>
+            string.Equals(row.PersonRole, role, StringComparison.OrdinalIgnoreCase);
+
+        // A row of the other role means the shop itself is on this side of the deal.
+        IEnumerable<string> shop = model.Rows.Any(row => !IsRole(row)) ? [FactorShopName] : [];
+
+        var parties = shop.Concat(
+                model.Rows.Where(IsRole)
+                    .Select(row => row.PersonLabel)
+                    .Where(label => !string.IsNullOrWhiteSpace(label))
+            )
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
+        return parties.Count == 0 ? FactorShopName : string.Join("، ", parties);
+    }
 
     private static void FactorInfoCard(IContainer container, string title, string value) =>
         container
