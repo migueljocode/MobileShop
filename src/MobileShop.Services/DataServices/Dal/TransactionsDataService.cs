@@ -114,7 +114,7 @@ public class TransactionsDataService(
         if (details is null)
             return null;
 
-        var model = new TransactionFactorViewModel([details.ToFactorRow(transactionId)], DateTime.UtcNow);
+        var model = new TransactionFactorViewModel([details.ToFactorRow(transactionId)], DateTime.Now);
         return pdfGenerator.GenerateTransactionFactor(model);
     }
 
@@ -432,7 +432,7 @@ public class TransactionsDataService(
             rows = resolved;
         }
 
-        var model = new TransactionFactorViewModel(rows, DateTime.UtcNow);
+        var model = new TransactionFactorViewModel(rows, DateTime.Now);
         return new FactorPdfResult(true, pdfGenerator.GenerateTransactionFactor(model), null);
     }
 

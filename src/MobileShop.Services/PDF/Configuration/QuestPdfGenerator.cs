@@ -106,7 +106,7 @@ public sealed class QuestPdfGenerator(IOptions<PdfSettings> options) : IPdfGener
                             {
                                 text.Span("تاریخ صدور: ").SemiBold().FontFamily("Vazirmatn");
                                 text.Span(
-                                        model.GeneratedAt.ToJalaliDateTimeString().ToPersianDigits()
+                                        model.GeneratedAt.ToJalaliDateTimeMeridiemString().ToPersianDigits()
                                     )
                                     .FontFamily("Vazirmatn");
                             });

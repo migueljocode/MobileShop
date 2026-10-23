@@ -33,6 +33,10 @@ public static partial class JalaliDateExtensions
     public static string ToJalaliDateTimeString(this DateTime value)
         => $"{value.ToJalaliDateString()} {value:HH:mm}";
 
+    /// <summary>Formats the Shamsi date with a 12-hour time and a Persian meridiem marker, for example <c>1404/07/13 02:30 ب.ظ</c>.</summary>
+    public static string ToJalaliDateTimeMeridiemString(this DateTime value)
+        => $"{value.ToJalaliDateString()} {(value.Hour + 11) % 12 + 1:00}:{value:mm} {(value.Hour < 12 ? "ق.ظ" : "ب.ظ")}";
+
     /// <summary>Formats the Shamsi year and month only, for example <c>1405/07</c>.</summary>
     public static string ToJalaliYearMonthString(this DateTime value)
         => $"{Calendar.GetYear(value):0000}/{Calendar.GetMonth(value):00}";
