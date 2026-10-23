@@ -1,5 +1,5 @@
-## Reviewer Audit — Stage 20, Job B (Step 3)
+## Reviewer Audit — Stage 20, Job B (Step 4)
 
-**PASS.** Verified commit `0e3fe0e`: `WithSpecsAsync` runs one query for all factor rows (no per-row query); both factor paths call it; the shared `IncludeProductGraph` helper keeps every invoice include and adds `DeviceSpecProfile` (+ storage), `GlassProfile.ModelFits` and `CaseProfile.ModelFits`, which the spec key needs. Rows with no transaction keep empty spec values. Tests cover the planned behaviour: identical products merge to quantity 2, different colours stay separate, single-row factor carries the key. GitHub Actions **#701 — Success** on `0e3fe0e`. Only the two files named in Step 3 changed.
+**PASS on code, rendered check PENDING.** Verified commit `0d6ec48`: `RenderFactorTable` declares the six columns in the planned order and widths; header and body cell order match; cells use `UnitPrice`, `Quantity`, `PaidAmount`, `PersonLabel`, `ProductText`; the summary and invoice code are untouched. Tests cover one quantity line and the artifact sample. GitHub Actions **#702 — Success**.
 
-Note (not blocking): the invoice query now loads a few more joins. Output is unchanged; the performance cost is small and the Step 3 plan allowed it.
+**Not signed off for this step:** the Definition of Done needs a rendered-PDF check (column order, no clipping, correct paid amount). The artifact `factor-pdf-inspection` from run #702 contains `quantity-lines-factor.pdf` and must be checked by a person. Until that is recorded, Step 4 stays open and Step 5 (validation) cannot be signed off.

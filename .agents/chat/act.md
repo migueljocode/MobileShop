@@ -1,6 +1,7 @@
-## Actor report — Stage 20, Step 3 — Fill SpecKey and SpecLabel in the data service
+## Actor report — Stage 20, Step 4 — Render the new columns in the factor table
 
-- Commit: `0e3fe0e` feat(services) — `TransactionsDataService`: `LoadInvoiceGraph` now uses a shared `IncludeProductGraph` helper; new `WithSpecsAsync` loads product graphs for all factor rows in one query and sets `SpecKey`/`SpecLabel` with `with`; applied to both `GetTransactionFactorPdfAsync` and `GenerateListFactorPdfAsync`. Helper adds `DeviceSpecProfile` (+ storage), and `ModelFits` on glass and case.
-- Tests: `TransactionsDataServiceTests`: fake PDF generator records the last factor model; three new tests (identical products merge into one line of quantity 2; different colours stay separate; single factor row carries the spec key).
-- Deviation: the invoice graph now also loads the extra spec includes (more joins, same output). Invoice output not changed in code; covered by existing invoice tests in CI.
-- CI: run #701 Success on `0e3fe0e`.
+- Commit: `0d6ec48` feat(pdf) — `RenderFactorTable` renders `model.Lines` with six columns, declared in this order (first declared is rightmost in the RTL content): `فی (ریال)` 105, `تعداد` 40, `مبلغ پرداختی (ریال)` 120, `طرف معامله` 1.15 relative, `محصول` 2.25 relative, `#` 35. `RenderFactorSummary`, the header and `ComposePagePersian` are unchanged.
+- Tests: new unit test `GenerateTransactionFactor_renders_identical_rows_as_one_quantity_line`; artifact test gained `quantity-lines-factor.pdf` (20 identical glass rows, one blue and one green phone, one large price).
+- CI: run #702 Success on `0d6ec48`. Artifact `factor-pdf-inspection` uploaded.
+- Rendered check: PENDING. The artifact cannot be downloaded from the sandbox (the storage host is blocked). The user must open `quantity-lines-factor.pdf` from run #702 and confirm: the 20-row glass line shows `تعداد` 20 and `مبلغ پرداختی` = 20 × `فی`; blue and green phone lines are separate; the columns do not clip; the summary total equals the sum of the raw rows.
+- Deviation: none.
