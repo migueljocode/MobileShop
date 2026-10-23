@@ -56,7 +56,7 @@
 - Risk: MEDIUM
 - Confidence: MEDIUM (the definition of "spec" is Assumption A)
 
-## [ ] Step 2 — Group rows into factor lines (view models)
+## ~~[x] Step 2 — Group rows into factor lines (view models)~~
 - Files: inspect: `src/MobileShop.Models/ViewModels/Web/TransactionFactorRowViewModel.cs`, `TransactionFactorViewModel.cs`, `src/MobileShop.Models/Extensions/TransactionFactorExtensions.cs`; modify: `TransactionFactorRowViewModel.cs`, `TransactionFactorViewModel.cs`; create: `src/MobileShop.Models/ViewModels/Web/TransactionFactorLineViewModel.cs`; do not touch: `TransactionListItemViewModel`, `TransactionDetailsViewModel`, `ToFactorRow` signatures.
 - Symbols: `TransactionFactorRowViewModel` (new trailing optional parameters `string SpecKey = ""`, `string SpecLabel = ""`); `TransactionFactorLineViewModel(string ProductText, int Quantity, long UnitPrice, string PersonLabel)` with `long PaidAmount => UnitPrice * Quantity`; `TransactionFactorViewModel.Lines`.
 - Current -> Desired: the PDF iterates rows. Desired: `Lines` groups `Rows` by the tuple (`ProductLabel`, `SpecKey`, `Direction`, `FinishedPrice`, `PersonLabel`), keeps first-appearance order, and sets `Quantity` to the group size. `ProductText` is `ProductLabel` plus `" · " + SpecLabel` when `SpecLabel` is non-empty. `Rows`, `TotalPrice` and the `Rows.Count` header stay unchanged.
