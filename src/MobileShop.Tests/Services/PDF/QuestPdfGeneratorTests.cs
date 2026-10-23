@@ -93,6 +93,29 @@ public class QuestPdfGeneratorTests
     }
 
     [Fact]
+    public void GenerateTransactionFactor_renders_identical_rows_as_one_quantity_line()
+    {
+        var rows = Enumerable.Range(1, 3)
+            .Select(id => new TransactionFactorRowViewModel(
+                id,
+                DateTime.UtcNow,
+                TransactionDirection.Sell,
+                "Apple iPhone 17 Glass Protector",
+                350_000,
+                "Customer",
+                "Sara",
+                "glass-iphone-17",
+                string.Empty))
+            .ToArray();
+        var model = new TransactionFactorViewModel(rows, DateTime.UtcNow);
+
+        var line = Assert.Single(model.Lines);
+        Assert.Equal(3, line.Quantity);
+        Assert.Equal(1_050_000, line.PaidAmount);
+        AssertValidPdf(_generator.GenerateTransactionFactor(model));
+    }
+
+    [Fact]
     public void GenerateTransactionFactor_supports_one_row_and_exact_total()
     {
         var model = Factor(
@@ -180,6 +203,44 @@ public class QuestPdfGeneratorTests
         File.WriteAllBytes(
             Path.Combine(outputDirectory, "spaced-phone-factor.pdf"),
             CreateSpacedPhoneGenerator().GenerateTransactionFactor(single));
+
+        var grouped = Factor(
+            Enumerable.Range(1, 20)
+                .Select(id => new TransactionFactorRowViewModel(
+                    id,
+                    new(2026, 2, 1, 10, 30, 0, DateTimeKind.Utc),
+                    TransactionDirection.Sell,
+                    "Apple iPhone 17 Glass Protector",
+                    350_000,
+                    "Customer",
+                    "سارا احمدی",
+                    "glass-iphone-17",
+                    string.Empty))
+                .Append(new TransactionFactorRowViewModel(
+                    21,
+                    new(2026, 2, 2, 10, 30, 0, DateTimeKind.Utc),
+                    TransactionDirection.Sell,
+                    "Apple iPhone 17",
+                    987_654_322,
+                    "Customer",
+                    "سارا احمدی",
+                    "blue-256",
+                    "Blue · 256 GB"))
+                .Append(new TransactionFactorRowViewModel(
+                    22,
+                    new(2026, 2, 2, 10, 30, 0, DateTimeKind.Utc),
+                    TransactionDirection.Sell,
+                    "Apple iPhone 17",
+                    987_654_322,
+                    "Customer",
+                    "سارا احمدی",
+                    "green-256",
+                    "Green · 256 GB"))
+                .ToArray());
+
+        File.WriteAllBytes(
+            Path.Combine(outputDirectory, "quantity-lines-factor.pdf"),
+            _generator.GenerateTransactionFactor(grouped));
 
         var multiPage = Factor(
             Enumerable.Range(1, 90)

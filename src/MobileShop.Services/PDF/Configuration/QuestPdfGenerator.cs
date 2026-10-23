@@ -226,9 +226,12 @@ public sealed class QuestPdfGenerator(IOptions<PdfSettings> options) : IPdfGener
     private static void RenderFactorTable(IContainer container, TransactionFactorViewModel model) =>
         container.Table(table =>
         {
+            // Declared left to right; the content is right-to-left, so the first column is the rightmost.
             table.ColumnsDefinition(columns =>
             {
                 columns.ConstantColumn(105);
+                columns.ConstantColumn(40);
+                columns.ConstantColumn(120);
                 columns.RelativeColumn(1.15f);
                 columns.RelativeColumn(2.25f);
                 columns.ConstantColumn(35);
@@ -237,24 +240,39 @@ public sealed class QuestPdfGenerator(IOptions<PdfSettings> options) : IPdfGener
             table.Header(header =>
             {
                 HeaderCell(header.Cell(), "فی (ریال)");
+                HeaderCell(header.Cell(), "تعداد");
+                HeaderCell(header.Cell(), "مبلغ پرداختی (ریال)");
                 HeaderCell(header.Cell(), "طرف معامله");
                 HeaderCell(header.Cell(), "محصول");
                 HeaderCell(header.Cell(), "#");
             });
 
-            for (var index = 0; index < model.Rows.Count; index++)
+            for (var index = 0; index < model.Lines.Count; index++)
             {
-                var row = model.Rows[index];
+                var line = model.Lines[index];
                 var background = index % 2 == 0 ? "#FFFFFF" : "#F8FAFC";
 
                 BodyCell(
                     table.Cell(),
-                    row.FinishedPrice.ToGroupedDigits().ToPersianDigits(),
+                    line.UnitPrice.ToGroupedDigits().ToPersianDigits(),
                     background,
                     true
                 );
-                BodyCell(table.Cell(), row.PersonLabel, background);
-                BodyCell(table.Cell(), row.ProductLabel, background);
+                BodyCell(
+                    table.Cell(),
+                    line.Quantity.ToString().ToPersianDigits(),
+                    background,
+                    false,
+                    true
+                );
+                BodyCell(
+                    table.Cell(),
+                    line.PaidAmount.ToGroupedDigits().ToPersianDigits(),
+                    background,
+                    true
+                );
+                BodyCell(table.Cell(), line.PersonLabel, background);
+                BodyCell(table.Cell(), line.ProductText, background);
                 BodyCell(
                     table.Cell(),
                     (index + 1).ToString().ToPersianDigits(),
