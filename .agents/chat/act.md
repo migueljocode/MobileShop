@@ -1,7 +1,6 @@
-## Actor report — Stage 20, Step 2 — Group rows into factor lines
+## Actor report — Stage 20, Step 3 — Fill SpecKey and SpecLabel in the data service
 
-- Commit: `92340102` feat(models) — `TransactionFactorRowViewModel` gains trailing optional `SpecKey`/`SpecLabel`; new `TransactionFactorLineViewModel` (`PaidAmount` = `UnitPrice` × `Quantity`); `TransactionFactorViewModel.Lines` groups by (`ProductLabel`, `SpecKey`, `Direction`, `FinishedPrice`, `PersonLabel`) in first-appearance order; `TotalPrice` unchanged.
-- Files: modified the three view-model files above; created `TransactionFactorLineViewModel.cs` and `src/MobileShop.Tests/Models/ViewModels/TransactionFactorViewModelTests.cs`.
-- Existing callers (`ToFactorRow` overloads) compile unchanged; they pass no spec data yet, which Step 3 fills in.
-- Deviation: none.
-- CI: run #700 Success on `92340102`.
+- Commit: `0e3fe0e` feat(services) — `TransactionsDataService`: `LoadInvoiceGraph` now uses a shared `IncludeProductGraph` helper; new `WithSpecsAsync` loads product graphs for all factor rows in one query and sets `SpecKey`/`SpecLabel` with `with`; applied to both `GetTransactionFactorPdfAsync` and `GenerateListFactorPdfAsync`. Helper adds `DeviceSpecProfile` (+ storage), and `ModelFits` on glass and case.
+- Tests: `TransactionsDataServiceTests`: fake PDF generator records the last factor model; three new tests (identical products merge into one line of quantity 2; different colours stay separate; single factor row carries the spec key).
+- Deviation: the invoice graph now also loads the extra spec includes (more joins, same output). Invoice output not changed in code; covered by existing invoice tests in CI.
+- CI: run #701 Success on `0e3fe0e`.

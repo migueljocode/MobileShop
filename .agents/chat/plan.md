@@ -69,7 +69,7 @@
 - Risk: LOW
 - Confidence: HIGH
 
-## [ ] Step 3 — Fill SpecKey and SpecLabel in the data service
+## ~~[x] Step 3 — Fill SpecKey and SpecLabel in the data service~~
 - Files: inspect: `src/MobileShop.Services/DataServices/Dal/TransactionsDataService.cs` (`GenerateListFactorPdfAsync`, `GetTransactionFactorPdfAsync`, `LoadInvoiceGraph`); modify: `TransactionsDataService.cs` only; do not touch: `ApiTransactionsDataService`, `ITransactionsDataService`, `IPdfGenerator`.
 - Symbols: `TransactionsDataService.LoadInvoiceGraph(int)`, a new private shared include helper for the product graph, a new private method that loads the product graphs for a set of transaction ids and returns `Dictionary<int, (string Key, string Label)>`.
 - Current -> Desired: factor rows carry no spec data. Desired: once the final rows are known, load their product graphs in one query and set `SpecKey`/`SpecLabel` on each row with `row with { ... }`; the single-transaction path does the same so a one-row factor is labelled consistently.
