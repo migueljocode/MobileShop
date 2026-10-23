@@ -12,10 +12,10 @@ public sealed class QuestPdfGenerator(IOptions<PdfSettings> options) : IPdfGener
 
     private const string InstagramGlyph =
         """
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#829AB1" stroke-width="2">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#627D98" stroke-width="2">
           <rect x="3" y="3" width="18" height="18" rx="5"/>
           <circle cx="12" cy="12" r="4"/>
-          <circle cx="17.5" cy="6.5" r="0.6" fill="#829AB1" stroke-width="1"/>
+          <circle cx="17.5" cy="6.5" r="0.6" fill="#627D98" stroke-width="1"/>
         </svg>
         """;
 
@@ -389,8 +389,6 @@ public sealed class QuestPdfGenerator(IOptions<PdfSettings> options) : IPdfGener
                         || !string.IsNullOrWhiteSpace(_settings.ShopPhone)
                     )
                         text.Span("  |  ").FontSize(7.5f).FontColor("#829AB1");
-                    text.Element().PaddingBottom(-1.5f).Width(8).Height(8).Svg(InstagramGlyph);
-                    text.Span(" ").FontSize(7.5f);
                     text.Span(_settings.ShopInstagram).FontSize(7.5f).FontColor("#829AB1");
                 }
             });
@@ -452,10 +450,14 @@ public sealed class QuestPdfGenerator(IOptions<PdfSettings> options) : IPdfGener
                 .Item()
                 .AlignCenter()
                 .ContentFromLeftToRight()
-                .Text("@zonemobile.ir")
-                .FontSize(8)
-                .FontColor("#627D98")
-                .FontFamily("Vazirmatn");
+                .Text(text =>
+                {
+                    text.Element().PaddingBottom(-1.5f).Width(8).Height(8).Svg(InstagramGlyph);
+                    text.Span(" @zonemobile.ir")
+                        .FontSize(8)
+                        .FontColor("#627D98")
+                        .FontFamily("Vazirmatn");
+                });
         });
 
     private static readonly string[] FactorTermsLines =
