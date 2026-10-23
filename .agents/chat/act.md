@@ -1,7 +1,7 @@
-## Actor report — Stage 20, Step 4 — Render the new columns in the factor table
+## Actor report — Stage 20, user-requested follow-up to Step 4 — swap فی and مبلغ پرداختی
 
-- Commit: `0d6ec48` feat(pdf) — `RenderFactorTable` renders `model.Lines` with six columns, declared in this order (first declared is rightmost in the RTL content): `فی (ریال)` 105, `تعداد` 40, `مبلغ پرداختی (ریال)` 120, `طرف معامله` 1.15 relative, `محصول` 2.25 relative, `#` 35. `RenderFactorSummary`, the header and `ComposePagePersian` are unchanged.
-- Tests: new unit test `GenerateTransactionFactor_renders_identical_rows_as_one_quantity_line`; artifact test gained `quantity-lines-factor.pdf` (20 identical glass rows, one blue and one green phone, one large price).
-- CI: run #702 Success on `0d6ec48`. Artifact `factor-pdf-inspection` uploaded.
-- Rendered check: PENDING. The artifact cannot be downloaded from the sandbox (the storage host is blocked). The user must open `quantity-lines-factor.pdf` from run #702 and confirm: the 20-row glass line shows `تعداد` 20 and `مبلغ پرداختی` = 20 × `فی`; blue and green phone lines are separate; the columns do not clip; the summary total equals the sum of the raw rows.
-- Deviation: none.
+- User confirmed the Step 4 render (run #702) and asked to swap the `فی (ریال)` and `مبلغ پرداختی (ریال)` columns.
+- Commit: `bcf18f6` refactor(pdf) — `RenderFactorTable` declared order is now `مبلغ پرداختی` 120, `تعداد` 40, `فی` 105, `طرف معامله`, `محصول`, `#`. Reading right to left: `#`, محصول, طرف معامله, فی, تعداد, مبلغ پرداختی. Widths move with their columns. No other change.
+- Deviation: the planned order from assumption E is replaced by this user request. Only the two columns named were swapped.
+- CI: run #703 Success on `bcf18f6`.
+- Rendered check of the swapped order: PENDING (user to confirm in the artifact of run #703, `quantity-lines-factor.pdf`).

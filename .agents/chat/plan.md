@@ -82,7 +82,7 @@
 - Risk: MEDIUM
 - Confidence: MEDIUM
 
-## [ ] Step 4 — Render the new columns in the factor table
+## ~~[x] Step 4 — Render the new columns in the factor table~~
 - Files: inspect: `src/MobileShop.Services/PDF/Configuration/QuestPdfGenerator.cs` (`RenderFactorTable`, `HeaderCell`, `BodyCell(cell, text, background, amount, numeric)`), `src/MobileShop.Tests/Services/PDF/QuestPdfGeneratorTests.cs`; modify: `QuestPdfGenerator.cs` (`RenderFactorTable` only) and `QuestPdfGeneratorTests.cs`; do not touch: `RenderFactorSummary`, the header block, `ComposePagePersian`, fonts.
 - Symbols: `QuestPdfGenerator.RenderFactorTable(IContainer, TransactionFactorViewModel)`.
 - Current -> Desired: four columns over `model.Rows`, declared `فی` 105, `طرف معامله` 1.15 relative, `محصول` 2.25 relative, `#` 35. Desired: six columns over `model.Lines`, declared in this order (first declared is rightmost): `فی (ریال)` ConstantColumn(105), `تعداد` ConstantColumn(40), `مبلغ پرداختی (ریال)` ConstantColumn(120), `طرف معامله` RelativeColumn(1.15f), `محصول` RelativeColumn(2.25f), `#` ConstantColumn(35). Header cells follow the same order.
