@@ -8,6 +8,10 @@ public sealed class QuestPdfGenerator(IOptions<PdfSettings> options) : IPdfGener
 {
     private readonly PdfSettings _settings = options.Value;
 
+    // Matches the space under the address block (page bottom margin + the footer rule: 7pt padding + 1pt border)
+    // so it looks symmetrical with the gap above it; 4pt of the gap already comes from the column spacing.
+    private float FactorAddressTopGap => _settings.MarginBottom + 8 - 4;
+
     private const string FactorShopName = "زون موبایل";
     private const string FactorContactPhone = "۰۹۱۱۵۰۰۹۱۰۹";
 
@@ -146,7 +150,7 @@ public sealed class QuestPdfGenerator(IOptions<PdfSettings> options) : IPdfGener
                     });
             });
 
-    private static void RenderFactorContent(
+    private void RenderFactorContent(
         IContainer container,
         TransactionFactorViewModel model
     ) =>
@@ -160,7 +164,6 @@ public sealed class QuestPdfGenerator(IOptions<PdfSettings> options) : IPdfGener
                 .Item()
                 .ExtendVertical()
                 .AlignBottom()
-                .PaddingBottom(10)
                 .ShowEntire()
                 .Element(RenderFactorTermsSection);
         });
@@ -410,7 +413,7 @@ public sealed class QuestPdfGenerator(IOptions<PdfSettings> options) : IPdfGener
                 }
             });
 
-    private static void RenderFactorTermsSection(IContainer container) =>
+    private void RenderFactorTermsSection(IContainer container) =>
         container.Column(column =>
         {
             column.Spacing(4);
@@ -445,7 +448,7 @@ public sealed class QuestPdfGenerator(IOptions<PdfSettings> options) : IPdfGener
 
             column
                 .Item()
-                .PaddingTop(20)
+                .PaddingTop(FactorAddressTopGap)
                 .AlignCenter()
                 .Text("گنبدکاووس٬ خیابان طالقانی شرقی٬ طالقانی دوم ٬ زون موبایل")
                 .FontSize(8)
