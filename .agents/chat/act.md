@@ -1,7 +1,7 @@
-- Commit: [226d6ac](https://github.com/migueljocode/MobileShop/commit/226d6ac) — `refactor(pdf): replace ToBidiSafePhone with ToRtlDisplayPhone for shop phone` (earlier: 1705fd4 `fix(pdf): display factor contact phone via ToRtlDisplayPhone`)
-- Verification: `Action: #678 — Success` (build/test) on 226d6ac; #677 Success on 1705fd4.
-- Rendered check: user reported the reversed-typed value printed correctly in the factor footer (same visible result as the new method). Final-commit render not yet re-checked.
-- Limitations: none beyond the rendered re-check.
-- Friction noted: NBSP-based fix in 3c51d05 did not change the rendered output; removed in 226d6ac.
-- Problems: None
-- Status: COMPLETE (pending final render re-check)
+## Actor report — Stage 20, Step 1 — Spec identity helpers
+
+- Commits: `86a8d6f` feat(models) — new `ProductSpecExtensions.cs` and its tests; `1cdb2bf` fix(tests) — helper name; `594f69e` fix(tests) — storage id tied to capacity.
+- Files: created `src/MobileShop.Models/Extensions/ProductSpecExtensions.cs`, `src/MobileShop.Tests/Models/Extensions/ProductSpecExtensionsTests.cs`. Nothing else in source changed.
+- CI: run #697 Failure (compile error: `MakeMakePhone` in the test file, from a bad string replacement; read from check-run annotations); run #698 Failure (test run, logs not readable from the sandbox; inferred as the storage test, whose two products shared `StorageCapacityId`); run #699 Success on `594f69e`.
+- Deviation: none from the plan. Step 1 is complete; no `Products`, entity, migration or Api file changed.
+- Evidence: CI #699 Success.

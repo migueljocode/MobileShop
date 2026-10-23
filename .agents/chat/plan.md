@@ -32,7 +32,7 @@
 - Step 4 is MEDIUM risk: six columns in an RTL table; the column order and widths below are explicit, and only a rendered PDF proves they fit.
 - Open state note: `TODO.md` shows Stage 19 ticked while the last audit said its sign-off was NOT MET; overwriting `chat/plan.md` drops Stage 19's open Step 3.
 
-## [ ] Step 1 — Spec identity helpers (pure, Models layer)
+## ~~[x] Step 1 — Spec identity helpers (pure, Models layer)~~
 - Files: inspect: `src/MobileShop.Models/Entities/Product.cs`, `DeviceSpec.cs`, `Phone.cs`, `Laptop.cs`, `Cable.cs`, `Charger.cs`, `PowerBank.cs`, `PortableStorage.cs`, `Glass.cs`, `Case.cs`, `src/MobileShop.Models/Extensions/InvoiceProfileExtensions.cs` (style reference); create: `src/MobileShop.Models/Extensions/ProductSpecExtensions.cs`, `src/MobileShop.Tests/Models/Extensions/ProductSpecExtensionsTests.cs`; do not touch: entities, configurations, `GetInvoiceExtras` methods.
 - Symbols: `ProductSpecExtensions.ToSpecKey(this Product)` returns `string`; `ProductSpecExtensions.ToSpecLabel(this Product)` returns `string`.
 - Current -> Desired: no notion of product spec identity. Desired: `ToSpecKey` joins these segments (null profile contributes an empty segment, never throws):
