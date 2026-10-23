@@ -10,6 +10,15 @@ public sealed class QuestPdfGenerator(IOptions<PdfSettings> options) : IPdfGener
 
     private const string FactorContactPhone = "۰۹۱۱۵۰۰۹۱۰۹";
 
+    private const string InstagramGlyph =
+        """
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#829AB1" stroke-width="2">
+          <rect x="3" y="3" width="18" height="18" rx="5"/>
+          <circle cx="12" cy="12" r="4"/>
+          <circle cx="17.5" cy="6.5" r="0.6" fill="#829AB1" stroke-width="1"/>
+        </svg>
+        """;
+
     /// <inheritdoc />
     public byte[] Generate(InvoiceViewModel model)
     {
@@ -380,6 +389,8 @@ public sealed class QuestPdfGenerator(IOptions<PdfSettings> options) : IPdfGener
                         || !string.IsNullOrWhiteSpace(_settings.ShopPhone)
                     )
                         text.Span("  |  ").FontSize(7.5f).FontColor("#829AB1");
+                    text.Element().PaddingBottom(-1.5f).Size(8).Svg(InstagramGlyph);
+                    text.Span(" ").FontSize(7.5f);
                     text.Span(_settings.ShopInstagram).FontSize(7.5f).FontColor("#829AB1");
                 }
             });
