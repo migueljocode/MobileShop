@@ -11,7 +11,7 @@ public class ProductSpecExtensionsTests
         DeviceSpecProfile = new DeviceSpec
         {
             Ram = 8,
-            StorageCapacityId = 3,
+            StorageCapacityId = storageGb,
             ChargeSpeed = 25,
             StorageCapacityNavigation = new StorageCapacity { Gb = storageGb },
         },
