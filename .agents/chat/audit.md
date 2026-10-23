@@ -1,13 +1,7 @@
-## Reviewer Audit — Stage 20, Job A (plan review)
+## Reviewer Audit — Stage 20, Job B (Step 1)
 
-Round 1 found one HIGH: Step 4 left column order and widths to the Actor and mis-stated the reading direction (the factor content sits in `ContentFromRightToLeft()`, `QuestPdfGenerator.cs:83`, so the first declared column is rightmost). The Planner folded in the fix plus the cheap MEDIUM notes (exact spec property names, rendered-test sample rows).
-
-Round 2 re-check: Step 4 now declares the exact column order and widths; Step 1's field names match the entities (`CpuId`, `GpuId`, `DisplaySize`, `Connector1/2`, `Length`, `Wattage`, `PortCount`, `Pd`, `CapacityMah`, `MaxWattage`, `Kind`, `StorageCapacityId`, `Speed`, `PartNumberId`, `ModelFits.ModelId`, `DeviceSpecProfile`); test paths and the `GenerateTransactionFactor_writes_rendered_inspection_artifacts` name exist; `TotalPrice` and the `Rows.Count` header stay valid because `Rows` is unchanged. Plan-only review, no CI run involved and no DB/migration claims.
-
-**APPROVED**
+**PASS.** Verified commits `86a8d6f`, `1cdb2bf`, `594f69e` against Step 1: the change touches only `ProductSpecExtensions.cs` and its test file (216 insertions, no edits to entities, migrations, Api or data services). Spec key covers the Step 1 field list; Barcode, IMEI, Notes and warranty fields are excluded as planned. Tests cover the planned cases (same specs with different barcode/IMEI, colour, storage, cable length, glass fit, second-hand, label, no-profile product). GitHub Actions **#699 — Success** on `594f69e`. Commit messages follow Conventional Commits.
 
 Notes (not blocking):
-- Assumption C (lines merge only when unit price, direction and party also match) narrows the user's "specs only" wording and is unconfirmed; it is a single `GroupBy` tuple in Step 2.
-- Assumption E (new columns declared right after `فی`) is an unconfirmed layout choice.
-- `TODO.md` shows Stage 19 ticked while the previous audit said sign-off NOT MET; this plan overwrites its open Step 3.
-- `TODO.md` is not updated: Stage 20 stays under `## Proposed stages` until the Planner adds it.
+- Earlier runs #697 (test name typo, compile error) and #698 (test failure) were red. The fix commits are the record of that; #698's cause is inferred from the test data, since the blob log could not be read from the sandbox.
+- The Step 1 test does not cover the planned "Notes" exclusion; it is covered by the key design, not a test.
