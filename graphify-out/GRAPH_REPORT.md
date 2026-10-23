@@ -1,9 +1,9 @@
 # Graph Report - MobileShop  (2026-10-23)
 
 ## Corpus Check
-- 371 files · ~130,434 words
+- 371 files · ~130,466 words
 - Verdict: corpus is large enough that graph structure adds value.
-- Unclassified: 23 file(s) not represented in the graph (top: .css 8, (none) 5, .woff2 4)
+- Unclassified: 25 file(s) not represented in the graph (top: .css 8, (none) 5, .ttf 4)
 
 ## Summary
 - 3779 nodes · 9725 edges · 225 communities (123 shown, 102 thin omitted)
@@ -11,7 +11,7 @@
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `9fcd78d0`
+- Built from commit: `89477504`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 

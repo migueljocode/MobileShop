@@ -20,6 +20,12 @@
     <Content Include="PDF\Fonts\Vazirmatn-Bold.ttf">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="PDF\Fonts\SFProRounded-Regular.ttf">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="PDF\Fonts\SFProRounded-Bold.ttf">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="PDF\Fonts\LICENSE-vazirmatn.txt">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Content>

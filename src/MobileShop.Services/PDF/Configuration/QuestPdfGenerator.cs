@@ -12,6 +12,9 @@ public sealed class QuestPdfGenerator(IOptions<PdfSettings> options) : IPdfGener
     // so it looks symmetrical with the gap above it; 4pt of the gap already comes from the column spacing.
     private float FactorAddressTopGap => _settings.MarginBottom + 8 - 4;
 
+    // English (Latin) glyphs use SF Pro Rounded; Persian glyphs fall back to Vazirmatn.
+    private static readonly string[] FactorFontFamilies = ["SF Pro Rounded", "Vazirmatn"];
+
     private const string FactorShopName = "زون موبایل";
     private const string FactorContactPhone = "۰۹۱۱۵۰۰۹۱۰۹";
 
@@ -72,7 +75,7 @@ public sealed class QuestPdfGenerator(IOptions<PdfSettings> options) : IPdfGener
         page.MarginRight(_settings.MarginRight);
         page.MarginBottom(_settings.MarginBottom);
         page.MarginLeft(_settings.MarginLeft);
-        page.DefaultTextStyle(x => x.FontFamily("Vazirmatn").FontSize(9.5f).FontColor("#25313C"));
+        page.DefaultTextStyle(x => x.FontFamily(FactorFontFamilies).FontSize(9.5f).FontColor("#25313C"));
 
         page.Header()
             .Element(c => c.ContentFromRightToLeft().Element(x => RenderFactorHeader(x, model)));
@@ -103,7 +106,7 @@ public sealed class QuestPdfGenerator(IOptions<PdfSettings> options) : IPdfGener
                             .FontSize(20)
                             .SemiBold()
                             .FontColor("#102A43")
-                            .FontFamily("Vazirmatn");
+                            .FontFamily(FactorFontFamilies);
 
                         row.RelativeItem()
                             .AlignMiddle()
@@ -117,7 +120,7 @@ public sealed class QuestPdfGenerator(IOptions<PdfSettings> options) : IPdfGener
                                     .FontSize(19)
                                     .SemiBold()
                                     .FontColor("#102A43")
-                                    .FontFamily("Vazirmatn");
+                                    .FontFamily(FactorFontFamilies);
                                 if (!string.IsNullOrWhiteSpace(_settings.ShopAddress))
                                     column
                                         .Item()
@@ -125,7 +128,7 @@ public sealed class QuestPdfGenerator(IOptions<PdfSettings> options) : IPdfGener
                                         .Text(_settings.ShopAddress)
                                         .FontSize(8)
                                         .FontColor("#627D98")
-                                        .FontFamily("Vazirmatn");
+                                        .FontFamily(FactorFontFamilies);
                             });
                     });
 
@@ -140,15 +143,15 @@ public sealed class QuestPdfGenerator(IOptions<PdfSettings> options) : IPdfGener
                             .AlignRight()
                             .Text(text =>
                             {
-                                text.Span("تعداد اقلام: ").SemiBold().FontFamily("Vazirmatn");
+                                text.Span("تعداد اقلام: ").SemiBold().FontFamily(FactorFontFamilies);
                                 text.Span(model.Rows.Count.ToString().ToPersianDigits())
-                                    .FontFamily("Vazirmatn");
+                                    .FontFamily(FactorFontFamilies);
                             });
 
                         row.RelativeItem()
                             .AlignLeft()
                             .Text(model.GeneratedAt.ToJalaliDateTimeMeridiemRtlString().ToPersianDigits())
-                            .FontFamily("Vazirmatn");
+                            .FontFamily(FactorFontFamilies);
                     });
             });
 
@@ -284,7 +287,7 @@ public sealed class QuestPdfGenerator(IOptions<PdfSettings> options) : IPdfGener
             .FontSize(8.5f)
             .SemiBold()
             .FontColor("#FFFFFF")
-            .FontFamily("Vazirmatn")
+            .FontFamily(FactorFontFamilies)
             .AlignCenter();
 
     private static void BodyCell(
@@ -310,7 +313,7 @@ public sealed class QuestPdfGenerator(IOptions<PdfSettings> options) : IPdfGener
             .Text(text)
             .FontSize(amount ? 8.5f : 8)
             .AlignCenter()
-            .FontFamily("Vazirmatn");
+            .FontFamily(FactorFontFamilies);
 
         if (amount)
             label.SemiBold();
@@ -343,7 +346,7 @@ public sealed class QuestPdfGenerator(IOptions<PdfSettings> options) : IPdfGener
                         .FontSize(11)
                         .SemiBold()
                         .FontColor("#102A43")
-                        .FontFamily("Vazirmatn");
+                        .FontFamily(FactorFontFamilies);
                     summary
                         .RelativeItem()
                         .ContentFromLeftToRight()
@@ -354,11 +357,11 @@ public sealed class QuestPdfGenerator(IOptions<PdfSettings> options) : IPdfGener
                                 .FontSize(13)
                                 .SemiBold()
                                 .FontColor("#102A43")
-                                .FontFamily("Vazirmatn");
+                                .FontFamily(FactorFontFamilies);
                             text.Span(" ریال")
                                 .FontSize(9)
                                 .FontColor("#627D98")
-                                .FontFamily("Vazirmatn");
+                                .FontFamily(FactorFontFamilies);
                         });
                 });
         });
@@ -425,10 +428,10 @@ public sealed class QuestPdfGenerator(IOptions<PdfSettings> options) : IPdfGener
                 .FontSize(9)
                 .SemiBold()
                 .FontColor("#102A43")
-                .FontFamily("Vazirmatn");
+                .FontFamily(FactorFontFamilies);
 
             foreach (var line in FactorTermsLines)
-                column.Item().Text(line).FontSize(8).FontColor("#25313C").FontFamily("Vazirmatn");
+                column.Item().Text(line).FontSize(8).FontColor("#25313C").FontFamily(FactorFontFamilies);
 
             column
                 .Item()
@@ -437,13 +440,13 @@ public sealed class QuestPdfGenerator(IOptions<PdfSettings> options) : IPdfGener
                 {
                     text.Span("گوشی کاملا تست و تحویل اینجانب ")
                         .FontSize(8)
-                        .FontFamily("Vazirmatn")
+                        .FontFamily(FactorFontFamilies)
                         .FontColor("#25313C");
                     text.Span("..................................")
                         .FontSize(8)
-                        .FontFamily("Vazirmatn")
+                        .FontFamily(FactorFontFamilies)
                         .FontColor("#627D98");
-                    text.Span(" گردید.").FontSize(8).FontFamily("Vazirmatn").FontColor("#25313C");
+                    text.Span(" گردید.").FontSize(8).FontFamily(FactorFontFamilies).FontColor("#25313C");
                 });
 
             column.Item().PaddingTop(12).Element(RenderFactorSignatures);
@@ -455,7 +458,7 @@ public sealed class QuestPdfGenerator(IOptions<PdfSettings> options) : IPdfGener
                 .Text("گنبدکاووس٬ خیابان طالقانی شرقی٬ طالقانی دوم ٬ زون موبایل")
                 .FontSize(8)
                 .FontColor("#627D98")
-                .FontFamily("Vazirmatn");
+                .FontFamily(FactorFontFamilies);
             column
                 .Item()
                 .AlignCenter()
@@ -464,7 +467,7 @@ public sealed class QuestPdfGenerator(IOptions<PdfSettings> options) : IPdfGener
                     text.Span(FactorContactPhone.ToRtlDisplayPhone())
                         .FontSize(8)
                         .FontColor("#627D98")
-                        .FontFamily("Vazirmatn");
+                        .FontFamily(FactorFontFamilies);
                     text.Span(" ").FontSize(8);
                     text.Element().PaddingBottom(-1.5f).Width(8).Height(8).Svg(PhoneGlyph);
                 });
@@ -478,7 +481,7 @@ public sealed class QuestPdfGenerator(IOptions<PdfSettings> options) : IPdfGener
                     text.Span(" @zonemobile.ir")
                         .FontSize(8)
                         .FontColor("#627D98")
-                        .FontFamily("Vazirmatn");
+                        .FontFamily(FactorFontFamilies);
                 });
         });
 
