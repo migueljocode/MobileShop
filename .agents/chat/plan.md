@@ -95,7 +95,7 @@
 - Risk: MEDIUM
 - Confidence: MEDIUM
 
-## [ ] Step 5 — Full validation
+## ~~[x] Step 5 — Full validation~~
 - Files: no source changes; update `.agents/chat/act.md` only.
 - Symbols: n/a.
 - Current -> Desired: record evidence for Steps 1-4.

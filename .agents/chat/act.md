@@ -1,7 +1,6 @@
-## Actor report — Stage 20, user-requested follow-up to Step 4 — swap فی and مبلغ پرداختی
+## Actor report — Stage 20, Step 5 — Full validation
 
-- User confirmed the Step 4 render (run #702) and asked to swap the `فی (ریال)` and `مبلغ پرداختی (ریال)` columns.
-- Commit: `bcf18f6` refactor(pdf) — `RenderFactorTable` declared order is now `مبلغ پرداختی` 120, `تعداد` 40, `فی` 105, `طرف معامله`, `محصول`, `#`. Reading right to left: `#`, محصول, طرف معامله, فی, تعداد, مبلغ پرداختی. Widths move with their columns. No other change.
-- Deviation: the planned order from assumption E is replaced by this user request. Only the two columns named were swapped.
-- CI: run #703 Success on `bcf18f6`.
-- Rendered check of the swapped order: PENDING (user to confirm in the artifact of run #703, `quantity-lines-factor.pdf`).
+- Source changes: none in this step.
+- CI: run #703 Success on `bcf18f6` (the final code). Earlier Step 1 failures (#697, #698) were fixed in #699.
+- Rendered check: confirmed by the user on the final layout (`quantity-lines-factor.pdf`, run #703 artifact).
+- Global Definition of Done: factor shows `تعداد` and `مبلغ پرداختی (ریال)`; identical-spec products merged with the right quantity; differing specs on separate lines; paid amount = quantity × `فی`; CI green; no schema, migration, entity, form, Api or invoice change.
