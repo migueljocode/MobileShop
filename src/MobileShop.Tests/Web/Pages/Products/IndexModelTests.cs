@@ -2,7 +2,7 @@ namespace MobileShop.Tests.Web.Pages.Products;
 
 public class IndexModelTests
 {
-    private static (Mock<IProductsDataService> service, IndexModel model) CreateModel()
+    private static (Mock<IProductsDataService> service, MobileShop.Web.Pages.Products.IndexModel model) CreateModel()
     {
         var service = new Mock<IProductsDataService>();
         service.Setup(s => s.GetInventoryRowsAsync(
@@ -15,7 +15,7 @@ public class IndexModelTests
         service.Setup(s => s.GetModelsAsync(It.IsAny<int>(), It.IsAny<string>()))
             .ReturnsAsync(Array.Empty<DropdownOptionViewModel>());
 
-        return (service, new IndexModel(service.Object));
+        return (service, new MobileShop.Web.Pages.Products.IndexModel(service.Object));
     }
 
     [Fact]

@@ -5,7 +5,7 @@ public class IndexModelTests : RepoTestBase
 {
     private static readonly byte[] PdfBytes = [0x25, 0x50, 0x44, 0x46];
 
-    private readonly IndexModel _model;
+    private readonly MobileShop.Web.Pages.Transactions.IndexModel _model;
     private readonly FakePdfGenerator _pdfGenerator = new();
     private readonly Transaction _tx1;
     private readonly Transaction _tx2;
@@ -73,7 +73,7 @@ public class IndexModelTests : RepoTestBase
         Context.Transactions.AddRange(_tx1, _tx2, _tx3);
         Context.SaveChanges();
 
-        _model = new IndexModel(CreateService());
+        _model = new MobileShop.Web.Pages.Transactions.IndexModel(CreateService());
     }
 
     private TransactionsDataService CreateService() => new(

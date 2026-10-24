@@ -8,7 +8,7 @@ public class DetailsModelTests : RepoTestBase
 {
     private static readonly byte[] PdfBytes = [0x25, 0x50, 0x44, 0x46];
 
-    private readonly DetailsModel _model;
+    private readonly MobileShop.Web.Pages.Transactions.DetailsModel _model;
     private readonly FakePdfGenerator _pdfGenerator = new();
 
     /// <summary>Thin PDF double so the factor path is exercised without QuestPDF rendering.</summary>
@@ -27,7 +27,7 @@ public class DetailsModelTests : RepoTestBase
 
     public DetailsModelTests()
     {
-        _model = new DetailsModel(new TransactionsDataService(
+        _model = new MobileShop.Web.Pages.Transactions.DetailsModel(new TransactionsDataService(
             new BaseRepo<Transaction>(Context),
             new BaseRepo<Seller>(Context),
             new BaseRepo<Customer>(Context),
