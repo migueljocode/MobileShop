@@ -166,6 +166,7 @@ public class DistributionCalculatorTests
             MakeEmployee(2, "Ali", "Zadeh", 20),
             MakeEmployee(3, "Mina", "Karimi", 30)));
 
-        Assert.Equal(new[] { "Mina Karimi", "Ali Zadeh", "Zed Zadeh", "Shop" }, rows.Select(r => r.EmployeeName));
+        // Shop is 100 − 70 = 30%, tying with Mina; ties break by name.
+        Assert.Equal(new[] { "Mina Karimi", "Shop", "Ali Zadeh", "Zed Zadeh" }, rows.Select(r => r.EmployeeName));
     }
 }
