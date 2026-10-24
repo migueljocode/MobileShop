@@ -1,9 +1,9 @@
-## Reviewer Audit — Stage 22, Job A (plan review)
+## Reviewer Audit — Stage 23, Job A (plan review)
 
-**Status: APPROVED.** Proposed stage (Stage 22) is simple and complete; it covers the single open MEDIUM finding from the Stage 21 Job B review and nothing else.
+**Status: APPROVED.** Proposed stage (Stage 23) is one coherent, behaviour-neutral UI step in dependency order; it covers the reported misalignment and keeps every form field, JS hook and the live-preview maths untouched.
 
-Verified against the repo: `ShowPostedShares()` overwrites `EditableShares`; `data-original-percent`, the input `value` and `shopPercent` all read `EditableShares` (`ProfitLoss.cshtml` lines 250, 276–281, 289); `distribution-shares.js` takes its baseline only from `data-original-percent` and runs `recalc()` on load, so no JS change is needed; the test helper stores id 1 at 40 %, so the planned `PostedPercents`/`EditableShares` assertions are valid; no Razor-render test infrastructure exists, so the manual check is correctly assigned to the user.
+Verified against the repo: the modal is a 3-column `.data-table` with a wrapping amount cell; `formatAmount()` appends ` Toman` to every number; no CSS exists for `is-changed` or the editor; all JS hooks listed in the plan exist; `overlays.css` uses `BEGIN/END name-vN` blocks and the cited tokens exist; the test project has no render/JS harness, so the manual check is correctly assigned to the user.
 
-MEDIUM/LOW: none.
+MEDIUM (fixed in the plan, no extra round): the pair-hiding mechanism was left as "pick one" — now fixed to wrapper `<div class="share-row__line">` + CSS only; JS delta text/class for an invalid input is specified.
 
-Next: Actor, Step 1 (after the Planner commit of `plan.md`, `audit.md` and the Stage 22 line in `TODO.md`).
+Next: Actor, Step 1 (after the Planner commit of `plan.md`, `audit.md` and the Stage 23 line in `TODO.md`).
