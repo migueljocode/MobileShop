@@ -14,4 +14,4 @@
 - [x] ~~Stage 20 — Factor lines grouped by product specs with quantity and paid amount~~
 - [x] ~~Stage 21 — Profit distribution from per-employee DB shares, editable in a Reports modal~~
 - [x] ~~Stage 22 — Edit-shares modal keeps the saved baseline after a rejected save~~
-- [ ] Stage 23 — Edit-shares modal: aligned, compact amount layout
+- [x] ~~Stage 23 — Edit-shares modal: aligned, compact amount layout~~
