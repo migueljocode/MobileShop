@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="color-scheme" content="light" />
-    <script>try{if(localStorage.getItem('mobileshop.surfaces')==='solid')document.documentElement.setAttribute('data-surfaces','solid');}catch(e){}</script>
+    <script>try{var t=localStorage.getItem('mobileshop.theme')==='dark'?'dark':'light';var h=document.documentElement;h.dataset.theme=t;h.setAttribute('data-bs-theme',t);h.style.colorScheme=t;}catch(e){}</script>
     <meta name="theme-color" content="#FFFFFF" />
     <title>@ViewData["Title"] - MobileShop</title>
     <script type="importmap"></script>

@@ -1,6 +1,6 @@
 /* BEGIN motion-v1 */
 /* Preference modes. Materials read only the glass tokens, so each mode overrides the tokens in one place:
-   solid surfaces for reduced transparency, more contrast, or the owner switch html[data-surfaces="solid"].
+   solid surfaces for reduced transparency or more contrast.
    The solid scrim colour is the token --scrim-solid-bg (tokens.css); this file holds no colour literal. */
 @media (prefers-reduced-transparency: reduce) {
   :root {
@@ -14,18 +14,6 @@
     --scrim-filter: none;
     --border-glass: var(--border-control);
   }
-}
-
-html[data-surfaces="solid"] {
-  --glass-regular-bg: var(--glass-solid-bg);
-  --glass-subtle-bg: var(--glass-solid-bg);
-  --glass-overlay-bg: var(--glass-solid-bg);
-  --glass-regular-filter: none;
-  --glass-subtle-filter: none;
-  --glass-overlay-filter: none;
-  --scrim-bg: var(--scrim-solid-bg);
-  --scrim-filter: none;
-  --border-glass: var(--border-control);
 }
 
 @media (prefers-contrast: more) {
@@ -50,10 +38,6 @@ html[data-surfaces="solid"] {
   .account-login-page {
     background: none;
   }
-}
-
-html[data-surfaces="solid"] .account-login-page {
-  background: none;
 }
 
 @media (forced-colors: active) {

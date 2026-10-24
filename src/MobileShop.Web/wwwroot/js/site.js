@@ -222,28 +222,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     wireValidationAria();
 
-    // Solid-surfaces switch (Profile page). The choice is remembered per browser in
-    // localStorage; the layout applies it before the first paint. Storage may be
-    // unavailable or blocked, so every access is guarded and the page still works.
-    const surfacesToggle = document.querySelector('[data-surfaces-toggle]');
-    if (surfacesToggle) {
-        surfacesToggle.checked = document.documentElement.dataset.surfaces === 'solid';
-
-        surfacesToggle.addEventListener('change', () => {
-            if (surfacesToggle.checked) {
-                document.documentElement.dataset.surfaces = 'solid';
-                try {
-                    localStorage.setItem('mobileshop.surfaces', 'solid');
-                } catch (e) { }
-            } else {
-                delete document.documentElement.dataset.surfaces;
-                try {
-                    localStorage.removeItem('mobileshop.surfaces');
-                } catch (e) { }
-            }
-        });
-    }
-
     // Light/dark theme switch. The choice is remembered per browser in
     // localStorage; the layout applies it before the first paint. Storage may be
     // unavailable or blocked, so every access is guarded and the page still works.
@@ -252,12 +230,18 @@ document.addEventListener('DOMContentLoaded', () => {
     const applyTheme = theme => {
         document.documentElement.dataset.theme = theme;
         document.documentElement.setAttribute('data-bs-theme', theme);
+        document.documentElement.style.colorScheme = theme;
         if (themeColorMeta) {
             themeColorMeta.setAttribute('content', themeColors[theme] || themeColors.dark);
         }
     };
 
-    const currentTheme = 'light';
+    // Restore the saved choice on every page (the layout already applied it before first paint).
+    let savedTheme = 'light';
+    try {
+        savedTheme = localStorage.getItem('mobileshop.theme') === 'dark' ? 'dark' : 'light';
+    } catch (e) { }
+    const currentTheme = savedTheme;
     applyTheme(currentTheme);
 
     document.querySelectorAll('[data-theme-toggle]').forEach(toggle => {
