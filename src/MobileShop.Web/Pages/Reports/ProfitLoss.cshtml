@@ -268,35 +268,48 @@
                 {
                     <div class="alert alert-danger" role="alert">@Model.SharesError</div>
                 }
-                <table class="data-table">
-                    <thead><tr><th scope="col">Employee</th><th scope="col" class="num">Share %</th><th scope="col" class="num">Amount (Toman)</th></tr></thead>
-                    <tbody>
+                <p class="share-editor__hint small mb-2">Amounts are in Toman.</p>
+                <div class="share-editor">
                     @for (var i = 0; i < Model.EditableShares.Count; i++)
                     {
                         var share = Model.EditableShares[i];
                         var inputPercent = Model.PostedPercents.TryGetValue(share.EmployeeId, out var posted) ? posted : share.SharePercent;
-                        <tr data-share-row data-original-percent="@share.SharePercent">
-                            <th scope="row" dir="auto">@share.Name</th>
-                            <td>
-                                <input type="hidden" name="Shares[@i].EmployeeId" value="@share.EmployeeId" />
-                                <input type="number" class="form-control form-control-sm num" name="Shares[@i].SharePercent" value="@inputPercent" min="0" max="100" step="1" inputmode="numeric" required data-share-input aria-label="Share percent for @share.Name" />
-                            </td>
-                            <td class="num">
-                                <div><span class="text-muted" data-was></span> <span data-now></span></div>
-                                <div class="small" data-change></div>
-                            </td>
-                        </tr>
+                        <div class="share-row" data-share-row data-original-percent="@share.SharePercent">
+                            <div class="share-row__head">
+                                <div class="share-row__title">
+                                    <span class="share-row__name" dir="auto">@share.Name</span>
+                                    <span class="share-row__note small" data-change></span>
+                                </div>
+                                <div class="share-row__input">
+                                    <input type="hidden" name="Shares[@i].EmployeeId" value="@share.EmployeeId" />
+                                    <input type="number" class="form-control form-control-sm num" name="Shares[@i].SharePercent" value="@inputPercent" min="0" max="100" step="1" inputmode="numeric" required data-share-input aria-label="Share percent for @share.Name" />
+                                    <span class="share-row__unit" aria-hidden="true">%</span>
+                                </div>
+                            </div>
+                                <dl class="share-row__amounts">
+                                    <div class="share-row__line share-row__line--plain"><dt>Amount</dt><dd data-amount></dd></div>
+                                    <div class="share-row__line share-row__line--changed"><dt>Was</dt><dd data-was></dd></div>
+                                    <div class="share-row__line share-row__line--changed"><dt>Now</dt><dd data-now></dd></div>
+                                    <div class="share-row__line share-row__line--changed"><dt>Change</dt><dd class="share-row__delta" data-delta></dd></div>
+                                </dl>
+                        </div>
                     }
-                    <tr data-shop-row data-original-percent="@shopPercent">
-                        <th scope="row">Shop</th>
-                        <td class="num" data-shop-share>@shopPercent%</td>
-                        <td class="num">
-                            <div><span class="text-muted" data-was></span> <span data-now></span></div>
-                            <div class="small" data-change></div>
-                        </td>
-                    </tr>
-                    </tbody>
-                </table>
+                    <div class="share-row" data-shop-row data-original-percent="@shopPercent">
+                        <div class="share-row__head">
+                            <div class="share-row__title">
+                                <span class="share-row__name">Shop</span>
+                                <span class="share-row__note small" data-change></span>
+                            </div>
+                            <span class="share-row__percent num" data-shop-share>@shopPercent%</span>
+                        </div>
+                            <dl class="share-row__amounts">
+                                <div class="share-row__line share-row__line--plain"><dt>Amount</dt><dd data-amount></dd></div>
+                                <div class="share-row__line share-row__line--changed"><dt>Was</dt><dd data-was></dd></div>
+                                <div class="share-row__line share-row__line--changed"><dt>Now</dt><dd data-now></dd></div>
+                                <div class="share-row__line share-row__line--changed"><dt>Change</dt><dd class="share-row__delta" data-delta></dd></div>
+                            </dl>
+                    </div>
+                </div>
                 <p class="small mb-1" role="status" aria-live="polite" data-summary></p>
                 @if (Model.TotalProfit <= 0)
                 {

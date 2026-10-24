@@ -17,7 +17,7 @@
 ## Reviewer Briefing
 - One step, MEDIUM risk / MEDIUM confidence only because the result is visual and cannot be unit-tested; the logic does not change. The thing to check in Job B is that the JS maths, input names and form fields are untouched and that every hook listed above still exists in the markup.
 
-## [ ] Step 1 — Row cards with right-aligned amount lines
+## ~~[x] Step 1 — Row cards with right-aligned amount lines~~
 - Files: inspect: `src/MobileShop.Web/Pages/Reports/ProfitLoss.cshtml` (modal block), `src/MobileShop.Web/wwwroot/js/distribution-shares.js`, `src/MobileShop.Web/wwwroot/css/overlays.css`, `tokens.css`; modify: `ProfitLoss.cshtml` (modal markup only), `distribution-shares.js` (rendering helpers only), `overlays.css` (one new block); do not touch: page model, services, tests, other pages, other CSS blocks.
 - Symbols: new CSS block `overlays-share-editor-v1`; classes `.share-editor`, `.share-row`, `.share-row__head`, `.share-row__name`, `.share-row__note`, `.share-row__percent`, `.share-row__amounts`, `.share-row__delta`; JS `renderRow()` and `formatAmount()`.
 - Current -> Desired: a 3-column table with a wrapping amount cell → a stack of compact row cards (no `<table>` in the modal), each card with a header line and an aligned amounts list.

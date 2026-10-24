@@ -525,3 +525,59 @@
   font-size: 0.76rem;
 }
 /* END overlays-jalali-v1 */
+
+/* BEGIN overlays-share-editor-v1 */
+.share-editor { display: grid; }
+.share-row {
+  display: grid;
+  gap: var(--space-2);
+  padding-block: var(--space-3);
+  border-bottom: 1px solid var(--hairline);
+}
+.share-row:last-child { border-bottom: 0; }
+.share-row__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+.share-row__title { min-width: 0; display: grid; gap: var(--space-1); }
+.share-row__name { min-width: 0; overflow-wrap: anywhere; font-weight: var(--fw-strong); }
+.share-row__note { color: var(--text-2); }
+.share-row__note:empty { display: none; }
+.share-row__input {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  width: 6.5rem;
+}
+.share-row__input .form-control { min-width: 0; text-align: end; }
+.share-row__unit { color: var(--text-2); }
+.share-row__percent { flex: none; align-self: center; font-variant-numeric: tabular-nums; }
+.share-row__amounts {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  column-gap: var(--space-4);
+  row-gap: var(--space-1);
+  margin: 0;
+}
+.share-row__line { display: contents; }
+.share-row__amounts dt { color: var(--text-2); font-size: var(--fs-sm); font-weight: 400; }
+.share-row__amounts dd {
+  margin: 0;
+  text-align: end;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.share-row:not(.is-changed) .share-row__line--changed,
+.share-row.is-changed .share-row__line--plain { display: none; }
+.share-row.is-changed {
+  background: var(--accent-soft);
+  border-radius: var(--radius-sm);
+  padding-inline: var(--space-3);
+  border-inline-start: 3px solid var(--accent-strong);
+}
+.share-row__delta.is-up { color: var(--accent-strong); }
+.share-row__delta.is-down { color: var(--danger); }
+/* END overlays-share-editor-v1 */

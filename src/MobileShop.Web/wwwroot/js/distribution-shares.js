@@ -34,11 +34,11 @@
         return profit * BigInt(percent) / HUNDRED;
     }
 
-    // Mirrors ToGroupedDigits + " Toman": spaces between digit groups.
+    // Mirrors ToGroupedDigits: spaces between digit groups. The unit is stated once above the editor.
     function formatAmount(value) {
         var negative = value < ZERO;
         var digits = (negative ? -value : value).toString();
-        return (negative ? '-' : '') + digits.replace(/\B(?=(\d{3})+(?!\d))/g, ' ') + ' Toman';
+        return (negative ? '-' : '') + digits.replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
     }
 
     function formatDelta(delta) {
@@ -66,17 +66,20 @@
         var changed = currentPercent !== null && currentPercent !== originalPercent;
         row.classList.toggle('is-changed', changed);
 
+        var nowText = nowAmount === null ? '—' : formatAmount(nowAmount);
+        setText(row, '[data-amount]', nowText);
         setText(row, '[data-was]', formatAmount(wasAmount));
-        setText(row, '[data-now]', nowAmount === null ? '—' : formatAmount(nowAmount));
+        setText(row, '[data-now]', nowText);
 
-        var notes = [];
-        if (changed) {
-            notes.push('was ' + originalPercent + '% → ' + currentPercent + '%');
-            if (nowAmount !== null) {
-                notes.push(formatDelta(nowAmount - wasAmount));
-            }
+        var delta = changed && nowAmount !== null ? nowAmount - wasAmount : null;
+        var deltaElement = row.querySelector('[data-delta]');
+        if (deltaElement) {
+            deltaElement.textContent = delta === null ? '' : formatDelta(delta);
+            deltaElement.classList.toggle('is-up', delta !== null && delta > ZERO);
+            deltaElement.classList.toggle('is-down', delta !== null && delta < ZERO);
         }
-        setText(row, '[data-change]', notes.join(' · '));
+
+        setText(row, '[data-change]', changed ? 'was ' + originalPercent + '% → ' + currentPercent + '%' : '');
     }
 
     function recalc() {
