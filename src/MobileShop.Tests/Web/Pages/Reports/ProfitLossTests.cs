@@ -1,5 +1,6 @@
 using MobileShop.Services.Logging.Settings;
 using MobileShop.Services.DataServices.Interfaces;
+using Microsoft.AspNetCore.Mvc.RazorPages;
 using MobileShop.Web.Pages.Reports;
 using Moq;
 using Xunit;
