@@ -225,21 +225,30 @@ public class ReportsDataService(
         if (shares.Any(share => share.SharePercent is < 0 or > 100))
             return EmployeeSharesResult.Fail("Each share must be between 0% and 100%.");
 
-        var active = (await employees.FindAllAsync(employee => employee.IsActive)).ToList();
-        var activeIds = active.Select(employee => employee.Id).ToHashSet();
+        var storedShares = (await employees.SelectAllAsync(
+            employee => employee.IsActive,
+            employee => new { employee.Id, employee.SharePercent })).ToList();
+        var activeIds = storedShares.Select(stored => stored.Id).ToHashSet();
         if (shares.Any(share => !activeIds.Contains(share.EmployeeId)))
             return EmployeeSharesResult.Fail("A selected employee is not active.");
 
         // Check the total against posted values, falling back to stored values for everyone else.
         var postedShares = shares.ToDictionary(share => share.EmployeeId, share => share.SharePercent);
-        var total = active.Sum(employee =>
-            postedShares.TryGetValue(employee.Id, out var posted) ? posted : employee.SharePercent);
+        var total = storedShares.Sum(stored =>
+            postedShares.TryGetValue(stored.Id, out var posted) ? posted : stored.SharePercent);
         if (total > 100)
             return EmployeeSharesResult.Fail($"Total share is {total}%; it cannot exceed 100%.");
 
-        var changed = active.Where(employee => postedShares.ContainsKey(employee.Id)).ToList();
-        foreach (var employee in changed)
-            employee.SharePercent = postedShares[employee.Id];
+        // Tracked reads, one per posted employee: they stay consistent with any entity this context already tracks.
+        var changed = new List<Employee>(shares.Count);
+        foreach (var share in shares)
+        {
+            var employee = await employees.FindAsync(candidate => candidate.Id == share.EmployeeId)
+                ?? throw new InvalidOperationException(
+                    $"Active employee {share.EmployeeId} was not found while saving shares.");
+            employee.SharePercent = share.SharePercent;
+            changed.Add(employee);
+        }
 
         await employees.UpdateRangeAsync(changed);
         Logger.LogInformation("Updated {Count} employee shares; active total is {Total}%.", changed.Count, total);
