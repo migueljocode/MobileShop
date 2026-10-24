@@ -21,4 +21,10 @@ public class ApiReportsDataService : IReportsDataService
     /// <inheritdoc />
     public Task<IReadOnlyList<DistributionRow>> GetDistributionRowsAsync(long totalProfit)
         => throw new NotImplementedException("ApiReportsDataService is not implemented yet.");
+
+    public Task<IReadOnlyList<EmployeeShareViewModel>> GetActiveEmployeeSharesAsync()
+        => throw new NotImplementedException("ApiReportsDataService is not implemented yet.");
+
+    public Task<EmployeeSharesResult> UpdateEmployeeSharesAsync(IReadOnlyList<EmployeeShareInput> shares)
+        => throw new NotImplementedException("ApiReportsDataService is not implemented yet.");
 }

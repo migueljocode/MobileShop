@@ -25,4 +25,11 @@ public interface IReportsDataService
     /// <summary>Gets distribution rows for a total profit amount.</summary>
     /// <param name="totalProfit">The total profit to distribute.</param>
     Task<IReadOnlyList<DistributionRow>> GetDistributionRowsAsync(long totalProfit);
+
+    /// <summary>Gets the active employees with their stored shares, ordered as the distribution report.</summary>
+    Task<IReadOnlyList<EmployeeShareViewModel>> GetActiveEmployeeSharesAsync();
+
+    /// <summary>Saves the posted shares of active employees after checking that the active total stays within 100%.</summary>
+    /// <param name="shares">The posted shares; a subset of the active employees is allowed.</param>
+    Task<EmployeeSharesResult> UpdateEmployeeSharesAsync(IReadOnlyList<EmployeeShareInput> shares);
 }

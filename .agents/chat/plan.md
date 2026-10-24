@@ -53,7 +53,7 @@
 - Risk: MEDIUM
 - Confidence: HIGH
 
-## [ ] Step 2 — Service: read and update employee shares
+## ~~[x] Step 2 — Service: read and update employee shares~~
 - Files: inspect: `src/MobileShop.Services/DataServices/Interfaces/IReportsDataService.cs`, `Dal/ReportsDataService.cs`, `src/MobileShop.Dal/Repo/BaseRepo.cs` (tracking behaviour of `FindAllAsync`/`UpdateRangeAsync`), `src/MobileShop.Models/ViewModels/Web/` (placement convention); modify: `IReportsDataService.cs`, `ReportsDataService.cs`, `src/MobileShop.Services/DataServices/Api/ApiReportsDataService.cs` (stubs only: both new methods throw `NotImplementedException`, same message as its siblings); create: `EmployeeShareViewModel.cs`, `EmployeeShareInput.cs`, `EmployeeSharesResult.cs` in the Models view-model folder found above, tests in `ReportsDataServiceTests.cs`; do not touch: other Api stubs.
 - Symbols: `IReportsDataService.GetActiveEmployeeSharesAsync()` → `Task<IReadOnlyList<EmployeeShareViewModel>>`; `IReportsDataService.UpdateEmployeeSharesAsync(IReadOnlyList<EmployeeShareInput>)` → `Task<EmployeeSharesResult>`; `EmployeeShareViewModel(int EmployeeId, string Name, int SharePercent)`; `EmployeeShareInput { int EmployeeId; int SharePercent }` (class with `[Range(0, 100)]` on the percent); `EmployeeSharesResult(bool Success, string? Error)` with static `Ok` and `Fail(string)` helpers.
 - Current -> Desired: no way to change shares. Desired: `Get…` returns active employees ordered like the report (percent desc, name); `Update…` validates then saves everything in one `SaveChanges`.

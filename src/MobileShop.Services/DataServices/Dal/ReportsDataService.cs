@@ -188,4 +188,61 @@ public class ReportsDataService(
 
         return DistributionCalculator.Calculate(totalProfit, employeeList);
     }
+
+    /// <inheritdoc />
+    public async Task<IReadOnlyList<EmployeeShareViewModel>> GetActiveEmployeeSharesAsync()
+    {
+        // Projection gives the person's name without loading navigations; FindAllAsync does not include them.
+        var active = await employees.SelectAllAsync(
+            employee => employee.IsActive,
+            employee => new
+            {
+                employee.Id,
+                employee.SharePercent,
+                employee.PersonNavigation.FirstName,
+                employee.PersonNavigation.LastName,
+            });
+
+        return active
+            .Select(employee => new EmployeeShareViewModel(
+                employee.Id,
+                $"{employee.FirstName} {employee.LastName}",
+                employee.SharePercent))
+            .OrderByDescending(share => share.SharePercent)
+            .ThenBy(share => share.Name)
+            .ToList();
+    }
+
+    /// <inheritdoc />
+    public async Task<EmployeeSharesResult> UpdateEmployeeSharesAsync(IReadOnlyList<EmployeeShareInput> shares)
+    {
+        if (shares.Count == 0)
+            return EmployeeSharesResult.Fail("No employee shares were submitted.");
+
+        if (shares.Select(share => share.EmployeeId).Distinct().Count() != shares.Count)
+            return EmployeeSharesResult.Fail("An employee appears more than once.");
+
+        if (shares.Any(share => share.SharePercent is < 0 or > 100))
+            return EmployeeSharesResult.Fail("Each share must be between 0% and 100%.");
+
+        var active = (await employees.FindAllAsync(employee => employee.IsActive)).ToList();
+        var activeIds = active.Select(employee => employee.Id).ToHashSet();
+        if (shares.Any(share => !activeIds.Contains(share.EmployeeId)))
+            return EmployeeSharesResult.Fail("A selected employee is not active.");
+
+        // Check the total against posted values, falling back to stored values for everyone else.
+        var postedShares = shares.ToDictionary(share => share.EmployeeId, share => share.SharePercent);
+        var total = active.Sum(employee =>
+            postedShares.TryGetValue(employee.Id, out var posted) ? posted : employee.SharePercent);
+        if (total > 100)
+            return EmployeeSharesResult.Fail($"Total share is {total}%; it cannot exceed 100%.");
+
+        var changed = active.Where(employee => postedShares.ContainsKey(employee.Id)).ToList();
+        foreach (var employee in changed)
+            employee.SharePercent = postedShares[employee.Id];
+
+        await employees.UpdateRangeAsync(changed);
+        Logger.LogInformation("Updated {Count} employee shares; active total is {Total}%.", changed.Count, total);
+        return EmployeeSharesResult.Ok;
+    }
 }

@@ -503,4 +503,159 @@ public class ReportsDataServiceTests : RepoTestBase
         Assert.Equal(2_000_000_000L, await _service.GetProfitLossTotalAsync(null, null));
     }
 
+    [Fact]
+    public async Task UpdateEmployeeSharesAsync_persists_posted_values()
+    {
+        var mikaeeil = AddEmployee("Mikaeeil", "Jorjany", sharePercent: 40);
+        var anis = AddEmployee("Anis", "Sahabi", sharePercent: 50);
+
+        var result = await _service.UpdateEmployeeSharesAsync(new List<EmployeeShareInput>
+        {
+            new() { EmployeeId = mikaeeil.Id, SharePercent = 30 },
+            new() { EmployeeId = anis.Id, SharePercent = 60 },
+        });
+
+        Assert.True(result.Success);
+        Context.ChangeTracker.Clear();
+        Assert.Equal(30, Context.Employees.Single(e => e.Id == mikaeeil.Id).SharePercent);
+        Assert.Equal(60, Context.Employees.Single(e => e.Id == anis.Id).SharePercent);
+    }
+
+    [Fact]
+    public async Task UpdateEmployeeSharesAsync_allows_total_of_exactly_100()
+    {
+        var mikaeeil = AddEmployee("Mikaeeil", "Jorjany", sharePercent: 40);
+        var anis = AddEmployee("Anis", "Sahabi", sharePercent: 50);
+
+        var result = await _service.UpdateEmployeeSharesAsync(new List<EmployeeShareInput>
+        {
+            new() { EmployeeId = mikaeeil.Id, SharePercent = 60 },
+            new() { EmployeeId = anis.Id, SharePercent = 40 },
+        });
+
+        Assert.True(result.Success);
+    }
+
+    [Fact]
+    public async Task UpdateEmployeeSharesAsync_rejects_total_above_100_and_leaves_database_unchanged()
+    {
+        var mikaeeil = AddEmployee("Mikaeeil", "Jorjany", sharePercent: 40);
+        var anis = AddEmployee("Anis", "Sahabi", sharePercent: 50);
+
+        var result = await _service.UpdateEmployeeSharesAsync(new List<EmployeeShareInput>
+        {
+            new() { EmployeeId = mikaeeil.Id, SharePercent = 51 },
+        });
+
+        Assert.False(result.Success);
+        Assert.Equal("Total share is 101%; it cannot exceed 100%.", result.Error);
+        Context.ChangeTracker.Clear();
+        Assert.Equal(40, Context.Employees.Single(e => e.Id == mikaeeil.Id).SharePercent);
+        Assert.Equal(50, Context.Employees.Single(e => e.Id == anis.Id).SharePercent);
+    }
+
+    [Fact]
+    public async Task UpdateEmployeeSharesAsync_checks_subset_against_stored_values_of_others()
+    {
+        var mikaeeil = AddEmployee("Mikaeeil", "Jorjany", sharePercent: 40);
+        AddEmployee("Anis", "Sahabi", sharePercent: 50);
+        var ali = AddEmployee("Ali", "Rezaei", sharePercent: 0);
+
+        var result = await _service.UpdateEmployeeSharesAsync(new List<EmployeeShareInput>
+        {
+            new() { EmployeeId = ali.Id, SharePercent = 20 },
+        });
+
+        Assert.False(result.Success);
+        Assert.Equal("Total share is 110%; it cannot exceed 100%.", result.Error);
+        Context.ChangeTracker.Clear();
+        Assert.Equal(40, Context.Employees.Single(e => e.Id == mikaeeil.Id).SharePercent);
+    }
+
+    [Fact]
+    public async Task UpdateEmployeeSharesAsync_rejects_inactive_or_unknown_employee()
+    {
+        var inactive = AddEmployee("Mikaeeil", "Jorjany", isActive: false, sharePercent: 40);
+
+        var inactiveResult = await _service.UpdateEmployeeSharesAsync(new List<EmployeeShareInput>
+        {
+            new() { EmployeeId = inactive.Id, SharePercent = 10 },
+        });
+        var unknownResult = await _service.UpdateEmployeeSharesAsync(new List<EmployeeShareInput>
+        {
+            new() { EmployeeId = 9999, SharePercent = 10 },
+        });
+
+        Assert.False(inactiveResult.Success);
+        Assert.False(unknownResult.Success);
+    }
+
+    [Fact]
+    public async Task UpdateEmployeeSharesAsync_rejects_duplicate_employee()
+    {
+        var anis = AddEmployee("Anis", "Sahabi", sharePercent: 50);
+
+        var result = await _service.UpdateEmployeeSharesAsync(new List<EmployeeShareInput>
+        {
+            new() { EmployeeId = anis.Id, SharePercent = 10 },
+            new() { EmployeeId = anis.Id, SharePercent = 20 },
+        });
+
+        Assert.False(result.Success);
+    }
+
+    [Theory]
+    [InlineData(-1)]
+    [InlineData(101)]
+    public async Task UpdateEmployeeSharesAsync_rejects_percent_outside_zero_to_hundred(int share)
+    {
+        var anis = AddEmployee("Anis", "Sahabi", sharePercent: 50);
+
+        var result = await _service.UpdateEmployeeSharesAsync(new List<EmployeeShareInput>
+        {
+            new() { EmployeeId = anis.Id, SharePercent = share },
+        });
+
+        Assert.False(result.Success);
+    }
+
+    [Fact]
+    public async Task UpdateEmployeeSharesAsync_rejects_empty_submission()
+    {
+        var result = await _service.UpdateEmployeeSharesAsync(new List<EmployeeShareInput>());
+
+        Assert.False(result.Success);
+    }
+
+    [Fact]
+    public async Task GetActiveEmployeeSharesAsync_excludes_inactive_and_deleted_and_orders_like_report()
+    {
+        AddEmployee("Anis", "Sahabi", sharePercent: 50);
+        AddEmployee("Mikaeeil", "Jorjany", sharePercent: 40);
+        AddEmployee("Inactive", "Person", isActive: false, sharePercent: 60);
+        var deleted = AddEmployee("Deleted", "Person", sharePercent: 30);
+        deleted.IsDeleted = true;
+        Context.SaveChanges();
+
+        var shares = await _service.GetActiveEmployeeSharesAsync();
+
+        Assert.Equal(new[] { "Anis Sahabi", "Mikaeeil Jorjany" }, shares.Select(share => share.Name));
+        Assert.Equal(new[] { 50, 40 }, shares.Select(share => share.SharePercent));
+    }
+
+    [Fact]
+    public async Task UpdateEmployeeSharesAsync_is_reflected_in_distribution_immediately()
+    {
+        var mikaeeil = AddEmployee("Mikaeeil", "Jorjany", sharePercent: 40);
+        AddEmployee("Anis", "Sahabi", sharePercent: 50);
+
+        await _service.UpdateEmployeeSharesAsync(new List<EmployeeShareInput>
+        {
+            new() { EmployeeId = mikaeeil.Id, SharePercent = 30 },
+        });
+        var rows = await _service.GetDistributionRowsAsync(1000);
+
+        Assert.Equal(300, rows.Single(row => row.EmployeeId == mikaeeil.Id).CalculatedAmount);
+        Assert.Equal(20, rows.Single(row => row.EmployeeName == "Shop").SharePercent);
+    }
 }
