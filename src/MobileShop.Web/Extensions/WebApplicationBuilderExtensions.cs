@@ -80,10 +80,16 @@ public static class WebApplicationBuilderExtensions
     }
 
     /// <summary>
-    /// Configures the authenticated web request pipeline.
+    /// Configures the authenticated web request pipeline. Returns <see langword="null"/> when the
+    /// one-off database command ran instead, so the host must not start.
     /// </summary>
-    public static WebApplication ConfigureApp(this WebApplication app)
+    public static WebApplication? ConfigureApp(this WebApplication app, string[] args)
     {
+        if (app.TryRunDatabaseCommand(args))
+        {
+            return null;
+        }
+
         if (app.Environment.IsDevelopment())
         {
             DatabaseInitializer.InitializeForDevelopment(app.Services);
@@ -103,6 +109,7 @@ public static class WebApplicationBuilderExtensions
         app.UseAuthorization();
         app.MapStaticAssets();
         app.MapRazorPages().WithStaticAssets();
+        app.PrintRunningAddress();
         return app;
     }
 }

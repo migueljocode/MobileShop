@@ -1,9 +1,2 @@
 var builder = CreateBuilder(args).ConfigureBuilder();
-var app = builder.Build();
-
-if (app.TryRunDatabaseCommand(args))
-{
-    return;
-}
-
-app.ConfigureApp().PrintRunningAddress().Run();
+builder.Build().ConfigureApp(args)?.Run();
