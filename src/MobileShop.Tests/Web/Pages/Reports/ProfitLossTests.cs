@@ -596,7 +596,62 @@ public class ProfitLossTests
 
         Assert.IsType<PageResult>(result);
         Assert.Equal("Total share is 101%; it cannot exceed 100%.", model.SharesError);
-        Assert.Equal(61, model.EditableShares.Single(share => share.EmployeeId == 1).SharePercent);
+        Assert.Equal(40, model.EditableShares.Single(share => share.EmployeeId == 1).SharePercent);
+        Assert.Equal(61, model.PostedPercents[1]);
         Assert.Null(model.SuccessMessage);
+    }
+
+    [Fact]
+    public async Task OnPostSaveSharesAsync_failure_keeps_first_value_for_duplicated_employee()
+    {
+        var mock = new Mock<IReportsDataService>();
+        SetupProfitLossMocks(mock);
+        mock.Setup(s => s.UpdateEmployeeSharesAsync(It.IsAny<IReadOnlyList<EmployeeShareInput>>()))
+            .ReturnsAsync(EmployeeSharesResult.Fail("An employee appears more than once."));
+        var model = CreateModel(mock);
+        model.Shares =
+        [
+            new EmployeeShareInput { EmployeeId = 1, SharePercent = 61 },
+            new EmployeeShareInput { EmployeeId = 1, SharePercent = 70 },
+        ];
+
+        await model.OnPostSaveSharesAsync();
+
+        Assert.Equal(61, model.PostedPercents[1]);
+        Assert.Equal(40, model.EditableShares.Single(share => share.EmployeeId == 1).SharePercent);
+    }
+
+    [Fact]
+    public async Task OnPostSaveSharesAsync_failure_keeps_posted_id_outside_editable_rows_without_throwing()
+    {
+        var mock = new Mock<IReportsDataService>();
+        SetupProfitLossMocks(mock);
+        mock.Setup(s => s.UpdateEmployeeSharesAsync(It.IsAny<IReadOnlyList<EmployeeShareInput>>()))
+            .ReturnsAsync(EmployeeSharesResult.Fail("A selected employee is not active."));
+        var model = CreateModel(mock);
+        model.Shares = [new EmployeeShareInput { EmployeeId = 99, SharePercent = 10 }];
+
+        await model.OnPostSaveSharesAsync();
+
+        Assert.Equal(10, model.PostedPercents[99]);
+        Assert.Equal(2, model.EditableShares.Count);
+        Assert.DoesNotContain(model.EditableShares, share => share.EmployeeId == 99);
+    }
+
+    [Fact]
+    public async Task PostedPercents_stay_empty_after_get_and_successful_save()
+    {
+        var mock = new Mock<IReportsDataService>();
+        SetupProfitLossMocks(mock);
+        mock.Setup(s => s.UpdateEmployeeSharesAsync(It.IsAny<IReadOnlyList<EmployeeShareInput>>()))
+            .ReturnsAsync(EmployeeSharesResult.Ok);
+        var model = CreateModel(mock);
+
+        await model.OnGetAsync();
+        Assert.Empty(model.PostedPercents);
+
+        model.Shares = [new EmployeeShareInput { EmployeeId = 1, SharePercent = 40 }];
+        await model.OnPostSaveSharesAsync();
+        Assert.Empty(model.PostedPercents);
     }
 }

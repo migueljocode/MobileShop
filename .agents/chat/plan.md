@@ -15,7 +15,7 @@
 ## Reviewer Briefing
 - One LOW-risk step touching one page model, one view and one test. A quick sanity check is enough; the only thing worth confirming is that `EditableShares` is never overwritten and the input values come from `PostedPercents`.
 
-## [ ] Step 1 — Separate stored baseline from posted input values
+## ~~[x] Step 1 — Separate stored baseline from posted input values~~
 - Files: inspect: `src/MobileShop.Web/Pages/Reports/ProfitLoss.cshtml.cs`, `src/MobileShop.Web/Pages/Reports/ProfitLoss.cshtml` (the modal, ~lines 255–300), `src/MobileShop.Web/wwwroot/js/distribution-shares.js` (read only); modify: `ProfitLoss.cshtml.cs`, `ProfitLoss.cshtml`, `src/MobileShop.Tests/Web/Pages/Reports/ProfitLossTests.cs`; do not touch: the service, calculator, JS (unless the manual check below fails), other pages.
 - Symbols: `ProfitLossModel.EditableShares` (stays the **stored** values, never overwritten); new `IReadOnlyDictionary<int, int> PostedPercents { get; private set; }` (employee id → posted percent), empty by default; `ProfitLossModel.ShowPostedShares()` (replace by filling `PostedPercents`).
 - Current -> Desired: the failure path replaces the stored percents with the posted ones. Desired: it only records the posted values; the view uses stored values for the baseline and posted values for the inputs.

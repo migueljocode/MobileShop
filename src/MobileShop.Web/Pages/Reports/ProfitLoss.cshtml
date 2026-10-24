@@ -274,11 +274,12 @@
                     @for (var i = 0; i < Model.EditableShares.Count; i++)
                     {
                         var share = Model.EditableShares[i];
+                        var inputPercent = Model.PostedPercents.TryGetValue(share.EmployeeId, out var posted) ? posted : share.SharePercent;
                         <tr data-share-row data-original-percent="@share.SharePercent">
                             <th scope="row" dir="auto">@share.Name</th>
                             <td>
                                 <input type="hidden" name="Shares[@i].EmployeeId" value="@share.EmployeeId" />
-                                <input type="number" class="form-control form-control-sm num" name="Shares[@i].SharePercent" value="@share.SharePercent" min="0" max="100" step="1" inputmode="numeric" required data-share-input aria-label="Share percent for @share.Name" />
+                                <input type="number" class="form-control form-control-sm num" name="Shares[@i].SharePercent" value="@inputPercent" min="0" max="100" step="1" inputmode="numeric" required data-share-input aria-label="Share percent for @share.Name" />
                             </td>
                             <td class="num">
                                 <div><span class="text-muted" data-was></span> <span data-now></span></div>

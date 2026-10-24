@@ -24,6 +24,9 @@ public class ProfitLossModel(
     // Distribution
     public IReadOnlyList<DistributionRow> DistributionRows { get; private set; } = [];
     public IReadOnlyList<EmployeeShareViewModel> EditableShares { get; private set; } = [];
+
+    // Posted percents from a rejected save (employee id → percent). EditableShares keeps the stored baseline.
+    public IReadOnlyDictionary<int, int> PostedPercents { get; private set; } = new Dictionary<int, int>();
     public string? DistributionError { get; private set; }
     public string? SharesError { get; private set; }
 
@@ -123,18 +126,12 @@ public class ProfitLossModel(
         }
     }
 
-    /// <summary>Shows the user's posted values in the editor after a rejected save.</summary>
+    /// <summary>Records the posted percents of a rejected save; the stored shares stay as the baseline.</summary>
     private void ShowPostedShares()
     {
-        var posted = Shares
+        PostedPercents = Shares
             .DistinctBy(share => share.EmployeeId)
             .ToDictionary(share => share.EmployeeId, share => share.SharePercent);
-
-        EditableShares = EditableShares
-            .Select(share => posted.TryGetValue(share.EmployeeId, out var percent)
-                ? share with { SharePercent = percent }
-                : share)
-            .ToList();
     }
 
     private ProfitLossInterval ResolveTrendInterval()
