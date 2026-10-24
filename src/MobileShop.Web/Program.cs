@@ -6,4 +6,4 @@ if (app.TryRunDatabaseCommand(args))
     return;
 }
 
-app.ConfigureApp().Run();
+app.ConfigureApp().PrintRunningAddress().Run();
