@@ -1,13 +1,9 @@
-## Reviewer Audit — Stage 21, Job A (plan review, round 2)
+## Reviewer Audit — Stage 22, Job A (plan review)
 
-**Status: APPROVED.** Proposed stage (Stage 21) is simple, in dependency order and complete; the four steps cover every requirement (config removal incl. Api JSON, DB-driven calculator, ≤100 validation, Reports modal with live preview).
+**Status: APPROVED.** Proposed stage (Stage 22) is simple and complete; it covers the single open MEDIUM finding from the Stage 21 Job B review and nothing else.
 
-Round 1 (APPROVED WITH CORRECTIONS) found four HIGH issues, all folded into `plan.md` and re-checked against the repo:
-- `MoneyLimits.MaxRials` is `long.MaxValue`: `profit × percent` can overflow → Step 1 now mandates the overflow-safe floor formula (+ a `long.MaxValue` test).
-- Redirect/hidden fields passed `DateTime`; filters are Jalali strings parsed by the global `JalaliDateTimeModelBinder` → Steps 3–4 now use `ToJalaliDateString()` strings.
-- Success message needs `[TempData] SuccessMessage` + `_ProductCreateSuccess` partial (pattern in `Products/Details`) → specified.
-- Wrong repo claim: no service catches `DbUpdateConcurrencyException` and `BaseEntity.TimeStamp` is not configured for SQLite → concurrency handling removed from Step 2.
+Verified against the repo: `ShowPostedShares()` overwrites `EditableShares`; `data-original-percent`, the input `value` and `shopPercent` all read `EditableShares` (`ProfitLoss.cshtml` lines 250, 276–281, 289); `distribution-shares.js` takes its baseline only from `data-original-percent` and runs `recalc()` on load, so no JS change is needed; the test helper stores id 1 at 40 %, so the planned `PostedPercents`/`EditableShares` assertions are valid; no Razor-render test infrastructure exists, so the manual check is correctly assigned to the user.
 
-MEDIUM/LOW (notes, no further round): calculator also rejects percents outside 0–100; five (not three/four) existing service tests to rewrite; empty-employee state shows a muted line; renaming `DistributionSettings.cs` → `DistributionCalculator.cs` is the only rename (the settings class is deleted); JS amount formatting must mirror `ToGroupedDigits` (Step 4 says to inspect it).
+MEDIUM/LOW: none.
 
-Next: Actor, Step 1 (after the Planner commit of `plan.md`, `audit.md` and the Stage 21 line in `TODO.md`).
+Next: Actor, Step 1 (after the Planner commit of `plan.md`, `audit.md` and the Stage 22 line in `TODO.md`).
