@@ -79,7 +79,7 @@
 - Risk: MEDIUM
 - Confidence: HIGH
 
-## [ ] Step 4 — Modal markup and live preview
+## ~~[x] Step 4 — Modal markup and live preview~~
 - Files: inspect: `src/MobileShop.Web/Pages/Reports/ProfitLoss.cshtml` (Distribution tab, lines ~214–232), `Pages/Products/CreatePhone.cshtml` modal markup, `wwwroot/js/profit-loss-chart.js` and `site.js` (script style, how tabs/hash are handled), the existing CSS tokens used by modals and `.stat`; `MoneyExtensions.ToToman` (output format to mirror); create: `src/MobileShop.Web/wwwroot/js/distribution-shares.js`; modify: `ProfitLoss.cshtml` (+ the shared stylesheet only if a few lines are unavoidable); do not touch: chart script, other pages.
 - Symbols: `#editSharesModal`, button `Edit shares` (above the distribution table, always rendered when `EditableShares.Count > 0`), form `asp-page-handler="SaveShares" method="post"` with hidden `Mode/Preset/From/To` (`From`/`To` rendered with `Model.From?.ToJalaliDateString()`, exactly like the filter inputs), one row per employee bound as `Shares[i].EmployeeId` (hidden) / `Shares[i].SharePercent` (`type=number min=0 max=100 step=1 inputmode=numeric`).
 - Current -> Desired: read-only table. Desired modal (compact, one column on a phone), per row: name · `% input` · **"was → now" amount in Toman**; then a read-only **Shop** row with the same columns, then a summary line `Total X% · Shop gets Y%` in `role="status" aria-live="polite"`.
