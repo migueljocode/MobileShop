@@ -12,3 +12,4 @@
 - [x] ~~Stage 18 — Fix Phone details identity and edit feedback~~
 - [x] ~~Stage 19 — Cable edit validation and invoice phone display~~
 - [x] ~~Stage 20 — Factor lines grouped by product specs with quantity and paid amount~~
+- [ ] Stage 21 — Profit distribution from per-employee DB shares, editable in a Reports modal
