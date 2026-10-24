@@ -13,3 +13,4 @@
 - [x] ~~Stage 19 — Cable edit validation and invoice phone display~~
 - [x] ~~Stage 20 — Factor lines grouped by product specs with quantity and paid amount~~
 - [x] ~~Stage 21 — Profit distribution from per-employee DB shares, editable in a Reports modal~~
+- [ ] Stage 22 — Edit-shares modal keeps the saved baseline after a rejected save
