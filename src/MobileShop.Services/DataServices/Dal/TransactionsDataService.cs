@@ -469,7 +469,8 @@ public class TransactionsDataService(
         .Include(t => t.ProductNavigation).ThenInclude(p => p.CaseProfile).ThenInclude(c => c!.ModelFits)
         .Include(t => t.ProductNavigation).ThenInclude(p => p.GlassProfile).ThenInclude(g => g!.ModelFits)
         .Include(t => t.ProductNavigation).ThenInclude(p => p.TabletProfile)
-        .Include(t => t.ProductNavigation).ThenInclude(p => p.SmartWatchProfile);
+        .Include(t => t.ProductNavigation).ThenInclude(p => p.SmartWatchProfile)
+        .AsSplitQuery();
 
     /// <summary>
     /// Fills each factor row with its product's spec key and label, using one query for all rows.
