@@ -94,7 +94,6 @@ Important settings:
 | `UseApi` | Keep `false` for normal operation. The alternative API data-service implementations are stubs and throw `NotImplementedException`. |
 | `Pdf` | Configure shop details such as address and phone before producing customer-facing invoices. |
 | `AppLogging` | Configure default, console, and file log levels. |
-| `Distribution` | Controls default and maximum share percentages. |
 | `AllowedHosts` | Standard ASP.NET Core host filtering; configure it appropriately for your deployment. |
 
 Logs are written under `logs/`. See the [log utilities guide](src/MobileShop.Scripts/README.md) for bash and PowerShell commands.

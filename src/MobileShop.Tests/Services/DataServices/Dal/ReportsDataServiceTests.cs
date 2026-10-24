@@ -12,7 +12,6 @@ public class ReportsDataServiceTests : RepoTestBase
         _service = new ReportsDataService(
             new BaseRepo<Transaction>(Context),
             new BaseRepo<Employee>(Context),
-            Options.Create(new DistributionSettings()),
             NullLogger<ReportsDataService>.Instance);
     }
 
@@ -62,13 +61,13 @@ public class ReportsDataServiceTests : RepoTestBase
         return transaction;
     }
 
-    private Employee AddEmployee(string firstName, string lastName, bool isActive = true)
+    private Employee AddEmployee(string firstName, string lastName, bool isActive = true, int sharePercent = 0)
     {
         var person = new Person { FirstName = firstName, LastName = lastName, PhoneNumber = "09120000033" };
         Context.People.Add(person);
         Context.SaveChanges();
 
-        var employee = new Employee { PersonId = person.Id, IsActive = isActive };
+        var employee = new Employee { PersonId = person.Id, IsActive = isActive, SharePercent = sharePercent };
         Context.Employees.Add(employee);
         Context.SaveChanges();
         return employee;
@@ -397,10 +396,10 @@ public class ReportsDataServiceTests : RepoTestBase
     }
 
     [Fact]
-    public async Task GetDistributionRowsAsync_returns_fixed_40_50_10_split_for_positive_profit()
+    public async Task GetDistributionRowsAsync_uses_each_active_employee_share_for_positive_profit()
     {
-        var mikaeeil = AddEmployee("Mikaeeil", "Jorjany");
-        var anis = AddEmployee("Anis", "Sahabi");
+        var mikaeeil = AddEmployee("Mikaeeil", "Jorjany", sharePercent: 40);
+        var anis = AddEmployee("Anis", "Sahabi", sharePercent: 50);
 
         var rows = await _service.GetDistributionRowsAsync(1000);
 
@@ -417,8 +416,8 @@ public class ReportsDataServiceTests : RepoTestBase
     [Fact]
     public async Task GetDistributionRowsAsync_reports_loss_period_with_zero_payouts()
     {
-        AddEmployee("Mikaeeil", "Jorjany");
-        AddEmployee("Anis", "Sahabi");
+        AddEmployee("Mikaeeil", "Jorjany", sharePercent: 40);
+        AddEmployee("Anis", "Sahabi", sharePercent: 50);
 
         var rows = await _service.GetDistributionRowsAsync(-250);
 
@@ -429,26 +428,28 @@ public class ReportsDataServiceTests : RepoTestBase
     }
 
     [Fact]
-    public async Task GetDistributionRowsAsync_reports_unlinked_fixed_split_when_employee_missing()
+    public async Task GetDistributionRowsAsync_shop_row_takes_remainder_of_active_shares()
     {
-        AddEmployee("Anis", "Sahabi");
+        AddEmployee("Anis", "Sahabi", sharePercent: 50);
 
         var rows = await _service.GetDistributionRowsAsync(100);
 
-        Assert.Equal(3, rows.Count);
-        Assert.Equal(0, rows.Single(row => row.EmployeeName == "Mikaeeil Jorjany").EmployeeId);
-        Assert.Equal(0, rows.Single(row => row.EmployeeName == "Shop").EmployeeId);
+        Assert.Equal(2, rows.Count);
+        var shop = rows.Single(row => row.EmployeeName == "Shop");
+        Assert.Equal(50, shop.SharePercent);
+        Assert.Equal(50, shop.CalculatedAmount);
     }
 
     [Fact]
-    public async Task GetDistributionRowsAsync_returns_fixed_split_when_database_has_no_employees()
+    public async Task GetDistributionRowsAsync_returns_single_shop_row_when_database_has_no_employees()
     {
         var rows = await _service.GetDistributionRowsAsync(0);
 
-        Assert.Equal(3, rows.Count);
-        Assert.All(rows, row => Assert.Equal(0, row.EmployeeId));
-        Assert.All(rows, row => Assert.Equal(0, row.CalculatedAmount));
-        Assert.All(rows, row => Assert.True(row.IsLossPeriod));
+        var shop = Assert.Single(rows);
+        Assert.Equal(0, shop.EmployeeId);
+        Assert.Equal(100, shop.SharePercent);
+        Assert.Equal(0, shop.CalculatedAmount);
+        Assert.True(shop.IsLossPeriod);
     }
 
     [Fact]
@@ -471,16 +472,17 @@ public class ReportsDataServiceTests : RepoTestBase
     }
 
     [Fact]
-    public async Task GetDistributionRowsAsync_reports_unlinked_row_for_inactive_employee()
+    public async Task GetDistributionRowsAsync_ignores_inactive_employee_share()
     {
-        AddEmployee("Mikaeeil", "Jorjany", isActive: false);
-        AddEmployee("Anis", "Sahabi");
+        AddEmployee("Mikaeeil", "Jorjany", isActive: false, sharePercent: 40);
+        AddEmployee("Anis", "Sahabi", sharePercent: 50);
 
         var rows = await _service.GetDistributionRowsAsync(100);
 
-        Assert.Equal(0, rows.Single(row => row.EmployeeName == "Mikaeeil Jorjany").EmployeeId);
-        Assert.NotEqual(0, rows.Single(row => row.EmployeeName == "Anis Sahabi").EmployeeId);
+        Assert.DoesNotContain(rows, row => row.EmployeeName == "Mikaeeil Jorjany");
+        Assert.Equal(50, rows.Single(row => row.EmployeeName == "Shop").SharePercent);
     }
+
     [Fact]
     public async Task GetProfitLossRowsAsync_handles_large_rial_profit_exactly()
     {

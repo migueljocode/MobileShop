@@ -4,7 +4,6 @@ namespace MobileShop.Services.DataServices.Dal;
 public class ReportsDataService(
     IBaseRepo<Transaction> transactions,
     IBaseRepo<Employee> employees,
-    IOptions<DistributionSettings> distributionSettings,
     ILogger<ReportsDataService> logger)
     : IReportsDataService
 {
@@ -159,18 +158,24 @@ public class ReportsDataService(
     /// <inheritdoc />
     public async Task<IReadOnlyList<DistributionRow>> GetDistributionRowsAsync(long totalProfit)
     {
-        // The calculator matches the required employees by exact full name, so the projection must
-        // supply the employee id plus the person's first and last name. Ordering by name mirrors
-        // the previous active-employee query.
+        // The calculator reads each active employee's stored share, so the projection supplies the
+        // id, the share and the person's name. Ordering by name mirrors the previous active-employee query.
         var active = await employees.SelectAllAsync(
             employee => employee.IsActive,
-            employee => new { employee.Id, employee.PersonNavigation.FirstName, employee.PersonNavigation.LastName });
+            employee => new
+            {
+                employee.Id,
+                employee.SharePercent,
+                employee.PersonNavigation.FirstName,
+                employee.PersonNavigation.LastName,
+            });
 
         var employeeList = active
             .Select(employee => new Employee
             {
                 Id = employee.Id,
                 IsActive = true,
+                SharePercent = employee.SharePercent,
                 PersonNavigation = new Person
                 {
                     FirstName = employee.FirstName,
@@ -181,6 +186,6 @@ public class ReportsDataService(
             .ThenBy(employee => employee.PersonNavigation.LastName)
             .ToList();
 
-        return DistributionCalculator.Calculate(totalProfit, employeeList, distributionSettings.Value);
+        return DistributionCalculator.Calculate(totalProfit, employeeList);
     }
 }

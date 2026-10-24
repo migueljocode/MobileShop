@@ -27,7 +27,6 @@ public static class ServiceCollectionExtensions
             .AddMobileShopRepository()
             .AddMobileShopSecurity()
             .AddMobileShopPdf(configuration)
-            .AddMobileShopDistribution(configuration)
             .AddMobileShopDataServices(useApi);
     }
 
@@ -39,14 +38,6 @@ public static class ServiceCollectionExtensions
         services.Configure<PdfSettings>(
             configuration.GetSection("Pdf"));
         services.AddScoped<IPdfGenerator, QuestPdfGenerator>();
-        return services;
-    }
-
-    private static IServiceCollection AddMobileShopDistribution(
-        this IServiceCollection services,
-        IConfiguration configuration)
-    {
-        services.Configure<DistributionSettings>(configuration.GetSection("Distribution"));
         return services;
     }
 
