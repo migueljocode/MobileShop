@@ -23,6 +23,13 @@ public class ProfitLossModel(
 
     // Distribution
     public IReadOnlyList<DistributionRow> DistributionRows { get; private set; } = [];
+    public IReadOnlyList<EmployeeShareViewModel> EditableShares { get; private set; } = [];
+    public string? DistributionError { get; private set; }
+    public string? SharesError { get; private set; }
+
+    [BindProperty] public List<EmployeeShareInput> Shares { get; set; } = [];
+
+    [TempData] public string? SuccessMessage { get; set; }
 
     private async Task ResolveBoundsAsync()
     {
@@ -64,14 +71,70 @@ public class ProfitLossModel(
     public async Task OnGetAsync()
     {
         await ResolveBoundsAsync();
+        await LoadAsync();
+    }
 
+    public async Task<IActionResult> OnPostSaveSharesAsync()
+    {
+        var result = await dataService.UpdateEmployeeSharesAsync(Shares);
+
+        if (result.Success)
+        {
+            SuccessMessage = "Shares saved.";
+            // Dates travel as Jalali strings, which the global binder parses back on the next GET.
+            return RedirectToPage(
+                "/Reports/ProfitLoss",
+                null,
+                new
+                {
+                    Mode,
+                    Preset,
+                    From = From?.ToJalaliDateString(),
+                    To = To?.ToJalaliDateString(),
+                },
+                "distribution");
+        }
+
+        SharesError = result.Error;
+        await ResolveBoundsAsync();
+        await LoadAsync();
+        ShowPostedShares();
+        return Page();
+    }
+
+    private async Task LoadAsync()
+    {
         Rows = await dataService.GetProfitLossRowsAsync(EffectiveFrom, EffectiveTo);
         TrendInterval = ResolveTrendInterval();
         TrendPoints = await dataService.GetProfitLossTrendAsync(EffectiveFrom, EffectiveTo, TrendInterval) ?? [];
         TotalProfit = await dataService.GetProfitLossTotalAsync(EffectiveFrom, EffectiveTo);
 
-        // Distribution
-        DistributionRows = await dataService.GetDistributionRowsAsync(TotalProfit);
+        EditableShares = await dataService.GetActiveEmployeeSharesAsync();
+
+        try
+        {
+            DistributionRows = await dataService.GetDistributionRowsAsync(TotalProfit);
+        }
+        catch (InvalidOperationException ex)
+        {
+            // Bad stored shares must not block the page: the editor stays usable so the user can repair them.
+            DistributionError = ex.Message;
+            DistributionRows = [];
+        }
+    }
+
+    /// <summary>Shows the user's posted values in the editor after a rejected save.</summary>
+    private void ShowPostedShares()
+    {
+        var posted = Shares
+            .DistinctBy(share => share.EmployeeId)
+            .ToDictionary(share => share.EmployeeId, share => share.SharePercent);
+
+        EditableShares = EditableShares
+            .Select(share => posted.TryGetValue(share.EmployeeId, out var percent)
+                ? share with { SharePercent = percent }
+                : share)
+            .ToList();
     }
 
     private ProfitLossInterval ResolveTrendInterval()

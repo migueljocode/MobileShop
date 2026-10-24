@@ -29,6 +29,13 @@ public class ProfitLossTests
                 new DistributionRow { EmployeeName = "Shop", SharePercent = 10, CalculatedAmount = 100 },
             });
 
+        serviceMock.Setup(s => s.GetActiveEmployeeSharesAsync())
+            .ReturnsAsync(new[]
+            {
+                new EmployeeShareViewModel(2, "Anis Sahabi", 50),
+                new EmployeeShareViewModel(1, "Mikaeeil Jorjany", 40),
+            });
+
         return new ProfitLossModel(serviceMock.Object);
     }
 
@@ -512,5 +519,82 @@ public class ProfitLossTests
         Assert.Equal(new DateTime(2025, 6, 20), capturedRowsTo);
         Assert.Equal(capturedRowsFrom, capturedTotalFrom);
         Assert.Equal(capturedRowsTo, capturedTotalTo);
+    }
+
+    [Fact]
+    public async Task OnGetAsync_populates_editable_shares_from_service()
+    {
+        var mock = new Mock<IReportsDataService>();
+        SetupProfitLossMocks(mock);
+        var model = CreateModel(mock);
+
+        await model.OnGetAsync();
+
+        Assert.Equal(2, model.EditableShares.Count);
+        Assert.Equal("Anis Sahabi", model.EditableShares[0].Name);
+    }
+
+    [Fact]
+    public async Task OnGetAsync_distribution_error_is_shown_without_throwing()
+    {
+        var mock = new Mock<IReportsDataService>();
+        SetupProfitLossMocks(mock);
+        CreateModel(mock);
+        mock.Setup(s => s.GetDistributionRowsAsync(It.IsAny<long>()))
+            .ThrowsAsync(new InvalidOperationException("Active employee shares total 120%, which exceeds 100%."));
+        var model = new ProfitLossModel(mock.Object);
+
+        await model.OnGetAsync();
+
+        Assert.Equal("Active employee shares total 120%, which exceeds 100%.", model.DistributionError);
+        Assert.Empty(model.DistributionRows);
+        Assert.Equal(2, model.EditableShares.Count);
+    }
+
+    [Fact]
+    public async Task OnPostSaveSharesAsync_success_redirects_to_distribution_keeping_date_range()
+    {
+        var mock = new Mock<IReportsDataService>();
+        SetupProfitLossMocks(mock);
+        mock.Setup(s => s.UpdateEmployeeSharesAsync(It.IsAny<IReadOnlyList<EmployeeShareInput>>()))
+            .ReturnsAsync(EmployeeSharesResult.Ok);
+        var model = CreateModel(mock);
+        model.Mode = DateRangeMode.Manual;
+        model.Preset = AutomaticPreset.Month;
+        model.From = new DateTime(2026, 10, 1);
+        model.To = new DateTime(2026, 10, 20);
+        model.Shares = [new EmployeeShareInput { EmployeeId = 1, SharePercent = 40 }];
+
+        var result = await model.OnPostSaveSharesAsync();
+
+        var redirect = Assert.IsType<RedirectToPageResult>(result);
+        Assert.Equal("/Reports/ProfitLoss", redirect.PageName);
+        Assert.Equal("distribution", redirect.Fragment);
+        Assert.Equal("Manual", redirect.RouteValues!["Mode"]?.ToString());
+        Assert.Equal("Month", redirect.RouteValues["Preset"]?.ToString());
+        Assert.Equal(new DateTime(2026, 10, 1).ToJalaliDateString(), redirect.RouteValues["From"]?.ToString());
+        Assert.Equal(new DateTime(2026, 10, 20).ToJalaliDateString(), redirect.RouteValues["To"]?.ToString());
+        Assert.Equal("Shares saved.", model.SuccessMessage);
+    }
+
+    [Fact]
+    public async Task OnPostSaveSharesAsync_failure_rerenders_page_with_error_and_posted_values()
+    {
+        var mock = new Mock<IReportsDataService>();
+        SetupProfitLossMocks(mock);
+        mock.Setup(s => s.UpdateEmployeeSharesAsync(It.IsAny<IReadOnlyList<EmployeeShareInput>>()))
+            .ReturnsAsync(EmployeeSharesResult.Fail("Total share is 101%; it cannot exceed 100%."));
+        var model = CreateModel(mock);
+        model.Mode = DateRangeMode.Manual;
+        model.From = new DateTime(2026, 10, 1);
+        model.To = new DateTime(2026, 10, 20);
+        model.Shares = [new EmployeeShareInput { EmployeeId = 1, SharePercent = 61 }];
+
+        var result = await model.OnPostSaveSharesAsync();
+
+        Assert.IsType<PageResult>(result);
+        Assert.Equal("Total share is 101%; it cannot exceed 100%.", model.SharesError);
+        Assert.Equal(61, model.EditableShares.Single(share => share.EmployeeId == 1).SharePercent);
+        Assert.Null(model.SuccessMessage);
     }
 }

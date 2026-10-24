@@ -66,7 +66,7 @@
 - Risk: MEDIUM
 - Confidence: HIGH
 
-## [ ] Step 3 — ProfitLoss page handler
+## ~~[x] Step 3 — ProfitLoss page handler~~
 - Files: inspect: `src/MobileShop.Web/Pages/Reports/ProfitLoss.cshtml.cs`, `src/MobileShop.Tests/Web/Pages/Reports/ProfitLossTests.cs`, how the filter form posts `From`/`To` (field names and date format in `ProfitLoss.cshtml` lines ~91–168) `Products/Details.cshtml.cs` (the `[TempData] SuccessMessage` pattern) and `Infrastructure/JalaliDateTimeModelBinder.cs`; modify: `ProfitLoss.cshtml.cs`, `ProfitLossTests.cs`; do not touch: the report queries and chart code.
 - Symbols: `ProfitLossModel.OnPostSaveSharesAsync()`; new properties `[BindProperty] List<EmployeeShareInput> Shares`, `[TempData] string? SuccessMessage`, `IReadOnlyList<EmployeeShareViewModel> EditableShares`, `string? SharesError`, `string? DistributionError`; private `LoadAsync()` extracted from `OnGetAsync` (same body, no behaviour change).
 - Current -> Desired: GET only. Desired: `OnGetAsync` = `ResolveBoundsAsync` + `LoadAsync`. `LoadAsync` loads rows/trend/total as today, `EditableShares` from the service, and distribution rows inside a `try`; an `InvalidOperationException` from `GetDistributionRowsAsync` sets `DistributionError` and leaves `DistributionRows` empty (Edit button must still work).
