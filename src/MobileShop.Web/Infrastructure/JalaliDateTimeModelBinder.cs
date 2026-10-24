@@ -1,7 +1,3 @@
-using Microsoft.AspNetCore.Mvc.ModelBinding;
-using Microsoft.AspNetCore.Mvc.ModelBinding.Binders;
-using MobileShop.Models.Extensions;
-
 namespace MobileShop.Web.Infrastructure;
 
 /// <summary>

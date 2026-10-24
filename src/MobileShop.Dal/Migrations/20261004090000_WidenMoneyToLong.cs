@@ -1,5 +1,3 @@
-using Microsoft.EntityFrameworkCore.Migrations;
-
 namespace MobileShop.Dal.Migrations;
 
 public partial class WidenMoneyToLong : Migration

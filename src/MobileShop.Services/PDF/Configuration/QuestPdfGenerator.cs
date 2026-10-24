@@ -1,5 +1,3 @@
-using MobileShop.Models.Extensions;
-
 namespace MobileShop.Services.PDF.Configuration;
 
 /// <summary>QuestPDF-backed invoice generator with English and Persian RTL support.</summary>

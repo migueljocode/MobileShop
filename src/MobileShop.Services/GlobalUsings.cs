@@ -32,3 +32,5 @@ global using MobileShop.Models.ViewModels.Web;
 global using MobileShop.Models.ViewModels.Web.BindModels;
 global using MobileShop.Models.ViewModels;
 global using Isopoh.Cryptography.Argon2;
+global using MobileShop.Services.DataServices.Shared;
+global using System.Text.RegularExpressions;

@@ -1,7 +1,3 @@
-using System.ComponentModel.DataAnnotations;
-using Microsoft.EntityFrameworkCore;
-using MobileShop.Models.ViewModels.Web.BindModels;
-
 namespace MobileShop.Tests.Dal.EfStructures;
 
 public class MoneyBoundaryTests : IDisposable

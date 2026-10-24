@@ -1,5 +1,3 @@
-using System.Runtime.CompilerServices;
-
 namespace MobileShop.Tests;
 
 internal static class ModuleInitializer

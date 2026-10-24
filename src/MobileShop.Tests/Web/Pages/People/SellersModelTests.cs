@@ -1,6 +1,3 @@
-using Microsoft.AspNetCore.Mvc.RazorPages;
-using MobileShop.Web.Pages.People;
-
 namespace MobileShop.Tests.Web.Pages.People;
 
 /// <summary>Verifies sort-parameter handling on the Sellers list page over the real area service.</summary>

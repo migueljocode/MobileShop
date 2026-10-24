@@ -1,6 +1,3 @@
-using MobileShop.Web.Pages.People;
-using Moq;
-
 namespace MobileShop.Tests.Web.Pages.People;
 
 public class PeopleIndexModelTests

@@ -1,8 +1,3 @@
-using MobileShop.Models.ViewModels.Web.BindModels;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
-using MobileShop.Web.Pages.Products;
-
 namespace MobileShop.Tests.Web.Pages.Products;
 
 public class CreateGlassModelTests : RepoTestBase

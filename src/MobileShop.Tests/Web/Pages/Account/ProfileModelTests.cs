@@ -1,13 +1,3 @@
-using System.Security.Claims;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.AspNetCore.Mvc.ViewFeatures;
-using Microsoft.Extensions.DependencyInjection;
-using MobileShop.Web.Pages.Account;
-using Moq;
-
 namespace MobileShop.Tests.Web.Pages.Account;
 
 public class ProfileModelTests

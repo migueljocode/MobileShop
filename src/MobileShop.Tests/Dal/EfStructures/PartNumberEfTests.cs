@@ -1,8 +1,3 @@
-using Microsoft.EntityFrameworkCore.Diagnostics;
-using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Migrations;
-using Microsoft.Extensions.DependencyInjection;
-
 namespace MobileShop.Tests.Dal.EfStructures;
 
 /// <summary>

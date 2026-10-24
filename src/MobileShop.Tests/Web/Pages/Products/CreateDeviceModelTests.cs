@@ -1,9 +1,3 @@
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
-using MobileShop.Models.Entities;
-using MobileShop.Models.ViewModels.Web.BindModels;
-using MobileShop.Web.Pages.Products;
-
 namespace MobileShop.Tests.Web.Pages.Products;
 
 public class CreateDeviceModelTests : RepoTestBase

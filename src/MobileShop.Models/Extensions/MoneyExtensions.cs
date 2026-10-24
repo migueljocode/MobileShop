@@ -1,5 +1,3 @@
-using System.Globalization;
-
 namespace MobileShop.Models.Extensions;
 
 public static class MoneyExtensions

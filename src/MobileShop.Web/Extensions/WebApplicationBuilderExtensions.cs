@@ -1,5 +1,3 @@
-using MobileShop.Web.Infrastructure;
-
 namespace MobileShop.Web.Extensions;
 
 /// <summary>

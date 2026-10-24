@@ -1,11 +1,3 @@
-using MobileShop.Services.Logging.Settings;
-using MobileShop.Services.DataServices.Interfaces;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
-using MobileShop.Web.Pages.Reports;
-using Moq;
-using Xunit;
-
 namespace MobileShop.Tests.Web.Pages.Reports;
 
 /// <summary>

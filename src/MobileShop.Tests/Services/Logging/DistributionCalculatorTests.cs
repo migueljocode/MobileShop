@@ -1,5 +1,3 @@
-using System.Numerics;
-
 namespace MobileShop.Tests.Services.Logging;
 
 /// <summary>

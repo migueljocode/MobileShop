@@ -1,7 +1,3 @@
-using Microsoft.AspNetCore.Hosting.Server;
-using Microsoft.AspNetCore.Hosting.Server.Features;
-using Microsoft.AspNetCore.Http.Features;
-
 namespace MobileShop.Web.Extensions;
 
 /// <summary>Prints the running host and the addresses the server listens on, independent of the console log level.</summary>

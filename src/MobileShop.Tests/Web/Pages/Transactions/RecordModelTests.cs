@@ -1,10 +1,3 @@
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
-using MobileShop.Models.ViewModels.Web.BindModels;
-using MobileShop.Models.ViewModels;
-using MobileShop.Services.PDF;
-using MobileShop.Web.Pages.Transactions;
-
 namespace MobileShop.Tests.Web.Pages.Transactions;
 
 /// <summary>Verifies the Sell page records transactions through the area data service.</summary>

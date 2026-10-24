@@ -1,6 +1,3 @@
-using Microsoft.AspNetCore.Builder;
-using MobileShop.Services.Logging.Configuration;
-
 namespace MobileShop.Tests.Logging;
 
 public class LoggingsConfigurationTests

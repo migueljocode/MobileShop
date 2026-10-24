@@ -1,6 +1,3 @@
-using Microsoft.AspNetCore.Mvc;
-using MobileShop.Web.Pages.Transactions;
-
 namespace MobileShop.Tests.Web.Pages.Transactions;
 
 public class PersonCreateHandlerTests

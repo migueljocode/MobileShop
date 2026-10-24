@@ -1,9 +1,3 @@
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
-using MobileShop.Web.Pages.Products;
-using MobileShop.Models.ViewModels.Web.BindModels;
-using MobileShop.Models.Entities;
-
 namespace MobileShop.Tests.Web.Pages.Products;
 
 public class CreateAccessoryModelTests : RepoTestBase

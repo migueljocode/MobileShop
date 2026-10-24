@@ -1,6 +1,3 @@
-using System.Text.RegularExpressions;
-using MobileShop.Services.DataServices.Shared;
-
 namespace MobileShop.Services.DataServices.Dal;
 
 /// <summary>Provides the catalog and creation operations for the Products area.</summary>

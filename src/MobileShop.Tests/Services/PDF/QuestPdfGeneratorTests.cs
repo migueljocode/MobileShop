@@ -1,6 +1,3 @@
-using MobileShop.Services.PDF.Settings;
-using Moq;
-
 namespace MobileShop.Tests.Services.PDF;
 
 public class QuestPdfGeneratorTests

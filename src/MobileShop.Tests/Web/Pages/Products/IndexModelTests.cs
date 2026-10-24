@@ -1,6 +1,3 @@
-using MobileShop.Web.Pages.Products;
-using Moq;
-
 namespace MobileShop.Tests.Web.Pages.Products;
 
 public class IndexModelTests

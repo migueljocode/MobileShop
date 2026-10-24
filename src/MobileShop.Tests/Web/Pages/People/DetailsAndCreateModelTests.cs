@@ -1,8 +1,3 @@
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
-using MobileShop.Models.ViewModels.Web.BindModels;
-using MobileShop.Web.Pages.People;
-
 namespace MobileShop.Tests.Web.Pages.People;
 
 /// <summary>Minimal coverage for the CustomerDetails page over the real area service.</summary>

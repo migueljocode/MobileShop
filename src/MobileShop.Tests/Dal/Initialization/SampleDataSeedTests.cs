@@ -1,5 +1,3 @@
-using Microsoft.Extensions.DependencyInjection;
-
 namespace MobileShop.Tests.Dal.Initialization;
 
 /// <summary>

@@ -1,7 +1,5 @@
 namespace MobileShop.Tests.Dal.Initialization;
 
-using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Migrations;
 
 public sealed class DatabaseMigratorTests : IDisposable
 {

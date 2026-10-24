@@ -1,8 +1,3 @@
-using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Migrations;
-using Microsoft.EntityFrameworkCore.Storage;
-using Microsoft.EntityFrameworkCore.Metadata;
-
 namespace MobileShop.Tests.Dal.EfStructures;
 
 public class MigrationChainTests : IDisposable
