@@ -582,7 +582,7 @@
 /* Disabled Save keeps a light-green fill instead of Bootstrap's faded teal. */
 .share-editor__save:disabled {
   opacity: 1;
-  --bs-btn-disabled-color: var(--ink);
+  --bs-btn-disabled-color: #06201C; /* fixed dark ink: --ink flips to near-white in dark mode and would vanish on this fill */
   --bs-btn-disabled-bg: color-mix(in srgb, var(--accent) 45%, white);
   --bs-btn-disabled-border-color: color-mix(in srgb, var(--accent) 45%, white);
 }
