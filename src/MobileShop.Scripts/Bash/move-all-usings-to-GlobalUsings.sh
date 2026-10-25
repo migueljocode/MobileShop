@@ -15,7 +15,11 @@ for project in */; do
 		((${#files[@]})) || exit 0
 
 		usings=$({
-			[[ -f $FILE ]] && cat "$FILE"
+			if [[ -f $FILE && -s $FILE ]]; then
+				cat "$FILE"
+				# A missing trailing newline would glue the next using onto the last line.
+				[[ -n $(tail -c1 "$FILE") ]] && echo
+			fi
 			rg -INo -e "$USING" "${files[@]}" | sed 's/^/global /'
 		} | LC_ALL=C sort -u)
 
