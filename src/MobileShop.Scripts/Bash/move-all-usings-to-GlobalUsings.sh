@@ -1,38 +1,25 @@
-#!/bin/bash
-
-# use this script only in you solutions root directory.
+#!/usr/bin/env bash
+# Run from the solution source root (the folder containing the project folders), e.g. src/. Needs rg.
+# Moves file-level usings of every project into <project>/GlobalUsings.cs.
+set -euo pipefail
 
 FILE=GlobalUsings.cs
+USING='^using +(static +)?([A-Za-z_]\w* *= *[^;]+|[A-Za-z_:][A-Za-z0-9_.:]*) *;'
+command -v rg >/dev/null || { echo "rg not found" >&2; exit 1; }
 
-has_csproj() {
-	compgen -G "$1*.csproj" >/dev/null
-}
-
-# Process each project directory in the solution root.
 for project in */; do
+	compgen -G "$project*.csproj" >/dev/null || continue
 	(
+		cd "$project"
+		mapfile -t files < <(rg -l -g '*.cs' -g "!$FILE" -e "$USING" . || true)
+		((${#files[@]})) || exit 0
 
-		has_csproj "$project" || exit
+		usings=$({
+			[[ -f $FILE ]] && cat "$FILE"
+			rg -INo -e "$USING" "${files[@]}" | sed 's/^/global /'
+		} | LC_ALL=C sort -u)
 
-		# Enter the project directory without changing the loop's directory.
-		cd "$project" || exit
-
-		tempfile=$(mktemp)
-		[[ -f "$FILE" ]] && cat "$FILE" >"$tempfile"
-
-		# Convert file-scoped using directives to global using directives.
-		fd -e cs -X sed -i '/^using /s/^/global /'
-
-		# Collect unique global using directives into one file.
-		rg -IN '^global using ' >>"$tempfile"
-
-		# Remove global using directives from the original C# files.
-		fd -e cs -X sed -i '/^global using /d'
-
-		sort -u "$tempfile" >"$FILE"
-		rm -f "$tempfile"
-
-		# Delete GlobalUsings.cs if it is empty or missing.
-		[[ -s "$FILE" ]] || rm -f "$FILE"
+		sed -i -E "/$USING/d; /./,\$!d" "${files[@]}"
+		printf '%s\n' "$usings" >"$FILE"
 	)
 done
