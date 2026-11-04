@@ -1161,7 +1161,10 @@ public class ProductsDataService(
             case "Apple ID":
                 if (!string.IsNullOrWhiteSpace(input.AppleIdPassword))
                     product.AppleIdProfile!.Password = input.AppleIdPassword.Trim();
-                product.AppleIdProfile!.Notes = NormalizeNote(input.Notes);
+                product.AppleIdProfile!.SecurityAnswer1 = NormalizeNote(input.SecurityAnswer1);
+                product.AppleIdProfile.SecurityAnswer2 = NormalizeNote(input.SecurityAnswer2);
+                product.AppleIdProfile.SecurityAnswer3 = NormalizeNote(input.SecurityAnswer3);
+                product.AppleIdProfile.Notes = NormalizeNote(input.Notes);
                 break;
 
             case "Cable":
@@ -1279,7 +1282,14 @@ public class ProductsDataService(
             "Tablet" => new { product.TabletProfile!.Notes },
             "Smart Watch" => new { product.SmartWatchProfile!.Notes },
             "Laptop" => new { product.LaptopProfile!.CpuId, product.LaptopProfile.GpuId, product.LaptopProfile.DisplaySize, product.LaptopProfile.Notes },
-            "Apple ID" => new { product.AppleIdProfile!.Password, product.AppleIdProfile.Notes },
+            "Apple ID" => new
+            {
+                product.AppleIdProfile!.Password,
+                product.AppleIdProfile.SecurityAnswer1,
+                product.AppleIdProfile.SecurityAnswer2,
+                product.AppleIdProfile.SecurityAnswer3,
+                product.AppleIdProfile.Notes,
+            },
             "Cable" => new { product.CableProfile!.Connector1, product.CableProfile.Connector2, product.CableProfile.Length, product.CableProfile.Notes },
             "Charger" => new { product.ChargerProfile!.Wattage, product.ChargerProfile.Pd, product.ChargerProfile.PortCount, product.ChargerProfile.Notes },
             "Power Bank" => new

@@ -74,6 +74,15 @@ public sealed class EditProductInputModel
     [StringLength(100)]
     public string? AppleIdPassword { get; set; }
 
+    [StringLength(100)]
+    public string? SecurityAnswer1 { get; set; }
+
+    [StringLength(100)]
+    public string? SecurityAnswer2 { get; set; }
+
+    [StringLength(100)]
+    public string? SecurityAnswer3 { get; set; }
+
     // Cable-specific
     public CableConnector? Connector1 { get; set; }
     public CableConnector? Connector2 { get; set; }

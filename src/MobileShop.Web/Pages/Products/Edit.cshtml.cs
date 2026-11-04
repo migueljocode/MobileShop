@@ -175,6 +175,9 @@ public class EditModel(
             DisplaySize = product.LaptopProfile?.DisplaySize,
             // Apple ID-specific
             AppleIdPassword = product.AppleIdProfile?.Password,
+            SecurityAnswer1 = product.AppleIdProfile?.SecurityAnswer1,
+            SecurityAnswer2 = product.AppleIdProfile?.SecurityAnswer2,
+            SecurityAnswer3 = product.AppleIdProfile?.SecurityAnswer3,
             // Cable-specific
             Connector1 = product.CableProfile?.Connector1,
             Connector2 = product.CableProfile?.Connector2,

@@ -145,6 +145,7 @@ public class EditModelTests : RepoTestBase
                 break;
             case "Apple ID":
                 Assert.Equal("original plaintext password", page.Product.AppleIdPassword);
+                Assert.Equal("original answer", page.Product.SecurityAnswer1);
                 break;
             case "Cable":
                 Assert.Equal(CableConnector.UsbC, page.Product.Connector1);
@@ -250,6 +251,31 @@ public class EditModelTests : RepoTestBase
             Assert.Equal("original plaintext password", (await Context.AppleIds.AsNoTracking().SingleAsync(item => item.ProductId == product.Id)).Password);
     }
 
+    [Fact]
+    public async Task UpdateProductAsync_updates_apple_id_security_answers_and_clears_blank_ones()
+    {
+        var (product, _) = await CreateProductForTypeAsync("Apple ID");
+        var input = new EditProductInputModel
+        {
+            ProductId = product.Id,
+            Type = "Apple ID",
+            Identifier = product.Barcode,
+            Price = product.Price,
+            SecurityAnswer1 = "  Sara  ",
+            SecurityAnswer2 = "Doctor",
+            SecurityAnswer3 = " ",
+        };
+
+        var result = await _service.UpdateProductAsync(input);
+
+        Assert.True(result.Succeeded, result.Message);
+        var appleId = await Context.AppleIds.AsNoTracking().SingleAsync(item => item.ProductId == product.Id);
+        Assert.Equal("Sara", appleId.SecurityAnswer1);
+        Assert.Equal("Doctor", appleId.SecurityAnswer2);
+        Assert.Null(appleId.SecurityAnswer3);
+        Assert.Equal("original plaintext password", appleId.Password);
+    }
+
     [Theory]
     [InlineData("Case")]
     [InlineData("Glass")]
@@ -296,7 +322,7 @@ public class EditModelTests : RepoTestBase
                 Context.Phones.Add(new Phone { ProductId = product.Id, IMEI1 = "123456789012345", Notes = "original note" });
                 break;
             case "Apple ID":
-                Context.AppleIds.Add(new AppleId { ProductId = product.Id, Email = $"{Guid.NewGuid():N}@example.com", Password = "original plaintext password", Notes = "original note" });
+                Context.AppleIds.Add(new AppleId { ProductId = product.Id, Email = $"{Guid.NewGuid():N}@example.com", Password = "original plaintext password", Notes = "original note", SecurityAnswer1 = "original answer" });
                 break;
             case "Tablet":
                 Context.Tablets.Add(new Tablet { ProductId = product.Id, Notes = "original note" });
