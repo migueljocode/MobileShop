@@ -16,11 +16,19 @@ public class DetailsModelTests : RepoTestBase
     {
         public TransactionFactorViewModel? LastFactor { get; private set; }
 
+        public AppleIdFactorViewModel? LastAppleIdFactor { get; private set; }
+
         public byte[] Generate(InvoiceViewModel model) => [1, 2, 3];
 
         public byte[] GenerateTransactionFactor(TransactionFactorViewModel model)
         {
             LastFactor = model;
+            return PdfBytes;
+        }
+
+        public byte[] GenerateAppleIdFactor(AppleIdFactorViewModel model)
+        {
+            LastAppleIdFactor = model;
             return PdfBytes;
         }
     }

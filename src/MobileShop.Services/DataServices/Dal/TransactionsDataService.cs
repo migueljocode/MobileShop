@@ -120,6 +120,37 @@ public class TransactionsDataService(
     }
 
     /// <inheritdoc />
+    public async Task<byte[]?> GetAppleIdFactorPdfAsync(int transactionId)
+    {
+        var model = await transactions.SelectAsync(
+            transaction => transaction.Id == transactionId
+                && transaction.Direction == TransactionDirection.Sell
+                && transaction.ProductNavigation.AppleIdProfile != null,
+            transaction => new AppleIdFactorViewModel(
+                transaction.CustomerNavigation.PersonNavigation == null
+                    ? "Shop"
+                    : transaction.CustomerNavigation.PersonNavigation.FirstName + " " + transaction.CustomerNavigation.PersonNavigation.LastName,
+                transaction.CustomerNavigation.PersonNavigation == null
+                    ? null
+                    : transaction.CustomerNavigation.PersonNavigation.PhoneNumber,
+                transaction.Date,
+                transaction.ProductNavigation.AppleIdProfile!.Email,
+                transaction.ProductNavigation.AppleIdProfile.Password,
+                transaction.ProductNavigation.AppleIdProfile.SecurityAnswer1,
+                transaction.ProductNavigation.AppleIdProfile.SecurityAnswer2,
+                transaction.ProductNavigation.AppleIdProfile.SecurityAnswer3,
+                transaction.ProductNavigation.AppleIdProfile.Notes));
+
+        if (model is null)
+        {
+            Logger.LogWarning("GetAppleIdFactorPdfAsync found no Apple ID sale for transaction {TransactionId}", transactionId);
+            return null;
+        }
+
+        return pdfGenerator.GenerateAppleIdFactor(model);
+    }
+
+    /// <inheritdoc />
     public async Task<IReadOnlyList<PartyOptionViewModel>> GetSellersAsync()
         => (await sellers
             .SelectAllAsync(seller => new PartyOptionViewModel(

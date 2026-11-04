@@ -9,6 +9,8 @@ public class RecordModelTests : RepoTestBase
         public byte[] Generate(InvoiceViewModel model) => [];
 
         public byte[] GenerateTransactionFactor(TransactionFactorViewModel model) => [];
+
+        public byte[] GenerateAppleIdFactor(AppleIdFactorViewModel model) => [];
     }
 
     private TransactionsDataService CreateService() => new(

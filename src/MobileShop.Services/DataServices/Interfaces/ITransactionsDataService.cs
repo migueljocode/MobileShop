@@ -26,6 +26,11 @@ public interface ITransactionsDataService
     /// <returns>The factor PDF bytes, or <c>null</c> when the transaction does not exist.</returns>
     Task<byte[]?> GetTransactionFactorPdfAsync(int transactionId);
 
+    /// <summary>Gets the Apple ID delivery form PDF bytes for a sold Apple ID.</summary>
+    /// <param name="transactionId">The transaction identifier.</param>
+    /// <returns>The PDF bytes, or <c>null</c> when the transaction is not a sale of an Apple ID.</returns>
+    Task<byte[]?> GetAppleIdFactorPdfAsync(int transactionId);
+
     /// <summary>Generates a factor PDF for the selected or filtered transactions.</summary>
     /// <param name="direction">The optional transaction direction filter.</param>
     /// <param name="take">The maximum number of list rows considered.</param>

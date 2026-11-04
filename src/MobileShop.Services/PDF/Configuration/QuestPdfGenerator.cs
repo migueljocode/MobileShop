@@ -2,7 +2,7 @@ namespace MobileShop.Services.PDF.Configuration;
 
 /// <summary>QuestPDF-backed invoice generator with English and Persian RTL support.</summary>
 /// <remarks>This is the only class in the solution that references QuestPDF types.</remarks>
-public sealed class QuestPdfGenerator(IOptions<PdfSettings> options) : IPdfGenerator
+public sealed partial class QuestPdfGenerator(IOptions<PdfSettings> options) : IPdfGenerator
 {
     private readonly PdfSettings _settings = options.Value;
 

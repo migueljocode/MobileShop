@@ -287,6 +287,44 @@ public class QuestPdfGeneratorTests
     public void GenerateTransactionFactor_throws_for_null_model()
         => Assert.Throws<ArgumentNullException>(() => _generator.GenerateTransactionFactor(null!));
 
+    [Fact]
+    public void GenerateAppleIdFactor_returns_valid_pdf_payload()
+    {
+        var model = new AppleIdFactorViewModel(
+            "سارا احمدی",
+            "09123456789",
+            new DateTime(2026, 11, 2),
+            "customer@example.com",
+            "secret-pass",
+            "Sara",
+            "Doctor",
+            "Tehran",
+            "Delivered with the original box.");
+
+        AssertValidPdf(_generator.GenerateAppleIdFactor(model));
+    }
+
+    [Fact]
+    public void GenerateAppleIdFactor_supports_blank_optional_fields_and_long_notes()
+    {
+        var model = new AppleIdFactorViewModel(
+            "Shop",
+            null,
+            DateTime.UtcNow,
+            "customer@example.com",
+            "secret-pass",
+            null,
+            " ",
+            null,
+            string.Join(' ', Enumerable.Repeat("توضیحات طولانی برای آزمون", 40)));
+
+        AssertValidPdf(_generator.GenerateAppleIdFactor(model));
+    }
+
+    [Fact]
+    public void GenerateAppleIdFactor_throws_for_null_model()
+        => Assert.Throws<ArgumentNullException>(() => _generator.GenerateAppleIdFactor(null!));
+
     private static TransactionFactorViewModel Factor(params TransactionFactorRowViewModel[] rows)
         => new(rows, DateTime.UtcNow);
 

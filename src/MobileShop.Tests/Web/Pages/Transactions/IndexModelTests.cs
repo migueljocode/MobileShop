@@ -24,6 +24,8 @@ public class IndexModelTests : RepoTestBase
             LastFactor = model;
             return PdfBytes;
         }
+
+        public byte[] GenerateAppleIdFactor(AppleIdFactorViewModel model) => [];
     }
 
     public IndexModelTests()

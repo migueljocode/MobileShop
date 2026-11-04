@@ -16,4 +16,11 @@ public interface IPdfGenerator
     /// <param name="model">The transaction factor data to render.</param>
     /// <returns>The generated PDF bytes.</returns>
     byte[] GenerateTransactionFactor(TransactionFactorViewModel model);
+
+    /// <summary>
+    /// Renders the Apple ID delivery form handed to the customer together with a sold Apple ID.
+    /// </summary>
+    /// <param name="model">The Apple ID delivery data to render.</param>
+    /// <returns>The generated PDF bytes.</returns>
+    byte[] GenerateAppleIdFactor(AppleIdFactorViewModel model);
 }

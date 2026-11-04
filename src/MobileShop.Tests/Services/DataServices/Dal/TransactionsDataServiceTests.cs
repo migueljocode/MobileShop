@@ -12,10 +12,18 @@ public class TransactionsDataServiceTests : RepoTestBase
 
         public TransactionFactorViewModel? LastFactor { get; private set; }
 
+        public AppleIdFactorViewModel? LastAppleIdFactor { get; private set; }
+
         public byte[] GenerateTransactionFactor(TransactionFactorViewModel model)
         {
             LastFactor = model;
             return [4, 5, 6];
+        }
+
+        public byte[] GenerateAppleIdFactor(AppleIdFactorViewModel model)
+        {
+            LastAppleIdFactor = model;
+            return [7, 8, 9];
         }
     }
 
@@ -287,6 +295,75 @@ public class TransactionsDataServiceTests : RepoTestBase
 
         Assert.NotNull(bytes);
         Assert.Equal(new byte[] { 4, 5, 6 }, bytes);
+    }
+
+    [Fact]
+    public async Task GetAppleIdFactorPdfAsync_returns_null_for_unknown_id()
+    {
+        Assert.Null(await _service.GetAppleIdFactorPdfAsync(999));
+        Assert.Null(_pdfGenerator.LastAppleIdFactor);
+    }
+
+    [Fact]
+    public async Task GetAppleIdFactorPdfAsync_returns_null_for_sale_of_a_non_apple_id_product()
+    {
+        var product = TestDataHelpers.CreateProduct(Context);
+        var seller = AddSeller("Ali", "Zed");
+        var customer = AddCustomer("Sara", "Ahmadi");
+        var transaction = AddTransaction(product, seller.Id, customer.Id, TransactionDirection.Sell, DateTime.UtcNow);
+
+        Assert.Null(await _service.GetAppleIdFactorPdfAsync(transaction.Id));
+        Assert.Null(_pdfGenerator.LastAppleIdFactor);
+    }
+
+    [Fact]
+    public async Task GetAppleIdFactorPdfAsync_returns_null_for_a_purchase_of_an_apple_id()
+    {
+        var product = TestDataHelpers.CreateProduct(Context);
+        AddAppleId(product);
+        var seller = AddSeller("Ali", "Zed");
+        var customer = AddCustomer("Sara", "Ahmadi");
+        var transaction = AddTransaction(product, seller.Id, customer.Id, TransactionDirection.Buy, DateTime.UtcNow);
+
+        Assert.Null(await _service.GetAppleIdFactorPdfAsync(transaction.Id));
+        Assert.Null(_pdfGenerator.LastAppleIdFactor);
+    }
+
+    [Fact]
+    public async Task GetAppleIdFactorPdfAsync_renders_credentials_and_customer_of_the_sale()
+    {
+        var product = TestDataHelpers.CreateProduct(Context);
+        AddAppleId(product);
+        var seller = AddSeller("Ali", "Zed");
+        var customer = AddCustomer("Sara", "Ahmadi");
+        var date = new DateTime(2026, 11, 2, 14, 30, 0);
+        var transaction = AddTransaction(product, seller.Id, customer.Id, TransactionDirection.Sell, date);
+
+        var bytes = await _service.GetAppleIdFactorPdfAsync(transaction.Id);
+
+        Assert.Equal(new byte[] { 7, 8, 9 }, bytes);
+        var factor = Assert.IsType<AppleIdFactorViewModel>(_pdfGenerator.LastAppleIdFactor);
+        Assert.Equal("Sara Ahmadi", factor.CustomerName);
+        Assert.Equal("09120000002", factor.CustomerPhone);
+        Assert.Equal(date, factor.Date);
+        Assert.Equal("customer@example.com", factor.Email);
+        Assert.Equal("secret-pass", factor.Password);
+        Assert.Equal("Sara", factor.SecurityAnswer1);
+        Assert.Null(factor.SecurityAnswer2);
+        Assert.Equal("handle with care", factor.Notes);
+    }
+
+    private void AddAppleId(Product product)
+    {
+        Context.AppleIds.Add(new AppleId
+        {
+            ProductId = product.Id,
+            Email = "customer@example.com",
+            Password = "secret-pass",
+            SecurityAnswer1 = "Sara",
+            Notes = "handle with care",
+        });
+        Context.SaveChanges();
     }
 
     [Fact]
