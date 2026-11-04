@@ -33,7 +33,8 @@ public class MigrationChainTests : IDisposable
                 "20261002060000_UseIntegerRialMoney",
                 "20261004090000_WidenMoneyToLong",
                 "20261006215821_AddPowerBankPortsAndPhoneSimSupport",
-                "20261008023227_AddCpuGpuLookups"
+                "20261008023227_AddCpuGpuLookups",
+                "20261104100000_AddAppleIdSecurityAnswers"
             },
             migrations);
     }

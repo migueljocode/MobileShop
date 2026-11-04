@@ -843,6 +843,9 @@ public class ProductsDataService(
             Email = email,
             Password = password,
             Notes = string.IsNullOrWhiteSpace(input.Notes) ? null : input.Notes.Trim(),
+            SecurityAnswer1 = NormalizeNote(input.SecurityAnswer1),
+            SecurityAnswer2 = NormalizeNote(input.SecurityAnswer2),
+            SecurityAnswer3 = NormalizeNote(input.SecurityAnswer3),
             ProductNavigation = product,
         };
 

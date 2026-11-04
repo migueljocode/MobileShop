@@ -1268,6 +1268,51 @@ public class ProductsDataServiceTests : RepoTestBase
     }
 
     [Fact]
+    public async Task CreateAppleIdAsync_finished_price_allows_percent_above_100()
+    {
+        SeedCatalog(out _, out _);
+        var input = new MobileShop.Models.ViewModels.Web.BindModels.CreateAppleIdInputModel
+        {
+            SellerId = 1,
+            Price = 200,
+            ProfitPercent = 250,
+            Email = "pricing-percent-above-100@example.com",
+            Password = "secret123",
+        };
+
+        var result = await _service.CreateAppleIdAsync(input);
+
+        Assert.True(result.Succeeded);
+        var appleId = await Context.AppleIds.FirstAsync(a => a.Email == input.Email);
+        var product = await Context.Products.FirstAsync(p => p.Id == appleId.ProductId);
+        Assert.Equal(700, product.Price);
+    }
+
+    [Fact]
+    public async Task CreateAppleIdAsync_stores_trimmed_security_answers_and_nulls_blank_ones()
+    {
+        SeedCatalog(out _, out _);
+        var input = new MobileShop.Models.ViewModels.Web.BindModels.CreateAppleIdInputModel
+        {
+            SellerId = 1,
+            Price = 200,
+            Email = "security-answers@example.com",
+            Password = "secret123",
+            SecurityAnswer1 = "  Sara  ",
+            SecurityAnswer2 = "Doctor",
+            SecurityAnswer3 = "   ",
+        };
+
+        var result = await _service.CreateAppleIdAsync(input);
+
+        Assert.True(result.Succeeded);
+        var appleId = await Context.AppleIds.FirstAsync(a => a.Email == input.Email);
+        Assert.Equal("Sara", appleId.SecurityAnswer1);
+        Assert.Equal("Doctor", appleId.SecurityAnswer2);
+        Assert.Null(appleId.SecurityAnswer3);
+    }
+
+    [Fact]
     public async Task CreateAppleIdAsync_finished_price_with_amount()
     {
         SeedCatalog(out _, out _);

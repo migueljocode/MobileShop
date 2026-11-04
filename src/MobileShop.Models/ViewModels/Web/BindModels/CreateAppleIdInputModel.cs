@@ -24,4 +24,13 @@ public sealed class CreateAppleIdInputModel
 
     [StringLength(500)]
     public string? Notes { get; set; }
+
+    [StringLength(100)]
+    public string? SecurityAnswer1 { get; set; }
+
+    [StringLength(100)]
+    public string? SecurityAnswer2 { get; set; }
+
+    [StringLength(100)]
+    public string? SecurityAnswer3 { get; set; }
 }
