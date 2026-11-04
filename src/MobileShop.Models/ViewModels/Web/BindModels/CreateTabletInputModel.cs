@@ -7,7 +7,7 @@ public sealed class CreateTabletInputModel
     [Required] public int ManufacturerId { get; set; }
     [Required] public int ModelId { get; set; }
     [Range(0, MoneyLimits.MaxRials)] public long Price { get; set; }
-    [Range(0, 100)] public decimal? ProfitPercent { get; set; }
+    [Range(0, double.MaxValue)] public decimal? ProfitPercent { get; set; }
     [Range(0, MoneyLimits.MaxRials)] public long? ProfitAmount { get; set; }
     public bool IsSecondHand { get; set; }
     [Range(0, int.MaxValue)] public int? TestPeriodDays { get; set; }

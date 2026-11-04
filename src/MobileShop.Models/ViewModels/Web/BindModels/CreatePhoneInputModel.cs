@@ -14,7 +14,7 @@ public sealed class CreatePhoneInputModel
     [Range(0, MoneyLimits.MaxRials)]
     public long Price { get; set; }
 
-    [Range(0, 100)]
+    [Range(0, double.MaxValue)]
     public decimal? ProfitPercent { get; set; }
 
     [Range(0, MoneyLimits.MaxRials)]
