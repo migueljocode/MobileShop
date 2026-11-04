@@ -74,6 +74,64 @@ public class DetailsModelTests : RepoTestBase
         return transaction;
     }
 
+    private Transaction SeedAppleIdSale()
+    {
+        var transaction = SeedTransaction();
+        transaction.Direction = TransactionDirection.Sell;
+        Context.AppleIds.Add(new AppleId
+        {
+            ProductId = transaction.ProductId,
+            Email = "sold@example.com",
+            Password = "secret-pass",
+        });
+        Context.SaveChanges();
+        return transaction;
+    }
+
+    [Fact]
+    public async Task OnGetAppleIdFactor_returns_printable_pdf_for_an_apple_id_sale()
+    {
+        var transaction = SeedAppleIdSale();
+
+        var result = await _model.OnGetAppleIdFactorAsync(transaction.Id);
+
+        var fileResult = Assert.IsType<FileContentResult>(result);
+        Assert.Equal("application/pdf", fileResult.ContentType);
+        Assert.True(string.IsNullOrEmpty(fileResult.FileDownloadName));
+        Assert.Equal(PdfBytes, fileResult.FileContents);
+        Assert.Equal("sold@example.com", _pdfGenerator.LastAppleIdFactor!.Email);
+    }
+
+    [Fact]
+    public async Task OnGetAppleIdFactor_returns_not_found_for_a_transaction_without_an_apple_id_sale()
+    {
+        var transaction = SeedTransaction();
+
+        Assert.IsType<NotFoundResult>(await _model.OnGetAppleIdFactorAsync(transaction.Id));
+        Assert.IsType<NotFoundResult>(await _model.OnGetAppleIdFactorAsync(99_999));
+        Assert.Null(_pdfGenerator.LastAppleIdFactor);
+    }
+
+    [Fact]
+    public async Task OnGet_does_not_flag_the_apple_id_factor_for_other_transactions()
+    {
+        var transaction = SeedTransaction();
+
+        await _model.OnGetAsync(transaction.Id);
+
+        Assert.False(_model.Transaction!.HasAppleIdFactor);
+    }
+
+    [Fact]
+    public async Task OnGet_flags_the_apple_id_factor_for_an_apple_id_sale()
+    {
+        var transaction = SeedAppleIdSale();
+
+        await _model.OnGetAsync(transaction.Id);
+
+        Assert.True(_model.Transaction!.HasAppleIdFactor);
+    }
+
     [Fact]
     public async Task OnGetFactor_returns_printable_pdf_for_the_requested_transaction()
     {

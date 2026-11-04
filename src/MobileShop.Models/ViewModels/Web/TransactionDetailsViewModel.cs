@@ -6,4 +6,5 @@ public sealed record TransactionDetailsViewModel(
     long FinishedPrice,
     string ProductLabel,
     string SellerLabel,
-    string CustomerLabel);
+    string CustomerLabel,
+    bool HasAppleIdFactor = false);

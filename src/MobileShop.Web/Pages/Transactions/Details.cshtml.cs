@@ -24,4 +24,14 @@ public class DetailsModel(
 
         return File(pdfBytes, "application/pdf");
     }
+
+    /// <summary>Returns the Apple ID delivery form for this sale as a browser-printable PDF.</summary>
+    public async Task<IActionResult> OnGetAppleIdFactorAsync(int id)
+    {
+        var pdfBytes = await dataService.GetAppleIdFactorPdfAsync(id);
+        if (pdfBytes is null)
+            return NotFound();
+
+        return File(pdfBytes, "application/pdf");
+    }
 }

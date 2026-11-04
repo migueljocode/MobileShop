@@ -105,7 +105,9 @@ public class TransactionsDataService(
                     : transaction.SellerNavigation.PersonNavigation.FirstName + " " + transaction.SellerNavigation.PersonNavigation.LastName,
                 transaction.CustomerNavigation.PersonNavigation == null
                     ? "Shop"
-                    : transaction.CustomerNavigation.PersonNavigation.FirstName + " " + transaction.CustomerNavigation.PersonNavigation.LastName));
+                    : transaction.CustomerNavigation.PersonNavigation.FirstName + " " + transaction.CustomerNavigation.PersonNavigation.LastName,
+                transaction.Direction == TransactionDirection.Sell
+                    && transaction.ProductNavigation.AppleIdProfile != null));
 
     /// <inheritdoc />
     public async Task<byte[]?> GetTransactionFactorPdfAsync(int transactionId)
