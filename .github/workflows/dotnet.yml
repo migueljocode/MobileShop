@@ -45,6 +45,12 @@ jobs:
           name: factor-pdf-inspection
           path: TestResults/FactorPdfInspection/
           if-no-files-found: warn
+      - uses: actions/upload-artifact@v5
+        if: always()
+        with:
+          name: apple-id-factor-pdf
+          path: TestResults/FactorPdfInspection/apple-id/
+          if-no-files-found: warn
 
   scripts:
     name: Log utility (${{ matrix.os }})
