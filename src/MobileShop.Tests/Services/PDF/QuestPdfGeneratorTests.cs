@@ -322,6 +322,56 @@ public class QuestPdfGeneratorTests
     }
 
     [Fact]
+    public void GenerateAppleIdFactor_writes_rendered_inspection_artifacts()
+    {
+        var inspectionDirectory = Environment.GetEnvironmentVariable("FACTOR_PDF_INSPECTION_DIR");
+        if (string.IsNullOrWhiteSpace(inspectionDirectory))
+            return;
+
+        var outputDirectory = Path.Combine(inspectionDirectory, "apple-id");
+        Directory.CreateDirectory(outputDirectory);
+
+        var complete = new AppleIdFactorViewModel(
+            "سارا احمدی",
+            "09123456789",
+            new DateTime(2026, 11, 2),
+            "customer@example.com",
+            "Secret-Pass-123",
+            "Sara",
+            "Doctor",
+            "Tehran",
+            "تحویل همراه با جعبه اصلی.");
+
+        var blankOptional = new AppleIdFactorViewModel(
+            "Shop",
+            null,
+            new DateTime(2026, 11, 2),
+            "customer@example.com",
+            "Secret-Pass-123",
+            null,
+            null,
+            null,
+            null);
+
+        var longNotes = complete with
+        {
+            Notes = string.Join(' ', Enumerable.Repeat("توضیحات طولانی برای بررسی چیدمان کادر توضیحات", 25)),
+        };
+
+        File.WriteAllBytes(
+            Path.Combine(outputDirectory, "apple-id-factor-complete.pdf"),
+            _generator.GenerateAppleIdFactor(complete));
+
+        File.WriteAllBytes(
+            Path.Combine(outputDirectory, "apple-id-factor-blank-optional.pdf"),
+            _generator.GenerateAppleIdFactor(blankOptional));
+
+        File.WriteAllBytes(
+            Path.Combine(outputDirectory, "apple-id-factor-long-notes.pdf"),
+            _generator.GenerateAppleIdFactor(longNotes));
+    }
+
+    [Fact]
     public void GenerateAppleIdFactor_throws_for_null_model()
         => Assert.Throws<ArgumentNullException>(() => _generator.GenerateAppleIdFactor(null!));
 
