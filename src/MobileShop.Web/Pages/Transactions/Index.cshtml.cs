@@ -61,6 +61,16 @@ public class IndexModel(
         return File(factor.Bytes!, "application/pdf", "transactions-factor.pdf");
     }
 
+    /// <summary>Downloads the Apple ID delivery form PDF of one sale.</summary>
+    public async Task<IActionResult> OnGetDownloadAppleIdFactorAsync(int id)
+    {
+        var pdfBytes = await dataService.GetAppleIdFactorPdfAsync(id);
+        if (pdfBytes is null)
+            return NotFound();
+
+        return File(pdfBytes, "application/pdf", $"apple-id-factor-{id}.pdf");
+    }
+
     private async Task LoadAsync(
         string? direction,
         int take,

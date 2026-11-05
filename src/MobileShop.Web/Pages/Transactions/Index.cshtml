@@ -142,6 +142,10 @@
                             <td class="table-actions">
                                 <a asp-page="/Transactions/Details" asp-route-id="@transaction.Id">Details</a>
                                 <a href="@Url.Page("/Transactions/Index", "DownloadFactor", new { direction = Model.Direction, customerId = Model.CustomerId, dateRange = Model.DateRange, take = Model.Take, sort = Model.Sort, order = Model.Order, selectedIds = transaction.Id })">Download factor</a>
+                                @if (transaction.HasAppleIdFactor)
+                                {
+                                    <a asp-page="/Transactions/Index" asp-page-handler="DownloadAppleIdFactor" asp-route-id="@transaction.Id">Download Apple ID factor</a>
+                                }
                             </td>
                         </tr>
                     }

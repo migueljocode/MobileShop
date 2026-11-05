@@ -10,4 +10,7 @@ public sealed record TransactionListItemViewModel(
     string CustomerLabel)
 {
     public int CustomerId { get; init; }
+
+    /// <summary>Gets whether this row is the sale of an Apple ID, which has its own delivery factor.</summary>
+    public bool HasAppleIdFactor { get; init; }
 }

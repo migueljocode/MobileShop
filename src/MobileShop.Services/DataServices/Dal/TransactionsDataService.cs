@@ -82,6 +82,8 @@ public class TransactionsDataService(
                 : transaction.CustomerNavigation.PersonNavigation.FirstName + " " + transaction.CustomerNavigation.PersonNavigation.LastName)
         {
             CustomerId = transaction.CustomerId,
+            HasAppleIdFactor = transaction.Direction == TransactionDirection.Sell
+                && transaction.ProductNavigation.AppleIdProfile != null,
         };
 
         if (string.Equals(direction, "buy", StringComparison.OrdinalIgnoreCase))

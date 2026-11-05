@@ -17,6 +17,8 @@ public class IndexModelTests : RepoTestBase
     {
         public TransactionFactorViewModel? LastFactor { get; private set; }
 
+        public AppleIdFactorViewModel? LastAppleIdFactor { get; private set; }
+
         public byte[] Generate(InvoiceViewModel model) => [1, 2, 3];
 
         public byte[] GenerateTransactionFactor(TransactionFactorViewModel model)
@@ -25,7 +27,11 @@ public class IndexModelTests : RepoTestBase
             return PdfBytes;
         }
 
-        public byte[] GenerateAppleIdFactor(AppleIdFactorViewModel model) => [];
+        public byte[] GenerateAppleIdFactor(AppleIdFactorViewModel model)
+        {
+            LastAppleIdFactor = model;
+            return PdfBytes;
+        }
     }
 
     public IndexModelTests()
@@ -88,6 +94,51 @@ public class IndexModelTests : RepoTestBase
         Context,
         _pdfGenerator,
         NullLogger<TransactionsDataService>.Instance);
+
+    private void MakeSecondTransactionAnAppleIdSale()
+    {
+        Context.AppleIds.Add(new AppleId
+        {
+            ProductId = _tx2.ProductId,
+            Email = "listed@example.com",
+            Password = "secret-pass",
+        });
+        Context.SaveChanges();
+    }
+
+    [Fact]
+    public async Task OnGetAsync_flags_only_apple_id_sales_for_the_apple_id_factor_download()
+    {
+        MakeSecondTransactionAnAppleIdSale();
+
+        await _model.OnGetAsync(direction: "all");
+
+        Assert.Equal(
+            [_tx2.Id],
+            _model.Transactions.Where(row => row.HasAppleIdFactor).Select(row => row.Id));
+    }
+
+    [Fact]
+    public async Task DownloadAppleIdFactor_returns_named_pdf_attachment_for_an_apple_id_sale()
+    {
+        MakeSecondTransactionAnAppleIdSale();
+
+        var result = await _model.OnGetDownloadAppleIdFactorAsync(_tx2.Id);
+
+        var file = Assert.IsType<FileContentResult>(result);
+        Assert.Equal("application/pdf", file.ContentType);
+        Assert.Equal($"apple-id-factor-{_tx2.Id}.pdf", file.FileDownloadName);
+        Assert.Equal(PdfBytes, file.FileContents);
+        Assert.Equal("listed@example.com", _pdfGenerator.LastAppleIdFactor!.Email);
+    }
+
+    [Fact]
+    public async Task DownloadAppleIdFactor_returns_not_found_when_the_transaction_is_not_an_apple_id_sale()
+    {
+        Assert.IsType<NotFoundResult>(await _model.OnGetDownloadAppleIdFactorAsync(_tx2.Id));
+        Assert.IsType<NotFoundResult>(await _model.OnGetDownloadAppleIdFactorAsync(99_999));
+        Assert.Null(_pdfGenerator.LastAppleIdFactor);
+    }
 
     [Fact]
     public async Task Manual_selection_returns_pdf_attachment_for_exact_transactions_in_submitted_order()
