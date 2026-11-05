@@ -72,9 +72,11 @@ public class TransactionsDataService(
             transaction.Direction,
             transaction.ProductNavigation.ModelNavigation.ManufacturerNavigation.Name + " " + transaction.ProductNavigation.ModelNavigation.Name,
             transaction.FinishedPrice,
-            transaction.SellerNavigation.PersonNavigation == null
-                ? "Shop"
-                : transaction.SellerNavigation.PersonNavigation.FirstName + " " + transaction.SellerNavigation.PersonNavigation.LastName,
+            transaction.Direction == TransactionDirection.Sell
+                ? ShopLabels.ZoneMobile
+                : transaction.SellerNavigation.PersonNavigation == null
+                    ? "Shop"
+                    : transaction.SellerNavigation.PersonNavigation.FirstName + " " + transaction.SellerNavigation.PersonNavigation.LastName,
             transaction.CustomerNavigation.PersonNavigation == null
                 ? "Shop"
                 : transaction.CustomerNavigation.PersonNavigation.FirstName + " " + transaction.CustomerNavigation.PersonNavigation.LastName)
@@ -100,9 +102,11 @@ public class TransactionsDataService(
                 transaction.Direction,
                 transaction.FinishedPrice,
                 transaction.ProductNavigation.ModelNavigation.ManufacturerNavigation.Name + " " + transaction.ProductNavigation.ModelNavigation.Name,
-                transaction.SellerNavigation.PersonNavigation == null
-                    ? "Shop"
-                    : transaction.SellerNavigation.PersonNavigation.FirstName + " " + transaction.SellerNavigation.PersonNavigation.LastName,
+                transaction.Direction == TransactionDirection.Sell
+                    ? ShopLabels.ZoneMobile
+                    : transaction.SellerNavigation.PersonNavigation == null
+                        ? "Shop"
+                        : transaction.SellerNavigation.PersonNavigation.FirstName + " " + transaction.SellerNavigation.PersonNavigation.LastName,
                 transaction.CustomerNavigation.PersonNavigation == null
                     ? "Shop"
                     : transaction.CustomerNavigation.PersonNavigation.FirstName + " " + transaction.CustomerNavigation.PersonNavigation.LastName,

@@ -152,6 +152,22 @@ public class TransactionsDataServiceTests : RepoTestBase
     }
 
     [Fact]
+    public async Task GetListAsync_labels_the_seller_of_every_sale_as_zone_mobile_and_keeps_purchase_sellers()
+    {
+        var purchased = TestDataHelpers.CreateProduct(Context);
+        var sold = TestDataHelpers.CreateProduct(Context);
+        var seller = AddSeller("Ali", "Zed");
+        var customer = AddCustomer("Sara", "Ahmadi");
+        var buy = AddTransaction(purchased, seller.Id, customer.Id, TransactionDirection.Buy, new DateTime(2024, 1, 1));
+        var sell = AddTransaction(sold, seller.Id, customer.Id, TransactionDirection.Sell, new DateTime(2024, 1, 2));
+
+        var rows = await _service.GetListAsync("all", 50, true);
+
+        Assert.Equal("Ali Zed", rows.Single(row => row.Id == buy.Id).SellerLabel);
+        Assert.Equal(ShopLabels.ZoneMobile, rows.Single(row => row.Id == sell.Id).SellerLabel);
+    }
+
+    [Fact]
     public async Task GetListAsync_sorts_by_seller_in_both_directions()
     {
         var product1 = TestDataHelpers.CreateProduct(Context);
@@ -256,7 +272,7 @@ public class TransactionsDataServiceTests : RepoTestBase
 
         Assert.NotNull(details);
         Assert.Equal(TransactionDirection.Sell, details!.Direction);
-        Assert.Equal("Ali Zed", details.SellerLabel);
+        Assert.Equal(ShopLabels.ZoneMobile, details.SellerLabel);
         Assert.Equal("Sara Ahmadi", details.CustomerLabel);
 
         Assert.Null(await _service.GetDetailsAsync(999));

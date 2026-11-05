@@ -867,7 +867,7 @@ public class ProductsDataServiceTests : RepoTestBase
         Assert.NotNull(details);
         Assert.Equal(2, details!.Transactions.Count);
         Assert.Equal(new DateTime(2026, 2, 1), details.Transactions[0].Date);
-        Assert.Equal("Ali Seller", details.Transactions[0].SellerLabel);
+        Assert.Equal(ShopLabels.ZoneMobile, details.Transactions[0].SellerLabel);
         Assert.Equal("Sara Customer", details.Transactions[0].CustomerLabel);
         Assert.Equal(new DateTime(2026, 1, 1), details.Transactions[1].Date);
         Assert.Equal("Ali Seller", details.Transactions[1].SellerLabel);

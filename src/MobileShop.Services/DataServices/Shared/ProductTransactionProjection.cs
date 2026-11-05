@@ -9,9 +9,11 @@ public static class ProductTransactionProjection
             transaction.Date,
             transaction.Direction,
             transaction.FinishedPrice,
-            transaction.SellerNavigation.PersonNavigation == null
-                ? "Shop"
-                : transaction.SellerNavigation.PersonNavigation.FirstName + " " + transaction.SellerNavigation.PersonNavigation.LastName,
+            transaction.Direction == TransactionDirection.Sell
+                ? ShopLabels.ZoneMobile
+                : transaction.SellerNavigation.PersonNavigation == null
+                    ? "Shop"
+                    : transaction.SellerNavigation.PersonNavigation.FirstName + " " + transaction.SellerNavigation.PersonNavigation.LastName,
             transaction.CustomerNavigation.PersonNavigation == null
                 ? "Shop"
                 : transaction.CustomerNavigation.PersonNavigation.FirstName + " " + transaction.CustomerNavigation.PersonNavigation.LastName);
