@@ -123,13 +123,7 @@ public sealed partial class QuestPdfGenerator
             .Column(column =>
             {
                 column.Spacing(3);
-                column
-                    .Item()
-                    .Text(text =>
-                    {
-                        text.AlignCenter();
-                        text.Span(label).FontSize(7.5f).FontColor(AppleIdMuted).FontFamily(FactorFontFamilies);
-                    });
+                column.Item().Text(label).FontSize(7.5f).FontColor(AppleIdMuted).FontFamily(FactorFontFamilies);
                 column
                     .Item()
                     .MinHeight(16)
