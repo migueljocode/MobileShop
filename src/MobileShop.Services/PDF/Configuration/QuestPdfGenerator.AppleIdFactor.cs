@@ -123,14 +123,21 @@ public sealed partial class QuestPdfGenerator
             .Column(column =>
             {
                 column.Spacing(3);
-                column.Item().Text(label).FontSize(7.5f).FontColor(AppleIdMuted).FontFamily(FactorFontFamilies);
+                column
+                    .Item()
+                    .Text(text =>
+                    {
+                        text.AlignCenter();
+                        text.Span(label).FontSize(7.5f).FontColor(AppleIdMuted).FontFamily(FactorFontFamilies);
+                    });
                 column
                     .Item()
                     .MinHeight(16)
-                    .Text(AppleIdBlankIfEmpty(value))
-                    .FontSize(11)
-                    .SemiBold()
-                    .FontFamily(FactorFontFamilies);
+                    .Text(text =>
+                    {
+                        text.AlignCenter();
+                        text.Span(AppleIdBlankIfEmpty(value)).FontSize(11).SemiBold().FontFamily(FactorFontFamilies);
+                    });
             });
 
     private static void RenderAppleIdCredentialsCard(IContainer container, AppleIdFactorViewModel model) =>
@@ -213,7 +220,13 @@ public sealed partial class QuestPdfGenerator
             {
                 column.Spacing(8);
                 column.Item().Element(c => AppleIdSectionTitle(c, "تایید مشتری"));
-                column.Item().Text(AppleIdConfirmationText).FontSize(9).FontColor("#1E3A5F").FontFamily(FactorFontFamilies);
+                column
+                    .Item()
+                    .Text(text =>
+                    {
+                        text.AlignCenter();
+                        text.Span(AppleIdConfirmationText).FontSize(9).FontColor("#1E3A5F").FontFamily(FactorFontFamilies);
+                    });
                 column
                     .Item()
                     .PaddingTop(4)
