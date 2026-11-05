@@ -41,10 +41,10 @@ public sealed partial class QuestPdfGenerator
             .Element(c => c.ContentFromRightToLeft().Element(RenderAppleIdFactorHeader));
         page.Content()
             .Element(c => c.ContentFromRightToLeft().Element(x => RenderAppleIdFactorContent(x, model)));
-        page.Footer().Element(c => c.ContentFromRightToLeft().Element(RenderFactorFooter));
+        page.Footer().Element(c => c.ContentFromRightToLeft().Element(RenderAppleIdFactorFooter));
     }
 
-    private void RenderAppleIdFactorHeader(IContainer container) =>
+    private static void RenderAppleIdFactorHeader(IContainer container) =>
         container
             .Background(AppleIdInk)
             .CornerRadius(14)
@@ -84,16 +84,15 @@ public sealed partial class QuestPdfGenerator
                             .SemiBold()
                             .FontColor(AppleIdWhite)
                             .FontFamily(FactorFontFamilies);
-                        if (!string.IsNullOrWhiteSpace(_settings.ShopAddress))
-                            column
-                                .Item()
-                                .AlignLeft()
-                                .Text(_settings.ShopAddress)
-                                .FontSize(7.5f)
-                                .FontColor("#94A3B8")
-                                .FontFamily(FactorFontFamilies);
                     });
             });
+
+    // Same address, phone and Instagram lines as the sale factor, so both documents carry identical contact details.
+    private static void RenderAppleIdFactorFooter(IContainer container) =>
+        container
+            .BorderTop(1)
+            .BorderColor(AppleIdLine)
+            .Column(column => RenderFactorContactLines(column, 6));
 
     private static void RenderAppleIdFactorContent(IContainer container, AppleIdFactorViewModel model) =>
         container.Column(column =>
@@ -193,7 +192,7 @@ public sealed partial class QuestPdfGenerator
             column =>
                 column
                     .Item()
-                    .MinHeight(72)
+                    .MinHeight(60)
                     .Background(AppleIdSurface)
                     .Border(1)
                     .BorderColor(AppleIdLine)
@@ -220,7 +219,7 @@ public sealed partial class QuestPdfGenerator
                     .PaddingTop(4)
                     .AlignCenter()
                     .Width(250)
-                    .Height(48)
+                    .Height(42)
                     .Background(AppleIdWhite)
                     .Border(1)
                     .BorderColor(AppleIdAccentBorder)
