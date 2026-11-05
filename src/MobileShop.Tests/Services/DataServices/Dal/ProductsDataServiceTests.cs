@@ -788,7 +788,7 @@ public class ProductsDataServiceTests : RepoTestBase
         product.ModelId = appleIdModel.Id;
         product = Context.Products.First(p => p.Id == product.Id);
         Context.Products.Update(product);
-        var appleId = new AppleId { ProductId = product.Id, Email = "detail@example.com", Password = "secret", Notes = "Recovery info stored separately" };
+        var appleId = new AppleId { ProductId = product.Id, Email = "detail@example.com", Password = "secret", Notes = "Recovery info stored separately", SecurityAnswer1 = "Sara", SecurityAnswer2 = "Doctor" };
         var conflictingAppleId = new AppleId { ProductId = unrelatedProduct.Id, Email = "wrong@example.com", Password = "wrong" };
         Context.AppleIds.AddRange(appleId, conflictingAppleId);
         Context.SaveChanges();
@@ -801,6 +801,9 @@ public class ProductsDataServiceTests : RepoTestBase
         Assert.Equal("Apple ID", details!.Type);
         Assert.Equal("Email: detail@example.com", details.Identifier);
         Assert.Equal("secret", details.AppleIdPassword);
+        Assert.Equal("Sara", details.SecurityAnswer1);
+        Assert.Equal("Doctor", details.SecurityAnswer2);
+        Assert.Null(details.SecurityAnswer3);
         Assert.Equal("Recovery info stored separately", details.Notes);
     }
 

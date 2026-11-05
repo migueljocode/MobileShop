@@ -247,6 +247,9 @@ public class ProductsDataService(
                     product.SecondHandProfile != null)
                 {
                     AppleIdPassword = product.AppleIdProfile!.Password,
+                    SecurityAnswer1 = product.AppleIdProfile!.SecurityAnswer1,
+                    SecurityAnswer2 = product.AppleIdProfile!.SecurityAnswer2,
+                    SecurityAnswer3 = product.AppleIdProfile!.SecurityAnswer3,
                     Notes = product.AppleIdProfile!.Notes,
                 });
         }

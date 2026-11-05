@@ -35,6 +35,12 @@
             {
                 <dt class="col-sm-4 text-muted">Password</dt>
                 <dd class="col-sm-8"><code>@Model.Product.AppleIdPassword</code></dd>
+                <dt class="col-sm-4 text-muted">Q1 (best friend)</dt>
+                <dd class="col-sm-8">@(string.IsNullOrWhiteSpace(Model.Product.SecurityAnswer1) ? "N/A" : Model.Product.SecurityAnswer1)</dd>
+                <dt class="col-sm-4 text-muted">Q2 (dream job)</dt>
+                <dd class="col-sm-8">@(string.IsNullOrWhiteSpace(Model.Product.SecurityAnswer2) ? "N/A" : Model.Product.SecurityAnswer2)</dd>
+                <dt class="col-sm-4 text-muted">Q3 (parents meet)</dt>
+                <dd class="col-sm-8">@(string.IsNullOrWhiteSpace(Model.Product.SecurityAnswer3) ? "N/A" : Model.Product.SecurityAnswer3)</dd>
                 <dt class="col-sm-4 text-muted">Notes</dt>
                 <dd class="col-sm-8">@(string.IsNullOrWhiteSpace(Model.Product.Notes) ? "N/A" : Model.Product.Notes)</dd>
             }

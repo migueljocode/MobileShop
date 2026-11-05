@@ -39,6 +39,9 @@ public sealed record ProductDetailsViewModel(
     public string? Gpu { get; init; }
     public decimal? DisplaySize { get; init; }
     public string? AppleIdPassword { get; init; }
+    public string? SecurityAnswer1 { get; init; }
+    public string? SecurityAnswer2 { get; init; }
+    public string? SecurityAnswer3 { get; init; }
     public string? Notes { get; init; }
     public CableConnector? Connector1 { get; init; }
     public CableConnector? Connector2 { get; init; }
