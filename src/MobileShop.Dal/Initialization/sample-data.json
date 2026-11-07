@@ -2,10 +2,10 @@
   "people": [
     {
       "id": 1,
-      "firstName": "Mohammad",
-      "lastName": "Karimi",
-      "phoneNumber": "09120000001",
-      "notes": "Shop owner"
+      "firstName": "Zone",
+      "lastName": "Mobile",
+      "phoneNumber": "09115009109",
+      "notes": "The shop"
     },
     {
       "id": 2,
@@ -98,11 +98,6 @@
       "id": 4,
       "personId": 6,
       "nationalId": "0034567890"
-    },
-    {
-      "id": 5,
-      "personId": 9,
-      "nationalId": "0099999999"
     }
   ],
   "users": [

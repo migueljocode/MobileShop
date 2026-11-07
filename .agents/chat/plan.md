@@ -47,7 +47,7 @@
 - Risk: MEDIUM
 - Confidence: MEDIUM
 
-## [ ] Step 4 — Sample data and seeder: Anis only as profit-share person
+## ~~[x] Step 4 — Sample data and seeder: Anis only as profit-share person~~
 - Files: modify: `src/MobileShop.Dal/Initialization/sample-data.json`, `src/MobileShop.Dal/Initialization/SampleDataInitializer.cs`, `src/MobileShop.Tests/Dal/Initialization/SampleDataSeedTests.cs`; do not touch: all other records and IDs, Person 9 and Employee 6.
 - Symbols: `SampleDataInitializer.EnsureAnisCustomer` (delete) and its call in `SeedIfEmpty`.
 - Current -> Desired: Person 1 "Mohammad Karimi" (notes "Shop owner") -> Person 1 "Zone Mobile" (phone `09115009109`, notes "The shop"); Customer 5 (Anis, 0099999999) removed.
