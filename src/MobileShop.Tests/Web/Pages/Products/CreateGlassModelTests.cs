@@ -26,7 +26,6 @@ public class CreateGlassModelTests : RepoTestBase
             NullLogger<ProductsDataService>.Instance);
 
         TestDataHelpers.SeedShopSentinels(Context);
-        TestDataHelpers.SeedAnisCustomer(Context);
                 Context.Categories.AddRange(new Category { Name = "Phone" }, new Category { Name = "Glass" });
         Context.Manufacturers.AddRange(new Manufacturer { Name = "Apple" }, new Manufacturer { Name = "Samsung" });
         Context.SaveChanges();

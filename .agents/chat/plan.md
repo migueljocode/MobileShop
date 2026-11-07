@@ -21,7 +21,7 @@
 - Risk: LOW
 - Confidence: HIGH
 
-## [ ] Step 2 — Purchases use the shop party; test fixtures
+## ~~[x] Step 2 — Purchases use the shop party; test fixtures~~
 - Files: modify: `src/MobileShop.Services/DataServices/Dal/ProductsDataService.cs`, `src/MobileShop.Tests/Dal/BaseClass/TestDataHelpers.cs`, `src/MobileShop.Tests/Services/DataServices/Dal/ProductsDataServiceTests.cs`, and every other caller of `SeedAnisCustomer` (grep): `src/MobileShop.Tests/Web/Pages/Products/CreateAccessoryModelTests.cs`, `EditModelTests.cs`, `CreateAppleIdModelTests.cs`, `CreateGlassModelTests.cs`, `CreatePhoneModelTests.cs`, `CreateDeviceModelTests.cs`; do not touch: `TransactionsDataService.cs`.
 - Symbols: `ProductsDataService.ResolvePurchasePartiesAsync(int)`; `TestDataHelpers.SeedShopSentinels`; `TestDataHelpers.SeedAnisCustomer` (delete).
 - Current -> Desired: purchase customer = Person "Anis Sahabi" -> purchase customer = the Zone Mobile customer from `ShopPartyResolver`.

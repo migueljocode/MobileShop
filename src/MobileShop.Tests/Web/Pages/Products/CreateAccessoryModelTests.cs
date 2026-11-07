@@ -5,7 +5,6 @@ public class CreateAccessoryModelTests : RepoTestBase
     public CreateAccessoryModelTests()
     {
         TestDataHelpers.SeedShopSentinels(Context);
-        TestDataHelpers.SeedAnisCustomer(Context);
     }
 
     private ProductsDataService Service() => new(

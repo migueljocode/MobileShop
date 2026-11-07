@@ -19,7 +19,6 @@ public class ProductsDataServiceTests : RepoTestBase
     public ProductsDataServiceTests()
     {
         TestDataHelpers.SeedShopSentinels(Context);
-        TestDataHelpers.SeedAnisCustomer(Context);
         _service = new ProductsDataService(
             new BaseRepo<Phone>(Context),
             new BaseRepo<AppleId>(Context),
@@ -1443,18 +1442,16 @@ public class ProductsDataServiceTests : RepoTestBase
         var purchase = Assert.Single(Context.Transactions.Where(transaction => transaction.ProductId == phone.ProductId));
         Assert.Equal(TransactionDirection.Buy, purchase.Direction);
         Assert.Equal(1, purchase.SellerId);
-        var anisPersonId = Context.People.Single(person =>
-            person.FirstName == "Anis" && person.LastName == "Sahabi").Id;
-        Assert.Equal(Context.Customers.Single(customer => customer.PersonId == anisPersonId).Id, purchase.CustomerId);
+        Assert.Equal(ZoneMobileCustomerId(), purchase.CustomerId);
     }
 
     [Fact]
-    public async Task CreatePhoneAsync_registers_Anis_as_customer_when_missing()
+    public async Task CreatePhoneAsync_registers_ZoneMobile_customer_when_missing()
     {
         SeedCatalog(out var phoneModel, out _);
-        var anis = Context.People.Single(person =>
-            person.FirstName == "Anis" && person.LastName == "Sahabi");
-        Context.Customers.RemoveRange(Context.Customers.Where(customer => customer.PersonId == anis.Id));
+        var shop = Context.People.Single(person =>
+            person.FirstName == "Zone" && person.LastName == "Mobile");
+        Context.Customers.RemoveRange(Context.Customers.Where(customer => customer.PersonId == shop.Id));
         Context.SaveChanges();
 
         var result = await _service.CreatePhoneAsync(new CreatePhoneInputModel
@@ -1467,11 +1464,47 @@ public class ProductsDataServiceTests : RepoTestBase
         });
 
         Assert.True(result.Succeeded);
-        var anisCustomer = Assert.Single(Context.Customers.Where(customer => customer.PersonId == anis.Id));
-        Assert.Equal("0099999999", anisCustomer.NationalId);
+        var shopCustomer = Assert.Single(Context.Customers.Where(customer => customer.PersonId == shop.Id));
+        Assert.Equal("0099999999", shopCustomer.NationalId);
         var transaction = Assert.Single(Context.Transactions);
-        Assert.Equal(anisCustomer.Id, transaction.CustomerId);
+        Assert.Equal(shopCustomer.Id, transaction.CustomerId);
     }
+
+    [Fact]
+    public async Task CreatePhoneAsync_fails_with_actionable_message_when_ZoneMobile_person_missing()
+    {
+        SeedCatalog(out var phoneModel, out _);
+        var supplierPerson = new Person { FirstName = "Supplier", LastName = "One", PhoneNumber = "09120000011" };
+        Context.People.Add(supplierPerson);
+        Context.SaveChanges();
+        var supplier = new Seller { PersonId = supplierPerson.Id, EntityType = SellerEntityType.Real };
+        Context.Sellers.Add(supplier);
+        var shop = Context.People.Single(person =>
+            person.FirstName == "Zone" && person.LastName == "Mobile");
+        Context.Customers.RemoveRange(Context.Customers.Where(customer => customer.PersonId == shop.Id));
+        Context.Sellers.RemoveRange(Context.Sellers.Where(seller => seller.PersonId == shop.Id));
+        Context.People.Remove(shop);
+        Context.SaveChanges();
+
+        var result = await _service.CreatePhoneAsync(new CreatePhoneInputModel
+        {
+            SellerId = supplier.Id,
+            ManufacturerId = phoneModel.ManufacturerId,
+            ModelId = phoneModel.Id,
+            Price = 100,
+            IMEI1 = TestDataHelpers.GenerateImei(),
+        });
+
+        Assert.False(result.Succeeded);
+        Assert.Contains("Zone Mobile", result.Message);
+        Assert.Contains("People", result.Message);
+        Assert.Empty(Context.Transactions);
+        Assert.Empty(Context.Phones);
+    }
+
+    private int ZoneMobileCustomerId() =>
+        Context.Customers.Single(customer =>
+            customer.PersonNavigation.FirstName == "Zone" && customer.PersonNavigation.LastName == "Mobile").Id;
 
     [Fact]
     public async Task CreatePhoneAsync_rejects_duplicate_imei_on_correct_field()
@@ -1557,10 +1590,8 @@ public class ProductsDataServiceTests : RepoTestBase
             Assert.NotEqual(TimeSpan.Zero, t.Date.TimeOfDay);
         });
         Assert.All(purchases, t => Assert.Equal(supplier.Id, t.SellerId));
-        var anisPersonId = Context.People.Single(person =>
-            person.FirstName == "Anis" && person.LastName == "Sahabi").Id;
-        var anisCustomerId = Context.Customers.Single(customer => customer.PersonId == anisPersonId).Id;
-        Assert.All(purchases, t => Assert.Equal(anisCustomerId, t.CustomerId));
+        var shopCustomerId = ZoneMobileCustomerId();
+        Assert.All(purchases, t => Assert.Equal(shopCustomerId, t.CustomerId));
         Assert.All(products, p => Assert.Equal(glassModel.Id, p.ModelId));
         Assert.Equal(3, products.Select(p => p.Barcode).Distinct().Count());
         Assert.All(products, p => Assert.Equal(12, p.Barcode.Length));
@@ -1728,9 +1759,7 @@ public class ProductsDataServiceTests : RepoTestBase
         var purchase = Assert.Single(Context.Transactions.Where(transaction => transaction.ProductId == appleId.ProductId));
         Assert.Equal(TransactionDirection.Buy, purchase.Direction);
         Assert.Equal(1, purchase.SellerId);
-        var anisPersonId = Context.People.Single(person =>
-            person.FirstName == "Anis" && person.LastName == "Sahabi").Id;
-        Assert.Equal(Context.Customers.Single(customer => customer.PersonId == anisPersonId).Id, purchase.CustomerId);
+        Assert.Equal(ZoneMobileCustomerId(), purchase.CustomerId);
     }
 
     [Fact]
@@ -2235,10 +2264,8 @@ public class ProductsDataServiceTests : RepoTestBase
         Assert.Equal(3, purchases.Count);
         Assert.All(purchases, transaction => Assert.Equal(TransactionDirection.Buy, transaction.Direction));
         Assert.All(purchases, transaction => Assert.Equal(1, transaction.SellerId));
-        var anisPersonId = Context.People.Single(person =>
-            person.FirstName == "Anis" && person.LastName == "Sahabi").Id;
-        var anisCustomerId = Context.Customers.Single(customer => customer.PersonId == anisPersonId).Id;
-        Assert.All(purchases, transaction => Assert.Equal(anisCustomerId, transaction.CustomerId));
+        var shopCustomerId = ZoneMobileCustomerId();
+        Assert.All(purchases, transaction => Assert.Equal(shopCustomerId, transaction.CustomerId));
         Assert.Equal([1000, 2000, 3000], purchases.Select(transaction => transaction.FinishedPrice));
         Assert.Equal(3, purchases.Select(transaction => transaction.ProductId).Distinct().Count());
     }
@@ -2298,10 +2325,8 @@ public class ProductsDataServiceTests : RepoTestBase
         Assert.Equal(10, Context.Transactions.Count(t => t.Direction == TransactionDirection.Buy));
         Assert.Equal(10, Context.Products.Select(p => p.Barcode).Distinct().Count());
         Assert.All(Context.Transactions, transaction => Assert.Equal(1, transaction.SellerId));
-        var anisPersonId = Context.People.Single(person =>
-            person.FirstName == "Anis" && person.LastName == "Sahabi").Id;
-        var anisCustomerId = Context.Customers.Single(customer => customer.PersonId == anisPersonId).Id;
-        Assert.All(Context.Transactions, transaction => Assert.Equal(anisCustomerId, transaction.CustomerId));
+        var shopCustomerId = ZoneMobileCustomerId();
+        Assert.All(Context.Transactions, transaction => Assert.Equal(shopCustomerId, transaction.CustomerId));
         Assert.All(Context.Products, product => Assert.True(product.Price >= 1000));
         Assert.Equal(2, Context.CaseModelFits.Count());
     }

@@ -8,7 +8,6 @@ public class EditModelTests : RepoTestBase
     public EditModelTests()
     {
         TestDataHelpers.SeedShopSentinels(Context);
-        TestDataHelpers.SeedAnisCustomer(Context);
         _service = new ProductsDataService(
             new BaseRepo<Phone>(Context),
             new BaseRepo<AppleId>(Context),

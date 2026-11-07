@@ -15,7 +15,6 @@ public class CreateAppleIdModelTests : RepoTestBase
     public CreateAppleIdModelTests()
     {
         TestDataHelpers.SeedShopSentinels(Context);
-        TestDataHelpers.SeedAnisCustomer(Context);
         var dataService = new ProductsDataService(
             new BaseRepo<Phone>(Context),
             new BaseRepo<AppleId>(Context),

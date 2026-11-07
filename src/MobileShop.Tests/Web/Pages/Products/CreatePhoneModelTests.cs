@@ -32,7 +32,6 @@ public class CreatePhoneModelTests : RepoTestBase
 
         // seed catalog data that would exist in production seed
         TestDataHelpers.SeedShopSentinels(Context);
-        TestDataHelpers.SeedAnisCustomer(Context);
         Context.Categories.Add(new Category { Name = "Phone" });
         Context.Manufacturers.AddRange(
             new Manufacturer { Name = "Apple" },

@@ -44,8 +44,8 @@ internal static class TestDataHelpers
     }
 
     /// <summary>
-    /// Seeds the sentinel Shop person, seller, and customer records (id = 1) expected by
-    /// <see cref="TransactionsDataService"/> when recording buy/sell operations.
+    /// Seeds the Zone Mobile shop person, seller, and customer records (id = 1): the shop party used
+    /// when recording buy/sell operations.
     /// </summary>
     internal static void SeedShopSentinels(AppDbContext context)
     {
@@ -55,8 +55,8 @@ internal static class TestDataHelpers
         var shopPerson = new Person
         {
             Id = 1,
-            FirstName = "Shop",
-            LastName = "Owner",
+            FirstName = "Zone",
+            LastName = "Mobile",
             PhoneNumber = "09120000001"
         };
         context.People.Add(shopPerson);
@@ -83,32 +83,5 @@ internal static class TestDataHelpers
         }
 
         context.SaveChanges();
-    }
-
-    internal static void SeedAnisCustomer(AppDbContext context)
-    {
-        var anis = context.People.FirstOrDefault(person =>
-            person.FirstName == "Anis" && person.LastName == "Sahabi");
-        if (anis is null)
-        {
-            anis = new Person
-            {
-                FirstName = "Anis",
-                LastName = "Sahabi",
-                PhoneNumber = "09120000009",
-            };
-            context.People.Add(anis);
-            context.SaveChanges();
-        }
-
-        if (!context.Customers.Any(customer => customer.PersonId == anis.Id))
-        {
-            context.Customers.Add(new Customer
-            {
-                PersonId = anis.Id,
-                NationalId = "0099999999",
-            });
-            context.SaveChanges();
-        }
     }
 }

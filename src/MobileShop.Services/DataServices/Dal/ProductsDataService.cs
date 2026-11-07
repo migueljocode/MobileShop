@@ -1391,24 +1391,11 @@ public class ProductsDataService(
             return new PurchasePartyResolution(0, 0,
                 new ServiceResult(false, "Selected seller not found.", "SellerId", null));
 
-        var anis = await customers.FindAsync(customer =>
-            customer.PersonNavigation.FirstName == "Anis" &&
-            customer.PersonNavigation.LastName == "Sahabi");
-        if (anis is null)
-        {
-            var anisPerson = await people.FindAsync(person =>
-                person.FirstName == "Anis" && person.LastName == "Sahabi");
-            if (anisPerson is null)
-                return new PurchasePartyResolution(0, 0,
-                    new ServiceResult(false, "Anis Sahabi must be registered as a person before creating products.", null, null));
+        var shop = await ShopPartyResolver.ResolveAsync(people, sellers, customers);
+        if (shop.Error is not null)
+            return new PurchasePartyResolution(0, 0, new ServiceResult(false, shop.Error, null, null));
 
-            anis = new Customer { PersonId = anisPerson.Id, NationalId = "0099999999" };
-            if (await customers.AddAsync(anis) <= 0)
-                return new PurchasePartyResolution(0, 0,
-                    new ServiceResult(false, "Anis Sahabi could not be registered as a customer.", null, null));
-        }
-
-        return new PurchasePartyResolution(sellerId, anis.Id, null);
+        return new PurchasePartyResolution(sellerId, shop.CustomerId, null);
     }
 
     private sealed record PurchasePartyResolution(int SellerId, int CustomerId, ServiceResult? Failure);
