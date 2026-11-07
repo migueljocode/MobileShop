@@ -33,6 +33,7 @@ public class TransactionsDataServiceTests : RepoTestBase
             new BaseRepo<Transaction>(Context),
             new BaseRepo<Seller>(Context),
             new BaseRepo<Customer>(Context),
+            new BaseRepo<Person>(Context),
             new BaseRepo<Phone>(Context),
             new BaseRepo<AppleId>(Context),
             new BaseRepo<Product>(Context),
@@ -401,7 +402,9 @@ public class TransactionsDataServiceTests : RepoTestBase
         Assert.True(result.Succeeded);
         var transaction = Context.Transactions.Single(t => t.Id == result.EntityId);
         Assert.Equal(TransactionDirection.Sell, transaction.Direction);
-        Assert.Equal(1, transaction.SellerId);
+        var shopSellerId = Context.Sellers.Single(seller =>
+            seller.PersonNavigation.FirstName == "Zone" && seller.PersonNavigation.LastName == "Mobile").Id;
+        Assert.Equal(shopSellerId, transaction.SellerId);
         Assert.Equal(customer.Id, transaction.CustomerId);
         Assert.InRange(transaction.Date, before, after);
 
@@ -414,6 +417,25 @@ public class TransactionsDataServiceTests : RepoTestBase
 
         Assert.False(duplicate.Succeeded);
         Assert.Equal("The sale could not be recorded. Check the product and price.", duplicate.Message);
+    }
+
+    [Fact]
+    public async Task RecordSellAsync_fails_with_actionable_message_when_ZoneMobile_person_missing()
+    {
+        var product = TestDataHelpers.CreateProduct(Context);
+        var customer = AddCustomer("Sara", "Ahmadi");
+
+        var result = await _service.RecordSellAsync(new SellInputModel
+        {
+            ProductId = product.Id,
+            CustomerId = customer.Id,
+            Price = 400,
+        });
+
+        Assert.False(result.Succeeded);
+        Assert.Contains("Zone Mobile", result.Message);
+        Assert.Contains("People", result.Message);
+        Assert.DoesNotContain(Context.Transactions, transaction => transaction.Direction == TransactionDirection.Sell);
     }
 
     [Fact]

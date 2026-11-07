@@ -5,6 +5,7 @@ public class TransactionsDataService(
     IBaseRepo<Transaction> transactions,
     IBaseRepo<Seller> sellers,
     IBaseRepo<Customer> customers,
+    IBaseRepo<Person> people,
     IBaseRepo<Phone> phones,
     IBaseRepo<AppleId> appleIds,
     IBaseRepo<Product> products,
@@ -13,10 +14,6 @@ public class TransactionsDataService(
     ILogger<TransactionsDataService> logger)
     : ITransactionsDataService
 {
-    // Shop sentinel records (Person/Seller/Customer Id = 1 in sample data).
-    // TODO: move to configuration when the shop entity is configurable.
-    private const int ShopSellerId = 1;
-
     /// <summary>Gets the structured logger for this transactions service.</summary>
     protected ILogger<TransactionsDataService> Logger { get; } = logger;
 
@@ -330,10 +327,17 @@ public class TransactionsDataService(
             return new ServiceResult(false, "The sale could not be recorded. Check the product and price.", null, null);
         }
 
+        var shop = await ShopPartyResolver.ResolveAsync(people, sellers, customers);
+        if (shop.Error is not null)
+        {
+            Logger.LogWarning("RecordSell rejected: {Error}", shop.Error);
+            return new ServiceResult(false, shop.Error, null, null);
+        }
+
         var transaction = new Transaction
         {
             ProductId = input.ProductId,
-            SellerId = ShopSellerId,
+            SellerId = shop.SellerId,
             CustomerId = input.CustomerId,
             FinishedPrice = input.Price,
             Date = input.Date ?? DateTime.Now,

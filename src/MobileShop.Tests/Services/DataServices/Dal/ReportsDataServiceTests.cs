@@ -242,6 +242,7 @@ public class ReportsDataServiceTests : RepoTestBase
     [Fact]
     public async Task GetProfitLossRowsAsync_includes_glass_sale_recorded_through_transactions_service()
     {
+        TestDataHelpers.SeedShopSentinels(Context);
         var seller = AddSeller();
         var customer = AddCustomer();
         var product = TestDataHelpers.CreateProduct(Context, 115_000);
@@ -253,6 +254,7 @@ public class ReportsDataServiceTests : RepoTestBase
             new BaseRepo<Transaction>(Context),
             new BaseRepo<Seller>(Context),
             new BaseRepo<Customer>(Context),
+            new BaseRepo<Person>(Context),
             new BaseRepo<Phone>(Context),
             new BaseRepo<AppleId>(Context),
             new BaseRepo<Product>(Context),

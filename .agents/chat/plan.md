@@ -34,7 +34,7 @@
 - Risk: MEDIUM
 - Confidence: MEDIUM
 
-## [ ] Step 3 — Sales use the shop party
+## ~~[x] Step 3 — Sales use the shop party~~
 - Files: modify: `src/MobileShop.Services/DataServices/Dal/TransactionsDataService.cs`, `src/MobileShop.Tests/Services/DataServices/Dal/TransactionsDataServiceTests.cs`, `src/MobileShop.Tests/Services/DataServices/Dal/ReportsDataServiceTests.cs`, `src/MobileShop.Tests/Web/Pages/Transactions/DetailsModelTests.cs`; do not touch: other services.
 - Symbols: `TransactionsDataService` primary constructor; `TransactionsDataService.RecordSellAsync` (~lines 306–345); constant `ShopSellerId` and its TODO comment (delete).
 - Current -> Desired: `SellerId = ShopSellerId` (always 1) -> `SellerId` from `ShopPartyResolver`.

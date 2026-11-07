@@ -39,6 +39,7 @@ public class DetailsModelTests : RepoTestBase
             new BaseRepo<Transaction>(Context),
             new BaseRepo<Seller>(Context),
             new BaseRepo<Customer>(Context),
+            new BaseRepo<Person>(Context),
             new BaseRepo<Phone>(Context),
             new BaseRepo<AppleId>(Context),
             new BaseRepo<Product>(Context),
