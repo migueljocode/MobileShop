@@ -34,7 +34,8 @@ public class MigrationChainTests : IDisposable
                 "20261004090000_WidenMoneyToLong",
                 "20261006215821_AddPowerBankPortsAndPhoneSimSupport",
                 "20261008023227_AddCpuGpuLookups",
-                "20261104100000_AddAppleIdSecurityAnswers"
+                "20261104100000_AddAppleIdSecurityAnswers",
+                "20261107120000_SeedZoneMobileShopParty"
             },
             migrations);
     }
@@ -115,6 +116,43 @@ public class MigrationChainTests : IDisposable
         Assert.Equal("Core i7", laptop.CpuNavigation.Name);
         Assert.Equal("RTX 4070", laptop.GpuNavigation!.Name);
     }
+
+    [Fact]
+    public void Chain_creates_the_Zone_Mobile_shop_party_on_an_empty_database()
+    {
+        _context.Database.Migrate();
+
+        Assert.Equal(1, Count("""
+            SELECT COUNT(*) AS Value FROM "People"
+            WHERE "FirstName" = 'Zone' AND "LastName" = 'Mobile' AND "PhoneNumber" = '09115009109' AND "IsDeleted" = 0
+            """));
+        Assert.Equal(1, Count("""
+            SELECT COUNT(*) AS Value FROM "Sellers" s JOIN "People" p ON p."Id" = s."PersonId"
+            WHERE p."FirstName" = 'Zone' AND p."LastName" = 'Mobile' AND s."EntityType" = 1
+            """));
+        Assert.Equal(1, Count("""
+            SELECT COUNT(*) AS Value FROM "Customers" c JOIN "People" p ON p."Id" = c."PersonId"
+            WHERE p."FirstName" = 'Zone' AND p."LastName" = 'Mobile' AND c."NationalId" = '0099999999'
+            """));
+    }
+
+    [Fact]
+    public void Zone_Mobile_migration_does_not_duplicate_an_existing_shop_person()
+    {
+        _context.GetService<IMigrator>().Migrate("20261104100000_AddAppleIdSecurityAnswers");
+        _context.Database.ExecuteSqlRaw("""
+            INSERT INTO People (Id, FirstName, LastName, PhoneNumber, IsDeleted)
+            VALUES (1, 'Zone', 'Mobile', '09120000000', 0);
+            """);
+
+        _context.Database.Migrate();
+
+        Assert.Equal(1, Count("""SELECT COUNT(*) AS Value FROM "People" WHERE "FirstName" = 'Zone' AND "LastName" = 'Mobile'"""));
+        Assert.Equal(1, Count("""SELECT COUNT(*) AS Value FROM "Sellers" WHERE "PersonId" = 1"""));
+        Assert.Equal(1, Count("""SELECT COUNT(*) AS Value FROM "Customers" WHERE "PersonId" = 1"""));
+    }
+
+    private int Count(string sql) => _context.Database.SqlQueryRaw<int>(sql).Single();
 
     public void Dispose()
     {

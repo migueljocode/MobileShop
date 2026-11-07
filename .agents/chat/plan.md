@@ -60,7 +60,7 @@
 - Risk: LOW
 - Confidence: HIGH
 
-## [ ] Step 5 — Data migration that creates the Zone Mobile shop party
+## ~~[x] Step 5 — Data migration that creates the Zone Mobile shop party~~
 - Files: inspect: `src/MobileShop.Dal/Migrations/20261104100000_AddAppleIdSecurityAnswers.cs` and `.Designer.cs` (shape), `20261008023227_AddCpuGpuLookups.cs` (`migrationBuilder.Sql` raw-string style); create: `src/MobileShop.Dal/Migrations/20261107120000_SeedZoneMobileShopParty.cs`, `src/MobileShop.Dal/Migrations/20261107120000_SeedZoneMobileShopParty.Designer.cs`; modify: `src/MobileShop.Tests/Dal/EfStructures/MigrationChainTests.cs`, `src/MobileShop.Tests/Dal/EfStructures/LegacyMoneyUpgradeTests.cs`; do not touch: `AppDbContextModelSnapshot.cs`, every other migration.
 - Symbols: new `SeedZoneMobileShopParty : Migration` (`Up`, `Down`); `MigrationChainTests.Migrations_are_discovered_in_order`; `LegacyMoneyUpgradeTests` People count assertion (~line 68).
 - Current -> Desired: no shop party in new or upgraded databases -> the migration creates Person + Seller + Customer for Zone Mobile.
