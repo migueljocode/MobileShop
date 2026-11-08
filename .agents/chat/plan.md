@@ -60,7 +60,7 @@
 - Risk: MEDIUM
 - Confidence: HIGH
 
-## [ ] Step 5 — Update the docs
+## ~~[x] Step 5 — Update the docs~~
 - Files: modify: `README.md`, `docs/publishing.md`; do not touch: everything else.
 - Symbols: none (docs).
 - Current -> Desired: docs say the `SeedZoneMobileShopParty` migration creates the shop party and "migrating an existing database adds the party" -> docs say startup and `--migrate-database` ensure the party using `Pdf:ShopPhone` from appsettings.json.
