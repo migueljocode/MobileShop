@@ -1,3 +1,3 @@
 - [x] ~~Stage 1 — Make the Zone Mobile shop party the stored seller of every sale and buyer of every purchase~~
-- [ ] Stage 2 — Show "Zone Mobile" as the buyer label on every purchase, including existing rows
+- [x] ~~Stage 2 — Show "Zone Mobile" as the buyer label on every purchase, including existing rows~~
 - [ ] Stage 3 — Document the Zone Mobile shop party (created by migration) in README and docs/publishing.md
