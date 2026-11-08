@@ -65,8 +65,7 @@ public class LegacyMoneyUpgradeTests
 
                 Assert.Empty(migratedContext.Database.GetPendingMigrations());
 
-                // The Zone Mobile migration adds the shop person.
-                Assert.Equal(beforeCounts["People"] + 1, Scalar<long>(migratedContext, "SELECT COUNT(*) FROM People;"));
+                Assert.Equal(beforeCounts["People"], Scalar<long>(migratedContext, "SELECT COUNT(*) FROM People;"));
                 Assert.Equal(beforeCounts["Products"], Scalar<long>(migratedContext, "SELECT COUNT(*) FROM Products;"));
                 Assert.Equal(beforeCounts["Transactions"], Scalar<long>(migratedContext, "SELECT COUNT(*) FROM Transactions;"));
 

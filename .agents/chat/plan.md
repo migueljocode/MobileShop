@@ -47,7 +47,7 @@
 - Risk: LOW
 - Confidence: HIGH
 
-## [ ] Step 4 — Make the migration a no-op and remove its data tests
+## ~~[x] Step 4 — Make the migration a no-op and remove its data tests~~
 - Files: modify: `src/MobileShop.Dal/Migrations/20261107120000_SeedZoneMobileShopParty.cs`, `src/MobileShop.Tests/Dal/EfStructures/MigrationChainTests.cs`, `src/MobileShop.Tests/Dal/EfStructures/LegacyMoneyUpgradeTests.cs`; do not touch: the Designer, the snapshot, the migration id.
 - Symbols: `SeedZoneMobileShopParty.Up/Down`; `MigrationChainTests.Chain_creates_the_Zone_Mobile_shop_party_on_an_empty_database`, `Zone_Mobile_migration_does_not_duplicate_an_existing_shop_person`, helper `Count`; the People expectation in `LegacyMoneyUpgradeTests` (~line 68).
 - Current -> Desired: the migration inserts the party with a hard-coded phone -> the migration changes nothing; the number lives only in appsettings.json.
