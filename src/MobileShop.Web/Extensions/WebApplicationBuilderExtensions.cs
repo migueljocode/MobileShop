@@ -54,6 +54,8 @@ public static class WebApplicationBuilderExtensions
             if (result.Status == DatabaseMigrationStatus.Created)
                 scope.ServiceProvider.GetRequiredService<IAccountDataService>().EnsureAdminUser();
 
+            EnsureShopParty(scope.ServiceProvider);
+
             Console.WriteLine(result.Status switch
             {
                 DatabaseMigrationStatus.Created => "Database created and all migrations applied.",
@@ -100,6 +102,8 @@ public static class WebApplicationBuilderExtensions
             var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
             if (DatabaseMigrator.EnsureCurrent(context))
                 scope.ServiceProvider.GetRequiredService<IAccountDataService>().EnsureAdminUser();
+
+            EnsureShopParty(scope.ServiceProvider);
         }
 
         app.UseRouting();
@@ -110,4 +114,10 @@ public static class WebApplicationBuilderExtensions
         app.PrintRunningAddress();
         return app;
     }
+
+    /// <summary>
+    /// Ensures the Zone Mobile shop party exists, using the shop phone from the application settings.
+    /// </summary>
+    private static void EnsureShopParty(IServiceProvider services)
+        => services.GetRequiredService<IShopPartyDataService>().EnsureAsync().GetAwaiter().GetResult();
 }

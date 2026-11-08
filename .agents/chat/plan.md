@@ -21,7 +21,7 @@
 - Risk: LOW
 - Confidence: HIGH
 
-## [ ] Step 2 — Run it at startup and in `--migrate-database`
+## ~~[x] Step 2 — Run it at startup and in `--migrate-database`~~
 - Files: inspect: `src/MobileShop.Web/Extensions/WebApplicationBuilderExtensions.cs`; modify: `src/MobileShop.Web/Extensions/WebApplicationBuilderExtensions.cs`; do not touch: the Api project, Development branch.
 - Symbols: `WebApplicationBuilderExtensions.TryRunDatabaseCommand`, `WebApplicationBuilderExtensions.ConfigureApp` (Production `else` branch); new private static helper `EnsureShopParty(IServiceProvider services)`.
 - Current -> Desired: only the admin user is ensured after the database is ready -> the shop party is ensured too.
