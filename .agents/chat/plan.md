@@ -33,7 +33,7 @@
 - Risk: LOW
 - Confidence: HIGH
 
-## [ ] Step 3 — Final validation
+## ~~[x] Step 3 — Final validation~~
 - Files: inspect only.
 - Symbols: none.
 - Current -> Desired: unvalidated -> validated.
