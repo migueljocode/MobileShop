@@ -66,14 +66,16 @@ The default local admin account is `admin` / `Admin@123`. Change the password im
 The Web project's launch settings select the Development environment. At startup, Development mode:
 
 1. Deletes and recreates the database from the current EF Core model.
-2. Loads sample data from `src/MobileShop.Dal/Initialization/sample-data.json`.
+2. Loads sample data from `src/MobileShop.Dal/Initialization/sample-data.json` (Person 1, Zone Mobile, is the shop party).
 3. Ensures the admin account exists.
 
 **Every Development-mode startup erases the existing database.** Use this mode only with disposable local data.
 
 ### Production
 
-Production startup is non-destructive. It checks that the database schema is current and creates the schema and initial admin account if the database is missing or empty. An outdated schema requires an explicit migration.
+Production startup is non-destructive. It checks that the database schema is current and creates the schema, the initial admin account and the Zone Mobile shop party if the database is missing or empty. An outdated schema requires an explicit migration.
+
+The Zone Mobile shop party is a person named Zone Mobile with a Legal seller and a customer record, created by the `SeedZoneMobileShopParty` migration. Every sale is recorded with Zone Mobile as the seller and every purchase with Zone Mobile as the customer, and the transaction pages show "Zone Mobile" for those sides, including existing purchases. Migrating an existing database adds the party without changing existing rows. If the party is missing (for example, a legacy database that was baselined without running migrations), recording a sale or purchase fails with a message asking you to add a customer with first name `Zone` and last name `Mobile` under People > Customers.
 
 Before migrating an existing database, make a verified backup. Then run:
 
@@ -153,7 +155,7 @@ dotnet publish src/MobileShop.Web -c Release -r linux-x64
 dotnet publish src/MobileShop.Web -c Release -r osx-arm64
 ```
 
-Publish output is written under `Publishes/<RID>/`. The build is self-contained and single-file, so the target machine does not need a separately installed .NET runtime. The database is not bundled; first startup creates the schema and initial admin account.
+Publish output is written under `Publishes/<RID>/`. The build is self-contained and single-file, so the target machine does not need a separately installed .NET runtime. The database is not bundled; first startup creates the schema, the initial admin account and the Zone Mobile shop party.
 
 See the [publishing guide](docs/publishing.md) for details. Native AOT is not enabled because the Razor Pages/MVC application does not support it.
 

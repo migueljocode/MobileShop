@@ -20,7 +20,7 @@
 - Risk: LOW
 - Confidence: HIGH
 
-## [ ] Step 2 — Document the Zone Mobile shop party
+## ~~[x] Step 2 — Document the Zone Mobile shop party~~
 - Files: modify: `README.md`, `docs/publishing.md`; do not touch: everything else.
 - Symbols: none (docs).
 - Current -> Desired: docs mention only the admin account at first start -> docs also describe the Zone Mobile shop party, its role in transactions and the upgrade behaviour.
