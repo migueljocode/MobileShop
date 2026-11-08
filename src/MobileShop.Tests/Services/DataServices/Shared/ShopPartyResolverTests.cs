@@ -85,7 +85,7 @@ public class ShopPartyResolverTests : RepoTestBase
 
     private Person AddShopPerson()
     {
-        var person = new Person { FirstName = "Zone", LastName = "Mobile", PhoneNumber = "09115009109" };
+        var person = new Person { FirstName = "Zone", LastName = "Mobile", PhoneNumber = "09120000000" };
         Context.People.Add(person);
         Context.SaveChanges();
         return person;

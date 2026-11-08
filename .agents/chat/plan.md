@@ -1,31 +1,44 @@
-# Plan — Show "Zone Mobile" as the buyer label on every purchase, including existing rows
+# Plan — Keep real contact details out of sample data and document the Zone Mobile shop party
 
 ## Reviewer Briefing
-- Requirement (user): every purchase's customer is the shop, "Zone Mobile". Stage 1 stores new purchases against the Zone Mobile customer, but existing rows (and rows in databases that predate it) still point at the old customer ("Anis Sahabi" in the live shop, sample customer 1 in sample data), so the UI still shows that person's name as the buyer.
-- Design: mirror the override that already exists for sales: the seller of a Sell row is always `ShopLabels.ZoneMobile` regardless of the stored record. Do the same for the customer of a Buy row at the three duplicated label expressions. No data changes, no migration, no repointing.
-- Verified: label sites are `ProductTransactionProjection.Selector` (customer label), `TransactionsDataService` list selector (~lines 70–82) and details selector (~lines 102–114); `GetAppleIdFactorPdfAsync` is Sell-only; factor rows use the seller label for purchases; three pages render `CustomerLabel` directly (`Products/Details.cshtml`, `Transactions/Index.cshtml`, `Transactions/Details.cshtml`). The only existing assertion that conflicts is `ProductsDataServiceTests` ~line 873 (the Buy row expects "Sara Customer").
-- Risk: LOW. The expression keeps the same ternary shape already translated by EF for the seller label.
-- Out of scope: consolidating the three duplicated label expressions into one (separate refactor), repointing stored rows, `HomeDataService` and Apple ID labels (they show counterparties), docs (Stage 3).
+- Defect found while planning the docs: Stage 1 Step 4 put the real shop phone (`09115009109`) into `sample-data.json` Person 1. `.agents/project.md` (line 15) requires sample data to contain "no real contact details or credentials". The real number must exist only in the Production migration (`SeedZoneMobileShopParty`) and the test that asserts it. Step 1 restores a fake number (`09120000001`, Person 1's previous value, unique in the sample data) and replaces the real number in the resolver test fixture.
+- Docs gap: README and `docs/publishing.md` still say Production first start creates only the schema and the admin account, and never mention the Zone Mobile shop party or the upgrade behaviour. There are no People edit pages, so the docs must not promise that the shop's phone can be edited in the UI.
+- Verified: README `### Development` item 2, `### Production` paragraph, publish paragraph (~line 156) and `docs/publishing.md` second paragraph are the statements to update; the real phone currently appears in `sample-data.json`, the migration, `MigrationChainTests`, `ShopPartyResolverTests` and (pre-existing, unrelated) `PhoneNumberExtensionsTests`.
+- Risk: LOW (data value, docs text, one test fixture value).
+- Out of scope: People edit pages, `.agents/project.md`, `PhoneNumberExtensionsTests`, any behavior change.
 
-## ~~[x] Step 1 — Label the buyer of every purchase as Zone Mobile~~
-- Files: modify: `src/MobileShop.Services/DataServices/Shared/ProductTransactionProjection.cs`, `src/MobileShop.Services/DataServices/Dal/TransactionsDataService.cs`, `src/MobileShop.Tests/Services/DataServices/Dal/ProductsDataServiceTests.cs`, `src/MobileShop.Tests/Services/DataServices/Dal/TransactionsDataServiceTests.cs`; do not touch: view models, pages, other services.
-- Symbols: `ProductTransactionProjection.Selector`; the selector lambdas in `TransactionsDataService.GetListAsync` (~70–82) and `TransactionsDataService.GetDetailsAsync` (~102–114); not `GetAppleIdFactorPdfAsync`.
-- Current -> Desired: customer label = stored customer's person name (or "Shop") for every direction -> customer label = `ShopLabels.ZoneMobile` when `Direction == TransactionDirection.Buy`, otherwise unchanged.
-- Change: at each of the three sites replace the customer-label argument with `transaction.Direction == TransactionDirection.Buy ? ShopLabels.ZoneMobile : <the existing customer-label expression unchanged>`. Leave the seller label, `CustomerId`, `HasAppleIdFactor` and everything else as is.
+## ~~[x] Step 1 — Fake shop phone in sample data and the resolver test~~
+- Files: modify: `src/MobileShop.Dal/Initialization/sample-data.json`, `src/MobileShop.Tests/Services/DataServices/Shared/ShopPartyResolverTests.cs`; do not touch: the migration, `MigrationChainTests`.
+- Symbols: sample Person 1 `phoneNumber`; `ShopPartyResolverTests.AddShopPerson`.
+- Current -> Desired: `"phoneNumber": "09115009109"` (Person 1) -> `"09120000001"`; `PhoneNumber = "09115009109"` in `AddShopPerson` -> `"09120000000"`.
+- Change: edit those two values only.
 - Depends on: none.
-- Edge cases / error handling: keep the expression a plain ternary over `transaction.Direction` (same shape as the seller label) so EF can translate it; keep the `"Shop"` fallback for sales.
-- Tests: in `ProductsDataServiceTests` (~873) the Buy row (`Transactions[1]`) expects `ShopLabels.ZoneMobile` for `CustomerLabel`; the Sell row (`Transactions[0]`) still expects "Sara Customer". In `TransactionsDataServiceTests` add `GetDetailsAsync_labels_the_buyer_of_a_purchase_as_ZoneMobile` (Buy transaction: `SellerLabel` "Ali Zed", `CustomerLabel` `ShopLabels.ZoneMobile`) and `GetListAsync_labels_the_buyer_of_a_purchase_as_ZoneMobile` (`GetListAsync("all", 0, false)` returns one row with `SellerLabel` "Ali Zed" and `CustomerLabel` `ShopLabels.ZoneMobile`); build both like the neighbouring tests with `AddSeller("Ali", "Zed")` and `AddCustomer("Sara", "Ahmadi")`.
-- Verify: CI green; `Action: #<run_number> — Success`.
-- Done when: all three sites use the Buy override and the tests above pass.
+- Edge cases / error handling: JSON stays valid; no other sample person uses `09120000001`.
+- Tests: none new; existing `SampleDataSeedTests` and `ShopPartyResolverTests` stay green.
+- Verify: CI green; `grep -rn "09115009109" src` lists only the migration, `MigrationChainTests` and `PhoneNumberExtensionsTests`.
+- Done when: no real shop phone remains in sample data or the resolver test.
 - Risk: LOW
 - Confidence: HIGH
 
-## ~~[x] Step 2 — Final validation~~
+## [ ] Step 2 — Document the Zone Mobile shop party
+- Files: modify: `README.md`, `docs/publishing.md`; do not touch: everything else.
+- Symbols: none (docs).
+- Current -> Desired: docs mention only the admin account at first start -> docs also describe the Zone Mobile shop party, its role in transactions and the upgrade behaviour.
+- Change: (a) README `### Development` item 2: append "(Person 1, Zone Mobile, is the shop party)". (b) README `### Production`: change "creates the schema and initial admin account" to "creates the schema, the initial admin account and the Zone Mobile shop party", and add one paragraph after that paragraph: the shop party is a person named Zone Mobile with a Legal seller and a customer record, created by the `SeedZoneMobileShopParty` migration; every sale is recorded with it as seller and every purchase with it as customer, and the transaction pages show "Zone Mobile" for those sides, including existing purchases; migrating an existing database adds the party without changing existing rows; if the party is missing (for example a legacy database baselined without running migrations), recording a sale or purchase fails with a message asking for a customer with first name `Zone` and last name `Mobile` to be added under People > Customers. (c) README publish paragraph (~line 156): "first startup creates the schema and initial admin account" -> "first startup creates the schema, the initial admin account and the Zone Mobile shop party". (d) `docs/publishing.md` second paragraph: "creates the current schema and a single initial admin account (`admin` / `Admin@123`)" -> "creates the current schema, a single initial admin account (`admin` / `Admin@123`) and the Zone Mobile shop party (the seller of every sale and the customer of every purchase)".
+- Depends on: none.
+- Edge cases / error handling: do not print the shop phone number; do not claim the phone can be edited in the UI; keep list numbering and the rest of the text unchanged.
+- Tests: none.
+- Verify: CI green; diff touches only those two files and only the described sentences.
+- Done when: README and publishing guide describe the shop party and the migration behaviour.
+- Risk: LOW
+- Confidence: HIGH
+
+## [ ] Step 3 — Final validation
 - Files: inspect only.
 - Symbols: none.
 - Current -> Desired: unvalidated -> validated.
-- Change: run `graphify update .` and commit the refreshed `graphify-out/graph.json` and `GRAPH_REPORT.md` (AGENTS.md rule); confirm the final-commit CI run is green; confirm with grep that exactly three customer-label expressions contain `TransactionDirection.Buy ? ShopLabels.ZoneMobile`; record the run number in act.md.
-- Depends on: Step 1.
+- Change: run `graphify update .` and commit the refreshed `graphify-out/graph.json` and `GRAPH_REPORT.md` (AGENTS.md rule); confirm the final-commit CI run is green; confirm with grep that `sample-data.json` no longer contains `09115009109` and that README and `docs/publishing.md` each mention "Zone Mobile"; record the run number in act.md.
+- Depends on: Steps 1–2.
 - Edge cases / error handling: report anything unexpected; do not widen scope.
 - Tests: none new.
 - Verify: `Action: #<run_number> — Success`.
@@ -34,6 +47,6 @@
 - Confidence: HIGH
 
 ## Global Definition of Done
-- Steps 1–2 done; only the files named above changed (plus the refreshed graph); CI green (cite run number).
-- Every purchase row shows "Zone Mobile" as its buyer in the transactions list, transaction details and product details; sales labels unchanged.
-- No schema, data, migration, auth or API changes; Conventional Commits; named-file `git add` only.
+- Steps 1–3 done; only the files named above changed (plus the refreshed graph); CI green (cite run number).
+- No real contact details in sample data; README and `docs/publishing.md` describe the Zone Mobile shop party and the migration/upgrade behaviour.
+- No behavior, schema, migration, auth or API changes; Conventional Commits; named-file `git add` only.
