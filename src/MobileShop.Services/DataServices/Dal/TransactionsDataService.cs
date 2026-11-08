@@ -74,9 +74,11 @@ public class TransactionsDataService(
                 : transaction.SellerNavigation.PersonNavigation == null
                     ? "Shop"
                     : transaction.SellerNavigation.PersonNavigation.FirstName + " " + transaction.SellerNavigation.PersonNavigation.LastName,
-            transaction.CustomerNavigation.PersonNavigation == null
-                ? "Shop"
-                : transaction.CustomerNavigation.PersonNavigation.FirstName + " " + transaction.CustomerNavigation.PersonNavigation.LastName)
+            transaction.Direction == TransactionDirection.Buy
+                ? ShopLabels.ZoneMobile
+                : transaction.CustomerNavigation.PersonNavigation == null
+                    ? "Shop"
+                    : transaction.CustomerNavigation.PersonNavigation.FirstName + " " + transaction.CustomerNavigation.PersonNavigation.LastName)
         {
             CustomerId = transaction.CustomerId,
             HasAppleIdFactor = transaction.Direction == TransactionDirection.Sell
@@ -106,9 +108,11 @@ public class TransactionsDataService(
                     : transaction.SellerNavigation.PersonNavigation == null
                         ? "Shop"
                         : transaction.SellerNavigation.PersonNavigation.FirstName + " " + transaction.SellerNavigation.PersonNavigation.LastName,
-                transaction.CustomerNavigation.PersonNavigation == null
-                    ? "Shop"
-                    : transaction.CustomerNavigation.PersonNavigation.FirstName + " " + transaction.CustomerNavigation.PersonNavigation.LastName,
+                transaction.Direction == TransactionDirection.Buy
+                    ? ShopLabels.ZoneMobile
+                    : transaction.CustomerNavigation.PersonNavigation == null
+                        ? "Shop"
+                        : transaction.CustomerNavigation.PersonNavigation.FirstName + " " + transaction.CustomerNavigation.PersonNavigation.LastName,
                 transaction.Direction == TransactionDirection.Sell
                     && transaction.ProductNavigation.AppleIdProfile != null));
 

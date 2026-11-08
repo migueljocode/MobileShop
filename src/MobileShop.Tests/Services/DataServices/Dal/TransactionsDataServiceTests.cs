@@ -280,6 +280,36 @@ public class TransactionsDataServiceTests : RepoTestBase
     }
 
     [Fact]
+    public async Task GetDetailsAsync_labels_the_buyer_of_a_purchase_as_ZoneMobile()
+    {
+        var product = TestDataHelpers.CreateProduct(Context);
+        var seller = AddSeller("Ali", "Zed");
+        var customer = AddCustomer("Sara", "Ahmadi");
+        var transaction = AddTransaction(product, seller.Id, customer.Id, TransactionDirection.Buy, new DateTime(2024, 3, 2));
+
+        var details = await _service.GetDetailsAsync(transaction.Id);
+
+        Assert.NotNull(details);
+        Assert.Equal("Ali Zed", details!.SellerLabel);
+        Assert.Equal(ShopLabels.ZoneMobile, details.CustomerLabel);
+    }
+
+    [Fact]
+    public async Task GetListAsync_labels_the_buyer_of_a_purchase_as_ZoneMobile()
+    {
+        var product = TestDataHelpers.CreateProduct(Context);
+        var seller = AddSeller("Ali", "Zed");
+        var customer = AddCustomer("Sara", "Ahmadi");
+        AddTransaction(product, seller.Id, customer.Id, TransactionDirection.Buy, DateTime.UtcNow);
+
+        var rows = await _service.GetListAsync("all", 0, false);
+
+        var row = Assert.Single(rows);
+        Assert.Equal("Ali Zed", row.SellerLabel);
+        Assert.Equal(ShopLabels.ZoneMobile, row.CustomerLabel);
+    }
+
+    [Fact]
     public async Task GetSellersAsync_and_GetCustomersAsync_return_party_options()
     {
         AddSeller("Ali", "Zed");
