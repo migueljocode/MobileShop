@@ -34,7 +34,7 @@
 - Risk: MEDIUM
 - Confidence: MEDIUM
 
-## [ ] Step 3 — Put the shop phone in appsettings.json
+## ~~[x] Step 3 — Put the shop phone in appsettings.json~~
 - Files: modify: `src/MobileShop.Web/appsettings.json`, `src/MobileShop.Api/appsettings.json`; do not touch: `appsettings.Development.json`.
 - Symbols: `Pdf:ShopPhone`.
 - Current -> Desired: `"ShopPhone": ""` -> `"ShopPhone": "+98 911 500 9109"`.
