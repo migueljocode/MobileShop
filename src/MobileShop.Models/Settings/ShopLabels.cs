@@ -7,5 +7,5 @@ public static class ShopLabels
     public const string ZoneMobile = "Zone Mobile";
 
     /// <summary>The product name shown for every Apple ID, whatever its direction.</summary>
-    public const string AppleIdProduct = "Apple iPhone";
+    public const string AppleIdProduct = "AppleId";
 }

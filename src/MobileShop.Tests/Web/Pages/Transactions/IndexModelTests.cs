@@ -276,7 +276,7 @@ public class IndexModelTests : RepoTestBase
     }
 
     [Fact]
-    public async Task OnGet_labels_every_apple_id_product_as_apple_iphone_in_both_directions()
+    public async Task OnGet_labels_every_apple_id_product_as_AppleId_in_both_directions()
     {
         Context.AppleIds.AddRange(
             new AppleId { ProductId = _tx1.ProductId, Email = "bought@example.com", Password = "pass-1" },
