@@ -1,44 +1,37 @@
-# Plan — People list: hide role-irrelevant columns by filter
+# Plan — People list: fix ugly Phone column alignment
 
 ## Proposed stages
-- [ ] Stage 10 — People list columns: customers hide Seller type; sellers hide National ID; all unchanged
+- [ ] Stage 11 — People list Phone column left-aligned (drop numeric `.num` styling)
 
 ## Reviewer Briefing
-- Pure presentation on `People/Index.cshtml`. Data already omits the other role’s field (`EntityType` null for customers, `NationalId` null for sellers), so the table shows `N/A` noise on filtered views.
-- `type=all` must keep **both** National ID and Seller type (user confirmed fine).
-- No service, model, or API changes required unless a test asserts fixed column headers.
-- Risk is low; only watch colspan/empty-state and sort toolbar (unchanged).
+- Stage 10 column visibility is already done. Remaining complaint: Phone looks sparse/ugly because `th`/`td` use `class="num"`.
+- `.num` in `surfaces.css` sets `text-align: end` (and tabular-nums). Fine for pure counts; phone strings read as identity labels next to Name and should align **start**, same as Name / National ID.
+- Markup-only change on `People/Index.cshtml`. Do not change global `.num` rules (other tables still want end-aligned numbers).
 
-## ~~[x] Step 1 — Conditionally render National ID and Seller type columns~~
-- Files: inspect: `src/MobileShop.Web/Pages/People/Index.cshtml`, `Index.cshtml.cs` (`Type`, `PersonRow`); modify: `Index.cshtml` only; do not touch: data service, create pages, Api.
-- Symbols: `Model.Type` (`"all"` | `"customers"` | `"sellers"`); `PersonRow.NationalId`, `PersonRow.EntityType`.
-- Current -> Desired:
-  - `?type=customers` → columns: Role, Name, Phone, **National ID**, Purchased, Details — **no** Seller type.
-  - `?type=sellers` → columns: Role, Name, Phone, **Seller type**, Sold, Details — **no** National ID.
-  - `?type=all` (or default) → all columns as today: Role, Name, Phone, National ID, Seller type, Purchases / sales, Details.
-- Change: In thead and each tbody row, wrap the National ID `<th>`/`<td>` in `@if (Model.Type is "all" or "customers")` and the Seller type `<th>`/`<td>` in `@if (Model.Type is "all" or "sellers")`. Keep `N/A` fallbacks for the `all` view when a field is null.
-- Depends on: none.
-- Edge cases: empty list still uses `_EmptyState` (no table); Activity column label already switches (Purchased / Sold / Purchases / sales) — leave as is.
-- Tests: none required (markup-only). Optional snapshot/page test only if one already pins header text.
-- Verify: open the three URLs from the report; column sets match Desired; `all` still shows both role-specific columns.
-- Done when: customers view has no Seller type; sellers view has no National ID; all unchanged.
+## [ ] Step 1 — Remove `.num` from People Phone header and cells
+- Files: inspect: `src/MobileShop.Web/Pages/People/Index.cshtml`, `src/MobileShop.Web/wwwroot/css/surfaces.css` (`.num`); modify: `Index.cshtml` only; do not touch: global CSS, other pages’ `.num` usage.
+- Symbols: Phone `<th class="num">`, `<td dir="auto" class="num">`.
+- Current -> Desired: Phone column is start-aligned under its header, visually consistent with Name; no large empty gap to the left of the digits.
+- Change: Remove `class="num"` from the Phone `<th>` and from the Phone `<td>`. Keep `dir="auto"` on the phone cell for RTL-friendly numbers. Leave Purchased/Sold activity counts without `.num` unless they already use it (they currently do not).
+- Depends on: none (Stage 10 already merged for column visibility).
+- Edge cases: `type=all|customers|sellers` all share the same Phone cells; long numbers still wrap/overflow per existing table rules.
+- Tests: none (markup-only).
+- Verify: `/People?type=customers`, `type=sellers`, `type=all` — Phone values sit under the Phone header on the start edge, not flush right.
+- Done when: Phone column no longer uses end alignment; other columns unchanged.
 - Risk: LOW
 - Confidence: HIGH
 
-## ~~[x] Step 2 — Final validation~~
+## [ ] Step 2 — Final validation
 - Files: inspect only.
-- Current -> Desired: CI green if a docs-only/markup push still runs checks; otherwise note `Action: unavailable` when paths-ignore applies.
-- Depends on: Step 1.
-- Verify: manual three-filter check; cite CI run if any.
+- Verify: manual three filters; CI if the push triggers workflows.
 - Done when: Global Definition of Done met.
 - Risk: LOW
 - Confidence: HIGH
 
 ## Global Definition of Done
-- Customers filter: no Seller type column.
-- Sellers filter: no National ID column.
-- All filter: both columns remain.
-- Only `Index.cshtml` changed for this stage; Conventional Commit; Job B after the single step commit.
+- People list Phone column is start-aligned (no `class="num"` on phone header/cells).
+- Customers/sellers/all filters unchanged aside from Phone alignment.
+- Only `Index.cshtml` touched for this stage.
 
 ## Execution notes
-One step → one commit → STOP for Job B. Actor must not edit plan/audit/TODO. After Reviewer APPROVES, Planner adds Stage 10 to `.agents/TODO.md` unchecked; Actor starts Step 1 only. Stages 8–9 (model uniqueness / person reuse) remain separate proposed work and are not blocked by this stage.
+One step → one commit → STOP for Job B. After Reviewer APPROVES, Planner adds Stage 11 to `.agents/TODO.md` unchecked; Actor starts Step 1 only.
