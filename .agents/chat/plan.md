@@ -1,92 +1,86 @@
-# Plan — Store the shop phone in appsettings.json and ensure the Zone Mobile shop party at startup
+# Plan — Glass UI polish: disabled Add button, list Identifier, Details fits, Edit fits
+
+## Proposed stages
+- [ ] Stage 7 — Glass UI polish (disabled Add accent, Identifier cell, Details compatible phones, Edit fits list)
 
 ## Reviewer Briefing
-- Requirement (user): use the shop's actual phone number `+98 911 500 9109`, stored in `appsettings.json`.
-- Verified: `appsettings.json` (Web and Api) already has `Pdf:ShopPhone` (empty), bound to `PdfSettings.ShopPhone` and printed in the PDF header. A migration is static SQL and cannot read configuration, so the hard-coded `09115009109` in `SeedZoneMobileShopParty` cannot come from appsettings. The Zone Mobile party must instead be ensured by a startup step. `Program`/`ConfigureApp` already runs database steps for Production (`EnsureCurrent` + `EnsureAdminUser`) and `TryRunDatabaseCommand` runs `--migrate-database`; the Api project does no database startup; `IBaseRepo` has `AddAsync`/`UpdateAsync`.
-- Design: new scoped `IShopPartyDataService.EnsureAsync()` reads `PdfSettings.ShopPhone`, creates the Person Zone Mobile with that phone when missing (and when a phone is configured), keeps the phone equal to the configured value when the person exists, then reuses `ShopPartyResolver.ResolveAsync` to get-or-create its Legal seller and customer. It is called after the database is ready in Production startup and in `--migrate-database`, both idempotent. Development is unchanged (sample data provides Person 1).
-- ASSUMPTIONS (user to confirm): A1 reuse `Pdf:ShopPhone` as the single source (also printed on factor PDFs) rather than a new setting; set in both `src/MobileShop.Web/appsettings.json` and `src/MobileShop.Api/appsettings.json`. A2 the number is stored exactly as written, `+98 911 500 9109` (16 chars, within the 20-char limit). A3 the already-pushed migration `SeedZoneMobileShopParty` becomes a no-op (kept, not deleted, so migration history stays valid wherever it may already have run). A4 a configured phone overwrites the existing shop person's phone. A5 `PhoneNumberExtensions.ToRtlDisplayPhone` was written for local `0911 500 9109`; how the `+98` prefix renders in the PDF header is not verified here and needs a visual check.
-- Risk: Step 2 (startup wiring, untestable by unit tests) and Step 4 (edits an applied-migration class and its tests) are MEDIUM; the rest LOW.
-- Out of scope: People edit pages, changing `ToRtlDisplayPhone`, Api startup, Development startup, repointing rows.
+- Step 1 (CSS disabled primary): LOW risk but touches shared `controls.css`; wrong selector could change every disabled primary on the site. Must mirror the existing `.share-editor__save:disabled` accent mix so the disabled Add button is light teal/green, not Bootstrap blue.
+- Step 2 (Identifier): MEDIUM confidence until the exact malformation is confirmed in markup/CSS. Strong hypothesis: `td.num` + `"Barcode: " + barcode` mixes a label with a hex string under numeric styling. Fix is scoped to glass list projection and/or not applying `.num` when Identifier is not pure numeric.
+- Step 3 (Details): HIGH confidence bug — glass branch of `GetDetailsAsync` never sets `CompatibleModels` (or `Notes`), and `Details.cshtml` only renders Compatible models when `Type == "Case"`. Straightforward projection + markup.
+- Step 4 (Edit): HIGH risk for scope creep. Create uses chip list + modal (`create-glass-fits.js`); Edit still uses a non-working multi `<select>`. Prefer reuse of create markup/JS patterns on Edit for Glass only; do not redesign Case in this stage unless required for shared partial safety.
+- Do not touch `src/MobileShop.Api`, auth, DB init, or glass create/save business rules beyond display.
 
-## ~~[x] Step 1 — Shop party data service and its tests~~
-- Files: inspect: `src/MobileShop.Services/DataServices/Interfaces/IAccountDataService.cs`, `src/MobileShop.Services/DataServices/Dal/AccountDataService.cs` (logger/ctor style), `src/MobileShop.Services/DataServices/Shared/ShopPartyResolver.cs`, `src/MobileShop.Services/PDF/Settings/PdfSettings.cs`, `src/MobileShop.Services/ServiceCollectionExtensions.cs`; create: `src/MobileShop.Services/DataServices/Interfaces/IShopPartyDataService.cs`, `src/MobileShop.Services/DataServices/Dal/ShopPartyDataService.cs`, `src/MobileShop.Tests/Services/DataServices/Dal/ShopPartyDataServiceTests.cs`; modify: `src/MobileShop.Services/ServiceCollectionExtensions.cs`; do not touch: `ShopPartyResolver.cs`.
-- Symbols: new `IShopPartyDataService.EnsureAsync()` returning `Task`; new `ShopPartyDataService(IBaseRepo<Person> people, IBaseRepo<Seller> sellers, IBaseRepo<Customer> customers, IOptions<PdfSettings> options, ILogger<ShopPartyDataService> logger)`.
-- Current -> Desired: nothing ensures the shop party outside the migration -> one idempotent service driven by `Pdf:ShopPhone`.
-- Change: `phone = options.Value.ShopPhone?.Trim()`. Find the person with `people.FindAsync(p => p.FirstName + " " + p.LastName == ShopLabels.ZoneMobile)`. Missing: if `phone` is blank, log a warning that the shop phone is not configured and return; otherwise add `Person { FirstName = "Zone", LastName = "Mobile", PhoneNumber = phone, Notes = "The shop" }` and, if `AddAsync` returns `<= 0`, log a warning and return. Present: if `phone` is not blank and differs from `PhoneNumber`, set it and `UpdateAsync`. Finally `var shop = await ShopPartyResolver.ResolveAsync(people, sellers, customers);` and log a warning when `shop.Error` is not null. Register `services.AddScoped<IShopPartyDataService, ShopPartyDataService>();` in the common section of `ServiceCollectionExtensions` (next to the `IBaseRepo<>` registration, outside the `UseApi` branches).
+## [ ] Step 1 — Disabled primary Add button uses accent (light green/teal), not Bootstrap blue
+- Files: inspect: `src/MobileShop.Web/wwwroot/css/controls.css`, `src/MobileShop.Web/wwwroot/css/overlays.css` (`.share-editor__save:disabled`); modify: `src/MobileShop.Web/wwwroot/css/controls.css`; do not touch: page markup for the modal button class (`btn btn-primary` stays).
+- Symbols: `.btn-primary`, `.btn-success` block already sets `--bs-btn-bg: var(--accent)`; Bootstrap’s default disabled primary stays blue because `--bs-btn-disabled-*` is unset in controls.
+- Current -> Desired: disabled `#addCompatiblePhoneBtn` (and any other `.btn-primary:disabled` / `.btn-success:disabled`) renders with light accent fill (same approach as `.share-editor__save:disabled`: `color-mix(in srgb, var(--accent) 45%, white)` for bg/border, dark readable ink), not light blue.
+- Change: in the buttons section of `controls.css`, after the enabled `.btn-primary, .btn-success` rules, add disabled overrides for `.btn-primary:disabled`, `.btn-primary.disabled`, `.btn-success:disabled`, `.btn-success.disabled` setting `--bs-btn-disabled-color`, `--bs-btn-disabled-bg`, `--bs-btn-disabled-border-color` (and the non-variable `color`/`background-color`/`border-color` if Bootstrap still wins) to match the share-editor disabled accent treatment. Keep opacity behavior consistent with other disabled controls.
 - Depends on: none.
-- Edge cases / error handling: never throw for missing configuration; follow the logging and primary-constructor style of `AccountDataService`.
-- Tests: `ShopPartyDataServiceTests : RepoTestBase`, `[Collection("MobileShop-Dal-Serial")]`, options via `Options.Create(new PdfSettings { ShopPhone = ... })`, `NullLogger<ShopPartyDataService>.Instance`: (1) person missing + phone configured -> one Person Zone/Mobile with that phone, one Legal seller, one customer; (2) person missing + blank phone -> nothing created; (3) person exists with another phone -> phone updated to the configured one, still one seller and one customer; (4) person exists + blank phone -> phone unchanged; (5) calling twice leaves exactly one person, seller and customer.
-- Verify: CI green; `Action: #<run_number> — Success`.
-- Done when: the service, its registration and the five tests exist and pass.
+- Edge cases / error handling: dark theme — accent mix must remain readable (share-editor already pins dark ink `#06201C`); do not change outline/secondary disabled looks.
+- Tests: none (CSS-only).
+- Verify: open Create glass → Add phone modal with manufacturer/model empty so Add stays disabled; visual check that the button is light teal/green, not blue. Optional: same check on any other page with a disabled primary.
+- Done when: disabled primary Add matches accent family; enabled primary unchanged.
 - Risk: LOW
 - Confidence: HIGH
 
-## ~~[x] Step 2 — Run it at startup and in `--migrate-database`~~
-- Files: inspect: `src/MobileShop.Web/Extensions/WebApplicationBuilderExtensions.cs`; modify: `src/MobileShop.Web/Extensions/WebApplicationBuilderExtensions.cs`; do not touch: the Api project, Development branch.
-- Symbols: `WebApplicationBuilderExtensions.TryRunDatabaseCommand`, `WebApplicationBuilderExtensions.ConfigureApp` (Production `else` branch); new private static helper `EnsureShopParty(IServiceProvider services)`.
-- Current -> Desired: only the admin user is ensured after the database is ready -> the shop party is ensured too.
-- Change: add `private static void EnsureShopParty(IServiceProvider services) => services.GetRequiredService<IShopPartyDataService>().EnsureAsync().GetAwaiter().GetResult();`. In `TryRunDatabaseCommand`, call it with `scope.ServiceProvider` right after the `Created` admin step and before the console message (for every status). In `ConfigureApp`'s Production branch, call it after the `EnsureCurrent` admin step (every start). Do not call it in the Development branch.
-- Depends on: Step 1.
-- Edge cases / error handling: `EnsureCurrent` still throws first on an outdated schema, so the service never runs against an old schema.
-- Tests: none (startup code is not unit-tested in this repo; behavior is covered by Step 1).
-- Verify: CI green (build).
-- Done when: both call sites exist and the Development branch is untouched.
-- Risk: MEDIUM
+## [ ] Step 2 — Products list Identifier column for glass is not malformed
+- Files: inspect: `src/MobileShop.Web/Pages/Products/Index.cshtml` (Identifier `<td class="num">`), `src/MobileShop.Web/wwwroot/css/surfaces.css` (`.num` / `td.num`), glass projection in `ProductsDataService.GetInventoryAsync` (~lines 113–126); modify: only what the inspection requires (prefer Index markup and/or glass projection string; avoid broad CSS changes).
+- Symbols: `ProductListItemViewModel.Identifier`; glass `project` lambda `"Barcode: " + product.Barcode`; `td.num`.
+- Current -> Desired: Identifier cells for glass (and other barcode types if the same bug appears) render a clear, correctly spaced label+value (or barcode-only if that matches product convention), without numeric-class distortion, missing space, or broken layout under `?type=glass&sortBy=name&sortDirection=asc`.
+- Change: (1) Confirm in browser/devtools whether the malformation is missing space, `.num` LTR/font on mixed text, truncation, or something else. (2) If `.num` is the cause, stop applying `class="num"` when Identifier is not a pure number (e.g. only for IMEI-style pure digits, or drop `.num` for barcode-prefixed values). (3) Ensure the glass projection string is exactly `"Barcode: " + product.Barcode` (space after colon) consistent with other barcode product types. Do not change glass product naming (`GlassModelNaming`).
+- Depends on: none (parallel-safe with Step 1).
+- Edge cases / error handling: empty barcode; RTL `dir="auto"` still readable; sort by identifier still works on the string.
+- Tests: none required unless an existing list test asserts Identifier text — then update expectation only if the string format intentionally changes.
+- Verify: `/Products?type=glass&sortBy=name&sortDirection=asc` shows four glass rows with readable Identifier values aligned under the column; no visual glitch.
+- Done when: user-visible Identifier for glass is correct and consistent.
+- Risk: LOW
+- Confidence: MEDIUM (exact malformation not re-checked in a live browser in this plan pass)
+
+## [ ] Step 3 — Glass Details shows compatible phones (and notes)
+- Files: inspect: `ProductsDataService.GetDetailsAsync` glass branch (~205–221), Case branch for pattern, `ProductDetailsViewModel.CompatibleModels` / `Notes`, `Details.cshtml` Case-only Compatible block; modify: `src/MobileShop.Services/DataServices/Dal/ProductsDataService.cs`, `src/MobileShop.Web/Pages/Products/Details.cshtml`; do not touch: Api, create path.
+- Symbols: `GetDetailsAsync`; `ProductDetailsViewModel`; `GlassProfile.ModelFits`; includes already list `"GlassProfile.ModelFits.ModelNavigation"`.
+- Current -> Desired: `/Products/Details?id={glassId}&type=glass` lists each compatible phone model name (same shape as Case). Notes from `GlassProfile.Notes` when present.
+- Change: (1) Glass branch of `GetDetailsAsync`: object initializer like Case — `CompatibleModels = product.GlassProfile!.ModelFits.Where(fit => !fit.IsDeleted).Select(fit => fit.ModelNavigation.Name).ToList()`, `Notes = product.GlassProfile.Notes` (or existing normalize helper if Case uses one). Prefer manufacturer+model labels only if Case already does; Case currently uses `ModelNavigation.Name` only — match that unless Create’s selected-fit labels are required for parity. (2) In `Details.cshtml`, extend the Compatible models block from `Type == "Case"` to Case **or** Glass (or duplicate a small Glass block). Keep empty → `N/A`.
+- Depends on: none for data; markup depends on projection.
+- Edge cases / error handling: soft-deleted fits excluded; no fits → N/A; null GlassProfile should not happen for type=glass but keep null-safe access consistent with Case.
+- Tests: if there is an existing details/service test for Case CompatibleModels, add a parallel glass assertion; otherwise no new test file required for this stage.
+- Verify: open Details for a glass that was created with multiple compatible phones (e.g. id 18 from the report); list shows those model names; Notes line correct.
+- Done when: Details glass page shows compatible phones; Case still works.
+- Risk: LOW
+- Confidence: HIGH
+
+## [ ] Step 4 — Edit glass uses functioning compatible-phones list (not old multi-select)
+- Files: inspect: `CreateGlass.cshtml` + `wwwroot/js/create-glass-fits.js` + glass-fit CSS in `controls.css`, `Edit.cshtml` / `Edit.cshtml.cs`, `_ProductEditForm.cshtml` Glass (and Case) blocks, `ProductsDataService` update path for `CompatibleModels` / `SynchronizeGlassModelFits`; modify: `_ProductEditForm.cshtml` (Glass section), `Edit.cshtml` Scripts if needed, `Edit.cshtml.cs` handlers as required, optionally extract or reuse JS; do not touch: Api, create save rules, Case section unless a shared partial forces a minimal safe tweak.
+- Symbols: `Product.CompatibleModels` on edit model; `CompatibleModelOptions`; `SynchronizeGlassModelFits`; create’s `glassFitList` / `Input.CompatibleModelIds` pattern.
+- Current -> Desired: Edit glass page shows the same style of compatible-phones list as Create (list of selected fits + Add phone modal with manufacturer/model + optional inline create), posts the selected model IDs, and save persists via existing update + `SynchronizeGlassModelFits`. Old `<select multiple>` for Glass is removed.
+- Change: Replace the Glass block in `_ProductEditForm.cshtml` with markup parallel to CreateGlass’s fit list (list + template + empty state + open-modal button). Wire scripts: either include `create-glass-fits.js` with edit-friendly element IDs, or a thin `edit-glass-fits.js` that reuses the same DOM contracts and posts `Product.CompatibleModels` (or the name the edit handler already binds). Ensure `Edit.cshtml.cs` exposes manufacturers, model-by-manufacturer handler (mirror CreateGlass `OnGetModelsAsync` / create manufacturer/model posts if edit must add new phones), and that OnPost maps the list into `CompatibleModels` for the existing update path. Pre-populate selected fits from `product.GlassProfile.ModelFits` (already partially loaded in EditModel). Keep Notes textarea.
+- Depends on: Step 3 optional (shared understanding of fit labels); not blocked by 1–2.
+- Edge cases / error handling: glass with zero fits; remove last fit (validation: at least one compatible model if create enforces that — match create/update service rules); cancel modal; antiforgery on create-manufacturer/model posts from edit; do not break Case multi-select in this step.
+- Tests: manual save round-trip; extend service test only if update CompatibleModels lacks coverage.
+- Verify: Edit a glass → see current fits as a list (not a multi-select) → add/remove a phone → Save changes → Details (after Step 3) shows the new set; `dotnet` CI green.
+- Done when: Edit glass fits UI works end-to-end; old multi-select gone for Glass.
+- Risk: HIGH (UI + handlers + binding)
 - Confidence: MEDIUM
 
-## ~~[x] Step 3 — Put the shop phone in appsettings.json~~
-- Files: modify: `src/MobileShop.Web/appsettings.json`, `src/MobileShop.Api/appsettings.json`; do not touch: `appsettings.Development.json`.
-- Symbols: `Pdf:ShopPhone`.
-- Current -> Desired: `"ShopPhone": ""` -> `"ShopPhone": "+98 911 500 9109"`.
-- Change: edit that one value in both files.
-- Depends on: none (Step 2 consumes it).
-- Edge cases / error handling: JSON stays valid; no test reads these files (checked: none reference `appsettings`).
-- Tests: none.
-- Verify: CI green.
-- Done when: both files carry the number.
-- Risk: LOW
-- Confidence: HIGH
-
-## ~~[x] Step 4 — Make the migration a no-op and remove its data tests~~
-- Files: modify: `src/MobileShop.Dal/Migrations/20261107120000_SeedZoneMobileShopParty.cs`, `src/MobileShop.Tests/Dal/EfStructures/MigrationChainTests.cs`, `src/MobileShop.Tests/Dal/EfStructures/LegacyMoneyUpgradeTests.cs`; do not touch: the Designer, the snapshot, the migration id.
-- Symbols: `SeedZoneMobileShopParty.Up/Down`; `MigrationChainTests.Chain_creates_the_Zone_Mobile_shop_party_on_an_empty_database`, `Zone_Mobile_migration_does_not_duplicate_an_existing_shop_person`, helper `Count`; the People expectation in `LegacyMoneyUpgradeTests` (~line 68).
-- Current -> Desired: the migration inserts the party with a hard-coded phone -> the migration changes nothing; the number lives only in appsettings.json.
-- Change: replace both method bodies with empty bodies and a class XML summary: "Intentionally empty. The Zone Mobile shop party is ensured at startup from `Pdf:ShopPhone` (see `ShopPartyDataService`); a migration cannot read configuration. Kept so migration history stays valid." Delete the two migration data tests and the `Count` helper from `MigrationChainTests` (keep the migration list entry and every other test). In `LegacyMoneyUpgradeTests` revert the expectation to `Assert.Equal(beforeCounts["People"], ...)` and remove the added comment line.
-- Depends on: Steps 1–3.
-- Edge cases / error handling: the Designer and `[Migration]` id stay, so `Migrations_are_discovered_in_order` and `Snapshot_matches_the_current_model` are unaffected.
-- Tests: the remaining migration tests; no new ones.
-- Verify: CI green including `MigrationChainTests` and `LegacyMoneyUpgradeTests`; `grep -rn "09115009109" src` returns only `PhoneNumberExtensionsTests`.
-- Done when: the migration is a no-op and no source file outside that test contains the old number.
-- Risk: MEDIUM
-- Confidence: HIGH
-
-## ~~[x] Step 5 — Update the docs~~
-- Files: modify: `README.md`, `docs/publishing.md`; do not touch: everything else.
-- Symbols: none (docs).
-- Current -> Desired: docs say the `SeedZoneMobileShopParty` migration creates the shop party and "migrating an existing database adds the party" -> docs say startup and `--migrate-database` ensure the party using `Pdf:ShopPhone` from appsettings.json.
-- Change: in README `### Production` replace the sentence naming the migration and the sentence about migrating an existing database with: the Zone Mobile shop party (a person with a Legal seller and a customer record) is ensured at every Production startup and by `--migrate-database`, using the shop phone from `Pdf:ShopPhone` in `appsettings.json` (which is also printed on factor PDFs); if `Pdf:ShopPhone` is empty and the party does not exist, recording a sale or purchase fails with a message asking for a customer with first name `Zone` and last name `Mobile` under People > Customers. Keep the other README and `docs/publishing.md` Zone Mobile sentences, adjusting "created" to "ensured" where needed. Do not print the phone number in the docs.
-- Depends on: Steps 1–4.
-- Edge cases / error handling: keep list numbering and surrounding text; mention that Development uses sample data instead.
-- Tests: none.
-- Verify: diff touches only those two files; docs-only pushes start no CI run (`paths-ignore`), report `Action: unavailable`.
-- Done when: README and publishing guide match the new behavior.
-- Risk: LOW
-- Confidence: HIGH
-
-## ~~[x] Step 6 — Final validation~~
-- Files: inspect only.
+## [ ] Step 5 — Final validation
+- Files: inspect only (+ `graphify update .` if code changed).
 - Symbols: none.
-- Current -> Desired: unvalidated -> validated.
-- Change: run `graphify update .` and commit the refreshed `graphify-out/graph.json` and `GRAPH_REPORT.md`; confirm the final-commit CI run is green; confirm `grep -rn "+98 911 500 9109" src` lists only the two appsettings files; record the run number in act.md.
-- Depends on: Steps 1–5.
-- Edge cases / error handling: report anything unexpected; do not widen scope.
-- Tests: none new.
-- Verify: `Action: #<run_number> — Success`.
-- Done when: the Global Definition of Done is met.
+- Current -> Desired: all four user issues closed; CI green.
+- Change: run full build/test per project rules when user requests local gate or after push; `graphify update .` and commit graph artifacts if the actor’s last code commit did not; record Action run number.
+- Depends on: Steps 1–4.
+- Edge cases: none beyond reporting leftovers.
+- Tests: solution test suite.
+- Verify: `Action: #<run_number> — Success`; manual checks for the four bullets in the user report.
+- Done when: Global Definition of Done met.
 - Risk: LOW
 - Confidence: HIGH
 
 ## Global Definition of Done
-- Steps 1–6 done; only the files named above changed (plus the refreshed graph); CI green (cite run number).
-- The shop phone `+98 911 500 9109` is stored only in the two `appsettings.json` files; Production startup and `--migrate-database` ensure the Zone Mobile party from it; the old migration is a no-op.
-- No schema, auth, API or Development-startup changes; Conventional Commits; named-file `git add` only.
+- Disabled primary Add on Create glass modal is light accent (green/teal), not light blue.
+- Products glass list Identifier column is readable and correctly formatted.
+- Glass Details shows compatible phone model names (and notes when set).
+- Glass Edit uses a working fit list + modal (Create-style), not the old multi-select; save persists fits.
+- Only files named in steps changed (plus graphify outputs if updated); no Api/auth/DB-init changes; Conventional Commits; CI green with cited run number.
+
+## Execution notes
+One step → one commit → STOP for Job B. Actor must not edit plan/audit/TODO. After Reviewer APPROVES this plan (and proposed Stage 7), Planner copies Stage 7 into `.agents/TODO.md` unchecked; Actor starts Step 1 only.
