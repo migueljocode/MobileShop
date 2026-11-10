@@ -8,7 +8,7 @@
 - `.num` in `surfaces.css` sets `text-align: end` (and tabular-nums). Fine for pure counts; phone strings read as identity labels next to Name and should align **start**, same as Name / National ID.
 - Markup-only change on `People/Index.cshtml`. Do not change global `.num` rules (other tables still want end-aligned numbers).
 
-## [ ] Step 1 — Remove `.num` from People Phone header and cells
+## ~~[x] Step 1 — Remove `.num` from People Phone header and cells~~
 - Files: inspect: `src/MobileShop.Web/Pages/People/Index.cshtml`, `src/MobileShop.Web/wwwroot/css/surfaces.css` (`.num`); modify: `Index.cshtml` only; do not touch: global CSS, other pages’ `.num` usage.
 - Symbols: Phone `<th class="num">`, `<td dir="auto" class="num">`.
 - Current -> Desired: Phone column is start-aligned under its header, visually consistent with Name; no large empty gap to the left of the digits.

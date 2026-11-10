@@ -60,7 +60,7 @@ else
             <tr>
                 <th scope="col">Role</th>
                 <th scope="col">Name</th>
-                <th scope="col" class="num">Phone</th>
+                <th scope="col">Phone</th>
                 @if (Model.Type is "all" or "customers")
                 {
                     <th scope="col">National ID</th>
@@ -79,7 +79,7 @@ else
                 <tr>
                     <td>@person.Role</td>
                     <td dir="auto">@person.Name</td>
-                    <td dir="auto" class="num">@person.PhoneNumber</td>
+                    <td dir="auto">@person.PhoneNumber</td>
                     @if (Model.Type is "all" or "customers")
                     {
                         <td dir="auto">@(person.NationalId ?? "N/A")</td>
