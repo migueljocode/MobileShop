@@ -700,23 +700,13 @@ public class ProductsDataService(
         if (!TryComputeFinishedPrice(input.Price, input.ProfitPercent, input.ProfitAmount, out var finishedPrice))
             return new ServiceResult(false, "The price is too large.", nameof(CreateGlassInputModel.Price), null);
 
-        var compatibleManufacturer = await manufacturers.FindAsync(input.CompatibleManufacturerId);
-        if (compatibleManufacturer is null)
-            return new ServiceResult(false, "Selected compatible phone manufacturer not found.", nameof(CreateGlassInputModel.CompatibleManufacturerId), null);
-
         var glassManufacturer = await manufacturers.FindAsync(input.GlassManufacturerId);
         if (glassManufacturer is null)
             return new ServiceResult(false, "Selected glass manufacturer not found.", nameof(CreateGlassInputModel.GlassManufacturerId), null);
 
-        var compatibleModel = await models.FindAsync(m =>
-            m.Id == input.CompatibleModelId &&
-            m.ManufacturerId == compatibleManufacturer.Id);
-        if (compatibleModel is null)
-            return new ServiceResult(false, "Selected compatible model not found for this manufacturer.", nameof(CreateGlassInputModel.CompatibleModelId), null);
-
-        var compatibleCategory = await categories.FindAsync(compatibleModel.CategoryId);
-        if (compatibleCategory is null || compatibleCategory.Name is not ("Phone" or "Tablet" or "SmartWatch"))
-            return new ServiceResult(false, "Selected model cannot be used for a glass product.", nameof(CreateGlassInputModel.CompatibleModelId), null);
+        var compatibleModels = await ResolveCompatibleGlassModelsAsync(input.CompatibleModelIds);
+        if (compatibleModels.Failure is not null)
+            return compatibleModels.Failure;
 
         var glassCategory = await categories.FindAsync(c => c.Name == "Glass");
         if (glassCategory is null)
@@ -726,7 +716,7 @@ public class ProductsDataService(
         if (purchaseParties.Failure is not null)
             return purchaseParties.Failure;
 
-        var glassModelName = compatibleModel.Name + " Glass";
+        var glassModelName = GlassModelNaming.Build(compatibleModels.Models.Select(model => model.Name).ToList());
         var glassModel = await models.FindAsync(m =>
             m.ManufacturerId == glassManufacturer.Id &&
             m.CategoryId == glassCategory.Id &&
@@ -760,12 +750,15 @@ public class ProductsDataService(
                 ProductNavigation = product,
             };
 
-            glass.ModelFits.Add(new GlassModelFit
+            foreach (var compatibleModel in compatibleModels.Models)
             {
-                GlassNavigation = glass,
-                ModelId = compatibleModel.Id,
-                ModelNavigation = compatibleModel,
-            });
+                glass.ModelFits.Add(new GlassModelFit
+                {
+                    GlassNavigation = glass,
+                    ModelId = compatibleModel.Id,
+                    ModelNavigation = compatibleModel,
+                });
+            }
 
             product.GlassProfile = glass;
             batch.Add(product);
@@ -792,8 +785,35 @@ public class ProductsDataService(
             return new ServiceResult(false, "The glass products could not be saved. Check the details and try again.", null, null);
         }
 
-        Logger.LogInformation("Added glass batch of {Count} products for GlassModelId={GlassModelId} and CompatibleModelId={CompatibleModelId}", input.Count, glassModel.Id, compatibleModel.Id);
+        Logger.LogInformation("Added glass batch of {Count} products for GlassModelId={GlassModelId} and {CompatibleModelCount} compatible phones", input.Count, glassModel.Id, compatibleModels.Models.Count);
         return new ServiceResult(true, null, null, batch[0].Id);
+    }
+
+    /// <summary>
+    /// Resolves the phones a glass fits. Every id must be a live Phone, Tablet or SmartWatch model; the
+    /// models may belong to any manufacturer. Duplicate ids collapse into one fit.
+    /// </summary>
+    private async Task<(List<Model> Models, ServiceResult? Failure)> ResolveCompatibleGlassModelsAsync(IReadOnlyCollection<int> requestedIds)
+    {
+        var ids = requestedIds.Distinct().ToList();
+        if (ids.Count == 0)
+            return (new List<Model>(), new ServiceResult(false, "Add at least one compatible phone.", nameof(CreateGlassInputModel.CompatibleModelIds), null));
+
+        var resolved = new List<Model>(ids.Count);
+        foreach (var id in ids)
+        {
+            var model = await models.FindAsync(m => m.Id == id);
+            if (model is null)
+                return (new List<Model>(), new ServiceResult(false, "One or more selected compatible phones were not found.", nameof(CreateGlassInputModel.CompatibleModelIds), null));
+
+            var category = await categories.FindAsync(model.CategoryId);
+            if (category is null || category.Name is not ("Phone" or "Tablet" or "SmartWatch"))
+                return (new List<Model>(), new ServiceResult(false, "Selected model cannot be used for a glass product.", nameof(CreateGlassInputModel.CompatibleModelIds), null));
+
+            resolved.Add(model);
+        }
+
+        return (resolved, null);
     }
 
     /// <inheritdoc />

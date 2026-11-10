@@ -1570,7 +1570,7 @@ public class ProductsDataServiceTests : RepoTestBase
         var input = new MobileShop.Models.ViewModels.Web.BindModels.CreateGlassInputModel
         {
             SellerId = supplier.Id,
-            CompatibleManufacturerId = 1, CompatibleModelId = phoneModel.Id, GlassManufacturerId = 1, Price = 100, ProfitPercent = 25, Count = 3
+            CompatibleModelIds = [phoneModel.Id], GlassManufacturerId = 1, Price = 100, ProfitPercent = 25, Count = 3
         };
 
         var result = await _service.CreateGlassesAsync(input);
@@ -1608,8 +1608,7 @@ public class ProductsDataServiceTests : RepoTestBase
         var result = await _service.CreateGlassesAsync(new MobileShop.Models.ViewModels.Web.BindModels.CreateGlassInputModel
         {
             SellerId = 1,
-            CompatibleManufacturerId = 1,
-            CompatibleModelId = phoneModel.Id,
+            CompatibleModelIds = [phoneModel.Id],
             GlassManufacturerId = 1,
             Price = 10,
             ProfitPercent = 200,
@@ -1632,7 +1631,7 @@ public class ProductsDataServiceTests : RepoTestBase
         var result = await _service.CreateGlassesAsync(new MobileShop.Models.ViewModels.Web.BindModels.CreateGlassInputModel
         {
             SellerId = 1,
-            CompatibleManufacturerId = 1, CompatibleModelId = phoneModel.Id, GlassManufacturerId = 1, Price = 100, ProfitPercent = 50, ProfitAmount = 20, Count = 2
+            CompatibleModelIds = [phoneModel.Id], GlassManufacturerId = 1, Price = 100, ProfitPercent = 50, ProfitAmount = 20, Count = 2
         });
 
         Assert.True(result.Succeeded);
@@ -1648,7 +1647,7 @@ public class ProductsDataServiceTests : RepoTestBase
         var one = await _service.CreateGlassesAsync(new MobileShop.Models.ViewModels.Web.BindModels.CreateGlassInputModel
         {
             SellerId = 1,
-            CompatibleManufacturerId = 1, CompatibleModelId = phoneModel.Id, GlassManufacturerId = 1, Price = 10, Count = 1
+            CompatibleModelIds = [phoneModel.Id], GlassManufacturerId = 1, Price = 10, Count = 1
         });
         Assert.True(one.Succeeded);
         Assert.Single(await Context.Products.ToListAsync());
@@ -1656,7 +1655,7 @@ public class ProductsDataServiceTests : RepoTestBase
         var fiveHundredAndOne = await _service.CreateGlassesAsync(new MobileShop.Models.ViewModels.Web.BindModels.CreateGlassInputModel
         {
             SellerId = 1,
-            CompatibleManufacturerId = 1, CompatibleModelId = phoneModel.Id, GlassManufacturerId = 1, Price = 10, Count = 501
+            CompatibleModelIds = [phoneModel.Id], GlassManufacturerId = 1, Price = 10, Count = 501
         });
         Assert.True(fiveHundredAndOne.Succeeded);
         Assert.Equal(502, await Context.Products.CountAsync());
@@ -1669,7 +1668,7 @@ public class ProductsDataServiceTests : RepoTestBase
 
         var result = await _service.CreateGlassesAsync(new MobileShop.Models.ViewModels.Web.BindModels.CreateGlassInputModel
         {
-            CompatibleManufacturerId = 1, CompatibleModelId = phoneModel.Id, GlassManufacturerId = 1, Price = 10, Count = 0
+            CompatibleModelIds = [phoneModel.Id], GlassManufacturerId = 1, Price = 10, Count = 0
         });
 
         Assert.False(result.Succeeded);
@@ -1678,9 +1677,9 @@ public class ProductsDataServiceTests : RepoTestBase
     }
 
     [Fact]
-    public async Task CreateGlassesAsync_rejects_model_from_another_manufacturer()
+    public async Task CreateGlassesAsync_accepts_phones_from_several_manufacturers_and_names_the_glass_by_all_of_them()
     {
-        SeedCatalog(out _, out _);
+        SeedCatalog(out var phoneModel, out _);
         var otherManufacturer = new Manufacturer { Name = "Samsung" };
         Context.Manufacturers.Add(otherManufacturer);
         Context.SaveChanges();
@@ -1695,14 +1694,24 @@ public class ProductsDataServiceTests : RepoTestBase
 
         var result = await _service.CreateGlassesAsync(new MobileShop.Models.ViewModels.Web.BindModels.CreateGlassInputModel
         {
-            CompatibleManufacturerId = 1, CompatibleModelId = otherModel.Id, GlassManufacturerId = 1, Price = 10, Count = 2
+            SellerId = 1,
+            CompatibleModelIds = [phoneModel.Id, otherModel.Id],
+            GlassManufacturerId = 1,
+            Price = 10,
+            Count = 2
         });
 
-        Assert.False(result.Succeeded);
-        Assert.Equal(nameof(MobileShop.Models.ViewModels.Web.BindModels.CreateGlassInputModel.CompatibleModelId), result.ErrorField);
-        Assert.Empty(await Context.Products.ToListAsync());
+        Assert.True(result.Succeeded);
+        var glasses = await Context.Glasses.Include(g => g.ModelFits).ToListAsync();
+        Assert.Equal(2, glasses.Count);
+        Assert.All(glasses, glass =>
+        {
+            Assert.Equal(2, glass.ModelFits.Count);
+            Assert.Contains(glass.ModelFits, fit => fit.ModelId == phoneModel.Id);
+            Assert.Contains(glass.ModelFits, fit => fit.ModelId == otherModel.Id);
+        });
+        Assert.Single(Context.Models.Where(m => m.Name == "Galaxy S24 / iPhone 16 Glass"));
     }
-
     [Fact]
     public async Task CreateGlassesAsync_rejects_disallowed_model_category()
     {
@@ -1710,31 +1719,90 @@ public class ProductsDataServiceTests : RepoTestBase
 
         var result = await _service.CreateGlassesAsync(new MobileShop.Models.ViewModels.Web.BindModels.CreateGlassInputModel
         {
-            CompatibleManufacturerId = 1, CompatibleModelId = appleIdModel.Id, GlassManufacturerId = 1, Price = 10, Count = 2
+            CompatibleModelIds = [appleIdModel.Id], GlassManufacturerId = 1, Price = 10, Count = 2
         });
 
         Assert.False(result.Succeeded);
-        Assert.Equal(nameof(MobileShop.Models.ViewModels.Web.BindModels.CreateGlassInputModel.CompatibleModelId), result.ErrorField);
+        Assert.Equal(nameof(MobileShop.Models.ViewModels.Web.BindModels.CreateGlassInputModel.CompatibleModelIds), result.ErrorField);
         Assert.Empty(await Context.Products.ToListAsync());
     }
 
     [Fact]
-    public async Task CreateGlassesAsync_rejects_unknown_manufacturer()
+    public async Task CreateGlassesAsync_rejects_unknown_phone_id()
     {
         SeedCatalog(out var phoneModel, out _);
 
         var result = await _service.CreateGlassesAsync(new MobileShop.Models.ViewModels.Web.BindModels.CreateGlassInputModel
         {
-            CompatibleManufacturerId = 999, CompatibleModelId = phoneModel.Id, GlassManufacturerId = 1, Price = 10, Count = 2
+            SellerId = 1,
+            CompatibleModelIds = [phoneModel.Id, 999],
+            GlassManufacturerId = 1,
+            Price = 10,
+            Count = 2
         });
 
         Assert.False(result.Succeeded);
-        Assert.Equal(nameof(MobileShop.Models.ViewModels.Web.BindModels.CreateGlassInputModel.CompatibleManufacturerId), result.ErrorField);
+        Assert.Equal(nameof(MobileShop.Models.ViewModels.Web.BindModels.CreateGlassInputModel.CompatibleModelIds), result.ErrorField);
         Assert.Empty(await Context.Products.ToListAsync());
     }
 
-    // ── CreateAppleIdAsync ───────────────────────────────────
+    [Fact]
+    public async Task CreateGlassesAsync_rejects_an_empty_phone_list()
+    {
+        SeedCatalog(out _, out _);
 
+        var result = await _service.CreateGlassesAsync(new MobileShop.Models.ViewModels.Web.BindModels.CreateGlassInputModel
+        {
+            SellerId = 1,
+            CompatibleModelIds = [],
+            GlassManufacturerId = 1,
+            Price = 10,
+            Count = 1
+        });
+
+        Assert.False(result.Succeeded);
+        Assert.Equal(nameof(MobileShop.Models.ViewModels.Web.BindModels.CreateGlassInputModel.CompatibleModelIds), result.ErrorField);
+        Assert.Empty(await Context.Products.ToListAsync());
+    }
+
+    [Fact]
+    public async Task CreateGlassesAsync_collapses_duplicate_phone_ids_into_one_fit()
+    {
+        SeedCatalog(out var phoneModel, out _);
+
+        var result = await _service.CreateGlassesAsync(new MobileShop.Models.ViewModels.Web.BindModels.CreateGlassInputModel
+        {
+            SellerId = 1,
+            CompatibleModelIds = [phoneModel.Id, phoneModel.Id],
+            GlassManufacturerId = 1,
+            Price = 10,
+            Count = 1
+        });
+
+        Assert.True(result.Succeeded);
+        var glass = await Context.Glasses.Include(g => g.ModelFits).SingleAsync();
+        Assert.Single(glass.ModelFits);
+        Assert.Single(Context.Models.Where(m => m.Name == "iPhone 16 Glass"));
+    }
+
+    [Fact]
+    public async Task CreateGlassesAsync_rejects_a_valid_phone_mixed_with_a_disallowed_model_without_writing_rows()
+    {
+        SeedCatalog(out var phoneModel, out var appleIdModel);
+
+        var result = await _service.CreateGlassesAsync(new MobileShop.Models.ViewModels.Web.BindModels.CreateGlassInputModel
+        {
+            SellerId = 1,
+            CompatibleModelIds = [phoneModel.Id, appleIdModel.Id],
+            GlassManufacturerId = 1,
+            Price = 10,
+            Count = 2
+        });
+
+        Assert.False(result.Succeeded);
+        Assert.Equal(nameof(MobileShop.Models.ViewModels.Web.BindModels.CreateGlassInputModel.CompatibleModelIds), result.ErrorField);
+        Assert.Empty(await Context.Products.ToListAsync());
+    }
     [Fact]
     public async Task CreateAppleIdAsync_creates_apple_id_and_returns_entity_id()
     {
@@ -2148,8 +2216,7 @@ public class ProductsDataServiceTests : RepoTestBase
 
         var result = await _service.CreateGlassesAsync(new MobileShop.Models.ViewModels.Web.BindModels.CreateGlassInputModel
         {
-            CompatibleManufacturerId = 1,
-            CompatibleModelId = phoneModel.Id,
+            CompatibleModelIds = [phoneModel.Id],
             GlassManufacturerId = 1,
             Price = MoneyLimits.MaxRials,
             ProfitPercent = 1m,
@@ -2171,8 +2238,7 @@ public class ProductsDataServiceTests : RepoTestBase
 
         var result = await _service.CreateGlassesAsync(new MobileShop.Models.ViewModels.Web.BindModels.CreateGlassInputModel
         {
-            CompatibleManufacturerId = 1,
-            CompatibleModelId = phoneModel.Id,
+            CompatibleModelIds = [phoneModel.Id],
             GlassManufacturerId = 1,
             Price = MoneyLimits.MaxRials,
             ProfitPercent = decimal.MaxValue,
@@ -2195,8 +2261,7 @@ public class ProductsDataServiceTests : RepoTestBase
         var result = await _service.CreateGlassesAsync(new MobileShop.Models.ViewModels.Web.BindModels.CreateGlassInputModel
         {
             SellerId = 1,
-            CompatibleManufacturerId = 1,
-            CompatibleModelId = phoneModel.Id,
+            CompatibleModelIds = [phoneModel.Id],
             GlassManufacturerId = 1,
             Price = 2_000_000_000L,
             ProfitPercent = 25m,

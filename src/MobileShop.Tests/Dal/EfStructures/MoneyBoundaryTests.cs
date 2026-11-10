@@ -68,7 +68,7 @@ public class MoneyBoundaryTests : IDisposable
         {
             new CreatePhoneInputModel { SellerId = 1, Price = MoneyLimits.MaxRials, ProfitAmount = MoneyLimits.MaxRials, IMEI1 = "123456789012345" },
             new CreateAppleIdInputModel { SellerId = 1, Price = MoneyLimits.MaxRials, ProfitAmount = MoneyLimits.MaxRials, Email = "limit@example.com", Password = "password" },
-            new CreateGlassInputModel { SellerId = 1, CompatibleManufacturerId = 1, CompatibleModelId = 1, GlassManufacturerId = 1, Price = MoneyLimits.MaxRials, ProfitAmount = MoneyLimits.MaxRials },
+            new CreateGlassInputModel { SellerId = 1, CompatibleModelIds = [1], GlassManufacturerId = 1, Price = MoneyLimits.MaxRials, ProfitAmount = MoneyLimits.MaxRials },
             new SellInputModel { ProductId = 1, CustomerId = 1, Price = MoneyLimits.MaxRials }
         };
 
@@ -78,7 +78,7 @@ public class MoneyBoundaryTests : IDisposable
         {
             new CreatePhoneInputModel { SellerId = 1, Price = -1, ProfitAmount = -1, IMEI1 = "123456789012345" },
             new CreateAppleIdInputModel { SellerId = 1, Price = -1, ProfitAmount = -1, Email = "limit@example.com", Password = "password" },
-            new CreateGlassInputModel { SellerId = 1, CompatibleManufacturerId = 1, CompatibleModelId = 1, GlassManufacturerId = 1, Price = -1, ProfitAmount = -1 },
+            new CreateGlassInputModel { SellerId = 1, CompatibleModelIds = [1], GlassManufacturerId = 1, Price = -1, ProfitAmount = -1 },
             new SellInputModel { ProductId = 1, CustomerId = 1, Price = -1 }
         };
 

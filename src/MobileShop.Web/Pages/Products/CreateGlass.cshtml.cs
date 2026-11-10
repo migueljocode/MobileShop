@@ -6,7 +6,8 @@ public class CreateGlassModel(IProductsDataService dataService) : PageModel
     public string? Message { get; private set; }
     [TempData] public string? SuccessMessage { get; set; }
     public IReadOnlyList<DropdownOptionViewModel> Manufacturers { get; private set; } = [];
-    public IReadOnlyList<DropdownOptionViewModel> CompatibleModels { get; private set; } = [];
+    public IReadOnlyList<DropdownOptionViewModel> SelectedFits { get; private set; } = [];
+    public DropdownOptionViewModel FitTemplate { get; } = new(0, string.Empty);
 
     public async Task OnGetAsync() => await PopulateDropdownsAsync();
 
@@ -59,8 +60,26 @@ public class CreateGlassModel(IProductsDataService dataService) : PageModel
     private async Task PopulateDropdownsAsync()
     {
         Manufacturers = await dataService.GetManufacturersAsync();
-        CompatibleModels = Input.CompatibleManufacturerId > 0
-            ? await dataService.GetModelsAsync(Input.CompatibleManufacturerId, "Phone")
-            : [];
+        SelectedFits = await ResolveSelectedFitsAsync(Input.CompatibleModelIds);
+    }
+
+    // Labels every selected phone as "<manufacturer> <model>", in the order it was added.
+    private async Task<IReadOnlyList<DropdownOptionViewModel>> ResolveSelectedFitsAsync(IReadOnlyCollection<int> selectedIds)
+    {
+        if (selectedIds.Count == 0)
+            return [];
+
+        var labels = new Dictionary<int, string>();
+        foreach (var manufacturer in Manufacturers)
+        {
+            foreach (var model in await dataService.GetModelsAsync(manufacturer.Id, "Phone"))
+                labels[model.Id] = $"{manufacturer.Name} {model.Name}";
+        }
+
+        return selectedIds.Distinct()
+            .Where(labels.ContainsKey)
+            .Select(id => new DropdownOptionViewModel(id, labels[id]))
+            .ToList()
+            .AsReadOnly();
     }
 }

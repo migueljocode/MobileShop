@@ -42,11 +42,10 @@ public class CreateGlassModelTests : RepoTestBase
         return (manufacturer, model);
     }
 
-    private static CreateGlassInputModel ValidInput(int compatibleManufacturerId, int compatibleModelId, int glassManufacturerId) => new()
+    private static CreateGlassInputModel ValidInput(int compatibleModelId, int glassManufacturerId) => new()
     {
         SellerId = 1,
-        CompatibleManufacturerId = compatibleManufacturerId,
-        CompatibleModelId = compatibleModelId,
+        CompatibleModelIds = [compatibleModelId],
         GlassManufacturerId = glassManufacturerId,
         Price = 100, ProfitPercent = 20m, Count = 3
     };
@@ -74,20 +73,20 @@ public class CreateGlassModelTests : RepoTestBase
     public async Task OnPostAsync_InvalidModelState_RedisplaysAndDoesNotCreate()
     {
         var (manufacturer, model) = SeedModel();
-        _model.Input = ValidInput(manufacturer.Id, model.Id, Context.Manufacturers.First(m => m.Name == "Samsung").Id);
+        _model.Input = ValidInput(model.Id, Context.Manufacturers.First(m => m.Name == "Samsung").Id);
         _model.ModelState.AddModelError(nameof(CreateGlassInputModel.Count), "Count is invalid.");
         var result = await _model.OnPostAsync();
         Assert.IsType<PageResult>(result);
         Assert.Empty(Context.Products);
         Assert.Equal(2, _model.Manufacturers.Count);
-        Assert.Single(_model.CompatibleModels);
+        Assert.Single(_model.SelectedFits);
     }
 
     [Fact]
     public async Task OnPostAsync_ValidInput_CreatesRequestedCountAndShowsMessage()
     {
         var (manufacturer, model) = SeedModel();
-        _model.Input = ValidInput(manufacturer.Id, model.Id, Context.Manufacturers.First(m => m.Name == "Samsung").Id);
+        _model.Input = ValidInput(model.Id, Context.Manufacturers.First(m => m.Name == "Samsung").Id);
         var result = await _model.OnPostAsync();
         Assert.Null(Assert.IsType<RedirectToPageResult>(result).PageName);
         Assert.Equal("Created 3 glass product(s) successfully.", _model.SuccessMessage);
@@ -109,7 +108,7 @@ public class CreateGlassModelTests : RepoTestBase
     public async Task OnPostAsync_allows_profit_percent_above_100()
     {
         var (manufacturer, model) = SeedModel();
-        _model.Input = ValidInput(manufacturer.Id, model.Id, Context.Manufacturers.First(m => m.Name == "Samsung").Id);
+        _model.Input = ValidInput(model.Id, Context.Manufacturers.First(m => m.Name == "Samsung").Id);
         _model.Input.Price = 10;
         _model.Input.ProfitPercent = 200m;
         _model.Input.ProfitAmount = null;
@@ -127,13 +126,44 @@ public class CreateGlassModelTests : RepoTestBase
     public async Task OnPostAsync_ServiceValidationError_IsAddedToFieldAndRedisplays()
     {
         var (manufacturer, model) = SeedModel();
-        _model.Input = ValidInput(manufacturer.Id, model.Id, Context.Manufacturers.First(m => m.Name == "Samsung").Id);
-        _model.Input.CompatibleManufacturerId = 9999;
+        _model.Input = ValidInput(model.Id, Context.Manufacturers.First(m => m.Name == "Samsung").Id);
+        _model.Input.CompatibleModelIds = [9999];
         var result = await _model.OnPostAsync();
         Assert.IsType<PageResult>(result);
         Assert.False(_model.ModelState.IsValid);
-        Assert.True(_model.ModelState.ContainsKey(nameof(CreateGlassInputModel.CompatibleManufacturerId)));
+        Assert.True(_model.ModelState.ContainsKey(nameof(CreateGlassInputModel.CompatibleModelIds)));
         Assert.Empty(Context.Products);
         Assert.Equal(2, _model.Manufacturers.Count);
+    }
+
+    [Fact]
+    public async Task OnGetAsync_without_selected_phones_shows_an_empty_list()
+    {
+        await _model.OnGetAsync();
+
+        Assert.Empty(_model.SelectedFits);
+    }
+
+    [Fact]
+    public async Task OnPostAsync_redisplay_labels_each_selected_phone_with_its_manufacturer_in_added_order()
+    {
+        var (_, appleModel) = SeedModel();
+        var samsung = Context.Manufacturers.First(m => m.Name == "Samsung");
+        var galaxy = new Model
+        {
+            ManufacturerId = samsung.Id,
+            CategoryId = Context.Categories.First(c => c.Name == "Phone").Id,
+            Name = "Galaxy S24"
+        };
+        Context.Models.Add(galaxy);
+        Context.SaveChanges();
+        _model.Input = ValidInput(appleModel.Id, samsung.Id);
+        _model.Input.CompatibleModelIds = [galaxy.Id, appleModel.Id];
+        _model.ModelState.AddModelError(nameof(CreateGlassInputModel.Count), "Count is invalid.");
+
+        var result = await _model.OnPostAsync();
+
+        Assert.IsType<PageResult>(result);
+        Assert.Equal(new[] { "Samsung Galaxy S24", "Apple iPhone 16" }, _model.SelectedFits.Select(fit => fit.Name));
     }
 }

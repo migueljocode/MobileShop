@@ -6,13 +6,10 @@ public sealed class CreateGlassInputModel
     [Range(1, int.MaxValue, ErrorMessage = "Select a seller.")]
     public int SellerId { get; set; }
     [Required]
-    public int CompatibleManufacturerId { get; set; }
-
-    [Required]
     public int GlassManufacturerId { get; set; }
 
-    [Required]
-    public int CompatibleModelId { get; set; }
+    /// <summary>The phone models the glass fits; they may come from several manufacturers.</summary>
+    public List<int> CompatibleModelIds { get; set; } = [];
 
     [Range(0, MoneyLimits.MaxRials)]
     public long Price { get; set; }
