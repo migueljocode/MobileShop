@@ -146,7 +146,7 @@ public class IndexModelTests : RepoTestBase
     {
         _model.SelectedIds = [_tx2.Id, _tx1.Id];
 
-        var result = await _model.OnGetDownloadFactorAsync();
+        var result = await _model.OnGetDownloadFactorAsync(direction: "all");
 
         var file = Assert.IsType<FileContentResult>(result);
         Assert.Equal("application/pdf", file.ContentType);
@@ -164,7 +164,7 @@ public class IndexModelTests : RepoTestBase
     {
         _model.SelectedIds = [_tx1.Id, _tx1.Id, _tx1.Id];
 
-        var result = await _model.OnGetDownloadFactorAsync();
+        var result = await _model.OnGetDownloadFactorAsync(direction: "all");
 
         Assert.IsType<FileContentResult>(result);
         Assert.NotNull(_pdfGenerator.LastFactor);
@@ -176,7 +176,7 @@ public class IndexModelTests : RepoTestBase
     {
         _model.SelectedIds = [-1, 0, _tx1.Id];
 
-        var result = await _model.OnGetDownloadFactorAsync();
+        var result = await _model.OnGetDownloadFactorAsync(direction: "all");
 
         Assert.IsType<PageResult>(result);
         Assert.False(_model.ModelState.IsValid);
@@ -251,9 +251,43 @@ public class IndexModelTests : RepoTestBase
     [Fact]
     public async Task OnGet_all_date_range_preserves_transactions_outside_current_year()
     {
-        await _model.OnGetAsync(dateRange: "all");
+        await _model.OnGetAsync(direction: "all", dateRange: "all");
 
         Assert.Equal("all", _model.DateRange);
         Assert.Equal(3, _model.Transactions.Count);
+    }
+
+    [Fact]
+    public async Task OnGet_defaults_to_sell_direction_when_none_is_given()
+    {
+        await _model.OnGetAsync();
+
+        Assert.Equal("sell", _model.Direction);
+        Assert.Equal([_tx2.Id], _model.Transactions.Select(transaction => transaction.Id));
+    }
+
+    [Fact]
+    public async Task OnGet_all_direction_still_lists_every_transaction()
+    {
+        await _model.OnGetAsync(direction: "all");
+
+        Assert.Equal("all", _model.Direction);
+        Assert.Equal(3, _model.Transactions.Count);
+    }
+
+    [Fact]
+    public async Task OnGet_labels_every_apple_id_product_as_apple_iphone_in_both_directions()
+    {
+        Context.AppleIds.AddRange(
+            new AppleId { ProductId = _tx1.ProductId, Email = "bought@example.com", Password = "pass-1" },
+            new AppleId { ProductId = _tx2.ProductId, Email = "sold@example.com", Password = "pass-2" });
+        Context.SaveChanges();
+
+        await _model.OnGetAsync(direction: "all");
+
+        var labels = _model.Transactions.ToDictionary(row => row.Id, row => row.ProductLabel);
+        Assert.Equal(ShopLabels.AppleIdProduct, labels[_tx1.Id]);
+        Assert.Equal(ShopLabels.AppleIdProduct, labels[_tx2.Id]);
+        Assert.NotEqual(ShopLabels.AppleIdProduct, labels[_tx3.Id]);
     }
 }

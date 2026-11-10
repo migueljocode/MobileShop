@@ -67,7 +67,9 @@ public class TransactionsDataService(
             transaction.Id,
             transaction.Date,
             transaction.Direction,
-            transaction.ProductNavigation.ModelNavigation.ManufacturerNavigation.Name + " " + transaction.ProductNavigation.ModelNavigation.Name,
+            transaction.ProductNavigation.AppleIdProfile != null
+                ? ShopLabels.AppleIdProduct
+                : transaction.ProductNavigation.ModelNavigation.ManufacturerNavigation.Name + " " + transaction.ProductNavigation.ModelNavigation.Name,
             transaction.FinishedPrice,
             transaction.Direction == TransactionDirection.Sell
                 ? ShopLabels.ZoneMobile

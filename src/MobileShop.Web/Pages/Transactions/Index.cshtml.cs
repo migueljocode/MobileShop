@@ -3,8 +3,10 @@ namespace MobileShop.Web.Pages.Transactions;
 public class IndexModel(
     ITransactionsDataService dataService) : PageModel
 {
+    private const string DefaultDirection = "sell";
+
     public IReadOnlyList<TransactionListItemViewModel> Transactions { get; private set; } = [];
-    public string Direction { get; private set; } = "all";
+    public string Direction { get; private set; } = DefaultDirection;
     public int Take { get; private set; } = 50;
     public string Sort { get; private set; } = "date";
     public string Order { get; private set; } = "desc";
@@ -79,7 +81,7 @@ public class IndexModel(
         int? customerId,
         string? dateRange)
     {
-        Direction = string.IsNullOrWhiteSpace(direction) ? "all" : direction.ToLowerInvariant();
+        Direction = string.IsNullOrWhiteSpace(direction) ? DefaultDirection : direction.ToLowerInvariant();
         Sort = sort?.Trim().ToLowerInvariant() switch
         {
             "product" => "product",
