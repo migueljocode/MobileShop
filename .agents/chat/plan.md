@@ -12,7 +12,7 @@
 
 ---
 
-## [ ] Step 1 — Case-insensitive model uniqueness in `CreateModelAsync` (+ tests)
+## ~~[x] Step 1 — Case-insensitive model uniqueness in `CreateModelAsync` (+ tests)~~
 - Files: inspect: `ProductsDataService.CreateModelAsync`, `ModelConfiguration` unique index, create-phone/glass JS that posts CreateModel; modify: `src/MobileShop.Services/DataServices/Dal/ProductsDataService.cs`; tests: `src/MobileShop.Tests/Services/DataServices/Dal/ProductsDataServiceTests.cs`; optional later UI in Step 2.
 - Symbols: `CreateModelAsync(int manufacturerId, string name, string categoryName = "Phone")`; `DropdownCreateResult`.
 - Current -> Desired: creating a model whose trimmed name equals an existing live model for the same manufacturer **and** category under ordinal-ignore-case returns the existing option (Succeeded) and does **not** insert a second row. Distinct names (different spelling beyond case) still create. Empty name still 400.

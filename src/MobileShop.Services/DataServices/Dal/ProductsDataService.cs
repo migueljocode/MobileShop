@@ -464,8 +464,11 @@ public class ProductsDataService(
         }
 
         var trimmed = name.Trim();
-        var existing = await models.FindAsync(m =>
-            m.ManufacturerId == manufacturerId && m.Name == trimmed && m.CategoryId == category.Id);
+        var existing = (await models.FindAllAsync())
+            .FirstOrDefault(m =>
+                m.ManufacturerId == manufacturerId
+                && m.CategoryId == category.Id
+                && string.Equals(m.Name, trimmed, StringComparison.OrdinalIgnoreCase));
         if (existing is not null)
             return new DropdownCreateResult(true, new DropdownOptionViewModel(existing.Id, existing.Name), null, 200);
 

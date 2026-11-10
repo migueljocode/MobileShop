@@ -1079,6 +1079,39 @@ public class ProductsDataServiceTests : RepoTestBase
     }
 
     [Fact]
+    public async Task CreateModelAsync_reuses_existing_case_insensitive_match_for_same_manufacturer_and_category()
+    {
+        SeedCatalog(out _, out _);
+
+        var first = await _service.CreateModelAsync(1, "iPhone 16");
+        var second = await _service.CreateModelAsync(1, "iphone 16");
+
+        Assert.True(first.Succeeded);
+        Assert.True(second.Succeeded);
+        Assert.Equal(first.Option!.Id, second.Option!.Id);
+        Assert.Equal(1, Context.Models.Count(m => m.ManufacturerId == 1 && m.CategoryId == Context.Categories.Single(c => c.Name == "Phone").Id && m.Name == "iPhone 16"));
+    }
+
+    [Fact]
+    public async Task CreateModelAsync_allows_same_name_for_different_manufacturer_or_category()
+    {
+        SeedCatalog(out _, out _);
+        var samsung = await _service.CreateManufacturerAsync("Samsung");
+        var phoneCategory = Context.Categories.Single(c => c.Name == "Phone");
+
+        var sameManufacturer = await _service.CreateModelAsync(1, "iPhone 16");
+        var differentManufacturer = await _service.CreateModelAsync(samsung.Option!.Id, "iPhone 16");
+        var differentCategory = await _service.CreateModelAsync(1, "iPhone 16", "SmartWatch");
+
+        Assert.True(sameManufacturer.Succeeded);
+        Assert.True(differentManufacturer.Succeeded);
+        Assert.True(differentCategory.Succeeded);
+        Assert.NotEqual(sameManufacturer.Option!.Id, differentManufacturer.Option!.Id);
+        Assert.NotEqual(sameManufacturer.Option!.Id, differentCategory.Option!.Id);
+        Assert.NotEqual(phoneCategory.Id, Context.Models.Single(m => m.Id == differentCategory.Option!.Id).CategoryId);
+    }
+
+    [Fact]
         public async Task CreateColorAsync_creates_and_dedupes()
     {
         SeedCatalog(out _, out _);
