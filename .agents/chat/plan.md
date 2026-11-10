@@ -1,86 +1,63 @@
-# Plan — Glass UI polish: disabled Add button, list Identifier, Details fits, Edit fits
+# Plan — Keep glass Model label in sync when compatible phones change on edit
 
 ## Proposed stages
-- [ ] Stage 7 — Glass UI polish (disabled Add accent, Identifier cell, Details compatible phones, Edit fits list)
+- [ ] Stage 7 — Glass Model label follows compatible-phone edits
 
 ## Reviewer Briefing
-- Step 1 (CSS disabled primary): LOW risk but touches shared `controls.css`; wrong selector could change every disabled primary on the site. Must mirror the existing `.share-editor__save:disabled` accent mix so the disabled Add button is light teal/green, not Bootstrap blue.
-- Step 2 (Identifier): MEDIUM confidence until the exact malformation is confirmed in markup/CSS. Strong hypothesis: `td.num` + `"Barcode: " + barcode` mixes a label with a hex string under numeric styling. Fix is scoped to glass list projection and/or not applying `.num` when Identifier is not pure numeric.
-- Step 3 (Details): HIGH confidence bug — glass branch of `GetDetailsAsync` never sets `CompatibleModels` (or `Notes`), and `Details.cshtml` only renders Compatible models when `Type == "Case"`. Straightforward projection + markup.
-- Step 4 (Edit): HIGH risk for scope creep. Create uses chip list + modal (`create-glass-fits.js`); Edit still uses a non-working multi `<select>`. Prefer reuse of create markup/JS patterns on Edit for Glass only; do not redesign Case in this stage unless required for shared partial safety.
-- Do not touch `src/MobileShop.Api`, auth, DB init, or glass create/save business rules beyond display.
+- Single focused bug: after Edit removes (or adds) a glass compatible phone, fits persist correctly but Identity **Model** stays the old composite name (e.g. still `iPhone 11 / iPhone 14 Glass` when only `iPhone 11` remains).
+- Root cause is in `ProductsDataService.UpdateProductAsync` glass branch: it calls `SynchronizeGlassModelFits` only. Create path already rebuilds the catalog name via `GlassModelNaming.Build` and find-or-creates a `Model` row; update never does.
+- Do **not** rename `Model.Name` in place: create shares one `Model` across glass units with the same manufacturer + name; in-place rename would corrupt sibling products. Always find-or-create by (ManufacturerId, Glass category, new name) and re-point `product.ModelId` / `ModelNavigation`.
+- `input.ModelId` is rejected when it differs from the stored id (“cannot be changed from this form”); the service must change `ModelId` server-side, not via the form field.
+- `CaptureEditableState` already includes `product.ModelId` and glass fit ModelIds, so re-pointing ModelId is enough for change detection.
+- Out of scope: Case products, Create path (already correct), Api, auth, DB init, UI chrome, Stage 7 UI polish items from the prior plan unless this step necessarily touches the same files.
 
-## [ ] Step 1 — Disabled primary Add button uses accent (light green/teal), not Bootstrap blue
-- Files: inspect: `src/MobileShop.Web/wwwroot/css/controls.css`, `src/MobileShop.Web/wwwroot/css/overlays.css` (`.share-editor__save:disabled`); modify: `src/MobileShop.Web/wwwroot/css/controls.css`; do not touch: page markup for the modal button class (`btn btn-primary` stays).
-- Symbols: `.btn-primary`, `.btn-success` block already sets `--bs-btn-bg: var(--accent)`; Bootstrap’s default disabled primary stays blue because `--bs-btn-disabled-*` is unset in controls.
-- Current -> Desired: disabled `#addCompatiblePhoneBtn` (and any other `.btn-primary:disabled` / `.btn-success:disabled`) renders with light accent fill (same approach as `.share-editor__save:disabled`: `color-mix(in srgb, var(--accent) 45%, white)` for bg/border, dark readable ink), not light blue.
-- Change: in the buttons section of `controls.css`, after the enabled `.btn-primary, .btn-success` rules, add disabled overrides for `.btn-primary:disabled`, `.btn-primary.disabled`, `.btn-success:disabled`, `.btn-success.disabled` setting `--bs-btn-disabled-color`, `--bs-btn-disabled-bg`, `--bs-btn-disabled-border-color` (and the non-variable `color`/`background-color`/`border-color` if Bootstrap still wins) to match the share-editor disabled accent treatment. Keep opacity behavior consistent with other disabled controls.
+## [ ] Step 1 — On glass update, rebuild catalog Model name from remaining fits
+- Files: inspect: `src/MobileShop.Services/DataServices/Shared/GlassModelNaming.cs`, create path in `ProductsDataService` (~719–740) that builds `glassModelName` and find-or-creates `Model`, glass `case "Glass":` in `UpdateProductAsync` (~1239–1244), `EditIncludes`, `CaptureEditableState` Glass arm; modify: `src/MobileShop.Services/DataServices/Dal/ProductsDataService.cs`; tests: `src/MobileShop.Tests/Web/Pages/Products/EditModelTests.cs` (or a dedicated service test next to existing update tests); do not touch: `src/MobileShop.Api`, Razor pages unless a binding bug is proven.
+- Symbols: `UpdateProductAsync`; `SynchronizeGlassModelFits`; `GlassModelNaming.Build`; `models` (`IBaseRepo<Model>`); `categories` (Glass category); `product.ModelId` / `product.ModelNavigation`.
+- Current -> Desired: after a successful glass edit that changes the set of non-deleted compatible phone models, the product’s catalog model name equals `GlassModelNaming.Build` of the remaining phone model names (same rules as create: sorted, distinct, ` / ` separator, ` Glass` suffix, length limits). List/Details/Edit Identity **Model** field show the new label after reload. Fits-only changes with no name change leave behavior unchanged.
+- Change: In the `case "Glass":` branch of `UpdateProductAsync`, after notes + `SynchronizeGlassModelFits` (when `selectedCompatibleModels is not null`):
+  1. Resolve the effective fit list: prefer `selectedCompatibleModels` when non-null; otherwise the profile’s non-deleted `ModelFits` with `ModelNavigation` (must have at least one phone model — if zero after sync, return the same validation failure create uses for empty compatible sets, or match existing update validation if it already rejects empty).
+  2. `var newName = GlassModelNaming.Build(fitModels.Select(m => m.Name).ToList());`
+  3. If `product.ModelNavigation.Name` already equals `newName` (ordinal), skip model re-point.
+  4. Else: `glassCategory` = category named `"Glass"` (same lookup as create); `manufacturerId` = `product.ModelNavigation.ManufacturerId` (glass brand, e.g. Anker — do not use phone manufacturers).
+  5. `FindAsync` Model where ManufacturerId + CategoryId + Name == newName; if missing, `AddAsync` a new `Model` with those fields (`persist: false` if that matches create).
+  6. Assign `product.ModelId = glassModel.Id` and `product.ModelNavigation = glassModel` so the tracked graph and `CaptureEditableState` see the change.
+  7. Do not delete the previous Model row (may still be referenced by other glass products).
+  Keep the existing guard that rejects client-submitted `input.ModelId` changes; only this server path may change ModelId for glass.
 - Depends on: none.
-- Edge cases / error handling: dark theme — accent mix must remain readable (share-editor already pins dark ink `#06201C`); do not change outline/secondary disabled looks.
-- Tests: none (CSS-only).
-- Verify: open Create glass → Add phone modal with manufacturer/model empty so Add stays disabled; visual check that the button is light teal/green, not blue. Optional: same check on any other page with a disabled primary.
-- Done when: disabled primary Add matches accent family; enabled primary unchanged.
-- Risk: LOW
+- Edge cases / error handling:
+  - Remove one of two phones → name shrinks to single `… Glass`.
+  - Add a phone → name gains the new segment (sorted).
+  - Fits unchanged → no ModelId churn; “No changes were made” still works.
+  - Two glass products shared the old Model; only the edited product moves to the new Model; the other keeps the old name until edited.
+  - Missing Glass category seed → same error style as create.
+  - Empty compatible list after edit → reject with a clear field error on `CompatibleModels` (do not call `GlassModelNaming.Build` with zero names).
+- Tests: add to `EditModelTests` (or service tests):
+  1. Create/setup a glass product whose Model.Name is built from two phone models (e.g. iPhone 11 + iPhone 14); `UpdateProductAsync` with only one CompatibleModels id → result succeeded; reloaded `product.ModelNavigation.Name` equals `GlassModelNaming.Build` of the remaining name; `GlassProfile` has one non-deleted fit.
+  2. Update with the same two ids → ModelId/Name unchanged (or still equal to the two-name build).
+  3. Optional: second product still pointing at the old shared Model keeps the old name after the first product is retargeted.
+- Verify: after push, CI green (`Action: #<run_number> — Success`). Manual: Edit Anker glass that shows `iPhone 11 / iPhone 14 Glass`, remove iPhone 14, Save → Identity Model (and list/details title) show `iPhone 11 Glass` (or exact `GlassModelNaming` output); chip list matches.
+- Done when: tests pass; Model label follows fit set on edit; no in-place rename of shared Model rows.
+- Risk: MEDIUM (Model identity shared across units; wrong manufacturer/category would orphan or mis-label)
 - Confidence: HIGH
 
-## [ ] Step 2 — Products list Identifier column for glass is not malformed
-- Files: inspect: `src/MobileShop.Web/Pages/Products/Index.cshtml` (Identifier `<td class="num">`), `src/MobileShop.Web/wwwroot/css/surfaces.css` (`.num` / `td.num`), glass projection in `ProductsDataService.GetInventoryAsync` (~lines 113–126); modify: only what the inspection requires (prefer Index markup and/or glass projection string; avoid broad CSS changes).
-- Symbols: `ProductListItemViewModel.Identifier`; glass `project` lambda `"Barcode: " + product.Barcode`; `td.num`.
-- Current -> Desired: Identifier cells for glass (and other barcode types if the same bug appears) render a clear, correctly spaced label+value (or barcode-only if that matches product convention), without numeric-class distortion, missing space, or broken layout under `?type=glass&sortBy=name&sortDirection=asc`.
-- Change: (1) Confirm in browser/devtools whether the malformation is missing space, `.num` LTR/font on mixed text, truncation, or something else. (2) If `.num` is the cause, stop applying `class="num"` when Identifier is not a pure number (e.g. only for IMEI-style pure digits, or drop `.num` for barcode-prefixed values). (3) Ensure the glass projection string is exactly `"Barcode: " + product.Barcode` (space after colon) consistent with other barcode product types. Do not change glass product naming (`GlassModelNaming`).
-- Depends on: none (parallel-safe with Step 1).
-- Edge cases / error handling: empty barcode; RTL `dir="auto"` still readable; sort by identifier still works on the string.
-- Tests: none required unless an existing list test asserts Identifier text — then update expectation only if the string format intentionally changes.
-- Verify: `/Products?type=glass&sortBy=name&sortDirection=asc` shows four glass rows with readable Identifier values aligned under the column; no visual glitch.
-- Done when: user-visible Identifier for glass is correct and consistent.
-- Risk: LOW
-- Confidence: MEDIUM (exact malformation not re-checked in a live browser in this plan pass)
-
-## [ ] Step 3 — Glass Details shows compatible phones (and notes)
-- Files: inspect: `ProductsDataService.GetDetailsAsync` glass branch (~205–221), Case branch for pattern, `ProductDetailsViewModel.CompatibleModels` / `Notes`, `Details.cshtml` Case-only Compatible block; modify: `src/MobileShop.Services/DataServices/Dal/ProductsDataService.cs`, `src/MobileShop.Web/Pages/Products/Details.cshtml`; do not touch: Api, create path.
-- Symbols: `GetDetailsAsync`; `ProductDetailsViewModel`; `GlassProfile.ModelFits`; includes already list `"GlassProfile.ModelFits.ModelNavigation"`.
-- Current -> Desired: `/Products/Details?id={glassId}&type=glass` lists each compatible phone model name (same shape as Case). Notes from `GlassProfile.Notes` when present.
-- Change: (1) Glass branch of `GetDetailsAsync`: object initializer like Case — `CompatibleModels = product.GlassProfile!.ModelFits.Where(fit => !fit.IsDeleted).Select(fit => fit.ModelNavigation.Name).ToList()`, `Notes = product.GlassProfile.Notes` (or existing normalize helper if Case uses one). Prefer manufacturer+model labels only if Case already does; Case currently uses `ModelNavigation.Name` only — match that unless Create’s selected-fit labels are required for parity. (2) In `Details.cshtml`, extend the Compatible models block from `Type == "Case"` to Case **or** Glass (or duplicate a small Glass block). Keep empty → `N/A`.
-- Depends on: none for data; markup depends on projection.
-- Edge cases / error handling: soft-deleted fits excluded; no fits → N/A; null GlassProfile should not happen for type=glass but keep null-safe access consistent with Case.
-- Tests: if there is an existing details/service test for Case CompatibleModels, add a parallel glass assertion; otherwise no new test file required for this stage.
-- Verify: open Details for a glass that was created with multiple compatible phones (e.g. id 18 from the report); list shows those model names; Notes line correct.
-- Done when: Details glass page shows compatible phones; Case still works.
-- Risk: LOW
-- Confidence: HIGH
-
-## [ ] Step 4 — Edit glass uses functioning compatible-phones list (not old multi-select)
-- Files: inspect: `CreateGlass.cshtml` + `wwwroot/js/create-glass-fits.js` + glass-fit CSS in `controls.css`, `Edit.cshtml` / `Edit.cshtml.cs`, `_ProductEditForm.cshtml` Glass (and Case) blocks, `ProductsDataService` update path for `CompatibleModels` / `SynchronizeGlassModelFits`; modify: `_ProductEditForm.cshtml` (Glass section), `Edit.cshtml` Scripts if needed, `Edit.cshtml.cs` handlers as required, optionally extract or reuse JS; do not touch: Api, create save rules, Case section unless a shared partial forces a minimal safe tweak.
-- Symbols: `Product.CompatibleModels` on edit model; `CompatibleModelOptions`; `SynchronizeGlassModelFits`; create’s `glassFitList` / `Input.CompatibleModelIds` pattern.
-- Current -> Desired: Edit glass page shows the same style of compatible-phones list as Create (list of selected fits + Add phone modal with manufacturer/model + optional inline create), posts the selected model IDs, and save persists via existing update + `SynchronizeGlassModelFits`. Old `<select multiple>` for Glass is removed.
-- Change: Replace the Glass block in `_ProductEditForm.cshtml` with markup parallel to CreateGlass’s fit list (list + template + empty state + open-modal button). Wire scripts: either include `create-glass-fits.js` with edit-friendly element IDs, or a thin `edit-glass-fits.js` that reuses the same DOM contracts and posts `Product.CompatibleModels` (or the name the edit handler already binds). Ensure `Edit.cshtml.cs` exposes manufacturers, model-by-manufacturer handler (mirror CreateGlass `OnGetModelsAsync` / create manufacturer/model posts if edit must add new phones), and that OnPost maps the list into `CompatibleModels` for the existing update path. Pre-populate selected fits from `product.GlassProfile.ModelFits` (already partially loaded in EditModel). Keep Notes textarea.
-- Depends on: Step 3 optional (shared understanding of fit labels); not blocked by 1–2.
-- Edge cases / error handling: glass with zero fits; remove last fit (validation: at least one compatible model if create enforces that — match create/update service rules); cancel modal; antiforgery on create-manufacturer/model posts from edit; do not break Case multi-select in this step.
-- Tests: manual save round-trip; extend service test only if update CompatibleModels lacks coverage.
-- Verify: Edit a glass → see current fits as a list (not a multi-select) → add/remove a phone → Save changes → Details (after Step 3) shows the new set; `dotnet` CI green.
-- Done when: Edit glass fits UI works end-to-end; old multi-select gone for Glass.
-- Risk: HIGH (UI + handlers + binding)
-- Confidence: MEDIUM
-
-## [ ] Step 5 — Final validation
-- Files: inspect only (+ `graphify update .` if code changed).
+## [ ] Step 2 — Final validation
+- Files: inspect only; `graphify update .` if code changed and graph is part of the commit policy for this repo.
 - Symbols: none.
-- Current -> Desired: all four user issues closed; CI green.
-- Change: run full build/test per project rules when user requests local gate or after push; `graphify update .` and commit graph artifacts if the actor’s last code commit did not; record Action run number.
-- Depends on: Steps 1–4.
-- Edge cases: none beyond reporting leftovers.
-- Tests: solution test suite.
-- Verify: `Action: #<run_number> — Success`; manual checks for the four bullets in the user report.
+- Current -> Desired: bug closed; CI green.
+- Change: confirm test + manual checks from Step 1; record Action run number in act.md when Job B runs.
+- Depends on: Step 1.
+- Edge cases: report any leftover Stage 7 UI items as out of scope for this stage.
+- Tests: full solution suite via CI.
+- Verify: `Action: #<run_number> — Success`.
 - Done when: Global Definition of Done met.
 - Risk: LOW
 - Confidence: HIGH
 
 ## Global Definition of Done
-- Disabled primary Add on Create glass modal is light accent (green/teal), not light blue.
-- Products glass list Identifier column is readable and correctly formatted.
-- Glass Details shows compatible phone model names (and notes when set).
-- Glass Edit uses a working fit list + modal (Create-style), not the old multi-select; save persists fits.
-- Only files named in steps changed (plus graphify outputs if updated); no Api/auth/DB-init changes; Conventional Commits; CI green with cited run number.
+- Editing a glass product’s compatible phones updates the product’s catalog `Model.Name` via `GlassModelNaming.Build` and find-or-create (same as create), so Identity **Model**, list, and details titles match the remaining phones.
+- Shared old Model rows are left intact for other products; client cannot change ModelId via the form; empty fits rejected.
+- Tests cover remove-one-phone rename; CI green; only the files named above changed (plus graphify outputs if updated).
 
 ## Execution notes
-One step → one commit → STOP for Job B. Actor must not edit plan/audit/TODO. After Reviewer APPROVES this plan (and proposed Stage 7), Planner copies Stage 7 into `.agents/TODO.md` unchecked; Actor starts Step 1 only.
+One step → one commit → STOP for Job B. Actor must not edit plan/audit/TODO. After Reviewer APPROVES, Planner adds Stage 7 to `.agents/TODO.md` unchecked; Actor starts Step 1 only.
