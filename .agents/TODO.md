@@ -3,4 +3,4 @@
 - [x] ~~Stage 3 — Keep real contact details out of sample data and document the Zone Mobile shop party~~
 - [x] ~~Stage 4 — Store the shop phone in appsettings.json and ensure the Zone Mobile shop party at startup~~
 - [ ] stage 5 every apple id in Transactions list Page no matter Direction will get Apple iPhone name for Product field instead of AppleId
-- [ ] stage 6 transactions page default directions should be Sell instead of All
+- [x] ~~stage 6 transactions page default directions should be Sell instead of All~~
