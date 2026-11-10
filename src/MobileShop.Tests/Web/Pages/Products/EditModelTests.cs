@@ -253,18 +253,87 @@ public class EditModelTests : RepoTestBase
     }
 
     [Fact]
-    public async Task Glass_update_replaces_compatible_phone_models()
+    public async Task Glass_update_rebuilds_model_name_without_renaming_shared_model()
     {
-        var (product, existingModelId) = await CreateProductForTypeAsync("Glass");
-        var existingModel = await Context.Models.SingleAsync(model => model.Id == existingModelId);
-        var replacementModel = new Model
-        {
-            ManufacturerId = existingModel.ManufacturerId,
-            CategoryId = existingModel.CategoryId,
-            Name = "Replacement phone model"
-        };
-        Context.Models.Add(replacementModel);
+        var phoneCategory = new Category { Name = "Phone" };
+        var glassCategory = new Category { Name = "Glass" };
+        var phoneManufacturer = new Manufacturer { Name = $"Phone manufacturer {Guid.NewGuid():N}" };
+        var glassManufacturer = new Manufacturer { Name = $"Glass manufacturer {Guid.NewGuid():N}" };
+        Context.Categories.AddRange(phoneCategory, glassCategory);
+        Context.Manufacturers.AddRange(phoneManufacturer, glassManufacturer);
         await Context.SaveChangesAsync();
+
+        var firstPhone = new Model
+        {
+            ManufacturerId = phoneManufacturer.Id,
+            CategoryId = phoneCategory.Id,
+            Name = "iPhone 11"
+        };
+        var secondPhone = new Model
+        {
+            ManufacturerId = phoneManufacturer.Id,
+            CategoryId = phoneCategory.Id,
+            Name = "iPhone 14"
+        };
+        Context.Models.AddRange(firstPhone, secondPhone);
+        await Context.SaveChangesAsync();
+
+        var originalGlassName = MobileShop.Services.DataServices.Shared.GlassModelNaming.Build([firstPhone.Name, secondPhone.Name]);
+        var originalGlassModel = new Model
+        {
+            ManufacturerId = glassManufacturer.Id,
+            CategoryId = glassCategory.Id,
+            Name = originalGlassName
+        };
+        Context.Models.Add(originalGlassModel);
+        await Context.SaveChangesAsync();
+
+        var product = new Product
+        {
+            ModelId = originalGlassModel.Id,
+            ModelNavigation = originalGlassModel,
+            Barcode = Guid.NewGuid().ToString("N")[..12],
+            Price = 100,
+            GlassProfile = new Glass
+            {
+                Notes = "Original notes",
+                ModelFits =
+                [
+                    new GlassModelFit { ModelId = firstPhone.Id, ModelNavigation = firstPhone },
+                    new GlassModelFit { ModelId = secondPhone.Id, ModelNavigation = secondPhone },
+                ]
+            }
+        };
+        var siblingProduct = new Product
+        {
+            ModelId = originalGlassModel.Id,
+            ModelNavigation = originalGlassModel,
+            Barcode = Guid.NewGuid().ToString("N")[..12],
+            Price = 100,
+            GlassProfile = new Glass
+            {
+                ModelFits =
+                [
+                    new GlassModelFit { ModelId = firstPhone.Id, ModelNavigation = firstPhone },
+                    new GlassModelFit { ModelId = secondPhone.Id, ModelNavigation = secondPhone },
+                ]
+            }
+        };
+        Context.Products.AddRange(product, siblingProduct);
+        await Context.SaveChangesAsync();
+
+        var unchanged = await _service.UpdateProductAsync(new EditProductInputModel
+        {
+            ProductId = product.Id,
+            Type = "Glass",
+            Identifier = product.Barcode,
+            Price = product.Price,
+            Notes = "Original notes",
+            CompatibleModels = [firstPhone.Id, secondPhone.Id]
+        });
+        Assert.True(unchanged.Succeeded, unchanged.Message);
+        Assert.False(unchanged.Changed);
+        Assert.Equal(originalGlassModel.Id, product.ModelId);
 
         var result = await _service.UpdateProductAsync(new EditProductInputModel
         {
@@ -272,14 +341,27 @@ public class EditModelTests : RepoTestBase
             Type = "Glass",
             Identifier = product.Barcode,
             Price = product.Price,
-            CompatibleModels = [replacementModel.Id]
+            Notes = "Original notes",
+            CompatibleModels = [firstPhone.Id]
         });
 
         Assert.True(result.Succeeded, result.Message);
-        var glass = await Context.Glasses.AsNoTracking()
+        Context.ChangeTracker.Clear();
+        var updatedProduct = await Context.Products.AsNoTracking()
+            .Include(item => item.ModelNavigation)
+            .SingleAsync(item => item.Id == product.Id);
+        var updatedGlass = await Context.Glasses.AsNoTracking()
             .Include(item => item.ModelFits)
             .SingleAsync(item => item.ProductId == product.Id);
-        Assert.Equal([replacementModel.Id], glass.ModelFits.Where(fit => !fit.IsDeleted).Select(fit => fit.ModelId));
+        var untouchedSibling = await Context.Products.AsNoTracking()
+            .Include(item => item.ModelNavigation)
+            .SingleAsync(item => item.Id == siblingProduct.Id);
+
+        Assert.Equal(MobileShop.Services.DataServices.Shared.GlassModelNaming.Build([firstPhone.Name]), updatedProduct.ModelNavigation.Name);
+        Assert.NotEqual(originalGlassModel.Id, updatedProduct.ModelId);
+        Assert.Equal(originalGlassModel.Id, untouchedSibling.ModelId);
+        Assert.Equal(originalGlassName, untouchedSibling.ModelNavigation.Name);
+        Assert.Equal([firstPhone.Id], updatedGlass.ModelFits.Where(fit => !fit.IsDeleted).Select(fit => fit.ModelId));
     }
 
     [Fact]
@@ -340,6 +422,18 @@ public class EditModelTests : RepoTestBase
             ? (await Context.Cases.AsNoTracking().Include(item => item.ModelFits).SingleAsync(item => item.ProductId == product.Id)).ModelFits.Where(fit => !fit.IsDeleted).Select(fit => fit.ModelId).ToArray()
             : (await Context.Glasses.AsNoTracking().Include(item => item.ModelFits).SingleAsync(item => item.ProductId == product.Id)).ModelFits.Where(fit => !fit.IsDeleted).Select(fit => fit.ModelId).ToArray();
         Assert.Equal([compatibleModelId.Value], selectedIds);
+
+        if (type == "Glass")
+        {
+            input.CompatibleModels = [];
+            var empty = await _service.UpdateProductAsync(input);
+            Assert.False(empty.Succeeded);
+            Assert.Equal(nameof(input.CompatibleModels), empty.ErrorField);
+            var stillUnchanged = await Context.Glasses.AsNoTracking()
+                .Include(item => item.ModelFits)
+                .SingleAsync(item => item.ProductId == product.Id);
+            Assert.Equal([compatibleModelId.Value], stillUnchanged.ModelFits.Where(fit => !fit.IsDeleted).Select(fit => fit.ModelId));
+        }
     }
 
     private async Task<(Product Product, int? CompatibleModelId)> CreateProductForTypeAsync(string type)
@@ -393,8 +487,11 @@ public class EditModelTests : RepoTestBase
             case "Case":
             case "Glass":
                 var phoneCategory = new Category { Name = "Phone" };
+                var glassCategory = type == "Glass" ? new Category { Name = "Glass" } : null;
                 var phoneManufacturer = new Manufacturer { Name = $"Phone manufacturer {Guid.NewGuid():N}" };
                 Context.Categories.Add(phoneCategory);
+                if (glassCategory is not null)
+                    Context.Categories.Add(glassCategory);
                 Context.Manufacturers.Add(phoneManufacturer);
                 await Context.SaveChangesAsync();
                 var phoneModel = new Model { ManufacturerId = phoneManufacturer.Id, CategoryId = phoneCategory.Id, Name = "Compatible phone model" };

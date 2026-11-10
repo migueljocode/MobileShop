@@ -1115,6 +1115,9 @@ public class ProductsDataService(
         if (actualType is "Case" or "Glass")
         {
             selectedCompatibleModels = [];
+            if (actualType == "Glass" && (input.CompatibleModels is null || input.CompatibleModels.Count == 0))
+                return new ServiceResult(false, "Add at least one compatible phone.", nameof(input.CompatibleModels), null);
+
             var selectedIds = new HashSet<int>();
             foreach (var modelId in input.CompatibleModels ?? [])
             {
@@ -1247,6 +1250,41 @@ public class ProductsDataService(
                 if (selectedCompatibleModels is not null)
                 {
                     SynchronizeGlassModelFits(product.GlassProfile, selectedCompatibleModels);
+                }
+
+                var compatibleGlassModels = selectedCompatibleModels ??
+                    product.GlassProfile.ModelFits
+                        .Where(fit => !fit.IsDeleted)
+                        .Select(fit => fit.ModelNavigation)
+                        .ToList();
+                if (compatibleGlassModels.Count == 0)
+                    return new ServiceResult(false, "Add at least one compatible phone.", nameof(input.CompatibleModels), null);
+
+                var glassModelName = GlassModelNaming.Build(compatibleGlassModels.Select(model => model.Name).ToList());
+                if (!string.Equals(product.ModelNavigation.Name, glassModelName, StringComparison.Ordinal))
+                {
+                    var glassCategory = await categories.FindAsync(category => category.Name == "Glass");
+                    if (glassCategory is null)
+                        return new ServiceResult(false, "The 'Glass' category is missing from the catalog seed data.", nameof(input.CompatibleModels), null);
+
+                    var glassModel = await models.FindAsync(model =>
+                        model.ManufacturerId == product.ModelNavigation.ManufacturerId &&
+                        model.CategoryId == glassCategory.Id &&
+                        model.Name == glassModelName);
+
+                    if (glassModel is null)
+                    {
+                        glassModel = new Model
+                        {
+                            ManufacturerId = product.ModelNavigation.ManufacturerId,
+                            CategoryId = glassCategory.Id,
+                            Name = glassModelName,
+                        };
+                        await models.AddAsync(glassModel, persist: false);
+                    }
+
+                    product.ModelId = glassModel.Id;
+                    product.ModelNavigation = glassModel;
                 }
                 break;
         }

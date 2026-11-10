@@ -11,7 +11,7 @@
 - `CaptureEditableState` already includes `product.ModelId` and glass fit ModelIds, so re-pointing ModelId is enough for change detection.
 - Out of scope: Case products, Create path (already correct), Api, auth, DB init, UI chrome, Stage 7 UI polish items from the prior plan unless this step necessarily touches the same files.
 
-## [ ] Step 1 — On glass update, rebuild catalog Model name from remaining fits
+## ~~[x] Step 1 — On glass update, rebuild catalog Model name from remaining fits~~
 - Files: inspect: `src/MobileShop.Services/DataServices/Shared/GlassModelNaming.cs`, create path in `ProductsDataService` (~719–740) that builds `glassModelName` and find-or-creates `Model`, glass `case "Glass":` in `UpdateProductAsync` (~1239–1244), `EditIncludes`, `CaptureEditableState` Glass arm; modify: `src/MobileShop.Services/DataServices/Dal/ProductsDataService.cs`; tests: `src/MobileShop.Tests/Web/Pages/Products/EditModelTests.cs` (or a dedicated service test next to existing update tests); do not touch: `src/MobileShop.Api`, Razor pages unless a binding bug is proven.
 - Symbols: `UpdateProductAsync`; `SynchronizeGlassModelFits`; `GlassModelNaming.Build`; `models` (`IBaseRepo<Model>`); `categories` (Glass category); `product.ModelId` / `product.ModelNavigation`.
 - Current -> Desired: after a successful glass edit that changes the set of non-deleted compatible phone models, the product’s catalog model name equals `GlassModelNaming.Build` of the remaining phone model names (same rules as create: sorted, distinct, ` / ` separator, ` Glass` suffix, length limits). List/Details/Edit Identity **Model** field show the new label after reload. Fits-only changes with no name change leave behavior unchanged.
