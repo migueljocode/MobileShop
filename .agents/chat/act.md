@@ -1,6 +1,6 @@
-Commit: 29b2927 — fix(products): sync glass Model name with compatible phones
-Verification: Action: unavailable (not pushed); `dotnet test src/MobileShop.slnx --no-restore --nologo` — 581 passed; `git diff --check` — passed.
-Limitations: No CI run; the update is local and has not been pushed.
-Friction noted: Initial test runs exposed a missing test namespace and a Glass category omitted from an existing fixture; both were fixed.
-Problems: CI evidence is unavailable because the commit has not been pushed.
-Status: BLOCKED
+Commit: c651034 — fix(products): make model names unique ignoring case
+Verification: Action: #762 — Pending; `dotnet test src/MobileShop.Tests/MobileShop.Tests.csproj --filter "FullyQualifiedName~ProductsDataServiceTests" --nologo --verbosity minimal` — 126 passed.
+Limitations: CI is still running in GitHub Actions; the step is implemented and locally validated, but the remote workflow result is not final yet.
+Friction noted: None.
+Problems: None.
+Status: COMPLETE
