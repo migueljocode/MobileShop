@@ -57,7 +57,21 @@ else
     <div class="table-responsive">
     <table class="data-table">
         <thead>
-            <tr><th scope="col">Role</th><th scope="col">Name</th><th scope="col">Phone</th><th scope="col">National ID</th><th scope="col">Seller type</th><th scope="col">@Model.ActivityColumnLabel</th><th scope="col"><span class="visually-hidden">Actions</span></th></tr>
+            <tr>
+                <th scope="col">Role</th>
+                <th scope="col">Name</th>
+                <th scope="col">Phone</th>
+                @if (Model.Type is "all" or "customers")
+                {
+                    <th scope="col">National ID</th>
+                }
+                @if (Model.Type is "all" or "sellers")
+                {
+                    <th scope="col">Seller type</th>
+                }
+                <th scope="col">@Model.ActivityColumnLabel</th>
+                <th scope="col"><span class="visually-hidden">Actions</span></th>
+            </tr>
         </thead>
         <tbody>
             @foreach (var person in Model.People)
@@ -66,8 +80,14 @@ else
                     <td>@person.Role</td>
                     <td dir="auto">@person.Name</td>
                     <td dir="auto" class="num">@person.PhoneNumber</td>
-                    <td dir="auto">@(person.NationalId ?? "N/A")</td>
-                    <td>@(person.EntityType ?? "N/A")</td>
+                    @if (Model.Type is "all" or "customers")
+                    {
+                        <td dir="auto">@(person.NationalId ?? "N/A")</td>
+                    }
+                    @if (Model.Type is "all" or "sellers")
+                    {
+                        <td>@(person.EntityType ?? "N/A")</td>
+                    }
                     <td>@person.ActivityCount</td>
                     <td><a asp-page="@person.DetailsPage" asp-route-id="@person.Id">Details</a></td>
                 </tr>

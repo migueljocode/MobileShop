@@ -9,7 +9,7 @@
 - No service, model, or API changes required unless a test asserts fixed column headers.
 - Risk is low; only watch colspan/empty-state and sort toolbar (unchanged).
 
-## [ ] Step 1 — Conditionally render National ID and Seller type columns
+## ~~[x] Step 1 — Conditionally render National ID and Seller type columns~~
 - Files: inspect: `src/MobileShop.Web/Pages/People/Index.cshtml`, `Index.cshtml.cs` (`Type`, `PersonRow`); modify: `Index.cshtml` only; do not touch: data service, create pages, Api.
 - Symbols: `Model.Type` (`"all"` | `"customers"` | `"sellers"`); `PersonRow.NationalId`, `PersonRow.EntityType`.
 - Current -> Desired:
