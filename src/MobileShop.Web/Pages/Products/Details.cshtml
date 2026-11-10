@@ -115,7 +115,7 @@
                 <dt class="col-sm-4 text-muted">Speed</dt>
                 <dd class="col-sm-8">@(Model.Product.Speed?.ToString() ?? "N/A") MB/s</dd>
             }
-            @if (Model.Product.Type == "Case")
+            @if (Model.Product.Type is "Case" or "Glass")
             {
                 <dt class="col-sm-4 text-muted">Compatible models</dt>
                 <dd class="col-sm-8">
@@ -133,6 +133,11 @@
                         </ul>
                     }
                 </dd>
+                @if (Model.Product.Type == "Glass")
+                {
+                    <dt class="col-sm-4 text-muted">Notes</dt>
+                    <dd class="col-sm-8">@(string.IsNullOrWhiteSpace(Model.Product.Notes) ? "N/A" : Model.Product.Notes)</dd>
+                }
             }
         </dl>
     </div>

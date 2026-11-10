@@ -103,6 +103,10 @@
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
     <script src="~/js/create-product-pricing.js" asp-append-version="true"></script>
+    @if (Model.Product?.Type == "Glass")
+    {
+        <script src="~/js/create-glass-fits.js" asp-append-version="true"></script>
+    }
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const rows = document.getElementById('powerBankPortRows');

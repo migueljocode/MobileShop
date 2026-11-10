@@ -10,7 +10,7 @@
 - Step 4 (Edit): HIGH risk for scope creep. Create uses chip list + modal (`create-glass-fits.js`); Edit still uses a non-working multi `<select>`. Prefer reuse of create markup/JS patterns on Edit for Glass only; do not redesign Case in this stage unless required for shared partial safety.
 - Do not touch `src/MobileShop.Api`, auth, DB init, or glass create/save business rules beyond display.
 
-## [ ] Step 1 — Disabled primary Add button uses accent (light green/teal), not Bootstrap blue
+## ~~[x] Step 1 — Disabled primary Add button uses accent (light green/teal), not Bootstrap blue~~
 - Files: inspect: `src/MobileShop.Web/wwwroot/css/controls.css`, `src/MobileShop.Web/wwwroot/css/overlays.css` (`.share-editor__save:disabled`); modify: `src/MobileShop.Web/wwwroot/css/controls.css`; do not touch: page markup for the modal button class (`btn btn-primary` stays).
 - Symbols: `.btn-primary`, `.btn-success` block already sets `--bs-btn-bg: var(--accent)`; Bootstrap’s default disabled primary stays blue because `--bs-btn-disabled-*` is unset in controls.
 - Current -> Desired: disabled `#addCompatiblePhoneBtn` (and any other `.btn-primary:disabled` / `.btn-success:disabled`) renders with light accent fill (same approach as `.share-editor__save:disabled`: `color-mix(in srgb, var(--accent) 45%, white)` for bg/border, dark readable ink), not light blue.
@@ -23,7 +23,7 @@
 - Risk: LOW
 - Confidence: HIGH
 
-## [ ] Step 2 — Products list Identifier column for glass is not malformed
+## ~~[x] Step 2 — Products list Identifier column for glass is not malformed~~
 - Files: inspect: `src/MobileShop.Web/Pages/Products/Index.cshtml` (Identifier `<td class="num">`), `src/MobileShop.Web/wwwroot/css/surfaces.css` (`.num` / `td.num`), glass projection in `ProductsDataService.GetInventoryAsync` (~lines 113–126); modify: only what the inspection requires (prefer Index markup and/or glass projection string; avoid broad CSS changes).
 - Symbols: `ProductListItemViewModel.Identifier`; glass `project` lambda `"Barcode: " + product.Barcode`; `td.num`.
 - Current -> Desired: Identifier cells for glass (and other barcode types if the same bug appears) render a clear, correctly spaced label+value (or barcode-only if that matches product convention), without numeric-class distortion, missing space, or broken layout under `?type=glass&sortBy=name&sortDirection=asc`.
@@ -36,7 +36,7 @@
 - Risk: LOW
 - Confidence: MEDIUM (exact malformation not re-checked in a live browser in this plan pass)
 
-## [ ] Step 3 — Glass Details shows compatible phones (and notes)
+## ~~[x] Step 3 — Glass Details shows compatible phones (and notes)~~
 - Files: inspect: `ProductsDataService.GetDetailsAsync` glass branch (~205–221), Case branch for pattern, `ProductDetailsViewModel.CompatibleModels` / `Notes`, `Details.cshtml` Case-only Compatible block; modify: `src/MobileShop.Services/DataServices/Dal/ProductsDataService.cs`, `src/MobileShop.Web/Pages/Products/Details.cshtml`; do not touch: Api, create path.
 - Symbols: `GetDetailsAsync`; `ProductDetailsViewModel`; `GlassProfile.ModelFits`; includes already list `"GlassProfile.ModelFits.ModelNavigation"`.
 - Current -> Desired: `/Products/Details?id={glassId}&type=glass` lists each compatible phone model name (same shape as Case). Notes from `GlassProfile.Notes` when present.
@@ -49,7 +49,7 @@
 - Risk: LOW
 - Confidence: HIGH
 
-## [ ] Step 4 — Edit glass uses functioning compatible-phones list (not old multi-select)
+## ~~[x] Step 4 — Edit glass uses functioning compatible-phones list (not old multi-select)~~
 - Files: inspect: `CreateGlass.cshtml` + `wwwroot/js/create-glass-fits.js` + glass-fit CSS in `controls.css`, `Edit.cshtml` / `Edit.cshtml.cs`, `_ProductEditForm.cshtml` Glass (and Case) blocks, `ProductsDataService` update path for `CompatibleModels` / `SynchronizeGlassModelFits`; modify: `_ProductEditForm.cshtml` (Glass section), `Edit.cshtml` Scripts if needed, `Edit.cshtml.cs` handlers as required, optionally extract or reuse JS; do not touch: Api, create save rules, Case section unless a shared partial forces a minimal safe tweak.
 - Symbols: `Product.CompatibleModels` on edit model; `CompatibleModelOptions`; `SynchronizeGlassModelFits`; create’s `glassFitList` / `Input.CompatibleModelIds` pattern.
 - Current -> Desired: Edit glass page shows the same style of compatible-phones list as Create (list of selected fits + Add phone modal with manufacturer/model + optional inline create), posts the selected model IDs, and save persists via existing update + `SynchronizeGlassModelFits`. Old `<select multiple>` for Glass is removed.

@@ -162,6 +162,8 @@ public class EditModelTests : RepoTestBase
             case "Glass":
                 Assert.Contains(compatibleModelId!.Value, page.Product.CompatibleModels);
                 Assert.Contains(page.CompatibleModelOptions, option => option.Id == compatibleModelId.Value);
+                if (type == "Glass")
+                    Assert.Contains(page.SelectedGlassFits, option => option.Id == compatibleModelId.Value);
                 break;
             case "Laptop":
                 Assert.Equal(13.3m, page.Product.DisplaySize);
@@ -248,6 +250,36 @@ public class EditModelTests : RepoTestBase
 
         if (type == "Apple ID")
             Assert.Equal("original plaintext password", (await Context.AppleIds.AsNoTracking().SingleAsync(item => item.ProductId == product.Id)).Password);
+    }
+
+    [Fact]
+    public async Task Glass_update_replaces_compatible_phone_models()
+    {
+        var (product, existingModelId) = await CreateProductForTypeAsync("Glass");
+        var existingModel = await Context.Models.SingleAsync(model => model.Id == existingModelId);
+        var replacementModel = new Model
+        {
+            ManufacturerId = existingModel.ManufacturerId,
+            CategoryId = existingModel.CategoryId,
+            Name = "Replacement phone model"
+        };
+        Context.Models.Add(replacementModel);
+        await Context.SaveChangesAsync();
+
+        var result = await _service.UpdateProductAsync(new EditProductInputModel
+        {
+            ProductId = product.Id,
+            Type = "Glass",
+            Identifier = product.Barcode,
+            Price = product.Price,
+            CompatibleModels = [replacementModel.Id]
+        });
+
+        Assert.True(result.Succeeded, result.Message);
+        var glass = await Context.Glasses.AsNoTracking()
+            .Include(item => item.ModelFits)
+            .SingleAsync(item => item.ProductId == product.Id);
+        Assert.Equal([replacementModel.Id], glass.ModelFits.Where(fit => !fit.IsDeleted).Select(fit => fit.ModelId));
     }
 
     [Fact]

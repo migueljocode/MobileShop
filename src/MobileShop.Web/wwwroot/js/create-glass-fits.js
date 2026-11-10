@@ -3,7 +3,7 @@
     'use strict';
 
     document.addEventListener('DOMContentLoaded', function () {
-        var form = document.getElementById('productCreateForm');
+        var form = document.getElementById('productCreateForm') || document.getElementById('productEditForm');
         var list = document.getElementById('glassFitList');
         var template = document.getElementById('glassFitTemplate');
         var emptyText = document.getElementById('glassFitEmpty');
@@ -18,11 +18,12 @@
         var newManufacturerRow = document.getElementById('newPhoneManufacturerRow');
         var newModelRow = document.getElementById('newPhoneModelRow');
         var glassManufacturer = document.getElementById('glassManufacturerSelect');
+        var saveGlassManufacturerButton = document.getElementById('saveGlassManufacturerBtn');
         var antiforgery = document.querySelector('input[name="__RequestVerificationToken"]');
 
         if (!form || !list || !template || !emptyText || !liveRegion || !validation || !openButton ||
             !modalEl || !phoneManufacturer || !phoneModel || !popupError || !addButton ||
-            !newManufacturerRow || !newModelRow || !glassManufacturer) {
+            !newManufacturerRow || !newModelRow) {
             return;
         }
 
@@ -32,7 +33,7 @@
 
         function selectedIds() {
             return items().map(function (item) {
-                return item.querySelector('input[name="Input.CompatibleModelIds"]').value;
+                return item.querySelector('[data-fit-model-id]').value;
             });
         }
 
@@ -75,7 +76,7 @@
             var fragment = template.content.cloneNode(true);
             var item = fragment.querySelector('.glass-fit-item');
             item.querySelector('[data-fit-label]').textContent = label;
-            item.querySelector('input[name="Input.CompatibleModelIds"]').value = id;
+            item.querySelector('[data-fit-model-id]').value = id;
             var remove = item.querySelector('[data-fit-remove]');
             remove.setAttribute('aria-label', 'Remove ' + label);
             remove.title = 'Remove ' + label;
@@ -200,7 +201,7 @@
             try {
                 var created = await postCreate('CreateManufacturer', { name: name });
                 phoneManufacturer.appendChild(new Option(created.name, created.id, true, true));
-                glassManufacturer.appendChild(new Option(created.name, created.id));
+                if (glassManufacturer) glassManufacturer.appendChild(new Option(created.name, created.id));
                 newManufacturerRow.classList.add('d-none');
                 input.value = '';
                 setPopupError('');
@@ -231,7 +232,7 @@
             }
         });
 
-        document.getElementById('saveGlassManufacturerBtn').addEventListener('click', async function () {
+        if (saveGlassManufacturerButton) saveGlassManufacturerButton.addEventListener('click', async function () {
             var input = document.getElementById('newGlassManufacturerName');
             var name = input.value.trim();
             if (!name) return;

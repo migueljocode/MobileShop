@@ -222,7 +222,14 @@ public class ProductsDataService(
                     product.GuaranteeProfile == null
                         ? "None"
                         : product.GuaranteeProfile.Corporation + " until " + product.GuaranteeProfile.ExpirationDate,
-                    product.SecondHandProfile != null));
+                        product.SecondHandProfile != null)
+                    {
+                        CompatibleModels = product.GlassProfile!.ModelFits
+                            .Where(fit => !fit.IsDeleted)
+                            .Select(fit => fit.ModelNavigation.Name)
+                            .ToList(),
+                        Notes = product.GlassProfile!.Notes,
+                    });
         }
         else if (string.Equals(type, "appleid", StringComparison.OrdinalIgnoreCase))
         {

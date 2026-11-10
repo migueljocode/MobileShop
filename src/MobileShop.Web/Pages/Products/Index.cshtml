@@ -134,7 +134,7 @@ else
                 <tr>
                     <td>@p.Type</td>
                     <td dir="auto">@p.Name</td>
-                    <td dir="auto" class="num">@p.Identifier</td>
+                    <td dir="auto" class="@(!string.IsNullOrEmpty(p.Identifier) && p.Identifier.All(char.IsDigit) ? "num" : null)">@p.Identifier</td>
                     <td>@p.PartNumberLabel</td>
                     <td>@(string.IsNullOrWhiteSpace(p.Color) ? "N/A" : p.Color)</td>
                     <td>

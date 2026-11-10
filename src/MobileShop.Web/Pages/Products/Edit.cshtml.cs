@@ -9,6 +9,8 @@ public class EditModel(
     public IReadOnlyList<string> Corporations { get; private set; } = [];
     public IReadOnlyList<DropdownOptionViewModel> CableConnectors { get; private set; } = [];
     public IReadOnlyList<DropdownOptionViewModel> CompatibleModelOptions { get; private set; } = [];
+    public IReadOnlyList<DropdownOptionViewModel> Manufacturers { get; private set; } = [];
+    public IReadOnlyList<DropdownOptionViewModel> SelectedGlassFits { get; private set; } = [];
 
     public async Task<IActionResult> OnGetAsync(int id, string? type = null)
     {
@@ -45,6 +47,28 @@ public class EditModel(
 
         var options = await dataService.GetPartNumbersAsync(modelId);
         return new JsonResult(options.Select(o => new { o.Id, o.Name }));
+    }
+
+    public async Task<IActionResult> OnGetModelsAsync(int manufacturerId)
+    {
+        var options = manufacturerId > 0 ? await dataService.GetModelsAsync(manufacturerId, "Phone") : [];
+        return new JsonResult(options.Select(option => new { option.Id, option.Name }));
+    }
+
+    public async Task<IActionResult> OnPostCreateManufacturerAsync(string name)
+    {
+        var result = await dataService.CreateManufacturerAsync(name);
+        if (!result.Succeeded)
+            return new JsonResult(new { error = result.Error! }) { StatusCode = result.StatusCode };
+        return new JsonResult(new { result.Option!.Id, result.Option.Name });
+    }
+
+    public async Task<IActionResult> OnPostCreateModelAsync(int manufacturerId, string name)
+    {
+        var result = await dataService.CreateModelAsync(manufacturerId, name);
+        if (!result.Succeeded)
+            return new JsonResult(new { error = result.Error! }) { StatusCode = result.StatusCode };
+        return new JsonResult(new { result.Option!.Id, result.Option.Name });
     }
 
     public async Task<IActionResult> OnPostAsync()
@@ -123,11 +147,26 @@ public class EditModel(
 
         if (type is "Case" or "Glass")
         {
-            var manufacturers = await dataService.GetManufacturersAsync();
+            Manufacturers = await dataService.GetManufacturersAsync();
             var modelOptions = new List<DropdownOptionViewModel>();
-            foreach (var manufacturer in manufacturers)
-                modelOptions.AddRange(await dataService.GetModelsAsync(manufacturer.Id));
+            var glassFitLabels = new Dictionary<int, string>();
+            foreach (var manufacturer in Manufacturers)
+            {
+                var models = await dataService.GetModelsAsync(manufacturer.Id);
+                modelOptions.AddRange(models);
+                foreach (var model in models)
+                    glassFitLabels[model.Id] = $"{manufacturer.Name} {model.Name}";
+            }
             CompatibleModelOptions = modelOptions.OrderBy(option => option.Name).ToList().AsReadOnly();
+            if (type == "Glass")
+            {
+                SelectedGlassFits = Product.CompatibleModels
+                    .Distinct()
+                    .Where(glassFitLabels.ContainsKey)
+                    .Select(id => new DropdownOptionViewModel(id, glassFitLabels[id]))
+                    .ToList()
+                    .AsReadOnly();
+            }
         }
     }
 

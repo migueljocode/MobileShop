@@ -276,14 +276,23 @@ public class ProductsDataServiceTests : RepoTestBase
     [Fact]
     public async Task GetInventoryRowsAsync_includes_glass_products_and_supports_glass_filter()
     {
-        SeedCatalog(out _, out _);
+        SeedCatalog(out var phoneModel, out _);
         var glassCategory = Context.Categories.Single(c => c.Name == "Glass");
         var manufacturer = Context.Manufacturers.Single(m => m.Name == "Apple");
         var glassModel = new Model { ManufacturerId = manufacturer.Id, CategoryId = glassCategory.Id, Name = "iPhone 16 Glass" };
         Context.Models.Add(glassModel);
         Context.SaveChanges();
 
-        var product = new Product { ModelId = glassModel.Id, Barcode = "GLASS123456", Price = 120, GlassProfile = new Glass() };
+        var glass = new Glass
+        {
+            Notes = "Tempered glass",
+            ModelFits =
+            [
+                new GlassModelFit { ModelId = phoneModel.Id, ModelNavigation = phoneModel },
+                new GlassModelFit { ModelId = phoneModel.Id, ModelNavigation = phoneModel, IsDeleted = true },
+            ],
+        };
+        var product = new Product { ModelId = glassModel.Id, Barcode = "GLASS123456", Price = 120, GlassProfile = glass };
         Context.Products.Add(product);
         Context.SaveChanges();
 
@@ -294,6 +303,11 @@ public class ProductsDataServiceTests : RepoTestBase
         Assert.Equal("Barcode: GLASS123456", row.Identifier);
         Assert.Single(glassRows);
         Assert.Equal("Glass", glassRows[0].Type);
+
+        var details = await _service.GetDetailsAsync(product.Id, "glass");
+        Assert.NotNull(details);
+        Assert.Equal(["iPhone 16"], details!.CompatibleModels);
+        Assert.Equal("Tempered glass", details.Notes);
     }
 
     [Fact]

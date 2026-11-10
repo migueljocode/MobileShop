@@ -1,0 +1,8 @@
+@model MobileShop.Models.ViewModels.Web.DropdownOptionViewModel
+<li class="glass-fit-item">
+    <span class="glass-fit-item__label" data-fit-label>@Model.Name</span>
+    <input type="hidden" name="Product.CompatibleModels" value="@Model.Id" data-fit-model-id />
+    <button type="button" class="glass-fit-remove" data-fit-remove aria-label="Remove @Model.Name" title="Remove @Model.Name">
+        <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M4 4l8 8M12 4l-8 8" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+    </button>
+</li>
