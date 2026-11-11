@@ -1,6 +1,6 @@
-Commit: c79a779 — fix(web): align people phone column left
-Verification: Action: #765 — queued; manually confirmed the phone cells no longer use the numeric alignment class.
-Limitations: CI is still queued for the pushed markup-only change.
+Commit: e6d67f2 — feat(people): add edit and soft-delete flows
+Verification: Action: #766 — Pending; targeted tests: 146 passed, 0 failed.
+Limitations: CI is still running.
 Friction noted: None.
 Problems: None.
 Status: COMPLETE
