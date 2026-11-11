@@ -367,6 +367,53 @@ public class PeopleDataServiceTests : RepoTestBase
     }
 
     [Fact]
+    public async Task UpdateCustomerAsync_updates_person_and_national_id()
+    {
+        var customer = AddCustomer("Ali", "Rezaei", "09120000001", "1000000001");
+
+        var result = await _service.UpdateCustomerAsync(customer.Id, new CreateCustomerInputModel
+        {
+            FirstName = "Ali",
+            LastName = "Hashemi",
+            PhoneNumber = "09120000099",
+            NationalId = "1000000099",
+        });
+
+        Assert.True(result.Succeeded);
+        var saved = Context.Customers.IgnoreQueryFilters().Single(c => c.Id == customer.Id);
+        Assert.Equal("1000000099", saved.NationalId);
+        Assert.Equal("Ali", saved.PersonNavigation.FirstName);
+        Assert.Equal("Hashemi", saved.PersonNavigation.LastName);
+    }
+
+    [Fact]
+    public async Task SoftDeleteCustomerAsync_and_SoftDeleteSellerAsync_block_zone_mobile_and_soft_delete_roles()
+    {
+        TestDataHelpers.SeedShopSentinels(Context);
+
+        var customer = AddCustomer("Ali", "Rezaei", "09120000001", "1000000001");
+        var seller = AddSeller("Sara", "Karimi", "09120000002");
+
+        var customerDelete = await _service.SoftDeleteCustomerAsync(customer.Id);
+        Assert.True(customerDelete.Succeeded);
+        Assert.True(Context.Customers.IgnoreQueryFilters().Single(c => c.Id == customer.Id).IsDeleted);
+
+        var zoneCustomer = Context.Customers.Single(c => c.PersonNavigation.FirstName == "Zone");
+        var zoneSeller = Context.Sellers.Single(s => s.PersonNavigation.FirstName == "Zone");
+        var rejectCustomer = await _service.SoftDeleteCustomerAsync(zoneCustomer.Id);
+        var rejectSeller = await _service.SoftDeleteSellerAsync(zoneSeller.Id);
+
+        Assert.False(rejectCustomer.Succeeded);
+        Assert.False(rejectSeller.Succeeded);
+        Assert.False(Context.Customers.IgnoreQueryFilters().Single(c => c.Id == zoneCustomer.Id).IsDeleted);
+        Assert.False(Context.Sellers.IgnoreQueryFilters().Single(s => s.Id == zoneSeller.Id).IsDeleted);
+
+        var sellerDelete = await _service.SoftDeleteSellerAsync(seller.Id);
+        Assert.True(sellerDelete.Succeeded);
+        Assert.True(Context.Sellers.IgnoreQueryFilters().Single(s => s.Id == seller.Id).IsDeleted);
+    }
+
+    [Fact]
     public async Task GetCustomerRowsAsync_purchased_count_ignores_soft_deleted_transactions()
     {
         var customer = AddCustomer("Sara", "Ahmadi", "09120000001", "1000000001");

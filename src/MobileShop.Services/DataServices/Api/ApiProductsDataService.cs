@@ -100,6 +100,10 @@ public class ApiProductsDataService : IProductsDataService
         => throw new NotImplementedException("ApiProductsDataService is not implemented yet.");
 
     /// <inheritdoc />
+    public Task<ServiceResult> SoftDeleteProductAsync(int productId)
+        => throw new NotImplementedException("ApiProductsDataService is not implemented yet.");
+
+    /// <inheritdoc />
     public Task<Product?> GetProductForEditAsync(int id)
         => throw new NotImplementedException("ApiProductsDataService is not implemented yet.");
 }

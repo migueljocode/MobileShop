@@ -34,4 +34,16 @@ public interface IPeopleDataService
     /// <summary>Creates a seller from the submitted input.</summary>
     /// <param name="input">The seller input.</param>
     Task<ServiceResult> CreateSellerAsync(MobileShop.Models.ViewModels.Web.BindModels.CreateSellerInputModel input);
+
+    /// <summary>Updates the customer identity and legal fields.</summary>
+    Task<ServiceResult> UpdateCustomerAsync(int customerId, CreateCustomerInputModel input);
+
+    /// <summary>Updates the seller identity and entity type.</summary>
+    Task<ServiceResult> UpdateSellerAsync(int sellerId, CreateSellerInputModel input);
+
+    /// <summary>Soft-deletes a customer role unless it is the shop record.</summary>
+    Task<ServiceResult> SoftDeleteCustomerAsync(int customerId);
+
+    /// <summary>Soft-deletes a seller role unless it is the shop record.</summary>
+    Task<ServiceResult> SoftDeleteSellerAsync(int sellerId);
 }

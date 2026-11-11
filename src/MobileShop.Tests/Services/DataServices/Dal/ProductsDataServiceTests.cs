@@ -58,6 +58,20 @@ public class ProductsDataServiceTests : RepoTestBase
     }
 
     [Fact]
+    public async Task SoftDeleteProductAsync_deletes_product_and_hides_it_from_live_queries()
+    {
+        var product = TestDataHelpers.CreateProduct(Context);
+        Context.Phones.Add(new Phone { ProductId = product.Id, IMEI1 = TestDataHelpers.GenerateImei() });
+        Context.SaveChanges();
+
+        var result = await _service.SoftDeleteProductAsync(product.Id);
+
+        Assert.True(result.Succeeded);
+        Assert.Null(await _service.GetDetailsAsync(product.Id, "phone"));
+        Assert.True(Context.Products.IgnoreQueryFilters().Single(p => p.Id == product.Id).IsDeleted);
+    }
+
+    [Fact]
     public async Task GetManufacturersAsync_projects_all_seed_manufacturers()
     {
         SeedCatalog(out _, out _);

@@ -23,6 +23,9 @@
         </div>
         <div class="page-head__actions">
             <a asp-page="/Products/Edit" asp-route-id="@Model.Product.ProductId" asp-route-type="@Model.Product.Type" class="btn btn-primary">Edit</a>
+            <form method="post" asp-page-handler="Delete" asp-route-id="@Model.Product.ProductId" asp-route-type="@Model.Product.Type" style="display:inline;" onsubmit="return confirm('Remove this product?');">
+                <button type="submit" class="btn btn-outline-danger">Remove</button>
+            </form>
             <a asp-page="/Products/Index" asp-route-type="@indexType" class="btn btn-outline-secondary">Back to products</a>
         </div>
     </div>

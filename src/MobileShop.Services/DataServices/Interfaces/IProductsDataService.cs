@@ -104,6 +104,10 @@ public interface IProductsDataService
     /// <param name="input">The product input.</param>
     Task<ServiceResult> UpdateProductAsync(EditProductInputModel input);
 
+    /// <summary>Soft-deletes a live product by ID.</summary>
+    /// <param name="productId">The product identifier.</param>
+    Task<ServiceResult> SoftDeleteProductAsync(int productId);
+
     /// <summary>Gets a product entity by ID with all navigation properties loaded for editing.</summary>
     /// <param name="id">The product identifier.</param>
     Task<Product?> GetProductForEditAsync(int id);

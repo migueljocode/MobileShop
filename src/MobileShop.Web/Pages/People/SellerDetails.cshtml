@@ -9,6 +9,10 @@
             <p class="page-head__sub">Seller</p>
         </div>
         <div class="page-head__actions">
+            <a asp-page="/People/EditSeller" asp-route-id="@Model.SellerId" class="btn btn-primary">Edit</a>
+            <form method="post" asp-page-handler="Delete" asp-route-id="@Model.SellerId" style="display:inline;" onsubmit="return confirm('Remove this seller?');">
+                <button type="submit" class="btn btn-outline-danger">Remove</button>
+            </form>
             <a asp-page="/People/Index" asp-route-type="sellers" class="btn btn-outline-secondary">Back to sellers</a>
         </div>
     </div>

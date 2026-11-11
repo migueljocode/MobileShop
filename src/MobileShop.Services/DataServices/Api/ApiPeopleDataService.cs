@@ -33,4 +33,20 @@ public class ApiPeopleDataService : IPeopleDataService
     /// <inheritdoc />
     public Task<ServiceResult> CreateSellerAsync(MobileShop.Models.ViewModels.Web.BindModels.CreateSellerInputModel input)
         => throw new NotImplementedException("ApiPeopleDataService is not implemented yet.");
+
+    /// <inheritdoc />
+    public Task<ServiceResult> UpdateCustomerAsync(int customerId, CreateCustomerInputModel input)
+        => throw new NotImplementedException("ApiPeopleDataService is not implemented yet.");
+
+    /// <inheritdoc />
+    public Task<ServiceResult> UpdateSellerAsync(int sellerId, CreateSellerInputModel input)
+        => throw new NotImplementedException("ApiPeopleDataService is not implemented yet.");
+
+    /// <inheritdoc />
+    public Task<ServiceResult> SoftDeleteCustomerAsync(int customerId)
+        => throw new NotImplementedException("ApiPeopleDataService is not implemented yet.");
+
+    /// <inheritdoc />
+    public Task<ServiceResult> SoftDeleteSellerAsync(int sellerId)
+        => throw new NotImplementedException("ApiPeopleDataService is not implemented yet.");
 }

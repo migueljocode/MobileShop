@@ -178,6 +178,121 @@ public class PeopleDataService(
     }
 
     /// <inheritdoc />
+    public async Task<ServiceResult> UpdateCustomerAsync(int customerId, CreateCustomerInputModel input)
+    {
+        if (customerId <= 0)
+            return new ServiceResult(false, "The customer could not be found.");
+
+        var customer = await customers.FindTrackedWithIncludesAsync(customerId, "PersonNavigation");
+        if (customer is null)
+            return new ServiceResult(false, "The customer could not be found.");
+
+        var firstName = input.FirstName.Trim();
+        var lastName = input.LastName.Trim();
+        var phone = input.PhoneNumber.Trim();
+        var nationalId = input.NationalId.Trim();
+
+        if (string.IsNullOrWhiteSpace(firstName) || string.IsNullOrWhiteSpace(lastName) || string.IsNullOrWhiteSpace(phone) || string.IsNullOrWhiteSpace(nationalId))
+            return new ServiceResult(false, "All required customer fields must be completed.");
+
+        customer.PersonNavigation.FirstName = firstName;
+        customer.PersonNavigation.LastName = lastName;
+        customer.PersonNavigation.PhoneNumber = phone;
+        customer.NationalId = nationalId;
+
+        var updated = await customers.SaveChangesAsync();
+        if (updated <= 0)
+        {
+            Logger.LogWarning("Failed to update Customer Id={Id}", customerId);
+            return new ServiceResult(false, "The customer could not be updated.");
+        }
+
+        return new ServiceResult(true, null, null, customer.Id);
+    }
+
+    /// <inheritdoc />
+    public async Task<ServiceResult> UpdateSellerAsync(int sellerId, CreateSellerInputModel input)
+    {
+        if (sellerId <= 0)
+            return new ServiceResult(false, "The seller could not be found.");
+
+        var seller = await sellers.FindTrackedWithIncludesAsync(sellerId, "PersonNavigation");
+        if (seller is null)
+            return new ServiceResult(false, "The seller could not be found.");
+
+        var firstName = input.FirstName.Trim();
+        var lastName = input.LastName.Trim();
+        var phone = input.PhoneNumber.Trim();
+
+        if (string.IsNullOrWhiteSpace(firstName) || string.IsNullOrWhiteSpace(lastName) || string.IsNullOrWhiteSpace(phone))
+            return new ServiceResult(false, "All required seller fields must be completed.");
+
+        seller.PersonNavigation.FirstName = firstName;
+        seller.PersonNavigation.LastName = lastName;
+        seller.PersonNavigation.PhoneNumber = phone;
+        seller.EntityType = input.EntityType;
+
+        var updated = await sellers.SaveChangesAsync();
+        if (updated <= 0)
+        {
+            Logger.LogWarning("Failed to update Seller Id={Id}", sellerId);
+            return new ServiceResult(false, "The seller could not be updated.");
+        }
+
+        return new ServiceResult(true, null, null, seller.Id);
+    }
+
+    /// <inheritdoc />
+    public async Task<ServiceResult> SoftDeleteCustomerAsync(int customerId)
+    {
+        if (customerId <= 0)
+            return new ServiceResult(false, "The customer could not be found.");
+
+        var customer = await customers.FindTrackedWithIncludesAsync(customerId, "PersonNavigation");
+        if (customer is null)
+            return new ServiceResult(false, "The customer could not be found.");
+
+        var shopName = customer.PersonNavigation.FirstName + " " + customer.PersonNavigation.LastName;
+        if (string.Equals(shopName, ShopLabels.ZoneMobile, StringComparison.Ordinal))
+            return new ServiceResult(false, "Zone Mobile cannot be removed.");
+
+        customer.IsDeleted = true;
+        var deleted = await customers.SaveChangesAsync();
+        if (deleted <= 0)
+        {
+            Logger.LogWarning("Failed to soft delete Customer Id={Id}", customerId);
+            return new ServiceResult(false, "The customer could not be removed.");
+        }
+
+        return new ServiceResult(true, null, null, customer.Id);
+    }
+
+    /// <inheritdoc />
+    public async Task<ServiceResult> SoftDeleteSellerAsync(int sellerId)
+    {
+        if (sellerId <= 0)
+            return new ServiceResult(false, "The seller could not be found.");
+
+        var seller = await sellers.FindTrackedWithIncludesAsync(sellerId, "PersonNavigation");
+        if (seller is null)
+            return new ServiceResult(false, "The seller could not be found.");
+
+        var shopName = seller.PersonNavigation.FirstName + " " + seller.PersonNavigation.LastName;
+        if (string.Equals(shopName, ShopLabels.ZoneMobile, StringComparison.Ordinal))
+            return new ServiceResult(false, "Zone Mobile cannot be removed.");
+
+        seller.IsDeleted = true;
+        var deleted = await sellers.SaveChangesAsync();
+        if (deleted <= 0)
+        {
+            Logger.LogWarning("Failed to soft delete Seller Id={Id}", sellerId);
+            return new ServiceResult(false, "The seller could not be removed.");
+        }
+
+        return new ServiceResult(true, null, null, seller.Id);
+    }
+
+    /// <inheritdoc />
     public async Task<ServiceResult> CreateCustomerAsync(CreateCustomerInputModel input)
     {
         var customer = new Customer

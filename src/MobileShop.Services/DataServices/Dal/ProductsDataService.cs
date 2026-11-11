@@ -194,6 +194,27 @@ public class ProductsDataService(
     }
 
     /// <inheritdoc />
+    public async Task<ServiceResult> SoftDeleteProductAsync(int productId)
+    {
+        if (productId <= 0)
+            return new ServiceResult(false, "The product could not be found.");
+
+        var product = await products.FindAsync(productId);
+        if (product is null)
+            return new ServiceResult(false, "The product could not be found.");
+
+        product.IsDeleted = true;
+        var deleted = await products.SaveChangesAsync();
+        if (deleted <= 0)
+        {
+            Logger.LogWarning("Failed to soft delete Product Id={Id}", productId);
+            return new ServiceResult(false, "The product could not be removed.");
+        }
+
+        return new ServiceResult(true, null, null, product.Id);
+    }
+
+    /// <inheritdoc />
     public async Task<ProductDetailsViewModel?> GetDetailsAsync(int id, string type)
     {
         type = NormalizeDetailsType(type);

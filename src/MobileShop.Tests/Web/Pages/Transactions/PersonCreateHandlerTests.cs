@@ -40,5 +40,9 @@ public class PersonCreateHandlerTests
         public Task<IReadOnlyList<PartyOptionViewModel>> SearchSellersAsync(string? q, int take = 25) => throw new NotImplementedException();
         public Task<ServiceResult> CreateCustomerAsync(CreateCustomerInputModel input) => Task.FromResult(CreateCustomerResult);
         public Task<ServiceResult> CreateSellerAsync(CreateSellerInputModel input) => throw new NotImplementedException();
+        public Task<ServiceResult> UpdateCustomerAsync(int customerId, CreateCustomerInputModel input) => throw new NotImplementedException();
+        public Task<ServiceResult> UpdateSellerAsync(int sellerId, CreateSellerInputModel input) => throw new NotImplementedException();
+        public Task<ServiceResult> SoftDeleteCustomerAsync(int customerId) => throw new NotImplementedException();
+        public Task<ServiceResult> SoftDeleteSellerAsync(int sellerId) => throw new NotImplementedException();
     }
 }
