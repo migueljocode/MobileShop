@@ -26,6 +26,12 @@
     <DefaultItemExcludes>$(DefaultItemExcludes);**/logs/**</DefaultItemExcludes>
   </PropertyGroup>
 
+  <!-- A plain `dotnet publish` targets the machine it runs on (e.g. linux-x64, osx-arm64, win-x64).
+       Pass -r <RID> to cross-publish. Builds and tests are unaffected: only publishing sets the RID. -->
+  <PropertyGroup Condition="'$(RuntimeIdentifier)' == '' and '$(_IsPublishing)' == 'true'">
+    <RuntimeIdentifier>$(NETCoreSdkPortableRuntimeIdentifier)</RuntimeIdentifier>
+  </PropertyGroup>
+
   <PropertyGroup Condition="'$(RuntimeIdentifier)' != ''">
     <SelfContained>true</SelfContained>
     <PublishSingleFile>true</PublishSingleFile>
@@ -35,6 +41,10 @@
     <DebugSymbols>false</DebugSymbols>
     <CopyOutputSymbolsToPublishDirectory>false</CopyOutputSymbolsToPublishDirectory>
     <PublishDir>$(MSBuildThisFileDirectory)..\..\Publishes\$(RuntimeIdentifier)\</PublishDir>
+    <!-- Keep the output to the executable, appsettings.json and wwwroot: no IIS web.config,
+         no per-language resource folders. -->
+    <IsTransformWebConfigDisabled>true</IsTransformWebConfigDisabled>
+    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
   </PropertyGroup>
 
   <ItemGroup Condition="'$(RuntimeIdentifier)' != ''">
