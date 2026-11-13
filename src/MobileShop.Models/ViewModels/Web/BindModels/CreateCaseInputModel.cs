@@ -5,7 +5,6 @@ public sealed class CreateCaseInputModel
     [Range(1, int.MaxValue, ErrorMessage = "Select a seller.")]
     public int SellerId { get; set; }
     [Required] public int ManufacturerId { get; set; }
-    [Required] public int CompatibleManufacturerId { get; set; }
     public List<int> CompatibleModelIds { get; set; } = [];
     [StringLength(500)] public string? Notes { get; set; }
     [Range(0, MoneyLimits.MaxRials)] public long Price { get; set; }

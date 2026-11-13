@@ -17,8 +17,8 @@
         var addButton = document.getElementById('addCompatiblePhoneBtn');
         var newManufacturerRow = document.getElementById('newPhoneManufacturerRow');
         var newModelRow = document.getElementById('newPhoneModelRow');
-        var glassManufacturer = document.getElementById('glassManufacturerSelect');
-        var saveGlassManufacturerButton = document.getElementById('saveGlassManufacturerBtn');
+        var productManufacturer = document.getElementById('glassManufacturerSelect') || document.getElementById('caseManufacturerSelect');
+        var saveProductManufacturerButton = document.getElementById('saveGlassManufacturerBtn') || document.getElementById('saveCaseManufacturerBtn');
         var antiforgery = document.querySelector('input[name="__RequestVerificationToken"]');
 
         if (!form || !list || !template || !emptyText || !liveRegion || !validation || !openButton ||
@@ -201,7 +201,7 @@
             try {
                 var created = await postCreate('CreateManufacturer', { name: name });
                 phoneManufacturer.appendChild(new Option(created.name, created.id, true, true));
-                if (glassManufacturer) glassManufacturer.appendChild(new Option(created.name, created.id));
+                if (productManufacturer) productManufacturer.appendChild(new Option(created.name, created.id));
                 newManufacturerRow.classList.add('d-none');
                 input.value = '';
                 setPopupError('');
@@ -232,15 +232,17 @@
             }
         });
 
-        if (saveGlassManufacturerButton) saveGlassManufacturerButton.addEventListener('click', async function () {
-            var input = document.getElementById('newGlassManufacturerName');
+        if (saveProductManufacturerButton) saveProductManufacturerButton.addEventListener('click', async function () {
+            var modal = saveProductManufacturerButton.closest('.modal');
+            var input = modal.querySelector('input');
             var name = input.value.trim();
             if (!name) return;
             try {
                 var created = await postCreate('CreateManufacturer', { name: name });
-                glassManufacturer.appendChild(new Option(created.name, created.id, true, true));
+                productManufacturer.appendChild(new Option(created.name, created.id, true, true));
+                phoneManufacturer.appendChild(new Option(created.name, created.id));
                 input.value = '';
-                bootstrap.Modal.getOrCreateInstance(document.getElementById('addGlassManufacturerModal')).hide();
+                bootstrap.Modal.getOrCreateInstance(modal).hide();
             } catch (error) {
                 window.alert(error.message);
             }

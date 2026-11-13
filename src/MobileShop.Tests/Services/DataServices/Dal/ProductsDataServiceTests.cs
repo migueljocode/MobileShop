@@ -2440,7 +2440,7 @@ public class ProductsDataServiceTests : RepoTestBase
         var charger = await _service.CreateChargersAsync(new CreateChargerInputModel { SellerId = 1, ManufacturerId = manufacturer.Id, ModelId = chargerModel.Id, Wattage = 65, Pd = true, PortCount = 2, Price = 2000, ProfitAmount = 500, Count = 2 });
         var powerBank = await _service.CreatePowerBanksAsync(new CreatePowerBankInputModel { SellerId = 1, ManufacturerId = manufacturer.Id, ModelId = powerBankModel.Id, CapacityMah = 20000, MaxWattage = 30, PortCount = 2, PortTypes = [CableConnector.UsbC, CableConnector.UsbA], Pd = true, Price = 3000, Count = 2 });
         var storage = await _service.CreatePortableStoragesAsync(new CreatePortableStorageInputModel { SellerId = 1, ManufacturerId = manufacturer.Id, ModelId = storageModel.Id, StorageKind = StorageKind.Ssd, StorageCapacityId = capacity.Id, Speed = 1000, Price = 4000, Count = 2 });
-        var @case = await _service.CreateCasesAsync(new CreateCaseInputModel { SellerId = 1, ManufacturerId = manufacturer.Id, CompatibleManufacturerId = phoneManufacturer.Id, CompatibleModelIds = [phoneModel.Id], Price = 5000, ProfitPercent = 10, Count = 2 });
+        var @case = await _service.CreateCasesAsync(new CreateCaseInputModel { SellerId = 1, ManufacturerId = manufacturer.Id, CompatibleModelIds = [phoneModel.Id], Price = 5000, ProfitPercent = 10, Count = 2 });
 
         Assert.True(cable.Succeeded);
         Assert.True(charger.Succeeded);
@@ -2483,7 +2483,7 @@ public class ProductsDataServiceTests : RepoTestBase
         await _service.CreateChargersAsync(new CreateChargerInputModel { SellerId = 1, ManufacturerId = manufacturer.Id, ModelId = chargerModel.Id, Wattage = 45, Pd = true, PortCount = 1, Price = 100 });
         await _service.CreatePowerBanksAsync(new CreatePowerBankInputModel { SellerId = 1, ManufacturerId = manufacturer.Id, ModelId = powerBankModel.Id, CapacityMah = 10000, MaxWattage = 20, PortCount = 2, PortTypes = [CableConnector.UsbC, CableConnector.Hdmi], Pd = false, Price = 100 });
         await _service.CreatePortableStoragesAsync(new CreatePortableStorageInputModel { SellerId = 1, ManufacturerId = manufacturer.Id, ModelId = storageModel.Id, StorageKind = StorageKind.UsbFlash, StorageCapacityId = capacity.Id, Speed = 200, Price = 100 });
-        var caseResult = await _service.CreateCasesAsync(new CreateCaseInputModel { SellerId = 1, ManufacturerId = manufacturer.Id, CompatibleManufacturerId = phoneManufacturer.Id, CompatibleModelIds = [phoneModel.Id], Price = 100 });
+        var caseResult = await _service.CreateCasesAsync(new CreateCaseInputModel { SellerId = 1, ManufacturerId = manufacturer.Id, CompatibleModelIds = [phoneModel.Id], Price = 100 });
         var rows = await _service.GetInventoryRowsAsync();
         Assert.Contains(rows, row => row.Type == "Cable");
         Assert.Contains(rows, row => row.Type == "Charger");

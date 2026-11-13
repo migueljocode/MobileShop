@@ -986,19 +986,9 @@ public class ProductsDataService(
             return new ServiceResult(false, "The price is too large.", nameof(CreateCaseInputModel.Price), null);
         if (await manufacturers.FindAsync(input.ManufacturerId) is null)
             return new ServiceResult(false, "Selected manufacturer not found.", nameof(CreateCaseInputModel.ManufacturerId), null);
-        var compatibleManufacturer = await manufacturers.FindAsync(input.CompatibleManufacturerId);
-        if (compatibleManufacturer is null)
-            return new ServiceResult(false, "Selected compatible manufacturer not found.", nameof(CreateCaseInputModel.CompatibleManufacturerId), null);
-        var compatibleModels = new List<Model>();
-        foreach (var modelId in input.CompatibleModelIds.Distinct())
-        {
-            var model = await models.FindAsync(m => m.Id == modelId && m.ManufacturerId == compatibleManufacturer.Id && m.CategoryNavigation.Name == "Phone");
-            if (model is null)
-                return new ServiceResult(false, "One or more selected compatible models were not found.", nameof(CreateCaseInputModel.CompatibleModelIds), null);
-            compatibleModels.Add(model);
-        }
-        if (compatibleModels.Count == 0)
-            return new ServiceResult(false, "Select at least one compatible model.", nameof(CreateCaseInputModel.CompatibleModelIds), null);
+        var (compatibleModels, failure) = await ResolveCompatibleCaseModelsAsync(input.CompatibleModelIds);
+        if (failure is not null)
+            return failure;
 
         var purchaseParties = await ResolvePurchasePartiesAsync(input.SellerId);
         if (purchaseParties.Failure is not null)
@@ -1007,7 +997,7 @@ public class ProductsDataService(
         var caseCategory = await categories.FindAsync(c => c.Name == "Case");
         if (caseCategory is null)
             return new ServiceResult(false, "The 'Case' category is missing from the catalog seed data.", nameof(CreateCaseInputModel.ManufacturerId), null);
-        var caseModelName = compatibleModels[0].Name + " Case";
+        var caseModelName = GlassModelNaming.Build(compatibleModels.Select(model => model.Name).ToList(), " Case");
         var caseModel = await models.FindAsync(m => m.ManufacturerId == input.ManufacturerId && m.CategoryId == caseCategory.Id && m.Name == caseModelName);
         if (caseModel is null)
         {
@@ -1031,6 +1021,23 @@ public class ProductsDataService(
         if (await products.AddRangeAsync(batch) <= 0)
             return new ServiceResult(false, "The case products could not be saved. Check the details and try again.", null, null);
         return new ServiceResult(true, null, null, batch[0].Id);
+    }
+
+    private async Task<(List<Model> Models, ServiceResult? Failure)> ResolveCompatibleCaseModelsAsync(IReadOnlyCollection<int> requestedIds)
+    {
+        var ids = requestedIds.Distinct().ToList();
+        if (ids.Count == 0)
+            return ([], new(false, "Add at least one compatible phone.", nameof(CreateCaseInputModel.CompatibleModelIds), null));
+
+        var resolved = new List<Model>(ids.Count);
+        foreach (var id in ids)
+        {
+            var model = await models.FindAsync(m => m.Id == id && m.CategoryNavigation.Name == "Phone");
+            if (model is null)
+                return ([], new(false, "One or more selected compatible phones were not found.", nameof(CreateCaseInputModel.CompatibleModelIds), null));
+            resolved.Add(model);
+        }
+        return (resolved, null);
     }
 
     public async Task<ServiceResult> UpdateProductAsync(EditProductInputModel input)

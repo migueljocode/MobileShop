@@ -100,7 +100,7 @@ public class CreateAccessoryModelTests : RepoTestBase
         Context.Manufacturers.Add(phoneManufacturer); Context.Categories.Add(phoneCategory); Context.SaveChanges();
         var phoneModel = new Model { ManufacturerId = phoneManufacturer.Id, CategoryId = phoneCategory.Id, Name = "Phone X" };
         Context.Models.Add(phoneModel); Context.SaveChanges();
-        var page = new CreateCaseModel(Service()) { Input = new CreateCaseInputModel { SellerId = 1, ManufacturerId = caseManufacturer.Id, CompatibleManufacturerId = phoneManufacturer.Id, CompatibleModelIds = [phoneModel.Id], Price = 100, Count = 2 } };
+        var page = new CreateCaseModel(Service()) { Input = new CreateCaseInputModel { SellerId = 1, ManufacturerId = caseManufacturer.Id, CompatibleModelIds = [phoneModel.Id], Price = 100, Count = 2 } };
         Assert.IsType<RedirectToPageResult>(await page.OnPostAsync());
         Assert.Equal(2, Context.Cases.Count()); Assert.All(Context.CaseModelFits, x => Assert.Equal(phoneModel.Id, x.ModelId));
     }
