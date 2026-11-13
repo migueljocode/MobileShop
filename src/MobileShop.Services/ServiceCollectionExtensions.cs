@@ -1,3 +1,5 @@
+using Microsoft.EntityFrameworkCore.Diagnostics;
+
 namespace MobileShop.Services;
 
 /// <summary>
@@ -45,7 +47,12 @@ public static class ServiceCollectionExtensions
     private static IServiceCollection AddMobileShopDbContext(this IServiceCollection services)
     {
         services.AddDbContext<AppDbContext>(options =>
-            options.UseSqlite($"Data Source={SolutionPaths.DatabaseFile}"));
+            options
+                .UseSqlite(
+                    $"Data Source={SolutionPaths.DatabaseFile}",
+                    sqlite => sqlite.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery))
+                .ConfigureWarnings(warnings =>
+                    warnings.Ignore(RelationalEventId.NonTransactionalMigrationOperationWarning)));
         return services;
     }
 
