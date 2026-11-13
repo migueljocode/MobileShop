@@ -88,11 +88,8 @@ public sealed partial class QuestPdfGenerator
             });
 
     // Same address, phone and Instagram lines as the sale factor, so both documents carry identical contact details.
-    private static void RenderAppleIdFactorFooter(IContainer container) =>
-        container
-            .BorderTop(1)
-            .BorderColor(AppleIdLine)
-            .Column(column => RenderFactorContactLines(column, 6));
+    private void RenderAppleIdFactorFooter(IContainer container) =>
+        RenderFactorContactFooter(container, AppleIdLine);
 
     private static void RenderAppleIdFactorContent(IContainer container, AppleIdFactorViewModel model) =>
         container.Column(column =>

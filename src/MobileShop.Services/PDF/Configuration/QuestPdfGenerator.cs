@@ -6,9 +6,7 @@ public sealed partial class QuestPdfGenerator(IOptions<PdfSettings> options) : I
 {
     private readonly PdfSettings _settings = options.Value;
 
-    // Matches the space under the address block (page bottom margin + the footer rule: 7pt padding + 1pt border)
-    // so it looks symmetrical with the gap above it; 4pt of the gap already comes from the column spacing.
-    private float FactorAddressTopGap => _settings.MarginBottom + 8 - 4;
+    private float FactorAddressTopGap => _settings.MarginBottom;
 
     // English (Latin) glyphs use SF Pro Rounded; Persian glyphs fall back to Vazirmatn.
     private static readonly string[] FactorFontFamilies = ["SF Pro Rounded", "Vazirmatn"];
@@ -168,6 +166,7 @@ public sealed partial class QuestPdfGenerator(IOptions<PdfSettings> options) : I
                 .Item()
                 .ExtendVertical()
                 .AlignBottom()
+                .PaddingBottom(16)
                 .ShowEntire()
                 .Element(RenderFactorTermsSection);
         });
@@ -392,32 +391,16 @@ public sealed partial class QuestPdfGenerator(IOptions<PdfSettings> options) : I
             });
 
     private void RenderFactorFooter(IContainer container) =>
+        RenderFactorContactFooter(container, "#D9E2EC");
+
+    private void RenderFactorContactFooter(IContainer container, string borderColor) =>
         container
-            .PaddingTop(7)
             .BorderTop(1)
-            .BorderColor("#D9E2EC")
-            .AlignCenter()
-            .Text(text =>
+            .BorderColor(borderColor)
+            .Column(column =>
             {
-                if (!string.IsNullOrWhiteSpace(_settings.ShopAddress))
-                    text.Span(_settings.ShopAddress).FontSize(7.5f).FontColor("#829AB1");
-
-                if (!string.IsNullOrWhiteSpace(_settings.ShopPhone))
-                {
-                    if (!string.IsNullOrWhiteSpace(_settings.ShopAddress))
-                        text.Span("  |  ").FontSize(7.5f).FontColor("#829AB1");
-                    text.Span(_settings.ShopPhone.ToRtlDisplayPhone()).FontSize(7.5f).FontColor("#829AB1");
-                }
-
-                if (!string.IsNullOrWhiteSpace(_settings.ShopInstagram))
-                {
-                    if (
-                        !string.IsNullOrWhiteSpace(_settings.ShopAddress)
-                        || !string.IsNullOrWhiteSpace(_settings.ShopPhone)
-                    )
-                        text.Span("  |  ").FontSize(7.5f).FontColor("#829AB1");
-                    text.Span(_settings.ShopInstagram).FontSize(7.5f).FontColor("#829AB1");
-                }
+                column.Spacing(3);
+                RenderFactorContactLines(column, FactorAddressTopGap);
             });
 
     private void RenderFactorTermsSection(IContainer container) =>
@@ -452,8 +435,6 @@ public sealed partial class QuestPdfGenerator(IOptions<PdfSettings> options) : I
                 });
 
             column.Item().PaddingTop(12).Element(RenderFactorSignatures);
-
-            RenderFactorContactLines(column, FactorAddressTopGap);
         });
 
     /// <summary>Renders the shop address, phone and Instagram lines shared by every factor.</summary>
