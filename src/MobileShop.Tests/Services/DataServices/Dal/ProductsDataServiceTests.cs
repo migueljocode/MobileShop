@@ -1310,6 +1310,28 @@ public class ProductsDataServiceTests : RepoTestBase
     }
 
     [Fact]
+    public async Task CreateAppleIdAsync_creates_missing_category_instead_of_throwing()
+    {
+        SeedCatalog(out _, out var appleIdModel);
+        Context.Models.Remove(appleIdModel);
+        Context.Categories.Remove(Context.Categories.Single(c => c.Name == "AppleId"));
+        Context.SaveChanges();
+        var input = new MobileShop.Models.ViewModels.Web.BindModels.CreateAppleIdInputModel
+        {
+            SellerId = 1,
+            Price = 200,
+            ProfitPercent = 50,
+            Email = "no-category@example.com",
+            Password = "secret123",
+        };
+
+        var result = await _service.CreateAppleIdAsync(input);
+
+        Assert.True(result.Succeeded);
+        Assert.Single(Context.Categories, c => c.Name == "AppleId");
+    }
+
+    [Fact]
     public async Task CreateAppleIdAsync_finished_price_with_percent()
     {
         SeedCatalog(out _, out _);

@@ -467,6 +467,18 @@ public class ProductsDataService(
     }
 
     /// <inheritdoc />
+    // Release databases are built from migrations only, so catalog categories are not pre-seeded
+    // there; create the category on first use instead of failing the save.
+    private async Task<Category?> GetOrCreateCategoryAsync(string name)
+    {
+        var category = await categories.FindAsync(c => c.Name == name);
+        if (category is not null)
+            return category;
+
+        category = new Category { Name = name };
+        return await categories.AddAsync(category) > 0 ? category : null;
+    }
+
     public async Task<DropdownCreateResult> CreateModelAsync(int manufacturerId, string name, string categoryName = "Phone")
     {
         if (string.IsNullOrWhiteSpace(name))
@@ -476,13 +488,9 @@ public class ProductsDataService(
         if (manufacturer is null)
             return new DropdownCreateResult(false, null, "Manufacturer not found.", 404);
 
-        var category = await categories.FindAsync(c => c.Name == categoryName);
+        var category = await GetOrCreateCategoryAsync(categoryName);
         if (category is null)
-        {
-            category = new Category { Name = categoryName };
-            if (await categories.AddAsync(category) <= 0)
-                return new DropdownCreateResult(false, null, $"The '{categoryName}' category could not be saved.", 500);
-        }
+            return new DropdownCreateResult(false, null, $"The '{categoryName}' category could not be saved.", 500);
 
         var trimmed = name.Trim();
         var existing = (await models.FindAllAsync())
@@ -739,9 +747,9 @@ public class ProductsDataService(
         if (compatibleModels.Failure is not null)
             return compatibleModels.Failure;
 
-        var glassCategory = await categories.FindAsync(c => c.Name == "Glass");
+        var glassCategory = await GetOrCreateCategoryAsync("Glass");
         if (glassCategory is null)
-            return new ServiceResult(false, "The 'Glass' category is missing from the catalog seed data.", nameof(CreateGlassInputModel.GlassManufacturerId), null);
+            return new ServiceResult(false, "The 'Glass' category could not be saved.", nameof(CreateGlassInputModel.GlassManufacturerId), null);
 
         var purchaseParties = await ResolvePurchasePartiesAsync(input.SellerId);
         if (purchaseParties.Failure is not null)
@@ -876,8 +884,9 @@ public class ProductsDataService(
         if (manufacturer.Id == 0)
             await manufacturers.AddAsync(manufacturer);
 
-        var category = await categories.FindAsync(c => c.Name == "AppleId")
-            ?? throw new InvalidOperationException("The 'AppleId' category is missing from the catalog seed data.");
+        var category = await GetOrCreateCategoryAsync("AppleId");
+        if (category is null)
+            return new ServiceResult(false, "The 'AppleId' category could not be saved.", null, null);
 
         var model = await models.FindAsync(m =>
                 m.ManufacturerId == manufacturer.Id &&
@@ -994,9 +1003,9 @@ public class ProductsDataService(
         if (purchaseParties.Failure is not null)
             return purchaseParties.Failure;
 
-        var caseCategory = await categories.FindAsync(c => c.Name == "Case");
+        var caseCategory = await GetOrCreateCategoryAsync("Case");
         if (caseCategory is null)
-            return new ServiceResult(false, "The 'Case' category is missing from the catalog seed data.", nameof(CreateCaseInputModel.ManufacturerId), null);
+            return new ServiceResult(false, "The 'Case' category could not be saved.", null, null);
         var caseModelName = GlassModelNaming.Build(compatibleModels.Select(model => model.Name).ToList(), " Case");
         var caseModel = await models.FindAsync(m => m.ManufacturerId == input.ManufacturerId && m.CategoryId == caseCategory.Id && m.Name == caseModelName);
         if (caseModel is null)
@@ -1294,9 +1303,9 @@ public class ProductsDataService(
                 var glassModelName = GlassModelNaming.Build(compatibleGlassModels.Select(model => model.Name).ToList());
                 if (!string.Equals(product.ModelNavigation.Name, glassModelName, StringComparison.Ordinal))
                 {
-                    var glassCategory = await categories.FindAsync(category => category.Name == "Glass");
+                    var glassCategory = await GetOrCreateCategoryAsync("Glass");
                     if (glassCategory is null)
-                        return new ServiceResult(false, "The 'Glass' category is missing from the catalog seed data.", nameof(input.CompatibleModels), null);
+                        return new ServiceResult(false, "The 'Glass' category could not be saved.", nameof(input.CompatibleModels), null);
 
                     var glassModel = await models.FindAsync(model =>
                         model.ManufacturerId == product.ModelNavigation.ManufacturerId &&
