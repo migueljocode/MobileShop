@@ -7,6 +7,9 @@ public class PhoneNumberExtensionsTests
     [InlineData("09115009109", "9109 500 0911")]
     [InlineData("۰۹۱۱ ۵۰۰ ۹۱۰۹", "۹۱۰۹ ۵۰۰ ۰۹۱۱")]
     [InlineData("  ۰۹۱۱   ۵۰۰\t۹۱۰۹  ", "۹۱۰۹ ۵۰۰ ۰۹۱۱")]
+    [InlineData("+98 911 500 9109", "9109 500 911 98+")]
+    [InlineData("+۹۸ ۹۱۱ ۵۰۰ ۹۱۰۹", "۹۱۰۹ ۵۰۰ ۹۱۱ ۹۸+")]
+    [InlineData("+989115009109", "989115009109+")]
     [InlineData("۱۲۳۴۵", "۱۲۳۴۵")]
     public void ToRtlDisplayPhone_reverses_phone_groups(string input, string expected)
         => Assert.Equal(expected, input.ToRtlDisplayPhone());

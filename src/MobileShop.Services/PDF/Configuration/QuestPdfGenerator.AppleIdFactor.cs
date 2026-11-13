@@ -109,7 +109,7 @@ public sealed partial class QuestPdfGenerator
         {
             row.Spacing(10);
             row.RelativeItem(1.5f).Element(c => AppleIdInfoChip(c, "نام مشتری", model.CustomerName));
-            row.RelativeItem(1.1f).Element(c => AppleIdInfoChip(c, "شماره تماس", model.CustomerPhone?.ToPersianDigits()));
+            row.RelativeItem(1.1f).Element(c => AppleIdInfoChip(c, "شماره تماس", model.CustomerPhone.ToRtlDisplayPhone().ToPersianDigits()));
             row.RelativeItem().Element(c => AppleIdInfoChip(c, "تاریخ", AppleIdDateText(model.Date)));
         });
 

@@ -372,6 +372,23 @@ public class QuestPdfGeneratorTests
     }
 
     [Fact]
+    public void GenerateAppleIdFactor_supports_international_spaced_customer_phone()
+    {
+        var model = new AppleIdFactorViewModel(
+            "Zone Mobile",
+            "+98 911 500 9109",
+            new DateTime(2026, 11, 13),
+            "customer@example.com",
+            "secret-pass",
+            "Sara",
+            "Doctor",
+            "Tehran",
+            null);
+
+        AssertValidPdf(_generator.GenerateAppleIdFactor(model));
+    }
+
+    [Fact]
     public void GenerateAppleIdFactor_throws_for_null_model()
         => Assert.Throws<ArgumentNullException>(() => _generator.GenerateAppleIdFactor(null!));
 
