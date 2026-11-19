@@ -10,15 +10,19 @@ public static class WebApplicationBuilderExtensions
     /// </summary>
     public static WebApplicationBuilder ConfigureBuilder(this WebApplicationBuilder builder)
     {
+        builder.UseDefaultUrlWhenUnset();
         QuestPdfSetup.UseCommunityLicense();
         QuestPdfSetup.RegisterFonts();
         builder.ConfigureSerilog();
+
         builder.Services.AddRazorPages(options =>
         {
             options.Conventions.AuthorizeFolder("/");
             options.Conventions.AllowAnonymousToPage("/Account/Login");
         })
         .AddMvcOptions(options => options.ModelBinderProviders.Insert(0, new JalaliDateTimeModelBinderProvider()));
+
+        builder.Services.AddMobileShopDataProtection();
         builder.Services
             .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
             .AddCookie(options =>
@@ -31,17 +35,28 @@ public static class WebApplicationBuilderExtensions
                 options.SlidingExpiration = true;
                 options.ExpireTimeSpan = TimeSpan.FromHours(8);
             });
+
         builder.Services.AddAuthorization();
         builder.Services.AddMobileShop(builder.Configuration);
         return builder;
     }
 
     /// <summary>
-    /// Handles the explicit production database migration command without starting the web host.
+    /// Handles one-off host commands (<c>--version</c>, <c>--backup-database</c>, <c>--migrate-database</c>)
+    /// without starting the web host.
     /// </summary>
     public static bool TryRunDatabaseCommand(this WebApplication app, string[] args)
     {
-        if (!args.Contains("--migrate-database", StringComparer.Ordinal))
+        if (args.Contains("--version", StringComparer.Ordinal))
+        {
+            Console.WriteLine($"MobileShop {VersionInfo.Describe(typeof(WebApplicationBuilderExtensions).Assembly)}");
+            Environment.ExitCode = 0;
+            return true;
+        }
+
+        var migrateDatabase = args.Contains("--migrate-database", StringComparer.Ordinal);
+        var backupDatabase = args.Contains("--backup-database", StringComparer.Ordinal);
+        if (!migrateDatabase && !backupDatabase)
         {
             return false;
         }
@@ -50,12 +65,19 @@ public static class WebApplicationBuilderExtensions
         {
             using var scope = app.Services.CreateScope();
             var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+            if (backupDatabase && !migrateDatabase)
+            {
+                var backupPath = DatabaseMigrator.BackupVerified(context);
+                Console.WriteLine($"Verified backup: {backupPath}");
+                Environment.ExitCode = 0;
+                return true;
+            }
+
             var result = DatabaseMigrator.Migrate(context, SolutionPaths.DatabaseFile, app.Logger);
             if (result.Status == DatabaseMigrationStatus.Created)
                 scope.ServiceProvider.GetRequiredService<IAccountDataService>().EnsureAdminUser();
-
             EnsureShopParty(scope.ServiceProvider);
-
             Console.WriteLine(result.Status switch
             {
                 DatabaseMigrationStatus.Created => "Database created and all migrations applied.",
@@ -64,7 +86,6 @@ public static class WebApplicationBuilderExtensions
                 DatabaseMigrationStatus.Baselined => $"Legacy database baselined successfully. Verified backup: {result.BackupPath}",
                 _ => throw new ArgumentOutOfRangeException()
             });
-
             Environment.ExitCode = 0;
         }
         catch (Exception exception) when (exception is InvalidOperationException
@@ -102,15 +123,16 @@ public static class WebApplicationBuilderExtensions
             var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
             if (DatabaseMigrator.EnsureCurrent(context))
                 scope.ServiceProvider.GetRequiredService<IAccountDataService>().EnsureAdminUser();
-
             EnsureShopParty(scope.ServiceProvider);
         }
 
         app.UseRouting();
         app.UseAuthentication();
         app.UseAuthorization();
+
         app.MapStaticAssets();
         app.MapRazorPages().WithStaticAssets();
+
         app.PrintRunningAddress();
         return app;
     }

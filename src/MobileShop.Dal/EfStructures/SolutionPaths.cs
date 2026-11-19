@@ -11,8 +11,8 @@ public static class SolutionPaths
     /// <summary>Full path to the SQLite database file, at the solution root.</summary>
     public static string DatabaseFile => Path.Combine(Root, "MobileShop.db");
 
-    /// <summary>Directory where application logs should be written, at the solution root.</summary>
-    public static string LogDirectory => Path.Combine(Root, "MobileShop.Log");
+    /// <summary>Directory where application logs are written, inside the configured data directory or solution root.</summary>
+    public static string LogDirectory => Path.Combine(Root, "logs");
 
     private static string ResolveRoot()
     {
@@ -29,7 +29,6 @@ public static class SolutionPaths
         {
             return directory.FullName;
         }
-
         while (directory is not null && !Directory.Exists(Path.Combine(directory.FullName, "src")))
         {
             directory = directory.Parent;

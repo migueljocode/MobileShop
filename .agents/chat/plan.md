@@ -94,7 +94,7 @@ Intel Mac, arm64 Linux, musl; any smaller-download mechanism (framework-dependen
 - Check the Git rules in 0.5: exactly six commits with the given messages, no extra fix commits, no force without lease, no tags or releases.
 - Step 3's deliberate choice: the shop profile values are pushed into the singleton `IOptions<PdfSettings>` instance so `QuestPdfGenerator` and its tests stay untouched. Flag it only if it breaks a test or thread-safety is demonstrably an issue.
 
-## [ ] Step 1 — Runtime hardening (commit 1)
+## ~~[x] Step 1 — Runtime hardening (commit 1)~~
 
 Commit message (exact):
 

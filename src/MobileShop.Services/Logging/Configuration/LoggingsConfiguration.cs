@@ -1,4 +1,4 @@
-﻿namespace MobileShop.Services.Logging.Configuration;
+namespace MobileShop.Services.Logging.Configuration;
 
 /// <summary>Configures the shared Serilog sinks used by the application hosts.</summary>
 public static class LoggingsConfiguration
@@ -8,6 +8,9 @@ public static class LoggingsConfiguration
 
     private const string FileOutputTemplate =
         "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz}\t{Level:u3}\t{SourceContext}\t{Message:lj}{NewLine}{Exception}";
+
+    /// <summary>Rolling log file path template inside <see cref="SolutionPaths.LogDirectory"/>.</summary>
+    public static string LogFilePath => Path.Combine(SolutionPaths.LogDirectory, "app-.log");
 
     /// <summary>Configures console and rolling-file Serilog sinks from application settings.</summary>
     /// <remarks>
@@ -32,7 +35,7 @@ public static class LoggingsConfiguration
                 restrictedToMinimumLevel: settings.Console,
                 theme: AnsiConsoleTheme.Literate)
             .WriteTo.File(
-                path: "logs/app-.log",
+                path: LogFilePath,
                 rollingInterval: RollingInterval.Day,
                 restrictedToMinimumLevel: settings.File,
                 outputTemplate: FileOutputTemplate)

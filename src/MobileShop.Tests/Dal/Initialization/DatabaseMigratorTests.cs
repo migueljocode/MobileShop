@@ -193,6 +193,36 @@ public sealed class DatabaseMigratorTests : IDisposable
         Assert.Empty(context.Database.GetPendingMigrations());
     }
 
+    [Fact]
+    public void BackupVerified_creates_a_verified_backup_of_a_migrated_database()
+    {
+        var databaseFile = DatabaseFile();
+        using var context = CreateContext(databaseFile);
+        DatabaseMigrator.Migrate(context, databaseFile, NullLogger.Instance);
+
+        var backupPath = DatabaseMigrator.BackupVerified(context);
+
+        Assert.Single(BackupFiles());
+        Assert.Equal(BackupFiles()[0], backupPath);
+        Assert.True(File.Exists(backupPath));
+
+        using var backup = new Microsoft.Data.Sqlite.SqliteConnection($"Data Source={backupPath};Pooling=False");
+        backup.Open();
+        Assert.Equal("ok", Scalar<string>(backup, "PRAGMA integrity_check;"));
+    }
+
+    [Fact]
+    public void BackupVerified_throws_when_database_file_does_not_exist()
+    {
+        var databaseFile = DatabaseFile();
+        using var context = CreateContext(databaseFile);
+
+        var exception = Assert.Throws<FileNotFoundException>(
+            () => DatabaseMigrator.BackupVerified(context));
+
+        Assert.Contains(databaseFile, exception.Message, StringComparison.Ordinal);
+    }
+
     private AppDbContext CreateContext(string databaseFile)
     {
         var options = new DbContextOptionsBuilder<AppDbContext>()

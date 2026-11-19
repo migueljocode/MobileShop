@@ -24,4 +24,15 @@ public class LoggingsConfigurationTests
 
         Assert.Same(builder, result);
     }
+
+    [Fact]
+    public void LogFilePath_lives_under_LogDirectory_with_rolling_app_log_template()
+    {
+        Assert.Equal("logs", Path.GetFileName(SolutionPaths.LogDirectory));
+        Assert.StartsWith(
+            SolutionPaths.LogDirectory + Path.DirectorySeparatorChar,
+            LoggingsConfiguration.LogFilePath,
+            StringComparison.Ordinal);
+        Assert.Equal("app-.log", Path.GetFileName(LoggingsConfiguration.LogFilePath));
+    }
 }

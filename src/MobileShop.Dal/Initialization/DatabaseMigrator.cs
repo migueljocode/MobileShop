@@ -119,6 +119,27 @@ public static class DatabaseMigrator
         return false;
     }
 
+    /// <summary>
+    /// Creates and integrity-checks a verified online backup of the configured SQLite database.
+    /// </summary>
+    public static string BackupVerified(AppDbContext context)
+    {
+        ArgumentNullException.ThrowIfNull(context);
+
+        var databaseFile = context.Database.GetDbConnection().DataSource;
+        if (string.IsNullOrWhiteSpace(databaseFile))
+        {
+            throw new InvalidOperationException("No database file is configured.");
+        }
+
+        if (!File.Exists(databaseFile))
+        {
+            throw new FileNotFoundException($"No database found at {databaseFile}.", databaseFile);
+        }
+
+        return CreateVerifiedBackup(databaseFile);
+    }
+
     private static string CreateVerifiedBackup(string databaseFile)
     {
         var backupPath = $"{databaseFile}.{DateTime.Now:yyyyMMddHHmmss}.bak";
