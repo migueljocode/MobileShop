@@ -814,6 +814,7 @@ run_with_app_env() {
     cd "$DATA_DIR" || exit 1
     export ASPNETCORE_ENVIRONMENT="Production"
     export DOTNET_ENVIRONMENT="Production"
+    # shellcheck disable=SC2031
     export ASPNETCORE_CONTENTROOT="$content_root"
     # shellcheck disable=SC2031
     export MOBILESHOP_DATA_DIRECTORY="$DATA_DIR"
@@ -836,9 +837,13 @@ cmd_run() {
 
   export ASPNETCORE_ENVIRONMENT="Production"
   export DOTNET_ENVIRONMENT="Production"
+  # shellcheck disable=SC2031
   export ASPNETCORE_CONTENTROOT="$CURRENT_LINK"
+  # shellcheck disable=SC2031
   export MOBILESHOP_DATA_DIRECTORY="$DATA_DIR"
+  # shellcheck disable=SC2031
   export ASPNETCORE_URLS="http://localhost:${CLI_PORT}"
+  # shellcheck disable=SC2031
   export DOTNET_BUNDLE_EXTRACT_BASE_DIR="$EXTRACT_DIR"
 
   exec "$exe" "$@"
