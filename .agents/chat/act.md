@@ -1,6 +1,6 @@
-Commit: e6d67f2 — feat(people): add edit and soft-delete flows
-Verification: Action: #766 — Pending; targeted tests: 146 passed, 0 failed.
-Limitations: CI is still running.
-Friction noted: None.
-Problems: None.
+Commit: 50e976b — fix(scripts): silence remaining shellcheck SC2016/SC2030/SC2031 in install.sh
+Verification: Action: pending (pushed to main; waiting for .NET CI)
+Limitations: None — only shellcheck directives; no behaviour change.
+Friction noted: Previous partial SC2031 disables were incomplete; one directive before the subshell covers SC2030+SC2031 cleanly.
+Problems: None
 Status: COMPLETE
