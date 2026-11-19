@@ -3,7 +3,7 @@ For humans: no tool loads this file.
 
 | Path | Purpose |
 |---|---|
-| `AGENTS.md` | Core rules for every role and tool (opencode and Kilo Code load it automatically) |
+| `AGENTS.md` | Core rules for every role and tool (Kilo Code loads it automatically) |
 | `.agents/roles/{planner,reviewer,actor}.md` | Per-role rules and templates |
 | `.agents/project.md` | Repository facts and invariants (loaded through `opencode.json` / `kilo.jsonc`) |
 | `.agents/chatbot.md` | Extra rules for chatbots without repo tools |
@@ -11,9 +11,9 @@ For humans: no tool loads this file.
 | `.opencode/agents/`, `.kilo/agents/` | Role pickers — stubs pointing at the role files (keep the folder your tool reads) |
 | `.github/copilot-instructions.md` | Copilot stub |
 
-**opencode / Kilo Code:** pick the `planner`, `reviewer` or `actor` agent and set each agent's model in the tool (order below).
+**Kilo Code:** pick the `planner`, `reviewer` or `actor` agent and set each agent's model in the tool (order below).
 **Chatbots (ChatGPT, Grok, AI Studio, Claude):** paste the output of `cat AGENTS.md .agents/chatbot.md .agents/roles/<role>.md .agents/project.md` (Git Bash on Windows: add `| clip`), then upload `.agents/TODO.md` and `.agents/chat/*.md`.
-**New repo:** copy `AGENTS.md`, `.agents/` (keep `roles/` and `chatbot.md`, rewrite `project.md`, reset the state files), the agent stubs and the two JSON configs.
+**New repo:** copy `AGENTS.md`, `.agents/` (keep `roles/` and `chatbot.md`, rewrite `project.md`, reset the state files), the Kilo agent stubs and `.kilo/kilo.json`.
 
 ## Model order (moved from the old role files)
 **Planner**

@@ -3,7 +3,7 @@
 # and auto-commit of graphify-out changes (chore: update graph).
 # Prints a terse summary to paste back to the chatbot.
 #
-# Usage: ./check.sh        Env: SOLUTION=<path>  MAX_LINES=<n>
+# Usage: ./src/MobileShop.Scripts/Bash/check.sh        Env: SOLUTION=<path>  MAX_LINES=<n>
 
 set -uo pipefail
 cd "$(git rev-parse --show-toplevel)" || exit 2

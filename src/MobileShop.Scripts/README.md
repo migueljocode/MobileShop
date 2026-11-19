@@ -58,3 +58,14 @@ The `Log utility` job matrix runs across three OS legs:
 - **`ubuntu-24.04`:** runs `test-bash.sh`, installs `shellcheck` if missing, runs `shellcheck -s bash` on `install.sh` and `test-install.sh`, runs `test-install.sh`, and runs `test-powershell.ps1`.
 - **`windows-2025`:** runs `test-powershell.ps1`.
 - **`macos-latest`:** installs `shellcheck` if missing, runs `shellcheck -s bash` on `install.sh` and `test-install.sh`, and runs `test-install.sh`.
+
+
+# Local repository check
+
+Entry point: `src/MobileShop.Scripts/Bash/check.sh` (run from the repository root).
+
+```bash
+./src/MobileShop.Scripts/Bash/check.sh
+```
+
+The helper runs restore, build and tests, then runs `graphify update .` when available. If the graph changes, it commits only `graphify-out/` as `chore: update graph`. It prints a concise summary suitable for sharing with the chatbot. Optional environment variables: `SOLUTION` (defaults to `src/MobileShop.slnx`) and `MAX_LINES` (defaults to `20`).

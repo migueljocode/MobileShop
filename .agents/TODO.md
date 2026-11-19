@@ -1,7 +1,0 @@
-- [ ] Stage 1 — Runtime hardening: data-folder logs, stable sessions, default port 5143, `--version` and `--backup-database`
-- [ ] Stage 2 — Startup guards for published data folders: missing DB, Development wipe, schema ahead
-- [ ] Stage 3 — Shop profile in the database (replaces `Pdf:Shop*` as the live source)
-- [ ] Stage 4 — Local installer, launcher and user services (`install.sh`)
-- [ ] Stage 5 — Release pipeline: installer asset, dry run and packaged-archive scenarios
-- [ ] Stage 6 — Documentation for install, update, rollback, prune and uninstall
-- [ ] Stage 7 — Final validation and fast-forward merge to main
