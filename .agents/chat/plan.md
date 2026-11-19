@@ -338,7 +338,7 @@ Implements Step 5 of plan.md.
 
 **Risk**: HIGH (workflow that cannot be exercised by normal CI). **Confidence**: MEDIUM.
 
-## [ ] Step 6 — Documentation (commit 6)
+## ~~[x] Step 6 — Documentation (commit 6)~~
 
 Commit message (exact):
 

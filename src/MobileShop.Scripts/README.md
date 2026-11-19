@@ -22,3 +22,39 @@ pwsh ./MobileShop.Scripts/PowerShell/log.ps1 --Level error --Above -Number 20
 Get-Content logs/app-*.log | pwsh ./MobileShop.Scripts/PowerShell/log.ps1 --Level error
 ```
 No grep/awk knowledge is required.
+
+# MobileShop local installer and tests
+
+Entry point: `src/MobileShop.Scripts/Bash/install.sh` (also installed as `ROOT/app/bin/mobileshop` and symlinked to `${MOBILESHOP_BIN_DIR:-$HOME/.local/bin}/mobileshop`).
+
+- Bash 3.2-compatible (`#!/usr/bin/env bash`, `set -eu`) and portable across GNU/Linux (`linux-x64`) and macOS Apple Silicon (`osx-arm64`).
+- Supports `install`, `update`, `rollback`, `prune`, `adopt`, `backup`, `start`, `stop`, `restart`, `status`, `logs`, `doctor`, `version`, `uninstall`, and `run`.
+- Supports environment overrides used in deployments and tests: `MOBILESHOP_ROOT`, `MOBILESHOP_BIN_DIR`, `MOBILESHOP_PORT`, `MOBILESHOP_SERVICE`, `MOBILESHOP_REPO`, `MOBILESHOP_BASE_URL`, `MOBILESHOP_UNAME_S`, and `MOBILESHOP_UNAME_M`.
+
+## Running the installer tests
+
+Run the fake-archive suite (scenarios `T1`–`T15`, using isolated temporary directories and a local Python HTTP redirect server):
+
+```bash
+bash src/MobileShop.Scripts/tests/test-install.sh
+```
+
+Lint with ShellCheck:
+
+```bash
+shellcheck -s bash src/MobileShop.Scripts/Bash/install.sh src/MobileShop.Scripts/tests/test-install.sh
+```
+
+To run the release smoke scenarios (`S1`–`S9`) against a packaged `MobileShop-<TAG>-<RID>.tar.gz` archive:
+
+```bash
+bash .github/scripts/installer-smoke.sh src/MobileShop.Scripts/Bash/install.sh <path-to-archive.tar.gz>
+```
+
+## CI checks (`.github/workflows/dotnet.yml`)
+
+The `Log utility` job matrix runs across three OS legs:
+
+- **`ubuntu-24.04`:** runs `test-bash.sh`, installs `shellcheck` if missing, runs `shellcheck -s bash` on `install.sh` and `test-install.sh`, runs `test-install.sh`, and runs `test-powershell.ps1`.
+- **`windows-2025`:** runs `test-powershell.ps1`.
+- **`macos-latest`:** installs `shellcheck` if missing, runs `shellcheck -s bash` on `install.sh` and `test-install.sh`, and runs `test-install.sh`.

@@ -73,9 +73,9 @@ The Web project's launch settings select the Development environment. At startup
 
 ### Production
 
-Production startup is non-destructive. It checks that the database schema is current and creates the schema and the initial admin account if the database is missing or empty. An outdated schema requires an explicit migration.
+Production startup is non-destructive and checks that the database schema matches the running build (refusing missing databases in a published layout, unknown newer migrations, and `ASPNETCORE_ENVIRONMENT=Development` initialization against a published data folder). Run `--migrate-database` before first start and before starting an updated build.
 
-The Zone Mobile shop party is a person named Zone Mobile with a Legal seller and a customer record. It is ensured at every Production startup and by `--migrate-database`, using the shop phone from `Pdf:ShopPhone` in `appsettings.json` (the same setting is printed on factor PDFs); a migration cannot read configuration, so none creates it. Every sale is recorded with Zone Mobile as the seller and every purchase with Zone Mobile as the customer, and the transaction pages show "Zone Mobile" for those sides, including existing purchases. If `Pdf:ShopPhone` is empty and the party does not exist, recording a sale or purchase fails with a message asking you to add a customer with first name `Zone` and last name `Mobile` under People > Customers.
+The Zone Mobile shop party is a person named Zone Mobile with a Legal seller and a customer record, and shop details (`Name`, `Address`, `Phone`, `Instagram`) are stored in the database (`ShopProfiles` table) and managed under **Account → Shop profile**. `Pdf:Shop*` settings in `appsettings.json` act only as first-run seeds when no profile row exists yet.
 
 Before migrating an existing database, make a verified backup. Then run:
 
@@ -94,11 +94,11 @@ Important settings:
 | Setting | Guidance |
 |---|---|
 | `UseApi` | Keep `false` for normal operation. The alternative API data-service implementations are stubs and throw `NotImplementedException`. |
-| `Pdf` | Configure shop details such as address and phone before producing customer-facing invoices. |
+| `Pdf` | First-run seed values (`Pdf:ShopName`, `Pdf:ShopAddress`, `Pdf:ShopPhone`, `Pdf:ShopInstagram`) for the database shop profile; edit shop details at runtime under **Account → Shop profile**. |
 | `AppLogging` | Configure default, console, and file log levels. |
 | `AllowedHosts` | Standard ASP.NET Core host filtering; configure it appropriately for your deployment. |
 
-Logs are written under `logs/`. See the [log utilities guide](src/MobileShop.Scripts/README.md) for bash and PowerShell commands.
+Logs are written under `logs/` inside the configured data directory (`MOBILESHOP_DATA_DIRECTORY/logs` when set, otherwise `logs/` in the solution/publish root). See the [scripts guide](src/MobileShop.Scripts/README.md) for log-query and installer commands.
 
 ## Solution structure
 
@@ -112,7 +112,7 @@ The solution file is `src/MobileShop.slnx`. Run commands from the repository roo
 | `src/MobileShop.Dal` | EF Core context, repositories, migrations, database initialization, and seeding |
 | `src/MobileShop.Models` | Entities, DTOs, view models, settings, and entity configuration |
 | `src/MobileShop.Tests` | Automated xUnit tests |
-| `src/MobileShop.Scripts` | Bash and PowerShell log-query utilities |
+| `src/MobileShop.Scripts` | Local installer/launcher, log-query utilities, and shell/PowerShell tests |
 
 Additional implementation references:
 
@@ -144,7 +144,74 @@ dotnet test src/MobileShop.slnx --no-build --filter "FullyQualifiedName~Customer
 
 Tests use xUnit, primarily with EF Core InMemory; migration and database-migrator tests use a temporary SQLite database.
 
-The [GitHub Actions workflow](.github/workflows/dotnet.yml) builds and tests the solution on Ubuntu with .NET 10 and tests the log utilities on Ubuntu and Windows. Markdown-only changes do not trigger this workflow.
+The [GitHub Actions workflow](.github/workflows/dotnet.yml) builds and tests the solution on Ubuntu with .NET 10 and runs the script lint/test suite across Ubuntu, Windows, and macOS. Pushes to `main` ignore markdown-only changes; pull requests run all checks.
+
+## Install and update
+
+For **Linux x86_64** (`linux-x64`) and **macOS Apple Silicon** (`osx-arm64`), install or update locally with:
+
+```sh
+curl -fsSL https://github.com/migueljocode/MobileShop/releases/latest/download/install.sh | bash
+```
+
+> **Note:** The one-liner requires a GitHub release published after the installer asset was added to the release pipeline.
+
+Once installed, open <http://localhost:5143>.
+
+- **Default login:** Sign in with `admin` / `Admin@123` and change the password immediately from the **Profile** page.
+- **Updating across the Shop Profile release:** After the first update that adds database-backed shop profiles, open **Account → Shop profile** and re-enter the shop name, address, and Instagram handle once (the shop phone is carried over from the existing Zone Mobile party).
+
+### Directory layout
+
+All files live under a single `ROOT` directory (override with `MOBILESHOP_ROOT`):
+
+- **Linux default:** `${XDG_DATA_HOME:-$HOME/.local/share}/mobileshop`
+- **macOS default:** `$HOME/Library/Application Support/MobileShop`
+
+| Path | Contents |
+|---|---|
+| `ROOT/app/versions/<TAG>/` | Extracted release directories (kept side by side) |
+| `ROOT/app/current` | Symlink to `versions/<TAG>` |
+| `ROOT/app/bin/mobileshop` | Installed launcher and management CLI (symlinked into `${MOBILESHOP_BIN_DIR:-$HOME/.local/bin}/mobileshop`) |
+| `ROOT/data/` | `MobileShop.db` (+ WAL/SHM files), verified `.bak` backups, and `logs/` (mode `700`; never removed by `update`, `prune`, or plain `uninstall`) |
+| `ROOT/state/` | `installed.env`, `install.log`, `lock/`, and `app.pid` (when running in pid mode) |
+| `ROOT/cache/` | Resumable release downloads (`downloads/`) and `.NET` single-file extraction cache (`extract/`) |
+
+### `mobileshop` commands
+
+| Command | Purpose |
+|---|---|
+| `mobileshop install [--version TAG] [--archive FILE] [--sha256 HEX] [--force] [--no-service]` | Install a release (online via GitHub Releases or offline via `--archive`), migrate the database, start the app, and verify `/Account/Login` |
+| `mobileshop update [--version TAG] [--archive FILE] [--sha256 HEX] [--force] [--no-service]` | Fetch and verify the latest release's `install.sh` (or use `--archive`) and upgrade using the same safe migration + health-check protocol |
+| `mobileshop rollback [--yes] [--no-service]` | Switch back to the previous installed version and restore its pre-migration `.bak` (prompts unless `--yes`) |
+| `mobileshop prune [--keep N] [--yes]` | Remove older version directories (default keeps `2`: `current` plus the newest other) and clear `cache/downloads` and `cache/extract`; never touches `data/` |
+| `mobileshop adopt <dir>` | Copy `MobileShop.db` from an existing manual install into `ROOT/data/` (copy-only; refuses if the target DB exists or the source WAL is non-empty—stop the old app first) |
+| `mobileshop backup` | Create a verified online SQLite backup (`MobileShop.db.<timestamp>.bak`) in `ROOT/data/` |
+| `mobileshop start \| stop \| restart \| status \| logs` | Control the user service or pid process, print status/URL, or follow the newest `app-*.log` |
+| `mobileshop doctor \| version` | Check platform, service/port health, disk space, database/backup status, `PATH`, glibc/libstdc++/ICU (Linux) or `codesign` (macOS); print installer and installed versions |
+| `mobileshop uninstall [--purge] [--yes]` | Stop and remove the service, PATH symlink, `app/`, `state/`, and `cache/`, keeping `data/` (`--purge` also deletes `data/` and `ROOT` after confirmation) |
+| `mobileshop run [app-args...]` | Launcher used by systemd/launchd/pid mode: pins `Production`, `ASPNETCORE_CONTENTROOT`, `MOBILESHOP_DATA_DIRECTORY`, `ASPNETCORE_URLS`, and `DOTNET_BUNDLE_EXTRACT_BASE_DIR`, then runs `MobileShop.Web` |
+
+### Backups, existing manual installs, and autostart
+
+- **Backups:** When `--migrate-database` has pending migrations (or when you run `mobileshop backup`), the app writes a verified SQLite online backup (`MobileShop.db.<yyyyMMddHHmmss>.bak`) under `ROOT/data/`. Backups are never deleted automatically.
+- **Migrating from a manual publish folder:** Stop the old application cleanly so SQLite checkpoints its WAL, run `mobileshop adopt <old-data-dir>`, and then run `mobileshop update` (or `mobileshop install`).
+- **Autostart at login / boot:**
+  - **macOS:** Installs a LaunchAgent (`~/Library/LaunchAgents/com.migueljocode.mobileshop.plist`) that starts MobileShop at login (logs under `~/Library/Logs/MobileShop/`).
+  - **Linux:** Installs a systemd user unit (`${XDG_CONFIG_HOME:-$HOME/.config}/systemd/user/mobileshop.service`) that starts at login. To also start at boot before any interactive login, enable user lingering (may require administrator rights):
+    ```sh
+    sudo loginctl enable-linger "$USER"
+    ```
+
+### Troubleshooting
+
+- **Port `5143` is already in use:** Set `MOBILESHOP_PORT=<port>` before running `mobileshop install`, `update`, `start`, `restart`, `status`, or `doctor`.
+- **Why port `5143` (macOS AirPlay Receiver):** On macOS 12+, AirPlay Receiver binds ports `5000` and `7000`, so MobileShop defaults to `5143` instead of `5000`.
+- **macOS Gatekeeper blocks a browser-downloaded archive:** Use the `curl ... | bash` one-liner, or install the downloaded archive via `install.sh --archive <file.tar.gz>` (which clears `com.apple.quarantine` and runs `codesign --verify`).
+- **`mobileshop: command not found` (`~/.local/bin` not on `PATH`):** Add `$HOME/.local/bin` to your shell `PATH`, invoke `ROOT/app/bin/mobileshop` directly, or set `MOBILESHOP_BIN_DIR` to a directory already on `PATH`.
+- **Linux missing `libicu`:** Run `mobileshop doctor`. If it warns that ICU was not detected and the binary fails to start, install your distro's `libicu` package or set `DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1`.
+- **No systemd user bus on Linux:** When `systemctl --user` is unavailable (for example, headless containers or sessions without D-Bus), the installer warns and uses pid mode (`ROOT/state/app.pid` and `ROOT/data/logs/stdout.log`). Passing `--no-service` or `MOBILESHOP_SERVICE=none` selects pid mode explicitly.
+- **A failed update rolled itself back:** Check `ROOT/state/install.log` for the `--migrate-database` or health-check error and which `.bak` file was restored.
 
 ## Publish a standalone build
 
@@ -155,7 +222,7 @@ dotnet publish src/MobileShop.Web -c Release -r linux-x64
 dotnet publish src/MobileShop.Web -c Release -r osx-arm64
 ```
 
-Publish output is written under `Publishes/<RID>/`. The build is self-contained and single-file, so the target machine does not need a separately installed .NET runtime. The database is not bundled; first startup creates the schema and the initial admin account, and every startup ensures the Zone Mobile shop party from `Pdf:ShopPhone` in `appsettings.json`.
+Publish output is written under `Publishes/<RID>/`. The build is self-contained and single-file, so the target machine does not need a separately installed .NET runtime. The database is not bundled; in a published layout, run `MobileShop.Web --migrate-database` before first start to create the schema, initial admin account, and first-run seeded shop profile. When no URL or port is configured, the published host listens on `http://localhost:5143`.
 
 See the [publishing guide](docs/publishing.md) for details. Native AOT is not enabled because the Razor Pages/MVC application does not support it.
 
