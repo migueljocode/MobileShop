@@ -8,11 +8,20 @@ public static class SolutionPaths
     /// <summary>The solution root directory.</summary>
     public static string Root { get; } = ResolveRoot();
 
+    /// <summary>
+    /// Whether the process is running against a configured data directory or published bundle layout.
+    /// </summary>
+    public static bool IsPublishedLayout { get; } = ResolveIsPublishedLayout();
+
     /// <summary>Full path to the SQLite database file, at the solution root.</summary>
     public static string DatabaseFile => Path.Combine(Root, "MobileShop.db");
 
     /// <summary>Directory where application logs are written, inside the configured data directory or solution root.</summary>
     public static string LogDirectory => Path.Combine(Root, "logs");
+
+    private static bool ResolveIsPublishedLayout()
+        => !string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("MOBILESHOP_DATA_DIRECTORY"))
+            || File.Exists(Path.Combine(Directory.GetCurrentDirectory(), "MobileShop.Web.staticwebassets.endpoints.json"));
 
     private static string ResolveRoot()
     {

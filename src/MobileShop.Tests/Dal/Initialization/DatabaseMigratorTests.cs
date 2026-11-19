@@ -223,6 +223,106 @@ public sealed class DatabaseMigratorTests : IDisposable
         Assert.Contains(databaseFile, exception.Message, StringComparison.Ordinal);
     }
 
+    [Fact]
+    public void Ensure_current_refuses_missing_database_in_published_layout()
+    {
+        var databaseFile = DatabaseFile();
+        using var context = CreateContext(databaseFile);
+
+        var exception = Assert.Throws<InvalidOperationException>(
+            () => DatabaseMigrator.EnsureCurrent(context, publishedLayout: true));
+
+        Assert.Contains("MobileShop.Web --migrate-database", exception.Message, StringComparison.Ordinal);
+        Assert.Contains("MOBILESHOP_DATA_DIRECTORY", exception.Message, StringComparison.Ordinal);
+        Assert.False(File.Exists(databaseFile));
+    }
+
+    [Fact]
+    public void Ensure_current_uses_published_and_development_pending_migration_messages()
+    {
+        var databaseFile = DatabaseFile();
+        using var context = CreateContext(databaseFile);
+        context.Database.Migrate("20261001161450_AddPartNumber");
+
+        var devException = Assert.Throws<InvalidOperationException>(
+            () => DatabaseMigrator.EnsureCurrent(context, publishedLayout: false));
+        var publishedException = Assert.Throws<InvalidOperationException>(
+            () => DatabaseMigrator.EnsureCurrent(context, publishedLayout: true));
+
+        Assert.Contains("dotnet run --project src/MobileShop.Web -- --migrate-database", devException.Message, StringComparison.Ordinal);
+        Assert.Contains("MobileShop.Web --migrate-database (or: mobileshop update)", publishedException.Message, StringComparison.Ordinal);
+        Assert.DoesNotContain("dotnet run", publishedException.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Ensure_current_refuses_unknown_applied_migration_and_names_newest_backup()
+    {
+        var databaseFile = DatabaseFile();
+        using var context = CreateContext(databaseFile);
+        DatabaseMigrator.Migrate(context, databaseFile, NullLogger.Instance);
+        context.Database.ExecuteSqlRaw(
+            "INSERT INTO \"__EFMigrationsHistory\" (\"MigrationId\", \"ProductVersion\") VALUES ('99990101000000_FutureMigration', '10.0.0')");
+
+        var olderBackup = $"{databaseFile}.20260101000000.bak";
+        var newerBackup = $"{databaseFile}.20260201000000.bak";
+        File.WriteAllBytes(olderBackup, Array.Empty<byte>());
+        File.WriteAllBytes(newerBackup, Array.Empty<byte>());
+
+        var exception = Assert.Throws<InvalidOperationException>(
+            () => DatabaseMigrator.EnsureCurrent(context, publishedLayout: true));
+
+        Assert.Contains("newer MobileShop", exception.Message, StringComparison.Ordinal);
+        Assert.Contains("99990101000000_FutureMigration", exception.Message, StringComparison.Ordinal);
+        Assert.Contains(newerBackup, exception.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Ensure_current_refuses_unknown_applied_migration_with_none_found_when_no_backup_exists()
+    {
+        var databaseFile = DatabaseFile();
+        using var context = CreateContext(databaseFile);
+        DatabaseMigrator.Migrate(context, databaseFile, NullLogger.Instance);
+        context.Database.ExecuteSqlRaw(
+            "INSERT INTO \"__EFMigrationsHistory\" (\"MigrationId\", \"ProductVersion\") VALUES ('99990101000000_FutureMigration', '10.0.0')");
+
+        var exception = Assert.Throws<InvalidOperationException>(
+            () => DatabaseMigrator.EnsureCurrent(context));
+
+        Assert.Contains("newer MobileShop", exception.Message, StringComparison.Ordinal);
+        Assert.Contains("none found", exception.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Migrate_refuses_unknown_applied_migration_without_creating_backup()
+    {
+        var databaseFile = DatabaseFile();
+        using var context = CreateContext(databaseFile);
+        DatabaseMigrator.Migrate(context, databaseFile, NullLogger.Instance);
+        context.Database.ExecuteSqlRaw(
+            "INSERT INTO \"__EFMigrationsHistory\" (\"MigrationId\", \"ProductVersion\") VALUES ('99990101000000_FutureMigration', '10.0.0')");
+
+        var exception = Assert.Throws<InvalidOperationException>(
+            () => DatabaseMigrator.Migrate(context, databaseFile, NullLogger.Instance));
+
+        Assert.Contains("newer MobileShop", exception.Message, StringComparison.Ordinal);
+        Assert.Contains("99990101000000_FutureMigration", exception.Message, StringComparison.Ordinal);
+        Assert.Empty(BackupFiles());
+    }
+
+    [Fact]
+    public void NewestBackup_returns_newest_backup_by_filename_or_null()
+    {
+        var databaseFile = DatabaseFile();
+        Assert.Null(DatabaseMigrator.NewestBackup(databaseFile));
+
+        var olderBackup = $"{databaseFile}.20260101000000.bak";
+        var newerBackup = $"{databaseFile}.20260201000000.bak";
+        File.WriteAllBytes(olderBackup, Array.Empty<byte>());
+        File.WriteAllBytes(newerBackup, Array.Empty<byte>());
+
+        Assert.Equal(newerBackup, DatabaseMigrator.NewestBackup(databaseFile));
+    }
+
     private AppDbContext CreateContext(string databaseFile)
     {
         var options = new DbContextOptionsBuilder<AppDbContext>()

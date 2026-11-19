@@ -142,7 +142,7 @@ Implements Step 1 of plan.md.
 
 **Risk**: LOW–MEDIUM (host startup and log path). **Confidence**: HIGH.
 
-## [ ] Step 2 — Startup guards for published data folders (commit 2)
+## ~~[x] Step 2 — Startup guards for published data folders (commit 2)~~
 
 Commit message (exact):
 

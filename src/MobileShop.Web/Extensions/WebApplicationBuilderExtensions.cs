@@ -113,6 +113,7 @@ public static class WebApplicationBuilderExtensions
 
         if (app.Environment.IsDevelopment())
         {
+            DatabaseInitializer.EnsureDevelopmentIsSafe(SolutionPaths.IsPublishedLayout);
             DatabaseInitializer.InitializeForDevelopment(app.Services);
             using var scope = app.Services.CreateScope();
             scope.ServiceProvider.GetRequiredService<IAccountDataService>().EnsureAdminUser();
@@ -121,7 +122,7 @@ public static class WebApplicationBuilderExtensions
         {
             using var scope = app.Services.CreateScope();
             var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-            if (DatabaseMigrator.EnsureCurrent(context))
+            if (DatabaseMigrator.EnsureCurrent(context, SolutionPaths.IsPublishedLayout))
                 scope.ServiceProvider.GetRequiredService<IAccountDataService>().EnsureAdminUser();
             EnsureShopParty(scope.ServiceProvider);
         }

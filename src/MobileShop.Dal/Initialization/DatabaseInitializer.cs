@@ -7,6 +7,18 @@ namespace MobileShop.Dal.Initialization;
 public static class DatabaseInitializer
 {
     /// <summary>
+    /// Refuses destructive Development initialization when running against a published data folder.
+    /// </summary>
+    public static void EnsureDevelopmentIsSafe(bool publishedLayout)
+    {
+        if (publishedLayout)
+        {
+            throw new InvalidOperationException(
+                $"Refusing to run the destructive Development initialization against a published data folder ({SolutionPaths.Root}). Remove ASPNETCORE_ENVIRONMENT=Development or use a different data folder.");
+        }
+    }
+
+    /// <summary>
     /// Recreates the development database from the current model on every startup (drop and
     /// create - no migrations) and seeds the bundled sample data.
     /// </summary>

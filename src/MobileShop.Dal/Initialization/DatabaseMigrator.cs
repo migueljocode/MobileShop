@@ -19,6 +19,9 @@ public static class DatabaseMigrator
     private const string CurrentMigrationMessage =
         "The database schema is not current. Back up MobileShop.db and run: dotnet run --project src/MobileShop.Web -- --migrate-database";
 
+    private const string PublishedMigrationMessage =
+        "The database schema is not current. Back up MobileShop.db and run: MobileShop.Web --migrate-database (or: mobileshop update)";
+
     public static DatabaseMigrationResult Migrate(
         AppDbContext context,
         string databaseFile,
@@ -37,6 +40,8 @@ public static class DatabaseMigrator
 
         if (historyExists)
         {
+            EnsureNoUnknownAppliedMigrations(context, databaseFile);
+
             if (!context.Database.GetPendingMigrations().Any())
             {
                 logger.LogInformation("Database is already up to date.");
@@ -78,16 +83,23 @@ public static class DatabaseMigrator
     /// Creates a missing or empty first-run database; otherwise verifies a production schema without upgrading it.
     /// </summary>
     /// <returns><see langword="true"/> if the database was newly initialized.</returns>
-    public static bool EnsureCurrent(AppDbContext context)
+    public static bool EnsureCurrent(AppDbContext context, bool publishedLayout = false)
     {
+        var migrationMessage = publishedLayout ? PublishedMigrationMessage : CurrentMigrationMessage;
         var databaseFile = context.Database.GetDbConnection().DataSource;
         if (string.IsNullOrWhiteSpace(databaseFile))
         {
-            throw new InvalidOperationException(CurrentMigrationMessage);
+            throw new InvalidOperationException(migrationMessage);
         }
 
         if (!File.Exists(databaseFile))
         {
+            if (publishedLayout)
+            {
+                throw new InvalidOperationException(
+                    $"No database found at {databaseFile}. If this is a first install run MobileShop.Web --migrate-database. If the data folder moved, point MOBILESHOP_DATA_DIRECTORY at it.");
+            }
+
             context.Database.Migrate();
             return true;
         }
@@ -104,19 +116,65 @@ public static class DatabaseMigrator
 
             if (tableCount == 0)
             {
+                if (publishedLayout)
+                {
+                    throw new InvalidOperationException(migrationMessage);
+                }
+
                 context.Database.Migrate();
                 return true;
             }
 
-            throw new InvalidOperationException(CurrentMigrationMessage);
+            throw new InvalidOperationException(migrationMessage);
         }
+
+        EnsureNoUnknownAppliedMigrations(context, databaseFile);
 
         if (context.Database.GetPendingMigrations().Any())
         {
-            throw new InvalidOperationException(CurrentMigrationMessage);
+            throw new InvalidOperationException(migrationMessage);
         }
 
         return false;
+    }
+
+    /// <summary>
+    /// Returns the newest verified backup file matching <c>{databaseFile}.*.bak</c>, or <see langword="null"/> if none exist.
+    /// </summary>
+    public static string? NewestBackup(string databaseFile)
+    {
+        if (string.IsNullOrWhiteSpace(databaseFile))
+        {
+            return null;
+        }
+
+        var directory = Path.GetDirectoryName(databaseFile);
+        var searchDirectory = string.IsNullOrEmpty(directory) ? Directory.GetCurrentDirectory() : directory;
+        if (!Directory.Exists(searchDirectory))
+        {
+            return null;
+        }
+
+        var pattern = $"{Path.GetFileName(databaseFile)}.*.bak";
+        return Directory.GetFiles(searchDirectory, pattern)
+            .OrderByDescending(Path.GetFileName, StringComparer.Ordinal)
+            .FirstOrDefault();
+    }
+
+    private static void EnsureNoUnknownAppliedMigrations(AppDbContext context, string databaseFile)
+    {
+        var unknownMigrations = context.Database
+            .GetAppliedMigrations()
+            .Except(context.Database.GetMigrations(), StringComparer.Ordinal)
+            .ToList();
+        if (unknownMigrations.Count == 0)
+        {
+            return;
+        }
+
+        var backup = NewestBackup(databaseFile) ?? "none found";
+        throw new InvalidOperationException(
+            $"This database was migrated by a newer MobileShop (unknown migration: {unknownMigrations[^1]}). Install the newer version, or restore the backup taken before the upgrade: {backup}.");
     }
 
     /// <summary>
