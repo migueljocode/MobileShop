@@ -1,30 +1,38 @@
 namespace MobileShop.Services.DataServices.Dal;
 
 /// <summary>
-/// Keeps the Zone Mobile shop party registered. The shop phone number comes from the application
-/// settings (<see cref="PdfSettings.ShopPhone"/>), because a migration cannot read configuration.
+/// Keeps the Zone Mobile shop party registered using the phone number stored in the database
+/// <see cref="ShopProfile"/> row.
 /// </summary>
 public class ShopPartyDataService(
     IBaseRepo<Person> people,
     IBaseRepo<Seller> sellers,
     IBaseRepo<Customer> customers,
-    IOptions<PdfSettings> options,
+    IBaseRepo<ShopProfile> shopProfiles,
     ILogger<ShopPartyDataService> logger)
     : IShopPartyDataService
 {
     /// <inheritdoc />
     public async Task EnsureAsync()
     {
-        var phone = options.Value.ShopPhone?.Trim();
+        var profile = await shopProfiles.FindAsync(_ => true);
+        if (profile is null)
+        {
+            logger.LogWarning(
+                "The {Shop} shop party was not ensured because no shop profile row exists yet.",
+                ShopLabels.ZoneMobile);
+            return;
+        }
+
+        var phone = profile.Phone?.Trim();
         var person = await people.FindAsync(candidate =>
             candidate.FirstName + " " + candidate.LastName == ShopLabels.ZoneMobile);
-
         if (person is null)
         {
             if (string.IsNullOrWhiteSpace(phone))
             {
                 logger.LogWarning(
-                    "The {Shop} shop party was not created because Pdf:ShopPhone is not configured.",
+                    "The {Shop} shop party was not created because the shop profile has no phone number.",
                     ShopLabels.ZoneMobile);
                 return;
             }

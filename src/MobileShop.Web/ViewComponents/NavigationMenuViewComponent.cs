@@ -46,6 +46,7 @@ public sealed class NavigationMenuViewComponent : ViewComponent
             CreateItem("account", "Profile", "nav-icon-account", "/Account", "/Account/Profile",
                 [
                     Link("Profile", "Manage your account profile.", "/Account/Profile", "nav-subicon-person"),
+                    Link("Shop profile", "Edit the shop details printed on invoices.", "/Account/ShopProfile", "nav-subicon-home"),
                     Link("Sign out", "End your current session.", "/Account/Logout", "nav-subicon-exit")
                 ])
         };

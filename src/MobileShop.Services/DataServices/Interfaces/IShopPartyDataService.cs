@@ -5,7 +5,7 @@ public interface IShopPartyDataService
 {
     /// <summary>
     /// Ensures the Zone Mobile shop person, seller, and customer exist, taking the shop phone number
-    /// from <c>Pdf:ShopPhone</c> in the application settings.
+    /// from the database shop profile.
     /// </summary>
     Task EnsureAsync();
 }

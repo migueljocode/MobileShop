@@ -1,6 +1,10 @@
 namespace MobileShop.Services.PDF.Settings;
 
-/// <summary>Configuration used by the invoice PDF generator.</summary>
+/// <summary>
+/// Configuration used by the invoice PDF generator.
+/// The <c>Shop*</c> properties serve as first-run seed defaults; live shop values come from the
+/// database (<see cref="ShopProfile"/>) via <see cref="IShopProfileDataService"/>.
+/// </summary>
 public sealed class PdfSettings
 {
     public string PageSize { get; set; } = "A4";

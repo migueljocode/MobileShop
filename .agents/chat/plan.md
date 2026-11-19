@@ -189,7 +189,7 @@ Implements Step 2 of plan.md.
 
 **Risk**: MEDIUM–HIGH (startup path of every deployment). **Confidence**: MEDIUM–HIGH.
 
-## [ ] Step 3 — Shop profile in the database (commit 3)
+## ~~[x] Step 3 — Shop profile in the database (commit 3)~~
 
 Commit message (exact):
 

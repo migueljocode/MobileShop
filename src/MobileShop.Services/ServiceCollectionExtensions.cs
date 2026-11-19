@@ -82,7 +82,8 @@ public static class ServiceCollectionExtensions
         this IServiceCollection services,
         bool useApi)
     {
-        // Always the local implementation: the shop party is ensured against the local database at startup in both modes.
+        // Always the local implementations: the shop profile and shop party are ensured against the local database at startup in both modes.
+        services.AddScoped<IShopProfileDataService, ShopProfileDataService>();
         services.AddScoped<IShopPartyDataService, ShopPartyDataService>();
 
         if (useApi)

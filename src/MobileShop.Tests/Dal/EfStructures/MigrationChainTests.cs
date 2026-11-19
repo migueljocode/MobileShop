@@ -35,7 +35,8 @@ public class MigrationChainTests : IDisposable
                 "20261006215821_AddPowerBankPortsAndPhoneSimSupport",
                 "20261008023227_AddCpuGpuLookups",
                 "20261104100000_AddAppleIdSecurityAnswers",
-                "20261107120000_SeedZoneMobileShopParty"
+                "20261107120000_SeedZoneMobileShopParty",
+                "20261119153500_AddShopProfile"
             },
             migrations);
     }

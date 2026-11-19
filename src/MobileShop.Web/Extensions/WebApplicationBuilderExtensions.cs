@@ -117,6 +117,7 @@ public static class WebApplicationBuilderExtensions
             DatabaseInitializer.InitializeForDevelopment(app.Services);
             using var scope = app.Services.CreateScope();
             scope.ServiceProvider.GetRequiredService<IAccountDataService>().EnsureAdminUser();
+            EnsureShopProfile(scope.ServiceProvider);
         }
         else
         {
@@ -138,9 +139,16 @@ public static class WebApplicationBuilderExtensions
         return app;
     }
 
+    private static void EnsureShopProfile(IServiceProvider services)
+        => services.GetRequiredService<IShopProfileDataService>().EnsureAsync().GetAwaiter().GetResult();
+
     /// <summary>
-    /// Ensures the Zone Mobile shop party exists, using the shop phone from the application settings.
+    /// Ensures the shop profile row is seeded and synced to <see cref="PdfSettings"/>,
+    /// then ensures the Zone Mobile shop party exists with the profile's phone number.
     /// </summary>
     private static void EnsureShopParty(IServiceProvider services)
-        => services.GetRequiredService<IShopPartyDataService>().EnsureAsync().GetAwaiter().GetResult();
+    {
+        EnsureShopProfile(services);
+        services.GetRequiredService<IShopPartyDataService>().EnsureAsync().GetAwaiter().GetResult();
+    }
 }

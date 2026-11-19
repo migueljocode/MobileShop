@@ -13,6 +13,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public virtual DbSet<Guarantee> Guarantees => Set<Guarantee>();
     public virtual DbSet<User> Users => Set<User>();
     public virtual DbSet<Employee> Employees => Set<Employee>();
+    public virtual DbSet<ShopProfile> ShopProfiles => Set<ShopProfile>();
 
     // lookups
     public virtual DbSet<Manufacturer> Manufacturers => Set<Manufacturer>();
