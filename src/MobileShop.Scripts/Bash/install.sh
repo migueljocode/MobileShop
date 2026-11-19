@@ -759,6 +759,7 @@ print_path_hint_if_needed() {
   case ":$PATH:" in
     *":${CLI_BIN_DIR}:"*) ;;
     *)
+      # shellcheck disable=SC2016  # intentional backticks around command name in message
       printf 'Note: add %s to your PATH to run `mobileshop` directly.\n' "$CLI_BIN_DIR"
       ;;
   esac
@@ -810,17 +811,15 @@ run_with_app_env() {
 
   mkdir -p "$DATA_DIR" "$LOGS_DIR" "$EXTRACT_DIR"
   chmod 700 "$DATA_DIR"
+  # Subshell intentionally isolates env for the one-shot process.
+  # shellcheck disable=SC2030,SC2031
   (
     cd "$DATA_DIR" || exit 1
     export ASPNETCORE_ENVIRONMENT="Production"
     export DOTNET_ENVIRONMENT="Production"
-    # shellcheck disable=SC2031
     export ASPNETCORE_CONTENTROOT="$content_root"
-    # shellcheck disable=SC2031
     export MOBILESHOP_DATA_DIRECTORY="$DATA_DIR"
-    # shellcheck disable=SC2031
     export ASPNETCORE_URLS="http://localhost:${CLI_PORT}"
-    # shellcheck disable=SC2031
     export DOTNET_BUNDLE_EXTRACT_BASE_DIR="$EXTRACT_DIR"
     "$exe_path" "$@"
   )
@@ -835,7 +834,11 @@ cmd_run() {
   chmod 700 "$DATA_DIR"
   cd "$DATA_DIR" || die 1 "Failed to enter data directory: $DATA_DIR"
 
+  # These exports apply to the exec'd process; SC2031 is a false positive from the
+  # earlier subshell in run_with_app_env (different call path).
+  # shellcheck disable=SC2031
   export ASPNETCORE_ENVIRONMENT="Production"
+  # shellcheck disable=SC2031
   export DOTNET_ENVIRONMENT="Production"
   # shellcheck disable=SC2031
   export ASPNETCORE_CONTENTROOT="$CURRENT_LINK"
