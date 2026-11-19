@@ -612,6 +612,14 @@ stop_pid_mode() {
   rm -f "$PID_FILE"
 }
 
+inherit_saved_service_mode() {
+  [ "$CLI_SERVICE" = "auto" ] || return 0
+  read_installed_env
+  if [ "$INST_SERVICE_MODE" = "none" ]; then
+    CLI_SERVICE="none"
+  fi
+}
+
 start_service() {
   local requested
   if [ "$CLI_SERVICE" = "none" ]; then
@@ -1412,6 +1420,7 @@ cmd_start() {
   detect_platform
   ensure_layout_dirs
   [ -x "$CURRENT_LINK/MobileShop.Web" ] || die 1 "MobileShop is not installed at $CURRENT_LINK."
+  inherit_saved_service_mode
   install_launcher_and_symlink ""
   start_service
   info "Started MobileShop (http://localhost:${CLI_PORT})."
@@ -1431,6 +1440,7 @@ cmd_restart() {
   detect_platform
   ensure_layout_dirs
   [ -x "$CURRENT_LINK/MobileShop.Web" ] || die 1 "MobileShop is not installed at $CURRENT_LINK."
+  inherit_saved_service_mode
   install_launcher_and_symlink ""
   restart_service
   info "Restarted MobileShop (http://localhost:${CLI_PORT})."
