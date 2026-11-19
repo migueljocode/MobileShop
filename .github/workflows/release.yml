@@ -17,6 +17,11 @@ on:
         required: false
         default: false
         type: boolean
+      dry_run:
+        description: 'Build, package and test without creating a GitHub release'
+        required: false
+        default: false
+        type: boolean
 
 permissions:
   contents: read
@@ -140,6 +145,13 @@ jobs:
           RID: ${{ matrix.rid }}
         run: bash .github/scripts/publish-smoke.sh "${RUNNER_TEMP}/dist/MobileShop-${TAG}-${RID}.tar.gz"
 
+      - name: Installer scenarios
+        timeout-minutes: 10
+        env:
+          TAG: ${{ needs.validate.outputs.tag }}
+          RID: ${{ matrix.rid }}
+        run: bash .github/scripts/installer-smoke.sh src/MobileShop.Scripts/Bash/install.sh "${RUNNER_TEMP}/dist/MobileShop-${TAG}-${RID}.tar.gz"
+
       - uses: actions/upload-artifact@v5
         with:
           name: release-${{ matrix.rid }}
@@ -149,21 +161,31 @@ jobs:
   release:
     name: Create GitHub Release
     needs: [validate, publish]
+    if: ${{ !inputs.dry_run }}
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     permissions:
       contents: write
     steps:
+      - uses: actions/checkout@v5
+
       - uses: actions/download-artifact@v5
         with:
           pattern: release-*
           path: dist
           merge-multiple: true
 
+      - name: Prepare installer asset
+        env:
+          TAG: ${{ needs.validate.outputs.tag }}
+        run: |
+          sed "s/__VERSION__/${TAG}/g" src/MobileShop.Scripts/Bash/install.sh > dist/install.sh
+          chmod +x dist/install.sh
+
       - name: Generate SHA-256 checksums
         run: |
           cd dist
-          sha256sum MobileShop-*.tar.gz > checksums.txt
+          sha256sum MobileShop-*.tar.gz install.sh > checksums.txt
           cat checksums.txt
 
       - name: Create GitHub Release
@@ -186,4 +208,4 @@ jobs:
             flags+=(--draft)
           fi
 
-          gh release create "$TAG" dist/MobileShop-*.tar.gz dist/checksums.txt "${flags[@]}"
+          gh release create "$TAG" dist/MobileShop-*.tar.gz dist/install.sh dist/checksums.txt "${flags[@]}"

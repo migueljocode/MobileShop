@@ -299,7 +299,7 @@ Implements Step 4 of plan.md.
 
 **Risk**: HIGH (size, bash 3.2/BSD differences). **Confidence**: MEDIUM.
 
-## [ ] Step 5 — Release pipeline: installer asset, dry run, packaged-archive scenarios (commit 5)
+## ~~[x] Step 5 — Release pipeline: installer asset, dry run, packaged-archive scenarios (commit 5)~~
 
 Commit message (exact):
 
