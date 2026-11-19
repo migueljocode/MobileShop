@@ -59,10 +59,27 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-24.04, windows-2025]
+        os: [ubuntu-24.04, windows-2025, macos-latest]
     steps:
       - uses: actions/checkout@v5
       - if: runner.os == 'Linux'
         run: bash src/MobileShop.Scripts/tests/test-bash.sh
-      - shell: pwsh
+      - if: runner.os != 'Windows'
+        name: Install shellcheck if missing
+        run: |
+          if ! command -v shellcheck >/dev/null 2>&1; then
+            if [ "${RUNNER_OS}" = "macOS" ]; then
+              brew install shellcheck
+            else
+              sudo apt-get update && sudo apt-get install -y shellcheck
+            fi
+          fi
+      - if: runner.os != 'Windows'
+        name: Lint installer scripts
+        run: shellcheck -s bash src/MobileShop.Scripts/Bash/install.sh src/MobileShop.Scripts/tests/test-install.sh
+      - if: runner.os != 'Windows'
+        name: Test installer scripts
+        run: bash src/MobileShop.Scripts/tests/test-install.sh
+      - if: runner.os != 'macOS'
+        shell: pwsh
         run: ./src/MobileShop.Scripts/tests/test-powershell.ps1

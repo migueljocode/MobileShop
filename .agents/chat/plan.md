@@ -238,7 +238,7 @@ Implements Step 3 of plan.md.
 
 **Risk**: MEDIUM–HIGH (new table, data flow shop party/PDF). **Confidence**: MEDIUM.
 
-## [ ] Step 4 — Local installer, launcher and user services (commit 4)
+## ~~[x] Step 4 — Local installer, launcher and user services (commit 4)~~
 
 Commit message (exact):
 
