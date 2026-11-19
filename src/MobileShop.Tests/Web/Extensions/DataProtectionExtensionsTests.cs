@@ -1,4 +1,6 @@
 using Microsoft.AspNetCore.DataProtection;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using MobileShop.Web.Extensions;
 
 namespace MobileShop.Tests.Web.Extensions;

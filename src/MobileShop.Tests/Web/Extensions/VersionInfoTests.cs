@@ -8,7 +8,6 @@ public class VersionInfoTests
     public void Describe_returns_non_empty_version_for_web_assembly()
     {
         var version = VersionInfo.Describe(typeof(VersionInfo).Assembly);
-
         Assert.False(string.IsNullOrWhiteSpace(version));
     }
 }

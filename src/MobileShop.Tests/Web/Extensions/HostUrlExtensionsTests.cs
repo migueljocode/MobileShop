@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Builder;
 using MobileShop.Web.Extensions;
 
 namespace MobileShop.Tests.Web.Extensions;

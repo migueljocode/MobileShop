@@ -1,3 +1,12 @@
+using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.Extensions.Options;
+using MobileShop.Dal.Repositories;
+using MobileShop.Models.Entities;
+using MobileShop.Models.ViewModels.Web.BindModels;
+using MobileShop.Services.DataServices.Dal;
+using MobileShop.Services.PDF.Settings;
+using MobileShop.Tests.Dal.BaseClass;
+
 namespace MobileShop.Tests.Services.DataServices.Dal;
 
 [Collection("MobileShop-Dal-Serial")]
@@ -110,7 +119,6 @@ public class ShopProfileDataServiceTests : RepoTestBase
         Assert.Equal(string.Empty, profile.Address);
         Assert.Equal("09123334455", profile.Phone);
         Assert.Equal(string.Empty, profile.Instagram);
-
         Assert.Equal("New Shop", settings.ShopName);
         Assert.Equal(string.Empty, settings.ShopAddress);
         Assert.Equal("09123334455", settings.ShopPhone);
@@ -163,7 +171,6 @@ public class ShopProfileDataServiceTests : RepoTestBase
             customers,
             profiles,
             NullLogger<ShopPartyDataService>.Instance);
-
         return new ShopProfileDataService(
             profiles,
             people,

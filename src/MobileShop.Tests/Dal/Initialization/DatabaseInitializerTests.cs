@@ -1,3 +1,6 @@
+using MobileShop.Dal.EfStructures;
+using MobileShop.Dal.Initialization;
+
 namespace MobileShop.Tests.Dal.Initialization;
 
 public class DatabaseInitializerTests
@@ -7,7 +10,6 @@ public class DatabaseInitializerTests
     {
         var exception = Assert.Throws<InvalidOperationException>(
             () => DatabaseInitializer.EnsureDevelopmentIsSafe(publishedLayout: true));
-
         Assert.Contains("published data folder", exception.Message, StringComparison.Ordinal);
         Assert.Contains("ASPNETCORE_ENVIRONMENT=Development", exception.Message, StringComparison.Ordinal);
     }
