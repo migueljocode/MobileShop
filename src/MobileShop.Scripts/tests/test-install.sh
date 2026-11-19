@@ -270,7 +270,11 @@ test_t2_t3_t4_t8_t9_t12_t14_lifecycle() {
   grep -q "^MOBILESHOP_DATA_DIRECTORY=${root}/data$" "$root/data/last-run.env" || fail "T14 data dir mismatch"
   grep -q "^ASPNETCORE_URLS=http://localhost:${port}$" "$root/data/last-run.env" || fail "T14 URLs mismatch"
   grep -q "^DOTNET_BUNDLE_EXTRACT_BASE_DIR=${root}/cache/extract$" "$root/data/last-run.env" || fail "T14 extract dir mismatch"
-  grep -q "^PWD=${root}/data$" "$root/data/last-run.env" || fail "T14 cwd mismatch"
+  # Compare physical paths: macOS resolves /tmp -> /private/tmp in $PWD after cd.
+  actual_pwd="$(grep '^PWD=' "$root/data/last-run.env" | cut -d= -f2-)"
+  expected_pwd="$(cd "${root}/data" && pwd -P)"
+  [ -n "$actual_pwd" ] || fail "T14 missing PWD in last-run.env"
+  [ "$(cd "$actual_pwd" 2>/dev/null && pwd -P)" = "$expected_pwd" ] || fail "T14 cwd mismatch: got [$actual_pwd] expected physical [$expected_pwd]"
 
   local dev_env_out
   dev_env_out="$(ASPNETCORE_ENVIRONMENT=Development MOBILESHOP_PORT="$port" "$bin_dir/mobileshop" run --version)"
