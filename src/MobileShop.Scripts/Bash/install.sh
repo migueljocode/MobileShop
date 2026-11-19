@@ -815,8 +815,11 @@ run_with_app_env() {
     export ASPNETCORE_ENVIRONMENT="Production"
     export DOTNET_ENVIRONMENT="Production"
     export ASPNETCORE_CONTENTROOT="$content_root"
+    # shellcheck disable=SC2031
     export MOBILESHOP_DATA_DIRECTORY="$DATA_DIR"
+    # shellcheck disable=SC2031
     export ASPNETCORE_URLS="http://localhost:${CLI_PORT}"
+    # shellcheck disable=SC2031
     export DOTNET_BUNDLE_EXTRACT_BASE_DIR="$EXTRACT_DIR"
     "$exe_path" "$@"
   )
@@ -1155,7 +1158,7 @@ cmd_update() {
   local idx=0
   local args_arr=()
   while [ "$#" -gt 0 ]; do
-    args_arr[$idx]="$1"
+    args_arr[idx]="$1"
     if [ "$1" = "--version" ] && [ "$#" -gt 1 ]; then
       req_version="$2"
     fi

@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
-using MobileShop.Dal.Repositories;
+using MobileShop.Dal.Repo;
 using MobileShop.Models.Entities;
 using MobileShop.Models.ViewModels.Web.BindModels;
 using MobileShop.Services.DataServices.Dal;
