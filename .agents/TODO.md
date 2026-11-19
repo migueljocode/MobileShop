@@ -1,6 +1,7 @@
-- [x] ~~Stage 1 — Make the Zone Mobile shop party the stored seller of every sale and buyer of every purchase~~
-- [x] ~~Stage 2 — Show "Zone Mobile" as the buyer label on every purchase, including existing rows~~
-- [x] ~~Stage 3 — Keep real contact details out of sample data and document the Zone Mobile shop party~~
-- [x] ~~Stage 4 — Store the shop phone in appsettings.json and ensure the Zone Mobile shop party at startup~~
-- [x] ~~stage 5 every apple id in Transactions list Page no matter Direction will get Apple iPhone name for Product field instead of AppleId~~
-- [x] ~~stage 6 transactions page default directions should be Sell instead of All~~
+- [ ] Stage 1 — Runtime hardening: data-folder logs, stable sessions, default port 5143, `--version` and `--backup-database`
+- [ ] Stage 2 — Startup guards for published data folders: missing DB, Development wipe, schema ahead
+- [ ] Stage 3 — Shop profile in the database (replaces `Pdf:Shop*` as the live source)
+- [ ] Stage 4 — Local installer, launcher and user services (`install.sh`)
+- [ ] Stage 5 — Release pipeline: installer asset, dry run and packaged-archive scenarios
+- [ ] Stage 6 — Documentation for install, update, rollback, prune and uninstall
+- [ ] Stage 7 — Final validation and fast-forward merge to main
