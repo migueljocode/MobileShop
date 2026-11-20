@@ -26,6 +26,7 @@ public static class ProductSpecExtensions
         segments.AddRange(ChargerSegments(product.ChargerProfile));
         segments.AddRange(PowerBankSegments(product.PowerBankProfile));
         segments.AddRange(PortableStorageSegments(product.PortableStorageProfile));
+        segments.AddRange(HeadphoneSegments(product.HeadphoneProfile));
         segments.Add(FitSegment(product.GlassProfile?.ModelFits.Select(fit => fit.ModelId)));
         segments.Add(FitSegment(product.CaseProfile?.ModelFits.Select(fit => fit.ModelId)));
         segments.Add(product.SecondHandProfile is null ? string.Empty : "second-hand");
@@ -102,6 +103,17 @@ public static class ProductSpecExtensions
                 storage.Kind.ToString(),
                 storage.StorageCapacityId.ToString(),
                 storage.Speed?.ToString() ?? string.Empty,
+            ];
+
+    private static IEnumerable<string> HeadphoneSegments(Headphone? headphone) =>
+        headphone is null
+            ? [string.Empty, string.Empty, string.Empty, string.Empty, string.Empty]
+            : [
+                headphone.Kind.ToString(),
+                headphone.Connection.ToString(),
+                headphone.NoiseCancelling.ToString(),
+                headphone.Connector?.ToString() ?? string.Empty,
+                headphone.HasMicrophone?.ToString() ?? string.Empty,
             ];
 
     private static string FitSegment(IEnumerable<int>? modelIds) =>

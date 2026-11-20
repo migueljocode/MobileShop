@@ -230,6 +230,7 @@ public class TransactionsDataService(
         var chargerRows = await products.SelectAllAsync(product => product.ChargerProfile != null && product.Transactions.All(transaction => transaction.Direction != direction), product => new ProductListItemViewModel(product.Id, product.Id, "Charger", product.ModelNavigation.ManufacturerNavigation.Name + " " + product.ModelNavigation.Name, "Barcode: " + product.Barcode, null, product.Transactions.Any(t => t.Direction == TransactionDirection.Sell), product.SecondHandProfile != null) { SuggestedPrice = product.Price, ManufacturerId = product.ModelNavigation.ManufacturerId, ManufacturerName = product.ModelNavigation.ManufacturerNavigation.Name, ModelId = product.ModelId, ModelName = product.ModelNavigation.Name });
         var powerBankRows = await products.SelectAllAsync(product => product.PowerBankProfile != null && product.Transactions.All(transaction => transaction.Direction != direction), product => new ProductListItemViewModel(product.Id, product.Id, "Power Bank", product.ModelNavigation.ManufacturerNavigation.Name + " " + product.ModelNavigation.Name, "Barcode: " + product.Barcode, null, product.Transactions.Any(t => t.Direction == TransactionDirection.Sell), product.SecondHandProfile != null) { SuggestedPrice = product.Price, ManufacturerId = product.ModelNavigation.ManufacturerId, ManufacturerName = product.ModelNavigation.ManufacturerNavigation.Name, ModelId = product.ModelId, ModelName = product.ModelNavigation.Name });
         var portableStorageRows = await products.SelectAllAsync(product => product.PortableStorageProfile != null && product.Transactions.All(transaction => transaction.Direction != direction), product => new ProductListItemViewModel(product.Id, product.Id, "Portable Storage", product.ModelNavigation.ManufacturerNavigation.Name + " " + product.ModelNavigation.Name, "Barcode: " + product.Barcode, null, product.Transactions.Any(t => t.Direction == TransactionDirection.Sell), product.SecondHandProfile != null) { SuggestedPrice = product.Price, ManufacturerId = product.ModelNavigation.ManufacturerId, ManufacturerName = product.ModelNavigation.ManufacturerNavigation.Name, ModelId = product.ModelId, ModelName = product.ModelNavigation.Name });
+        var headphoneRows = await products.SelectAllAsync(product => product.HeadphoneProfile != null && product.Transactions.All(transaction => transaction.Direction != direction), product => new ProductListItemViewModel(product.Id, product.Id, "Headphone", product.ModelNavigation.ManufacturerNavigation.Name + " " + product.ModelNavigation.Name, "Barcode: " + product.Barcode, product.ColorNavigation == null ? null : product.ColorNavigation.Name, product.Transactions.Any(t => t.Direction == TransactionDirection.Sell), product.SecondHandProfile != null) { SuggestedPrice = product.Price, ManufacturerId = product.ModelNavigation.ManufacturerId, ManufacturerName = product.ModelNavigation.ManufacturerNavigation.Name, ModelId = product.ModelId, ModelName = product.ModelNavigation.Name });
         var caseRows = await products.SelectAllAsync(product => product.CaseProfile != null && product.Transactions.All(transaction => transaction.Direction != direction), product => new ProductListItemViewModel(product.Id, product.Id, "Case", product.ModelNavigation.ManufacturerNavigation.Name + " " + product.ModelNavigation.Name, "Barcode: " + product.Barcode, null, product.Transactions.Any(t => t.Direction == TransactionDirection.Sell), product.SecondHandProfile != null) { SuggestedPrice = product.Price, ManufacturerId = product.ModelNavigation.ManufacturerId, ManufacturerName = product.ModelNavigation.ManufacturerNavigation.Name, ModelId = product.ModelId, ModelName = product.ModelNavigation.Name });
 
         var appleIdRows = await appleIds.SelectAllAsync(
@@ -261,6 +262,7 @@ public class TransactionsDataService(
             .Concat(chargerRows)
             .Concat(powerBankRows)
             .Concat(portableStorageRows)
+            .Concat(headphoneRows)
             .Concat(caseRows)
             .OrderBy(row => row.Name)
             .ToList();
@@ -515,6 +517,7 @@ public class TransactionsDataService(
         .Include(t => t.ProductNavigation)
             .ThenInclude(p => p.PortableStorageProfile)
             .ThenInclude(s => s!.StorageCapacityNavigation)
+        .Include(t => t.ProductNavigation).ThenInclude(p => p.HeadphoneProfile)
         .Include(t => t.ProductNavigation).ThenInclude(p => p.CaseProfile).ThenInclude(c => c!.ModelFits)
         .Include(t => t.ProductNavigation).ThenInclude(p => p.GlassProfile).ThenInclude(g => g!.ModelFits)
         .Include(t => t.ProductNavigation).ThenInclude(p => p.TabletProfile)
@@ -561,6 +564,8 @@ public class TransactionsDataService(
             return product.PowerBankProfile.GetInvoiceExtras();
         if (product.PortableStorageProfile is not null)
             return product.PortableStorageProfile.GetInvoiceExtras();
+        if (product.HeadphoneProfile is not null)
+            return product.HeadphoneProfile.GetInvoiceExtras();
         if (product.CaseProfile is not null)
             return product.CaseProfile.GetInvoiceExtras();
         if (product.GlassProfile is not null)

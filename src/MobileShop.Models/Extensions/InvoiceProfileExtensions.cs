@@ -105,4 +105,17 @@ public static class InvoiceProfileExtensions
         if (!string.IsNullOrWhiteSpace(smartWatch.Notes))
             yield return ("Notes", smartWatch.Notes);
     }
+
+    public static IEnumerable<(string Label, string Value)> GetInvoiceExtras(this Headphone headphone)
+    {
+        yield return ("Kind", headphone.Kind.ToString());
+        yield return ("Connection", headphone.Connection.ToString());
+        yield return ("Noise cancelling", headphone.NoiseCancelling ? "Yes" : "No");
+        if (headphone.Connector.HasValue)
+            yield return ("Connector", headphone.Connector.Value.ToString());
+        if (headphone.HasMicrophone.HasValue)
+            yield return ("Microphone", headphone.HasMicrophone.Value ? "Yes" : "No");
+        if (!string.IsNullOrWhiteSpace(headphone.Notes))
+            yield return ("Notes", headphone.Notes);
+    }
 }

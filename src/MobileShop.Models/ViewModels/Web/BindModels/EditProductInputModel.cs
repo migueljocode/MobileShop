@@ -104,6 +104,13 @@ public sealed class EditProductInputModel
     public string? StorageCapacityLabel { get; set; }
     public int? Speed { get; set; }
 
+    // Headphone-specific
+    public HeadphoneKind? HeadphoneKind { get; set; }
+    public HeadphoneConnection? HeadphoneConnection { get; set; }
+    public bool? HeadphoneNoiseCancelling { get; set; }
+    public CableConnector? HeadphoneConnector { get; set; }
+    public bool? HeadphoneHasMicrophone { get; set; }
+
     // Case/Glass-specific
     public List<int> CompatibleModels { get; set; } = [];
 }

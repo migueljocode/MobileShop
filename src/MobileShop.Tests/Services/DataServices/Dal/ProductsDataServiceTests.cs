@@ -2852,4 +2852,395 @@ public class ProductsDataServiceTests : RepoTestBase
         Assert.Contains(stillValid.ModelFits, fit => fit.ModelId == phoneModel.Id);
     }
 
+    // ── Headphone (Stage 2) ─────────────────────────────
+
+    private (Manufacturer Manufacturer, Model Model) SeedHeadphoneModel(string name = "WH-1000XM5")
+    {
+        var manufacturer = new Manufacturer { Name = "Sony" };
+        var category = new Category { Name = "Headphone" };
+        Context.Manufacturers.Add(manufacturer);
+        Context.Categories.Add(category);
+        Context.SaveChanges();
+
+        var model = new Model { ManufacturerId = manufacturer.Id, CategoryId = category.Id, Name = name };
+        Context.Models.Add(model);
+        Context.SaveChanges();
+        return (manufacturer, model);
+    }
+
+    [Fact]
+    public async Task CreateHeadphonesAsync_creates_batch_with_color_and_separate_guarantees_and_purchase_transactions()
+    {
+        var (manufacturer, model) = SeedHeadphoneModel();
+        var color = new MobileShop.Models.Entities.Color { Name = "Silver" };
+        Context.Colors.Add(color);
+        Context.SaveChanges();
+
+        var expiry = new DateTime(2028, 5, 1);
+        var result = await _service.CreateHeadphonesAsync(new CreateHeadphoneInputModel
+        {
+            SellerId = 1,
+            ManufacturerId = manufacturer.Id,
+            ModelId = model.Id,
+            Kind = HeadphoneKind.OverEar,
+            Connection = HeadphoneConnection.WiredAndWireless,
+            NoiseCancelling = true,
+            Connector = CableConnector.UsbC,
+            HasMicrophone = true,
+            ColorId = color.Id,
+            HasGuarantee = true,
+            GuaranteeCorporation = "  Sony Care  ",
+            GuaranteeExpiry = expiry,
+            GuaranteeNotes = "  Full coverage  ",
+            Price = 10_000_000,
+            ProfitPercent = 10,
+            Count = 2,
+        });
+
+        Assert.True(result.Succeeded);
+        var headphones = await Context.Headphones
+            .Include(h => h.ProductNavigation).ThenInclude(p => p.GuaranteeProfile)
+            .OrderBy(h => h.ProductId)
+            .ToListAsync();
+        Assert.Equal(2, headphones.Count);
+        Assert.All(headphones, h =>
+        {
+            Assert.Equal(HeadphoneKind.OverEar, h.Kind);
+            Assert.Equal(HeadphoneConnection.WiredAndWireless, h.Connection);
+            Assert.True(h.NoiseCancelling);
+            Assert.Equal(CableConnector.UsbC, h.Connector);
+            Assert.True(h.HasMicrophone);
+            Assert.Equal(color.Id, h.ProductNavigation.ColorId);
+            Assert.Equal(11_000_000, h.ProductNavigation.Price);
+            Assert.NotNull(h.ProductNavigation.GuaranteeProfile);
+            Assert.Equal("Sony Care", h.ProductNavigation.GuaranteeProfile!.Corporation);
+            Assert.Equal(expiry, h.ProductNavigation.GuaranteeProfile.ExpirationDate);
+            Assert.Equal("Full coverage", h.ProductNavigation.GuaranteeProfile.Notes);
+        });
+        Assert.Equal(2, Context.Guarantees.Select(g => g.Id).Distinct().Count());
+        Assert.Equal(2, Context.Transactions.Count(t => t.Direction == TransactionDirection.Buy && t.FinishedPrice == 10_000_000));
+    }
+
+    [Fact]
+    public async Task CreateHeadphonesAsync_without_color_or_guarantee_persists_none()
+    {
+        var (manufacturer, model) = SeedHeadphoneModel("AirPods");
+
+        var result = await _service.CreateHeadphonesAsync(new CreateHeadphoneInputModel
+        {
+            SellerId = 1,
+            ManufacturerId = manufacturer.Id,
+            ModelId = model.Id,
+            Kind = HeadphoneKind.Earbuds,
+            Connection = HeadphoneConnection.Wireless,
+            NoiseCancelling = false,
+            Connector = null,
+            HasMicrophone = null,
+            ColorId = null,
+            HasGuarantee = false,
+            GuaranteeCorporation = "Should Be Ignored",
+            GuaranteeExpiry = new DateTime(1990, 1, 1),
+            Price = 5_000_000,
+            Count = 1,
+        });
+
+        Assert.True(result.Succeeded);
+        var product = await Context.Products
+            .Include(p => p.HeadphoneProfile)
+            .Include(p => p.GuaranteeProfile)
+            .SingleAsync();
+        Assert.Null(product.ColorId);
+        Assert.Null(product.GuaranteeProfile);
+        Assert.NotNull(product.HeadphoneProfile);
+        Assert.Null(product.HeadphoneProfile!.Connector);
+        Assert.Null(product.HeadphoneProfile.HasMicrophone);
+    }
+
+    [Fact]
+    public async Task CreateHeadphonesAsync_rejects_unknown_color_undefined_kind_and_unknown_model()
+    {
+        var (manufacturer, model) = SeedHeadphoneModel();
+
+        var badColor = await _service.CreateHeadphonesAsync(new CreateHeadphoneInputModel
+        {
+            SellerId = 1,
+            ManufacturerId = manufacturer.Id,
+            ModelId = model.Id,
+            Kind = HeadphoneKind.Earbuds,
+            Connection = HeadphoneConnection.Wireless,
+            ColorId = 9999,
+            Price = 1000,
+        });
+        Assert.False(badColor.Succeeded);
+        Assert.Equal(nameof(CreateHeadphoneInputModel.ColorId), badColor.ErrorField);
+
+        var badKind = await _service.CreateHeadphonesAsync(new CreateHeadphoneInputModel
+        {
+            SellerId = 1,
+            ManufacturerId = manufacturer.Id,
+            ModelId = model.Id,
+            Kind = (HeadphoneKind)999,
+            Connection = HeadphoneConnection.Wireless,
+            Price = 1000,
+        });
+        Assert.False(badKind.Succeeded);
+        Assert.Equal(nameof(CreateHeadphoneInputModel.Kind), badKind.ErrorField);
+
+        var badModel = await _service.CreateHeadphonesAsync(new CreateHeadphoneInputModel
+        {
+            SellerId = 1,
+            ManufacturerId = manufacturer.Id,
+            ModelId = 9999,
+            Kind = HeadphoneKind.Headset,
+            Connection = HeadphoneConnection.Wired,
+            Price = 1000,
+        });
+        Assert.False(badModel.Succeeded);
+        Assert.Empty(Context.Products);
+    }
+
+    [Fact]
+    public async Task GetInventoryRowsAsync_and_GetDetailsAsync_include_headphones_with_and_without_color()
+    {
+        var (manufacturer, model) = SeedHeadphoneModel();
+        var color = new MobileShop.Models.Entities.Color { Name = "Matte Black" };
+        Context.Colors.Add(color);
+        Context.SaveChanges();
+
+        var withColorResult = await _service.CreateHeadphonesAsync(new CreateHeadphoneInputModel
+        {
+            SellerId = 1,
+            ManufacturerId = manufacturer.Id,
+            ModelId = model.Id,
+            Kind = HeadphoneKind.OverEar,
+            Connection = HeadphoneConnection.WiredAndWireless,
+            NoiseCancelling = true,
+            Connector = CableConnector.Jack35,
+            HasMicrophone = true,
+            ColorId = color.Id,
+            HasGuarantee = true,
+            GuaranteeCorporation = "Shop Warranty",
+            GuaranteeExpiry = new DateTime(2027, 6, 1),
+            Price = 2_000_000,
+        });
+        var withoutColorResult = await _service.CreateHeadphonesAsync(new CreateHeadphoneInputModel
+        {
+            SellerId = 1,
+            ManufacturerId = manufacturer.Id,
+            ModelId = model.Id,
+            Kind = HeadphoneKind.Earbuds,
+            Connection = HeadphoneConnection.Wireless,
+            NoiseCancelling = false,
+            Price = 1_000_000,
+        });
+        Assert.True(withColorResult.Succeeded);
+        Assert.True(withoutColorResult.Succeeded);
+
+        var headphoneRows = await _service.GetInventoryRowsAsync("headphone");
+        Assert.Equal(2, headphoneRows.Count);
+        Assert.All(headphoneRows, row => Assert.Equal("Headphone", row.Type));
+        Assert.Contains(headphoneRows, row => row.ProductId == withColorResult.EntityId && row.Color == "Matte Black");
+
+        var allRows = await _service.GetInventoryRowsAsync("all");
+        Assert.Equal(2, allRows.Count(row => row.Type == "Headphone"));
+
+        var detailsWithColor = await _service.GetDetailsAsync(withColorResult.EntityId!.Value, "headphone");
+        Assert.NotNull(detailsWithColor);
+        Assert.Equal("Headphone", detailsWithColor!.Type);
+        Assert.Equal("Matte Black", detailsWithColor.Color);
+        Assert.Contains("Shop Warranty", detailsWithColor.GuaranteeLabel);
+        Assert.Equal(HeadphoneKind.OverEar, detailsWithColor.HeadphoneKind);
+        Assert.Equal(HeadphoneConnection.WiredAndWireless, detailsWithColor.HeadphoneConnection);
+        Assert.True(detailsWithColor.NoiseCancelling);
+        Assert.Equal(CableConnector.Jack35, detailsWithColor.HeadphoneConnector);
+        Assert.True(detailsWithColor.HasMicrophone);
+
+        var detailsNoColor = await _service.GetDetailsAsync(withoutColorResult.EntityId!.Value, "headphone");
+        Assert.NotNull(detailsNoColor);
+        Assert.Null(detailsNoColor!.Color);
+        Assert.Equal("None", detailsNoColor.GuaranteeLabel);
+        Assert.Null(detailsNoColor.HeadphoneConnector);
+        Assert.Null(detailsNoColor.HasMicrophone);
+    }
+
+    [Fact]
+    public async Task UpdateProductAsync_headphone_edits_fields_color_and_guarantee_and_ignores_second_hand()
+    {
+        var (manufacturer, model) = SeedHeadphoneModel();
+        var color1 = new MobileShop.Models.Entities.Color { Name = "Black" };
+        var color2 = new MobileShop.Models.Entities.Color { Name = "White" };
+        Context.Colors.AddRange(color1, color2);
+        Context.SaveChanges();
+
+        var created = await _service.CreateHeadphonesAsync(new CreateHeadphoneInputModel
+        {
+            SellerId = 1,
+            ManufacturerId = manufacturer.Id,
+            ModelId = model.Id,
+            Kind = HeadphoneKind.Earbuds,
+            Connection = HeadphoneConnection.Wireless,
+            NoiseCancelling = false,
+            Connector = CableConnector.UsbC,
+            HasMicrophone = true,
+            ColorId = color1.Id,
+            Price = 1_000_000,
+        });
+        var product = await Context.Products.AsNoTracking().SingleAsync(p => p.Id == created.EntityId);
+
+        var update = await _service.UpdateProductAsync(new MobileShop.Models.ViewModels.Web.BindModels.EditProductInputModel
+        {
+            ProductId = product.Id,
+            Type = "Headphone",
+            Identifier = product.Barcode,
+            Price = 1_500_000,
+            ColorId = color2.Id,
+            IsSecondHand = true,
+            GuaranteeCorporation = "Sony Official",
+            GuaranteeExpiry = new DateTime(2029, 1, 15),
+            GuaranteeNotes = "Extended",
+            HeadphoneKind = HeadphoneKind.Headset,
+            HeadphoneConnection = HeadphoneConnection.WiredAndWireless,
+            HeadphoneNoiseCancelling = true,
+            HeadphoneConnector = CableConnector.Jack35,
+            HeadphoneHasMicrophone = false,
+            Notes = "Edited notes",
+        });
+
+        Assert.True(update.Succeeded);
+        Assert.True(update.Changed);
+
+        var updated = await _service.GetProductForEditAsync(product.Id);
+        Assert.NotNull(updated);
+        Assert.Equal(color2.Id, updated!.ColorId);
+        Assert.Null(updated.SecondHandProfile);
+        Assert.NotNull(updated.GuaranteeProfile);
+        Assert.Equal("Sony Official", updated.GuaranteeProfile!.Corporation);
+        Assert.Equal(new DateTime(2029, 1, 15), updated.GuaranteeProfile.ExpirationDate);
+        Assert.Equal("Extended", updated.GuaranteeProfile.Notes);
+        Assert.Equal(HeadphoneKind.Headset, updated.HeadphoneProfile!.Kind);
+        Assert.Equal(HeadphoneConnection.WiredAndWireless, updated.HeadphoneProfile.Connection);
+        Assert.True(updated.HeadphoneProfile.NoiseCancelling);
+        Assert.Equal(CableConnector.Jack35, updated.HeadphoneProfile.Connector);
+        Assert.False(updated.HeadphoneProfile.HasMicrophone);
+        Assert.Equal("Edited notes", updated.HeadphoneProfile.Notes);
+    }
+
+    [Fact]
+    public async Task UpdateProductAsync_headphone_clears_optional_fields_detects_guarantee_only_change_and_rejects_bad_enum()
+    {
+        var (manufacturer, model) = SeedHeadphoneModel();
+        var created = await _service.CreateHeadphonesAsync(new CreateHeadphoneInputModel
+        {
+            SellerId = 1,
+            ManufacturerId = manufacturer.Id,
+            ModelId = model.Id,
+            Kind = HeadphoneKind.Headset,
+            Connection = HeadphoneConnection.Wired,
+            NoiseCancelling = true,
+            Connector = CableConnector.Jack35,
+            HasMicrophone = true,
+            Price = 1_000_000,
+        });
+        var product = await Context.Products.AsNoTracking().SingleAsync(p => p.Id == created.EntityId);
+
+        // Clear optional Connector and HasMicrophone
+        var cleared = await _service.UpdateProductAsync(new MobileShop.Models.ViewModels.Web.BindModels.EditProductInputModel
+        {
+            ProductId = product.Id,
+            Type = "Headphone",
+            Identifier = product.Barcode,
+            Price = product.Price,
+            HeadphoneKind = HeadphoneKind.Headset,
+            HeadphoneConnection = HeadphoneConnection.Wired,
+            HeadphoneNoiseCancelling = true,
+            HeadphoneConnector = null,
+            HeadphoneHasMicrophone = null,
+        });
+        Assert.True(cleared.Succeeded);
+        Assert.True(cleared.Changed);
+        var afterClear = await Context.Headphones.AsNoTracking().SingleAsync(h => h.ProductId == product.Id);
+        Assert.Null(afterClear.Connector);
+        Assert.Null(afterClear.HasMicrophone);
+
+        // Guarantee-only edit must be detected as changed
+        var guaranteeOnly = await _service.UpdateProductAsync(new MobileShop.Models.ViewModels.Web.BindModels.EditProductInputModel
+        {
+            ProductId = product.Id,
+            Type = "Headphone",
+            Identifier = product.Barcode,
+            Price = product.Price,
+            HeadphoneKind = HeadphoneKind.Headset,
+            HeadphoneConnection = HeadphoneConnection.Wired,
+            HeadphoneNoiseCancelling = true,
+            GuaranteeCorporation = "Shop Warranty",
+            GuaranteeExpiry = new DateTime(2028, 3, 10),
+        });
+        Assert.True(guaranteeOnly.Succeeded);
+        Assert.True(guaranteeOnly.Changed);
+
+        // Undefined enum rejected without mutating
+        var invalid = await _service.UpdateProductAsync(new MobileShop.Models.ViewModels.Web.BindModels.EditProductInputModel
+        {
+            ProductId = product.Id,
+            Type = "Headphone",
+            Identifier = "SHOULD-NOT-CHANGE",
+            Price = product.Price,
+            HeadphoneKind = (HeadphoneKind)999,
+        });
+        Assert.False(invalid.Succeeded);
+        Assert.Equal(nameof(MobileShop.Models.ViewModels.Web.BindModels.EditProductInputModel.HeadphoneKind), invalid.ErrorField);
+        var unchanged = await Context.Products.AsNoTracking().SingleAsync(p => p.Id == product.Id);
+        Assert.Equal(product.Barcode, unchanged.Barcode);
+    }
+
+    [Fact]
+    public async Task UpdateProductAsync_devices_still_persist_color_second_hand_and_guarantee()
+    {
+        var manufacturer = new Manufacturer { Name = "Apple" };
+        var tabletCategory = new Category { Name = "Tablet" };
+        var color = new MobileShop.Models.Entities.Color { Name = "Space Gray" };
+        Context.Manufacturers.Add(manufacturer);
+        Context.Categories.Add(tabletCategory);
+        Context.Colors.Add(color);
+        Context.SaveChanges();
+
+        var tabletModel = new Model { ManufacturerId = manufacturer.Id, CategoryId = tabletCategory.Id, Name = "iPad Pro" };
+        Context.Models.Add(tabletModel);
+        Context.SaveChanges();
+
+        var created = await _service.CreateTabletAsync(new CreateTabletInputModel
+        {
+            SellerId = 1,
+            ManufacturerId = manufacturer.Id,
+            ModelId = tabletModel.Id,
+            Price = 20_000_000,
+        });
+        Assert.True(created.Succeeded);
+        var product = await Context.Products.AsNoTracking().SingleAsync(p => p.Id == created.EntityId);
+
+        var updated = await _service.UpdateProductAsync(new MobileShop.Models.ViewModels.Web.BindModels.EditProductInputModel
+        {
+            ProductId = product.Id,
+            Type = "Tablet",
+            Identifier = product.Barcode,
+            Price = 21_000_000,
+            ColorId = color.Id,
+            IsSecondHand = true,
+            GuaranteeCorporation = "AppleCare",
+            GuaranteeExpiry = new DateTime(2028, 12, 31),
+        });
+        Assert.True(updated.Succeeded);
+        Assert.True(updated.Changed);
+
+        var saved = await Context.Products
+            .AsNoTracking()
+            .Include(p => p.SecondHandProfile)
+            .Include(p => p.GuaranteeProfile)
+            .SingleAsync(p => p.Id == product.Id);
+        Assert.Equal(color.Id, saved.ColorId);
+        Assert.NotNull(saved.SecondHandProfile);
+        Assert.NotNull(saved.GuaranteeProfile);
+        Assert.Equal("AppleCare", saved.GuaranteeProfile!.Corporation);
+    }
 }
+

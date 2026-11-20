@@ -55,6 +55,11 @@ public sealed record ProductDetailsViewModel(
     public StorageKind? StorageKind { get; init; }
     public string? StorageCapacityLabel { get; init; }
     public int? Speed { get; init; }
+    public HeadphoneKind? HeadphoneKind { get; init; }
+    public HeadphoneConnection? HeadphoneConnection { get; init; }
+    public bool? NoiseCancelling { get; init; }
+    public CableConnector? HeadphoneConnector { get; init; }
+    public bool? HasMicrophone { get; init; }
     public IReadOnlyList<string> CompatibleModels { get; init; } = [];
 
     // Edit-specific properties

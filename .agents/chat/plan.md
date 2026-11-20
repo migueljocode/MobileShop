@@ -78,7 +78,7 @@
 ---
 # STAGE 2 — Services (no UI yet; nothing can create a headphone until Stage 3)
 
-## [ ] Step 5 — Create path: input model, interface, service, API stub
+## ~~[x] Step 5 — Create path: input model, interface, service, API stub~~
 - Files: inspect: `BindModels/CreatePortableStorageInputModel.cs`, `ProductsDataService.cs` (`CreatePortableStoragesAsync` ~979, `CreateAccessoryBatchAsync` ~1438, phone guarantee block ~687-695, `GetColorsAsync`), `ApiProductsDataService.cs`; create: `src/MobileShop.Models/ViewModels/Web/BindModels/CreateHeadphoneInputModel.cs`; modify: `src/MobileShop.Services/DataServices/Interfaces/IProductsDataService.cs`, `src/MobileShop.Services/DataServices/Dal/ProductsDataService.cs`, `src/MobileShop.Services/DataServices/Api/ApiProductsDataService.cs`, `src/MobileShop.Tests/Services/DataServices/Dal/ProductsDataServiceTests.cs`; do not touch: `CreateAccessoryBatchAsync` signature, `src/MobileShop.Api`.
 - Symbols: `CreateHeadphoneInputModel` (`SellerId` [Range 1..], `ManufacturerId`, `ModelId` [Required], `HeadphoneKind Kind`, `HeadphoneConnection Connection`, `bool NoiseCancelling`, `CableConnector? Connector`, `bool? HasMicrophone`, `int? ColorId`, `bool HasGuarantee`, `[StringLength(100)] string? GuaranteeCorporation`, `[DataType(DataType.Date)] DateTime? GuaranteeExpiry`, `[StringLength(500)] string? GuaranteeNotes`, `Price`, `ProfitPercent`, `ProfitAmount`, `Count = 1`, same attributes as `CreatePortableStorageInputModel`); `Task<ServiceResult> CreateHeadphonesAsync(CreateHeadphoneInputModel input)`.
 - Current -> Desired: no way to create a headphone -> batch create with optional colour and guarantee.
@@ -91,7 +91,7 @@
 - Risk: MEDIUM
 - Confidence: HIGH
 
-## [ ] Step 6 — Read paths: list, details, type detection, spec key, invoice extras, sell rows
+## ~~[x] Step 6 — Read paths: list, details, type detection, spec key, invoice extras, sell rows~~
 - Files: inspect: `ProductsDataService.cs` (lines ~33-56 `EditIncludes`, ~68 + ~141 list, ~221 + ~308 details, ~1362 `GetProductType`), `TransactionsDataService.cs` (~226-232 sell rows, ~503-516 includes, ~562 extras), `ProductSpecExtensions.cs`, `InvoiceProfileExtensions.cs`, `ProductDetailsViewModel.cs`; modify: `ProductsDataService.cs`, `TransactionsDataService.cs`, `src/MobileShop.Models/Extensions/ProductSpecExtensions.cs`, `src/MobileShop.Models/Extensions/InvoiceProfileExtensions.cs`, `src/MobileShop.Models/ViewModels/Web/ProductDetailsViewModel.cs`, `ProductsDataServiceTests.cs`, matching Transactions/extension tests that already cover `PortableStorage`; do not touch: edit path (Step 7), `Details.cshtml` (Step 10).
 - Symbols: include `"HeadphoneProfile"`; type key `"headphone"`; type label `"Headphone"`; `HeadphoneSegments(Headphone?)`; `GetInvoiceExtras(this Headphone)`; new init properties on `ProductDetailsViewModel`: `HeadphoneKind? HeadphoneKind`, `HeadphoneConnection? HeadphoneConnection`, `bool? NoiseCancelling`, `CableConnector? HeadphoneConnector`, `bool? HasMicrophone`.
 - Current -> Desired: headphones invisible to every read path -> listed, detailed, grouped and invoiced.
@@ -104,7 +104,7 @@
 - Risk: MEDIUM
 - Confidence: MEDIUM
 
-## [ ] Step 7 — Edit path (service): input model, validation, apply, audit snapshot, colour/guarantee gating
+## ~~[x] Step 7 — Edit path (service): input model, validation, apply, audit snapshot, colour/guarantee gating~~
 - Files: inspect: `EditProductInputModel.cs` (~101 portable-storage block, existing `ColorId` / `Guarantee*` properties), `ProductsDataService.cs` (`UpdateProductAsync` ~1050: ~1077 `deviceFieldsEditable` + colour check, ~1143 per-type validation, ~1176-1210 apply, ~1273 type switch, ~1382 `IsDeviceType`, ~1385-1424 `CaptureEditableState`); modify: `src/MobileShop.Models/ViewModels/Web/BindModels/EditProductInputModel.cs`, `ProductsDataService.cs`, tests that cover the portable-storage edit path; do not touch: second-hand behaviour, `IsDeviceType` membership.
 - Symbols: `private static bool SupportsColorAndGuarantee(string type) => IsDeviceType(type) || type == "Headphone";`; new input properties `HeadphoneKind? HeadphoneKind`, `HeadphoneConnection? HeadphoneConnection`, `bool? HeadphoneNoiseCancelling`, `CableConnector? HeadphoneConnector`, `bool? HeadphoneHasMicrophone`.
 - Current -> Desired: headphone cannot be edited -> its own fields, colour and guarantee are editable; second-hand is not offered.
@@ -117,7 +117,7 @@
 - Risk: HIGH (shared edit method used by all types)
 - Confidence: MEDIUM
 
-## [ ] Step 8 — Stage 2 validation
+## ~~[x] Step 8 — Stage 2 validation~~
 - Files: inspect only.
 - Symbols: n/a.
 - Current -> Desired: evidence recorded.

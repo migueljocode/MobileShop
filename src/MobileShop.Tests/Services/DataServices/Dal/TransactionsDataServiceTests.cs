@@ -795,4 +795,130 @@ public class TransactionsDataServiceTests : RepoTestBase
         var row = Assert.Single(_pdfGenerator.LastFactor!.Rows);
         Assert.Equal(product.ToSpecKey(), row.SpecKey);
     }
+
+    [Fact]
+    public async Task GetSelectableProductsAsync_includes_unsold_headphones_with_color_and_excludes_sold()
+    {
+        var manufacturer = new Manufacturer { Name = "Sony" };
+        var category = new Category { Name = "Headphone" };
+        var color = new Color { Name = "Midnight Black" };
+        Context.Manufacturers.Add(manufacturer);
+        Context.Categories.Add(category);
+        Context.Colors.Add(color);
+        Context.SaveChanges();
+
+        var model = new Model { ManufacturerId = manufacturer.Id, CategoryId = category.Id, Name = "WH-1000XM5" };
+        Context.Models.Add(model);
+        Context.SaveChanges();
+
+        var unsold = new Product
+        {
+            ModelId = model.Id,
+            ColorId = color.Id,
+            Barcode = "HP-UNSOLD",
+            Price = 15_000_000,
+            HeadphoneProfile = new Headphone
+            {
+                Kind = HeadphoneKind.OverEar,
+                Connection = HeadphoneConnection.WiredAndWireless,
+                NoiseCancelling = true,
+                Connector = CableConnector.Jack35,
+                HasMicrophone = true,
+            },
+        };
+        var sold = new Product
+        {
+            ModelId = model.Id,
+            Barcode = "HP-SOLD",
+            Price = 15_000_000,
+            HeadphoneProfile = new Headphone
+            {
+                Kind = HeadphoneKind.OverEar,
+                Connection = HeadphoneConnection.Wireless,
+                NoiseCancelling = false,
+            },
+        };
+        Context.Products.AddRange(unsold, sold);
+        Context.SaveChanges();
+
+        var seller = AddSeller("Ali", "Zed");
+        var customer = AddCustomer("Sara", "Ahmadi");
+        AddTransaction(sold, seller.Id, customer.Id, TransactionDirection.Sell, DateTime.Today, 15_000_000);
+
+        var rows = await _service.GetSelectableProductsAsync(TransactionDirection.Sell);
+        var row = Assert.Single(rows, r => r.Type == "Headphone");
+        Assert.Equal(unsold.Id, row.ProductId);
+        Assert.Equal("Midnight Black", row.Color);
+        Assert.Equal(15_000_000, row.SuggestedPrice);
+        Assert.DoesNotContain(rows, r => r.ProductId == sold.Id);
+    }
+
+    [Fact]
+    public async Task GetInvoiceAsync_includes_headphone_extras_and_skips_unset_optional_fields()
+    {
+        var manufacturer = new Manufacturer { Name = "Apple" };
+        var category = new Category { Name = "Headphone" };
+        Context.Manufacturers.AddRange(manufacturer);
+        Context.Categories.Add(category);
+        Context.SaveChanges();
+
+        var model = new Model { ManufacturerId = manufacturer.Id, CategoryId = category.Id, Name = "AirPods Pro" };
+        Context.Models.Add(model);
+        Context.SaveChanges();
+
+        var full = new Product
+        {
+            ModelId = model.Id,
+            Barcode = "HP-FULL",
+            Price = 10_000_000,
+            HeadphoneProfile = new Headphone
+            {
+                Kind = HeadphoneKind.Earbuds,
+                Connection = HeadphoneConnection.Wireless,
+                NoiseCancelling = true,
+                Connector = CableConnector.UsbC,
+                HasMicrophone = true,
+                Notes = "Sealed box",
+            },
+        };
+        var minimal = new Product
+        {
+            ModelId = model.Id,
+            Barcode = "HP-MIN",
+            Price = 8_000_000,
+            HeadphoneProfile = new Headphone
+            {
+                Kind = HeadphoneKind.Headset,
+                Connection = HeadphoneConnection.Wired,
+                NoiseCancelling = false,
+                Connector = null,
+                HasMicrophone = null,
+            },
+        };
+        Context.Products.AddRange(full, minimal);
+        Context.SaveChanges();
+
+        var seller = AddSeller("Ali", "Zed");
+        var customer = AddCustomer("Sara", "Ahmadi");
+        var txFull = AddTransaction(full, seller.Id, customer.Id, TransactionDirection.Sell, DateTime.Today, 10_000_000);
+        var txMinimal = AddTransaction(minimal, seller.Id, customer.Id, TransactionDirection.Sell, DateTime.Today, 8_000_000);
+
+        var fullInvoice = await _service.GetInvoiceAsync(txFull.Id);
+        Assert.NotNull(fullInvoice);
+        Assert.Contains(("Kind", "Earbuds"), fullInvoice!.ProductExtras);
+        Assert.Contains(("Connection", "Wireless"), fullInvoice.ProductExtras);
+        Assert.Contains(("Noise cancelling", "Yes"), fullInvoice.ProductExtras);
+        Assert.Contains(("Connector", "UsbC"), fullInvoice.ProductExtras);
+        Assert.Contains(("Microphone", "Yes"), fullInvoice.ProductExtras);
+        Assert.Contains(("Notes", "Sealed box"), fullInvoice.ProductExtras);
+
+        var minimalInvoice = await _service.GetInvoiceAsync(txMinimal.Id);
+        Assert.NotNull(minimalInvoice);
+        Assert.Contains(("Kind", "Headset"), minimalInvoice!.ProductExtras);
+        Assert.Contains(("Connection", "Wired"), minimalInvoice.ProductExtras);
+        Assert.Contains(("Noise cancelling", "No"), minimalInvoice.ProductExtras);
+        Assert.DoesNotContain(minimalInvoice.ProductExtras, pair => pair.Label == "Connector");
+        Assert.DoesNotContain(minimalInvoice.ProductExtras, pair => pair.Label == "Microphone");
+        Assert.DoesNotContain(minimalInvoice.ProductExtras, pair => pair.Label == "Notes");
+    }
 }

@@ -104,4 +104,67 @@ public class ProductSpecExtensionsTests
     {
         Assert.Equal(string.Empty, new Product { ModelId = 9 }.ToSpecLabel());
     }
+
+    [Fact]
+    public void Headphone_spec_key_differs_by_color_and_kind_and_handles_unset_optional_fields()
+    {
+        var baseHeadphone = new Product
+        {
+            ModelId = 12,
+            ColorId = 1,
+            HeadphoneProfile = new Headphone
+            {
+                Kind = HeadphoneKind.Earbuds,
+                Connection = HeadphoneConnection.Wireless,
+                NoiseCancelling = true,
+                Connector = null,
+                HasMicrophone = null,
+                Notes = "Note A",
+            },
+        };
+        var sameSpecsDifferentNotes = new Product
+        {
+            ModelId = 12,
+            ColorId = 1,
+            HeadphoneProfile = new Headphone
+            {
+                Kind = HeadphoneKind.Earbuds,
+                Connection = HeadphoneConnection.Wireless,
+                NoiseCancelling = true,
+                Connector = null,
+                HasMicrophone = null,
+                Notes = "Note B",
+            },
+        };
+        var differentColor = new Product
+        {
+            ModelId = 12,
+            ColorId = 2,
+            HeadphoneProfile = new Headphone
+            {
+                Kind = HeadphoneKind.Earbuds,
+                Connection = HeadphoneConnection.Wireless,
+                NoiseCancelling = true,
+                Connector = null,
+                HasMicrophone = null,
+            },
+        };
+        var differentKind = new Product
+        {
+            ModelId = 12,
+            ColorId = 1,
+            HeadphoneProfile = new Headphone
+            {
+                Kind = HeadphoneKind.OverEar,
+                Connection = HeadphoneConnection.Wireless,
+                NoiseCancelling = true,
+                Connector = CableConnector.UsbC,
+                HasMicrophone = true,
+            },
+        };
+
+        Assert.Equal(baseHeadphone.ToSpecKey(), sameSpecsDifferentNotes.ToSpecKey());
+        Assert.NotEqual(baseHeadphone.ToSpecKey(), differentColor.ToSpecKey());
+        Assert.NotEqual(baseHeadphone.ToSpecKey(), differentKind.ToSpecKey());
+    }
 }

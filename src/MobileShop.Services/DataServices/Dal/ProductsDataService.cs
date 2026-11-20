@@ -49,6 +49,7 @@ public class ProductsDataService(
         "PowerBankProfile.Ports",
         "PortableStorageProfile",
         "PortableStorageProfile.StorageCapacityNavigation",
+        "HeadphoneProfile",
         "CaseProfile",
         "CaseProfile.ModelFits",
         "CaseProfile.ModelFits.ModelNavigation",
@@ -65,7 +66,7 @@ public class ProductsDataService(
     {
         var rows = new List<ProductListItemViewModel>();
         var normalizedType = type?.Trim().ToLowerInvariant();
-        var showAll = string.IsNullOrEmpty(normalizedType) || normalizedType == "all" || normalizedType is not ("phone" or "appleid" or "glass" or "tablet" or "smartwatch" or "laptop" or "cable" or "charger" or "powerbank" or "portablestorage" or "case");
+        var showAll = string.IsNullOrEmpty(normalizedType) || normalizedType == "all" || normalizedType is not ("phone" or "appleid" or "glass" or "tablet" or "smartwatch" or "laptop" or "cable" or "charger" or "powerbank" or "portablestorage" or "headphone" or "case");
         var hasPartNumberFilter = partNumberId is > 0;
         if (showAll || normalizedType == "phone")
         {
@@ -140,6 +141,8 @@ public class ProductsDataService(
             rows.AddRange((await products.SelectAllAsync(product => product.PowerBankProfile != null, product => new ProductListItemViewModel(product.Id, product.Id, "Power Bank", product.ModelNavigation.ManufacturerNavigation.Name + " " + product.ModelNavigation.Name, "Barcode: " + product.Barcode, null, product.Transactions.Any(t => t.Direction == TransactionDirection.Sell), product.SecondHandProfile != null))).OrderBy(row => row.ProductId));
         if (showAll || normalizedType == "portablestorage")
             rows.AddRange((await products.SelectAllAsync(product => product.PortableStorageProfile != null, product => new ProductListItemViewModel(product.Id, product.Id, "Portable Storage", product.ModelNavigation.ManufacturerNavigation.Name + " " + product.ModelNavigation.Name, "Barcode: " + product.Barcode, null, product.Transactions.Any(t => t.Direction == TransactionDirection.Sell), product.SecondHandProfile != null))).OrderBy(row => row.ProductId));
+        if (showAll || normalizedType == "headphone")
+            rows.AddRange((await products.SelectAllAsync(product => product.HeadphoneProfile != null, product => new ProductListItemViewModel(product.Id, product.Id, "Headphone", product.ModelNavigation.ManufacturerNavigation.Name + " " + product.ModelNavigation.Name, "Barcode: " + product.Barcode, product.ColorNavigation == null ? null : product.ColorNavigation.Name, product.Transactions.Any(t => t.Direction == TransactionDirection.Sell), product.SecondHandProfile != null))).OrderBy(row => row.ProductId));
         if (showAll || normalizedType == "case")
             rows.AddRange((await products.SelectAllAsync(product => product.CaseProfile != null, product => new ProductListItemViewModel(product.Id, product.Id, "Case", product.ModelNavigation.ManufacturerNavigation.Name + " " + product.ModelNavigation.Name, "Barcode: " + product.Barcode, null, product.Transactions.Any(t => t.Direction == TransactionDirection.Sell), product.SecondHandProfile != null))).OrderBy(row => row.ProductId));
 
@@ -218,7 +221,7 @@ public class ProductsDataService(
     public async Task<ProductDetailsViewModel?> GetDetailsAsync(int id, string type)
     {
         type = NormalizeDetailsType(type);
-        if (type is not ("phone" or "appleid" or "glass" or "tablet" or "smartwatch" or "laptop" or "cable" or "charger" or "powerbank" or "portablestorage" or "case"))
+        if (type is not ("phone" or "appleid" or "glass" or "tablet" or "smartwatch" or "laptop" or "cable" or "charger" or "powerbank" or "portablestorage" or "headphone" or "case"))
             return null;
 
         ProductDetailsViewModel? details;
@@ -308,6 +311,29 @@ public class ProductsDataService(
         else if (string.Equals(type, "portablestorage", StringComparison.OrdinalIgnoreCase))
         {
             details = await products.SelectAsync(id, product => new ProductDetailsViewModel("Portable Storage", product.Id, product.ModelNavigation.ManufacturerNavigation.Name, product.ModelNavigation.Name, "Barcode: " + product.Barcode, null, product.Transactions.Where(t => t.Direction == TransactionDirection.Sell).OrderByDescending(t => t.Date).Select(t => t.CustomerNavigation.PersonNavigation).Select(person => person.FirstName + " " + person.LastName).FirstOrDefault() ?? "Not sold", product.GuaranteeProfile == null ? "None" : product.GuaranteeProfile.Corporation + " until " + product.GuaranteeProfile.ExpirationDate.ToString("d"), product.SecondHandProfile != null) { StorageKind = product.PortableStorageProfile!.Kind, StorageCapacityLabel = product.PortableStorageProfile.StorageCapacityNavigation.Gb + " GB", Speed = product.PortableStorageProfile.Speed, Notes = product.PortableStorageProfile.Notes });
+        }
+        else if (string.Equals(type, "headphone", StringComparison.OrdinalIgnoreCase))
+        {
+            details = await products.SelectAsync(
+                product => product.Id == id && product.HeadphoneProfile != null,
+                product => new ProductDetailsViewModel(
+                    "Headphone",
+                    product.Id,
+                    product.ModelNavigation.ManufacturerNavigation.Name,
+                    product.ModelNavigation.Name,
+                    "Barcode: " + product.Barcode,
+                    product.ColorNavigation == null ? null : product.ColorNavigation.Name,
+                    product.Transactions.Where(t => t.Direction == TransactionDirection.Sell).OrderByDescending(t => t.Date).Select(t => t.CustomerNavigation.PersonNavigation).Select(person => person.FirstName + " " + person.LastName).FirstOrDefault() ?? "Not sold",
+                    product.GuaranteeProfile == null ? "None" : product.GuaranteeProfile.Corporation + " until " + product.GuaranteeProfile.ExpirationDate.ToString("d"),
+                    product.SecondHandProfile != null)
+                {
+                    HeadphoneKind = product.HeadphoneProfile!.Kind,
+                    HeadphoneConnection = product.HeadphoneProfile.Connection,
+                    NoiseCancelling = product.HeadphoneProfile.NoiseCancelling,
+                    HeadphoneConnector = product.HeadphoneProfile.Connector,
+                    HasMicrophone = product.HeadphoneProfile.HasMicrophone,
+                    Notes = product.HeadphoneProfile.Notes,
+                });
         }
         else if (string.Equals(type, "case", StringComparison.OrdinalIgnoreCase))
         {
@@ -987,6 +1013,55 @@ public class ProductsDataService(
             product => product.PortableStorageProfile = new PortableStorage { Kind = input.StorageKind, StorageCapacityId = input.StorageCapacityId, Speed = input.Speed });
     }
 
+    public async Task<ServiceResult> CreateHeadphonesAsync(CreateHeadphoneInputModel input)
+    {
+        if (!Enum.IsDefined(input.Kind))
+            return new ServiceResult(false, "Select a valid headphone kind.", nameof(CreateHeadphoneInputModel.Kind), null);
+        if (!Enum.IsDefined(input.Connection))
+            return new ServiceResult(false, "Select a valid headphone connection.", nameof(CreateHeadphoneInputModel.Connection), null);
+        if (input.Connector.HasValue && !Enum.IsDefined(input.Connector.Value))
+            return new ServiceResult(false, "Select a valid connector.", nameof(CreateHeadphoneInputModel.Connector), null);
+        if (input.ColorId is > 0 && await colors.FindAsync(input.ColorId.Value) is null)
+            return new ServiceResult(false, "Selected color not found.", nameof(CreateHeadphoneInputModel.ColorId), null);
+        if (input.HasGuarantee && input.GuaranteeExpiry.HasValue &&
+            (input.GuaranteeExpiry.Value.Year < 2000 || input.GuaranteeExpiry.Value.Year > 2100))
+            return new ServiceResult(false, "Guarantee expiry must be between 2000 and 2100.", nameof(CreateHeadphoneInputModel.GuaranteeExpiry), null);
+
+        return await CreateAccessoryBatchAsync(
+            input.SellerId,
+            input.Count,
+            input.Price,
+            input.ProfitPercent,
+            input.ProfitAmount,
+            input.ManufacturerId,
+            input.ModelId,
+            "Headphone",
+            product =>
+            {
+                product.HeadphoneProfile = new Headphone
+                {
+                    Kind = input.Kind,
+                    Connection = input.Connection,
+                    NoiseCancelling = input.NoiseCancelling,
+                    Connector = input.Connector,
+                    HasMicrophone = input.HasMicrophone,
+                };
+                product.ColorId = input.ColorId is > 0 ? input.ColorId : null;
+                if (input.HasGuarantee)
+                {
+                    product.GuaranteeProfile = new Guarantee
+                    {
+                        StartDate = DateTime.Today,
+                        ExpirationDate = input.GuaranteeExpiry ?? DateTime.Today.AddYears(1),
+                        Corporation = string.IsNullOrWhiteSpace(input.GuaranteeCorporation)
+                            ? "Shop Warranty"
+                            : input.GuaranteeCorporation.Trim(),
+                        Notes = NormalizeNote(input.GuaranteeNotes),
+                    };
+                }
+            });
+    }
+
     public async Task<ServiceResult> CreateCasesAsync(CreateCaseInputModel input)
     {
         if (input.Count < 1)
@@ -1075,7 +1150,8 @@ public class ProductsDataService(
             return new ServiceResult(false, "The product model cannot be changed from this form.", nameof(input.ModelId), null);
 
         var deviceFieldsEditable = IsDeviceType(actualType);
-        if (deviceFieldsEditable && input.ColorId is > 0 && await colors.FindAsync(input.ColorId.Value) is null)
+        var colorAndGuaranteeEditable = SupportsColorAndGuarantee(actualType);
+        if (colorAndGuaranteeEditable && input.ColorId is > 0 && await colors.FindAsync(input.ColorId.Value) is null)
             return new ServiceResult(false, "Selected color not found.", nameof(input.ColorId), null);
 
         if (input.GuaranteeExpiry.HasValue &&
@@ -1150,6 +1226,15 @@ public class ProductsDataService(
             if (input.Speed is < 0)
                 return new ServiceResult(false, "Storage speed cannot be negative.", nameof(input.Speed), null);
         }
+        if (actualType == "Headphone")
+        {
+            if (input.HeadphoneKind.HasValue && !Enum.IsDefined(input.HeadphoneKind.Value))
+                return new ServiceResult(false, "Select a valid headphone kind.", nameof(input.HeadphoneKind), null);
+            if (input.HeadphoneConnection.HasValue && !Enum.IsDefined(input.HeadphoneConnection.Value))
+                return new ServiceResult(false, "Select a valid headphone connection.", nameof(input.HeadphoneConnection), null);
+            if (input.HeadphoneConnector.HasValue && !Enum.IsDefined(input.HeadphoneConnector.Value))
+                return new ServiceResult(false, "Select a valid connector.", nameof(input.HeadphoneConnector), null);
+        }
 
         List<Model>? selectedCompatibleModels = null;
         if (actualType is "Case" or "Glass")
@@ -1173,7 +1258,7 @@ public class ProductsDataService(
         var before = CaptureEditableState(product, actualType);
         product.Price = finishedPrice;
         product.Barcode = identifier;
-        if (deviceFieldsEditable && input.ColorId is > 0)
+        if (colorAndGuaranteeEditable && input.ColorId is > 0)
             product.ColorId = input.ColorId.Value;
 
         if (deviceFieldsEditable)
@@ -1193,8 +1278,11 @@ public class ProductsDataService(
             {
                 product.SecondHandProfile = null;
             }
+        }
 
-            // These fields are rendered only for device types. If no guarantee fields were submitted,
+        if (colorAndGuaranteeEditable)
+        {
+            // These fields are rendered for device types and headphones. If no guarantee fields were submitted,
             // preserve an existing profile; the form has no explicit "remove guarantee" control.
             if (!string.IsNullOrWhiteSpace(input.GuaranteeCorporation) || input.GuaranteeExpiry.HasValue)
             {
@@ -1275,6 +1363,14 @@ public class ProductsDataService(
                 product.PortableStorageProfile.StorageCapacityId = input.StorageCapacityId ?? product.PortableStorageProfile.StorageCapacityId;
                 product.PortableStorageProfile.Speed = input.Speed ?? product.PortableStorageProfile.Speed;
                 product.PortableStorageProfile.Notes = NormalizeNote(input.Notes);
+                break;
+            case "Headphone":
+                product.HeadphoneProfile!.Kind = input.HeadphoneKind ?? product.HeadphoneProfile.Kind;
+                product.HeadphoneProfile.Connection = input.HeadphoneConnection ?? product.HeadphoneProfile.Connection;
+                product.HeadphoneProfile.NoiseCancelling = input.HeadphoneNoiseCancelling ?? product.HeadphoneProfile.NoiseCancelling;
+                product.HeadphoneProfile.Connector = input.HeadphoneConnector;
+                product.HeadphoneProfile.HasMicrophone = input.HeadphoneHasMicrophone;
+                product.HeadphoneProfile.Notes = NormalizeNote(input.Notes);
                 break;
 
             case "Case":
@@ -1371,6 +1467,7 @@ public class ProductsDataService(
         if (product.ChargerProfile is not null) return "Charger";
         if (product.PowerBankProfile is not null) return "Power Bank";
         if (product.PortableStorageProfile is not null) return "Portable Storage";
+        if (product.HeadphoneProfile is not null) return "Headphone";
         if (product.CaseProfile is not null) return "Case";
         if (product.GlassProfile is not null) return "Glass";
         return null;
@@ -1381,6 +1478,9 @@ public class ProductsDataService(
 
     private static bool IsDeviceType(string type)
         => type is "Phone" or "Tablet" or "Smart Watch" or "Laptop";
+
+    private static bool SupportsColorAndGuarantee(string type)
+        => IsDeviceType(type) || type == "Headphone";
 
     private static string CaptureEditableState(Product product, string type)
     {
@@ -1411,13 +1511,22 @@ public class ProductsDataService(
                     .Select(port => new { port.PortNumber, port.Connector }).ToArray()
             },
             "Portable Storage" => new { product.PortableStorageProfile!.Kind, product.PortableStorageProfile.StorageCapacityId, product.PortableStorageProfile.Speed, product.PortableStorageProfile.Notes },
+            "Headphone" => new
+            {
+                product.HeadphoneProfile!.Kind,
+                product.HeadphoneProfile.Connection,
+                product.HeadphoneProfile.NoiseCancelling,
+                product.HeadphoneProfile.Connector,
+                product.HeadphoneProfile.HasMicrophone,
+                product.HeadphoneProfile.Notes,
+            },
             "Case" => new { product.CaseProfile!.Notes, ModelIds = product.CaseProfile.ModelFits.Where(fit => !fit.IsDeleted).Select(fit => fit.ModelId).OrderBy(id => id).ToArray() },
             "Glass" => new { product.GlassProfile!.Notes, ModelIds = product.GlassProfile.ModelFits.Where(fit => !fit.IsDeleted).Select(fit => fit.ModelId).OrderBy(id => id).ToArray() },
             _ => null
         };
 
         var secondHand = IsDeviceType(type) && product.SecondHandProfile is not null;
-        var guarantee = IsDeviceType(type) && product.GuaranteeProfile is not null
+        var guarantee = SupportsColorAndGuarantee(type) && product.GuaranteeProfile is not null
             ? new { product.GuaranteeProfile.StartDate, product.GuaranteeProfile.ExpirationDate, product.GuaranteeProfile.Corporation, product.GuaranteeProfile.Notes }
             : null;
 

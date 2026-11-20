@@ -93,6 +93,7 @@ public class ApiProductsDataService : IProductsDataService
     public Task<ServiceResult> CreateChargersAsync(CreateChargerInputModel input) => throw new NotImplementedException("ApiProductsDataService is not implemented yet.");
     public Task<ServiceResult> CreatePowerBanksAsync(CreatePowerBankInputModel input) => throw new NotImplementedException("ApiProductsDataService is not implemented yet.");
     public Task<ServiceResult> CreatePortableStoragesAsync(CreatePortableStorageInputModel input) => throw new NotImplementedException("ApiProductsDataService is not implemented yet.");
+    public Task<ServiceResult> CreateHeadphonesAsync(CreateHeadphoneInputModel input) => throw new NotImplementedException("ApiProductsDataService is not implemented yet.");
     public Task<ServiceResult> CreateCasesAsync(CreateCaseInputModel input) => throw new NotImplementedException("ApiProductsDataService is not implemented yet.");
 
     /// <inheritdoc />
