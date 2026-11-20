@@ -1,1 +1,4 @@
-1. update the install.sh to be stunning like AriaSharp and Drawplate installer.
+- [ ] Stage 1 — Headphone data model and additive migration
+- [ ] Stage 2 — Headphone services: create, read, edit, invoice, API stub
+- [ ] Stage 3 — Headphone web UI: create page, tab, nav, edit, details, final validation
+- [ ] Stage 4 — Update install.sh to be stunning like the AriaSharp and Drawplate installers

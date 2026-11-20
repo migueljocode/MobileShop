@@ -1,11 +1,5 @@
 # Plan — Headphone product type (all stages)
 
-## Proposed stages
-(Reviewer approval needed before these go into `TODO.md`; then delete this section)
-- [ ] Stage 1 — Headphone data model and additive migration (Steps 1-4)
-- [ ] Stage 2 — Headphone services: create, read, edit, invoice, API stub (Steps 5-8)
-- [ ] Stage 3 — Headphone web UI: create page, tab, nav, edit, details, final validation (Steps 9-11)
-
 ## Reviewer Briefing
 - Step 1 (entity + migration) is HIGH-risk: the migration runs on every user's database during update. It must be purely additive (one `CreateTable` + one `CreateIndex` in Up, one `DropTable` in Down). Confidence MEDIUM if hand-written, HIGH if generated with `dotnet ef` (only if the user permits a local run; AGENTS.md says CI is the only build gate).
 - Entity, model snapshot, migration and the id list hard-coded in `Migrations_are_discovered_in_order` are ONE step on purpose: any of them alone turns `Snapshot_matches_the_current_model` or `Migrations_are_discovered_in_order` red in CI, and every step commit must pass CI.
