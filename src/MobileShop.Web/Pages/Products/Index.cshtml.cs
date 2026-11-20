@@ -158,6 +158,7 @@ public class IndexModel(
             "charger" => "Charger",
             "powerbank" => "Power Bank",
             "portablestorage" => "Portable Storage",
+            "headphone" => "Headphone",
             "case" => "Case",
             _ => "Phone",
         };

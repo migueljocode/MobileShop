@@ -1,14 +1,25 @@
-# Act — Stage 2 (Steps 5–8)
+# Act — Stage 3 (Steps 9–11)
 
-- Commit: committed locally on `main` (following Stage 1 commit `0ca65fa` and graph commit `0ee9f15`)
-- Verification:
-  - `./src/MobileShop.Scripts/Bash/check.sh` -> `STATUS: PASS` (`restore: PASS`, `build: PASS`, `test: PASS`, `graphify: PASS`, `graph_commit: PASS`)
+- **Scope**: Headphone Web UI (create page, products tab, navigation menu link, edit form & page model, details block, index category mapping), Web page tests, README inventory list, and final validation.
+- **Verification**:
+  - `./src/MobileShop.Scripts/Bash/check.sh` -> `STATUS: PASS` (`restore: PASS`, `build: PASS`, `test: PASS`, `graphify: PASS`, `graph_commit: PASS` at graph commit `d1537de`)
+  - Targeted Stage 3 + migrator tests (`CreateAccessoryModelTests`, `EditModelTests`, `DatabaseMigratorTests`) -> `63/63 Passed`
+  - `DatabaseMigratorTests` -> `19/19 Passed`
+  - Step 1 migration grep (`AlterColumn|DropColumn|InsertData|UpdateData|\.Sql\(` on `src/MobileShop.Dal/Migrations/20261121100000_AddHeadphones.cs`) -> clean (no matches)
   - `src/MobileShop.Api` untouched (`git diff --name-only 81cb777..HEAD -- src/MobileShop.Api` empty)
-  - `Action: unavailable` (remote push blocked because `pat` secret is not exposed to the agent shell)
-- Files changed (Stage 2):
-  - Created: `src/MobileShop.Models/ViewModels/Web/BindModels/CreateHeadphoneInputModel.cs`
-  - Modified: `src/MobileShop.Models/ViewModels/Web/BindModels/EditProductInputModel.cs`, `src/MobileShop.Models/ViewModels/Web/ProductDetailsViewModel.cs`, `src/MobileShop.Models/Extensions/ProductSpecExtensions.cs`, `src/MobileShop.Models/Extensions/InvoiceProfileExtensions.cs`, `src/MobileShop.Services/DataServices/Interfaces/IProductsDataService.cs`, `src/MobileShop.Services/DataServices/Api/ApiProductsDataService.cs`, `src/MobileShop.Services/DataServices/Dal/ProductsDataService.cs`, `src/MobileShop.Services/DataServices/Dal/TransactionsDataService.cs`, `src/MobileShop.Tests/Models/Extensions/ProductSpecExtensionsTests.cs`, `src/MobileShop.Tests/Services/DataServices/Dal/ProductsDataServiceTests.cs`, `src/MobileShop.Tests/Services/DataServices/Dal/TransactionsDataServiceTests.cs`
-- Limitations: Remote push skipped (PAT not accessible in agent shell).
-- Friction noted: None.
-- Problems: None.
-- Status: COMPLETE (Stage 2; awaiting user review before Stage 3 or push)
+  - GitHub Actions CI -> Pending at commit time (run triggered on push to `main`).
+- **Files changed (Stage 3)**:
+  - Created: `src/MobileShop.Web/Pages/Products/CreateHeadphone.cshtml`, `src/MobileShop.Web/Pages/Products/CreateHeadphone.cshtml.cs`
+  - Modified: `src/MobileShop.Web/Pages/Products/Index.cshtml`, `src/MobileShop.Web/Pages/Products/Index.cshtml.cs`, `src/MobileShop.Web/ViewComponents/NavigationMenuViewComponent.cs`, `src/MobileShop.Web/Pages/Products/Edit.cshtml.cs`, `src/MobileShop.Web/Pages/Shared/_ProductEditForm.cshtml`, `src/MobileShop.Web/Pages/Products/Details.cshtml`, `src/MobileShop.Tests/Web/Pages/Products/CreateAccessoryModelTests.cs`, `src/MobileShop.Tests/Web/Pages/Products/EditModelTests.cs`, `README.md`, `.agents/chat/plan.md`, `.agents/chat/act.md`
+- **Full change set (`81cb777..HEAD`)**:
+  - Stage 1: `HeadphoneKind`, `HeadphoneConnection`, `Headphone`, `HeadphoneConfiguration`, `Product`, `AppDbContext`, `20261121100000_AddHeadphones(.Designer).cs`, `AppDbContextModelSnapshot`, `MigrationChainTests`, `SampleDataLoader`, `SampleDataInitializer`, `sample-data.json`, `docs/erd.mermaid`
+  - Stage 2: `CreateHeadphoneInputModel`, `EditProductInputModel`, `ProductDetailsViewModel`, `ProductSpecExtensions`, `InvoiceProfileExtensions`, `IProductsDataService`, `ApiProductsDataService`, `ProductsDataService`, `TransactionsDataService`, `ProductSpecExtensionsTests`, `ProductsDataServiceTests`, `TransactionsDataServiceTests`
+  - Stage 3: listed above
+- **Manual smoke checklist**:
+  1. Create 2 headphones with color and guarantee via **Products → Headphones → Create headphone**.
+  2. Confirm both appear in the `Headphones` tab on `/Products/Index`.
+  3. Open Details for a headphone and verify Kind, Connection, Noise cancelling, Connector, Microphone, Color, Guarantee, and Notes.
+  4. Edit color, headphone fields, and guarantee on `/Products/Edit` (confirm Guarantee block is visible and no Second-hand section appears).
+  5. Sell one headphone via **Transactions → Record a sale** and verify the invoice lines include headphone specs.
+  6. Upgrade over an existing SQLite database and confirm existing tables/rows are preserved unchanged.
+- **Status**: COMPLETE (Stages 1–3 complete)

@@ -118,6 +118,21 @@
                 <dt class="col-sm-4 text-muted">Speed</dt>
                 <dd class="col-sm-8">@(Model.Product.Speed?.ToString() ?? "N/A") MB/s</dd>
             }
+            @if (Model.Product.Type == "Headphone")
+            {
+                <dt class="col-sm-4 text-muted">Kind</dt>
+                <dd class="col-sm-8">@Model.Product.HeadphoneKind</dd>
+                <dt class="col-sm-4 text-muted">Connection</dt>
+                <dd class="col-sm-8">@Model.Product.HeadphoneConnection</dd>
+                <dt class="col-sm-4 text-muted">Noise cancelling</dt>
+                <dd class="col-sm-8">@(Model.Product.NoiseCancelling == true ? "Yes" : "No")</dd>
+                <dt class="col-sm-4 text-muted">Connector</dt>
+                <dd class="col-sm-8">@(Model.Product.HeadphoneConnector?.ToString() ?? "N/A")</dd>
+                <dt class="col-sm-4 text-muted">Microphone</dt>
+                <dd class="col-sm-8">@(Model.Product.HasMicrophone.HasValue ? (Model.Product.HasMicrophone.Value ? "Yes" : "No") : "N/A")</dd>
+                <dt class="col-sm-4 text-muted">Notes</dt>
+                <dd class="col-sm-8">@(string.IsNullOrWhiteSpace(Model.Product.Notes) ? "N/A" : Model.Product.Notes)</dd>
+            }
             @if (Model.Product.Type is "Case" or "Glass")
             {
                 <dt class="col-sm-4 text-muted">Compatible models</dt>

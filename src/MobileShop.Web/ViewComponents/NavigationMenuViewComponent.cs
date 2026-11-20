@@ -26,7 +26,8 @@ public sealed class NavigationMenuViewComponent : ViewComponent
                     Link("Add a cable", "Register a new cable accessory.", "/Products/CreateCable", "nav-subicon-plus"),
                     Link("Add a charger", "Register a new charger.", "/Products/CreateCharger", "nav-subicon-plus"),
                     Link("Add a power bank", "Register a new power bank.", "/Products/CreatePowerBank", "nav-subicon-plus"),
-                    Link("Add portable storage", "Register portable storage in stock.", "/Products/CreatePortableStorage", "nav-subicon-plus")
+                    Link("Add portable storage", "Register portable storage in stock.", "/Products/CreatePortableStorage", "nav-subicon-plus"),
+                    Link("Add headphone", "Register headphones, earbuds or headsets in stock.", "/Products/CreateHeadphone", "nav-subicon-plus")
                 ]),
             CreateItem("transactions", "Transactions", "nav-icon-transactions", "/Transactions", "/Transactions/Index",
                 [

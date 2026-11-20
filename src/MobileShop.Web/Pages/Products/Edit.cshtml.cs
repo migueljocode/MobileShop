@@ -130,7 +130,7 @@ public class EditModel(
             .ToList()
             .AsReadOnly();
 
-        if (type == "Phone" || type == "Tablet" || type == "Smart Watch" || type == "Laptop")
+        if (type == "Phone" || type == "Tablet" || type == "Smart Watch" || type == "Laptop" || type == "Headphone")
         {
             Colors = await dataService.GetColorsAsync();
         }
@@ -140,7 +140,7 @@ public class EditModel(
             PartNumbers = await dataService.GetPartNumbersAsync(Product.ModelId);
         }
 
-        if (type == "Phone" || type == "Tablet" || type == "Smart Watch" || type == "Laptop")
+        if (type == "Phone" || type == "Tablet" || type == "Smart Watch" || type == "Laptop" || type == "Headphone")
         {
             Corporations = await dataService.GetGuaranteeCorporationsAsync();
         }
@@ -234,6 +234,12 @@ public class EditModel(
             StorageCapacityId = product.PortableStorageProfile?.StorageCapacityId,
             StorageCapacityLabel = product.PortableStorageProfile?.StorageCapacityNavigation?.Gb + " GB",
             Speed = product.PortableStorageProfile?.Speed,
+            // Headphone-specific
+            HeadphoneKind = product.HeadphoneProfile?.Kind,
+            HeadphoneConnection = product.HeadphoneProfile?.Connection,
+            HeadphoneNoiseCancelling = product.HeadphoneProfile?.NoiseCancelling,
+            HeadphoneConnector = product.HeadphoneProfile?.Connector,
+            HeadphoneHasMicrophone = product.HeadphoneProfile?.HasMicrophone,
             // Case/Glass-specific
             CompatibleModels = product.CaseProfile?.ModelFits?.Where(f => !f.IsDeleted).Select(f => f.ModelId).ToList() ??
                                product.GlassProfile?.ModelFits?.Where(f => !f.IsDeleted).Select(f => f.ModelId).ToList() ?? [],
@@ -254,6 +260,7 @@ public class EditModel(
         if (product.ChargerProfile != null) return "Charger";
         if (product.PowerBankProfile != null) return "Power Bank";
         if (product.PortableStorageProfile != null) return "Portable Storage";
+        if (product.HeadphoneProfile != null) return "Headphone";
         if (product.CaseProfile != null) return "Case";
         if (product.GlassProfile != null) return "Glass";
         return "Unknown";
@@ -272,6 +279,7 @@ public class EditModel(
             "Charger" => product.ChargerProfile?.Notes,
             "Power Bank" => product.PowerBankProfile?.Notes,
             "Portable Storage" => product.PortableStorageProfile?.Notes,
+            "Headphone" => product.HeadphoneProfile?.Notes,
             "Case" => product.CaseProfile?.Notes,
             "Glass" => product.GlassProfile?.Notes,
             _ => null

@@ -104,4 +104,89 @@ public class CreateAccessoryModelTests : RepoTestBase
         Assert.IsType<RedirectToPageResult>(await page.OnPostAsync());
         Assert.Equal(2, Context.Cases.Count()); Assert.All(Context.CaseModelFits, x => Assert.Equal(phoneModel.Id, x.ModelId));
     }
+
+    [Fact]
+    public async Task Headphone_Create_Works()
+    {
+        var (m, model) = Seed("Headphone");
+        var color = new MobileShop.Models.Entities.Color { Name = "Matte Black" };
+        Context.Colors.Add(color);
+        await Context.SaveChangesAsync();
+
+        var page = new CreateHeadphoneModel(Service())
+        {
+            Input = new CreateHeadphoneInputModel
+            {
+                SellerId = 1,
+                ManufacturerId = m.Id,
+                ModelId = model.Id,
+                Kind = HeadphoneKind.OverEar,
+                Connection = HeadphoneConnection.WiredAndWireless,
+                NoiseCancelling = true,
+                Connector = CableConnector.UsbC,
+                HasMicrophone = true,
+                ColorId = color.Id,
+                HasGuarantee = true,
+                GuaranteeCorporation = "Shop Warranty",
+                GuaranteeExpiry = new DateTime(2027, 5, 1),
+                GuaranteeNotes = "12m",
+                Price = 200,
+                Count = 2
+            }
+        };
+
+        var result = Assert.IsType<RedirectToPageResult>(await page.OnPostAsync());
+        Assert.Null(result.PageName);
+        Assert.Equal("Headphones created successfully.", page.SuccessMessage);
+        Assert.Equal(2, Context.Headphones.Count());
+        var products = Context.Products.Include(p => p.HeadphoneProfile).Include(p => p.GuaranteeProfile).ToList();
+        Assert.Equal(2, products.Count);
+        Assert.All(products, p =>
+        {
+            Assert.Equal(color.Id, p.ColorId);
+            Assert.NotNull(p.GuaranteeProfile);
+            Assert.Equal("Shop Warranty", p.GuaranteeProfile!.Corporation);
+            Assert.Equal(HeadphoneKind.OverEar, p.HeadphoneProfile!.Kind);
+            Assert.True(p.HeadphoneProfile.NoiseCancelling);
+            Assert.Equal(CableConnector.UsbC, p.HeadphoneProfile.Connector);
+            Assert.True(p.HeadphoneProfile.HasMicrophone);
+        });
+    }
+
+    [Fact]
+    public async Task Headphone_AddModel_CreatesHeadphoneCategoryModel()
+    {
+        var manufacturer = new Manufacturer { Name = "Acme Audio" };
+        Context.Manufacturers.Add(manufacturer);
+        await Context.SaveChangesAsync();
+        var page = new CreateHeadphoneModel(Service());
+
+        Assert.IsType<JsonResult>(await page.OnPostCreateModelAsync(manufacturer.Id, "Headphone X"));
+
+        var category = Context.Categories.Single(item => item.Name == "Headphone");
+        Assert.Equal(category.Id, Context.Models.Single(item => item.Name == "Headphone X").CategoryId);
+    }
+
+    [Fact]
+    public async Task Headphone_InvalidModelState_RepopulatesDropdowns()
+    {
+        var (m, model) = Seed("Headphone");
+        Context.Colors.Add(new MobileShop.Models.Entities.Color { Name = "White" });
+        var guaranteeProduct = TestDataHelpers.CreateProduct(Context);
+        Context.Guarantees.Add(new Guarantee { ProductId = guaranteeProduct.Id, StartDate = DateTime.Today, ExpirationDate = DateTime.Today.AddYears(1), Corporation = "AudioCare" });
+        await Context.SaveChangesAsync();
+
+        var page = new CreateHeadphoneModel(Service())
+        {
+            Input = new CreateHeadphoneInputModel { ManufacturerId = m.Id, ModelId = model.Id }
+        };
+        page.ModelState.AddModelError("Input.SellerId", "Select a seller.");
+
+        var result = Assert.IsType<PageResult>(await page.OnPostAsync());
+        Assert.NotNull(result);
+        Assert.Contains(page.Manufacturers, x => x.Id == m.Id);
+        Assert.Contains(page.Models, x => x.Id == model.Id);
+        Assert.Contains(page.Colors, x => x.Name == "White");
+        Assert.Contains("AudioCare", page.Corporations);
+    }
 }

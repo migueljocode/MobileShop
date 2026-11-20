@@ -121,6 +121,7 @@ public class EditModelTests : RepoTestBase
     [InlineData("Charger")]
     [InlineData("Power Bank")]
     [InlineData("Portable Storage")]
+    [InlineData("Headphone")]
     [InlineData("Case")]
     [InlineData("Glass")]
     public async Task Edit_get_maps_each_supported_product_type(string type)
@@ -158,6 +159,13 @@ public class EditModelTests : RepoTestBase
                 Assert.Equal(StorageKind.UsbFlash, page.Product.StorageKind);
                 Assert.Equal("128 GB", page.Product.StorageCapacityLabel);
                 break;
+            case "Headphone":
+                Assert.Equal(HeadphoneKind.OverEar, page.Product.HeadphoneKind);
+                Assert.Equal(HeadphoneConnection.WiredAndWireless, page.Product.HeadphoneConnection);
+                Assert.True(page.Product.HeadphoneNoiseCancelling);
+                Assert.Equal(CableConnector.UsbC, page.Product.HeadphoneConnector);
+                Assert.True(page.Product.HeadphoneHasMicrophone);
+                break;
             case "Case":
             case "Glass":
                 Assert.Contains(compatibleModelId!.Value, page.Product.CompatibleModels);
@@ -181,6 +189,7 @@ public class EditModelTests : RepoTestBase
     [InlineData("Charger")]
     [InlineData("Power Bank")]
     [InlineData("Portable Storage")]
+    [InlineData("Headphone")]
     [InlineData("Case")]
     [InlineData("Glass")]
     public async Task UpdateProductAsync_updates_profile_notes_for_each_supported_type(string type)
@@ -219,6 +228,13 @@ public class EditModelTests : RepoTestBase
                 input.StorageCapacityId = product.PortableStorageProfile!.StorageCapacityId;
                 input.Speed = 100;
                 break;
+            case "Headphone":
+                input.HeadphoneKind = HeadphoneKind.Headset;
+                input.HeadphoneConnection = HeadphoneConnection.Wired;
+                input.HeadphoneNoiseCancelling = false;
+                input.HeadphoneConnector = CableConnector.Jack35;
+                input.HeadphoneHasMicrophone = true;
+                break;
             case "Laptop":
                 input.DisplaySize = 13.3m;
                 break;
@@ -242,6 +258,7 @@ public class EditModelTests : RepoTestBase
             "Charger" => (await Context.Chargers.AsNoTracking().SingleAsync(item => item.ProductId == product.Id)).Notes,
             "Power Bank" => (await Context.PowerBanks.AsNoTracking().SingleAsync(item => item.ProductId == product.Id)).Notes,
             "Portable Storage" => (await Context.PortableStorages.AsNoTracking().SingleAsync(item => item.ProductId == product.Id)).Notes,
+            "Headphone" => (await Context.Headphones.AsNoTracking().SingleAsync(item => item.ProductId == product.Id)).Notes,
             "Case" => (await Context.Cases.AsNoTracking().SingleAsync(item => item.ProductId == product.Id)).Notes,
             "Glass" => (await Context.Glasses.AsNoTracking().SingleAsync(item => item.ProductId == product.Id)).Notes,
             _ => throw new ArgumentOutOfRangeException(nameof(type), type, "Unsupported product type.")
@@ -484,6 +501,18 @@ public class EditModelTests : RepoTestBase
                     StorageCapacityNavigation = capacity, Speed = 100, Notes = "original note"
                 });
                 break;
+            case "Headphone":
+                Context.Headphones.Add(new Headphone
+                {
+                    ProductId = product.Id,
+                    Kind = HeadphoneKind.OverEar,
+                    Connection = HeadphoneConnection.WiredAndWireless,
+                    NoiseCancelling = true,
+                    Connector = CableConnector.UsbC,
+                    HasMicrophone = true,
+                    Notes = "original note"
+                });
+                break;
             case "Case":
             case "Glass":
                 var phoneCategory = new Category { Name = "Phone" };
@@ -511,4 +540,90 @@ public class EditModelTests : RepoTestBase
         return (product, compatibleModelId);
     }
 
+    [Fact]
+    public async Task Headphone_edit_get_maps_fields_and_loads_colors_and_corporations()
+    {
+        var color = new MobileShop.Models.Entities.Color { Name = "Silver" };
+        Context.Colors.Add(color);
+        var (product, _) = await CreateProductForTypeAsync("Headphone");
+        product.ColorId = color.Id;
+        Context.Guarantees.Add(new Guarantee
+        {
+            ProductId = product.Id,
+            StartDate = new DateTime(2026, 1, 1),
+            ExpirationDate = new DateTime(2027, 1, 1),
+            Corporation = "AudioShield",
+            Notes = "Official"
+        });
+        await Context.SaveChangesAsync();
+        Context.ChangeTracker.Clear();
+
+        var page = new EditModel(_service);
+        var result = await page.OnGetAsync(product.Id, "Headphone");
+
+        Assert.IsType<PageResult>(result);
+        Assert.Equal("Headphone", page.Product.Type);
+        Assert.Equal(HeadphoneKind.OverEar, page.Product.HeadphoneKind);
+        Assert.Equal(HeadphoneConnection.WiredAndWireless, page.Product.HeadphoneConnection);
+        Assert.True(page.Product.HeadphoneNoiseCancelling);
+        Assert.Equal(CableConnector.UsbC, page.Product.HeadphoneConnector);
+        Assert.True(page.Product.HeadphoneHasMicrophone);
+        Assert.Equal(color.Id, page.Product.ColorId);
+        Assert.Equal("AudioShield", page.Product.GuaranteeCorporation);
+        Assert.Contains(page.Colors, option => option.Id == color.Id);
+        Assert.Contains("AudioShield", page.Corporations);
+    }
+
+    [Fact]
+    public async Task Headphone_edit_post_persists_changes()
+    {
+        var oldColor = new MobileShop.Models.Entities.Color { Name = "Black" };
+        var newColor = new MobileShop.Models.Entities.Color { Name = "Navy" };
+        Context.Colors.AddRange(oldColor, newColor);
+        var (product, _) = await CreateProductForTypeAsync("Headphone");
+        product.ColorId = oldColor.Id;
+        await Context.SaveChangesAsync();
+        Context.ChangeTracker.Clear();
+
+        var page = new EditModel(_service)
+        {
+            TempData = new TempDataDictionary(new DefaultHttpContext(), Mock.Of<ITempDataProvider>()),
+            Product = new EditProductInputModel
+            {
+                ProductId = product.Id,
+                Type = "Headphone",
+                Identifier = product.Barcode,
+                Price = product.Price,
+                ColorId = newColor.Id,
+                HeadphoneKind = HeadphoneKind.Earbuds,
+                HeadphoneConnection = HeadphoneConnection.Wireless,
+                HeadphoneNoiseCancelling = false,
+                HeadphoneConnector = null,
+                HeadphoneHasMicrophone = false,
+                GuaranteeCorporation = "Shop Warranty",
+                GuaranteeExpiry = new DateTime(2028, 3, 15),
+                GuaranteeNotes = "Updated",
+                Notes = "edited headphone note"
+            }
+        };
+
+        var result = Assert.IsType<RedirectToPageResult>(await page.OnPostAsync());
+        Assert.Equal("/Products/Details", result.PageName);
+
+        var updated = await Context.Products
+            .AsNoTracking()
+            .Include(p => p.HeadphoneProfile)
+            .Include(p => p.GuaranteeProfile)
+            .SingleAsync(p => p.Id == product.Id);
+        Assert.Equal(newColor.Id, updated.ColorId);
+        Assert.Equal(HeadphoneKind.Earbuds, updated.HeadphoneProfile!.Kind);
+        Assert.Equal(HeadphoneConnection.Wireless, updated.HeadphoneProfile.Connection);
+        Assert.False(updated.HeadphoneProfile.NoiseCancelling);
+        Assert.Null(updated.HeadphoneProfile.Connector);
+        Assert.False(updated.HeadphoneProfile.HasMicrophone);
+        Assert.Equal("edited headphone note", updated.HeadphoneProfile.Notes);
+        Assert.NotNull(updated.GuaranteeProfile);
+        Assert.Equal("Shop Warranty", updated.GuaranteeProfile!.Corporation);
+        Assert.Equal(new DateTime(2028, 3, 15), updated.GuaranteeProfile.ExpirationDate);
+    }
 }

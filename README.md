@@ -43,7 +43,7 @@ For detailed directory layout, commands, backups, autostart and troubleshooting 
 
 ## Features
 
-- **Inventory** — phones, laptops, tablets, smart watches, power banks, portable storage, cables, chargers, cases, glass protectors, Apple ID inventory and second-hand products
+- **Inventory** — phones, laptops, tablets, smart watches, power banks, portable storage, headphones, cables, chargers, cases, glass protectors, Apple ID inventory and second-hand products
 - **Device tracking** — full IMEI support and product-specific details
 - **People** — customer and seller records with dedicated detail pages
 - **Sales** — record transactions, inspect details and generate PDF invoices

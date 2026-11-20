@@ -385,6 +385,81 @@
         <div class="col-md-12"><label asp-for="Product.Notes" class="form-label">Notes</label><textarea asp-for="Product.Notes" class="form-control" rows="3"></textarea></div>
     </div></div>
 }
+@if (Model.Product.Type == "Headphone")
+{
+    <div class="form-section col-12">
+        <h2 class="form-section__title">Headphone details</h2>
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label asp-for="Product.HeadphoneKind" class="form-label">Kind</label>
+                <select asp-for="Product.HeadphoneKind" asp-items="Html.GetEnumSelectList<MobileShop.Models.Enums.HeadphoneKind>()" class="form-select">
+                    <option value="">-- Select kind --</option>
+                </select>
+                <span asp-validation-for="Product.HeadphoneKind" class="text-danger"></span>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="Product.HeadphoneConnection" class="form-label">Connection</label>
+                <select asp-for="Product.HeadphoneConnection" asp-items="Html.GetEnumSelectList<MobileShop.Models.Enums.HeadphoneConnection>()" class="form-select">
+                    <option value="">-- Select connection --</option>
+                </select>
+                <span asp-validation-for="Product.HeadphoneConnection" class="text-danger"></span>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="Product.HeadphoneConnector" class="form-label">Connector</label>
+                <select asp-for="Product.HeadphoneConnector" asp-items="@(new SelectList(Model.CableConnectors, "Id", "Name"))" class="form-select">
+                    <option value="">-- None --</option>
+                </select>
+                <span asp-validation-for="Product.HeadphoneConnector" class="text-danger"></span>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="Product.HeadphoneHasMicrophone" class="form-label">Microphone</label>
+                <select asp-for="Product.HeadphoneHasMicrophone" class="form-select">
+                    <option value="">Unknown</option>
+                    <option value="true">Yes</option>
+                    <option value="false">No</option>
+                </select>
+                <span asp-validation-for="Product.HeadphoneHasMicrophone" class="text-danger"></span>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="Product.HeadphoneNoiseCancelling" class="form-label">Noise cancelling</label>
+                <select asp-for="Product.HeadphoneNoiseCancelling" class="form-select">
+                    <option value="false">No</option>
+                    <option value="true">Yes</option>
+                </select>
+                <span asp-validation-for="Product.HeadphoneNoiseCancelling" class="text-danger"></span>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="Product.ColorId" class="form-label">Color</label>
+                <select asp-for="Product.ColorId" asp-items="@(new SelectList(Model.Colors, "Id", "Name"))" class="form-select" id="colorSelect">
+                    <option value="">-- No color --</option>
+                </select>
+                <span asp-validation-for="Product.ColorId" class="text-danger"></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="form-section col-12">
+        <h2 class="form-section__title">Guarantee</h2>
+        <div class="row g-3">
+            <div class="col-md-3" data-guarantee-block>
+                <label asp-for="Product.GuaranteeCorporation" class="form-label">Guarantee corporation</label>
+                <select asp-for="Product.GuaranteeCorporation" asp-items="@(new SelectList(Model.Corporations))" class="form-select">
+                    <option value="">-- Select corporation --</option>
+                </select>
+                <label asp-for="Product.GuaranteeExpiry" class="form-label mt-2">Guarantee expiry</label>
+                <input asp-for="Product.GuaranteeExpiry" class="form-control" type="text" data-jalali-date placeholder="1405/12/29" value="@(Model.Product.GuaranteeExpiry.HasValue ? Model.Product.GuaranteeExpiry.Value.ToJalaliDateString() : string.Empty)" />
+                <span asp-validation-for="Product.GuaranteeExpiry" class="text-danger"></span>
+                <label asp-for="Product.GuaranteeNotes" class="form-label mt-2">Guarantee notes</label>
+                <input asp-for="Product.GuaranteeNotes" class="form-control" />
+            </div>
+
+            <div class="col-md-12">
+                <label asp-for="Product.Notes" class="form-label">Notes</label>
+                <textarea asp-for="Product.Notes" class="form-control" rows="3"></textarea>
+            </div>
+        </div>
+    </div>
+}
 @if (Model.Product.Type == "Case")
 {
     <div class="form-section col-12"><h2 class="form-section__title">Case details</h2><div class="row g-3">

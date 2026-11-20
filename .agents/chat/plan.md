@@ -133,7 +133,7 @@
 ---
 # STAGE 3 — Web UI
 
-## [ ] Step 9 — Create page, tab, navigation
+## ~~[x] Step 9 — Create page, tab, navigation~~
 - Files: inspect: `Pages/Products/CreatePortableStorage.cshtml(.cs)`, `CreateSmartWatch.cshtml(.cs)` (guarantee markup + Jalali date + scripts), `CreatePhone.cshtml` (colour select), `Pages/Products/Index.cshtml` (~17 tab tuples), `ViewComponents/NavigationMenuViewComponent.cs` (~29), `Tests/Web/Pages/Products/CreateAccessoryModelTests.cs`; create: `src/MobileShop.Web/Pages/Products/CreateHeadphone.cshtml` and `.cshtml.cs`; modify: `Pages/Products/Index.cshtml`, `NavigationMenuViewComponent.cs`, `CreateAccessoryModelTests.cs`; do not touch: `product-create-modal.js`, `ProductCreateRegistry.cs`, `_ProductCreate*Form.cshtml` (dead code).
 - Symbols: `CreateHeadphoneModel(IProductsDataService dataService) : PageModel` with `Input`, `Manufacturers`, `Models`, `Colors`, `Corporations`, `OnGetAsync`, `OnGetModelsAsync` (category `"Headphone"`), `OnPostCreateManufacturerAsync`, `OnPostCreateModelAsync` (category `"Headphone"`), `OnPostAsync`; tab tuple `("headphone", "Headphones", "/Products/CreateHeadphone", "Create headphone")`; nav link `Link("Add headphone", "Register headphones, earbuds or headsets in stock.", "/Products/CreateHeadphone", "nav-subicon-plus")`.
 - Current -> Desired: no create UI -> page reachable from the Products tabs and the nav menu.
@@ -146,7 +146,7 @@
 - Risk: MEDIUM
 - Confidence: MEDIUM
 
-## [ ] Step 10 — Edit page, details block, index mapping
+## ~~[x] Step 10 — Edit page, details block, index mapping~~
 - Files: inspect: `Pages/Products/Edit.cshtml.cs` (`PopulateDropdownsAsync` ~128-150, `MapToEditModel` ~190-240, type + notes ~250-276), `Pages/Shared/_ProductEditForm.cshtml` (Smart Watch block ~132-184, Portable Storage block ~379-387), `Pages/Products/Details.cshtml` (Portable Storage block ~112-120), `Pages/Products/Index.cshtml.cs` (~147-160); modify: `Edit.cshtml.cs`, `_ProductEditForm.cshtml`, `Details.cshtml`, `Index.cshtml.cs`, `Tests/Web/Pages/Products/EditModelTests.cs`; do not touch: other type blocks, `Details.cshtml.cs` (its `indexType` switches already lowercase `Headphone` to `headphone` in the default branch).
 - Symbols: `"Headphone"` type string; `GetCategoryName` entry `"headphone" => "Headphone"`.
 - Current -> Desired: a headphone opens no edit form and its Details page shows no headphone fields -> full edit with colour and guarantee, and a Details block.
@@ -159,7 +159,7 @@
 - Risk: MEDIUM
 - Confidence: MEDIUM
 
-## [ ] Step 11 — Final validation and docs
+## ~~[x] Step 11 — Final validation and docs~~
 - Files: inspect: `README.md`, `docs/*` (grep for lists of product types); modify only where such a list exists (add Headphone); do not create new docs.
 - Symbols: n/a.
 - Current -> Desired: all stages proven end to end.
