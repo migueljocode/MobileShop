@@ -43,10 +43,19 @@ CODESIGN_EOF
     export PATH
   fi
 
+  # install.sh appends slow stop/port waits here (silent when everything is fast).
+  MOBILESHOP_DEBUG_FILE="$TEST_TMP/installer-debug.log"
+  export MOBILESHOP_DEBUG_FILE
+
   SERVER_PID=""
 }
 
 cleanup_all() {
+  if [ -s "${MOBILESHOP_DEBUG_FILE:-}" ]; then
+    printf -- '--- installer slow-wait diagnostics ---\n'
+    cat "$MOBILESHOP_DEBUG_FILE"
+    printf -- '--- end diagnostics ---\n'
+  fi
   if [ -n "${SERVER_PID:-}" ] && kill -0 "$SERVER_PID" 2>/dev/null; then
     kill "$SERVER_PID" 2>/dev/null || true
     wait "$SERVER_PID" 2>/dev/null || true
@@ -209,10 +218,10 @@ FAKE_APP_EOF
 }
 
 run_case() {
-  local name="$1"
+  local name="$1" started="$SECONDS"
   shift
   "$@"
-  pass "$name"
+  pass "$name ($((SECONDS - started))s)"
 }
 
 test_t1_platform_refusal() {

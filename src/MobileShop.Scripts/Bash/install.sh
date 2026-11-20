@@ -1181,6 +1181,22 @@ active_service_mode() {
   fi
 }
 
+debug_log() {
+  [ -n "${MOBILESHOP_DEBUG_FILE:-}" ] || return 0
+  printf '%s %s\n' "$(date '+%H:%M:%S' 2>/dev/null || printf '??')" "$*" >> "$MOBILESHOP_DEBUG_FILE" 2>/dev/null || true
+}
+
+# True when the pid exists and is not a zombie (a zombie still answers kill -0).
+pid_alive() {
+  local pid="$1" stat
+  kill -0 "$pid" 2>/dev/null || return 1
+  stat="$(ps -o stat= -p "$pid" 2>/dev/null || true)"
+  case "$stat" in
+    *Z*) return 1 ;;
+  esac
+  return 0
+}
+
 is_pid_running() {
   [ -f "$PID_FILE" ] || return 1
   local pid
@@ -1188,7 +1204,7 @@ is_pid_running() {
   case "$pid" in
     ''|*[!0-9]*) return 1 ;;
   esac
-  kill -0 "$pid" 2>/dev/null
+  pid_alive "$pid"
 }
 
 is_our_app_running() {
@@ -1212,13 +1228,17 @@ is_our_app_running() {
 wait_for_port_free() {
   local port="$1"
   local i=0
-  while [ "$i" -lt 40 ]; do
+  while [ "$i" -lt 100 ]; do
     if ! port_is_listening "$port"; then
+      if [ "$i" -ge 20 ]; then
+        debug_log "wait_for_port_free: port $port freed after ~$((i / 10))s"
+      fi
       return 0
     fi
-    sleep 0.5
+    sleep 0.1
     i=$((i + 1))
   done
+  debug_log "wait_for_port_free: port $port still listening after 10s: $(lsof -nP -iTCP:"$port" -sTCP:LISTEN 2>&1 | head -n 3 | tr '\n' ';')"
   return 1
 }
 
@@ -1302,17 +1322,20 @@ stop_pid_mode() {
       return 0
       ;;
   esac
-  if kill -0 "$pid" 2>/dev/null; then
+  if pid_alive "$pid"; then
     kill "$pid" 2>/dev/null || true
     i=0
-    while [ "$i" -lt 40 ]; do
-      if ! kill -0 "$pid" 2>/dev/null; then
+    while [ "$i" -lt 100 ]; do
+      if ! pid_alive "$pid"; then
         break
       fi
-      sleep 0.5
+      sleep 0.1
       i=$((i + 1))
     done
-    if kill -0 "$pid" 2>/dev/null; then
+    if [ "$i" -ge 20 ]; then
+      debug_log "stop_pid_mode: pid $pid took ~$((i / 10))s after TERM: $(ps -o pid=,ppid=,stat=,command= -p "$pid" 2>&1 | head -n 1)"
+    fi
+    if pid_alive "$pid"; then
       kill -9 "$pid" 2>/dev/null || true
     fi
   fi
