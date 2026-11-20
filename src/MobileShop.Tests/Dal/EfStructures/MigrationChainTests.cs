@@ -36,7 +36,8 @@ public class MigrationChainTests : IDisposable
                 "20261008023227_AddCpuGpuLookups",
                 "20261104100000_AddAppleIdSecurityAnswers",
                 "20261107120000_SeedZoneMobileShopParty",
-                "20261119153500_AddShopProfile"
+                "20261119153500_AddShopProfile",
+                "20261121100000_AddHeadphones"
             },
             migrations);
     }
@@ -116,6 +117,46 @@ public class MigrationChainTests : IDisposable
             .Single();
         Assert.Equal("Core i7", laptop.CpuNavigation.Name);
         Assert.Equal("RTX 4070", laptop.GpuNavigation!.Name);
+    }
+
+    [Fact]
+    public void Headphone_migration_keeps_existing_rows()
+    {
+        _context.GetService<IMigrator>().Migrate("20261119153500_AddShopProfile");
+
+        _context.Database.ExecuteSqlRaw("""
+            INSERT INTO Manufacturers (Id, Name, IsDeleted) VALUES (1, 'TestMaker', 0);
+            INSERT INTO Categories (Id, Name, IsDeleted) VALUES (1, 'Cable', 0);
+            INSERT INTO Models (Id, ManufacturerId, CategoryId, Name, IsDeleted) VALUES (1, 1, 1, 'Test Cable', 0);
+            INSERT INTO Products (Id, Price, ModelId, Barcode, IsDeleted) VALUES (1, 250000, 1, 'cable001', 0);
+            INSERT INTO Cables (Id, ProductId, Connector1, Connector2, Length, Notes, IsDeleted)
+                VALUES (1, 1, 0, 2, 1.5, 'Braided', 0);
+            """);
+
+        _context.Database.Migrate();
+
+        var cable = _context.Cables
+            .Include(item => item.ProductNavigation)
+                .ThenInclude(product => product.ModelNavigation)
+                    .ThenInclude(model => model.ManufacturerNavigation)
+            .Include(item => item.ProductNavigation)
+                .ThenInclude(product => product.ModelNavigation)
+                    .ThenInclude(model => model.CategoryNavigation)
+            .Single();
+
+        Assert.Equal(CableConnector.UsbC, cable.Connector1);
+        Assert.Equal(CableConnector.Lightning, cable.Connector2);
+        Assert.Equal(1.5m, cable.Length);
+        Assert.Equal("Braided", cable.Notes);
+        Assert.Equal(250000L, cable.ProductNavigation.Price);
+        Assert.Equal("cable001", cable.ProductNavigation.Barcode);
+        Assert.Equal("Test Cable", cable.ProductNavigation.ModelNavigation.Name);
+        Assert.Equal("TestMaker", cable.ProductNavigation.ModelNavigation.ManufacturerNavigation.Name);
+        Assert.Equal("Cable", cable.ProductNavigation.ModelNavigation.CategoryNavigation.Name);
+
+        Assert.Empty(_context.Headphones.ToList());
+        var applied = _context.Database.GetAppliedMigrations();
+        Assert.Contains("20261121100000_AddHeadphones", applied);
     }
 
     public void Dispose()

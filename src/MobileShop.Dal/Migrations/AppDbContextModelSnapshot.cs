@@ -534,6 +534,50 @@ namespace MobileShop.Dal.Migrations
                     b.ToTable("Guarantees");
                 });
 
+            modelBuilder.Entity("MobileShop.Models.Entities.Headphone", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Connection")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int?>("Connector")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool?>("HasMicrophone")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Kind")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("NoiseCancelling")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<byte[]>("TimeStamp")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("BLOB");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductId")
+                        .IsUnique();
+
+                    b.ToTable("Headphones");
+                });
+
             modelBuilder.Entity("MobileShop.Models.Entities.Laptop", b =>
                 {
                     b.Property<int>("Id")
@@ -1356,6 +1400,17 @@ namespace MobileShop.Dal.Migrations
                     b.Navigation("ProductNavigation");
                 });
 
+            modelBuilder.Entity("MobileShop.Models.Entities.Headphone", b =>
+                {
+                    b.HasOne("MobileShop.Models.Entities.Product", "ProductNavigation")
+                        .WithOne("HeadphoneProfile")
+                        .HasForeignKey("MobileShop.Models.Entities.Headphone", "ProductId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("ProductNavigation");
+                });
+
             modelBuilder.Entity("MobileShop.Models.Entities.Laptop", b =>
                 {
                     b.HasOne("MobileShop.Models.Entities.Cpu", "CpuNavigation")
@@ -1660,6 +1715,8 @@ namespace MobileShop.Dal.Migrations
                     b.Navigation("GlassProfile");
 
                     b.Navigation("GuaranteeProfile");
+
+                    b.Navigation("HeadphoneProfile");
 
                     b.Navigation("LaptopProfile");
 

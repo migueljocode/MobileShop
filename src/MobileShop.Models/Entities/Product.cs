@@ -35,6 +35,7 @@ public class Product : BaseEntity
     public virtual Charger? ChargerProfile { get; set; }
     public virtual PowerBank? PowerBankProfile { get; set; }
     public virtual PortableStorage? PortableStorageProfile { get; set; }
+    public virtual Headphone? HeadphoneProfile { get; set; }
     public virtual Case? CaseProfile { get; set; }
     public virtual Glass? GlassProfile { get; set; }
 }

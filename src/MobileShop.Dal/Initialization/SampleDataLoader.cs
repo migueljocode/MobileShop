@@ -26,6 +26,7 @@ internal sealed class SampleDataSet
     public List<Charger> Chargers { get; init; } = [];
     public List<PowerBank> PowerBanks { get; init; } = [];
     public List<PortableStorage> PortableStorages { get; init; } = [];
+    public List<Headphone> Headphones { get; init; } = [];
     public List<Case> Cases { get; init; } = [];
     public List<CaseModelFit> CaseModelFits { get; init; } = [];
     public List<Glass> Glasses { get; init; } = [];
@@ -74,6 +75,7 @@ internal static class SampleDataLoader
             Chargers = Deserialize<Charger>(root, "chargers"),
             PowerBanks = Deserialize<PowerBank>(root, "powerBanks"),
             PortableStorages = Deserialize<PortableStorage>(root, "portableStorages"),
+            Headphones = Deserialize<Headphone>(root, "headphones"),
             Cases = Deserialize<Case>(root, "cases"),
             CaseModelFits = Deserialize<CaseModelFit>(root, "caseModelFits"),
             Glasses = Deserialize<Glass>(root, "glasses"),

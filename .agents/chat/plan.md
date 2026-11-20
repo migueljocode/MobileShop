@@ -23,7 +23,7 @@
 ---
 # STAGE 1 — Data model and additive migration (ships a dormant schema; a release after this stage is safe)
 
-## [ ] Step 1 — Entity, enums, configuration, DbSet, Product navigation, migration `AddHeadphones`
+## ~~[x] Step 1 — Entity, enums, configuration, DbSet, Product navigation, migration `AddHeadphones`~~
 - Files: inspect: `src/MobileShop.Models/Entities/Cable.cs`, `Entities/Configuration/CableConfiguration.cs`, `Enums/CableConnector.cs`, `src/MobileShop.Dal/Migrations/20260920163656_NormalizeCatalog.cs` (Cables `CreateTable` + `IX_Cables_ProductId`), `20261119153500_AddShopProfile*.cs`; modify: `src/MobileShop.Models/Entities/Product.cs`, `src/MobileShop.Dal/EfStructures/AppDbContext.cs`, `src/MobileShop.Dal/Migrations/AppDbContextModelSnapshot.cs`, `src/MobileShop.Tests/Dal/EfStructures/MigrationChainTests.cs`; create: `src/MobileShop.Models/Enums/HeadphoneKind.cs`, `src/MobileShop.Models/Enums/HeadphoneConnection.cs`, `src/MobileShop.Models/Entities/Headphone.cs`, `src/MobileShop.Models/Entities/Configuration/HeadphoneConfiguration.cs`, `src/MobileShop.Dal/Migrations/20261121100000_AddHeadphones.cs` and `.Designer.cs`; do not touch: Api, Web, Services, all other migration files.
 - Symbols: `enum HeadphoneKind { Earbuds, OverEar, Headset }`; `enum HeadphoneConnection { Wired, Wireless, WiredAndWireless }`; `Headphone : BaseEntity` with `[Table("Headphones")]`, `ProductId`, `ProductNavigation`, `Kind`, `Connection`, `bool NoiseCancelling`, `CableConnector? Connector`, `bool? HasMicrophone`, `[StringLength(500, ErrorMessage = "{0} cannot exceed {1} characters.")] string? Notes`; `Product.HeadphoneProfile` (`Headphone?`, after `PortableStorageProfile`); `AppDbContext.Headphones` (after `PortableStorages`); `partial class AddHeadphones : Migration` (`Up`, `Down`); id `20261121100000_AddHeadphones` (must sort after `20261119153500`).
 - Current -> Desired: no headphone type, snapshot without `Headphone` -> entity mapped one-to-one with `Product`, snapshot with `Headphone` + `Product.HeadphoneProfile` navigation, and the matching migration.
@@ -36,7 +36,7 @@
 - Risk: HIGH
 - Confidence: MEDIUM (hand-written) / HIGH (generated)
 
-## [ ] Step 2 — Data-preservation test
+## ~~[x] Step 2 — Data-preservation test~~
 - Files: inspect: `src/MobileShop.Tests/Dal/EfStructures/MigrationChainTests.cs` (`Cpu_and_gpu_names_are_preserved_when_laptop_catalog_is_migrated`), migrations after `20261006215821_AddPowerBankPortsAndPhoneSimSupport` for new NOT NULL columns; modify: `MigrationChainTests.cs`; do not touch: Web, Services, Api, Dal production code.
 - Symbols: test `Headphone_migration_keeps_existing_rows`.
 - Current -> Desired: no proof existing data survives -> test proves it.
@@ -49,7 +49,7 @@
 - Risk: MEDIUM
 - Confidence: MEDIUM
 
-## [ ] Step 3 — Sample-data wiring and ERD
+## ~~[x] Step 3 — Sample-data wiring and ERD~~
 - Files: inspect: `src/MobileShop.Tests/Dal/Initialization/SampleDataSeedTests.cs` (locate with `git ls-files | grep SampleDataSeedTests`); modify: `src/MobileShop.Dal/Initialization/SampleDataLoader.cs`, `SampleDataInitializer.cs`, `sample-data.json`, `docs/erd.mermaid`; do not touch: Web, Services, Api, tests.
 - Symbols: `SampleDataSet.Headphones`; `SampleDataLoader.Load()`; clear/insert lists in `SampleDataInitializer`.
 - Current -> Desired: dev seed ignores the new table -> dev seed knows it.
@@ -62,7 +62,7 @@
 - Risk: LOW
 - Confidence: HIGH
 
-## [ ] Step 4 — Stage 1 validation
+## ~~[x] Step 4 — Stage 1 validation~~
 - Files: inspect only.
 - Symbols: n/a.
 - Current -> Desired: evidence recorded for the Reviewer.

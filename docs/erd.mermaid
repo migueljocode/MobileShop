@@ -23,6 +23,7 @@ erDiagram
     PRODUCT ||--o| SMART_WATCH : "profile"
     PRODUCT ||--o| LAPTOP : "profile"
     PRODUCT ||--o| CABLE : "profile"
+    PRODUCT ||--o| HEADPHONE : "profile"
     PRODUCT ||--o| CHARGER : "profile"
     PRODUCT ||--o| POWER_BANK : "profile"
     PRODUCT ||--o| PORTABLE_STORAGE : "profile"
@@ -197,6 +198,16 @@ erDiagram
         int Connector1 "enum"
         int Connector2 "enum"
         decimal Length
+        string Notes
+    }
+    HEADPHONE {
+        int Id PK
+        int ProductId FK
+        int Kind "enum"
+        int Connection "enum"
+        boolean NoiseCancelling
+        int Connector "enum nullable"
+        boolean HasMicrophone "nullable"
         string Notes
     }
     CHARGER {

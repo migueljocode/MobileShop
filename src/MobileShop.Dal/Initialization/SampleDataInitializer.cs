@@ -22,6 +22,7 @@ public static class SampleDataInitializer
         ClearSet<Charger>(context);
         ClearSet<PowerBank>(context);
         ClearSet<PortableStorage>(context);
+        ClearSet<Headphone>(context);
         ClearSet<CaseModelFit>(context);
         ClearSet<Case>(context);
         ClearSet<GlassModelFit>(context);
@@ -76,6 +77,7 @@ public static class SampleDataInitializer
         ProcessInsert(context, context.Chargers, data.Chargers);
         ProcessInsert(context, context.PowerBanks, data.PowerBanks);
         ProcessInsert(context, context.PortableStorages, data.PortableStorages);
+        ProcessInsert(context, context.Headphones, data.Headphones);
         ProcessInsert(context, context.Cases, data.Cases);
         ProcessInsert(context, context.CaseModelFits, data.CaseModelFits);
         ProcessInsert(context, context.Glasses, data.Glasses);
