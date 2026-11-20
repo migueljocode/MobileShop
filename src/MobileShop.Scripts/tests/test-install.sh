@@ -205,7 +205,16 @@ class Handler(http.server.BaseHTTPRequestHandler):
     def log_message(self, format, *args):
         pass
 
-http.server.HTTPServer(("127.0.0.1", port), Handler).serve_forever()
+import socketserver
+
+class FastServer(http.server.HTTPServer):
+    # HTTPServer.server_bind() calls socket.getfqdn(), whose reverse lookup stalls ~35s on macOS runners.
+    def server_bind(self):
+        socketserver.TCPServer.server_bind(self)
+        self.server_name = "localhost"
+        self.server_port = self.server_address[1]
+
+FastServer(("127.0.0.1", port), Handler).serve_forever()
 PY_SERVER
 FAKE_APP_EOF
   chmod +x "$app_dir/MobileShop.Web"
@@ -533,7 +542,16 @@ class GitHubMock(http.server.BaseHTTPRequestHandler):
     def log_message(self, format, *args):
         pass
 
-http.server.HTTPServer(("127.0.0.1", port), GitHubMock).serve_forever()
+import socketserver
+
+class FastServer(http.server.HTTPServer):
+    # Skip socket.getfqdn() in server_bind(): its reverse lookup stalls ~35s on macOS runners.
+    def server_bind(self):
+        socketserver.TCPServer.server_bind(self)
+        self.server_name = "localhost"
+        self.server_port = self.server_address[1]
+
+FastServer(("127.0.0.1", port), GitHubMock).serve_forever()
 PY_GH
   SERVER_PID="$!"
 
@@ -671,7 +689,16 @@ class UiMock(http.server.BaseHTTPRequestHandler):
     def log_message(self, format, *args):
         pass
 
-http.server.HTTPServer(("127.0.0.1", port), UiMock).serve_forever()
+import socketserver
+
+class FastServer(http.server.HTTPServer):
+    # Skip socket.getfqdn() in server_bind(): its reverse lookup stalls ~35s on macOS runners.
+    def server_bind(self):
+        socketserver.TCPServer.server_bind(self)
+        self.server_name = "localhost"
+        self.server_port = self.server_address[1]
+
+FastServer(("127.0.0.1", port), UiMock).serve_forever()
 PY_SRV
   SERVER_PID="$!"
 
