@@ -70,7 +70,7 @@ jobs:
         with:
           dotnet-version: 10.0.x
 
-      - uses: actions/cache@v4
+      - uses: actions/cache@v5
         with:
           path: ~/.nuget/packages
           key: nuget-${{ runner.os }}-${{ hashFiles('**/*.csproj') }}
@@ -102,7 +102,7 @@ jobs:
         with:
           dotnet-version: 10.0.x
 
-      - uses: actions/cache@v4
+      - uses: actions/cache@v5
         with:
           path: ~/.nuget/packages
           key: nuget-${{ runner.os }}-${{ matrix.rid }}-${{ hashFiles('**/*.csproj') }}
@@ -152,7 +152,7 @@ jobs:
           RID: ${{ matrix.rid }}
         run: bash .github/scripts/installer-smoke.sh src/MobileShop.Scripts/Bash/install.sh "${RUNNER_TEMP}/dist/MobileShop-${TAG}-${RID}.tar.gz"
 
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v6
         with:
           name: release-${{ matrix.rid }}
           path: ${{ runner.temp }}/dist/MobileShop-${{ needs.validate.outputs.tag }}-${{ matrix.rid }}.tar.gz
@@ -169,7 +169,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      - uses: actions/download-artifact@v5
+      - uses: actions/download-artifact@v7
         with:
           pattern: release-*
           path: dist
