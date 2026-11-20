@@ -23,3 +23,16 @@
   5. Sell one headphone via **Transactions → Record a sale** and verify the invoice lines include headphone specs.
   6. Upgrade over an existing SQLite database and confirm existing tables/rows are preserved unchanged.
 - **Status**: COMPLETE (Stages 1–3 complete)
+
+# Act — Stage 4 (Installer UI Upgrade & Stage Tracking)
+
+- **Scope**: Upgraded `src/MobileShop.Scripts/Bash/install.sh` with terminal UI visuals and progress telemetry, extended `src/MobileShop.Scripts/tests/test-install.sh` with `T16`, and ticked Stages 1–4 in `.agents/TODO.md`.
+- **Installer Enhancements (`src/MobileShop.Scripts/Bash/install.sh`)**:
+  - Added capability detection (`init_ui` checking `MOBILESHOP_NO_UI`, `MOBILESHOP_FORCE_UI`, `[ -t 1 ]`, `NO_COLOR`, `TERM`, `COLORTERM`, `TERM_PROGRAM`, UTF-8 locale) with automatic cursor hide/show and interrupt cleanup (`cleanup_ui`, `cleanup_all_runtime`).
+  - Added multi-byte UTF-8 safe diagonal TrueColor (256-color fallback) `awk` gradient renderer (`render_gradient_lines`) and `MobileShop` block/ASCII banner (`render_banner`, preserving `__VERSION__` placeholder and single-banner guard `MOBILESHOP_BANNER_SHOWN`).
+  - Added `[1/6]`..`[6/6]` phase progress bar (`ui_phase`, `ui_progress_bar_str`), metadata & completion cards (`render_install_card`, `render_success_card`), and animated Braille/ASCII spinner with sliding shimmer track (`run_with_spinner`, `render_shimmer_frame`).
+  - Upgraded `curl_download` with `probe_content_length`, live gradient progress bar, downloaded/total bytes, transfer speed (`B/s`, `KB/s`, `MB/s`), percentage (`0%`–`100%`), and ceiling-rounded `ETA MM:SS` countdown (`render_download_frame`).
+- **Verification**:
+  - `bash -n src/MobileShop.Scripts/Bash/install.sh src/MobileShop.Scripts/tests/test-install.sh` -> syntax OK.
+  - `bash src/MobileShop.Scripts/tests/test-install.sh` -> `ALL 16 INSTALLER SCENARIOS PASSED (linux-x64)` (including `T16 animated UI, gradient banner, ETA & NO_COLOR`).
+- **Status**: COMPLETE (Stages 1–4 ticked in `.agents/TODO.md`)

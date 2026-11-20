@@ -574,6 +574,163 @@ test_t15_lock_refusal() {
   [ -d "$root/state/lock" ] || fail "T15 second installer deleted pre-existing lock!"
 }
 
+test_t16_ui_progress_eta_and_nocolor() {
+  local root="$TEST_TMP/t16-root"
+  local bin_dir="$TEST_TMP/t16-bin"
+  local dist="$TEST_TMP/dist-t16"
+  local nocolor_root="$TEST_TMP/t16-nocolor-root"
+  local nocolor_bin="$TEST_TMP/t16-nocolor-bin"
+  local plain_root="$TEST_TMP/t16-plain-root"
+  local plain_bin="$TEST_TMP/t16-plain-bin"
+  local app_port srv_port nocolor_port plain_port
+  app_port="$(free_port)"
+  srv_port="$(free_port)"
+  nocolor_port="$(free_port)"
+  plain_port="$(free_port)"
+
+  make_fake_archive "$dist" "v1.0.0" 0 0 0 0
+  # Add an incompressible ~180 KB payload inside a custom archive so curl streams multiple progress frames
+  python3 - "$dist" "MobileShop-v1.0.0-${HOST_RID}" <<'PY_BIG'
+import hashlib, os, sys, tarfile, tempfile
+dist, top_name = sys.argv[1:3]
+tar_name = f"{top_name}.tar.gz"
+tar_path = os.path.join(dist, tar_name)
+with tempfile.TemporaryDirectory() as tmpdir:
+    with tarfile.open(tar_path, "r:gz") as tf:
+        tf.extractall(tmpdir)
+    with open(os.path.join(tmpdir, top_name, "payload.bin"), "wb") as f:
+        f.write(os.urandom(180 * 1024))
+    with tarfile.open(tar_path, "w:gz") as tf:
+        tf.add(os.path.join(tmpdir, top_name), arcname=top_name)
+h = hashlib.sha256(open(tar_path, "rb").read()).hexdigest()
+with open(os.path.join(dist, "checksums.txt"), "w", encoding="utf-8") as f:
+    f.write(f"{h}  {tar_name}\n")
+PY_BIG
+
+  python3 - "$srv_port" "$dist" "v1.0.0" >"$TEST_TMP/t16-server.log" 2>&1 <<'PY_SRV' &
+import http.server, os, sys, time
+port = int(sys.argv[1])
+dist = sys.argv[2]
+latest_tag = sys.argv[3]
+repo_prefix = "/migueljocode/MobileShop"
+
+class UiMock(http.server.BaseHTTPRequestHandler):
+    def do_HEAD(self):
+        prefix = f"{repo_prefix}/releases/download/{latest_tag}/"
+        if self.path.startswith(prefix):
+            name = self.path[len(prefix):]
+            fpath = os.path.join(dist, name)
+            if os.path.isfile(fpath):
+                self.send_response(200)
+                self.send_header("Content-Length", str(os.path.getsize(fpath)))
+                self.end_headers()
+                return
+        self.send_response(404)
+        self.end_headers()
+
+    def do_GET(self):
+        if self.path == f"{repo_prefix}/releases/latest":
+            self.send_response(302)
+            self.send_header("Location", f"{repo_prefix}/releases/tag/{latest_tag}")
+            self.end_headers()
+            return
+        if self.path == f"{repo_prefix}/releases/tag/{latest_tag}":
+            self.send_response(200)
+            self.end_headers()
+            self.wfile.write(b"ok")
+            return
+        prefix = f"{repo_prefix}/releases/download/{latest_tag}/"
+        if self.path.startswith(prefix):
+            name = self.path[len(prefix):]
+            fpath = os.path.join(dist, name)
+            if os.path.isfile(fpath):
+                with open(fpath, "rb") as fh:
+                    data = fh.read()
+                self.send_response(200)
+                self.send_header("Content-Length", str(len(data)))
+                self.end_headers()
+                chunk = 32768
+                for i in range(0, len(data), chunk):
+                    self.wfile.write(data[i:i + chunk])
+                    self.wfile.flush()
+                    if len(data) > 50000:
+                        time.sleep(0.12)
+                return
+        self.send_response(404)
+        self.end_headers()
+
+    def log_message(self, format, *args):
+        pass
+
+http.server.HTTPServer(("127.0.0.1", port), UiMock).serve_forever()
+PY_SRV
+  SERVER_PID="$!"
+
+  local i=0
+  while [ "$i" -lt 30 ]; do
+    if curl -s -o /dev/null "http://127.0.0.1:${srv_port}/migueljocode/MobileShop/releases/tag/v1.0.0"; then
+      break
+    fi
+    sleep 0.2
+    i=$((i + 1))
+  done
+
+  local ui_out="$TEST_TMP/t16-ui.out"
+  local ui_err="$TEST_TMP/t16-ui.err"
+  MOBILESHOP_ROOT="$root" MOBILESHOP_BIN_DIR="$bin_dir" MOBILESHOP_PORT="$app_port" \
+    MOBILESHOP_SERVICE="none" MOBILESHOP_BASE_URL="http://127.0.0.1:${srv_port}" \
+    MOBILESHOP_FORCE_UI="1" COLORTERM="truecolor" TERM="xterm-256color" LANG="C.UTF-8" \
+    bash "$INSTALL_SH" install --no-service >"$ui_out" 2>"$ui_err"
+
+  python3 - "$ui_out" "$ui_err" <<'PY_CHK_UI'
+import re, sys
+out = open(sys.argv[1], "r", encoding="utf-8", errors="replace").read()
+err = open(sys.argv[2], "r", encoding="utf-8", errors="replace").read()
+assert err == "", f"T16 expected empty stderr in UI mode, got: {err!r}"
+assert "\x1b[38;2;" in out, "T16 expected TrueColor RGB gradient ANSI escape sequences"
+plain = re.sub(r"\x1b\[[0-9;?]*[A-Za-z]", "", out)
+for token in ["MobileShop", "[1/6]", "[6/6]", "100%", "ETA ", "Installed MobileShop v1.0.0"]:
+    assert token in plain, f"T16 missing UI token {token!r}"
+PY_CHK_UI
+  MOBILESHOP_PORT="$app_port" "$bin_dir/mobileshop" stop >/dev/null
+
+  # Check NO_COLOR=1 emits zero ANSI escapes even when MOBILESHOP_FORCE_UI=1
+  local nc_out="$TEST_TMP/t16-nc.out"
+  local nc_err="$TEST_TMP/t16-nc.err"
+  MOBILESHOP_ROOT="$nocolor_root" MOBILESHOP_BIN_DIR="$nocolor_bin" MOBILESHOP_PORT="$nocolor_port" \
+    MOBILESHOP_SERVICE="none" MOBILESHOP_FORCE_UI="1" NO_COLOR="1" \
+    bash "$INSTALL_SH" install --version v1.0.0 --archive "$dist/MobileShop-v1.0.0-${HOST_RID}.tar.gz" --no-service >"$nc_out" 2>"$nc_err"
+  python3 - "$nc_out" "$nc_err" <<'PY_CHK_NC'
+import sys
+out = open(sys.argv[1], "r", encoding="utf-8", errors="replace").read()
+err = open(sys.argv[2], "r", encoding="utf-8", errors="replace").read()
+# Expect NO color/SGR sequences when NO_COLOR=1 (cursor/line-clear escapes still allowed in TTY mode only; NO SGR m sequences)
+import re
+sgr = re.findall(r"\x1b\[[0-9;]*m", out + err)
+assert not sgr, f"T16 expected zero SGR color escapes under NO_COLOR=1, found: {sgr[:5]}"
+PY_CHK_NC
+  MOBILESHOP_PORT="$nocolor_port" "$nocolor_bin/mobileshop" stop >/dev/null
+
+  # Check piped non-TTY run emits zero ANSI escapes anywhere
+  local pl_out="$TEST_TMP/t16-pl.out"
+  local pl_err="$TEST_TMP/t16-pl.err"
+  MOBILESHOP_ROOT="$plain_root" MOBILESHOP_BIN_DIR="$plain_bin" MOBILESHOP_PORT="$plain_port" \
+    MOBILESHOP_SERVICE="none" \
+    bash "$INSTALL_SH" install --version v1.0.0 --archive "$dist/MobileShop-v1.0.0-${HOST_RID}.tar.gz" --no-service >"$pl_out" 2>"$pl_err"
+  python3 - "$pl_out" "$pl_err" <<'PY_CHK_PL'
+import sys
+out = open(sys.argv[1], "r", encoding="utf-8", errors="replace").read()
+err = open(sys.argv[2], "r", encoding="utf-8", errors="replace").read()
+assert "\x1b" not in out and "\x1b" not in err, "T16 expected zero ESC bytes in non-TTY piped mode"
+assert "Installed MobileShop v1.0.0" in out, "T16 missing plain install confirmation"
+PY_CHK_PL
+  MOBILESHOP_PORT="$plain_port" "$plain_bin/mobileshop" stop >/dev/null
+
+  kill "$SERVER_PID" 2>/dev/null || true
+  wait "$SERVER_PID" 2>/dev/null || true
+  SERVER_PID=""
+}
+
 main() {
   init_test_env
   trap cleanup_all EXIT INT TERM
@@ -586,8 +743,9 @@ main() {
   run_case "T10 adopt" test_t10_adopt
   run_case "T13 redirect server & update" test_t13_redirect_server_and_update
   run_case "T15 lock refusal" test_t15_lock_refusal
+  run_case "T16 animated UI, gradient banner, ETA & NO_COLOR" test_t16_ui_progress_eta_and_nocolor
 
-  printf 'ALL 15 INSTALLER SCENARIOS PASSED (%s)\n' "$HOST_RID"
+  printf 'ALL 16 INSTALLER SCENARIOS PASSED (%s)\n' "$HOST_RID"
 }
 
 main "$@"
