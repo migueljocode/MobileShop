@@ -133,6 +133,9 @@ erDiagram
         string Email
         string Password
         string Notes
+        string SecurityAnswer1 "nullable"
+        string SecurityAnswer2 "nullable"
+        string SecurityAnswer3 "nullable"
     }
     APPLE_INFO {
         int Id PK
@@ -261,5 +264,13 @@ erDiagram
         int GlassId FK
         int ModelId FK
     }
+    SHOP_PROFILE {
+        int Id PK
+        string Name
+        string Address
+        string Phone
+        string Instagram
+    }
 
+%% SHOP_PROFILE is a standalone single-row table (shop identity printed on invoices) with no relationships.
 %% All tables also contain the inherited IsDeleted boolean and nullable TimeStamp BLOB columns.
